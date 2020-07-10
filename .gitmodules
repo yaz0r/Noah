@@ -1,0 +1,12 @@
+[submodule "ThirdParty/bgfx.cmake"]
+	path = ThirdParty/bgfx.cmake
+	url = git@github.com:yaz0r/bgfx.cmake.git
+[submodule "ThirdParty/SDL"]
+	path = ThirdParty/SDL
+	url = git@github.com:yaz0r/SDL.git
+[submodule "ThirdParty/soloud.cmake/soloud"]
+	path = ThirdParty/soloud.cmake/soloud
+	url = git@github.com:yaz0r/soloud.git
+[submodule "ThirdParty/imgui"]
+	path = ThirdParty/imgui
+	url = git@github.com:ocornut/imgui.git
