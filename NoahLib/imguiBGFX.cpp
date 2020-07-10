@@ -399,6 +399,7 @@ struct OcornutImguiContext
 	{
 		m_viewId = _viewId;
 
+#if 0
 		ImGuiIO& io = ImGui::GetIO();
 		if (_inputChar >= 0)
 		{
@@ -419,6 +420,7 @@ struct OcornutImguiContext
 		io.MouseDown[2] = 0 != (_button & IMGUI_MBUT_MIDDLE);
 		io.MouseWheel = (float)(_scroll - m_lastScroll);
 		m_lastScroll = _scroll;
+#endif
 
 #if USE_ENTRY
 		uint8_t modifiers = inputGetModifiersState();

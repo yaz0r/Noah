@@ -52,10 +52,9 @@ void StartFrame()
         bgfx::reset(outputResolution[0], outputResolution[1]);
     }
 
-    imguiBeginFrame(0, 0, 0, 0, outputResolution[0], outputResolution[1]);
-
     // Pull the input from SDL2 instead
     ImGui_ImplSDL2_NewFrame(gWindowBGFX);
+    imguiBeginFrame(0, 0, 0, 0, outputResolution[0], outputResolution[1]);
 
     if (ImGui::BeginMainMenuBar())
     {

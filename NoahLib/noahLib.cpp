@@ -1,6 +1,6 @@
+#include "noahLib.h"
 #include "bgfxGlue.h"
-
-#include "bgfxGlue.h"
+#include "imgui.h"
 
 bool noahInit(int argc, char* argv[])
 {
@@ -11,6 +11,12 @@ bool noahInit(int argc, char* argv[])
 bool noahFrame()
 {
     StartFrame();
+
+    ImGui::Begin("Test");
+    ImGui::Text("Testing..");
+    ImGui::End();
+
+
     EndFrame();
 
     return gCloseApp;
