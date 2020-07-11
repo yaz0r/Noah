@@ -28,6 +28,7 @@ set(SOURCES
  ${SOURCES}
  ${SRC_ROOT}
  "${THIRD_PARTY}/imgui/imgui.cpp"
+ "${THIRD_PARTY}/imgui/imgui.h"
  "${THIRD_PARTY}/imgui/imgui_draw.cpp"
  "${THIRD_PARTY}/imgui/imgui_widgets.cpp"
  "${THIRD_PARTY}/imgui/examples/imgui_impl_sdl.cpp"

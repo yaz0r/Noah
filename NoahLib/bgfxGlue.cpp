@@ -9,9 +9,10 @@
 
 SDL_Window* gWindowBGFX = nullptr;
 
-int gFrameLimit = 30;
+int gFrameLimit = 60;
 bool gCloseApp = false;
 
+// Because SDL is not well defined when using cmake (it's using the old style config.h and is somewhat broken)
 extern "C" {
     size_t
         wcslcpy(SDL_OUT_Z_CAP(maxlen) wchar_t* dst, const wchar_t* src, size_t maxlen)
@@ -52,16 +53,6 @@ void StartFrame()
         bgfx::reset(outputResolution[0], outputResolution[1]);
     }
 
-    // Pull the input from SDL2 instead
-    ImGui_ImplSDL2_NewFrame(gWindowBGFX);
-    imguiBeginFrame(0, 0, 0, 0, outputResolution[0], outputResolution[1]);
-
-    if (ImGui::BeginMainMenuBar())
-    {
-        ImGui::Text(" %.2f FPS (%.2f ms)", ImGui::GetIO().Framerate, 1000.0f / ImGui::GetIO().Framerate);
-        ImGui::EndMainMenuBar();
-    }
-
     SDL_Event event;
     while (SDL_PollEvent(&event))
     {
@@ -69,13 +60,27 @@ void StartFrame()
 
         switch (event.type)
         {
+        case SDL_QUIT:
+            gCloseApp = true;
+            break;
         default:
             break;
         }
-
-        if (event.type == SDL_QUIT)
-            gCloseApp = true;
     }
+
+    // Pull the input from SDL2 instead
+    ImGui_ImplSDL2_NewFrame(gWindowBGFX);
+    imguiBeginFrame(0, 0, 0, 0, outputResolution[0], outputResolution[1], -1, 0);
+
+    if (ImGui::BeginMainMenuBar())
+    {
+        ImGui::Text(" %.2f FPS (%.2f ms)", ImGui::GetIO().Framerate, 1000.0f / ImGui::GetIO().Framerate);
+        ImGui::EndMainMenuBar();
+    }
+
+
+    bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH);
+    bgfx::touch(0);
 }
 
 void EndFrame()
@@ -88,13 +93,13 @@ void EndFrame()
         static Uint64 last_time = SDL_GetPerformanceCounter();
         Uint64 now = SDL_GetPerformanceCounter();
 
-        float freq = SDL_GetPerformanceFrequency();
-        float secs = (now - last_time) / freq;
-        float timeToWait = ((1.f / gFrameLimit) - secs) * 1000;
+        double freq = (double)SDL_GetPerformanceFrequency();
+        double secs = (now - last_time) / freq;
+        double timeToWait = ((1.f / gFrameLimit) - secs) * 1000;
         //timeToWait = 0;
         if (timeToWait > 0)
         {
-            SDL_Delay(timeToWait);
+            SDL_Delay((u32)timeToWait);
         }
 
         last_time = SDL_GetPerformanceCounter();
@@ -147,4 +152,14 @@ int initBgfxGlue(int argc, char* argv[])
 
     imguiCreate();
     ImGui_ImplSDL2_InitForD3D(gWindowBGFX);
+
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+
+    return true;
+}
+
+void deleteBgfxGlue()
+{
+    imguiDestroy();
 }

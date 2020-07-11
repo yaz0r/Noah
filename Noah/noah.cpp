@@ -1,5 +1,6 @@
 bool noahInit(int argc, char* argv[]);
 bool noahFrame();
+void noahExit();
 
 int main(int argc, char* argv[])
 {
@@ -8,6 +9,8 @@ int main(int argc, char* argv[])
     while (!noahFrame())
     {
     }
+
+    noahExit();
 
     return 0;
 }
