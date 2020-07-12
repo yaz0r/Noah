@@ -508,6 +508,7 @@ void displayDialog(int index)
     ImGui::EndChildFrame();
 }
 
+u16 startOfInstruction;
 u16 currentPC = -1;
 
 u8 readScriptByte(int offset)
@@ -611,6 +612,7 @@ struct sByteType
 {
     u8 mType;
     std::string mLabel;
+    std::string mComment;
 };
 
 std::vector<sByteType> m_byteTypeTable;
@@ -640,6 +642,11 @@ void markFunctionStart(u16 functionStart, std::string name)
         name = buffer;
     }
     m_byteTypeTable[functionStart].mLabel = name;
+}
+
+void addComment(std::string comment)
+{
+    m_byteTypeTable[startOfInstruction].mComment = comment;
 }
 
 void decodeJumpIf()
@@ -797,6 +804,7 @@ void getVar10(int valueOffset, int controlOffset)
 
 bool decompileOpcode(u16& inputPC)
 {
+    startOfInstruction = inputPC;
     currentPC = inputPC;
     ImGui::Text("    0x%04X\t", currentPC); ImGui::SameLine();
 
@@ -1027,6 +1035,16 @@ bool decompileOpcode(u16& inputPC)
         decodeGenericOpcode("SET_DIALOG_AVATAR", "i");
         currentPC += 3;
         return true;
+    case 0xFE18: // 24
+        decodeGenericOpcode("OP_FE18", "b");
+        addComment("Load something, skip next opcode if already loaded");
+        currentPC += 2;
+        return true;
+    case 0xFE1A: // 26
+        ImGui::Text("OP_FE1A()");
+        addComment("Wait for loading to finish");
+        currentPC += 1;
+        return true;
     case 0xFE53: // 83
         ImGui::Text("OP_FE53()");
         currentPC++;
@@ -1098,6 +1116,13 @@ void fieldInspector_scriptsForEntity(int entityId)
 
             u16 startPC = i;
             while (decompileOpcode(startPC)) {
+                if (m_byteTypeTable[startPC].mComment.length())
+                {
+                    ImGui::SameLine();
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5, 0.5, 0.5, 1));
+                    ImGui::Text("// %s", m_byteTypeTable[startPC].mComment.c_str());
+                    ImGui::PopStyleColor();
+                }
                 startPC = currentPC;
                 m_byteTypeTable[startPC].mType = 1;
             }
@@ -1151,7 +1176,7 @@ void fieldInspector_frame()
         {
             if (ImGui::MenuItem("Load&Inspect"))
             {
-                LoadAndInspectField(0x23);
+                LoadAndInspectField(0);
             }
             ImGui::EndMenu();
         }
