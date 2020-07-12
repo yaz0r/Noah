@@ -1,0 +1,63 @@
+#include "noahLib.h"
+#include "decompress.h"
+
+void decompress(std::vector<u8>::iterator& inputStream, std::vector<u8>& output)
+{
+    int totalSize = READ_LE_U32(inputStream);
+    if (totalSize == 0)
+    {
+        output.resize(0);
+        return;
+    }
+
+    if (output.size() <= 16)
+    {
+        output.resize(0);
+        return;
+    }
+
+    inputStream += 4;
+    int controlByte = READ_LE_U8(inputStream);
+
+    std::vector<u8>::iterator outputStream = output.begin();
+    do
+    {
+        u8 controlBit = controlByte & 1;
+        u8 bitCounter = 8;
+        inputStream++;
+
+        do
+        {
+            controlByte >>= 1;
+            bitCounter--;
+            if (controlBit == 0)
+            {
+                *outputStream++ = *inputStream++;
+            }
+            else
+            {
+                u8 controlByte1 = *inputStream++;
+                u8 controlByte0 = *inputStream++;
+
+                int offset = ((controlByte0 & 0xF) << 8) | controlByte1;
+                int length = (controlByte0 >> 4) + 3;
+
+                std::vector<u8>::iterator readBackIterator = outputStream - offset;
+
+                for (int i = 0; i < length; i++)
+                {
+                    *outputStream++ = *readBackIterator++;
+                }
+            }
+            controlBit = controlByte & 1;
+        } while (bitCounter != 0);
+        controlByte = READ_LE_U8(inputStream);
+    } while (outputStream - output.begin() < totalSize);
+
+    output.resize(totalSize);
+}
+
+void fieldDecompress(int size, std::vector<u8>::iterator& inputStream, std::vector<u8>& output)
+{
+    decompress(inputStream, output);
+}
