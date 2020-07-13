@@ -6,6 +6,9 @@
 
 #include "../imgui_club/imgui_memory_editor/imgui_memory_editor.h"
 
+#include <array>
+#include <vector>
+
 std::vector<u8> rawField;
 std::vector<u8> rawFieldImageBundle;
 std::vector<u8> rawFieldImageBundle2;
@@ -802,8 +805,525 @@ void getVar10(int valueOffset, int controlOffset)
     getVarWithFlag(0x10, valueOffset, controlOffset);
 }
 
+struct sOpcodeArg
+{
+    enum type
+    {
+        unknown = 0,
+        entryPoint,
+        jumpLocation,
+        immediateS16,
+        immediateOrVar,
+        controlByte,
+        byte,
+        character,
+        dialogId,
+    } m_type = unknown;
+    std::string m_name;
+    u8 m_offset;
+};
+
+struct sOpcodeInfo
+{
+    bool m_isInitialized = false;
+    u8 m_opcodeSize = 1;
+    std::string m_name;
+    std::string m_comment;
+    std::vector<sOpcodeArg> m_args;
+
+    void end()
+    {
+        m_isInitialized = true;
+    }
+
+    sOpcodeInfo& setName(const char* name)
+    {
+        m_name = name;
+        return *this;
+    }
+
+    sOpcodeInfo& setComment(const char* comment)
+    {
+        m_comment = comment;
+        return *this;
+    }
+
+    sOpcodeArg& addAgument(sOpcodeArg::type opcodeType, const char* argumentName = nullptr)
+    {
+        m_args.push_back(sOpcodeArg());
+
+        sOpcodeArg& newArg = m_args[m_args.size() - 1];
+
+        newArg.m_type = opcodeType;
+        newArg.m_offset = m_opcodeSize;
+        if (argumentName)
+        {
+            newArg.m_name = argumentName;
+        }
+
+        return newArg;
+    }
+
+    sOpcodeInfo& addArgumentJumpLocation(const char* argumentName = nullptr)
+    {
+        addAgument(sOpcodeArg::jumpLocation, argumentName);
+        m_opcodeSize += 0x2;
+        return *this;
+    }
+
+    sOpcodeInfo& addArgumentFunctionEntryPoint(const char* argumentName = nullptr)
+    {
+        addAgument(sOpcodeArg::entryPoint, argumentName);
+        m_opcodeSize += 0x2;
+        return *this;
+    }
+
+    sOpcodeInfo& addArgumentS16(const char* argumentName = nullptr)
+    {
+        addAgument(sOpcodeArg::immediateS16, argumentName);
+        m_opcodeSize += 0x2;
+        return *this;
+    }
+
+    sOpcodeInfo& addArgumentImmediateOrVar(const char* argumentName = nullptr)
+    {
+        addAgument(sOpcodeArg::immediateOrVar, argumentName);
+        m_opcodeSize += 0x2;
+        return *this;
+    }
+
+    sOpcodeInfo& addSignControlByte()
+    {
+        addAgument(sOpcodeArg::controlByte);
+        m_opcodeSize += 0x1;
+        return *this;
+    }
+
+    sOpcodeInfo& addArgumentDialogId(const char* argumentName = nullptr)
+    {
+        addAgument(sOpcodeArg::dialogId, argumentName);
+        m_opcodeSize += 0x2;
+        return *this;
+    }
+
+    sOpcodeInfo& addArgumentByte(const char* argumentName = nullptr)
+    {
+        addAgument(sOpcodeArg::byte, argumentName);
+        m_opcodeSize += 0x1;
+        return *this;
+    }
+
+    sOpcodeInfo& addArgumentCharacter(const char* argumentName = nullptr)
+    {
+        addAgument(sOpcodeArg::character, argumentName);
+        m_opcodeSize += 0x1;
+        return *this;
+    }
+};
+
+std::array<sOpcodeInfo, 256> m_opcode;
+std::array<sOpcodeInfo, 256> m_extendedOpcode;
+
+u16 findControlByteOffset(const sOpcodeInfo& opcode, u16 offsetToVarArg)
+{
+    for (int i = 0; i < opcode.m_args.size(); i++)
+    {
+        if (opcode.m_args[i].m_type == sOpcodeArg::controlByte)
+            return opcode.m_args[i].m_offset;
+    }
+
+    assert(0);
+
+    return 0;
+}
+
+bool handleGenericOpcode(const sOpcodeInfo& opcode, bool isExtendedOpcode = false)
+{
+    if (opcode.m_name.length())
+    {
+        ImGui::Text("%s(", opcode.m_name.c_str()); ImGui::SameLine(0, 0);
+    }
+    else
+    {
+        u8 opcode = readScriptByte(0);
+        if (isExtendedOpcode)
+        {
+            ImGui::Text("OP_FE%02X(", opcode); ImGui::SameLine(0, 0);
+        }
+        else
+        {
+            ImGui::Text("OP_%02X(", opcode); ImGui::SameLine(0, 0);
+        }
+    }
+    
+    int offsetToArgs = 1;
+    u8 currentS16ControlFlag = 0x80;
+    int dialogIdToDisplay = -1;
+    for(int i=0; i<opcode.m_args.size(); i++)
+    {
+        const sOpcodeArg& argument = opcode.m_args[i];
+        switch (argument.m_type)
+        {
+        case sOpcodeArg::jumpLocation:
+        case sOpcodeArg::entryPoint:
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 1, 1));
+            ImGui::Text("0x%04X", readU16FromScript(offsetToArgs));
+            ImGui::PopStyleColor();
+            addToExploreStack(readU16FromScript(offsetToArgs));
+            offsetToArgs += 2;
+            break;
+        case sOpcodeArg::immediateOrVar:
+            getImmediateOrVariableUnsigned(offsetToArgs);
+            offsetToArgs += 2;
+            break;
+        case sOpcodeArg::immediateS16:
+            assert(currentS16ControlFlag);
+            getVarWithFlag(currentS16ControlFlag, offsetToArgs, findControlByteOffset(opcode, offsetToArgs));
+            currentS16ControlFlag >>= 1;
+            offsetToArgs += 2;
+            break;
+        case sOpcodeArg::controlByte:
+            offsetToArgs++;
+            break;
+        case sOpcodeArg::byte:
+        case sOpcodeArg::character:
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0.5, 0, 1));
+            ImGui::Text("%d", readScriptByte(offsetToArgs)); ImGui::SameLine(0, 0);
+            ImGui::PopStyleColor();
+            offsetToArgs++;
+            break;
+
+        case sOpcodeArg::dialogId:
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0.5, 0, 1));
+            ImGui::Text("0x%04X", readU16FromScript(offsetToArgs)); ImGui::SameLine(0, 0);
+            ImGui::PopStyleColor();
+            dialogIdToDisplay = readU16FromScript(offsetToArgs);
+            offsetToArgs += 2;
+            break;
+
+            /*
+        case 'b':
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0.5, 0, 1));
+            ImGui::Text("%d", readScriptByte(offsetToArgs)); ImGui::SameLine(0, 0);
+            ImGui::PopStyleColor();
+            offsetToArgs++;
+            break;
+        case 's':
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0.5, 0, 1));
+            ImGui::Text("0x%04X", readU16FromScript(offsetToArgs)); ImGui::SameLine(0, 0);
+            ImGui::PopStyleColor();
+            offsetToArgs += 2;
+            break;
+        case 'c':
+            readCharacter(offsetToArgs); ImGui::SameLine(0, 0);
+            offsetToArgs++;
+            break;
+        case 'i':
+            getImmediateOrVariableUnsigned(offsetToArgs); ImGui::SameLine(0, 0);
+            offsetToArgs += 2;
+            break;
+        case 'v':
+            getVariable(offsetToArgs); ImGui::SameLine(0, 0);
+            offsetToArgs += 2;
+            break;
+            */
+        default:
+            assert(0);
+            break;
+        }
+
+        ImGui::SameLine(0, 0);
+
+        // last parameter?
+        if (i != opcode.m_args.size() - 1)
+        {
+            ImGui::Text(", "); ImGui::SameLine(0, 0);
+        }
+    }
+    ImGui::Text(")");
+
+    if (dialogIdToDisplay >= 0)
+    {
+        displayDialog(dialogIdToDisplay);
+    }
+
+    currentPC += offsetToArgs;
+
+    return true;
+}
+
+void initOpcodeTable()
+{
+    m_opcode[0x01]
+        .setName("JUMP")
+        .addArgumentJumpLocation()
+        .end();
+
+    m_opcode[0x04]
+        .end();
+
+    m_opcode[0x05]
+        .setName("CALL")
+        .addArgumentFunctionEntryPoint("Call destination")
+        .setComment("Call a sub function")
+        .end();
+
+    m_opcode[0xB]
+        .setName("INIT_ENTITY_NPC")
+        .addArgumentImmediateOrVar("Id")
+        .setComment("Init as NPC")
+        .end();
+
+    m_opcode[0x15]
+        .end();
+
+    m_opcode[0x16]
+        .setName("INIT_ENTITY_PC")
+        .addArgumentImmediateOrVar("Id")
+        .setComment("Init as PC")
+        .end();
+
+    m_opcode[0x19]
+        .setName("SET_ACTOR_POSITION_2D")
+        .addArgumentS16("X")
+        .addArgumentS16("Y")
+        .addSignControlByte()
+        .end();
+
+    m_opcode[0x1F]
+        .addArgumentByte()
+        .end();
+
+    m_opcode[0x26]
+        .setName("Wait")
+        .addArgumentImmediateOrVar("Amount")
+        .end();
+
+    m_opcode[0x28]
+        .addArgumentCharacter()
+        .end();
+
+    m_opcode[0x2A]
+        .end();
+
+    m_opcode[0x2C]
+        .addArgumentByte()
+        .end();
+
+    m_opcode[0x35]
+        .addArgumentImmediateOrVar()
+        .addArgumentS16()
+        .addSignControlByte()
+        .end();
+
+    m_opcode[0x3C]
+        .setName("SET_VAR_INC")
+        .addArgumentByte()
+        .end();
+
+    m_opcode[0x46]
+        .end();
+
+    m_opcode[0x47]
+        .setName("FIELD_CHANGE_WHEN_READY")
+        .addArgumentByte()
+        .addArgumentImmediateOrVar()
+        .addArgumentImmediateOrVar()
+        .setComment("TODO: the first byte is unused?")
+        .end();
+
+    m_opcode[0x57]
+        .setName("FIELD_CHANGE_WHEN_READY")
+        .addArgumentByte()
+        .addArgumentS16()
+        .addArgumentS16()
+        .addArgumentS16()
+        .addArgumentS16()
+        .addSignControlByte()
+        .end();
+
+    m_opcode[0x5A]
+        .setName("OP_5A")
+        .end();
+
+    m_opcode[0x5B]
+        .end();
+
+    m_opcode[0x5D]
+        .addArgumentByte()
+        .end();
+
+    m_opcode[0x5E]
+        .end();
+
+    m_opcode[0x5F]
+        .addArgumentByte()
+        .end();
+
+    m_opcode[0x60]
+        .end();
+
+    m_opcode[0x63]
+        .addArgumentS16()
+        .addArgumentS16()
+        .addArgumentS16()
+        .addSignControlByte()
+        .end();
+
+    m_opcode[0x64]
+        .end();
+
+    m_opcode[0x6F]
+        .setName("ROTATE_TO_ACTOR")
+        .addArgumentCharacter()
+        .end();
+
+    m_opcode[0x74]
+        .addArgumentImmediateOrVar()
+        .end();
+
+    m_opcode[0x75]
+        .addArgumentImmediateOrVar()
+        .end();
+
+    m_opcode[0x7C]
+        .addArgumentS16()
+        .addSignControlByte()
+        .end();
+
+    m_opcode[0x80]
+        .addArgumentByte()
+        .addArgumentByte()
+        .addArgumentImmediateOrVar()
+        .end();
+
+    m_opcode[0x91]
+        .setName("IF_CHARACTER_IN_PARTY")
+        .addArgumentByte()
+        .addArgumentJumpLocation()
+        .end();
+
+    m_opcode[0x99]
+        .end();
+
+    m_opcode[0x9B]
+        .addArgumentImmediateOrVar()
+        .addArgumentImmediateOrVar()
+        .end();
+
+    m_opcode[0x9C]
+        .setName("WAIT_DIALOG")
+        .end();
+
+    m_opcode[0x9D]
+        .addArgumentImmediateOrVar()
+        .end();
+
+    m_opcode[0xA0]
+        .setName("OP_CONFIG_SCREEN")
+        .addArgumentImmediateOrVar()
+        .addArgumentImmediateOrVar()
+        .addArgumentImmediateOrVar()
+        .end();
+
+    m_opcode[0xA3]
+        .addArgumentS16()
+        .addArgumentS16()
+        .addArgumentS16()
+        .addSignControlByte()
+        .end();
+
+    m_opcode[0xA7]
+        .setName("UPDATE_CHARACTER")
+        .end();
+
+    m_opcode[0xA9]
+        .addArgumentByte()
+        .end();
+
+    m_opcode[0xAA]
+        .addArgumentByte()
+        .end();
+
+    m_opcode[0xB5]
+        .addArgumentImmediateOrVar()
+        .addArgumentImmediateOrVar()
+        .end();
+
+    m_opcode[0xBA]
+        .setName("REMOVE_FROM_AVAILABLE_PARTY")
+        .addArgumentByte()
+        .end();
+
+    m_opcode[0xBC]
+        .setName("INIT_ENTITY_SCRIPT")
+        .end();
+
+    m_opcode[0xC4]
+        .setName("REMOVE_FROM_AVAILABLE_PARTY")
+        .addArgumentByte()
+        .end();
+
+    m_opcode[0xD2]
+        .setName("SHOW_DIALOG_WINDOW_MODE0")
+        .addArgumentDialogId()
+        .addArgumentByte()
+        .end();
+
+    m_opcode[0xE7]
+        .addArgumentImmediateOrVar()
+        .addArgumentImmediateOrVar()
+        .addArgumentImmediateOrVar()
+        .end();
+
+    m_opcode[0xEE]
+        .addArgumentByte()
+        .addArgumentByte()
+        .end();
+}
+
+void initExtendedOpcodeTable()
+{
+    m_extendedOpcode[0xD]
+        .setName("SET_DIALOG_AVATAR")
+        .addArgumentImmediateOrVar()
+        .end();
+
+    m_extendedOpcode[0x18]
+        .setComment("Load something, skip next opcode if already loaded")
+        .addArgumentByte()
+        .end();
+
+    m_extendedOpcode[0x1A]
+        .setComment("Wait for loading to finish")
+        .end();
+
+    m_extendedOpcode[0x53]
+        .end();
+
+    m_extendedOpcode[0x54]
+        .end();
+
+    m_extendedOpcode[0x64]
+        .addArgumentImmediateOrVar()
+        .end();
+
+    m_extendedOpcode[0x8E]
+        .addArgumentImmediateOrVar()
+        .addArgumentImmediateOrVar()
+        .end();
+}
+
 bool decompileOpcode(u16& inputPC)
 {
+    static bool bOpcodesInitialized = false;
+    if (!bOpcodesInitialized)
+    {
+        initOpcodeTable();
+        initExtendedOpcodeTable();
+        bOpcodesInitialized = true;
+    }
+
     startOfInstruction = inputPC;
     currentPC = inputPC;
     ImGui::Text("    0x%04X\t", currentPC); ImGui::SameLine();
@@ -812,255 +1332,32 @@ bool decompileOpcode(u16& inputPC)
 
     if (opcode == 0xFE)
     {
-        opcode <<= 8;
-        opcode |= readScriptByte(1);
         currentPC++;
+        opcode <<= 8;
+        opcode |= readScriptByte(0);
+        if (m_extendedOpcode[opcode& 0xFF].m_isInitialized)
+        {
+            return handleGenericOpcode(m_extendedOpcode[opcode&0xFF], true);
+        }
     }
-
-    //ImGui::Text("OP%02X_", opcode); ImGui::SameLine(0,0);
+    else if (m_opcode[opcode].m_isInitialized)
+    {
+        return handleGenericOpcode(m_opcode[opcode]);
+    }
 
     switch (opcode)
     {
     case 0:
         ImGui::Text("RETURN()");
         return false;
-    case 1:
-        ImGui::Text("JUMP("); ImGui::SameLine(0, 0);
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 1, 1));
-        ImGui::Text("0x%04X", readU16FromScript(1)); ImGui::SameLine(0, 0); ImGui::Text(")");
-        ImGui::PopStyleColor();
-        addToExploreStack(readU16FromScript(1));
-        currentPC += 3;
-        return true;
     case 2:
         decodeJumpIf();
         currentPC += 8;
         return true;
-    case 4:
-        ImGui::Text("OP_4()");
-        return false;
-    case 5:
-        ImGui::Text("CALL("); ImGui::SameLine(0, 0);
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 1, 1));
-        ImGui::Text("0x%04X", readU16FromScript(1)); ImGui::SameLine(0, 0); ImGui::Text(")");
-        ImGui::PopStyleColor();
-        markFunctionStart(readU16FromScript(1), "");
-        currentPC+=3;
-        return true;
-    case 0xB: //11
-        decodeGenericOpcode("INIT_ENTITY_NPC", "i");
-        currentPC += 3;
-        return true;
     case 0xC: //12
         ImGui::Text("UPDATE_CHARACTER_INFINITLY()");
         return false;
-    case 0x15: //21
-        ImGui::Text("OP_15()");
-        currentPC++;
-        return true;
-    case 0x16: //22
-        decodeGenericOpcode("INIT_ENTITY_PC", "i");
-        currentPC += 3;
-        return true;
-    case 0x19: // 25
-        ImGui::Text("SET_ACTOR_POSITION_2D("); ImGui::SameLine(0, 0);
-        getVar80(1, 5); ImGui::SameLine(0, 0); ImGui::Text(" ,"); ImGui::SameLine(0, 0);
-        getVar40(3, 5); ImGui::SameLine(0, 0); ImGui::Text(")");
-        currentPC += 0x6;
-        return true;
-    case 0x1F: // 31
-        decodeGenericOpcode("OP_1F", "b");
-        currentPC += 2;
-        return true;
-    case 0x26: //38
-        decodeGenericOpcode("WAIT", "i");
-        currentPC += 3;
-        return true;
-    case 0x28: //40
-        decodeGenericOpcode("OP_28", "c");
-        currentPC += 2;
-        return true;
-    case 0x2A: //42
-        ImGui::Text("OP_42()");
-        currentPC++;
-        return true;
-    case 0x2C: // 44
-        decodeGenericOpcode("OP_2C", "b");
-        currentPC += 2;
-        return true;
-    case 0x35: // 53
-        printVarAssignementFromU16(1);
-        getVar40(3, 5);
-        currentPC+=6;
-        return true;
-    case 0x46: //70
-        ImGui::Text("OP_46()");
-        currentPC++;
-        return true;
-    case 0x47: // 71
-        decodeGenericOpcode("FIELD_CHANGE_WHEN_READY", "bii"); // TODO: the first byte is unused?
-        currentPC += 6;
-        return true;
-    case 0x57: // 87
-        ImGui::Text("OP_57("); ImGui::SameLine(0, 0);
-        ImGui::Text("%d", readScriptByte(1));  ImGui::SameLine(0, 0); ImGui::Text(" ,"); ImGui::SameLine(0, 0);
-        getVar80(2, 10); ImGui::SameLine(0, 0); ImGui::Text(" ,"); ImGui::SameLine(0, 0);
-        getVar40(4, 10); ImGui::SameLine(0, 0); ImGui::Text(" ,"); ImGui::SameLine(0, 0);
-        getVar20(6, 10); ImGui::SameLine(0, 0); ImGui::Text(" ,"); ImGui::SameLine(0, 0);
-        getVar10(8, 10); ImGui::SameLine(0, 0); ImGui::Text(")");
-        currentPC += 0xB;
-        return true;
-    case 0x5A: // 90
-        ImGui::Text("OP_5A()");
-        currentPC++;
-        return true;
-    case 0x5B: //91
-        ImGui::Text("OP_5B()");
-        currentPC++;
-        return true;
-    case 0x5D: // 93
-        decodeGenericOpcode("OP_5D", "b");
-        currentPC += 2;
-        return true;
-    case 0x5E: // 94
-        ImGui::Text("OP_5E()");
-        currentPC++;
-        return true;
-    case 0x5F: // 95
-        decodeGenericOpcode("OP_5F", "b");
-        currentPC += 2;
-        return true;
-    case 0x60: // 96
-        ImGui::Text("OP_60()");
-        currentPC++;
-        return true;
-    case 0x63: // 99
-        ImGui::Text("OP_63("); ImGui::SameLine(0, 0);
-        getVar80(1, 7); ImGui::SameLine(0, 0); ImGui::Text(" ,"); ImGui::SameLine(0, 0);
-        getVar40(3, 7); ImGui::SameLine(0, 0); ImGui::Text(" ,"); ImGui::SameLine(0, 0);
-        getVar20(5, 7); ImGui::SameLine(0, 0); ImGui::Text(")");
-        currentPC += 8;
-        return true;
-    case 0x64: // 100
-        ImGui::Text("OP_64()");
-        currentPC++;
-        return true;
-    case 0x6F: // 111
-        decodeGenericOpcode("ROTATE_TO_ACTOR", "c");
-        currentPC += 2;
-        return true;
-    case 0x74: //116
-        decodeGenericOpcode("OP_74", "i");
-        currentPC += 3;
-        return true;
-    case 0x75: //117
-        decodeGenericOpcode("OP_75", "i");
-        currentPC += 3;
-        return true;
-    case 0x7C: // 124
-        ImGui::Text("OP_7C("); ImGui::SameLine(0, 0);
-        getVar80(1, 3); ImGui::SameLine(0, 0); ImGui::Text(" ,"); ImGui::SameLine(0, 0);
-        ImGui::Text("%d", readScriptByte(3) & 3);  ImGui::SameLine(0, 0); ImGui::Text(")");
-        currentPC += 4;
-        return true;
-    case 0x80: // 128
-        decodeGenericOpcode("OP_80", "bbi");
-        currentPC += 5;
-        return true;
-    case 0x99: // 153
-        ImGui::Text("OP_99()");
-        currentPC++;
-        return true;
-    case 0x9B: // 155
-        decodeGenericOpcode("OP_9B", "ii");
-        currentPC += 5;
-        return true;
-    case 0x9C: //156
-        ImGui::Text("WAIT_DIALOG()");
-        currentPC++;
-        return true;
-    case 0x9D: //157
-        decodeGenericOpcode("OP_9D", "i");
-        currentPC += 7;
-        return true;
-    case 0xA0:
-        decodeGenericOpcode("OP_CONFIG_SCREEN", "iii");
-        currentPC += 7;
-        return true;
-    case 0xA3: // 163
-        ImGui::Text("OP_A3("); ImGui::SameLine(0, 0);
-        getVar80(1, 7); ImGui::SameLine(0, 0); ImGui::Text(" ,"); ImGui::SameLine(0, 0);
-        getVar40(3, 7); ImGui::SameLine(0, 0); ImGui::Text(" ,"); ImGui::SameLine(0, 0);
-        getVar20(5, 7); ImGui::SameLine(0, 0); ImGui::Text(")");
-        currentPC += 8;
-        return true;
-    case 0xA7: //167
-        ImGui::Text("UPDATE_CHARACTER()");
-        currentPC++;
-        return true;
-    case 0xA9: // 169
-        decodeGenericOpcode("OP_A9", "b");
-        currentPC += 2;
-        return true;
-    case 0xAA: // 170
-        decodeGenericOpcode("OP_AA", "b");
-        currentPC += 2;
-        return true;
-    case 0xB5: // 181
-        decodeGenericOpcode("OP_B5", "ii");
-        currentPC += 5;
-        return true;
-    case 0xBC: //188
-        ImGui::Text("INIT_ENTITY_SCRIPT()");
-        currentPC++;
-        return true;
-    case 0xC4: // 196
-        decodeGenericOpcode("OP_C4", "b");
-        currentPC += 2;
-        return true;
-    case 0xD2: //210
-        decodeGenericOpcode("SHOW_DIALOG_WINDOW_MODE0", "sb");
-        displayDialog(readU16FromScript(1));
-        currentPC+=4;
-        return true;
-    case 0xE7: //231
-        decodeGenericOpcode("OP_E7", "iii");
-        currentPC += 7;
-        return true;
-    case 0xEE: //238
-        decodeGenericOpcode("OP_EE", "bb");
-        currentPC += 7;
-        return true;
-    case 0xFE0D: // 13
-        decodeGenericOpcode("SET_DIALOG_AVATAR", "i");
-        currentPC += 3;
-        return true;
-    case 0xFE18: // 24
-        decodeGenericOpcode("OP_FE18", "b");
-        addComment("Load something, skip next opcode if already loaded");
-        currentPC += 2;
-        return true;
-    case 0xFE1A: // 26
-        ImGui::Text("OP_FE1A()");
-        addComment("Wait for loading to finish");
-        currentPC += 1;
-        return true;
-    case 0xFE53: // 83
-        ImGui::Text("OP_FE53()");
-        currentPC++;
-        return true;
-    case 0xFE54: // 84
-        ImGui::Text("OP_FE54()");
-        currentPC++;
-        return true;
-    case 0xFE64: //100
-        decodeGenericOpcode("OP_FE64", "i");
-        currentPC += 7;
-        return true;
-    case 0xFE8E: // 142
-        decodeGenericOpcode("OP_FE8E", "ii");
-        currentPC += 5;
-        return true;
+
     default:
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));
         ImGui::Text("Failed to decode opcode 0x%02X (%d)", opcode, opcode&0xFF);
