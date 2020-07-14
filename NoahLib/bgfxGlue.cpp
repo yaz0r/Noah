@@ -123,7 +123,7 @@ int initBgfxGlue(int argc, char* argv[])
 
     int resolution[2] = { 1280, 960 };
 
-    gWindowBGFX = SDL_CreateWindow("Noah", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, resolution[0], resolution[1], flags);
+    gWindowBGFX = SDL_CreateWindow("Noah", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, resolution[0], resolution[1], flags);
 
     SDL_SysWMinfo wmi;
     SDL_VERSION(&wmi.version);
