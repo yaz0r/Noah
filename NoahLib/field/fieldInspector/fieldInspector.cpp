@@ -96,7 +96,7 @@ public:
     {
         m_fieldID = fieldIndex;
         setCurrentDirectory(4, 0);
-        readFile(fieldIndex * 2 + 184, rawField);
+        readFile(fieldIndex * 2 + 184, rawField, 0, 0x80);
 
         {
             int rawFieldImageBundleSize = READ_LE_U32(&rawField[0x10C]);
@@ -150,7 +150,7 @@ public:
         {
             int rawFieldSize = READ_LE_U32(&rawField[0x12C]);
             rawFieldTriggerData.resize(rawFieldSize + 0x10);
-            // fieldDecompress(rawFieldSize + 0x10, rawField.begin() + READ_LE_U32(&rawField[0x150]), rawFieldTriggerData);
+            fieldDecompress(rawFieldSize + 0x10, rawField.begin() + READ_LE_U32(&rawField[0x150]), rawFieldTriggerData);
         }
 
 
@@ -758,7 +758,7 @@ public:
 
         currentPC += offsetToArgs;
 
-        return true;
+        return !opcode.m_breakFlow;
     }
 
     bool decompileOpcode(u16& inputPC)
@@ -796,19 +796,10 @@ public:
 
         switch (opcode)
         {
-        case 0:
-            ImGui::Text("STOP()");
-            return false;
         case 2:
             decodeJumpIf();
             currentPC += 8;
             return true;
-        case 0xC: //12
-            ImGui::Text("UPDATE_CHARACTER_INFINITLY()");
-            return false;
-        case 0xD:
-            ImGui::Text("RETURN()");
-            return false;
         case 0x57: // dynamic opcode
             switch (readU8FromScript(1) & 3)
             {

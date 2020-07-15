@@ -15,7 +15,7 @@ void readRawSectorsFromDisk(int startSector, std::vector<u8>& output, int size, 
 
 void waitReadCompletion(int)
 {
-
+    MissingCode();
 }
 
 int getNumFilesInDirectory(int directory)
@@ -123,12 +123,23 @@ int getFileSize(int fileIndex)
     return fatFileTableBuffer[fileIndex + startOfDirectoryFileIndex - 1].m3_size;
 }
 
+int getFileSizeAligned(int fileIndex)
+{
+    int size = getFileSize(fileIndex);
+    int size2 = size + 3;
+    if (size2 < 0)
+    {
+        size2 + size + 6;
+    }
+    return size2 & ~3;
+}
+
 int getFileStartSector(int fileIndex)
 {
     return fatFileTableBuffer[fileIndex + startOfDirectoryFileIndex - 1].m0_startSector;
 }
 
-void readFile(int fileIndex, std::vector<u8>& output)
+void readFile(int fileIndex, std::vector<u8>& output, int, int)
 {
     c_isoManager::getCurrentDisc()->readData(getFileStartSector(fileIndex), getFileSize(fileIndex), output);
 }
@@ -145,7 +156,7 @@ public:
         mName = buffer;
 
         setCurrentDirectory(directory, 0);
-        readFile(file, mBuffer);
+        readFile(file, mBuffer, 0, 0x80);
     }
 
     bool frame()
@@ -210,7 +221,7 @@ void c_filesystemExplorer::frame()
                                 {
                                     std::vector<u8> buffer;
                                     setCurrentDirectory(i, 0);
-                                    readFile(j, buffer);
+                                    readFile(j, buffer, 0, 0x80);
                                     FILE* fHandle = fopen("file.bin", "wb+");
                                     fwrite(&buffer[0], 1, getFileSize(j), fHandle);
                                     fclose(fHandle);

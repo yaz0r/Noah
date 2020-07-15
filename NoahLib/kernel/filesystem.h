@@ -26,7 +26,8 @@ extern std::vector<s_directoryEntry> fatDirectoryTableBuffer;
 void initCDAndFileSystem(std::vector<s_fileTableEntry>* fileTable, std::vector<s_directoryEntry>* directoryTable, int);
 
 int getFileSize(int fileIndex);
+int getFileSizeAligned(int fileIndex);
 int getFileStartSector(int fileIndex);
-void readFile(int fileIndex, std::vector<u8>& output);
+void readFile(int fileIndex, std::vector<u8>& output, int, int);
 int setCurrentDirectory(int directory, int offset);
-
+void waitReadCompletion(int);

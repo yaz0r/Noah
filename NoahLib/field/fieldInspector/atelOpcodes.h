@@ -30,6 +30,7 @@ struct sOpcodeInfo
 {
     bool m_isInitialized = false;
     u8 m_opcodeSize = 1;
+    bool m_breakFlow = false;
     std::string m_name;
     std::string m_comment;
     std::vector<sOpcodeArg> m_args;
@@ -155,6 +156,12 @@ struct sOpcodeInfo
     {
         addAgument(sOpcodeArg::triggerIndex, argumentName);
         m_opcodeSize += 0x1;
+        return *this;
+    }
+
+    sOpcodeInfo& setOpcodeBreakExecutionFlow()
+    {
+        m_breakFlow = true;
         return *this;
     }
 

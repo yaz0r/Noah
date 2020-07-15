@@ -7,10 +7,17 @@ std::array<sOpcodeInfo, 256> m_extendedOpcode;
 
 void initOpcodeTable()
 {
+    m_opcode[0x00]
+        .setName("STOP")
+        .setOpcodeBreakExecutionFlow()
+        .end();
+
     m_opcode[0x01]
         .setName("JUMP")
         .addArgumentJumpLocation()
         .end();
+
+    // special case IF
 
     m_opcode[0x03]
         .setName("SHOW_DIALOG_WINDOW_FOR_CURRENT_ACTOR_MODE2")
@@ -25,6 +32,13 @@ void initOpcodeTable()
         .setName("CALL")
         .addArgumentFunctionEntryPoint("Call destination")
         .setComment("Call a sub function")
+        .end();
+
+    m_opcode[0x07]
+        .setName("RUN_ENTITY_SCRIPT_ASYNC")
+        .setComment("ScriptNumber is & 0x1F, other param in upper bits")
+        .addArgumentCharacter("FieldScriptEntity")
+        .addArgumentByte("ScriptId")
         .end();
 
     m_opcode[0x08]
@@ -51,6 +65,16 @@ void initOpcodeTable()
         .setName("INIT_ENTITY_NPC")
         .addArgumentImmediateOrVar("Id")
         .setComment("Init as NPC")
+        .end();
+
+    m_opcode[0x0C]
+        .setName("UPDATE_CHARACTER_INFINITLY")
+        .setOpcodeBreakExecutionFlow()
+        .end();
+
+    m_opcode[0x0D]
+        .setName("RETURN")
+        .setOpcodeBreakExecutionFlow()
         .end();
 
     m_opcode[0xE]
@@ -106,6 +130,10 @@ void initOpcodeTable()
 
     m_opcode[0x20]
         .setName("SET_CURRENT_ACTOR_FLAGS")
+        .addArgumentImmediateOrVar()
+        .end();
+
+    m_opcode[0x21]
         .addArgumentImmediateOrVar()
         .end();
 
@@ -219,6 +247,8 @@ void initOpcodeTable()
         .addArgumentS16()
         .addSignControlByte()
         .end();
+
+    // opcode 0x57 is dynamic
 
     m_opcode[0x5A]
         .setName("OP_5A")
@@ -429,6 +459,36 @@ void initOpcodeTable()
         .setName("INIT_ENTITY_SCRIPT")
         .end();
 
+    m_opcode[0xBD]
+        .setName("ROTATION_3D_YAW_ADD")
+        .addArgumentImmediateOrVar()
+        .end();
+
+    m_opcode[0xBE]
+        .setName("ROTATION_3D_YAW_SUBSTRACT")
+        .addArgumentImmediateOrVar()
+        .end();
+
+    m_opcode[0xBF]
+        .setName("ROTATION_3D_PITC_ADD")
+        .addArgumentImmediateOrVar()
+        .end();
+
+    m_opcode[0xC0]
+        .setName("ROTATION_3D_PITCH_SUBSTRACT")
+        .addArgumentImmediateOrVar()
+        .end();
+
+    m_opcode[0xC1]
+        .setName("ROTATION_3D_ROLL_ADD")
+        .addArgumentImmediateOrVar()
+        .end();
+
+    m_opcode[0xC2]
+        .setName("ROTATION_3D_ROLL_SUBSTRACT")
+        .addArgumentImmediateOrVar()
+        .end();
+
     m_opcode[0xC4]
         .setName("REMOVE_FROM_AVAILABLE_PARTY")
         .addArgumentByte()
@@ -634,6 +694,33 @@ void initExtendedOpcodeTable()
     m_extendedOpcode[0x8E]
         .addArgumentImmediateOrVar()
         .addArgumentImmediateOrVar()
+        .end();
+
+    m_extendedOpcode[0x8F]
+        .addArgumentCharacter()
+        .addArgumentImmediateOrVar()
+        .addArgumentImmediateOrVar()
+        .addArgumentImmediateOrVar()
+        .end();
+
+    m_extendedOpcode[0x90]
+        .addArgumentImmediateOrVar()
+        .addArgumentImmediateOrVar()
+        .addArgumentImmediateOrVar()
+        .addArgumentImmediateOrVar()
+        .end();
+
+    m_extendedOpcode[0x91]
+        .addArgumentS16()
+        .addArgumentS16()
+        .addArgumentS16()
+        .addArgumentS16()
+        .addArgumentS16()
+        .addSignControlByte()
+        .end();
+
+    m_extendedOpcode[0x97]
+        .addArgumentByte()
         .end();
 
     m_extendedOpcode[0xA1]

@@ -4,6 +4,7 @@
 #include "kernel/isoManager.h"
 #include "kernel/fileSystem.h"
 #include "field/fieldInspector/fieldInspector.h"
+#include "field/field.h"
 
 bool noahInit(int argc, char* argv[])
 {
@@ -22,6 +23,8 @@ bool noahInit(int argc, char* argv[])
     /*
     stuff
     */
+
+    fieldEntryPoint();
 
     return true;
 }

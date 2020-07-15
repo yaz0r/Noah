@@ -17,14 +17,14 @@ void decompress(std::vector<u8>::iterator& inputStream, std::vector<u8>& output)
     }
 
     inputStream += 4;
-    int controlByte = READ_LE_U8(inputStream);
 
     std::vector<u8>::iterator outputStream = output.begin();
     do
     {
+        int controlByte = READ_LE_U8(inputStream);
+        inputStream++;
         u8 controlBit = controlByte & 1;
         u8 bitCounter = 8;
-        inputStream++;
 
         do
         {
@@ -51,7 +51,6 @@ void decompress(std::vector<u8>::iterator& inputStream, std::vector<u8>& output)
             }
             controlBit = controlByte & 1;
         } while (bitCounter != 0);
-        controlByte = READ_LE_U8(inputStream);
     } while (outputStream - output.begin() < totalSize);
 
     output.resize(totalSize);
