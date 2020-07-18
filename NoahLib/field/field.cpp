@@ -7,6 +7,7 @@
 #include <array>
 
 std::vector<u8> rawFieldBundle;
+std::vector<u8> fieldHeader;
 std::vector<u8> rawFieldModels;
 std::vector<u8> rawFieldScriptData;
 std::vector<u8> rawFieldTriggerData;
@@ -33,7 +34,7 @@ struct sFP1616
 
 struct sMatrix
 {
-    sFP1616 t[3];
+    std::array<sFP1616, 3> t;
 };
 
 struct sModelBlock
@@ -78,21 +79,64 @@ struct sFieldEntity2dSprite
 
 struct sFieldScriptEntity
 {
+    u32 m0_flags;
     u32 m4_flags;
+    s16 m18[4];
+    std::array<sFP1616, 3> m20_position;
     s16 m5A;
     u16 mCC_scriptPC;
+
+    u8 m126;
+    u8 m127;
+    struct
+    {
+        u32 m28 : 2;
+    }m130;
+
+    struct
+    {
+        u32 m0 : 4;
+        u32 m4 : 1;
+    }m134;
+
     // size 0x138
+};
+
+struct sFieldEntitySub4_F4
+{
+    s16 m14_actorId;
+    //size ???
+};
+
+struct sFieldEntitySub4
+{
+    std::array<sFP1616, 3> m0_position;
+    s32 mC;
+    s32 m10;
+    s32 m14;
+    s32 m1C;
+    s16 m2C;
+    u32 m40;
+    sFieldEntitySub4_F4* m7C;
+    s16 m82;
+    s16 m84;
+    u16 m86_thisSize;
+
+    sFieldEntitySub4_F4 mF4;
+    //size 0x164
 };
 
 struct sFieldEntity
 {
     sFieldEntitySub0* m0;
+    sFieldEntitySub4* m4_pSub4;
     sFieldEntity2dSprite* m8_2dSprite;
     sMatrix mC_matrix;
     sMatrix m2C_matrixBackup;
     sFieldScriptEntity* m4C_scriptEntity;
     s16 m50_modelRotation[3];
     u16 m58_flags;
+    u16 m5A;
     //size 0x5C
 };
 
@@ -207,9 +251,191 @@ void sprintf_screen(const char* format, ...)
 typedef void (*tOpcode)();
 std::array<tOpcode, 256> fieldScriptOpcodes;
 
+void initModel3(int, int)
+{
+    MissingCode();
+}
+
+void deleteFieldEntitySub4(sFieldEntitySub4* param_1)
+{
+    MissingCode();
+}
+
+void initFieldEntitySub4Sub1(sFieldEntitySub4* param_1)
+{
+    MissingCode();
+}
+
+void initFieldEntitySub4Sub2(sFieldEntitySub4* pThis)
+{
+    MissingCode();
+}
+
+void initFieldEntitySub4Sub3(sFieldEntitySub4* param_1, int)
+{
+    MissingCode();
+}
+
+sFieldEntitySub4* initFieldEntitySub4(sFieldEntitySub4* param_1, std::vector<u8>::iterator pSetup, int param_3, int param_4, int param_5, int param_6, int param_7)
+{
+    initFieldEntitySub4Sub1(param_1);
+    initFieldEntitySub4Sub2(param_1);
+    initFieldEntitySub4Sub3(param_1, 0x10000);
+
+    MissingCode();
+
+    return param_1;
+}
+
+sFieldEntitySub4* createFieldEntitySub4(std::vector<u8>::iterator pSetup, int param_2, int param_3, int param_4, int param_5, int param_6)
+{
+    sFieldEntitySub4* pNewEntry = new sFieldEntitySub4;
+    pNewEntry->m86_thisSize = sizeof(sFieldEntitySub4);
+    return initFieldEntitySub4(pNewEntry, pSetup, param_2, param_3, param_4, param_5, param_6);
+}
+
+void OP_INIT_ENTITY_SCRIPT_sub0Sub4(sFieldEntitySub4* param1, int param2, int* param3, int* param4, int* param5)
+{
+    MissingCode();
+}
+
+void OP_INIT_ENTITY_SCRIPT_sub0Sub5(sFieldEntitySub4* param1, int param2)
+{
+    MissingCode();
+}
+
+void OP_INIT_ENTITY_SCRIPT_sub0Sub6(sFieldEntitySub4* param1, int param2)
+{
+    MissingCode();
+}
+
+void OP_INIT_ENTITY_SCRIPT_sub0Sub7(sFieldEntitySub4* param1, int param2)
+{
+    MissingCode();
+}
+
+void OP_INIT_ENTITY_SCRIPT_sub0Sub8(sFieldEntitySub4* param1, void(*callback)(sFieldEntitySub4*))
+{
+    MissingCode();
+}
+
+void fieldActorCallback(sFieldEntitySub4* pThis)
+{
+    fieldEntityArray[pThis->m7C->m14_actorId].m4C_scriptEntity->m4_flags |= 0x10000;
+}
+
+s16 WasOpcodeE5Called = 0;
+
+void OP_INIT_ENTITY_SCRIPT_sub0(int actorId, int param_2, std::vector<u8>::iterator pSetup, int param_4, int param_5, int param_6, int param_7)
+{
+    initModel3(8, 0);
+    fieldEntityArray[actorId].m4C_scriptEntity->m127 = param_2;
+    fieldEntityArray[actorId].m4C_scriptEntity->m126 = param_6;
+    fieldEntityArray[actorId].m4C_scriptEntity->m134.m0 = param_5;
+    fieldEntityArray[actorId].m4C_scriptEntity->m130.m28 = param_4;
+    fieldEntityArray[actorId].m4C_scriptEntity->m134.m4 = param_7;
+
+    if (param_4 == 0)
+    {
+        s16 sVar6 = READ_LE_S16(fieldHeader.begin() + 2 + param_2 * 8);
+        s16 sVar1 = READ_LE_S16(fieldHeader.begin() + 0 + param_2 * 8);
+
+        if (param_5 == 0)
+        {
+            if (fieldEntityArray[actorId].m5A & 1)
+            {
+                deleteFieldEntitySub4(fieldEntityArray[actorId].m4_pSub4);
+            }
+
+            fieldEntityArray[actorId].m4_pSub4 = createFieldEntitySub4(pSetup, 0x100, ((param_2 + 480) * 0x10000) >> 0x10, sVar1, sVar6, 0x40);
+        }
+        else
+        {
+            assert(0);
+        }
+    }
+    else
+    {
+        assert(0);
+    }
+
+    fieldEntityArray[actorId].m5A |= 1;
+
+    sFieldEntitySub4* pFieldEntitySub4 = fieldEntityArray[actorId].m4_pSub4;
+
+    int temp0;
+    int temp1;
+    int temp2;
+    OP_INIT_ENTITY_SCRIPT_sub0Sub4(pFieldEntitySub4, 0, &temp0, &temp1, &temp2);
+    OP_INIT_ENTITY_SCRIPT_sub0Sub5(pFieldEntitySub4, 3);
+
+    pFieldEntitySub4->m2C = 0xC00;
+    pFieldEntitySub4->m82 = 0x2000;
+
+    if (!fieldScriptEntityAlreadyInitialized)
+    {
+        pFieldEntitySub4->m0_position = fieldEntityArray[actorId].m4C_scriptEntity->m20_position;
+        pFieldEntitySub4->m10 = 0;
+        pFieldEntitySub4->mC = 0;
+        pFieldEntitySub4->m10 = 0;
+        pFieldEntitySub4->m14 = 0;
+        pFieldEntitySub4->m1C = 0x10000;
+        pFieldEntitySub4->m84 = fieldEntityArray[actorId].mC_matrix.t[1].m2_fraq;
+        if (!param_4)
+        {
+            fieldEntityArray[actorId].m4C_scriptEntity->m18[1] = temp1 * 2;
+        }
+        else
+        {
+            fieldEntityArray[actorId].m4C_scriptEntity->m18[1] = 0x40;
+        }
+    }
+    else
+    {
+        assert(0);
+    }
+
+    if (WasOpcodeE5Called)
+    {
+        pFieldEntitySub4->m40 |= 0x40000;
+    }
+
+    OP_INIT_ENTITY_SCRIPT_sub0Sub6(pFieldEntitySub4, 0);
+    OP_INIT_ENTITY_SCRIPT_sub0Sub7(pFieldEntitySub4, 0);
+    initModel3(8, 0);
+
+    pFieldEntitySub4->m7C->m14_actorId = actorId;
+    OP_INIT_ENTITY_SCRIPT_sub0Sub8(pFieldEntitySub4, &fieldActorCallback);
+
+    if (!param_7)
+    {
+        assert(0);
+    }
+
+    fieldEntityArray[actorId].mC_matrix.t[0].m2_fraq = fieldEntityArray[actorId].m4C_scriptEntity->m20_position[0].m2_fraq; // TODO: probably wrong, and if not, that also overwrite the integer part
+    fieldEntityArray[actorId].mC_matrix.t[1].m2_fraq = fieldEntityArray[actorId].m4C_scriptEntity->m20_position[1].m2_fraq;
+    fieldEntityArray[actorId].mC_matrix.t[2].m2_fraq = fieldEntityArray[actorId].m4C_scriptEntity->m20_position[2].m2_fraq;
+
+    fieldEntityArray[actorId].m2C_matrixBackup.t = fieldEntityArray[actorId].mC_matrix.t;
+
+    pFieldEntitySub4->m84 = fieldEntityArray[actorId].mC_matrix.t[1].m2_fraq;
+
+    pFieldEntitySub4->m0_position = fieldEntityArray[actorId].m4C_scriptEntity->m20_position;
+}
+
+void OP_INIT_ENTITY_SCRIPT_sub1()
+{
+    MissingCode();
+}
+
 void OP_INIT_ENTITY_SCRIPT()
 {
-    assert(0);
+    OP_INIT_ENTITY_SCRIPT_sub0(currentFieldActorId, 0, rawFieldActorSetupParams.begin() + READ_LE_U32(rawFieldActorSetupParams.begin() + 4), 0, 0, 0x80, 1);
+    OP_INIT_ENTITY_SCRIPT_sub1();
+
+    pCurrentFieldScriptActor->m0_flags |= 0x100;
+    pCurrentFieldScriptActor->m4_flags |= 0x800;
+    pCurrentFieldScriptActor->mCC_scriptPC++;
 }
 
 void executeFieldScript(int param)
@@ -300,6 +526,9 @@ void startAllEntityScripts()
 void initFieldData()
 {
     resetFieldDefault();
+
+    fieldHeader.resize(256);
+    memcpy(&fieldHeader[0], &rawFieldBundle[0], 256); // TODO: yuk...
 
     MissingCode();
 
