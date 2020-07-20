@@ -141,7 +141,7 @@ int getFileStartSector(int fileIndex)
 
 void readFile(int fileIndex, std::vector<u8>& output, int, int)
 {
-    c_isoManager::getCurrentDisc()->readData(getFileStartSector(fileIndex), getFileSize(fileIndex), output);
+    c_isoManager::getCurrentDisc()->readData(getFileStartSector(fileIndex), getFileSizeAligned(fileIndex), output);
 }
 
 std::vector<class c_fileHexView*> gFileHexView;

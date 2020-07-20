@@ -113,6 +113,7 @@ void initOpcodeTable()
         .end();
 
     m_opcode[0x1C]
+        .setName("SET_CURRENT_ACTOR_ELEVATION")
         .addArgumentS16("Y")
         .addSignControlByte()
         .end();
@@ -267,6 +268,7 @@ void initOpcodeTable()
         .end();
 
     m_opcode[0x5F]
+        .setName("SET_CURRENT_ACTOR_CARDINAL_DIRECTION")
         .addArgumentByte()
         .end();
 
@@ -601,7 +603,8 @@ void initExtendedOpcodeTable()
         .end();
 
     m_extendedOpcode[0x18]
-        .setComment("Load something, skip next opcode if already loaded")
+        .setName("ADD_TO_CURRENT_PARTY")
+        .setComment("Triggers async loading")
         .addArgumentByte()
         .end();
 
@@ -611,6 +614,7 @@ void initExtendedOpcodeTable()
         .end();
 
     m_extendedOpcode[0x1A]
+        .setName("FINALIZE_PARTY_CHARACTER_LOADING")
         .setComment("Wait for loading to finish")
         .end();
 
@@ -674,6 +678,7 @@ void initExtendedOpcodeTable()
         .end();
 
     m_extendedOpcode[0x5E]
+        .setName("SET_TRANSPARENCY_MODE")
         .addArgumentImmediateOrVar()
         .end();
 

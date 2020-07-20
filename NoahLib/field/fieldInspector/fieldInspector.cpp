@@ -16,11 +16,11 @@ struct sFieldListEntry
     std::string mComment;
 };
 
-std::array<sFieldListEntry, 256> gFieldList;
+std::array<sFieldListEntry, 800> gFieldList;
 
 bool getFieldListName(void* data, int idx, const char** out_text)
 {
-    std::array<sFieldListEntry, 256>* pList = (std::array<sFieldListEntry, 256>*)data;
+    std::array<sFieldListEntry, 800>* pList = (std::array<sFieldListEntry, 800>*)data;
 
     *out_text = (*pList)[idx].mName.c_str();
 

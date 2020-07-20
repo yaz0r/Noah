@@ -14,6 +14,10 @@ typedef int32_t s32;
 typedef uint64_t u64;
 typedef int64_t s64;
 
+typedef u8 byte;
+typedef u16 ushort;
+typedef u32 uint;
+
 u16 READ_LE_U16(void* ptr);
 s16 READ_LE_S16(void* ptr);
 u32 READ_LE_U32(void* ptr);

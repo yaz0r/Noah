@@ -39,7 +39,7 @@ bool c_isoFile::readData(int startSector, int size, std::vector<u8>& output)
     if (size < 0)
         return false;
 
-    output.resize(size);
+    output.resize(size + 0x10); // TODO: 0x10 because reading past the end of the buffer in field files
 
     fseek(m_fHandle, 0x930 * startSector, SEEK_SET);
 
