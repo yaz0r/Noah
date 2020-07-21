@@ -5,6 +5,9 @@
 #include "kernel/decompress.h"
 #include "atelOpcodes.h"
 
+#include "bgfx/bgfx.h"
+#include "imguiBGFX.h"
+
 #include "../imgui_club/imgui_memory_editor/imgui_memory_editor.h"
 
 #include <array>
@@ -74,6 +77,12 @@ public:
                     ImGui::EndTabItem();
                 }
 
+                if (ImGui::BeginTabItem("SpriteSheets"))
+                {
+                    fieldInspector_spriteSheets();
+
+                    ImGui::EndTabItem();
+                }
 
                 ImGui::EndTabBar();
             }
@@ -560,6 +569,96 @@ public:
             displayDialog(i);
         }
     }
+
+    struct sSpriteSheetEntry
+    {
+        int w;
+        int h;
+        bgfx::TextureHandle handle;
+    };
+
+    std::vector<sSpriteSheetEntry> mSpriteSheetTextures;
+
+    void displaySpriteSheet(int index)
+    {
+        if (mSpriteSheetTextures.size() <= index)
+        {
+            int offset = READ_LE_U32(rawFieldImageBundle2.begin() + 4 + index * 4);
+            std::vector<u8>::iterator pImageData = rawFieldImageBundle2.begin() + offset;
+
+            int count = READ_LE_U32(pImageData);
+            assert(count == 1);
+
+            std::vector<u8> textureBuffer;
+
+            int textureHeight = 256;
+            int textureWidth = count * 0x40 * 4;
+
+            textureBuffer.resize(textureHeight * textureWidth * 4); // assuming 256 in height
+
+            int xOffset = 0;
+
+            for (int i = 0; i < count; i++)
+            {
+                int offset = READ_LE_U32(pImageData + 4 + i * 4);
+                std::vector<u8>::iterator data = pImageData + offset;
+
+                int x = xOffset;
+                int y = 0;
+                int w = READ_LE_U16(data);
+                int h = READ_LE_U16(data + 2);
+
+                xOffset += 0x40;
+
+                data += 4;
+                for (int outputY = 0; outputY < h; outputY++)
+                {
+                    for (int outputX = 0; outputX < w * 4; outputX++)
+                    {
+                        u8 colorValue = *data;
+                        if (!(outputX & 1))
+                        {
+                            colorValue &= 0xF;
+                            
+                        }
+                        else
+                        {
+                            colorValue >>= 4;
+                            data++;
+                        }
+
+                        textureBuffer[(outputY * textureWidth + outputX) * 4 + 0] = colorValue << 4;
+                        textureBuffer[(outputY * textureWidth + outputX) * 4 + 1] = colorValue << 4;
+                        textureBuffer[(outputY * textureWidth + outputX) * 4 + 2] = colorValue << 4;
+                        textureBuffer[(outputY * textureWidth + outputX) * 4 + 3] = 0xFF;
+                    }
+                }
+
+                bgfx::TextureHandle newHandle = bgfx::createTexture2D(textureWidth, h, false, 1, bgfx::TextureFormat::RGBA8, 0, bgfx::copy(&textureBuffer[0], textureWidth * h * 4));
+
+                sSpriteSheetEntry newEntry;
+                newEntry.handle = newHandle;
+                newEntry.w = textureWidth;
+                newEntry.h = h;
+
+                mSpriteSheetTextures.push_back(newEntry);
+            }
+        }
+
+        ImGui::Image(mSpriteSheetTextures[index].handle, ImVec2(mSpriteSheetTextures[index].w*2, mSpriteSheetTextures[index].h*2));
+    }
+
+    void fieldInspector_spriteSheets()
+    {
+        int NumEntries = READ_LE_U32(rawFieldImageBundle2.begin());
+        mSpriteSheetTextures.reserve(NumEntries);
+
+        for (int i = 0; i < NumEntries; i++)
+        {
+            displaySpriteSheet(i);
+        }
+    }
+
 
     u16 startOfInstruction;
     u16 currentPC = -1;

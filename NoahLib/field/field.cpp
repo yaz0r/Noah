@@ -6,8 +6,17 @@
 
 #include <array>
 
+struct sFieldVramMapping
+{
+    s16 m0_vramX;
+    s16 m2_vramY;
+    s16 m4;
+    s16 m6;
+};
+std::array<sFieldVramMapping, 32> fieldVramMapping;
+
 std::vector<u8> rawFieldBundle;
-std::vector<u8> fieldHeader;
+
 std::vector<u8> rawFieldModels;
 std::vector<u8> rawFieldScriptData;
 std::vector<u8> rawFieldTriggerData;
@@ -294,6 +303,50 @@ void resetFieldDefault()
 
 void uploadFieldImages(std::vector<u8>::iterator& pImageData)
 {
+    MissingCode();
+}
+
+struct RECT
+{
+    s16 x;
+    s16 y;
+    s16 w;
+    s16 h;
+};
+
+RECT* currentNpcSpriteUploadRect = nullptr;
+std::vector<u8>::iterator currentNpcSpriteUploadDataPtr;
+
+void transfertNpcSpriteSheetElement()
+{
+    MissingCode();
+}
+
+void uploadNpcSpriteSheet(std::vector<u8>::iterator& pImageData, int x, int y)
+{
+    int count = READ_LE_U32(pImageData);
+
+    int xOffset = 0;
+
+    for (int i=0; i<count; i++)
+    {
+        int offset = READ_LE_U32(pImageData + 4 + i * 4);
+        std::vector<u8>::iterator data = pImageData + offset;
+
+        RECT rect;
+        rect.x = x + xOffset;
+        rect.y = y;
+        rect.w = READ_LE_U16(data);
+        rect.h = READ_LE_U16(data + 2);
+
+        xOffset += 0x40;
+
+        currentNpcSpriteUploadDataPtr = data + 4;
+        currentNpcSpriteUploadRect = &rect;
+
+        transfertNpcSpriteSheetElement();
+    }
+
     MissingCode();
 }
 
@@ -743,7 +796,7 @@ void initFieldEntitySub4Sub1(sFieldEntitySub4* param_1)
     param_1->m50 = 0;
 }
 
-sFieldEntitySub4* initFieldEntitySub4(sFieldEntitySub4* param_1, u8* pSetup, int param_3, int param_4, int param_5, int param_6, int param_7)
+sFieldEntitySub4* initFieldEntitySub4(sFieldEntitySub4* param_1, u8* pSetup, int param_3, int param_4, int vramX, int vramY, int param_7)
 {
     initFieldEntitySub4Sub1(param_1);
     initFieldEntitySub4Sub2(param_1);
@@ -770,8 +823,8 @@ sFieldEntitySub4* initFieldEntitySub4(sFieldEntitySub4* param_1, u8* pSetup, int
     int count = initFieldEntitySub4Sub4(pSetup + READ_LE_U32(pSetup + 8));
     param_1->m20->m2C = param_1->m20->m30 = new u8[count * 0x18]; // TODO: figure that
 
-    param_1->m24->m4 = param_5 << 16;
-    param_1->m24->m4 |= param_6;
+    param_1->m24->m4 = vramX << 16;
+    param_1->m24->m4 |= vramY;
     param_1->m24->m8 = param_3 << 16;
     param_1->m24->m8 |= param_4;
 
@@ -785,11 +838,12 @@ sFieldEntitySub4* initFieldEntitySub4(sFieldEntitySub4* param_1, u8* pSetup, int
     return param_1;
 }
 
-sFieldEntitySub4* createFieldEntitySub4(u8* pSetup, int param_2, int param_3, int param_4, int param_5, int param_6)
+sFieldEntitySub4* createFieldEntitySub4(u8* pSetup, int param_2, int param_3, int vramX, int vramY, int param_6)
 {
     sFieldEntitySub4* pNewEntry = new sFieldEntitySub4;
     pNewEntry->m86_thisSize = sizeof(sFieldEntitySub4);
-    return initFieldEntitySub4(pNewEntry, pSetup, param_2, param_3, param_4, param_5, param_6);
+
+    return initFieldEntitySub4(pNewEntry, pSetup, param_2, param_3, vramX, vramY, param_6);
 }
 
 void OP_INIT_ENTITY_SCRIPT_sub0Sub4(sFieldEntitySub4* param_1, int param_2, int* param_3, int* param_4, int* param_5)
@@ -904,8 +958,8 @@ void OP_INIT_ENTITY_SCRIPT_sub0(int actorId, int param_2, u8* pSetup, int param_
 
     if (param_4 == 0)
     {
-        s16 sVar6 = READ_LE_S16(fieldHeader.begin() + 2 + param_2 * 8);
-        s16 sVar1 = READ_LE_S16(fieldHeader.begin() + 0 + param_2 * 8);
+        s16 vramX = fieldVramMapping[param_2].m0_vramX;
+        s16 vramY = fieldVramMapping[param_2].m2_vramY;
 
         if (param_5 == 0)
         {
@@ -914,7 +968,7 @@ void OP_INIT_ENTITY_SCRIPT_sub0(int actorId, int param_2, u8* pSetup, int param_
                 deleteFieldEntitySub4(fieldEntityArray[actorId].m4_pSub4);
             }
 
-            fieldEntityArray[actorId].m4_pSub4 = createFieldEntitySub4(pSetup, 0x100, ((param_2 + 480) * 0x10000) >> 0x10, sVar1, sVar6, 0x40);
+            fieldEntityArray[actorId].m4_pSub4 = createFieldEntitySub4(pSetup, 0x100, ((param_2 + 480) * 0x10000) >> 0x10, vramX, vramY, 0x40);
         }
         else
         {
@@ -1339,8 +1393,7 @@ void OP_INIT_ENTITY_NPC(void)
     sFieldScriptEntity* psVar3;
     uint uVar4;
 
-    fieldEntityArray[currentFieldActorId].m58_flags =
-        fieldEntityArray[currentFieldActorId].m58_flags & 0xf07f | 0x200;
+    fieldEntityArray[currentFieldActorId].m58_flags = fieldEntityArray[currentFieldActorId].m58_flags & 0xf07f | 0x200;
     uVar4 = getImmediateOrVariableUnsigned(1);
     OP_INIT_ENTITY_SCRIPT_sub0(currentFieldActorId, uVar4, &rawFieldActorSetupParams[0] + READ_LE_U32(rawFieldActorSetupParams.begin() + uVar4 * 4 + 4), 0, 0, uVar4 | 0x80, 0);
     OP_INIT_ENTITY_SCRIPT_sub1();
@@ -1825,8 +1878,13 @@ void initFieldData()
 {
     resetFieldDefault();
 
-    fieldHeader.resize(256);
-    memcpy(&fieldHeader[0], &rawFieldBundle[0], 256); // TODO: yuk...
+    for (int i=0; i<32; i++)
+    {
+        fieldVramMapping[i].m0_vramX = READ_LE_S16(rawFieldBundle.begin() + i * 8 + 0);
+        fieldVramMapping[i].m2_vramY = READ_LE_S16(rawFieldBundle.begin() + i * 8 + 2);
+        fieldVramMapping[i].m4 = READ_LE_S16(rawFieldBundle.begin() + i * 8 + 4);
+        fieldVramMapping[i].m6 = READ_LE_S16(rawFieldBundle.begin() + i * 8 + 6);
+    }
 
     MissingCode();
 
@@ -1856,9 +1914,16 @@ void initFieldData()
             int numImages = READ_LE_U32(rawFieldImageBundle2.begin());
             for (int i = 0; i < numImages; i++)
             {
-                int offset = READ_LE_U32(rawFieldImageBundle2.begin() + i * 4);
-                MissingCode();
-                //uploadFieldImages(rawFieldImageBundle2.begin() + offset);
+                int offset = READ_LE_U32(rawFieldImageBundle2.begin() + 4 + i * 4);
+
+                if (fieldVramMapping[i].m6 == 0)
+                {
+                    int x = fieldVramMapping[i].m0_vramX;
+                    int y = fieldVramMapping[i].m2_vramY;
+
+                    uploadNpcSpriteSheet(rawFieldImageBundle2.begin() + offset, x, y);
+                }
+                
             }
         }
 
