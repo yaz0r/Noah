@@ -111,6 +111,9 @@ struct sFieldEntity2dSprite
     //size 0x70
 };
 
+
+typedef std::array<s16, 2> sVec2_s16;
+
 struct sFieldScriptEntityScriptSlot
 {
     u16 m0_scriptPC;
@@ -161,7 +164,7 @@ struct sFieldEntitySub4_F4
     s32 m4;
     s32 m8;
     s16 mC;
-    sFP1616 mE;
+    sVec2_s16 mE_vramLocation;
     s16 m14_actorId;
     s32 m18;
     //size ???
@@ -194,7 +197,7 @@ struct sFieldEntitySub4_B4
 struct sFieldEntitySub4_110
 {
     u8* m0;
-    sFP1616 m4;
+    sVec2_s16 m4_vramLocation;
     sFP1616 m8;
     u8* mC;
     u8* m10;
@@ -249,10 +252,10 @@ struct sFieldEntitySub4
     u8* m48;
     u8* m4C;
     s32 m50;
-    s32 m54;
+    u8* m54;
     u16* m58;
     void* m60;
-    s32 m64;
+    u8* m64_spriteByteCode;
     void(*m68)(sFieldEntitySub4*);
     sFieldEntitySub4* m6C;
     s32 m70;
@@ -496,14 +499,14 @@ int initFieldEntitySub4Sub4(void* param_1)
 int initFieldVar4 = 0;
 int initFieldVar5 = 0;
 
-void initFieldEntitySub4Sub5Sub0(sFieldEntitySub4_110* param_1, u8* param_2, sFP1616 param_3, sFP1616 param_4)
+void initFieldEntitySub4Sub5Sub0(sFieldEntitySub4_110* param_1, u8* param_2, sVec2_s16 param_3_vramLocation, sFP1616 param_4)
 
 {
     u16 uVar1;
     char cVar2;
     u16* puVar3;
 
-    param_1->m4 = param_3;
+    param_1->m4_vramLocation = param_3_vramLocation;
     param_1->m8 = param_4;
     param_1->mC = param_2 + READ_LE_U32(param_2 + 0xC);
     cVar2 = initFieldVar1;
@@ -530,18 +533,19 @@ void initFieldEntitySub4Sub5(sFieldEntitySub4* param_1, u8* param_2)
     psVar2 = param_1->m24;
     if (param_2 != 0) {
         if (param_2 != param_1->m44) {
-            initFieldEntitySub4Sub5Sub0(psVar2, param_2, psVar2->m4, psVar2->m8);
+            initFieldEntitySub4Sub5Sub0(psVar2, param_2, psVar2->m4_vramLocation, psVar2->m8);
             param_1->m44 = param_2;
             param_1->m3C = param_1->m3C | 0x40000000;
         }
         if (initFieldVar1 != '\0') {
             iVar1 = initFieldEntitySub4Sub5Sub1(psVar2->m0);
             if (iVar1 == 0) {
-                psVar2->m4 = 0x100 << 16;
-                psVar2->m4 |= 0x300;
+                psVar2->m4_vramLocation[0] = 0x100;
+                psVar2->m4_vramLocation[1] = 0x300;
             }
             else {
-                psVar2->m4 = param_1->m7C->mE;
+                psVar2->m4_vramLocation[0] = param_1->m7C->mE_vramLocation[0];
+                psVar2->m4_vramLocation[1] = param_1->m7C->mE_vramLocation[1];
             }
         }
     }
@@ -628,31 +632,42 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1Sub1(sFieldEntitySub4* param_1)
 
 int initFieldVar3 = 0;
 
+//header is
+//u16 m0: flags
+//u16 m2: offset to byte code
+//u16 m4: offset to?
+
 void OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1(sFieldEntitySub4* param_1, ushort* param_2)
 {
     uint uVar1;
     sFieldEntitySub4_B4* psVar2;
     sFieldEntitySub4_F4* psVar3;
-    int iVar4;
     int iVar5;
 
+    u16 flags = READ_LE_U16(param_2);
+    u16 offsetToByteCode = READ_LE_U16(((u8*)param_2) + 2);
+    u16 offset2 = READ_LE_U16(((u8*)param_2) + 4);
+
     param_1->m58 = param_2;
-    param_1->m64 = (uint)param_2[1] + 2 + (int)param_2;
-    param_1->mA8 = param_1->mA8 & 0xffcfffff | ((uint)*param_2 & 3) << 0x14;
-    param_1->m54 = (uint)param_2[2] + 4 + (int)param_2;
-    uVar1 = (uint)(*param_2 >> 2) & 0x3f;
-    if ((*param_2 >> 2 & 0x20) != 0) {
+    param_1->m64_spriteByteCode = offsetToByteCode + 2 + (u8*)param_2;
+    param_1->mA8 = param_1->mA8 & 0xffcfffff | (flags & 3) << 0x14;
+    param_1->m54 = offset2 + 4 + (u8*)param_2;
+
+    uVar1 = (uint)(flags >> 2) & 0x3f;
+    if ((flags >> 2 & 0x20) != 0) {
         uVar1 = uVar1 | 0xffffffc0;
     }
-    iVar4 = (initFieldVar3 + 1) * (initFieldVar3 + 1) * (int)(short)param_1->m82;
+
     param_1->m1C = uVar1 * 0x400;
+    int iVar4 = (initFieldVar3 + 1) * (initFieldVar3 + 1) * param_1->m82;
     if (iVar4 < 0) {
         iVar4 = iVar4 + 0xfff;
     }
-    iVar5 = 0x10000 / (int)(param_1->mAC >> 7 & 0xfff);
     iVar4 = uVar1 * 0x400 * (iVar4 >> 0xc);
-    iVar5 = iVar5 * iVar5;
     param_1->m1C = iVar4;
+
+    iVar5 = 0x10000 / (int)(param_1->mAC >> 7 & 0xfff);
+    iVar5 = iVar5 * iVar5;
     if (iVar5 < 0) {
         iVar5 = iVar5 + 0xff;
     }
@@ -662,41 +677,44 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1(sFieldEntitySub4* param_1, ushort* param
         iVar4 = iVar4 + 0xff;
     }
     param_1->m1C = iVar4 >> 8;
-    if ((*param_2 >> 0xb & 1) == 0) {
+
+
+    if ((flags >> 0xb & 1) == 0) {
         param_1->m14 = 0;
         param_1->m10 = 0;
         param_1->mC = 0;
         param_1->m18 = 0;
     }
     psVar2 = param_1->m20;
-    if (psVar2 == (sFieldEntitySub4_B4*)0x0) goto LAB_80023774;
-    if ((*param_2 >> 0xc & 1) == 0) {
-        psVar2->m0_rotation[2] = 0;
-        psVar2->m0_rotation[0] = 0;
-        psVar2->m0_rotation[1] = 0;
-        OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1Sub0(param_1);
-    }
-    if ((*param_2 >> 0xd & 1) == 0) {
-        if (initFieldVar1 != '\0') {
-            initFieldEntitySub4Sub3(param_1, (short)OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1_var);
-            goto LAB_800236f4;
-        }
-    }
-    else {
-    LAB_800236f4:
-        if (initFieldVar1 != '\0') {
+    if (psVar2)
+    {
+        if ((flags >> 0xc & 1) == 0) {
+            psVar2->m0_rotation[2] = 0;
+            psVar2->m0_rotation[0] = 0;
+            psVar2->m0_rotation[1] = 0;
             OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1Sub0(param_1);
         }
-    }
-    if ((param_1->m3C & 3) == 1) {
-        psVar2 = param_1->m20;
-        psVar2->m3D = 0;
-        psVar2->m3C = 0;
-        if (((param_1->m40 >> 0x14 & 1) == 0) && (param_1->m20->m34 != (sFieldEntitySub4_124*)0x0)) {
-            OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1Sub1(param_1);
+        if ((flags >> 0xd & 1) == 0) {
+            if (initFieldVar1 != '\0') {
+                initFieldEntitySub4Sub3(param_1, (short)OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1_var);
+                goto LAB_800236f4;
+            }
+        }
+        else {
+        LAB_800236f4:
+            if (initFieldVar1 != '\0') {
+                OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1Sub0(param_1);
+            }
+        }
+        if ((param_1->m3C & 3) == 1) {
+            psVar2 = param_1->m20;
+            psVar2->m3D = 0;
+            psVar2->m3C = 0;
+            if (((param_1->m40 >> 0x14 & 1) == 0) && (param_1->m20->m34 != (sFieldEntitySub4_124*)0x0)) {
+                OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1Sub1(param_1);
+            }
         }
     }
-LAB_80023774:
     param_1->m8C = 0x10;
     uVar1 = param_1->mA8;
     param_1->m30 = 0;
@@ -726,7 +744,7 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub6(sFieldEntitySub4* param_1, int param_2)
     byte* pbVar5;
 
     if (param_1->m48 == nullptr) {
-        param_1->m64 = 0;
+        param_1->m64_spriteByteCode = 0;
     }
     else {
         if (param_1->m44 == param_1->m48) {
@@ -740,14 +758,14 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub6(sFieldEntitySub4* param_1, int param_2)
             initFieldEntitySub4Sub5(param_1, param_1->m4C);
             if ((initFieldVar1 != '\0') &&
                 (iVar3 = initFieldEntitySub4Sub5Sub1(param_1->m24->m0), iVar3 == 0)) {
-                param_1->m24->m4 = 0x100 << 16;
-                param_1->m24->m4 |= 0x300;
+                param_1->m24->m4_vramLocation[0] = 0x100;
+                param_1->m24->m4_vramLocation[1] = 0x300;
             }
         }
         else {
             initFieldEntitySub4Sub5(param_1, param_1->m48);
             if (initFieldVar1 != '\0') {
-                param_1->m24->m4 = param_1->m7C->mE;
+                param_1->m24->m4_vramLocation = param_1->m7C->mE_vramLocation;
             }
         }
         param_1->mAC = (param_1->mAC & 0xFF00FFFF) | (((char)param_2) << 16);
@@ -785,7 +803,7 @@ void initFieldEntitySub4Sub1(sFieldEntitySub4* param_1)
         iVar1 = iVar1 + 0xfff;
     }
     param_1->m1C = iVar1 >> 0xc;
-    param_1->m64 = 0;
+    param_1->m64_spriteByteCode = 0;
     param_1->m70 = 0;
     param_1->m44 = 0;
     param_1->m68 = 0;
@@ -823,8 +841,8 @@ sFieldEntitySub4* initFieldEntitySub4(sFieldEntitySub4* param_1, u8* pSetup, int
     int count = initFieldEntitySub4Sub4(pSetup + READ_LE_U32(pSetup + 8));
     param_1->m20->m2C = param_1->m20->m30 = new u8[count * 0x18]; // TODO: figure that
 
-    param_1->m24->m4 = vramX << 16;
-    param_1->m24->m4 |= vramY;
+    param_1->m24->m4_vramLocation[0] = vramX;
+    param_1->m24->m4_vramLocation[1] = vramY;
     param_1->m24->m8 = param_3 << 16;
     param_1->m24->m8 |= param_4;
 
