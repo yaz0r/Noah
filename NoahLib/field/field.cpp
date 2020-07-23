@@ -3,6 +3,7 @@
 #include "kernel/filesystem.h"
 #include "kernel/decompress.h"
 #include "kernel/graphics.h"
+#include "kernel/gameState.h"
 
 #include <array>
 
@@ -35,23 +36,7 @@ s32 currentFieldId1 = -1;
 s32 numActiveFieldScriptEntity;
 std::vector<u8>::iterator pCurrentFieldScriptFile;
 
-std::array<int, 3> currentParty;
-
-struct sGameStateA4
-{
-    s8 m30C_partyData_gearNum;
-    //size 0xA4
-};
-
-struct sGameState
-{
-    std::array<sGameStateA4, 11> m294;
-    u16 m1D30_partyMemberBitField;
-    std::array<s8, 3> m22B1_isOnGear;
-};
-
-sGameState gameState;
-sGameState* pKernelGameState;
+std::array<s32, 3> currentParty;
 
 typedef s32 sFP1616;
 
@@ -208,6 +193,8 @@ struct sFieldActorSetupParams
 {
     void init(std::vector<u8>::iterator inputData)
     {
+        rawData = &inputData[0];
+
         m4_offset = READ_LE_U32(inputData + 4);
         m4_pData = &(*(inputData + m4_offset));
 
@@ -219,6 +206,8 @@ struct sFieldActorSetupParams
 
         u32 end = READ_LE_U32(inputData + 0x10);
     }
+
+    u8* rawData;
 
     u32 m4_offset;
     u8* m4_pData;
@@ -248,9 +237,9 @@ struct sFieldEntitySub4
     s16 m3A;
     u32 m3C;
     u32 m40;
-    u8* m44;
-    u8* m48;
-    u8* m4C;
+    sFieldActorSetupParams* m44;
+    sFieldActorSetupParams* m48;
+    sFieldActorSetupParams* m4C;
     s32 m50;
     u8* m54;
     u16* m58;
@@ -499,7 +488,7 @@ int initFieldEntitySub4Sub4(void* param_1)
 int initFieldVar4 = 0;
 int initFieldVar5 = 0;
 
-void initFieldEntitySub4Sub5Sub0(sFieldEntitySub4_110* param_1, u8* param_2, sVec2_s16 param_3_vramLocation, sFP1616 param_4)
+void initFieldEntitySub4Sub5Sub0(sFieldEntitySub4_110* param_1, sFieldActorSetupParams* param_2, sVec2_s16 param_3_vramLocation, sFP1616 param_4)
 
 {
     u16 uVar1;
@@ -508,12 +497,13 @@ void initFieldEntitySub4Sub5Sub0(sFieldEntitySub4_110* param_1, u8* param_2, sVe
 
     param_1->m4_vramLocation = param_3_vramLocation;
     param_1->m8 = param_4;
-    param_1->mC = param_2 + READ_LE_U32(param_2 + 0xC);
+    param_1->mC = param_2->mC_pData;
     cVar2 = initFieldVar1;
-    param_1->m0 = param_2 + READ_LE_U32(param_2 + 0x8);
+    param_1->m0 = param_2->m8_pData;
     initFieldVar4 = 0;
-    param_1->m10 = param_2 + READ_LE_U32(param_2 + 0x4);
-    if ((cVar2 != '\0') && (uVar1 = READ_LE_U16(param_2 + READ_LE_U32(param_2 + 0x4)) >> 6, (uVar1 & 0x3f) != 0)) {
+    param_1->m10 = param_2->m4_pData;
+
+    if ((cVar2 != '\0') && (uVar1 = READ_LE_U16(param_2->m4_pData) >> 6, (uVar1 & 0x3f) != 0)) {
         initFieldVar5 = (u8)uVar1 & 0x3f;
     }
     return;
@@ -525,7 +515,7 @@ int initFieldEntitySub4Sub5Sub1(void* param_1)
 }
 
 
-void initFieldEntitySub4Sub5(sFieldEntitySub4* param_1, u8* param_2)
+void initFieldEntitySub4Sub5(sFieldEntitySub4* param_1, sFieldActorSetupParams* param_2)
 {
     int iVar1;
     sFieldEntitySub4_110* psVar2;
@@ -814,7 +804,7 @@ void initFieldEntitySub4Sub1(sFieldEntitySub4* param_1)
     param_1->m50 = 0;
 }
 
-sFieldEntitySub4* initFieldEntitySub4(sFieldEntitySub4* param_1, u8* pSetup, int param_3, int param_4, int vramX, int vramY, int param_7)
+sFieldEntitySub4* initFieldEntitySub4(sFieldEntitySub4* param_1, sFieldActorSetupParams* pSetup, int param_3, int param_4, int vramX, int vramY, int param_7)
 {
     initFieldEntitySub4Sub1(param_1);
     initFieldEntitySub4Sub2(param_1);
@@ -838,7 +828,7 @@ sFieldEntitySub4* initFieldEntitySub4(sFieldEntitySub4* param_1, u8* pSetup, int
     param_1->m6C = param_1;
     param_1->m3C = param_1->m3C & 0xff00ffff | (initFieldVar2 & 0xf) << 0x14 | (initFieldVar2 & 0xf) << 0x10;;
 
-    int count = initFieldEntitySub4Sub4(pSetup + READ_LE_U32(pSetup + 8));
+    int count = initFieldEntitySub4Sub4(pSetup->m8_pData);
     param_1->m20->m2C = param_1->m20->m30 = new u8[count * 0x18]; // TODO: figure that
 
     param_1->m24->m4_vramLocation[0] = vramX;
@@ -856,7 +846,7 @@ sFieldEntitySub4* initFieldEntitySub4(sFieldEntitySub4* param_1, u8* pSetup, int
     return param_1;
 }
 
-sFieldEntitySub4* createFieldEntitySub4(u8* pSetup, int param_2, int param_3, int vramX, int vramY, int param_6)
+sFieldEntitySub4* createFieldEntitySub4(sFieldActorSetupParams* pSetup, int param_2, int param_3, int vramX, int vramY, int param_6)
 {
     sFieldEntitySub4* pNewEntry = new sFieldEntitySub4;
     pNewEntry->m86_thisSize = sizeof(sFieldEntitySub4);
@@ -965,7 +955,7 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub3(sFieldEntitySub4* param_1, int param_2)
 }
 
 
-void OP_INIT_ENTITY_SCRIPT_sub0(int actorId, int param_2, u8* pSetup, int param_4, int param_5, int param_6, int param_7)
+void OP_INIT_ENTITY_SCRIPT_sub0(int actorId, int param_2, sFieldActorSetupParams* pSetup, int param_4, int param_5, int param_6, int param_7)
 {
     initModel3(8, 0);
     fieldEntityArray[actorId].m4C_scriptEntity->m127 = param_2;
@@ -1084,7 +1074,7 @@ void OP_INIT_ENTITY_SCRIPT_sub1()
 
 void OP_INIT_ENTITY_SCRIPT()
 {
-    OP_INIT_ENTITY_SCRIPT_sub0(currentFieldActorId, 0, &rawFieldActorSetupParams[0] + READ_LE_U32(rawFieldActorSetupParams.begin() + 4), 0, 0, 0x80, 1);
+    OP_INIT_ENTITY_SCRIPT_sub0(currentFieldActorId, 0, &fieldActorSetupParams[0], 0, 0, 0x80, 1);
     OP_INIT_ENTITY_SCRIPT_sub1();
 
     pCurrentFieldScriptActor->m0_flags |= 0x100;
@@ -1291,7 +1281,7 @@ std::vector<u8> asyncPartyCharacterLoadingBuffer;
 
 int getGearForCharacter(int param_1)
 {
-    return pKernelGameState->m294[param_1].m30C_partyData_gearNum;
+    return pKernelGameState->m294[param_1].m78_partyData_gearNum;
 }
 
 void startPartyCharacterASyncLoading(int partyCharacter, int partySlot)
@@ -1413,7 +1403,7 @@ void OP_INIT_ENTITY_NPC(void)
 
     fieldEntityArray[currentFieldActorId].m58_flags = fieldEntityArray[currentFieldActorId].m58_flags & 0xf07f | 0x200;
     uVar4 = getImmediateOrVariableUnsigned(1);
-    OP_INIT_ENTITY_SCRIPT_sub0(currentFieldActorId, uVar4, &rawFieldActorSetupParams[0] + READ_LE_U32(rawFieldActorSetupParams.begin() + uVar4 * 4 + 4), 0, 0, uVar4 | 0x80, 0);
+    OP_INIT_ENTITY_SCRIPT_sub0(currentFieldActorId, uVar4, &fieldActorSetupParams[uVar4], 0, 0, uVar4 | 0x80, 0);
     OP_INIT_ENTITY_SCRIPT_sub1();
     psVar3 = pCurrentFieldScriptActor;
     puVar1 = &pCurrentFieldScriptActor->m0_flags;
@@ -1553,7 +1543,9 @@ int findCharacterInParty(int param_1)
 }
 
 std::array<int, 3> partyToFieldEntityArrayMapping;
-std::array<std::vector<u8>, 3> partyCharacterBuffers;
+std::array<std::vector<u8>, 3> partyCharacterBuffersRaw;
+std::array<std::vector<u8>, 3> partyCharacterBuffersCompressed;
+std::array<sFieldActorSetupParams, 3> partyCharacterBuffers;
 s16 pcInitVar0 = 0;
 s32 pcInitVar1 = 0;
 std::array<int, 11> PCToActorArray;
@@ -1591,7 +1583,7 @@ void OP_INIT_ENTITY_PC(void)
     pCurrentFieldScriptActor->mE4_playableCharacterId = (short)iVar3;
     psVar8->m58_flags = psVar8->m58_flags & 0xf07f | 0x200;
     if (iVar4 == -1) {
-        OP_INIT_ENTITY_SCRIPT_sub0(currentFieldActorId, 0, &partyCharacterBuffers[0][0], 1, 0, 0, 1);
+        OP_INIT_ENTITY_SCRIPT_sub0(currentFieldActorId, 0, &partyCharacterBuffers[0], 1, 0, 0, 1);
         psVar7 = pCurrentFieldScriptActor;
         pCurrentFieldScriptActor->m0_flags = pCurrentFieldScriptActor->m0_flags | 1;
         currentScriptFinished = 1;
@@ -1607,12 +1599,12 @@ void OP_INIT_ENTITY_PC(void)
         iVar2 = currentFieldActorId;
         partyToFieldEntityArrayMapping[iVar4] = currentFieldActorId;
         if (pcInitVar1 == 0) {
-            OP_INIT_ENTITY_SCRIPT_sub0(iVar2, iVar4, &partyCharacterBuffers[iVar4][0], 1, 0, iVar4, 1);
+            OP_INIT_ENTITY_SCRIPT_sub0(iVar2, iVar4, &partyCharacterBuffers[iVar4], 1, 0, iVar4, 1);
             pCurrentFieldScriptActor->m0_flags = pCurrentFieldScriptActor->m0_flags & 0xfffffcff | 0x400;
         }
         else {
             OP_INIT_ENTITY_SCRIPT_sub0
-            (iVar2, (uint)characterMappingTable[iVar3] + pcInitVar1, &rawFieldActorSetupParams[0] + READ_LE_U32(rawFieldActorSetupParams.begin() + pcInitVar1 * 4 + (uint)characterMappingTable[iVar3] * 4 + 4), 0, 0,
+            (iVar2, (uint)characterMappingTable[iVar3] + pcInitVar1, &fieldActorSetupParams[pcInitVar1 + characterMappingTable[iVar3]], 0, 0,
                 (uint)characterMappingTable[iVar3] + pcInitVar1 | 0x80, 1);
             psVar7 = pCurrentFieldScriptActor;
             psVar1 = pKernelGameState;
@@ -2142,24 +2134,163 @@ void allocatePartyCharacterBuffers()
 {
     initModel3(8, 0);
 
-    partyCharacterBuffers[0].resize(0x14000);
-    partyCharacterBuffers[1].resize(0x14000);
-    partyCharacterBuffers[2].resize(0x14000);
+    partyCharacterBuffersRaw[0].resize(0x14000);
+    partyCharacterBuffersRaw[1].resize(0x14000);
+    partyCharacterBuffersRaw[2].resize(0x14000);
 
-    flagAllocation(partyCharacterBuffers[0]);
-    flagAllocation(partyCharacterBuffers[1]);
-    flagAllocation(partyCharacterBuffers[2]);
+    flagAllocation(partyCharacterBuffersRaw[0]);
+    flagAllocation(partyCharacterBuffersRaw[1]);
+    flagAllocation(partyCharacterBuffersRaw[2]);
+}
+
+void waitForReadFinished(void)
+
+{
+    int iVar1;
+
+    do {
+        iVar1 = isCDBusy();
+    } while (iVar1 != 0);
+    waitReadCompletion(0);
+    return;
+}
+
+int characterOrGearsLoadingInProgress = 0;
+int fieldRequestedGears = 0;
+int typeOfPlayableCharacterLoaded = 0;
+
+void finalizeLoadPlayableCharacters()
+{
+    if (characterOrGearsLoadingInProgress != 0) {
+        waitForReadFinished();
+
+        for (int i = 0; i < 3; i++)
+        {
+            unflagAllocation(partyCharacterBuffersRaw[i]);
+            if (currentParty[i] != -1)
+            {
+                unflagAllocation(partyCharacterBuffersCompressed[i]);
+                decompress(partyCharacterBuffersCompressed[i].begin(), partyCharacterBuffersRaw[i]);
+                partyCharacterBuffersCompressed[i].clear();
+
+                partyCharacterBuffers[i].init(partyCharacterBuffersRaw[i].begin());
+            }
+        }
+
+        characterOrGearsLoadingInProgress = 0;
+    }
+}
+
+void refinalizePlayableCharacters(int)
+{
+    MissingCode();
+}
+
+void setupFieldCurrentPartyFromKernelAsGears()
+{
+    MissingCode();
+}
+
+struct sLoadingBatchCommands
+{
+    u16 m0_fileIndex;
+    std::vector<u8>* m4_loadPtr;
+};
+
+sLoadingBatchCommands playableCharacterLoadingBatchCommands[11];
+
+void batchStartLoadingFiles(sLoadingBatchCommands* pCommands, int param_2)
+{
+    // TODO: this is a quick and dirty implementation, not how the original code worked
+    while (pCommands->m4_loadPtr)
+    {
+        readFile(pCommands->m0_fileIndex, *pCommands->m4_loadPtr, 0, 0);
+
+        pCommands++;
+    }
+}
+
+void setupFieldCurrentPartyFromKernelAsCharacters()
+{
+    pKernelGameState = &gameState;
+
+    for (int i=0; i<3; i++)
+    {
+        currentParty[i] = -1;
+        if (gameState.m1D34_currentParty[i] != -1)
+        {
+            currentParty[i] = gameState.m1D34_currentParty[i];
+        }
+    }
+
+    int loadSlot = 0;
+    for (int i=0; i<3; i++)
+    {
+        if (currentParty[i] != -1)
+        {
+            playableCharacterLoadingBatchCommands[loadSlot].m0_fileIndex = currentParty[i] + 5;
+            asyncPartyCharacterLoadingTable[i] = currentParty[i];
+            partyCharacterBuffersCompressed[i].resize(getFileSizeAligned(currentParty[i] + 5));
+            playableCharacterLoadingBatchCommands[loadSlot].m4_loadPtr = &partyCharacterBuffersCompressed[i];
+            flagAllocation(partyCharacterBuffersCompressed[i]);
+            loadSlot++;
+        }
+    }
+
+    playableCharacterLoadingBatchCommands[loadSlot].m0_fileIndex = 0;
+    playableCharacterLoadingBatchCommands[loadSlot].m4_loadPtr = nullptr;
+
+    batchStartLoadingFiles(playableCharacterLoadingBatchCommands, 0);
+    typeOfPlayableCharacterLoaded = 1;
+}
+
+void startLoadingPlayableCharacters()
+{
+    waitForReadFinished();
+    if (characterOrGearsLoadingInProgress == 1) {
+        finalizeLoadPlayableCharacters();
+        if (fieldScriptEntityAlreadyInitialized != 0) {
+            return;
+        }
+    }
+    else {
+        if (fieldScriptEntityAlreadyInitialized != 0) {
+            refinalizePlayableCharacters(0);
+            return;
+        }
+    }
+    fieldRequestedGears = (requestFieldId0 & 0xc000) != 0;
+    characterOrGearsLoadingInProgress = 0;
+    if (fieldRequestedGears) {
+        if (typeOfPlayableCharacterLoaded != 2) {
+            setupFieldCurrentPartyFromKernelAsGears();
+            characterOrGearsLoadingInProgress = 1;
+        }
+    }
+    else {
+        if (typeOfPlayableCharacterLoaded != 1) {
+            setupFieldCurrentPartyFromKernelAsCharacters();
+            characterOrGearsLoadingInProgress = 1;
+        }
+    }
 }
 
 void fieldEntryPoint()
 {
     MissingCode();
 
+    setCurrentDirectory(4, 0); // TODO: this is not explicitely called at this level
+
     allocatePartyCharacterBuffers();
 
     MissingCode();
 
     pKernelGameState = &gameState;
+
+    MissingCode();
+
+    startLoadingPlayableCharacters();
+    finalizeLoadPlayableCharacters();
 
     MissingCode();
 

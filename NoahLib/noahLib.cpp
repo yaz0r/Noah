@@ -3,6 +3,7 @@
 #include "imgui.h"
 #include "kernel/isoManager.h"
 #include "kernel/fileSystem.h"
+#include "kernel/gameState.h"
 #include "field/fieldInspector/fieldInspector.h"
 #include "field/field.h"
 
@@ -12,17 +13,18 @@ bool noahInit(int argc, char* argv[])
     c_isoManager::init();
 
     //////////////////////////////////////////////////////////////////////////
-    // start the origin code
+    // start the original code
 
-    /*
-    stuff
-    */
+    MissingCode();
 
     initCDAndFileSystem(&fatFileTableBuffer, &fatDirectoryTableBuffer, -1);
 
-    /*
-    stuff
-    */
+    MissingCode();
+
+    initGameState();
+
+    MissingCode();
+
 
     fieldEntryPoint();
 
@@ -70,6 +72,11 @@ s32 READ_LE_S32(void* ptr)
 u8 READ_LE_U8(std::vector<u8>::iterator& inputStream)
 {
     return *inputStream;
+}
+
+s8 READ_LE_S8(std::vector<u8>::iterator& inputStream)
+{
+    return *(s8*)&inputStream[0];
 }
 
 u16 READ_LE_U16(std::vector<u8>::iterator& inputStream)

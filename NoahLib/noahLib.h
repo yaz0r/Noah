@@ -24,6 +24,7 @@ u32 READ_LE_U32(void* ptr);
 s32 READ_LE_S32(void* ptr);
 
 u8 READ_LE_U8(std::vector<u8>::iterator& inputStream);
+s8 READ_LE_S8(std::vector<u8>::iterator& inputStream);
 u16 READ_LE_U16(std::vector<u8>::iterator& inputStream);
 s16 READ_LE_S16(std::vector<u8>::iterator& inputStream);
 u32 READ_LE_U32(std::vector<u8>::iterator& inputStream);
