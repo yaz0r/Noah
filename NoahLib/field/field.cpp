@@ -4,7 +4,7 @@
 #include "kernel/decompress.h"
 #include "kernel/graphics.h"
 #include "kernel/gameState.h"
-
+#include "walkMesh.h"
 #include <array>
 
 struct sFieldVramMapping
@@ -939,7 +939,7 @@ void fieldActorCallback(sFieldEntitySub4* pThis)
     fieldEntityArray[pThis->m7C->m14_actorId].m4C_scriptEntity->m4_flags |= 0x10000;
 }
 
-s16 WasOpcodeE5Called = 0;
+s16 isFogSetup = 0;
 
 void OP_INIT_ENTITY_SCRIPT_sub0Sub3(sFieldEntitySub4* param_1, int param_2)
 
@@ -1039,7 +1039,7 @@ void OP_INIT_ENTITY_SCRIPT_sub0(int actorId, int param_2, sFieldActorSetupParams
         assert(0);
     }
 
-    if (WasOpcodeE5Called)
+    if (isFogSetup)
     {
         pFieldEntitySub4->m40 |= 0x40000;
     }
@@ -1977,6 +1977,7 @@ void initFieldData()
         int rawFieldSize = READ_LE_U32(&rawFieldBundle[0x110]);
         rawFieldWalkMesh.resize(rawFieldSize + 0x10);
         fieldDecompress(rawFieldSize + 0x10, rawFieldBundle.begin() + READ_LE_U32(&rawFieldBundle[0x134]), rawFieldWalkMesh);
+        walkMesh.init(rawFieldWalkMesh);
     }
 
     MissingCode(); // WalkMesh init code

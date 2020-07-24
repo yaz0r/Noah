@@ -49,4 +49,70 @@ endfunction(assign_source_group)
 
 assign_source_group(${SOURCES})
 
+
+macro(addShaderProgram vsname psname varyingname)
+
+set(SOURCES
+    ${SOURCES}
+    ${THIRD_PARTY}/../data/shaders/${vsname}.sc
+    ${THIRD_PARTY}/../data/shaders/${psname}.sc
+    ${THIRD_PARTY}/../data/shaders/${varyingname}.sc
+)
+
+shaderc(FILE ${THIRD_PARTY}/../data/shaders/${vsname}.sc OUTPUT ${THIRD_PARTY}/../data/shaders/generated/${vsname}.glsl.bin VERTEX WINDOWS VARYINGDEF ${THIRD_PARTY}/../data/shaders/${varyingname}.sc INCLUDES ${BGFX_DIR}/src PROFILE 430)
+shaderc(FILE ${THIRD_PARTY}/../data/shaders/${psname}.sc OUTPUT ${THIRD_PARTY}/../data/shaders/generated/${psname}.glsl.bin FRAGMENT WINDOWS VARYINGDEF ${THIRD_PARTY}/../data/shaders/${varyingname}.sc INCLUDES ${BGFX_DIR}/src PROFILE 430)
+
+set(SOURCES
+    ${SOURCES}
+    ${THIRD_PARTY}/../data/shaders/generated/${vsname}.glsl.bin
+    ${THIRD_PARTY}/../data/shaders/generated/${psname}.glsl.bin
+)
+
+IF(${CMAKE_SYSTEM_NAME} MATCHES iOS|tvOS)
+    shaderc(FILE ${THIRD_PARTY}/../data/shaders/${vsname}.sc OUTPUT ${THIRD_PARTY}/../data/shaders/generated/${vsname}.metal.bin VERTEX IOS VARYINGDEF ${THIRD_PARTY}/../data/shaders/${varyingname}.sc INCLUDES ${BGFX_DIR}/src PROFILE metal)
+    shaderc(FILE ${THIRD_PARTY}/../data/shaders/${psname}.sc OUTPUT ${THIRD_PARTY}/../data/shaders/generated/${psname}.metal.bin FRAGMENT IOS VARYINGDEF ${THIRD_PARTY}/../data/shaders/${varyingname}.sc INCLUDES ${BGFX_DIR}/src PROFILE metal)
+    set(SOURCES
+        ${SOURCES}
+        ${THIRD_PARTY}/../data/shaders/generated/${vsname}.metal.bin
+        ${THIRD_PARTY}/../data/shaders/generated/${psname}.metal.bin
+    )
+endif()
+
+IF(${CMAKE_SYSTEM_NAME} MATCHES Darwin)
+    shaderc(FILE ${THIRD_PARTY}/../data/shaders/${vsname}.sc OUTPUT ${THIRD_PARTY}/../data/shaders/generated/${vsname}.metal.bin VERTEX OSX VARYINGDEF ${THIRD_PARTY}/../data/shaders/${varyingname}.sc INCLUDES ${BGFX_DIR}/src PROFILE metal)
+    shaderc(FILE ${THIRD_PARTY}/../data/shaders/${psname}.sc OUTPUT ${THIRD_PARTY}/../data/shaders/generated/${psname}.metal.bin FRAGMENT OSX VARYINGDEF ${THIRD_PARTY}/../data/shaders/${varyingname}.sc INCLUDES ${BGFX_DIR}/src PROFILE metal)
+    set(SOURCES
+        ${SOURCES}
+        ${THIRD_PARTY}/../data/shaders/generated/${vsname}.metal.bin
+        ${THIRD_PARTY}/../data/shaders/generated/${psname}.metal.bin
+    )
+endif()
+
+IF(${CMAKE_SYSTEM_NAME} MATCHES Windows)
+    shaderc(FILE ${THIRD_PARTY}/../data/shaders/${vsname}.sc OUTPUT ${THIRD_PARTY}/../data/shaders/generated/${vsname}.dx11.bin VERTEX WINDOWS VARYINGDEF ${THIRD_PARTY}/../data/shaders/${varyingname}.sc INCLUDES ${BGFX_DIR}/src PROFILE vs_5_0)
+    shaderc(FILE ${THIRD_PARTY}/../data/shaders/${psname}.sc OUTPUT ${THIRD_PARTY}/../data/shaders/generated/${psname}.dx11.bin FRAGMENT WINDOWS VARYINGDEF ${THIRD_PARTY}/../data/shaders/${varyingname}.sc INCLUDES ${BGFX_DIR}/src PROFILE ps_5_0)
+    shaderc(FILE ${THIRD_PARTY}/../data/shaders/${vsname}.sc OUTPUT ${THIRD_PARTY}/../data/shaders/generated/${vsname}.dx11.debug.bin DEBUG VERTEX WINDOWS VARYINGDEF ${THIRD_PARTY}/../data/shaders/${varyingname}.sc INCLUDES ${BGFX_DIR}/src PROFILE vs_5_0)
+    shaderc(FILE ${THIRD_PARTY}/../data/shaders/${psname}.sc OUTPUT ${THIRD_PARTY}/../data/shaders/generated/${psname}.dx11.debug.bin DEBUG FRAGMENT WINDOWS VARYINGDEF ${THIRD_PARTY}/../data/shaders/${varyingname}.sc INCLUDES ${BGFX_DIR}/src PROFILE ps_5_0)
+    set(SOURCES
+        ${SOURCES}
+        ${THIRD_PARTY}/../data/shaders/generated/${vsname}.dx11.bin
+        ${THIRD_PARTY}/../data/shaders/generated/${psname}.dx11.bin
+        ${THIRD_PARTY}/../data/shaders/generated/${vsname}.dx11.debug.bin
+        ${THIRD_PARTY}/../data/shaders/generated/${psname}.dx11.debug.bin
+    )
+
+    
+    shaderc(FILE ${THIRD_PARTY}/../data/shaders/${vsname}.sc OUTPUT ${THIRD_PARTY}/../data/shaders/generated/${vsname}.spirv.bin VERTEX LINUX VARYINGDEF ${THIRD_PARTY}/../data/shaders/${varyingname}.sc INCLUDES ${BGFX_DIR}/src PROFILE spirv)
+    shaderc(FILE ${THIRD_PARTY}/../data/shaders/${psname}.sc OUTPUT ${THIRD_PARTY}/../data/shaders/generated/${psname}.spirv.bin FRAGMENT LINUX VARYINGDEF ${THIRD_PARTY}/../data/shaders/${varyingname}.sc INCLUDES ${BGFX_DIR}/src PROFILE spirv)
+    set(SOURCES
+        ${SOURCES}
+        ${THIRD_PARTY}/../data/shaders/generated/${vsname}.spirv.bin
+        ${THIRD_PARTY}/../data/shaders/generated/${psname}.spirv.bin
+    )
+endif()
+
+endmacro()
+
+addShaderProgram(vertexColor_vs vertexColor_ps vertexColor.varying.def)
+
 add_library (NoahLib ${SOURCES})

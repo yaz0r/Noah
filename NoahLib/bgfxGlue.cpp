@@ -70,7 +70,7 @@ void StartFrame()
 
     // Pull the input from SDL2 instead
     ImGui_ImplSDL2_NewFrame(gWindowBGFX);
-    imguiBeginFrame(0, 0, 0, 0, outputResolution[0], outputResolution[1], -1, 0);
+    imguiBeginFrame(0, 0, 0, 0, outputResolution[0], outputResolution[1], -1);
 
     if (ImGui::BeginMainMenuBar())
     {
@@ -79,6 +79,7 @@ void StartFrame()
     }
 
 
+    bgfx::setViewRect(0, 0, 0, outputResolution[0], outputResolution[1]);
     bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH);
     bgfx::touch(0);
 }

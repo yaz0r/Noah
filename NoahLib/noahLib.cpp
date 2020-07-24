@@ -6,6 +6,7 @@
 #include "kernel/gameState.h"
 #include "field/fieldInspector/fieldInspector.h"
 #include "field/field.h"
+#include "field/fieldDebugger/fieldDebugger.h"
 
 bool noahInit(int argc, char* argv[])
 {
@@ -39,6 +40,8 @@ bool noahFrame()
 
     fieldInspector_frame();
 
+    fieldDebugger_step();
+
     EndFrame();
 
     return gCloseApp;
@@ -49,47 +52,47 @@ void noahExit()
     deleteBgfxGlue();
 }
 
-u16 READ_LE_U16(void* ptr)
+u16 READ_LE_U16(const void* ptr)
 {
     return *(u16*)ptr;
 }
 
-s16 READ_LE_S16(void* ptr)
+s16 READ_LE_S16(const void* ptr)
 {
     return *(s16*)ptr;
 }
 
-u32 READ_LE_U32(void* ptr)
+u32 READ_LE_U32(const void* ptr)
 {
     return *(u32*)ptr;
 }
 
-s32 READ_LE_S32(void* ptr)
+s32 READ_LE_S32(const void* ptr)
 {
     return *(s32*)ptr;
 }
 
-u8 READ_LE_U8(std::vector<u8>::iterator& inputStream)
+u8 READ_LE_U8(std::vector<u8>::const_iterator& inputStream)
 {
     return *inputStream;
 }
 
-s8 READ_LE_S8(std::vector<u8>::iterator& inputStream)
+s8 READ_LE_S8(std::vector<u8>::const_iterator& inputStream)
 {
     return *(s8*)&inputStream[0];
 }
 
-u16 READ_LE_U16(std::vector<u8>::iterator& inputStream)
+u16 READ_LE_U16(std::vector<u8>::const_iterator& inputStream)
 {
     return READ_LE_U16(&inputStream[0]);
 }
 
-s16 READ_LE_S16(std::vector<u8>::iterator& inputStream)
+s16 READ_LE_S16(std::vector<u8>::const_iterator& inputStream)
 {
     return READ_LE_S16(&inputStream[0]);
 }
 
-u32 READ_LE_U32(std::vector<u8>::iterator& inputStream)
+u32 READ_LE_U32(std::vector<u8>::const_iterator& inputStream)
 {
     return READ_LE_U32(&inputStream[0]);
 }
