@@ -28,5 +28,6 @@ s8 READ_LE_S8(std::vector<u8>::const_iterator& inputStream);
 u16 READ_LE_U16(std::vector<u8>::const_iterator& inputStream);
 s16 READ_LE_S16(std::vector<u8>::const_iterator& inputStream);
 u32 READ_LE_U32(std::vector<u8>::const_iterator& inputStream);
+s32 READ_LE_S32(std::vector<u8>::const_iterator& inputStream);
 
 #define MissingCode()

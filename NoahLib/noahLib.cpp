@@ -96,3 +96,8 @@ u32 READ_LE_U32(std::vector<u8>::const_iterator& inputStream)
 {
     return READ_LE_U32(&inputStream[0]);
 }
+
+s32 READ_LE_S32(std::vector<u8>::const_iterator& inputStream)
+{
+    return READ_LE_S32(&inputStream[0]);
+}

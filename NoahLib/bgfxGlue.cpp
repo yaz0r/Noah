@@ -152,10 +152,11 @@ int initBgfxGlue(int argc, char* argv[])
     bgfx::init(initparam);
 
     imguiCreate();
-    ImGui_ImplSDL2_InitForD3D(gWindowBGFX);
 
     ImGuiIO& io = ImGui::GetIO();
-    io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+    //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+
+    ImGui_ImplSDL2_InitForD3D(gWindowBGFX);
 
     return true;
 }

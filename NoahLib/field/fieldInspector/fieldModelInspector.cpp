@@ -1,5 +1,5 @@
 #include "noahLib.h"
-#include "fieldDebugger.h"
+#include "fieldModelInspector.h"
 
 #include "bgfx/bgfx.h"
 #include "bx/math.h"
@@ -11,29 +11,31 @@
 
 #include "ImGuizmo.h"
 #include "SDL_scancode.h"
-#include "field/field.h"
+#include "field/fieldModel.h"
 
-int fieldDebugger_bgfxView = 1;
+int fieldModelInspector_bgfxView = 2;
 
-bgfx::FrameBufferHandle fieldDebugger_FB = BGFX_INVALID_HANDLE;
-bgfx::TextureHandle fieldDebugger_Texture = BGFX_INVALID_HANDLE;
-bgfx::TextureHandle fieldDebugger_Depth = BGFX_INVALID_HANDLE;
+bgfx::FrameBufferHandle fieldModelInspector_FB = BGFX_INVALID_HANDLE;
+bgfx::TextureHandle fieldModelInspector_Texture = BGFX_INVALID_HANDLE;
+bgfx::TextureHandle fieldModelInspector_Depth = BGFX_INVALID_HANDLE;
 
-ImVec2 oldWindowSize = { -1,-1 };
-
-void fieldDebugger_step()
+void fieldModelInspector_step(int modelId)
 {
-    if (ImGui::Begin("Field 3d view"))
+    static ImVec2 oldWindowSize = { -1,-1 };
+    //if (ImGui::Begin("Model 3d view"))
     {
         ImVec2 currentWindowSize = ImGui::GetContentRegionAvail();
 
         if ((currentWindowSize[0] != oldWindowSize[0]) || (currentWindowSize[1] != oldWindowSize[1]))
         {
+            currentWindowSize[0] = std::max<int>(currentWindowSize[0], 1);
+            currentWindowSize[1] = std::max<int>(currentWindowSize[1], 1);
+
             oldWindowSize = currentWindowSize;
 
-            if (bgfx::isValid(fieldDebugger_FB))
+            if (bgfx::isValid(fieldModelInspector_FB))
             {
-                bgfx::destroy(fieldDebugger_FB);
+                bgfx::destroy(fieldModelInspector_FB);
             }
 
             const uint64_t tsFlags = 0
@@ -44,12 +46,12 @@ void fieldDebugger_step()
                 | BGFX_SAMPLER_V_CLAMP
                 ;
 
-            fieldDebugger_Texture = bgfx::createTexture2D(currentWindowSize[0], currentWindowSize[1], false, 0, bgfx::TextureFormat::BGRA8, BGFX_TEXTURE_RT | tsFlags);
-            fieldDebugger_Depth = bgfx::createTexture2D(currentWindowSize[0], currentWindowSize[1], false, 0, bgfx::TextureFormat::D24S8, BGFX_TEXTURE_RT | tsFlags);
+            fieldModelInspector_Texture = bgfx::createTexture2D(currentWindowSize[0], currentWindowSize[1], false, 0, bgfx::TextureFormat::BGRA8, BGFX_TEXTURE_RT | tsFlags);
+            fieldModelInspector_Depth = bgfx::createTexture2D(currentWindowSize[0], currentWindowSize[1], false, 0, bgfx::TextureFormat::D24S8, BGFX_TEXTURE_RT | tsFlags);
             std::array<bgfx::Attachment, 2> attachements;
-            attachements[0].init(fieldDebugger_Texture);
-            attachements[1].init(fieldDebugger_Depth);
-            fieldDebugger_FB = bgfx::createFrameBuffer(2, &attachements[0], true);
+            attachements[0].init(fieldModelInspector_Texture);
+            attachements[1].init(fieldModelInspector_Depth);
+            fieldModelInspector_FB = bgfx::createFrameBuffer(2, &attachements[0], true);
         }
 
         static float mtx_view[16];
@@ -123,7 +125,7 @@ void fieldDebugger_step()
 
         ImVec2 imageStart = ImGui::GetCursorScreenPos();
 
-        ImGui::Image(fieldDebugger_Texture, currentWindowSize);
+        ImGui::Image(fieldModelInspector_Texture, currentWindowSize);
 
         // ----------------------------------
         /*
@@ -196,29 +198,24 @@ void fieldDebugger_step()
         */
         // ----------------------------------
 
-        bgfx::setViewRect(fieldDebugger_bgfxView, 0, 0, currentWindowSize[0], currentWindowSize[1]);
-        bgfx::setViewTransform(fieldDebugger_bgfxView, mtx_view, mtx_projection);
+        bgfx::setViewRect(fieldModelInspector_bgfxView, 0, 0, currentWindowSize[0], currentWindowSize[1]);
+        bgfx::setViewTransform(fieldModelInspector_bgfxView, mtx_view, mtx_projection);
         //bgfx::setTransform(matrix);
 
-        bgfx::setViewFrameBuffer(fieldDebugger_bgfxView, fieldDebugger_FB);
-        bgfx::setViewRect(fieldDebugger_bgfxView, 0, 0, currentWindowSize[0], currentWindowSize[1]);
+        bgfx::setViewFrameBuffer(fieldModelInspector_bgfxView, fieldModelInspector_FB);
+        bgfx::setViewRect(fieldModelInspector_bgfxView, 0, 0, currentWindowSize[0], currentWindowSize[1]);
 
-        bgfx::setViewClear(fieldDebugger_bgfxView, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 255);
+        bgfx::setViewClear(fieldModelInspector_bgfxView, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 255);
 
-        bgfx::setViewName(fieldDebugger_bgfxView, "FieldDebugger");
-        bgfx::setViewMode(fieldDebugger_bgfxView, bgfx::ViewMode::Sequential);
+        bgfx::setViewName(fieldModelInspector_bgfxView, "FieldModelDebugger");
+        bgfx::setViewMode(fieldModelInspector_bgfxView, bgfx::ViewMode::Sequential);
 
-        bgfx::touch(fieldDebugger_bgfxView);
+        bgfx::touch(fieldModelInspector_bgfxView);
 
-        walkMesh.bgfxRender(fieldDebugger_bgfxView);
+        gCurrentFieldModels[modelId].bgfxRender(fieldModelInspector_bgfxView);
 
-        for (int i=0; i<fieldEntityArray.size(); i++)
-        {
-            if (!(fieldEntityArray[i].m58_flags & 0x40))
-            {
-                fieldEntityArray[i].m0->m4_pModelBlock->bgfxRender(fieldDebugger_bgfxView);
-            }
-        }
     }
-    ImGui::End();
+    //ImGui::End();
 }
+
+

@@ -236,6 +236,8 @@ struct OcornutImguiContext
 
 		ImGuiIO& io = ImGui::GetIO();
 
+		io.BackendFlags |= ImGuiBackendFlags_RendererHasViewports;
+
 		io.DisplaySize = ImVec2(1280.0f, 720.0f);
 		io.DeltaTime = 1.0f / 60.0f;
 		//io.IniFilename = NULL;
@@ -443,7 +445,27 @@ struct OcornutImguiContext
 	void endFrame()
 	{
 		ImGui::Render();
+		ImGui::UpdatePlatformWindows();
 		render(ImGui::GetDrawData());
+
+        ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();
+        for (int i = 1; i < platform_io.Viewports.Size; i++)
+        {
+            ImGuiViewport* viewport = platform_io.Viewports[i];
+            if (viewport->Flags & ImGuiViewportFlags_Minimized)
+                continue;
+            //if (platform_io.Platform_RenderWindow) platform_io.Platform_RenderWindow(viewport, platform_render_arg);
+            //if (platform_io.Renderer_RenderWindow) platform_io.Renderer_RenderWindow(viewport, renderer_render_arg);
+        }
+        for (int i = 1; i < platform_io.Viewports.Size; i++)
+        {
+            ImGuiViewport* viewport = platform_io.Viewports[i];
+            if (viewport->Flags & ImGuiViewportFlags_Minimized)
+                continue;
+            //if (platform_io.Platform_SwapBuffers) platform_io.Platform_SwapBuffers(viewport, platform_render_arg);
+            //if (platform_io.Renderer_SwapBuffers) platform_io.Renderer_SwapBuffers(viewport, renderer_render_arg);
+        }
+
 	}
 
 	ImGuiContext* m_imgui;

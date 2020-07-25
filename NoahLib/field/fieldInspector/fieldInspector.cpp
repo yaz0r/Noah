@@ -8,6 +8,9 @@
 #include "bgfx/bgfx.h"
 #include "imguiBGFX.h"
 
+#include "fieldModelInspector.h"
+#include "field/fieldModel.h"
+
 #include "../imgui_club/imgui_memory_editor/imgui_memory_editor.h"
 
 #include <array>
@@ -80,6 +83,16 @@ public:
                 if (ImGui::BeginTabItem("SpriteSheets"))
                 {
                     fieldInspector_spriteSheets();
+
+                    ImGui::EndTabItem();
+                }
+
+                if (ImGui::BeginTabItem("Model"))
+                {
+                    static int modelInspected = 0;
+                    ImGui::InputInt("ModelId", &modelInspected);
+                    modelInspected = std::min<int>(modelInspected, gCurrentFieldModels.size());
+                    fieldModelInspector_step(modelInspected);
 
                     ImGui::EndTabItem();
                 }
@@ -562,7 +575,7 @@ public:
 
     void fieldInspector_dialogs()
     {
-        int NumEntries = READ_LE_U32(rawFieldDialogBundle.begin());
+        int NumEntries = READ_LE_S16(rawFieldDialogBundle.begin());
 
         for (int i = 0; i < NumEntries; i++)
         {

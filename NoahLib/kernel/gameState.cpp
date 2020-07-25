@@ -29,6 +29,9 @@ void loadInitialGameState()
         {
             gameState.m1D34_currentParty[i] = READ_LE_S8(rawGameState.begin() + 0x1D34 + i);
         }
+
+        gameState.m231A_fieldID = READ_LE_U16(rawGameState.begin() + 0x231A);
+        gameState.m231A_fieldID = 1; // override to boot in debug room
     }
 
     MissingCode();

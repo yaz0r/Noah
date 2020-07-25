@@ -8,7 +8,7 @@ sWalkMesh walkMesh;
 void sWalkMesh::init(const std::vector<u8>& input)
 {
     m0_count = READ_LE_U32(input.begin());
-    assert(m0_count == 2);
+    //assert(m0_count == 2);
 
     m_blocks.resize(m0_count);
     for (int i=0; i<m0_count; i++)
@@ -149,8 +149,8 @@ void sWalkMesh::bgfxRender(int viewIndex)
             pVertices[i].v[2] = newBlock.m_vertices[i][2];
 
             pVertices[i].color[0] = 1.f;
-            pVertices[i].color[1] = 1.f;
-            pVertices[i].color[2] = 1.f;
+            pVertices[i].color[1] = 0.f;
+            pVertices[i].color[2] = 0.f;
             pVertices[i].color[3] = 1.f;
         }
 
