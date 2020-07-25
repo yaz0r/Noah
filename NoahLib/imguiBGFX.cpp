@@ -14,14 +14,16 @@
 
 #include <../3rdparty/dear-imgui/widgets/dock.h>
 //#include <../3rdparty/dear-imgui/widgets/file_list.h>
-#include <../3rdparty/dear-imgui/widgets/gizmo.h>
+//#include <../3rdparty/dear-imgui/widgets/gizmo.h>
+
+#include "ImGuizmo.h"
 
 #ifndef IMGUI_DEFINE_MATH_OPERATORS
 #define IMGUI_DEFINE_MATH_OPERATORS
 #endif
 #include <imgui_internal.h>
 #include <../3rdparty/dear-imgui/widgets/dock.inl>
-#include <../3rdparty/dear-imgui/widgets/gizmo.inl>
+//#include <../3rdparty/dear-imgui/widgets/gizmo.inl>
 
 namespace ImGui
 {

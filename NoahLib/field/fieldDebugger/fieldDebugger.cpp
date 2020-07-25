@@ -9,7 +9,7 @@
 
 #include <array>
 
-#include <../3rdparty/dear-imgui/widgets/gizmo.h>
+#include "ImGuizmo.h"
 
 
 int fieldDebugger_bgfxView = 1;

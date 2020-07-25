@@ -4,6 +4,7 @@ include_directories(
     "."
     "${THIRD_PARTY}/SDL/include"
     "${THIRD_PARTY}/imgui"
+    "${THIRD_PARTY}/ImGuizmo"
     "${THIRD_PARTY}/soloud/soloud/include"
 #    "${THIRD_PARTY}/glm"
 #    "${THIRD_PARTY}/tracy"
@@ -32,6 +33,9 @@ set(SOURCES
  "${THIRD_PARTY}/imgui/imgui_draw.cpp"
  "${THIRD_PARTY}/imgui/imgui_widgets.cpp"
  "${THIRD_PARTY}/imgui/examples/imgui_impl_sdl.cpp"
+
+ "${THIRD_PARTY}/ImGuizmo/ImGuizmo.cpp"
+ "${THIRD_PARTY}/ImGuizmo/ImGuizmo.h"
 )
 
 function(assign_source_group)
