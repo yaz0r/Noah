@@ -2,6 +2,7 @@
 #include "fieldModel.h"
 
 #include "bgfx/bgfx.h"
+#include <map>
 
 std::vector<sModel> gCurrentFieldModels;
 
@@ -38,7 +39,171 @@ void sModel::init(std::vector<u8>::iterator& input, int dataSize)
     }
 }
 
-bgfx::ProgramHandle getLineShader();
+struct sVertice
+{
+    float v[3];
+    float n[3];
+    float uv[3];
+    float color[4];
+};
+
+std::vector<sVertice> currentVertices;
+std::vector<u16> currentIndices;
+
+bgfx::ProgramHandle getModelShader();
+
+struct TexInfo {
+    u16 status;
+    u16 clut;
+    u8 alpha;
+    bool abe;
+    bool operator<(const TexInfo& rhs) const {
+        if (status != rhs.status) {
+            return status < rhs.status;
+        }
+        if (clut != rhs.clut) {
+            return clut < rhs.clut;
+        }
+        if (alpha != rhs.alpha) {
+            return alpha < rhs.alpha;
+        }
+        return abe < rhs.abe;
+    }
+};
+
+std::map<TexInfo, bgfx::TextureHandle> texInfoMap;
+extern std::array<u8, 2048 * 512> gVram;
+
+bgfx::TextureHandle getTexture(u16 status, u16 clut, bool abe, int alpha)
+{
+    if (currentIndices.size() == 0)
+    {
+        return BGFX_INVALID_HANDLE;
+    }
+
+    alpha = 128;
+    TexInfo texInfo;
+    texInfo.status = status;
+    texInfo.clut = clut;
+    texInfo.abe = abe;
+    texInfo.alpha = alpha;
+    if (texInfoMap.find(texInfo) != texInfoMap.end()) {
+        return texInfoMap[texInfo];
+    }
+
+    u8* texture = new u8[256 * 256 * 4];
+
+    int tx = (status & 0xF) * 64 * 2;
+    int ty = ((status >> 4) & 1) * 256;
+    int tp = (status >> 7) & 3;
+
+    int px = clut & 63;
+    int py = clut >> 6;
+
+    switch (tp) {
+    case 0: {
+        for (int y = 0; y < 256; y++) {
+            for (int x = 0; x < 256; x++) {
+                u8 val = gVram[(y + ty) * 2048 + (x / 2) + tx];
+                int idx = (x & 1) ? val >> 4 : val & 0xF;
+                u16 col = READ_LE_U16(&gVram[0] + (py) * 2048 + idx * 2 + px * 2);
+                bool stp = (col & 0x8000) != 0;
+
+                int r = (((col) & 31) * 255 + 15) / 31;
+                int g = (((col >> 5) & 31) * 255 + 15) / 31;
+                int b = (((col >> 10) & 31) * 255 + 15) / 31;
+                int a = /*(idx == 0) || */(col == 0) ? 0 : (abe && stp && ((col & 0x7FFF) != 0)) ? alpha : 255;
+
+                int addr = (y * 256 + x) * 4;
+                texture[addr + 0] = r;
+                texture[addr + 1] = g;
+                texture[addr + 2] = b;
+                texture[addr + 3] = a;
+            }
+        }
+        break;
+    }
+    case 1: {
+        for (int y = 0; y < 256; y++) {
+            for (int x = 0; x < 256; x++) {
+                int idx = gVram[(y + ty) * 2048 + x + tx];
+                u16 col = READ_LE_U16(&gVram[0] + (py) * 2048 + idx * 2 + px * 2);
+                bool stp = (col & 0x8000) != 0;
+
+                int r = (((col) & 31) * 255 + 15) / 31;
+                int g = (((col >> 5) & 31) * 255 + 15) / 31;
+                int b = (((col >> 10) & 31) * 255 + 15) / 31;
+                int a = /* (idx == 0)  ||*/ (col == 0) ? 0 : (abe && stp && ((col & 0x7FFF) != 0)) ? alpha : 255;
+
+                int addr = (y * 256 + x) * 4;
+                texture[addr + 0] = r;
+                texture[addr + 1] = g;
+                texture[addr + 2] = b;
+                texture[addr + 3] = a;
+            }
+        }
+        break;
+    }
+    case 2: {
+        for (int y = 0; y < 256; y++) {
+            for (int x = 0; x < 256; x++) {
+                u16 col = READ_LE_U16(&gVram[0] + (y + ty) * 2048 + x * 2 + tx);
+                bool stp = (col & 0x8000) != 0;
+
+                int r = (((col) & 31) * 255 + 15) / 31;
+                int g = (((col >> 5) & 31) * 255 + 15) / 31;
+                int b = (((col >> 10) & 31) * 255 + 15) / 31;
+                int a = (col == 0) ? 0 : (abe && stp && ((col & 0x7FFF) != 0)) ? alpha : 255;
+
+                int addr = (y * 256 + x) * 4;
+                texture[addr + 0] = r;
+                texture[addr + 1] = g;
+                texture[addr + 2] = b;
+                texture[addr + 3] = a;
+            }
+        }
+        break;
+    }
+    }
+
+    bgfx::TextureHandle newHandle = bgfx::createTexture2D(256,256, false, 1, bgfx::TextureFormat::RGBA8, 0, bgfx::copy(texture, 256 * 256 * 4));
+    delete texture;
+
+    texInfoMap[texInfo] = newHandle;
+
+    return newHandle;
+}
+
+void flushTriangles(sModelBlock* pThis, int viewIndex, bgfx::TextureHandle textureHandle)
+{
+    if (currentIndices.size() == 0)
+    {
+        return;
+    }
+
+    bgfx::VertexLayout layout;
+    layout
+        .begin()
+        .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
+        .add(bgfx::Attrib::Normal, 3, bgfx::AttribType::Float)
+        .add(bgfx::Attrib::TexCoord0, 3, bgfx::AttribType::Float)
+        .add(bgfx::Attrib::Color0, 4, bgfx::AttribType::Float)
+        .end();
+
+    bgfx::TransientVertexBuffer vertexBuffer;
+    bgfx::TransientIndexBuffer indexBuffer;
+    bgfx::allocTransientBuffers(&vertexBuffer, layout, currentVertices.size(), &indexBuffer, currentIndices.size());
+
+    sDrawCall newDrawCall;
+    newDrawCall.m_vb = bgfx::createVertexBuffer(bgfx::copy(&currentVertices[0], currentVertices.size() * sizeof(sVertice)), layout);
+    newDrawCall.m_ib = bgfx::createIndexBuffer(bgfx::copy(&currentIndices[0], currentIndices.size() * 2));
+    newDrawCall.m_texture = textureHandle;
+
+    pThis->m_drawCalls.push_back(newDrawCall);
+
+    currentVertices.clear();
+    currentIndices.clear();
+}
 
 void renderTriangleWithTexture(int viewIndex, std::vector<u8>::iterator& mesh_blocks, std::vector<u8>::iterator& displaylist, std::vector<u8>::iterator& vertices, u32 cmd)
 {
@@ -51,25 +216,7 @@ void renderTriangleWithTexture(int viewIndex, std::vector<u8>::iterator& mesh_bl
     uv[2][1] = (cmd >> 8) & 255;
     displaylist += 4;
 
-    bgfx::VertexLayout layout;
-    layout
-        .begin()
-        .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
-        .add(bgfx::Attrib::Color0, 4, bgfx::AttribType::Float)
-        .end();
-
-    bgfx::TransientVertexBuffer vertexBuffer;
-    bgfx::TransientIndexBuffer indexBuffer;
-    bgfx::allocTransientBuffers(&vertexBuffer, layout, 3, &indexBuffer, 3 * 2);
-
-    struct sVertice
-    {
-        float v[3];
-        float color[4];
-    };
-
-    sVertice* pVertices = (sVertice*)vertexBuffer.data;
-    u16* pIndices = (u16*)indexBuffer.data;
+    int startIndex = currentVertices.size();
 
     for (int j = 0; j < 3; j++)
     {
@@ -78,62 +225,32 @@ void renderTriangleWithTexture(int viewIndex, std::vector<u8>::iterator& mesh_bl
         int y = (s16)READ_LE_S16(vertices + vtx * 8 + 2);
         int z = (s16)READ_LE_S16(vertices + vtx * 8 + 4);
 
-        pVertices[j].v[0] = x;
-        pVertices[j].v[1] = y;
-        pVertices[j].v[2] = z;
+        sVertice newVertice;
 
-        pVertices[j].color[0] = 1.f;
-        pVertices[j].color[1] = 1.f;
-        pVertices[j].color[2] = 1.f;
-        pVertices[j].color[3] = 1.f;
+        newVertice.v[0] = x;
+        newVertice.v[1] = y;
+        newVertice.v[2] = z;
+
+        newVertice.uv[0] = uv[j][0]/256.f;
+        newVertice.uv[1] = uv[j][1]/256.f;
+        newVertice.uv[2] = 1.f;
+
+        newVertice.color[0] = 1.f;
+        newVertice.color[1] = 1.f;
+        newVertice.color[2] = 1.f;
+        newVertice.color[3] = 1.f;
+
+        currentVertices.push_back(newVertice);
     }
 
-    pIndices[0] = 0;
-    pIndices[1] = 1;
-
-    pIndices[2] = 1;
-    pIndices[3] = 2;
-
-    pIndices[4] = 2;
-    pIndices[5] = 0;
-
-    bgfx::setState(0 | BGFX_STATE_WRITE_RGB
-        | BGFX_STATE_WRITE_A
-        | BGFX_STATE_WRITE_Z
-        | BGFX_STATE_DEPTH_TEST_LEQUAL
-        | BGFX_STATE_CULL_CW
-        | BGFX_STATE_MSAA
-        | BGFX_STATE_PT_LINES
-    );
-
-    bgfx::setVertexBuffer(0, &vertexBuffer);
-    bgfx::setIndexBuffer(&indexBuffer);
-
-    bgfx::submit(viewIndex, getLineShader());
-
+    currentIndices.push_back(startIndex + 0);
+    currentIndices.push_back(startIndex + 1);
+    currentIndices.push_back(startIndex + 2);
 }
 
 void renderTriangleWithColor(int viewIndex, std::vector<u8>::iterator& mesh_blocks, std::vector<u8>::iterator& displaylist, std::vector<u8>::iterator& vertices, u32 cmd)
 {
-    bgfx::VertexLayout layout;
-    layout
-        .begin()
-        .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
-        .add(bgfx::Attrib::Color0, 4, bgfx::AttribType::Uint8)
-        .end();
-
-    bgfx::TransientVertexBuffer vertexBuffer;
-    bgfx::TransientIndexBuffer indexBuffer;
-    bgfx::allocTransientBuffers(&vertexBuffer, layout, 3, &indexBuffer, 3 * 2);
-
-    struct sVertice
-    {
-        float v[3];
-        u8 color[4];
-    };
-
-    sVertice* pVertices = (sVertice*)vertexBuffer.data;
-    u16* pIndices = (u16*)indexBuffer.data;
+    int startIndex = currentVertices.size();
 
     for (int j = 0; j < 3; j++)
     {
@@ -142,106 +259,65 @@ void renderTriangleWithColor(int viewIndex, std::vector<u8>::iterator& mesh_bloc
         int y = (s16)READ_LE_S16(vertices + vtx * 8 + 2);
         int z = (s16)READ_LE_S16(vertices + vtx * 8 + 4);
 
-        pVertices[j].v[0] = x;
-        pVertices[j].v[1] = y;
-        pVertices[j].v[2] = z;
+        sVertice newVertice;
 
-        pVertices[j].color[0] = (cmd >> 16) & 255;
-        pVertices[j].color[1] = (cmd >> 8) & 255;
-        pVertices[j].color[2] = (cmd) & 255;
-        pVertices[j].color[3] = 0xFF;
+        newVertice.v[0] = x;
+        newVertice.v[1] = y;
+        newVertice.v[2] = z;
+
+        newVertice.uv[0] = 0;
+        newVertice.uv[1] = 0;
+        newVertice.uv[2] = 0;
+
+        newVertice.color[2] = ((cmd >> 16) & 255) / 255.f;
+        newVertice.color[1] = ((cmd >> 8) & 255) / 255.f;
+        newVertice.color[0] = ((cmd) & 255) / 255.f;
+        newVertice.color[3] = 0.f;
+
+        currentVertices.push_back(newVertice);
     }
 
-    pIndices[0] = 0;
-    pIndices[1] = 1;
-
-    pIndices[2] = 1;
-    pIndices[3] = 2;
-
-    pIndices[4] = 2;
-    pIndices[5] = 0;
-
-    bgfx::setState(0 | BGFX_STATE_WRITE_RGB
-        | BGFX_STATE_WRITE_A
-        | BGFX_STATE_WRITE_Z
-        | BGFX_STATE_DEPTH_TEST_LEQUAL
-        | BGFX_STATE_CULL_CW
-        | BGFX_STATE_MSAA
-        | BGFX_STATE_PT_LINES
-    );
-
-    bgfx::setVertexBuffer(0, &vertexBuffer);
-    bgfx::setIndexBuffer(&indexBuffer);
-
-    bgfx::submit(viewIndex, getLineShader());
-
+    currentIndices.push_back(startIndex + 0);
+    currentIndices.push_back(startIndex + 1);
+    currentIndices.push_back(startIndex + 2);
 }
 
 void renderQuadWithColor(int viewIndex, std::vector<u8>::iterator& mesh_blocks, std::vector<u8>::iterator& displaylist, std::vector<u8>::iterator& vertices, u32 cmd)
 {
-    bgfx::VertexLayout layout;
-    layout
-        .begin()
-        .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
-        .add(bgfx::Attrib::Color0, 4, bgfx::AttribType::Uint8)
-        .end();
+    int startIndex = currentVertices.size();
 
-    bgfx::TransientVertexBuffer vertexBuffer;
-    bgfx::TransientIndexBuffer indexBuffer;
-    bgfx::allocTransientBuffers(&vertexBuffer, layout, 4, &indexBuffer, 4 * 2);
-
-    struct sVertice
-    {
-        float v[3];
-        u8 color[4];
-    };
-
-    sVertice* pVertices = (sVertice*)vertexBuffer.data;
-    u16* pIndices = (u16*)indexBuffer.data;
-
-    const int quad_idx[] = { 0, 1, 3, 2 };
     for (int j = 0; j < 4; j++)
     {
-        int vtx = READ_LE_U16(mesh_blocks + quad_idx[j] * 2);
+        int vtx = READ_LE_U16(mesh_blocks + j * 2);
         int x = (s16)READ_LE_S16(vertices + vtx * 8 + 0);
         int y = (s16)READ_LE_S16(vertices + vtx * 8 + 2);
         int z = (s16)READ_LE_S16(vertices + vtx * 8 + 4);
 
-        pVertices[j].v[0] = x;
-        pVertices[j].v[1] = y;
-        pVertices[j].v[2] = z;
+        sVertice newVertice;
 
-        pVertices[j].color[0] = (cmd >> 16) & 255;
-        pVertices[j].color[1] = (cmd >> 8) & 255;
-        pVertices[j].color[2] = (cmd) & 255;
-        pVertices[j].color[3] = 0xFF;
+        newVertice.v[0] = x;
+        newVertice.v[1] = y;
+        newVertice.v[2] = z;
+
+        newVertice.uv[0] = 0;
+        newVertice.uv[1] = 0;
+        newVertice.uv[2] = 0;
+
+        newVertice.color[2] = ((cmd >> 16) & 255) / 255.f;
+        newVertice.color[1] = ((cmd >> 8) & 255) / 255.f;
+        newVertice.color[0] = ((cmd) & 255) / 255.f;
+        newVertice.color[3] = 0.f;
+
+        currentVertices.push_back(newVertice);
     }
 
-    pIndices[0] = 0;
-    pIndices[1] = 1;
+    currentIndices.push_back(startIndex + 0);
+    currentIndices.push_back(startIndex + 1);
+    currentIndices.push_back(startIndex + 2);
 
-    pIndices[2] = 1;
-    pIndices[3] = 2;
-
-    pIndices[4] = 2;
-    pIndices[5] = 3;
-
-    pIndices[6] = 3;
-    pIndices[7] = 0;
-
-    bgfx::setState(0 | BGFX_STATE_WRITE_RGB
-        | BGFX_STATE_WRITE_A
-        | BGFX_STATE_WRITE_Z
-        | BGFX_STATE_DEPTH_TEST_LEQUAL
-        | BGFX_STATE_CULL_CW
-        | BGFX_STATE_MSAA
-        | BGFX_STATE_PT_LINES
-    );
-
-    bgfx::setVertexBuffer(0, &vertexBuffer);
-    bgfx::setIndexBuffer(&indexBuffer);
-
-    bgfx::submit(viewIndex, getLineShader());
+    currentIndices.push_back(startIndex + 3);
+    currentIndices.push_back(startIndex + 2);
+    currentIndices.push_back(startIndex + 1);
 }
 
 void renderQuadWithTexture(int viewIndex, std::vector<u8>::iterator& mesh_blocks, std::vector<u8>::iterator& displaylist, std::vector<u8>::iterator& vertices)
@@ -257,81 +333,87 @@ void renderQuadWithTexture(int viewIndex, std::vector<u8>::iterator& mesh_blocks
     uv[3][1] = displaylist[7];
     displaylist += 8;
 
-    bgfx::VertexLayout layout;
-    layout
-        .begin()
-        .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
-        .add(bgfx::Attrib::Color0, 4, bgfx::AttribType::Float)
-        .end();
+    int startIndex = currentVertices.size();
 
-    bgfx::TransientVertexBuffer vertexBuffer;
-    bgfx::TransientIndexBuffer indexBuffer;
-    bgfx::allocTransientBuffers(&vertexBuffer, layout, 4, &indexBuffer, 4 * 2);
-
-    struct sVertice
-    {
-        float v[3];
-        float color[4];
-    };
-
-    sVertice* pVertices = (sVertice*)vertexBuffer.data;
-    u16* pIndices = (u16*)indexBuffer.data;
-
-    const int quad_idx[] = { 0, 1, 3, 2 };
     for (int j = 0; j < 4; j++)
     {
-        int vtx = READ_LE_U16(mesh_blocks + quad_idx[j] * 2);
+        int vtx = READ_LE_U16(mesh_blocks + j * 2);
         int x = (s16)READ_LE_S16(vertices + vtx * 8 + 0);
         int y = (s16)READ_LE_S16(vertices + vtx * 8 + 2);
         int z = (s16)READ_LE_S16(vertices + vtx * 8 + 4);
 
-        pVertices[j].v[0] = x;
-        pVertices[j].v[1] = y;
-        pVertices[j].v[2] = z;
+        sVertice newVertice;
 
-        pVertices[j].color[0] = 1.f;
-        pVertices[j].color[1] = 1.f;
-        pVertices[j].color[2] = 1.f;
-        pVertices[j].color[3] = 1.f;
+        newVertice.v[0] = x;
+        newVertice.v[1] = y;
+        newVertice.v[2] = z;
+
+        newVertice.uv[0] = uv[j][0]/256.f;
+        newVertice.uv[1] = uv[j][1]/256.f;
+        newVertice.uv[2] = 1;
+
+        newVertice.color[0] = 1.f;
+        newVertice.color[1] = 1.f;
+        newVertice.color[2] = 1.f;
+        newVertice.color[3] = 1.f;
+
+        currentVertices.push_back(newVertice);
     }
 
-    pIndices[0] = 0;
-    pIndices[1] = 1;
+    currentIndices.push_back(startIndex + 0);
+    currentIndices.push_back(startIndex + 1);
+    currentIndices.push_back(startIndex + 2);
 
-    pIndices[2] = 1;
-    pIndices[3] = 2;
-
-    pIndices[4] = 2;
-    pIndices[5] = 3;
-
-    pIndices[6] = 3;
-    pIndices[7] = 0;
-
-    bgfx::setState(0 | BGFX_STATE_WRITE_RGB
-        | BGFX_STATE_WRITE_A
-        | BGFX_STATE_WRITE_Z
-        | BGFX_STATE_DEPTH_TEST_LEQUAL
-        | BGFX_STATE_CULL_CW
-        | BGFX_STATE_MSAA
-        | BGFX_STATE_PT_LINES
-    );
-
-    bgfx::setVertexBuffer(0, &vertexBuffer);
-    bgfx::setIndexBuffer(&indexBuffer);
-
-    bgfx::submit(viewIndex, getLineShader());
-
+    currentIndices.push_back(startIndex + 3);
+    currentIndices.push_back(startIndex + 2);
+    currentIndices.push_back(startIndex + 1);
 }
 
-void sModel::bgfxRender(int viewIndex)
+void sModel::bgfxRender(int viewIndex, float* modelMatrix)
 {
     for (int i = 0; i < m0_numBlocks; i++)
     {
-        m10_blocks[i].bgfxRender(viewIndex);
+        m10_blocks[i].bgfxRender(viewIndex, modelMatrix);
     }
 }
 
-void sModelBlock::bgfxRender(int viewIndex)
+void sModelBlock::bgfxRender(int viewIndex, float* modelMatrix)
+{
+    if (m_drawCalls.size() == 0)
+    {
+        buildDrawcall(viewIndex);
+    }
+
+    for (int i=0; i<m_drawCalls.size(); i++)
+    {
+        static bgfx::UniformHandle textureUniform = BGFX_INVALID_HANDLE;
+        if (!bgfx::isValid(textureUniform))
+        {
+            textureUniform = bgfx::createUniform("s_texture", bgfx::UniformType::Sampler);
+        }
+        bgfx::setTexture(0, textureUniform, m_drawCalls[i].m_texture);
+
+        bgfx::setState(0 | BGFX_STATE_WRITE_RGB
+            | BGFX_STATE_WRITE_A
+            | BGFX_STATE_WRITE_Z
+            | BGFX_STATE_DEPTH_TEST_LEQUAL
+            | BGFX_STATE_CULL_CCW
+            | BGFX_STATE_MSAA
+        );
+
+        if (modelMatrix)
+        {
+            bgfx::setTransform(modelMatrix);
+        }
+
+        bgfx::setVertexBuffer(0, m_drawCalls[i].m_vb);
+        bgfx::setIndexBuffer(m_drawCalls[i].m_ib);
+
+        bgfx::submit(viewIndex, getModelShader());
+    }
+}
+
+void sModelBlock::buildDrawcall(int viewIndex)
 {
     std::vector<u8>::iterator mesh_blocks = m_model->mRawData.begin() + m10_offsetMeshBlocks;
     std::vector<u8>::iterator displaylist = m_model->mRawData.begin() + m14_offsetDisplayList;
@@ -340,6 +422,8 @@ void sModelBlock::bgfxRender(int viewIndex)
     bool quad_block = false;
     int poly_available = 0;
     int number_mesh_block = m6_numMeshBlock;
+    u16 status = 0;
+    u16 clut = 0;
     while (poly_available > 0 || number_mesh_block > 0)
     {
         // init the mesh block
@@ -361,11 +445,12 @@ void sModelBlock::bgfxRender(int viewIndex)
 
         int srcAlpha = 255;
         int dstAlpha = 255;
-        u16 status = 0;
-        u16 clut = 0;
+
         switch ((cmd >> 24) & ~(16 | 2 | 1)) // (careful not to mask 0xc4 or 0xc8!)
         {
         case 0xC4: // texture page
+            flushTriangles(this, viewIndex, getTexture(status, clut, abe, srcAlpha));
+
             status = cmd & 0xFFFF;
             switch ((status >> 3) & 7) {
             case 0:
@@ -384,6 +469,7 @@ void sModelBlock::bgfxRender(int viewIndex)
             }
             break;
         case 0xC8: // clut
+            flushTriangles(this, viewIndex, getTexture(status, clut, abe, srcAlpha));
             clut = cmd & 0xFFFF;
             break;
 
@@ -421,6 +507,13 @@ void sModelBlock::bgfxRender(int viewIndex)
         default:
             assert(0);
         }
+
+        if (!((poly_available > 0 || number_mesh_block > 0)))
+        {
+            flushTriangles(this, viewIndex, getTexture(status, clut, abe, srcAlpha)); //last flush
+        }
     }
+
+    
 }
 

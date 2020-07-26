@@ -6,6 +6,7 @@
 #include "kernel/gameState.h"
 #include "walkMesh.h"
 #include "fieldModel.h"
+#include "kernel/isoManager.h"
 
 #include <array>
 
@@ -1890,6 +1891,64 @@ void loadInitialField()
     while (loadNewField((requestFieldId0 & 0xFFF) * 2, 0));
 }
 
+
+void* allocateBufferForVramUpload(int)
+{
+    MissingCode();
+    return nullptr;
+}
+
+std::array<u8, 2048 * 512> gVram;
+
+void loadImageFileToVram(int fileId, void* allocation, int, int, int, int, int, int, int, int)
+{
+    MissingCode(); // this is completely different from the original code that was done async and using the cd callbacks
+
+    std::vector<u8> data;
+    c_isoManager::getCurrentDisc()->readData(getFileStartSector(fileId), getFileSize(fileId), data);
+
+    int offset = 0;
+    while (offset < data.size() - 0x14)
+    {
+        std::vector<u8>::iterator texture = data.begin() + offset;
+        u32 type = READ_LE_U16(texture + 0x00);
+        u16 pos_x = READ_LE_U16(texture + 0x04);
+        u16 pos_y = READ_LE_U16(texture + 0x06);
+        u16 move_x = READ_LE_U16(texture + 0x08);
+        u16 move_y = READ_LE_U16(texture + 0x0a);
+        u16 width = READ_LE_U16(texture + 0x0c);
+        u16 height = READ_LE_U16(texture + 0x0e);
+        u16 chunks = READ_LE_U16(texture + 0x12);
+
+        if (width > 2048 || height > 512 || width == 0 || height == 0) {
+            return;
+        }
+        int blockSize = 0x1C + chunks * 2;
+        offset += (blockSize + 2047) & ~2047;
+        for (int i = 0; i < chunks; i++) {
+            height = READ_LE_U16(texture + 0x1C + i * 2);
+            for (int j = 0; j < height; j++) {
+                memcpy(&gVram[0] + (pos_y + move_y + j) * 2048 + (pos_x + move_x) * 2, ((u8*)&data[0]) + offset + j * width * 2, width * 2);
+            }
+            pos_y += height;
+            blockSize = width * height * 2;
+            offset += (blockSize + 2047) & ~2047;
+        }
+    }
+}
+
+int fieldGraphicsUploaded = 0;
+void loadFieldGraphics()
+{
+    if (!fieldGraphicsUploaded)
+    {
+        fieldGraphicsUploaded = 1;
+        void* fieldGraphicsAllocation = allocateBufferForVramUpload(4);
+        loadImageFileToVram((requestFieldId0 & 0xfff) * 2 + 0xb9, fieldGraphicsAllocation, 0, 0, 0, 0, 0, 0, 0, 0);
+    }
+}
+
+
 void bootField()
 {
     MissingCode();
@@ -1902,7 +1961,7 @@ void bootField()
     waitReadCompletion(0);
     setCurrentDirectory(4, 0);
     initFieldData();
-
+    loadFieldGraphics();
 
     MissingCode();
 }
@@ -2056,7 +2115,7 @@ void fieldEntryPoint()
 {
     MissingCode();
 
-    setCurrentDirectory(4, 0); // TODO: this is not explicitely called at this level
+    setCurrentDirectory(4, 0); // TODO: this is not explicitly called at this level
 
     allocatePartyCharacterBuffers();
 

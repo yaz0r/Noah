@@ -3,6 +3,15 @@
 #include <vector>
 #include <array>
 
+#include "bgfx/bgfx.h"
+
+struct sDrawCall
+{
+    bgfx::VertexBufferHandle m_vb;
+    bgfx::IndexBufferHandle m_ib;
+    bgfx::TextureHandle m_texture;
+};
+
 struct sModelBlock
 {
     s16 m2_numVertices;
@@ -25,9 +34,11 @@ struct sModelBlock
     };
 
     std::vector<sMeshBlock> m_meshBlocks;
+    std::vector<sDrawCall> m_drawCalls;
 
     struct sModel* m_model;
-    void bgfxRender(int viewIndex);
+    void bgfxRender(int viewIndex, float* modelMatrix);
+    void buildDrawcall(int viewIndex);
 };
 
 struct sModel
@@ -39,7 +50,7 @@ struct sModel
 
     std::vector<u8> mRawData;
 
-    void bgfxRender(int viewIndex);
+    void bgfxRender(int viewIndex, float* modelMatrix);
 };
 
 extern std::vector<sModel> gCurrentFieldModels;

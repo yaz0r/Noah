@@ -59,59 +59,63 @@ void fieldModelInspector_step(int modelId)
 
         static float matrix[16];
 
-        static float matrixTranslation[3], matrixRotation[3], matrixScale[3];
+        static bx::Vec3 matrixTranslation(0, 0, 0);
+        static bx::Vec3 matrixRotation(0, 0, 0);
+        static bx::Vec3 matrixScale(1, 1, 1);
 
-        static bool bInitialized = false;
-        if (!bInitialized)
         {
-            bInitialized = true;
-            bx::mtxIdentity(mtx_view);
-            bx::mtxIdentity(matrix);
+            float rotationMatrix[16];
+            bx::mtxRotateXYZ(rotationMatrix, matrixRotation.x, matrixRotation.y, matrixRotation.z);
 
-            bx::mtxLookAt(mtx_view, bx::Vec3(0, 500, -500), bx::Vec3(0, 0, 0));
+            bx::Vec3 vAt = bx::mul(bx::Vec3(0, 0, -1), rotationMatrix);
+            vAt = bx::add(vAt, matrixTranslation);
 
-            ImGuizmo::DecomposeMatrixToComponents(mtx_view, matrixTranslation, matrixRotation, matrixScale);
+            bx::Vec3 vUp = bx::mul(bx::Vec3(0.f, -1.f, 0.f), rotationMatrix);
+
+            bx::mtxLookAt(mtx_view, matrixTranslation, vAt, vUp);
+
+            ImGuiIO& io = ImGui::GetIO();
+
+            if (io.MouseDown[1])
+            {
+                matrixRotation.x -= io.MouseDelta[1] / 256.f;
+                matrixRotation.y += io.MouseDelta[0] / 256.f;
+            }
+
+            bx::Vec3 translationVector(0, 0, 0);
+
+            if (io.KeysDown[SDL_SCANCODE_A])
+            {
+                translationVector.x -= 10;
+            }
+
+            if (io.KeysDown[SDL_SCANCODE_D])
+            {
+                translationVector.x += 10;
+            }
+
+            if (io.KeysDown[SDL_SCANCODE_Q])
+            {
+                translationVector.y -= 10;
+            }
+
+            if (io.KeysDown[SDL_SCANCODE_E])
+            {
+                translationVector.y += 10;
+            }
+
+            if (io.KeysDown[SDL_SCANCODE_W])
+            {
+                translationVector.z -= 10;
+            }
+
+            if (io.KeysDown[SDL_SCANCODE_S])
+            {
+                translationVector.z += 10;
+            }
+
+            matrixTranslation = bx::add(matrixTranslation, bx::mul(translationVector, rotationMatrix));
         }
-
-        ImGuiIO& io = ImGui::GetIO();
-
-        if (io.MouseDown[1])
-        {
-            matrixRotation[0] += io.MouseDelta[1];
-            matrixRotation[1] += io.MouseDelta[0];
-        }
-
-        if (io.KeysDown[SDL_SCANCODE_A])
-        {
-            matrixTranslation[0] += 10;
-        }
-
-        if (io.KeysDown[SDL_SCANCODE_D])
-        {
-            matrixTranslation[0] -= 10;
-        }
-
-        if (io.KeysDown[SDL_SCANCODE_Q])
-        {
-            matrixTranslation[1] -= 10;
-        }
-
-        if (io.KeysDown[SDL_SCANCODE_E])
-        {
-            matrixTranslation[1] += 10;
-        }
-
-        if (io.KeysDown[SDL_SCANCODE_W])
-        {
-            matrixTranslation[2] -= 10;
-        }
-
-        if (io.KeysDown[SDL_SCANCODE_S])
-        {
-            matrixTranslation[2] += 10;
-        }
-
-        ImGuizmo::RecomposeMatrixFromComponents(matrixTranslation, matrixRotation, matrixScale, mtx_view);
 
         const float camFovy = 60.0f;
         const float camAspect = float(int32_t(currentWindowSize[0])) / float(int32_t(currentWindowSize[1]));
@@ -122,6 +126,7 @@ void fieldModelInspector_step(int modelId)
 
         const bgfx::Caps* caps = bgfx::getCaps();
         bx::mtxProj(mtx_projection, camFovy, camAspect, camNear, camFar, caps->homogeneousDepth);
+
 
         ImVec2 imageStart = ImGui::GetCursorScreenPos();
 
@@ -212,7 +217,7 @@ void fieldModelInspector_step(int modelId)
 
         bgfx::touch(fieldModelInspector_bgfxView);
 
-        gCurrentFieldModels[modelId].bgfxRender(fieldModelInspector_bgfxView);
+        gCurrentFieldModels[modelId].bgfxRender(fieldModelInspector_bgfxView, nullptr);
 
     }
     //ImGui::End();

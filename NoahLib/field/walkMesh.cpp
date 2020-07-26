@@ -113,6 +113,17 @@ bgfx::ProgramHandle getLineShader()
     return programHandle;
 }
 
+bgfx::ProgramHandle getModelShader() // TODO: move!
+{
+    static bgfx::ProgramHandle programHandle = BGFX_INVALID_HANDLE;
+    if (!bgfx::isValid(programHandle))
+    {
+        programHandle = loadBgfxProgram("model3d_vs", "model3d_ps");
+    }
+
+    return programHandle;
+}
+
 void sWalkMesh::bgfxRender(int viewIndex)
 {
     if (m_blocks.size() == 0)

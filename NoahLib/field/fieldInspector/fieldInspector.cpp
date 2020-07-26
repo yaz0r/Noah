@@ -87,6 +87,13 @@ public:
                     ImGui::EndTabItem();
                 }
 
+                if (ImGui::BeginTabItem("Vram"))
+                {
+                    fieldInspector_vram();
+
+                    ImGui::EndTabItem();
+                }
+
                 if (ImGui::BeginTabItem("Model"))
                 {
                     static int modelInspected = 0;
@@ -672,6 +679,59 @@ public:
         }
     }
 
+    bool m_isVramDirty = true;
+    bgfx::TextureHandle m_vramTextureHandle = BGFX_INVALID_HANDLE;
+
+    void fieldInspector_vram()
+    {
+        int textureHeight = 512;
+        int textureWidth = 2048;
+
+        extern std::array<u8, 2048 * 512> gVram;
+        if (m_isVramDirty)
+        {
+            if (bgfx::isValid(m_vramTextureHandle))
+            {
+                bgfx::destroy(m_vramTextureHandle);
+                m_vramTextureHandle = BGFX_INVALID_HANDLE;
+            }
+
+            std::vector<u8> textureBuffer;
+
+            textureBuffer.resize(textureHeight * textureWidth * 4);
+
+            int xOffset = 0;
+
+            std::array<u8, 2048 * 512>::iterator vramIterator = gVram.begin();
+
+            for (int outputY = 0; outputY < textureHeight; outputY++)
+            {
+                for (int outputX = 0; outputX < textureWidth; outputX++)
+                {
+                    u8 colorValue = *vramIterator;
+                    if (!(outputX & 1))
+                    {
+                        colorValue &= 0xF;
+                    }
+                    else
+                    {
+                        colorValue >>= 4;
+                        vramIterator++;
+                    }
+
+                    textureBuffer[(outputY * textureWidth + outputX) * 4 + 0] = colorValue << 4;
+                    textureBuffer[(outputY * textureWidth + outputX) * 4 + 1] = colorValue << 4;
+                    textureBuffer[(outputY * textureWidth + outputX) * 4 + 2] = colorValue << 4;
+                    textureBuffer[(outputY * textureWidth + outputX) * 4 + 3] = 0xFF;
+                }
+            }
+
+            m_vramTextureHandle = bgfx::createTexture2D(textureWidth, textureHeight, false, 1, bgfx::TextureFormat::RGBA8, 0, bgfx::copy(&textureBuffer[0], textureWidth * textureHeight * 4));
+        }
+
+        ImGui::Image(m_vramTextureHandle, ImVec2(textureWidth, textureHeight));
+
+    }
 
     u16 startOfInstruction;
     u16 currentPC = -1;
