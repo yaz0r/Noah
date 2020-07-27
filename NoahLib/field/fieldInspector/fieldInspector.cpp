@@ -18,17 +18,19 @@
 #include <array>
 #include <vector>
 
+#include "fieldNames.h"
+
 struct sFieldListEntry
 {
     std::string mName;
     std::string mComment;
 };
 
-std::array<sFieldListEntry, 800> gFieldList;
+std::vector<sFieldListEntry> gFieldList;
 
 bool getFieldListName(void* data, int idx, const char** out_text)
 {
-    std::array<sFieldListEntry, 800>* pList = (std::array<sFieldListEntry, 800>*)data;
+    std::vector<sFieldListEntry>* pList = (std::vector<sFieldListEntry>*)data;
 
     *out_text = (*pList)[idx].mName.c_str();
 
@@ -1307,6 +1309,20 @@ public:
 
 std::vector<c_fieldInspector*> gInspectedFields;
 
+sFieldName* findFieldName(int index)
+{
+    sFieldName* pEntry = fieldNames;
+    while (pEntry->fieldId != -1)
+    {
+        if (pEntry->fieldId == index)
+            return pEntry;
+
+        pEntry++;
+    }
+
+    return nullptr;
+}
+
 void fieldInspector_frame()
 {
     static bool gFieldListInitialized = false;
@@ -1314,11 +1330,23 @@ void fieldInspector_frame()
     {
         gFieldListInitialized = true;
 
+        gFieldList.resize(730);
+
         for (int i = 0; i < gFieldList.size(); i++)
         {
-            char buffer[256];
-            sprintf(buffer, "Field %d", i);
-            gFieldList[i].mName = buffer;
+            sFieldName* pFieldName = findFieldName(i);
+            if (pFieldName)
+            {
+                char buffer[1024];
+                sprintf(buffer, "Field %d: %s", i, pFieldName->fieldName);
+                gFieldList[i].mName = buffer;
+            }
+            else
+            {
+                char buffer[256];
+                sprintf(buffer, "Field %d", i);
+                gFieldList[i].mName = buffer;
+            }
         }
 
         c_fieldInspector* pNewInspectedField = new c_fieldInspector;
@@ -1345,11 +1373,14 @@ void fieldInspector_frame()
         ImGui::OpenPopup(popupToOpen.c_str());
     }
 
+
+    //ImGui::SetNextWindowSize(ImVec2(500, 500));
     if (ImGui::BeginPopup("ChooseField"))
     {
         ImGui::Text("Choose Field");
 
         static int selectedField = 0;
+        ImGui::SetNextItemWidth(500);
         ImGui::ListBox("Field list", &selectedField, getFieldListName, &gFieldList, gFieldList.size());
 
         if (ImGui::Button("Go!"))
