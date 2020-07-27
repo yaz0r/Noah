@@ -103,6 +103,7 @@ public:
                     static int modelInspected = 0;
                     ImGui::InputInt("ModelId", &modelInspected);
                     modelInspected = std::min<int>(modelInspected, gCurrentFieldModels.size());
+                    modelInspected = std::max<int>(modelInspected, 0);
                     fieldModelInspector_step(modelInspected);
 
                     ImGui::EndTabItem();
