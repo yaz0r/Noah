@@ -11,6 +11,8 @@
 #include "fieldModelInspector.h"
 #include "field/fieldModel.h"
 
+#include "field/field.h"
+
 #include "../imgui_club/imgui_memory_editor/imgui_memory_editor.h"
 
 #include <array>
@@ -1386,7 +1388,7 @@ void fieldInspector_frame()
     {
         if (ImGui::BeginMenu("Field"))
         {
-            if (ImGui::MenuItem("Load&Inspect"))
+            if (ImGui::MenuItem("Go to..."))
             {
                 popupToOpen = "ChooseField";
             }
@@ -1408,11 +1410,17 @@ void fieldInspector_frame()
         static int selectedField = 0;
         ImGui::ListBox("Field list", &selectedField, getFieldListName, &gFieldList, gFieldList.size());
 
-        if (ImGui::Button("Open"))
+        if (ImGui::Button("Go!"))
         {
+            /*
             c_fieldInspector* pNewInspectedField = new c_fieldInspector;
             pNewInspectedField->LoadAndInspectField(selectedField);
             gInspectedFields.push_back(pNewInspectedField);
+            */
+            fieldChangePrevented = 0;
+            requestFieldId0 = selectedField;
+            setVar(2, 0); // set boot var
+            ImGui::CloseCurrentPopup();
         }
         ImGui::EndPopup();
     }

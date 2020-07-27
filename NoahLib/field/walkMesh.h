@@ -23,6 +23,11 @@ struct sWalkMesh
     std::vector<sBlock> m_blocks;
 
     void init(const std::vector<u8>& input);
+    void clear()
+    {
+        m0_count = 0;
+        m_blocks.clear();
+    }
 
     void bgfxRender(int viewIndex);
 };

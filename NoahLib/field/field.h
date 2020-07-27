@@ -218,4 +218,10 @@ struct sFieldEntity
 };
 extern std::vector<sFieldEntity> fieldEntityArray;
 
+extern s32 requestFieldId0;
+extern s32 fieldChangePrevented;
+extern s32 fieldChangePrevented2;
+
+void setVar(int varIndex, s16 value);
+
 void fieldEntryPoint();

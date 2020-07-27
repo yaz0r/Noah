@@ -30,4 +30,7 @@ s16 READ_LE_S16(std::vector<u8>::const_iterator& inputStream);
 u32 READ_LE_U32(std::vector<u8>::const_iterator& inputStream);
 s32 READ_LE_S32(std::vector<u8>::const_iterator& inputStream);
 
+void noahFrame_start();
+bool noahFrame_end();
+
 #define MissingCode()

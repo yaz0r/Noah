@@ -50,8 +50,20 @@ void fieldModelRelocation(std::vector<u8>::iterator& pModelData)
     MissingCode();
 }
 
+s32 fieldChangePrevented = -1;
+s32 fieldChangePrevented2 = -1;
+s32 fieldTransitionMode = 0;
+
 void resetFieldDefault()
 {
+    MissingCode();
+
+    fieldTransitionMode = 2;
+
+    MissingCode();
+
+    fieldChangePrevented = -1;
+
     MissingCode();
 }
 
@@ -1874,7 +1886,7 @@ int loadNewField(int fieldId, int param)
     if (currentFieldId1 != -1)
     {
         unflagAllocation(rawFieldBundle);
-        rawFieldBundle.resize(0);
+        rawFieldBundle.clear();
     }
     loadRawFieldBundle(fieldId);
 
@@ -1899,10 +1911,15 @@ void* allocateBufferForVramUpload(int)
 }
 
 std::array<u8, 2048 * 512> gVram;
+void clearModelTextureCache();
 
 void loadImageFileToVram(int fileId, void* allocation, int, int, int, int, int, int, int, int)
 {
-    MissingCode(); // this is completely different from the original code that was done async and using the cd callbacks
+    // this is completely different from the original code that was done async and using the cd callbacks
+    MissingCode();
+
+    // make sure we recreate all texture after loading this
+    clearModelTextureCache();
 
     std::vector<u8> data;
     c_isoManager::getCurrentDisc()->readData(getFileStartSector(fileId), getFileSize(fileId), data);
@@ -1962,6 +1979,15 @@ void bootField()
     setCurrentDirectory(4, 0);
     initFieldData();
     loadFieldGraphics();
+
+    MissingCode();
+
+    if (fieldGraphicsUploaded)
+    {
+        MissingCode();
+        fieldGraphicsUploaded = 0;
+        MissingCode();
+    }
 
     MissingCode();
 }
@@ -2111,6 +2137,57 @@ void startLoadingPlayableCharacters()
     }
 }
 
+void freeFieldData()
+{
+    MissingCode();
+
+    fieldEntityArray.clear();
+    rawFieldTriggerData.clear();
+    rawFieldDialogBundle.clear();
+    rawFieldScriptData.clear();
+    rawFieldWalkMesh.clear();
+    walkMesh.clear();
+    rawFieldModels.clear();
+    gCurrentFieldModels.clear();
+    rawFieldActorSetupParams.clear();
+
+    MissingCode();
+}
+
+void transitionFields()
+{
+    MissingCode();
+
+    freeFieldData();
+
+    MissingCode();
+
+    switch (fieldTransitionMode)
+    {
+    case 2:
+        MissingCode();
+        startLoadingPlayableCharacters();
+        finalizeLoadPlayableCharacters();
+        initFieldData();
+        loadFieldGraphics();
+        if (fieldGraphicsUploaded)
+        {
+            MissingCode();
+            fieldGraphicsUploaded = 0;
+            MissingCode();
+        }
+        MissingCode();
+        break;
+    default:
+        assert(0);
+        break;
+    }
+
+    fieldTransitionMode = 2;
+    MissingCode();
+
+}
+
 void fieldEntryPoint()
 {
     MissingCode();
@@ -2134,4 +2211,34 @@ void fieldEntryPoint()
     bootField();
 
     MissingCode();
+
+    while (!noahFrame_end())
+    {
+        noahFrame_start();
+
+        ////
+        if ((fieldChangePrevented == 0) /*&& (fieldChangePrevented2 == 0)*/)
+        {
+            //if ((asyncLoadingVar1 == 0xff) && (DAT_Field__800adb90 == 0))
+            {
+                setCurrentDirectory(4, 0); //TODO: shouldn't be necessary!
+                if (loadNewField((requestFieldId0 & 0xfff) * 2, 0) == 0)
+                {
+                    if (isCDBusy() == 0)
+                    {
+                        //if (screenEffects[0].m3C_duration == 0)
+                        {
+                            //fieldTransitionCompleted = 0;
+                            //saveStateToKernel();
+                            waitReadCompletion(0);
+                            transitionFields();
+                            //resetInputs();
+                            //fieldTransitionCompleted = 1;
+                        }
+                    }
+                }
+            }
+        }
+        ////
+    }
 }

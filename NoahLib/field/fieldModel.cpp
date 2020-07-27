@@ -74,6 +74,11 @@ struct TexInfo {
 std::map<TexInfo, bgfx::TextureHandle> texInfoMap;
 extern std::array<u8, 2048 * 512> gVram;
 
+void clearModelTextureCache()
+{
+    texInfoMap.clear();
+}
+
 bgfx::TextureHandle getTexture(u16 status, u16 clut, bool abe, int alpha)
 {
     if (currentIndices.size() == 0)

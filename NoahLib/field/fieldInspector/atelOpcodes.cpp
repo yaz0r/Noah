@@ -235,7 +235,7 @@ void initOpcodeTable()
         .end();
 
     m_opcode[0x47]
-        .setName("FIELD_CHANGE_WHEN_READY")
+        .setName("WALK_AND_CHANGE_FIELD")
         .addArgumentByte()
         .addArgumentImmediateOrVar()
         .addArgumentImmediateOrVar()
@@ -368,7 +368,7 @@ void initOpcodeTable()
         .end();
 
     m_opcode[0x98]
-        .setComment("Trigger a field map change after waiting")
+        .setName("CHANGE_FIELD_WHEN_READY")
         .addArgumentImmediateOrVar()
         .addArgumentImmediateOrVar()
         .end();

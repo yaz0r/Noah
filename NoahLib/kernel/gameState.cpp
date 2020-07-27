@@ -31,7 +31,7 @@ void loadInitialGameState()
         }
 
         gameState.m231A_fieldID = READ_LE_U16(rawGameState.begin() + 0x231A);
-        gameState.m231A_fieldID = 17; // override to boot in debug room
+        //gameState.m231A_fieldID = 0; // override to boot in debug room
     }
 
     MissingCode();

@@ -13,6 +13,8 @@ bool noahInit(int argc, char* argv[])
     initBgfxGlue(argc, argv);
     c_isoManager::init();
 
+    noahFrame_start();
+
     //////////////////////////////////////////////////////////////////////////
     // start the original code
 
@@ -32,10 +34,13 @@ bool noahInit(int argc, char* argv[])
     return true;
 }
 
-bool noahFrame()
+void noahFrame_start()
 {
     StartFrame();
+}
 
+bool noahFrame_end()
+{
     c_filesystemExplorer::frame();
 
     fieldInspector_frame();
