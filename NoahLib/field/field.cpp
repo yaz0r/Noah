@@ -20,13 +20,17 @@ struct sFieldVramMapping
 std::array<sFieldVramMapping, 32> fieldVramMapping;
 
 std::vector<u8> rawFieldBundle;
-
 std::vector<u8> rawFieldModels;
 std::vector<u8> rawFieldScriptData;
 std::vector<u8> rawFieldTriggerData;
 std::vector<u8> rawFieldDialogBundle;
 std::vector<u8> rawFieldWalkMesh;
 std::vector<u8> rawFieldActorSetupParams;
+
+// this is malloc/free in original code, I keep it around for debugger
+std::vector<u8> rawFieldImageBundle;
+std::vector<u8> rawFieldImageBundle2;
+
 
 std::array<s16, 4> fieldInitVar1;
 
@@ -1673,9 +1677,6 @@ void initFieldData()
     MissingCode();
 
     {
-        // this is malloc/free in original code
-        std::vector<u8> rawFieldImageBundle;
-        std::vector<u8> rawFieldImageBundle2;
         {
 
             int rawFieldImageBundleSize = READ_LE_U32(&rawFieldBundle[0x10C]);

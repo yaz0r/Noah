@@ -35,30 +35,32 @@ bool getFieldListName(void* data, int idx, const char** out_text)
     return true;
 }
 
+extern std::vector<u8> rawFieldBundle;
+extern std::vector<u8> rawFieldImageBundle;
+extern std::vector<u8> rawFieldImageBundle2;
+extern std::vector<u8> rawFieldModels;
+extern std::vector<u8> rawFieldScriptData;
+extern std::vector<u8> rawFieldTriggerData;
+extern std::vector<u8> rawFieldDialogBundle;
+extern std::vector<u8> rawFieldWalkMesh;
+extern std::vector<u8> rawFieldActorSetupParams;
+
+
 class c_fieldInspector
 {
 public:
-    int m_fieldID;
-    std::vector<u8> rawField;
-    std::vector<u8> rawFieldImageBundle;
-    std::vector<u8> rawFieldImageBundle2;
-    std::vector<u8> rawFieldModels;
-    std::vector<u8> rawFieldScriptData;
-    std::vector<u8> rawFieldTriggerData;
-    std::vector<u8> rawFieldDialogBundle;
-    std::vector<u8> rawFieldWalkMesh;
-    std::vector<u8> rawFieldActorSetupParams;
     MemoryEditor mFieldMemoryEditor;
 
     void Frame()
     {
-        if (rawField.size() == 0)
+        if (rawFieldBundle.size() == 0)
             return;
 
         //mFieldMemoryEditor.DrawWindow(gFieldList[m_fieldID].mName.c_str(), &rawField[0], rawField.size());
 
-        if (ImGui::Begin(gFieldList[m_fieldID].mName.c_str()))
+        if (ImGui::Begin("Field Inspector"))
         {
+            //gFieldList[currentFieldId0/2].mName.c_str()
             if (ImGui::BeginTabBar("Field Tabs"))
             {
                 if (ImGui::BeginTabItem("Info"))
@@ -123,70 +125,6 @@ public:
         }
     }
 
-    void c_fieldInspector::LoadAndInspectField(int fieldIndex)
-    {
-        m_fieldID = fieldIndex;
-        setCurrentDirectory(4, 0);
-        readFile(fieldIndex * 2 + 184, rawField, 0, 0x80);
-
-        {
-            int rawFieldImageBundleSize = READ_LE_U32(&rawField[0x10C]);
-            rawFieldImageBundle.resize(rawFieldImageBundleSize + 0x10);
-            fieldDecompress(rawFieldImageBundleSize + 0x10, rawField.begin() + READ_LE_U32(&rawField[0x130]), rawFieldImageBundle);
-            dump(rawFieldImageBundle, "0_image1.bin");
-        }
-
-        {
-            int rawFieldSize = READ_LE_U32(&rawField[0x110]);
-            rawFieldWalkMesh.resize(rawFieldSize + 0x10);
-            fieldDecompress(rawFieldSize + 0x10, rawField.begin() + READ_LE_U32(&rawField[0x134]), rawFieldWalkMesh);
-            dump(rawFieldWalkMesh, "1_walkmesh.bin");
-        }
-
-        {
-            int rawFieldSize = READ_LE_U32(&rawField[0x114]);
-            rawFieldModels.resize(rawFieldSize + 0x10);
-            fieldDecompress(rawFieldSize + 0x10, rawField.begin() + READ_LE_U32(&rawField[0x138]), rawFieldModels);
-            dump(rawFieldModels, "2_models.bin");
-        }
-
-        {
-            int rawFieldSize = READ_LE_U32(&rawField[0x118]);
-            rawFieldActorSetupParams.resize(rawFieldSize + 0x10);
-            fieldDecompress(rawFieldSize + 0x10, rawField.begin() + READ_LE_U32(&rawField[0x13C]), rawFieldActorSetupParams);
-            dump(rawFieldActorSetupParams, "3_fieldEntities.bin");
-        }
-
-        {
-            int rawFieldImageBundle2Size = READ_LE_U32(&rawField[0x11C]);
-            rawFieldImageBundle2.resize(rawFieldImageBundle2Size + 0x10);
-            fieldDecompress(rawFieldImageBundle2Size + 0x10, rawField.begin() + READ_LE_U32(&rawField[0x140]), rawFieldImageBundle2);
-            dump(rawFieldImageBundle2, "4_image2.bin");
-        }
-
-        {
-            int rawFieldSize = READ_LE_U32(&rawField[0x120]);
-            rawFieldScriptData.resize(rawFieldSize + 0x10);
-            fieldDecompress(rawFieldSize + 0x10, rawField.begin() + READ_LE_U32(&rawField[0x144]), rawFieldScriptData);
-            dump(rawFieldScriptData, "5_fieldScript.bin");
-        }
-
-        {
-            int rawFieldSize = READ_LE_U32(&rawField[0x128]);
-            rawFieldDialogBundle.resize(rawFieldSize + 0x10);
-            fieldDecompress(rawFieldSize + 0x10, rawField.begin() + READ_LE_U32(&rawField[0x14C]), rawFieldDialogBundle);
-            dump(rawFieldDialogBundle, "6_dialog.bin");
-        }
-
-        {
-            int rawFieldSize = READ_LE_U32(&rawField[0x12C]);
-            rawFieldTriggerData.resize(rawFieldSize + 0x10);
-            fieldDecompress(rawFieldSize + 0x10, rawField.begin() + READ_LE_U32(&rawField[0x150]), rawFieldTriggerData);
-        }
-
-
-    }
-
     void c_fieldInspector::fieldInspector_info()
     {
         ImGui::Text("Num image bundle 1 entries: %d", READ_LE_U32(rawFieldImageBundle.begin()));
@@ -200,17 +138,17 @@ public:
 
         ImGui::Separator();
         ImGui::Text("Scene setup");
-        std::vector<u8>::iterator sceneParams = rawField.begin() + 0x154;
+        std::vector<u8>::iterator sceneParams = rawFieldBundle.begin() + 0x154;
         ImGui::Text("(%d %d %d)", READ_LE_S16(sceneParams + 0), READ_LE_S16(sceneParams + 2), READ_LE_S16(sceneParams + 4));
         ImGui::Text("(%d %d)", READ_LE_S16(sceneParams + 8), READ_LE_S16(sceneParams + 10));
         ImGui::Text("(%d %d %d)", READ_LE_S16(sceneParams + 0x10), READ_LE_S16(sceneParams + 0x12), READ_LE_S16(sceneParams + 0x14));
         ImGui::Text("(%d %d %d)", READ_LE_S16(sceneParams + 0x30), READ_LE_S16(sceneParams + 0x32), READ_LE_S16(sceneParams + 0x34));
 
         ImGui::Separator();
-        ImGui::Text("Actors count: %d", READ_LE_U16(rawField.begin() + 0x18C));
-        for (int i = 0; i < READ_LE_U16(rawField.begin() + 0x18C); i++)
+        ImGui::Text("Actors count: %d", READ_LE_U16(rawFieldBundle.begin() + 0x18C));
+        for (int i = 0; i < READ_LE_U16(rawFieldBundle.begin() + 0x18C); i++)
         {
-            std::vector<u8>::iterator actorDefinition = rawField.begin() + 0x190 + 16 * i;
+            std::vector<u8>::iterator actorDefinition = rawFieldBundle.begin() + 0x190 + 16 * i;
             char name[256];
             sprintf(name, "Actor %d", i);
             if (ImGui::CollapsingHeader(name))
@@ -1381,6 +1319,9 @@ void fieldInspector_frame()
             sprintf(buffer, "Field %d", i);
             gFieldList[i].mName = buffer;
         }
+
+        c_fieldInspector* pNewInspectedField = new c_fieldInspector;
+        gInspectedFields.push_back(pNewInspectedField);
     }
 
     std::string popupToOpen = "";
@@ -1412,11 +1353,6 @@ void fieldInspector_frame()
 
         if (ImGui::Button("Go!"))
         {
-            /*
-            c_fieldInspector* pNewInspectedField = new c_fieldInspector;
-            pNewInspectedField->LoadAndInspectField(selectedField);
-            gInspectedFields.push_back(pNewInspectedField);
-            */
             fieldChangePrevented = 0;
             requestFieldId0 = selectedField;
             setVar(2, 0); // set boot var

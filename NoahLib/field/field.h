@@ -221,6 +221,7 @@ extern std::vector<sFieldEntity> fieldEntityArray;
 extern s32 requestFieldId0;
 extern s32 fieldChangePrevented;
 extern s32 fieldChangePrevented2;
+extern s32 currentFieldId0;
 
 void setVar(int varIndex, s16 value);
 
