@@ -949,6 +949,7 @@ public:
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));
             ImGui::Text("Failed to decode opcode 0x%02X (%d)", opcode, opcode & 0xFF);
             ImGui::PopStyleColor();
+            currentPC++;
             return false;
         }
 
@@ -1013,6 +1014,12 @@ public:
 
     std::vector<sByteType> m_byteTypeTable;
     std::vector<u16> mToExplore;
+    int selectedEntityId = 0;
+
+    void reset()
+    {
+        selectedEntityId = 0;
+    }
 
     void addToExploreStack(u16 newPCToExplore)
     {
@@ -1204,15 +1211,10 @@ public:
         getVarWithFlag(0x10, valueOffset, controlOffset);
     }
 
-    int previousEntityInspected = -1;
-
     void fieldInspector_scriptsForEntity(int entityId)
     {
-        if (previousEntityInspected != entityId)
-        {
-            m_byteTypeTable.clear();
-            previousEntityInspected = entityId;
-        }
+        m_byteTypeTable.clear();
+        mToExplore.clear();
 
         if (m_byteTypeTable.size() == 0)
         {
@@ -1237,7 +1239,7 @@ public:
             }
         }
 
-        for (int i = 0; i < m_byteTypeTable.size(); i++)
+        for (int i = 0; i < m_byteTypeTable.size();)
         {
             if (m_byteTypeTable[i].mType == 1)
             {
@@ -1261,6 +1263,10 @@ public:
                 }
                 i = currentPC;
             }
+            else
+            {
+                i++;
+            }
         }
 
         for (int i = 0; i < mToExplore.size(); i++)
@@ -1280,7 +1286,6 @@ public:
         mToExplore.clear();
     }
 
-    int selectedEntityId = 0;
     void fieldInspector_scripts()
     {
         int numScriptEntity = READ_LE_U32(rawFieldScriptData.begin() + 0x80);
@@ -1388,6 +1393,7 @@ void fieldInspector_frame()
             fieldChangePrevented = 0;
             requestFieldId0 = selectedField;
             setVar(2, 0); // set boot var
+            gInspectedFields[0]->reset();
             ImGui::CloseCurrentPopup();
         }
         ImGui::EndPopup();

@@ -139,11 +139,11 @@ void initOpcodeTable()
         .end();
 
     m_opcode[0x22]
-        .setComment("Set current fieldEntity m58_flags &= ~0x20")
+        .setName("MAKE_VISIBLE")
         .end();
 
     m_opcode[0x23]
-        .setComment("Set current fieldEntity m58_flags |= 0x20")
+        .setName("MAKE_INVISIBLE")
         .end();
 
     m_opcode[0x24]
@@ -275,6 +275,14 @@ void initOpcodeTable()
     m_opcode[0x60]
         .end();
 
+    m_opcode[0x61]
+        .setName("SET_CAMERA_TARGET_OVERRIDE")
+        .addArgumentS16()
+        .addArgumentS16()
+        .addArgumentS16()
+        .addSignControlByte()
+        .end();
+
     m_opcode[0x63]
         .setName("SET_DESIRED_CAMERA_TARGET")
         .addArgumentS16()
@@ -346,6 +354,24 @@ void initOpcodeTable()
         .addArgumentImmediateOrVar()
         .end();
 
+    m_opcode[0x84]
+        .setName("IF_GAMEPROGRESS_LESS")
+        .addArgumentImmediateOrVar()
+        .addArgumentJumpLocation()
+        .end();
+
+    m_opcode[0x85]
+        .setName("IF_GAMEPROGRESS_GREATER")
+        .addArgumentImmediateOrVar()
+        .addArgumentJumpLocation()
+        .end();
+
+    m_opcode[0x86]
+        .setName("IF_GAMEPROGRESS_EQUAL")
+        .addArgumentImmediateOrVar()
+        .addArgumentJumpLocation()
+        .end();
+
     m_opcode[0x87]
         .setName("SET_GAMEPROGRESS")
         .addArgumentImmediateOrVar("NewGameProgress")
@@ -377,6 +403,7 @@ void initOpcodeTable()
         .end();
 
     m_opcode[0x9B]
+        .setName("SET_CAMERA_INTERPOLATION_RATE")
         .addArgumentImmediateOrVar()
         .addArgumentImmediateOrVar()
         .end();
@@ -673,6 +700,9 @@ void initExtendedOpcodeTable()
     m_extendedOpcode[0x54]
         .end();
 
+    m_extendedOpcode[0x57]
+        .end();
+
     m_extendedOpcode[0x5A]
         .addArgumentImmediateOrVar()
         .end();
@@ -680,6 +710,17 @@ void initExtendedOpcodeTable()
     m_extendedOpcode[0x5E]
         .setName("SET_TRANSPARENCY_MODE")
         .addArgumentImmediateOrVar()
+        .end();
+
+    m_extendedOpcode[0x60]
+        .setName("SET_2D_BACKGROUND")
+        .addArgumentImmediateOrVar()
+        .addArgumentImmediateOrVar()
+        .addArgumentImmediateOrVar()
+        .addArgumentImmediateOrVar()
+        .end();
+
+    m_extendedOpcode[0x61]
         .end();
 
     m_extendedOpcode[0x64]
@@ -690,6 +731,10 @@ void initExtendedOpcodeTable()
         .addArgumentImmediateOrVar()
         .addArgumentImmediateOrVar()
         .addArgumentCharacter()
+        .end();
+
+    m_extendedOpcode[0x86]
+        .addArgumentByte()
         .end();
 
     m_extendedOpcode[0x87]
@@ -740,5 +785,10 @@ void initExtendedOpcodeTable()
 
     m_extendedOpcode[0xA4]
         .setComment("Backup something in list of 20 in gamestate")
+        .end();
+
+    m_extendedOpcode[0xCD]
+        .setName("GET_FILE_INDEX_FROM_DIRECTORY_78")
+        .addArgumentVarIndex()
         .end();
 }
