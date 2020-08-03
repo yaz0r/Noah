@@ -6,4 +6,4 @@ struct sFieldName
     const char* fieldName;
 };
 
-extern sFieldName fieldNames[];
+const sFieldName* findFieldName(int index);

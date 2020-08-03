@@ -18,15 +18,7 @@
 #include <array>
 #include <vector>
 
-#include "fieldNames.h"
-
-struct sFieldListEntry
-{
-    std::string mName;
-    std::string mComment;
-};
-
-std::vector<sFieldListEntry> gFieldList;
+#include "fieldDebugInfo.h"
 
 bool getFieldListName(void* data, int idx, const char** out_text)
 {
@@ -761,7 +753,6 @@ public:
         }
 
         int offsetToArgs = 1;
-        u8 currentS16ControlFlag = 0x80;
         int dialogIdToDisplay = -1;
         for (int i = 0; i < opcode.m_args.size(); i++)
         {
@@ -795,7 +786,7 @@ public:
                 addToExploreStack(readU16FromScript(offsetToArgs));
                 offsetToArgs += 2;
                 break;
-            case sOpcodeArg::immediateOrVar:
+            case sOpcodeArg::immediateU16OrVar:
                 getImmediateOrVariableUnsigned(offsetToArgs);
                 offsetToArgs += 2;
                 break;
@@ -805,16 +796,14 @@ public:
                 ImGui::PopStyleColor();
                 offsetToArgs += 2;
                 break;
-            case sOpcodeArg::immediateRawS16:
+            case sOpcodeArg::immediateS16:
                 ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0.5, 0, 1));
                 ImGui::Text("%d", readS16FromScript(offsetToArgs)); ImGui::SameLine(0, 0);
                 ImGui::PopStyleColor();
                 offsetToArgs += 2;
                 break;
-            case sOpcodeArg::immediateSignConditionalS16:
-                assert(currentS16ControlFlag);
-                getVarWithFlag(currentS16ControlFlag, offsetToArgs, findControlByteOffset(opcode, offsetToArgs));
-                currentS16ControlFlag >>= 1;
+            case sOpcodeArg::immediateS16OrVar:
+                getVarWithFlag(argument.m_mask, offsetToArgs, findControlByteOffset(opcode, offsetToArgs));
                 offsetToArgs += 2;
                 break;
             case sOpcodeArg::controlByte:
@@ -923,11 +912,50 @@ public:
                 dynamicOpcode
                     .setComment("TODO: this might be very incorrect")
                     .addArgumentByte()
-                    .addArgumentS16()
-                    .addArgumentS16()
-                    .addArgumentS16()
-                    .addArgumentS16()
+                    .addArgumentS16OrVar(0x80)
+                    .addArgumentS16OrVar(0x40)
+                    .addArgumentS16OrVar(0x20)
+                    .addArgumentS16OrVar(0x10)
                     .addSignControlByte()
+                    .end();
+                handleGenericOpcode(dynamicOpcode);
+                break;
+            case 3:
+                dynamicOpcode
+                    .setComment("TODO: this might be very incorrect")
+                    .addArgumentByte()
+                    .end();
+                handleGenericOpcode(dynamicOpcode);
+                break;
+            default:
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));
+                ImGui::Text("Failed to decode opcode 0x%02X (%d)", opcode, opcode & 0xFF);
+                ImGui::PopStyleColor();
+                break;
+            }
+            break;
+        case 0xFE27:
+            switch (readU8FromScript(1) & 3)
+            {
+            case 0:
+                dynamicOpcode
+                    .setComment("TODO: this might be very incorrect")
+                    .addArgumentByte()
+                    .addArgumentU16OrVar()
+                    .end();
+                handleGenericOpcode(dynamicOpcode);
+                break;
+            case 1:
+                dynamicOpcode
+                    .setComment("TODO: this might be very incorrect")
+                    .addArgumentByte()
+                    .end();
+                handleGenericOpcode(dynamicOpcode);
+                break;
+            case 2:
+                dynamicOpcode
+                    .setComment("TODO: this might be very incorrect")
+                    .addArgumentByte()
                     .end();
                 handleGenericOpcode(dynamicOpcode);
                 break;
@@ -1179,16 +1207,14 @@ public:
 
         if (controlValue & flag)
         {
-            value = readS16FromScript(valueOffset);
+            ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0.5, 0, 1));
+            ImGui::Text("%d", readS16FromScript(valueOffset));
+            ImGui::PopStyleColor();
         }
         else
         {
-            value = readU16FromScript(valueOffset);
+            getVariable(readU16FromScript(valueOffset));
         }
-
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0.5, 0, 1));
-        ImGui::Text("%d", value);
-        ImGui::PopStyleColor();
     }
 
     void getVar80(int valueOffset, int controlOffset)
@@ -1286,20 +1312,58 @@ public:
         mToExplore.clear();
     }
 
+    sFieldListEntry& getCurrentFieldDebugInfo()
+    {
+        return gFieldDebugInfo.mFieldList[currentFieldId0 / 2];
+    }
+
     void fieldInspector_scripts()
     {
+        sFieldListEntry& currentFielDebugInfo = getCurrentFieldDebugInfo();
+
         int numScriptEntity = READ_LE_U32(rawFieldScriptData.begin() + 0x80);
+
+        if (currentFielDebugInfo.mScriptEntities.size())
+        {
+            assert(currentFielDebugInfo.mScriptEntities.size() == numScriptEntity);
+        }
+        else
+        {
+            currentFielDebugInfo.mScriptEntities.resize(numScriptEntity);
+        }
+
+        std::string popupToOpen = "";
+        static int scriptEntityToRename = -1;
+        static char entityRenameBuffer[1024] = "";
 
         ImGui::BeginChild("ScriptL", ImVec2(200, 0));
         for (int entityId = 0; entityId < numScriptEntity; entityId++)
         {
-            char buffer[256];
-            sprintf(buffer, "Entity %d", entityId);
+            ImGui::PushID(entityId);
+            char buffer[1024];
+            if (currentFielDebugInfo.mScriptEntities[entityId].mName.size())
+            {
+                strcpy_s(buffer, sizeof(buffer), currentFielDebugInfo.mScriptEntities[entityId].mName.c_str());
+            }
+            else
+            {
+                sprintf(buffer, "Entity %d", entityId);
+            }
+            
             bool isSelected = (entityId == selectedEntityId);
             if (ImGui::Checkbox(buffer, &isSelected))
             {
                 selectedEntityId = entityId;
             }
+
+            ImGui::SameLine();
+            if (ImGui::Button("Rename"))
+            {
+                popupToOpen = "RenameScriptEntity";
+                strcpy(entityRenameBuffer, buffer);
+                scriptEntityToRename = entityId;
+            }
+            ImGui::PopID();
         }
         ImGui::EndChild();
 
@@ -1308,25 +1372,35 @@ public:
         ImGui::BeginChild("ScriptR");
         fieldInspector_scriptsForEntity(selectedEntityId);
         ImGui::EndChild();
+
+        if (popupToOpen.length())
+        {
+            ImGui::OpenPopup(popupToOpen.c_str());
+            popupToOpen.clear();
+        }
+
+        //ImGui::SetNextWindowSize(ImVec2(500, 500));
+        if (ImGui::BeginPopup("RenameScriptEntity"))
+        {
+            ImGui::InputText("Name", entityRenameBuffer, sizeof(entityRenameBuffer));
+            if (ImGui::Button("OK"))
+            {
+                currentFielDebugInfo.mScriptEntities[scriptEntityToRename].mName = entityRenameBuffer;
+
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel"))
+            {
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
     }
 };
 
 
 std::vector<c_fieldInspector*> gInspectedFields;
-
-sFieldName* findFieldName(int index)
-{
-    sFieldName* pEntry = fieldNames;
-    while (pEntry->fieldId != -1)
-    {
-        if (pEntry->fieldId == index)
-            return pEntry;
-
-        pEntry++;
-    }
-
-    return nullptr;
-}
 
 void fieldInspector_frame()
 {
@@ -1335,24 +1409,7 @@ void fieldInspector_frame()
     {
         gFieldListInitialized = true;
 
-        gFieldList.resize(730);
-
-        for (int i = 0; i < gFieldList.size(); i++)
-        {
-            sFieldName* pFieldName = findFieldName(i);
-            if (pFieldName)
-            {
-                char buffer[1024];
-                sprintf(buffer, "Field %d: %s", i, pFieldName->fieldName);
-                gFieldList[i].mName = buffer;
-            }
-            else
-            {
-                char buffer[256];
-                sprintf(buffer, "Field %d", i);
-                gFieldList[i].mName = buffer;
-            }
-        }
+        fieldDebugInfo_load();
 
         c_fieldInspector* pNewInspectedField = new c_fieldInspector;
         gInspectedFields.push_back(pNewInspectedField);
@@ -1367,6 +1424,13 @@ void fieldInspector_frame()
             {
                 popupToOpen = "ChooseField";
             }
+            
+
+            if (ImGui::MenuItem("Save debug info"))
+            {
+                fieldDebugInfo_save();
+            }
+
             ImGui::EndMenu();
         }
 
@@ -1386,7 +1450,7 @@ void fieldInspector_frame()
 
         static int selectedField = 0;
         ImGui::SetNextItemWidth(500);
-        ImGui::ListBox("Field list", &selectedField, getFieldListName, &gFieldList, gFieldList.size());
+        ImGui::ListBox("Field list", &selectedField, getFieldListName, &gFieldDebugInfo.mFieldList, gFieldDebugInfo.mFieldList.size());
 
         if (ImGui::Button("Go!"))
         {

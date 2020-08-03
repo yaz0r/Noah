@@ -1,5 +1,5 @@
 #include "noahLib.h"
-#include "fieldDebugger.h"
+#include "fieldViewDebug.h"
 
 #include "bgfx/bgfx.h"
 #include "bx/math.h"
@@ -21,7 +21,7 @@ bgfx::TextureHandle fieldDebugger_Depth = BGFX_INVALID_HANDLE;
 
 ImVec2 oldWindowSize = { -1,-1 };
 
-void fieldDebugger_step()
+void fieldViewDebug_step()
 {
     if (ImGui::Begin("Field 3d view"))
     {

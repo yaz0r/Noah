@@ -63,7 +63,7 @@ void initOpcodeTable()
 
     m_opcode[0xB]
         .setName("INIT_ENTITY_NPC")
-        .addArgumentImmediateOrVar("Id")
+        .addArgumentU16OrVar("Id")
         .setComment("Init as NPC")
         .end();
 
@@ -94,7 +94,7 @@ void initOpcodeTable()
 
     m_opcode[0x16]
         .setName("INIT_ENTITY_PC")
-        .addArgumentImmediateOrVar("Id")
+        .addArgumentU16OrVar("Id")
         .setComment("Init as PC")
         .end();
 
@@ -107,22 +107,26 @@ void initOpcodeTable()
 
     m_opcode[0x19]
         .setName("SET_ACTOR_POSITION_2D")
-        .addArgumentS16("X")
-        .addArgumentS16("Y")
+        .addArgumentS16OrVar(0x80, "X")
+        .addArgumentS16OrVar(0x40, "Y")
         .addSignControlByte()
+        .end();
+
+    m_opcode[0x1A]
+        .addArgumentByte()
         .end();
 
     m_opcode[0x1C]
         .setName("SET_CURRENT_ACTOR_ELEVATION")
-        .addArgumentS16("Y")
+        .addArgumentS16OrVar(0x80, "Y")
         .addSignControlByte()
         .end();
 
     m_opcode[0x1D]
         .setName("SET_CURRENT_ACTOR_POSITION_3D")
-        .addArgumentRawS16("X")
-        .addArgumentRawS16("Y")
-        .addArgumentRawS16("Z")
+        .addArgumentS16("X")
+        .addArgumentS16("Y")
+        .addArgumentS16("Z")
         .end();
 
     m_opcode[0x1F]
@@ -131,11 +135,11 @@ void initOpcodeTable()
 
     m_opcode[0x20]
         .setName("SET_CURRENT_ACTOR_FLAGS")
-        .addArgumentImmediateOrVar()
+        .addArgumentU16OrVar()
         .end();
 
     m_opcode[0x21]
-        .addArgumentImmediateOrVar()
+        .addArgumentU16OrVar()
         .end();
 
     m_opcode[0x22]
@@ -156,10 +160,20 @@ void initOpcodeTable()
 
     m_opcode[0x26]
         .setName("WAIT")
-        .addArgumentImmediateOrVar("Amount")
+        .addArgumentU16OrVar("Amount")
+        .end();
+
+    m_opcode[0x27]
+        .setName("RESET_CHARACTER")
+        .addArgumentCharacter()
         .end();
 
     m_opcode[0x28]
+        .addArgumentCharacter()
+        .end();
+
+    m_opcode[0x29]
+        .setName("DELETE_ENTITY")
         .addArgumentCharacter()
         .end();
 
@@ -179,7 +193,7 @@ void initOpcodeTable()
     m_opcode[0x35]
         .setName("SET_VAR_FROM_S16")
         .addArgumentVarIndex()
-        .addArgumentS16()
+        .addArgumentS16OrVar(0x40)
         .addSignControlByte()
         .end();
 
@@ -196,28 +210,28 @@ void initOpcodeTable()
     m_opcode[0x38]
         .setName("SET_VAR_ADD")
         .addArgumentVarIndex()
-        .addArgumentS16()
+        .addArgumentS16OrVar(0x40)
         .addSignControlByte()
         .end();
 
     m_opcode[0x39]
         .setName("SET_VAR_ADD")
         .addArgumentVarIndex()
-        .addArgumentS16()
+        .addArgumentS16OrVar(0x40)
         .addSignControlByte()
         .end();
 
     m_opcode[0x3A]
         .setName("SET_VARBIT_TRUE")
         .addArgumentVarIndex()
-        .addArgumentS16()
+        .addArgumentS16OrVar(0x40)
         .addSignControlByte()
         .end();
 
     m_opcode[0x3B]
         .setName("SET_VARBIT_FALSE")
         .addArgumentVarIndex()
-        .addArgumentS16()
+        .addArgumentS16OrVar(0x40)
         .addSignControlByte()
         .end();
 
@@ -231,21 +245,36 @@ void initOpcodeTable()
         .addArgumentVarIndex()
         .end();
 
+    m_opcode[0x3E]
+        .setName("SET_VAR_AND")
+        .addArgumentVarIndex()
+        .addArgumentS16OrVar(0x40)
+        .addSignControlByte()
+        .end();
+
     m_opcode[0x46]
         .end();
 
     m_opcode[0x47]
         .setName("WALK_AND_CHANGE_FIELD")
         .addArgumentByte()
-        .addArgumentImmediateOrVar()
-        .addArgumentImmediateOrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
         .setComment("TODO: the first byte is unused?")
         .end();
 
     m_opcode[0x4A]
         .setName("SPRITE_WALK_TO_POSITION_AND_WAIT")
-        .addArgumentS16()
-        .addArgumentS16()
+        .addArgumentS16OrVar(0x80)
+        .addArgumentS16OrVar(0x40)
+        .addSignControlByte()
+        .end();
+
+    m_opcode[0x4C]
+        .setComment("Decoding seems to depend from current execution slots flags?!")
+        .addArgumentS16OrVar(0x80)
+        .addArgumentS16OrVar(0x40)
+        .addArgumentS16OrVar(0x20)
         .addSignControlByte()
         .end();
 
@@ -277,17 +306,17 @@ void initOpcodeTable()
 
     m_opcode[0x61]
         .setName("SET_CAMERA_TARGET_OVERRIDE")
-        .addArgumentS16()
-        .addArgumentS16()
-        .addArgumentS16()
+        .addArgumentS16OrVar(0x80)
+        .addArgumentS16OrVar(0x40)
+        .addArgumentS16OrVar(0x20)
         .addSignControlByte()
         .end();
 
     m_opcode[0x63]
         .setName("SET_DESIRED_CAMERA_TARGET")
-        .addArgumentS16()
-        .addArgumentS16()
-        .addArgumentS16()
+        .addArgumentS16OrVar(0x80)
+        .addArgumentS16OrVar(0x40)
+        .addArgumentS16OrVar(0x20)
         .addSignControlByte()
         .end();
 
@@ -295,25 +324,25 @@ void initOpcodeTable()
         .end();
 
     m_opcode[0x65]
-        .addArgumentS16()
-        .addArgumentS16()
-        .addArgumentS16()
+        .addArgumentS16OrVar(0x80)
+        .addArgumentS16OrVar(0x40)
+        .addArgumentS16OrVar(0x20)
         .addSignControlByte()
         .end();
 
     m_opcode[0x69]
         .setName("SET_CURRENT_ACTOR_ROTATION")
-        .addArgumentImmediateOrVar("Angle")
+        .addArgumentU16OrVar("Angle")
         .end();
 
     m_opcode[0x6B]
         .setName("ROTATE_ACTOR_CLOCKWISE")
-        .addArgumentImmediateOrVar("Angle")
+        .addArgumentU16OrVar("Angle")
         .end();
 
     m_opcode[0x6C]
         .setName("ROTATE_ACTOR_ANTICLOCKWISE")
-        .addArgumentImmediateOrVar("Angle")
+        .addArgumentU16OrVar("Angle")
         .end();
 
     m_opcode[0x6F]
@@ -323,16 +352,16 @@ void initOpcodeTable()
 
     m_opcode[0x72]
         .setComment("Wait for something")
-        .addArgumentImmediateOrVar()
+        .addArgumentU16OrVar()
         .end();
 
     m_opcode[0x74]
-        .addArgumentImmediateOrVar()
+        .addArgumentU16OrVar()
         .end();
 
     m_opcode[0x75]
         .setName("PLAY_MUSIC")
-        .addArgumentImmediateOrVar("MusicId")
+        .addArgumentU16OrVar("MusicId")
         .end();
 
     m_opcode[0x79]
@@ -344,47 +373,47 @@ void initOpcodeTable()
         .end();
 
     m_opcode[0x7C]
-        .addArgumentS16()
+        .addArgumentS16OrVar(0x80)
         .addSignControlByte()
         .end();
 
     m_opcode[0x80]
         .addArgumentByte()
         .addArgumentByte()
-        .addArgumentImmediateOrVar()
+        .addArgumentU16OrVar()
         .end();
 
     m_opcode[0x84]
         .setName("IF_GAMEPROGRESS_LESS")
-        .addArgumentImmediateOrVar()
+        .addArgumentU16OrVar()
         .addArgumentJumpLocation()
         .end();
 
     m_opcode[0x85]
         .setName("IF_GAMEPROGRESS_GREATER")
-        .addArgumentImmediateOrVar()
+        .addArgumentU16OrVar()
         .addArgumentJumpLocation()
         .end();
 
     m_opcode[0x86]
         .setName("IF_GAMEPROGRESS_EQUAL")
-        .addArgumentImmediateOrVar()
+        .addArgumentU16OrVar()
         .addArgumentJumpLocation()
         .end();
 
     m_opcode[0x87]
         .setName("SET_GAMEPROGRESS")
-        .addArgumentImmediateOrVar("NewGameProgress")
+        .addArgumentU16OrVar("NewGameProgress")
         .end();
 
     m_opcode[0x8C]
         .setName("ADD_TO_GAMESTATE_ARRAYS")
-        .addArgumentImmediateOrVar()
+        .addArgumentU16OrVar()
         .end();
 
     m_opcode[0x8F]
         .setName("ADD_GOLD")
-        .addArgumentImmediateOrVar()
+        .addArgumentU16OrVar()
         .end();
 
     m_opcode[0x91]
@@ -395,8 +424,8 @@ void initOpcodeTable()
 
     m_opcode[0x98]
         .setName("CHANGE_FIELD_WHEN_READY")
-        .addArgumentImmediateOrVar()
-        .addArgumentImmediateOrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
         .end();
 
     m_opcode[0x99]
@@ -404,8 +433,8 @@ void initOpcodeTable()
 
     m_opcode[0x9B]
         .setName("SET_CAMERA_INTERPOLATION_RATE")
-        .addArgumentImmediateOrVar()
-        .addArgumentImmediateOrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
         .end();
 
     m_opcode[0x9C]
@@ -413,7 +442,7 @@ void initOpcodeTable()
         .end();
 
     m_opcode[0x9D]
-        .addArgumentImmediateOrVar()
+        .addArgumentU16OrVar()
         .addArgumentByte()
         .end();
 
@@ -430,9 +459,9 @@ void initOpcodeTable()
 
     m_opcode[0xA3]
         .setName("SET_DESIRED_CAMERA_POSITION")
-        .addArgumentS16()
-        .addArgumentS16()
-        .addArgumentS16()
+        .addArgumentS16OrVar(0x80)
+        .addArgumentS16OrVar(0x40)
+        .addArgumentS16OrVar(0x20)
         .addSignControlByte()
         .end();
 
@@ -450,22 +479,25 @@ void initOpcodeTable()
 
     m_opcode[0xAC]
         .addArgumentByte()
-        .addArgumentImmediateOrVar()
+        .addArgumentU16OrVar()
         .end();
 
     m_opcode[0xB3]
         .setName("START_FADE_IN")
-        .addArgumentImmediateOrVar("Duration")
+        .addArgumentU16OrVar("Duration")
         .end();
 
     m_opcode[0xB4]
         .setName("START_FADE_TO_BLACK")
-        .addArgumentImmediateOrVar("Duration")
+        .addArgumentU16OrVar("Duration")
         .end();
 
     m_opcode[0xB5]
-        .addArgumentImmediateOrVar()
-        .addArgumentImmediateOrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .end();
+
+    m_opcode[0xB7]
         .end();
 
     m_opcode[0xB9]
@@ -490,32 +522,32 @@ void initOpcodeTable()
 
     m_opcode[0xBD]
         .setName("ROTATION_3D_YAW_ADD")
-        .addArgumentImmediateOrVar()
+        .addArgumentU16OrVar()
         .end();
 
     m_opcode[0xBE]
         .setName("ROTATION_3D_YAW_SUBSTRACT")
-        .addArgumentImmediateOrVar()
+        .addArgumentU16OrVar()
         .end();
 
     m_opcode[0xBF]
         .setName("ROTATION_3D_PITC_ADD")
-        .addArgumentImmediateOrVar()
+        .addArgumentU16OrVar()
         .end();
 
     m_opcode[0xC0]
         .setName("ROTATION_3D_PITCH_SUBSTRACT")
-        .addArgumentImmediateOrVar()
+        .addArgumentU16OrVar()
         .end();
 
     m_opcode[0xC1]
         .setName("ROTATION_3D_ROLL_ADD")
-        .addArgumentImmediateOrVar()
+        .addArgumentU16OrVar()
         .end();
 
     m_opcode[0xC2]
         .setName("ROTATION_3D_ROLL_SUBSTRACT")
-        .addArgumentImmediateOrVar()
+        .addArgumentU16OrVar()
         .end();
 
     m_opcode[0xC4]
@@ -530,13 +562,21 @@ void initOpcodeTable()
     m_opcode[0xC6]
         .end();
 
+    m_opcode[0xCD]
+        .setComment("Set flag 0x800000 on current entity")
+        .end();
+
+    m_opcode[0xCE]
+        .setComment("Clear flag 0x800000 on current entity")
+        .end();
+
     m_opcode[0xD0]
         .setName("SET_DIALOG_WINDOW_PARAM")
-        .addArgumentImmediateOrVar("x")
-        .addArgumentImmediateOrVar("y")
-        .addArgumentImmediateOrVar()
-        .addArgumentImmediateOrVar()
-        .addArgumentImmediateOrVar()
+        .addArgumentU16OrVar("x")
+        .addArgumentU16OrVar("y")
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
         .end();
 
     m_opcode[0xD2]
@@ -545,21 +585,29 @@ void initOpcodeTable()
         .addArgumentByte()
         .end();
 
+    m_opcode[0xD4]
+        .setName("SHOW_DIALOG_WINDOW_FOR_OTHER_ACTOR_MODE0")
+        .addArgumentCharacter()
+        .addArgumentDialogId()
+        .addArgumentByte()
+        .end();
+
     m_opcode[0xE7]
-        .addArgumentImmediateOrVar()
-        .addArgumentImmediateOrVar()
-        .addArgumentImmediateOrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
         .end();
 
     m_opcode[0xEC]
-        .addArgumentByte()
-        .addArgumentS16()
-        .addArgumentS16()
-        .addArgumentS16()
+        .addArgumentByte("mode")
+        .addArgumentS16OrVar(0x80, "InputVector")
+        .addArgumentS16OrVar(0x40)
+        .addArgumentS16OrVar(0x20)
         .addSignControlByte()
+        .addArgumentVarIndex("OutputVector")
         .addArgumentVarIndex()
         .addArgumentVarIndex()
-        .addArgumentVarIndex()
+        .setComment("Mode0: cameraTargetOverride, Mode1: cameraTarget, Mode2: cameraPositionOverride, Mode3: desiredCameraPosition")
         .end();
 
     m_opcode[0xEE]
@@ -568,16 +616,16 @@ void initOpcodeTable()
         .end();
 
     m_opcode[0xEF]
-        .addArgumentImmediateOrVar()
+        .addArgumentU16OrVar()
         .end();
 
     m_opcode[0xF1]
         .setName("SETUP_SCREEN_EFFECT1")
-        .addArgumentImmediateOrVar("mode")
-        .addArgumentImmediateOrVar("b")
-        .addArgumentImmediateOrVar("g")
-        .addArgumentImmediateOrVar("r")
-        .addArgumentImmediateOrVar("duration")
+        .addArgumentU16OrVar("mode")
+        .addArgumentU16OrVar("b")
+        .addArgumentU16OrVar("g")
+        .addArgumentU16OrVar("r")
+        .addArgumentU16OrVar("duration")
         .end();
 
     m_opcode[0xF3]
@@ -591,12 +639,24 @@ void initOpcodeTable()
         .addArgumentByte()
         .end();
 
+    m_opcode[0xF5]
+        .setName("SHOW_DIALOG_WINDOW_MODE3")
+        .addArgumentDialogId()
+        .addArgumentByte()
+        .end();
+
     m_opcode[0xF6]
         .addArgumentByte()
         .end();
 
-    m_opcode[0xF5]
-        .setName("SHOW_DIALOG_WINDOW_MODE3")
+    m_opcode[0xF8]
+        .setName("SET_FLAGS_DYNAMIC")
+        .addArgumentByte("mode")
+        .addArgumentU16("FlagValue")
+        .end();
+
+    m_opcode[0xFC]
+        .addArgumentCharacter()
         .addArgumentDialogId()
         .addArgumentByte()
         .end();
@@ -610,23 +670,23 @@ void initExtendedOpcodeTable()
 
     m_extendedOpcode[0xD]
         .setName("SET_DIALOG_AVATAR")
-        .addArgumentImmediateOrVar()
+        .addArgumentU16OrVar()
         .end();
 
     m_extendedOpcode[0xE]
-        .addArgumentImmediateOrVar()
-        .addArgumentImmediateOrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
         .end();
 
     m_extendedOpcode[0xF]
-        .addArgumentS16()
-        .addArgumentS16()
+        .addArgumentS16OrVar(0x80)
+        .addArgumentS16OrVar(0x40)
         .addSignControlByte()
         .end();
 
     m_extendedOpcode[0x10]
-        .addArgumentImmediateOrVar()
-        .addArgumentImmediateOrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
         .end();
 
     m_extendedOpcode[0x18]
@@ -646,32 +706,63 @@ void initExtendedOpcodeTable()
         .end();
 
     m_extendedOpcode[0x1C]
-        .addArgumentS16()
-        .addArgumentS16()
-        .addArgumentS16()
+        .addArgumentS16OrVar(0x80)
+        .addArgumentS16OrVar(0x40)
+        .addArgumentS16OrVar(0x20)
         .addSignControlByte()
         .end();
 
+    m_extendedOpcode[0x23]
+        .addArgumentS16OrVar(0x80)
+        .addArgumentS16OrVar(0x40)
+        .addArgumentS16OrVar(0x20)
+        .addArgumentS16OrVar(0x10)
+        .addArgumentS16OrVar(0x08)
+        .addArgumentS16OrVar(0x04)
+        .addSignControlByte()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .end();
+
+    m_extendedOpcode[0x26]
+        .setName("SETUP_SCREEN_DISTORTION")
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .end();
+
+    // 0x27 is dynamic
+
     m_extendedOpcode[0x3B]
         .setName("CLEAR_PARTY_FRAME_MASK")
-        .addArgumentImmediateOrVar()
-        .addArgumentCharacter()
+        .addArgumentU16OrVar()
         .end();
 
     m_extendedOpcode[0x41]
         .setName("SET_ON_GEAR")
-        .addArgumentImmediateOrVar()
+        .addArgumentU16OrVar()
         .end();
 
     m_extendedOpcode[0x42]
         .setName("SET_OFF_GEAR")
-        .addArgumentImmediateOrVar()
+        .addArgumentU16OrVar()
+        .end();
+
+    m_extendedOpcode[0x45]
+        .setName("SET_OVERRIDE_ANIMATION")
+        .setComment("Set field mE6 of current entity")
+        .addArgumentByte()
         .end();
 
     m_extendedOpcode[0x4A]
         .setName("LOAD_SPECIAL_2D_ANIMATION")
         .setComment("Load a file from disk and assign it to current scriptActor (from folder 4 + 1914)")
-        .addArgumentImmediateOrVar("FileId")
+        .addArgumentU16OrVar("FileId")
         .end();
 
     m_extendedOpcode[0x4B]
@@ -704,33 +795,50 @@ void initExtendedOpcodeTable()
         .end();
 
     m_extendedOpcode[0x5A]
-        .addArgumentImmediateOrVar()
+        .addArgumentU16OrVar()
         .end();
 
     m_extendedOpcode[0x5E]
         .setName("SET_TRANSPARENCY_MODE")
-        .addArgumentImmediateOrVar()
+        .addArgumentU16OrVar()
         .end();
 
     m_extendedOpcode[0x60]
         .setName("SET_2D_BACKGROUND")
-        .addArgumentImmediateOrVar()
-        .addArgumentImmediateOrVar()
-        .addArgumentImmediateOrVar()
-        .addArgumentImmediateOrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
         .end();
 
     m_extendedOpcode[0x61]
         .end();
 
     m_extendedOpcode[0x64]
-        .addArgumentImmediateOrVar()
+        .addArgumentU16OrVar()
+        .end();
+
+    m_extendedOpcode[0x66]
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
         .end();
 
     m_extendedOpcode[0x6B]
-        .addArgumentImmediateOrVar()
-        .addArgumentImmediateOrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
         .addArgumentCharacter()
+        .end();
+
+    m_extendedOpcode[0x83]
+        .setName("SET_BOOTMODE")
+        .addArgumentU16("Flags")
+        .setComment("&0x80: reload new game state, &0x7F: boot mode")
+        .end();
+
+    m_extendedOpcode[0x85]
+        .addArgumentVarIndex("Destination")
         .end();
 
     m_extendedOpcode[0x86]
@@ -742,30 +850,31 @@ void initExtendedOpcodeTable()
         .end();
 
     m_extendedOpcode[0x8E]
-        .addArgumentImmediateOrVar()
-        .addArgumentImmediateOrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
         .end();
 
     m_extendedOpcode[0x8F]
         .addArgumentCharacter()
-        .addArgumentImmediateOrVar()
-        .addArgumentImmediateOrVar()
-        .addArgumentImmediateOrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
         .end();
 
     m_extendedOpcode[0x90]
-        .addArgumentImmediateOrVar()
-        .addArgumentImmediateOrVar()
-        .addArgumentImmediateOrVar()
-        .addArgumentImmediateOrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
         .end();
 
     m_extendedOpcode[0x91]
-        .addArgumentS16()
-        .addArgumentS16()
-        .addArgumentS16()
-        .addArgumentS16()
-        .addArgumentS16()
+        .addArgumentS16OrVar(0x80)
+        .addArgumentS16OrVar(0x40)
+        .addArgumentS16OrVar(0x20)
+        .addArgumentS16OrVar(0x10)
+        .addArgumentS16OrVar(0x8)
+        .addArgumentS16OrVar(0x4)
         .addSignControlByte()
         .end();
 
@@ -775,8 +884,8 @@ void initExtendedOpcodeTable()
 
     m_extendedOpcode[0xA1]
         .setName("ASSIGN_GEAR")
-        .addArgumentImmediateOrVar("Character")
-        .addArgumentImmediateOrVar("Gear")
+        .addArgumentU16OrVar("Character")
+        .addArgumentU16OrVar("Gear")
         .end();
 
     m_extendedOpcode[0xA2]
@@ -788,7 +897,7 @@ void initExtendedOpcodeTable()
         .end();
 
     m_extendedOpcode[0xCD]
-        .setName("GET_FILE_INDEX_FROM_DIRECTORY_78")
+        .setName("GET_CURRENT_DISC_NUMBER")
         .addArgumentVarIndex()
         .end();
 }

@@ -11,9 +11,9 @@ struct sOpcodeArg
         entryPoint,
         jumpLocation,
         immediateU16,
-        immediateRawS16,
-        immediateSignConditionalS16,
-        immediateOrVar,
+        immediateS16,
+        immediateS16OrVar,
+        immediateU16OrVar,
         controlByte,
         byte,
         character,
@@ -24,6 +24,7 @@ struct sOpcodeArg
     } m_type = unknown;
     std::string m_name;
     u8 m_offset;
+    u8 m_mask;
 };
 
 struct sOpcodeInfo
@@ -89,23 +90,23 @@ struct sOpcodeInfo
         return *this;
     }
 
+    sOpcodeInfo& addArgumentS16OrVar(const u8 mask, const char* argumentName = nullptr)
+    {
+        addAgument(sOpcodeArg::immediateS16OrVar, argumentName).m_mask = mask;
+        m_opcodeSize += 0x2;
+        return *this;
+    }
+
     sOpcodeInfo& addArgumentS16(const char* argumentName = nullptr)
     {
-        addAgument(sOpcodeArg::immediateSignConditionalS16, argumentName);
+        addAgument(sOpcodeArg::immediateS16, argumentName);
         m_opcodeSize += 0x2;
         return *this;
     }
 
-    sOpcodeInfo& addArgumentRawS16(const char* argumentName = nullptr)
+    sOpcodeInfo& addArgumentU16OrVar(const char* argumentName = nullptr)
     {
-        addAgument(sOpcodeArg::immediateRawS16, argumentName);
-        m_opcodeSize += 0x2;
-        return *this;
-    }
-
-    sOpcodeInfo& addArgumentImmediateOrVar(const char* argumentName = nullptr)
-    {
-        addAgument(sOpcodeArg::immediateOrVar, argumentName);
+        addAgument(sOpcodeArg::immediateU16OrVar, argumentName);
         m_opcodeSize += 0x2;
         return *this;
     }

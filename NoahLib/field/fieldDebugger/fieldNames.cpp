@@ -3,7 +3,7 @@
 
 // stolen from https://gamefaqs.gamespot.com/ps/199365-xenogears/faqs/4415
 
-sFieldName fieldNames[] =
+static const sFieldName fieldNames[] =
 {
     {0, "Main debug room"},
     {1, "Lahan village                                                  "},
@@ -721,3 +721,18 @@ sFieldName fieldNames[] =
 
     {-1, nullptr}
 };
+
+const sFieldName* findFieldName(int index)
+{
+    const sFieldName* pEntry = fieldNames;
+    while (pEntry->fieldId != -1)
+    {
+        if (pEntry->fieldId == index)
+            return pEntry;
+
+        pEntry++;
+    }
+
+    return nullptr;
+}
+

@@ -4,9 +4,9 @@
 #include "kernel/isoManager.h"
 #include "kernel/fileSystem.h"
 #include "kernel/gameState.h"
-#include "field/fieldInspector/fieldInspector.h"
 #include "field/field.h"
-#include "field/fieldDebugger/fieldDebugger.h"
+#include "field/fieldDebugger/fieldInspector.h"
+#include "field/fieldDebugger/fieldViewDebug.h"
 
 bool noahInit(int argc, char* argv[])
 {
@@ -45,7 +45,7 @@ bool noahFrame_end()
 
     fieldInspector_frame();
 
-    fieldDebugger_step();
+    fieldViewDebug_step();
 
     EndFrame();
 
