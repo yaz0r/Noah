@@ -7,6 +7,7 @@
 #include "walkMesh.h"
 #include "fieldModel.h"
 #include "kernel/isoManager.h"
+#include "fieldDebugger/fieldInspector.h"
 
 #include <array>
 
@@ -1843,6 +1844,9 @@ void initFieldData()
     startAllEntityScripts();
 
     MissingCode();
+
+    // hack!
+    fieldIdForDebugger = currentFieldId0 / 2;
 }
 
 void flagAllocation(std::vector<u8>&)

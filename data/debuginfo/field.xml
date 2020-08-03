@@ -1,7 +1,7 @@
 <fieldList>
     <fieldInfo ID="0" Name="Main debug room">
         <scriptEntity ID="0" Name="Director"/>
-        <scriptEntity ID="1" Name=""/>
+        <scriptEntity ID="1" Name="PartyChange (Margie?)"/>
         <scriptEntity ID="2" Name="Fei"/>
         <scriptEntity ID="3" Name="Elly"/>
         <scriptEntity ID="4" Name="Citan"/>
@@ -11,6 +11,35 @@
         <scriptEntity ID="8" Name="Emer"/>
         <scriptEntity ID="9" Name="Chu-chu"/>
         <scriptEntity ID="10" Name="Maria"/>
+        <scriptEntity ID="11" Name=""/>
+        <scriptEntity ID="12" Name=""/>
+        <scriptEntity ID="13" Name=""/>
+        <scriptEntity ID="14" Name=""/>
+        <scriptEntity ID="15" Name=""/>
+        <scriptEntity ID="16" Name="Planner Maps"/>
+        <scriptEntity ID="17" Name="Dokodemo Door"/>
+        <scriptEntity ID="18" Name=""/>
+        <scriptEntity ID="19" Name="Lahan door"/>
+        <scriptEntity ID="20" Name="Preview door"/>
+        <scriptEntity ID="21" Name="Dazil door"/>
+        <scriptEntity ID="22" Name="Citan door"/>
+        <scriptEntity ID="23" Name="Music debug"/>
+        <scriptEntity ID="24" Name=""/>
+        <scriptEntity ID="25" Name="Face Test"/>
+        <scriptEntity ID="26" Name="Gear change"/>
+    </fieldInfo>
+    <fieldInfo ID="1" Name="Lahan village">
+        <scriptEntity ID="0" Name="Director"/>
+        <scriptEntity ID="1" Name="Fei"/>
+        <scriptEntity ID="2" Name=""/>
+        <scriptEntity ID="3" Name=""/>
+        <scriptEntity ID="4" Name=""/>
+        <scriptEntity ID="5" Name=""/>
+        <scriptEntity ID="6" Name=""/>
+        <scriptEntity ID="7" Name=""/>
+        <scriptEntity ID="8" Name=""/>
+        <scriptEntity ID="9" Name=""/>
+        <scriptEntity ID="10" Name=""/>
         <scriptEntity ID="11" Name=""/>
         <scriptEntity ID="12" Name=""/>
         <scriptEntity ID="13" Name=""/>
@@ -27,28 +56,210 @@
         <scriptEntity ID="24" Name=""/>
         <scriptEntity ID="25" Name=""/>
         <scriptEntity ID="26" Name=""/>
+        <scriptEntity ID="27" Name=""/>
+        <scriptEntity ID="28" Name=""/>
+        <scriptEntity ID="29" Name=""/>
+        <scriptEntity ID="30" Name=""/>
+        <scriptEntity ID="31" Name=""/>
+        <scriptEntity ID="32" Name=""/>
+        <scriptEntity ID="33" Name=""/>
+        <scriptEntity ID="34" Name=""/>
+        <scriptEntity ID="35" Name=""/>
+        <scriptEntity ID="36" Name=""/>
+        <scriptEntity ID="37" Name=""/>
+        <scriptEntity ID="38" Name=""/>
+        <scriptEntity ID="39" Name=""/>
+        <scriptEntity ID="40" Name=""/>
+        <scriptEntity ID="41" Name=""/>
+        <scriptEntity ID="42" Name=""/>
+        <scriptEntity ID="43" Name=""/>
+        <scriptEntity ID="44" Name=""/>
+        <scriptEntity ID="45" Name=""/>
+        <scriptEntity ID="46" Name=""/>
+        <scriptEntity ID="47" Name=""/>
+        <scriptEntity ID="48" Name=""/>
+        <scriptEntity ID="49" Name=""/>
+        <scriptEntity ID="50" Name=""/>
+        <scriptEntity ID="51" Name=""/>
+        <scriptEntity ID="52" Name=""/>
+        <scriptEntity ID="53" Name=""/>
+        <scriptEntity ID="54" Name=""/>
+        <scriptEntity ID="55" Name=""/>
+        <scriptEntity ID="56" Name=""/>
+        <scriptEntity ID="57" Name=""/>
+        <scriptEntity ID="58" Name=""/>
+        <scriptEntity ID="59" Name=""/>
+        <scriptEntity ID="60" Name=""/>
+        <scriptEntity ID="61" Name=""/>
+        <scriptEntity ID="62" Name=""/>
+        <scriptEntity ID="63" Name=""/>
     </fieldInfo>
-    <fieldInfo ID="1" Name="Lahan village"/>
     <fieldInfo ID="2" Name="Lahan battle(intro version)"/>
-    <fieldInfo ID="3" Name="Outside Lahan - after the battle"/>
-    <fieldInfo ID="4" Name="Introductory text at the start of the game"/>
-    <fieldInfo ID="5" Name="Lahan - Beginners hall"/>
+    <fieldInfo ID="3" Name="Outside Lahan - after the battle">
+        <scriptEntity ID="0" Name="Director"/>
+        <scriptEntity ID="1" Name="Fei"/>
+        <scriptEntity ID="2" Name="Citan"/>
+        <scriptEntity ID="3" Name="Dan"/>
+        <scriptEntity ID="4" Name=""/>
+        <scriptEntity ID="5" Name=""/>
+        <scriptEntity ID="6" Name=""/>
+        <scriptEntity ID="7" Name=""/>
+        <scriptEntity ID="8" Name=""/>
+        <scriptEntity ID="9" Name=""/>
+        <scriptEntity ID="10" Name=""/>
+        <scriptEntity ID="11" Name=""/>
+        <scriptEntity ID="12" Name=""/>
+        <scriptEntity ID="13" Name=""/>
+        <scriptEntity ID="14" Name=""/>
+        <scriptEntity ID="15" Name=""/>
+        <scriptEntity ID="16" Name=""/>
+        <scriptEntity ID="17" Name=""/>
+        <scriptEntity ID="18" Name=""/>
+        <scriptEntity ID="19" Name=""/>
+        <scriptEntity ID="20" Name=""/>
+        <scriptEntity ID="21" Name=""/>
+        <scriptEntity ID="22" Name=""/>
+        <scriptEntity ID="23" Name=""/>
+        <scriptEntity ID="24" Name=""/>
+    </fieldInfo>
+    <fieldInfo ID="4" Name="Introductory text at the start of the game">
+        <scriptEntity ID="0" Name="Director"/>
+        <scriptEntity ID="1" Name=""/>
+        <scriptEntity ID="2" Name=""/>
+        <scriptEntity ID="3" Name=""/>
+        <scriptEntity ID="4" Name=""/>
+        <scriptEntity ID="5" Name=""/>
+        <scriptEntity ID="6" Name=""/>
+        <scriptEntity ID="7" Name=""/>
+        <scriptEntity ID="8" Name=""/>
+        <scriptEntity ID="9" Name=""/>
+        <scriptEntity ID="10" Name=""/>
+        <scriptEntity ID="11" Name=""/>
+        <scriptEntity ID="12" Name="Intro text display"/>
+        <scriptEntity ID="13" Name=""/>
+    </fieldInfo>
+    <fieldInfo ID="5" Name="Lahan - Beginners hall">
+        <scriptEntity ID="0" Name=""/>
+        <scriptEntity ID="1" Name=""/>
+        <scriptEntity ID="2" Name=""/>
+        <scriptEntity ID="3" Name=""/>
+        <scriptEntity ID="4" Name=""/>
+        <scriptEntity ID="5" Name=""/>
+        <scriptEntity ID="6" Name=""/>
+        <scriptEntity ID="7" Name=""/>
+        <scriptEntity ID="8" Name=""/>
+        <scriptEntity ID="9" Name=""/>
+        <scriptEntity ID="10" Name=""/>
+        <scriptEntity ID="11" Name=""/>
+        <scriptEntity ID="12" Name=""/>
+        <scriptEntity ID="13" Name=""/>
+        <scriptEntity ID="14" Name=""/>
+        <scriptEntity ID="15" Name=""/>
+        <scriptEntity ID="16" Name=""/>
+    </fieldInfo>
     <fieldInfo ID="6" Name="Lahan - Item shop"/>
     <fieldInfo ID="7" Name="Lahan - Rock - Paper - Scissors man"/>
     <fieldInfo ID="8" Name="Lahan - RPS man&apos;s basement"/>
     <fieldInfo ID="9" Name="Lahan - Pub"/>
     <fieldInfo ID="10" Name="Lahan - Pub, upstairs"/>
     <fieldInfo ID="11" Name="Lahan - Alice&apos;s house"/>
-    <fieldInfo ID="12" Name="Lahan - Fei talks to Alice"/>
-    <fieldInfo ID="13" Name="Lahan - Fei&apos;s house"/>
-    <fieldInfo ID="14" Name="Lahan - Looking at Fei&apos;s painting"/>
+    <fieldInfo ID="12" Name="Lahan - Fei talks to Alice">
+        <scriptEntity ID="0" Name="Director"/>
+        <scriptEntity ID="1" Name=""/>
+        <scriptEntity ID="2" Name=""/>
+        <scriptEntity ID="3" Name=""/>
+        <scriptEntity ID="4" Name=""/>
+        <scriptEntity ID="5" Name=""/>
+        <scriptEntity ID="6" Name=""/>
+        <scriptEntity ID="7" Name=""/>
+        <scriptEntity ID="8" Name=""/>
+        <scriptEntity ID="9" Name="Alice"/>
+        <scriptEntity ID="10" Name=""/>
+        <scriptEntity ID="11" Name=""/>
+        <scriptEntity ID="12" Name=""/>
+        <scriptEntity ID="13" Name=""/>
+        <scriptEntity ID="14" Name=""/>
+    </fieldInfo>
+    <fieldInfo ID="13" Name="Lahan - Fei&apos;s house">
+        <scriptEntity ID="0" Name=""/>
+        <scriptEntity ID="1" Name=""/>
+        <scriptEntity ID="2" Name=""/>
+        <scriptEntity ID="3" Name=""/>
+        <scriptEntity ID="4" Name=""/>
+        <scriptEntity ID="5" Name=""/>
+        <scriptEntity ID="6" Name=""/>
+        <scriptEntity ID="7" Name=""/>
+        <scriptEntity ID="8" Name=""/>
+        <scriptEntity ID="9" Name=""/>
+        <scriptEntity ID="10" Name=""/>
+        <scriptEntity ID="11" Name=""/>
+        <scriptEntity ID="12" Name=""/>
+        <scriptEntity ID="13" Name=""/>
+        <scriptEntity ID="14" Name=""/>
+        <scriptEntity ID="15" Name=""/>
+        <scriptEntity ID="16" Name=""/>
+        <scriptEntity ID="17" Name=""/>
+        <scriptEntity ID="18" Name=""/>
+        <scriptEntity ID="19" Name=""/>
+    </fieldInfo>
+    <fieldInfo ID="14" Name="Lahan - Looking at Fei&apos;s painting">
+        <scriptEntity ID="0" Name="Director"/>
+        <scriptEntity ID="1" Name="Fei"/>
+        <scriptEntity ID="2" Name=""/>
+        <scriptEntity ID="3" Name=""/>
+        <scriptEntity ID="4" Name=""/>
+        <scriptEntity ID="5" Name=""/>
+        <scriptEntity ID="6" Name=""/>
+        <scriptEntity ID="7" Name=""/>
+        <scriptEntity ID="8" Name=""/>
+        <scriptEntity ID="9" Name="Bed"/>
+        <scriptEntity ID="10" Name="Maid"/>
+        <scriptEntity ID="11" Name=""/>
+        <scriptEntity ID="12" Name=""/>
+        <scriptEntity ID="13" Name=""/>
+        <scriptEntity ID="14" Name=""/>
+        <scriptEntity ID="15" Name=""/>
+        <scriptEntity ID="16" Name=""/>
+        <scriptEntity ID="17" Name=""/>
+        <scriptEntity ID="18" Name=""/>
+        <scriptEntity ID="19" Name=""/>
+        <scriptEntity ID="20" Name=""/>
+        <scriptEntity ID="21" Name=""/>
+    </fieldInfo>
     <fieldInfo ID="15" Name="Outside Lahan - Mountain path"/>
     <fieldInfo ID="16" Name="Outside Lahan - Gears fly over Citan&apos;s"/>
     <fieldInfo ID="17" Name="Citan&apos;s House"/>
     <fieldInfo ID="18" Name="Citan&apos;s house - Bedroom"/>
     <fieldInfo ID="19" Name="Citan&apos;s house - Kitchen"/>
     <fieldInfo ID="20" Name="Citan&apos;s House - Upstairs room"/>
-    <fieldInfo ID="21" Name="Citan&apos;s House - Workshop (with music box)"/>
+    <fieldInfo ID="21" Name="Citan&apos;s House - Workshop (with music box)">
+        <scriptEntity ID="0" Name="Director"/>
+        <scriptEntity ID="1" Name="Fei"/>
+        <scriptEntity ID="2" Name="Citan"/>
+        <scriptEntity ID="3" Name=""/>
+        <scriptEntity ID="4" Name=""/>
+        <scriptEntity ID="5" Name=""/>
+        <scriptEntity ID="6" Name=""/>
+        <scriptEntity ID="7" Name=""/>
+        <scriptEntity ID="8" Name=""/>
+        <scriptEntity ID="9" Name=""/>
+        <scriptEntity ID="10" Name=""/>
+        <scriptEntity ID="11" Name=""/>
+        <scriptEntity ID="12" Name="Citan (NPC)"/>
+        <scriptEntity ID="13" Name="Event camera control"/>
+        <scriptEntity ID="14" Name="Music Box Statue"/>
+        <scriptEntity ID="15" Name="Event Control"/>
+        <scriptEntity ID="16" Name=""/>
+        <scriptEntity ID="17" Name=""/>
+        <scriptEntity ID="18" Name=""/>
+        <scriptEntity ID="19" Name=""/>
+        <scriptEntity ID="20" Name=""/>
+        <scriptEntity ID="21" Name=""/>
+        <scriptEntity ID="22" Name=""/>
+        <scriptEntity ID="23" Name=""/>
+        <scriptEntity ID="24" Name=""/>
+        <scriptEntity ID="25" Name=""/>
+    </fieldInfo>
     <fieldInfo ID="22" Name="Blackmoon Forest Entrance"/>
     <fieldInfo ID="23" Name="Blackmoon Forest - Fei &amp; Elly wake up by tree"/>
     <fieldInfo ID="24" Name="Blackmoon Forest - The &apos;Rankar&apos; opening.T"/>
@@ -749,9 +960,80 @@
     <fieldInfo ID="717" Name="Merkava - The inner chamber, about to fight Deus."/>
     <fieldInfo ID="718" Name="Ending - Fei persuing the destructing Deus."/>
     <fieldInfo ID="719" Name="Ending - Talking to Krelian before fighting Urobolus."/>
-    <fieldInfo ID="720" Name="Debug room - Kato"/>
-    <fieldInfo ID="721" Name="Debug room - Eto"/>
-    <fieldInfo ID="722" Name="Debug room - Kazoumi"/>
+    <fieldInfo ID="720" Name="Debug room - Kato">
+        <scriptEntity ID="0" Name=""/>
+        <scriptEntity ID="1" Name=""/>
+        <scriptEntity ID="2" Name=""/>
+        <scriptEntity ID="3" Name=""/>
+        <scriptEntity ID="4" Name=""/>
+        <scriptEntity ID="5" Name=""/>
+        <scriptEntity ID="6" Name=""/>
+        <scriptEntity ID="7" Name=""/>
+        <scriptEntity ID="8" Name=""/>
+        <scriptEntity ID="9" Name=""/>
+        <scriptEntity ID="10" Name=""/>
+        <scriptEntity ID="11" Name=""/>
+        <scriptEntity ID="12" Name=""/>
+        <scriptEntity ID="13" Name=""/>
+        <scriptEntity ID="14" Name=""/>
+        <scriptEntity ID="15" Name=""/>
+        <scriptEntity ID="16" Name=""/>
+        <scriptEntity ID="17" Name=""/>
+        <scriptEntity ID="18" Name=""/>
+    </fieldInfo>
+    <fieldInfo ID="721" Name="Debug room - Eto">
+        <scriptEntity ID="0" Name=""/>
+        <scriptEntity ID="1" Name=""/>
+        <scriptEntity ID="2" Name=""/>
+        <scriptEntity ID="3" Name=""/>
+        <scriptEntity ID="4" Name=""/>
+        <scriptEntity ID="5" Name=""/>
+        <scriptEntity ID="6" Name=""/>
+        <scriptEntity ID="7" Name=""/>
+        <scriptEntity ID="8" Name=""/>
+        <scriptEntity ID="9" Name=""/>
+        <scriptEntity ID="10" Name=""/>
+        <scriptEntity ID="11" Name=""/>
+        <scriptEntity ID="12" Name=""/>
+        <scriptEntity ID="13" Name=""/>
+        <scriptEntity ID="14" Name=""/>
+        <scriptEntity ID="15" Name=""/>
+        <scriptEntity ID="16" Name=""/>
+        <scriptEntity ID="17" Name=""/>
+        <scriptEntity ID="18" Name=""/>
+        <scriptEntity ID="19" Name=""/>
+        <scriptEntity ID="20" Name=""/>
+    </fieldInfo>
+    <fieldInfo ID="722" Name="Debug room - Kazoumi">
+        <scriptEntity ID="0" Name=""/>
+        <scriptEntity ID="1" Name=""/>
+        <scriptEntity ID="2" Name=""/>
+        <scriptEntity ID="3" Name=""/>
+        <scriptEntity ID="4" Name=""/>
+        <scriptEntity ID="5" Name=""/>
+        <scriptEntity ID="6" Name=""/>
+        <scriptEntity ID="7" Name=""/>
+        <scriptEntity ID="8" Name=""/>
+        <scriptEntity ID="9" Name=""/>
+        <scriptEntity ID="10" Name=""/>
+        <scriptEntity ID="11" Name=""/>
+        <scriptEntity ID="12" Name=""/>
+        <scriptEntity ID="13" Name=""/>
+        <scriptEntity ID="14" Name=""/>
+        <scriptEntity ID="15" Name=""/>
+        <scriptEntity ID="16" Name=""/>
+        <scriptEntity ID="17" Name=""/>
+        <scriptEntity ID="18" Name=""/>
+        <scriptEntity ID="19" Name=""/>
+        <scriptEntity ID="20" Name=""/>
+        <scriptEntity ID="21" Name=""/>
+        <scriptEntity ID="22" Name=""/>
+        <scriptEntity ID="23" Name=""/>
+        <scriptEntity ID="24" Name=""/>
+        <scriptEntity ID="25" Name=""/>
+        <scriptEntity ID="26" Name=""/>
+        <scriptEntity ID="27" Name=""/>
+    </fieldInfo>
     <fieldInfo ID="723" Name="Debug room - Suzuki"/>
     <fieldInfo ID="724" Name="Debug room - Tane"/>
     <fieldInfo ID="725" Name="Debug room - Koumoto"/>

@@ -20,6 +20,8 @@
 
 #include "fieldDebugInfo.h"
 
+int fieldIdForDebugger = -1;
+
 bool getFieldListName(void* data, int idx, const char** out_text)
 {
     std::vector<sFieldListEntry>* pList = (std::vector<sFieldListEntry>*)data;
@@ -984,55 +986,6 @@ public:
         return true;
     }
 
-
-    void decodeGenericOpcode(const char* opcodeName, const char* paramterTypes)
-    {
-        ImGui::Text("%s(", opcodeName); ImGui::SameLine(0, 0);
-        int offsetToArgs = 1;
-        while (*paramterTypes)
-        {
-            switch (*paramterTypes)
-            {
-            case 'b':
-                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0.5, 0, 1));
-                ImGui::Text("%d", readU8FromScript(offsetToArgs)); ImGui::SameLine(0, 0);
-                ImGui::PopStyleColor();
-                offsetToArgs++;
-                break;
-            case 's':
-                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0.5, 0, 1));
-                ImGui::Text("0x%04X", readU16FromScript(offsetToArgs)); ImGui::SameLine(0, 0);
-                ImGui::PopStyleColor();
-                offsetToArgs += 2;
-                break;
-            case 'c':
-                readCharacter(offsetToArgs); ImGui::SameLine(0, 0);
-                offsetToArgs++;
-                break;
-            case 'i':
-                getImmediateOrVariableUnsigned(offsetToArgs); ImGui::SameLine(0, 0);
-                offsetToArgs += 2;
-                break;
-            case 'v':
-                getVariable(offsetToArgs); ImGui::SameLine(0, 0);
-                offsetToArgs += 2;
-                break;
-            default:
-                assert(0);
-                break;
-            }
-
-            // last parameter?
-            if (*(++paramterTypes))
-            {
-                ImGui::Text(", "); ImGui::SameLine(0, 0);
-            }
-
-            ImGui::SameLine(0, 0);
-        }
-        ImGui::Text(")");
-    }
-
     struct sByteType
     {
         u8 mType;
@@ -1258,7 +1211,7 @@ public:
                     if (scriptStart)
                     {
                         char buffer[256];
-                        sprintf(buffer, "Entity %d Function %d", entityId, scriptId);
+                        sprintf(buffer, "Entity %d Function 0x%02X", entityId, scriptId);
                         markFunctionStart(scriptStart, std::string(buffer));
                     }
                 }
@@ -1273,6 +1226,12 @@ public:
                 {
                     ImGui::Separator();
                     ImGui::Text("%s:", m_byteTypeTable[i].mLabel.c_str());
+                    ImGui::SameLine();
+
+                    if (ImGui::Button("Rename"))
+                    {
+                        assert(0);
+                    }
                 }
 
                 u16 startPC = i;
@@ -1314,7 +1273,7 @@ public:
 
     sFieldListEntry& getCurrentFieldDebugInfo()
     {
-        return gFieldDebugInfo.mFieldList[currentFieldId0 / 2];
+        return gFieldDebugInfo.mFieldList[fieldIdForDebugger];
     }
 
     void fieldInspector_scripts()
@@ -1336,7 +1295,7 @@ public:
         static int scriptEntityToRename = -1;
         static char entityRenameBuffer[1024] = "";
 
-        ImGui::BeginChild("ScriptL", ImVec2(200, 0));
+        ImGui::BeginChild("ScriptL", ImVec2(300, 0));
         for (int entityId = 0; entityId < numScriptEntity; entityId++)
         {
             ImGui::PushID(entityId);
@@ -1351,12 +1310,22 @@ public:
             }
             
             bool isSelected = (entityId == selectedEntityId);
-            if (ImGui::Checkbox(buffer, &isSelected))
+            if (ImGui::Checkbox("", &isSelected))
             {
                 selectedEntityId = entityId;
             }
 
             ImGui::SameLine();
+            {
+                char buffer[1024];
+                sprintf(buffer, "0x%02X: ", entityId);
+                ImGui::Text(buffer);
+                ImGui::SameLine();
+            }
+
+            ImGui::Text(buffer);
+            ImGui::SameLine();
+
             if (ImGui::Button("Rename"))
             {
                 popupToOpen = "RenameScriptEntity";

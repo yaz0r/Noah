@@ -431,6 +431,10 @@ void initOpcodeTable()
     m_opcode[0x99]
         .end();
 
+    m_opcode[0x9A]
+        .addArgumentU16OrVar()
+        .end();
+
     m_opcode[0x9B]
         .setName("SET_CAMERA_INTERPOLATION_RATE")
         .addArgumentU16OrVar()
@@ -447,9 +451,9 @@ void initOpcodeTable()
         .end();
 
     m_opcode[0xA0]
-        .addArgumentVarIndex()
-        .addArgumentVarIndex()
-        .addArgumentVarIndex()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
         .end();
 
     m_opcode[0xA2]
@@ -592,6 +596,10 @@ void initOpcodeTable()
         .addArgumentByte()
         .end();
 
+    m_opcode[0xD7]
+        .addArgumentU16OrVar()
+        .end();
+
     m_opcode[0xE7]
         .addArgumentU16OrVar()
         .addArgumentU16OrVar()
@@ -626,6 +634,13 @@ void initOpcodeTable()
         .addArgumentU16OrVar("g")
         .addArgumentU16OrVar("r")
         .addArgumentU16OrVar("duration")
+        .end();
+
+    m_opcode[0xF2]
+        .addArgumentU16OrVar("x")
+        .addArgumentU16OrVar("z")
+        .addArgumentU16OrVar("y")
+        .addArgumentU16OrVar("ratio")
         .end();
 
     m_opcode[0xF3]
@@ -725,6 +740,10 @@ void initExtendedOpcodeTable()
         .addArgumentU16OrVar()
         .end();
 
+    m_extendedOpcode[0x24]
+        .setComment("Wait for something about player X/Z coordinates and other 2 PC")
+        .end();
+
     m_extendedOpcode[0x26]
         .setName("SETUP_SCREEN_DISTORTION")
         .addArgumentU16OrVar()
@@ -815,6 +834,11 @@ void initExtendedOpcodeTable()
         .end();
 
     m_extendedOpcode[0x64]
+        .addArgumentU16OrVar()
+        .end();
+
+    m_extendedOpcode[0x65]
+        .addArgumentU16OrVar()
         .addArgumentU16OrVar()
         .end();
 
