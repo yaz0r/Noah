@@ -752,10 +752,10 @@ void OP_INIT_ENTITY_SCRIPT_sub0(int actorId, int param_2, sFieldActorSetupParams
         {
             if (fieldEntityArray[actorId].m5A & 1)
             {
-                deleteFieldEntitySub4(fieldEntityArray[actorId].m4_pSub4);
+                deleteFieldEntitySub4(fieldEntityArray[actorId].m4_pVramSpriteSheet);
             }
 
-            fieldEntityArray[actorId].m4_pSub4 = createFieldEntitySub4(pSetup, 0x100, ((param_2 + 480) * 0x10000) >> 0x10, vramX, vramY, 0x40);
+            fieldEntityArray[actorId].m4_pVramSpriteSheet = createFieldEntitySub4(pSetup, 0x100, ((param_2 + 480) * 0x10000) >> 0x10, vramX, vramY, 0x40);
         }
         else
         {
@@ -768,7 +768,7 @@ void OP_INIT_ENTITY_SCRIPT_sub0(int actorId, int param_2, sFieldActorSetupParams
         short sVar5;
 
         if ((fieldEntityArray[actorId].m5A & 1U) != 0) {
-            deleteFieldEntitySub4(fieldEntityArray[actorId].m4_pSub4);
+            deleteFieldEntitySub4(fieldEntityArray[actorId].m4_pVramSpriteSheet);
         }
         if (param_4 == 1) {
             iVar4 = param_2 + 0xe0;
@@ -778,13 +778,13 @@ void OP_INIT_ENTITY_SCRIPT_sub0(int actorId, int param_2, sFieldActorSetupParams
             iVar4 = param_2 + 0xe3;
             sVar5 = 0x2a0;
         }
-        fieldEntityArray[actorId].m4_pSub4 = createFieldEntitySub4(pSetup, 0x100, (short)((uint)(iVar4 * 0x10000) >> 0x10), sVar5, (short)param_2 * 0x40 + 0x100, 8);
-        OP_INIT_ENTITY_SCRIPT_sub0Sub3(fieldEntityArray[actorId].m4_pSub4, 0x20);
+        fieldEntityArray[actorId].m4_pVramSpriteSheet = createFieldEntitySub4(pSetup, 0x100, (short)((uint)(iVar4 * 0x10000) >> 0x10), sVar5, (short)param_2 * 0x40 + 0x100, 8);
+        OP_INIT_ENTITY_SCRIPT_sub0Sub3(fieldEntityArray[actorId].m4_pVramSpriteSheet, 0x20);
     }
 
     fieldEntityArray[actorId].m5A |= 1;
 
-    sFieldEntitySub4* pFieldEntitySub4 = fieldEntityArray[actorId].m4_pSub4;
+    sFieldEntitySub4* pFieldEntitySub4 = fieldEntityArray[actorId].m4_pVramSpriteSheet;
 
     int temp0;
     int temp1;
@@ -844,6 +844,7 @@ void OP_INIT_ENTITY_SCRIPT_sub0(int actorId, int param_2, sFieldActorSetupParams
     pFieldEntitySub4->m84 = fieldEntityArray[actorId].mC_matrix.t[1] & 0xFFFF;
 
     pFieldEntitySub4->m0_position = fieldEntityArray[actorId].m4C_scriptEntity->m20_position;
+    fieldScriptInitVar0++;
 }
 
 void OP_INIT_ENTITY_SCRIPT_sub1()
@@ -895,8 +896,7 @@ int readS16FromScript(int param_1)
 int getBytesSign(int param_1)
 
 {
-    return -(uint)((*(uint*)(&rawFieldScriptData[0] + (param_1 >> 6) * 4) & 1 << (param_1 >> 1 & 0x1fU))
-        != 0);
+    return -(uint)((*(uint*)(&rawFieldScriptData[0] + (param_1 >> 6) * 4) & 1 << (param_1 >> 1 & 0x1fU))!= 0);
 }
 
 
@@ -1389,9 +1389,9 @@ void OP_INIT_ENTITY_PC(void)
             psVar1 = pKernelGameState;
             pCurrentFieldScriptActor->m0_flags = pCurrentFieldScriptActor->m0_flags & 0xfffffcff | 0x400;
             if (psVar1->m22B1_isOnGear[iVar4] != 0) {
-                psVar6 = fieldEntityArray[currentFieldActorId].m4_pSub4;
-                fieldEntityArray[currentFieldActorId].m4_pSub4 = fieldEntityArray[unkPartyTable[iVar4]].m4_pSub4;
-                fieldEntityArray[unkPartyTable[iVar4]].m4_pSub4 = psVar6;
+                psVar6 = fieldEntityArray[currentFieldActorId].m4_pVramSpriteSheet;
+                fieldEntityArray[currentFieldActorId].m4_pVramSpriteSheet = fieldEntityArray[unkPartyTable[iVar4]].m4_pVramSpriteSheet;
+                fieldEntityArray[unkPartyTable[iVar4]].m4_pVramSpriteSheet = psVar6;
                 psVar7->m0_flags = psVar7->m0_flags & 0xfffffaff | 0x200;
             }
         }
@@ -1490,6 +1490,79 @@ void OP_JUMP(void)
     return;
 }
 
+u8 OPX_50Param = 0;
+void OPX_50(void)
+{
+    OPX_50Param = 1;
+    pCurrentFieldScriptActor->mCC_scriptPC++;
+}
+
+u8 OPX_52Param = 0;
+void OPX_52(void)
+{
+	OPX_52Param = 1;
+	pCurrentFieldScriptActor->mCC_scriptPC++;
+}
+
+u16 OPX_80Params[8] = { 0,0,0,0,0,0,0,0 };
+void OPX_80(void)
+{
+    OPX_80Params[0] = readU16FromScript(1);
+    OPX_80Params[1] = readU16FromScript(3);
+    OPX_80Params[2] = readU16FromScript(5);
+    if (OPX_80Params[2] == 0)
+    {
+        OPX_80Params[2]++;
+    }
+    OPX_80Params[3] = readU16FromScript(7);
+    OPX_80Params[4] = 0;
+    OPX_80Params[5] = readU16FromScript(9);
+    OPX_80Params[6] = readU16FromScript(0xB);
+    OPX_80Params[7] = readU16FromScript(0xD);
+
+    pCurrentFieldScriptActor->mCC_scriptPC += 0xF;
+}
+
+s32 OPX_81Params[3] = { 0,0,0 };
+void OPX_81(void)
+{
+	OPX_81Params[0] = getVar80(1, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 7]);
+	OPX_81Params[2] = getVar40(3, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 7]);
+    OPX_81Params[1] = getVar20(5, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 7]);
+
+    pCurrentFieldScriptActor->mCC_scriptPC += 8;
+}
+
+s8 OPX_82Param0[4] = { 0,0,0,0 };
+s8 OPX_82Param1[4] = { 0,0,0,0 };
+s8 OPX_82Param2[4] = { 0,0,0,0 };
+s16 OPX_82Param3[3] = { 0,0,0 };
+s16 OPX_82Param4 = 0;
+void OPX_82(void)
+{
+	OPX_82Param0[0] = getImmediateOrVariableUnsigned(1);
+	OPX_82Param0[1] = getImmediateOrVariableUnsigned(3);
+	OPX_82Param0[2] = getImmediateOrVariableUnsigned(5);
+	OPX_82Param1[0] = getImmediateOrVariableUnsigned(7);
+	OPX_82Param1[1] = getImmediateOrVariableUnsigned(9);
+	OPX_82Param1[2] = getImmediateOrVariableUnsigned(0xb);
+	OPX_82Param2[0] = getImmediateOrVariableUnsigned(0xd);
+	OPX_82Param2[1] = getImmediateOrVariableUnsigned(0xf);
+	OPX_82Param2[2] = getImmediateOrVariableUnsigned(0x11);
+	OPX_82Param3[0] = getImmediateOrVariableUnsigned(0x13);
+	OPX_82Param3[1] = getImmediateOrVariableUnsigned(0x15);
+	OPX_82Param3[2] = getImmediateOrVariableUnsigned(0x17);
+    pCurrentFieldScriptActor->mCC_scriptPC += 0x19;
+    OPX_82Param4 = 1;
+}
+
+s8 OPX_E0Param = 0;
+void OPX_E0(void)
+{
+	OPX_E0Param = pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1];
+	pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 2;
+}
+
 void OPX_1C(void)
 {
     uint* puVar1;
@@ -1501,7 +1574,7 @@ void OPX_1C(void)
     sFieldEntitySub4* psVar7;
 
     psVar4 = pCurrentFieldScriptActor;
-    psVar7 = fieldEntityArray[currentFieldActorId].m4_pSub4;
+    psVar7 = fieldEntityArray[currentFieldActorId].m4_pVramSpriteSheet;
     puVar1 = &pCurrentFieldScriptActor->m4_flags;
     pCurrentFieldScriptActor->m0_flags = pCurrentFieldScriptActor->m0_flags | 0x10000;
     pbVar3 = &pCurrentFieldScriptFile[0];
@@ -1573,6 +1646,12 @@ void executeFieldScript(int param)
         fieldScriptOpcodes_EX[0x0D] = OP_SET_DIALOG_AVATAR;
         fieldScriptOpcodes_EX[0x18] = OP_ADD_TO_CURRENT_PARTY;
         fieldScriptOpcodes_EX[0x1C] = OPX_1C;
+        fieldScriptOpcodes_EX[0x50] = OPX_50;
+        fieldScriptOpcodes_EX[0x52] = OPX_52;
+        fieldScriptOpcodes_EX[0x80] = OPX_80;
+        fieldScriptOpcodes_EX[0x81] = OPX_81;
+        fieldScriptOpcodes_EX[0x82] = OPX_82;
+        fieldScriptOpcodes_EX[0xE0] = OPX_E0;
     }
 
     breakCurrentScript = 0;
@@ -1651,11 +1730,10 @@ void startAllEntityScripts()
 
             if (fieldScriptInitVar0 == 0)
             {
-                MissingCode();
+                OP_INIT_ENTITY_SCRIPT_sub0(i, 0, &fieldActorSetupParams[0], 0, 0, 0x80, 0);
+                pCurrentFieldScriptActor->m4_flags |= 0x800;
             }
         }
-
-        MissingCode();
     }
     else
     {
@@ -2193,8 +2271,97 @@ void transitionFields()
 
 }
 
+void ClearCacheAfterOverlayLoad()
+{
+    MissingCode();
+}
+
+char noUpdatesToPartyMemebers = 0;
+
+int onlyUpdateDirector = 0;
+void exectueEntitiesUpdateFunction()
+{
+    int numEntitiesToUpdate = numActiveFieldScriptEntity;
+    if (onlyUpdateDirector == 1)
+    {
+        numEntitiesToUpdate = 1;
+    }
+
+    MissingCode();
+
+    for (int i = 0; i < numEntitiesToUpdate; i++)
+    {
+        sFieldEntity* pFieldEntity = &fieldEntityArray[i];
+        if (((pFieldEntity->m58_flags & 0xf00) != 0) && ((pFieldEntity->m4C_scriptEntity->m4_flags & 0x100000) == 0))
+        {
+            MissingCode();
+
+            pCurrentFieldScriptActor = pFieldEntity->m4C_scriptEntity;
+            pCurrentFieldScriptActor->m0_flags &= 0xfeffffff;
+            currentFieldActorId = i;
+            pCurrentFieldEntity = pFieldEntity;
+
+            int maxScriptIndex = 0xF;
+            if (noUpdatesToPartyMemebers)
+            {
+                assert(0);
+            }
+            for (int j = 0; j < 8; j++)
+            {
+                if(((pCurrentFieldScriptActor->m8C_scriptSlots[j].m4_flags >> 0x12) & 0xF) <= maxScriptIndex)
+                {
+                    pCurrentFieldScriptActor->mCE_currentScriptSlot = j;
+                    maxScriptIndex = ((pCurrentFieldScriptActor->m8C_scriptSlots[j].m4_flags >> 0x12) & 0xF);
+                }
+            }
+            if (maxScriptIndex == 0xF)
+            {
+                pCurrentFieldScriptActor->m8C_scriptSlots[0].m0_scriptPC = getScriptEntryPoint(i, 1);
+                pCurrentFieldScriptActor->mCE_currentScriptSlot = 0;
+                pCurrentFieldScriptActor->m8C_scriptSlots[0].m4_flags = pCurrentFieldScriptActor->m8C_scriptSlots[0].m4_flags & 0xffc3ffff | 0x1c0000;
+            }
+            currentScriptFinished = 1;
+            pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m0_scriptPC;
+            if (!(pCurrentFieldScriptActor->m0_flags & 1))
+            {
+                executeFieldScript(8);
+            }
+            pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m0_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC;
+        }
+    }
+}
+
+void updateScriptAndMoveEntities()
+{
+    MissingCode();
+    exectueEntitiesUpdateFunction();
+    MissingCode();
+}
+
+void updateAllEntities()
+{
+    updateScriptAndMoveEntities();
+    MissingCode();
+}
+
+void updateAndRenderField()
+{
+    MissingCode();
+    updateAllEntities();
+    MissingCode();
+}
+
+int runningOnDTL = -1;
+
 void fieldEntryPoint()
 {
+    fieldDebugDisable = (runningOnDTL == -1);
+    ClearCacheAfterOverlayLoad();
+    if (fieldDebugDisable == 0) {
+        assert(0);
+        //DrawSyncCallback(fieldDebuggerDrawSyncCallback);
+    }
+
     MissingCode();
 
     setCurrentDirectory(4, 0); // TODO: this is not explicitly called at this level
@@ -2221,6 +2388,11 @@ void fieldEntryPoint()
     {
         noahFrame_start();
 
+        MissingCode();
+        ////
+        updateAndRenderField();
+
+        MissingCode();
         ////
         if ((fieldChangePrevented == 0) /*&& (fieldChangePrevented2 == 0)*/)
         {
@@ -2245,5 +2417,6 @@ void fieldEntryPoint()
             }
         }
         ////
+        MissingCode();
     }
 }

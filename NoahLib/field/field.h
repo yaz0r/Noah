@@ -206,7 +206,7 @@ struct sFieldEntitySub4
 struct sFieldEntity
 {
     sFieldEntitySub0* m0;
-    sFieldEntitySub4* m4_pSub4;
+    sFieldEntitySub4* m4_pVramSpriteSheet;
     sFieldEntity2dSprite* m8_2dSprite;
     sMatrix mC_matrix;
     sMatrix m2C_matrixBackup;

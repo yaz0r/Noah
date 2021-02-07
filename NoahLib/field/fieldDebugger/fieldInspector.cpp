@@ -746,7 +746,7 @@ public:
             u8 opcode = readU8FromScript(0);
             if (isExtendedOpcode)
             {
-                ImGui::Text("OP_FE%02X(", opcode); ImGui::SameLine(0, 0);
+                ImGui::Text("OPX_%02X(", opcode); ImGui::SameLine(0, 0);
             }
             else
             {
@@ -1132,7 +1132,7 @@ public:
             break;
         }
 
-        ImGui::SameLine(0, 0); ImGui::Text(") GOTO "); ImGui::SameLine(0, 0);
+        ImGui::SameLine(0, 0); ImGui::Text(") ELSE GOTO "); ImGui::SameLine(0, 0);
 
         ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 1, 1));
         ImGui::Text("0x%04X", jumpDestination);
@@ -1208,7 +1208,7 @@ public:
                 for (int scriptId = 0; scriptId < 0x20; scriptId++)
                 {
                     u16 scriptStart = READ_LE_U16(rawFieldScriptData.begin() + 0x84 + entityId * 0x40 + scriptId * 2);
-                    if (scriptStart)
+                    if (scriptStart || !scriptId) // script 0 can refer to offset 0
                     {
                         char buffer[256];
                         sprintf(buffer, "Entity %d Function 0x%02X", entityId, scriptId);

@@ -804,6 +804,9 @@ void initExtendedOpcodeTable()
     m_extendedOpcode[0x50]
         .end();
 
+    m_extendedOpcode[0x52]
+        .end();
+
     m_extendedOpcode[0x53]
         .end();
 
@@ -853,6 +856,38 @@ void initExtendedOpcodeTable()
         .addArgumentU16OrVar()
         .addArgumentU16OrVar()
         .addArgumentCharacter()
+        .end();
+
+    m_extendedOpcode[0x80]
+        .addArgumentU16()
+        .addArgumentU16()
+        .addArgumentU16()
+        .addArgumentU16()
+        .addArgumentU16()
+        .addArgumentU16()
+        .addArgumentU16()
+        .end();
+
+    m_extendedOpcode[0x81]
+        .addArgumentS16OrVar(0x80)
+        .addArgumentS16OrVar(0x40)
+        .addArgumentS16OrVar(0x20)
+        .addSignControlByte()
+        .end();
+
+    m_extendedOpcode[0x82]
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
         .end();
 
     m_extendedOpcode[0x83]
@@ -923,5 +958,9 @@ void initExtendedOpcodeTable()
     m_extendedOpcode[0xCD]
         .setName("GET_CURRENT_DISC_NUMBER")
         .addArgumentVarIndex()
+        .end();
+
+    m_extendedOpcode[0xE0]
+        .addArgumentByte()
         .end();
 }
