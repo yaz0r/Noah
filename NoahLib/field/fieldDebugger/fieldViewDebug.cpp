@@ -223,9 +223,6 @@ void fieldViewDebug_step()
         {
             if (!(fieldEntityArray[i].m58_flags & 0x40))
             {
-                float translationMatrix[16];
-                bx::mtxTranslate(translationMatrix, fieldEntityArray[i].mC_matrix.t[0] / (float)(1 << 16), fieldEntityArray[i].mC_matrix.t[1] / (float)(1 << 16), fieldEntityArray[i].mC_matrix.t[2] / (float)(1 << 16));
-
                 float rot[3];
                 rot[0] = bx::kPi * -fieldEntityArray[i].m50_modelRotation[0] / (float)(0x800);
                 rot[1] = bx::kPi * -fieldEntityArray[i].m50_modelRotation[1] / (float)(0x800);
@@ -235,7 +232,7 @@ void fieldViewDebug_step()
                 bx::mtxRotateXYZ(rotationMatrix, rot[0], rot[1], rot[2]);
 
                 float finalMatrix[16];
-                bx::mtxSRT(finalMatrix, 1, 1, 1, rot[0], rot[1], rot[2], fieldEntityArray[i].mC_matrix.t[0] / (float)(1 << 16), fieldEntityArray[i].mC_matrix.t[1] / (float)(1 << 16), fieldEntityArray[i].mC_matrix.t[2] / (float)(1 << 16));
+                bx::mtxSRT(finalMatrix, 1, 1, 1, rot[0], rot[1], rot[2], fieldEntityArray[i].mC_matrix.t[0], fieldEntityArray[i].mC_matrix.t[1], fieldEntityArray[i].mC_matrix.t[2]);
 
                 fieldEntityArray[i].m0->m4_pModelBlock->bgfxRender(fieldDebugger_bgfxView, finalMatrix);
             }

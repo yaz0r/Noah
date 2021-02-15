@@ -41,15 +41,15 @@
         <scriptEntity ID="9" Name=""/>
         <scriptEntity ID="10" Name=""/>
         <scriptEntity ID="11" Name=""/>
-        <scriptEntity ID="12" Name=""/>
-        <scriptEntity ID="13" Name=""/>
+        <scriptEntity ID="12" Name="Tavern sign"/>
+        <scriptEntity ID="13" Name="Store sign"/>
         <scriptEntity ID="14" Name=""/>
         <scriptEntity ID="15" Name=""/>
         <scriptEntity ID="16" Name=""/>
         <scriptEntity ID="17" Name=""/>
         <scriptEntity ID="18" Name=""/>
         <scriptEntity ID="19" Name=""/>
-        <scriptEntity ID="20" Name=""/>
+        <scriptEntity ID="20" Name="Windmill"/>
         <scriptEntity ID="21" Name=""/>
         <scriptEntity ID="22" Name=""/>
         <scriptEntity ID="23" Name=""/>
@@ -67,7 +67,7 @@
         <scriptEntity ID="35" Name=""/>
         <scriptEntity ID="36" Name=""/>
         <scriptEntity ID="37" Name=""/>
-        <scriptEntity ID="38" Name=""/>
+        <scriptEntity ID="38" Name="Greeter"/>
         <scriptEntity ID="39" Name=""/>
         <scriptEntity ID="40" Name=""/>
         <scriptEntity ID="41" Name=""/>

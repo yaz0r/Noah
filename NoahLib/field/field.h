@@ -71,8 +71,11 @@ struct sFieldScriptEntityScriptSlot
 {
     u16 m0_scriptPC;
     u8 m2_delay;
-    u8 m3;
-    u32 m4_flags;
+    u8 m3_scriptIndex;
+    struct {
+        u32 m0 : 16;
+        u32 m2 : 16;
+    } m4_flags; // bit 18, size 4
     // size 8
 };
 
@@ -80,23 +83,37 @@ struct sFieldScriptEntity
 {
     u32 m0_flags;
     u32 m4_flags;
+    u16 m10;
     s16 m18[4];
     VECTOR m20_position;
+    std::array<int, 7> m30;
     s16 m5A;
     s16 m60;
     s16 m64;
     s16 m72_elevation;
+    s16 m76;
+    std::array<u16, 4> m78_stack;
     s8 m80_DialogAvatarFace;
     std::array<sFieldScriptEntityScriptSlot, 8> m8C_scriptSlots;
     u16 mCC_scriptPC;
     s8 mCE_currentScriptSlot;
+    s8 mCF;
     s16 mE4_playableCharacterId;
+    s16 mEA_currentAnimationPlaying;
     s16 mEC_elevation;
+    std::array<s16, 3> mF4_scale3d;
+    s16 m102_rotationCount;
     s16 m104_rotation;
     s16 m106_currentRotation;
     s16 m108_rotation3;
+    s16 m10A;
+    s8 m10C;
+    s8 m10D;
+    std::vector<u16> m114;
+    std::vector<s32> m118;
     u8 m126;
     u8 m127;
+    u32 m12C_flags;
     struct
     {
         u32 m28 : 2;
@@ -168,7 +185,7 @@ struct sFieldEntitySub4
     sFieldEntitySub4_B4* m20;
     sFieldEntitySub4_110* m24;
     s8 m2B;
-    s16 m2C;
+    s16 m2C_scale;
     s16 m30;
     s16 m32;
     s16 m34;

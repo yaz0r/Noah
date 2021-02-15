@@ -1190,6 +1190,26 @@ public:
         getVarWithFlag(0x10, valueOffset, controlOffset);
     }
 
+    void getVar08(int valueOffset, int controlOffset)
+    {
+        getVarWithFlag(0x8, valueOffset, controlOffset);
+    }
+
+    void getVar04(int valueOffset, int controlOffset)
+    {
+        getVarWithFlag(0x4, valueOffset, controlOffset);
+    }
+
+    void getVar02(int valueOffset, int controlOffset)
+    {
+        getVarWithFlag(0x2, valueOffset, controlOffset);
+    }
+
+    void getVar01(int valueOffset, int controlOffset)
+    {
+        getVarWithFlag(0x1, valueOffset, controlOffset);
+    }
+
     void fieldInspector_scriptsForEntity(int entityId)
     {
         m_byteTypeTable.clear();
