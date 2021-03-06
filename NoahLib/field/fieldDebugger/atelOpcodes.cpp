@@ -198,10 +198,11 @@ void initOpcodeTable()
         .end();
 
     m_opcode[0x2D]
+        .setName("GET_ACTOR_POSITION")
         .addArgumentCharacter()
-        .addArgumentU16()
-        .addArgumentU16()
-        .addArgumentU16()
+        .addArgumentVarIndex()
+        .addArgumentVarIndex()
+        .addArgumentVarIndex()
         .end();
 
     m_opcode[0x2E]
@@ -460,11 +461,11 @@ void initOpcodeTable()
         .end();
 
     m_opcode[0x79]
-        .setComment("Backup data 1 of all PC")
+        .setName("RESTORE_HP")
         .end();
 
     m_opcode[0x7A]
-        .setComment("Backup data 2 of all PC")
+        .setName("RESTORE_MP")
         .end();
 
     m_opcode[0x7C]
@@ -515,6 +516,11 @@ void initOpcodeTable()
         .setName("IF_CHARACTER_IN_PARTY")
         .addArgumentByte()
         .addArgumentJumpLocation()
+        .end();
+
+    m_opcode[0x93]
+        .setName("ADD_ENDITY_TO_FIELD1721_LIST")
+        .addArgumentU16OrVar()
         .end();
 
     m_opcode[0x98]
@@ -832,6 +838,7 @@ void initExtendedOpcodeTable()
         .end();
 
     m_extendedOpcode[0xE]
+        .setName("SET_MUSIC_PARAMS")
         .addArgumentU16OrVar()
         .addArgumentU16OrVar()
         .end();
@@ -912,6 +919,11 @@ void initExtendedOpcodeTable()
 
     m_extendedOpcode[0x3B]
         .setName("CLEAR_PARTY_FRAME_MASK")
+        .addArgumentU16OrVar()
+        .end();
+
+    m_extendedOpcode[0x3C]
+        .addArgumentU16OrVar()
         .addArgumentU16OrVar()
         .end();
 
@@ -1147,7 +1159,7 @@ void initExtendedOpcodeTable()
         .end();
 
     m_extendedOpcode[0xA4]
-        .setComment("Backup something in list of 20 in gamestate")
+        .setName("RESTORE_GEAR")
         .end();
 
     m_extendedOpcode[0xA5]

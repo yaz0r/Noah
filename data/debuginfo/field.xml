@@ -257,9 +257,9 @@
         <scriptEntity ID="15" Name=""/>
         <scriptEntity ID="16" Name=""/>
         <scriptEntity ID="17" Name=""/>
-        <scriptEntity ID="18" Name=""/>
-        <scriptEntity ID="19" Name=""/>
-        <scriptEntity ID="20" Name=""/>
+        <scriptEntity ID="18" Name="Screen Effect entity"/>
+        <scriptEntity ID="19" Name="Chest 1"/>
+        <scriptEntity ID="20" Name="Chest 2"/>
         <scriptEntity ID="21" Name=""/>
     </fieldInfo>
     <fieldInfo ID="15" Name="Outside Lahan - Mountain path"/>

@@ -2,7 +2,21 @@
 
 #include "fieldModel.h"
 
-typedef s32 sFP1616;
+struct sFP1616
+{
+    u32 value;
+
+    void set(s16 x, s16 y)
+    {
+        value = ((u16)x) * 0x10000 + (u16)y;
+    }
+
+    void get(s16& x, s16& y)
+    {
+        x = (s16)(value >> 16);
+        y = (s16)(value & 0xFFFF);
+    }
+};
 
 struct MATRIX
 {
@@ -10,34 +24,35 @@ struct MATRIX
     std::array<s32, 3> t;
 };
 
-struct VECTOR
+struct sVec3
 {
     s32 vx;
     s32 vy;
     s32 vz;
 };
 
-typedef std::array<s16, 3> SVECTOR;
+struct sVec2_s16
+{
+    s32 vx;
+    s32 vy;
+};
 
 typedef MATRIX sMatrix;
 
-
-typedef std::array<s16, 2> sVec2_s16;
-
 struct sFieldActorSetupParams
 {
-    void init(std::vector<u8>::iterator inputData)
+    void init(std::vector<u8>::iterator& inputData)
     {
         rawData = &inputData[0];
 
         m4_offset = READ_LE_U32(inputData + 4);
-        m4_pData = &(*(inputData + m4_offset));
+        m4_pData.setPointer(&(*(inputData + m4_offset)));
 
         m8_offset = READ_LE_U32(inputData + 8);
-        m8_pData = &(*(inputData + m8_offset));
+        m8_pData.setPointer(&(*(inputData + m8_offset)));
 
         mC_offset = READ_LE_U32(inputData + 0xC);
-        mC_pData = &(*(inputData + mC_offset));
+        mC_pData.setPointer(&(*(inputData + mC_offset)));
 
         u32 end = READ_LE_U32(inputData + 0x10);
     }
@@ -45,11 +60,11 @@ struct sFieldActorSetupParams
     u8* rawData;
 
     u32 m4_offset;
-    u8* m4_pData;
+    sPS1Pointer m4_pData;
     u32 m8_offset;
-    u8* m8_pData;
+    sPS1Pointer m8_pData;
     u32 mC_offset;
-    u8* mC_pData;
+    sPS1Pointer mC_pData;
 
 };
 
@@ -74,7 +89,11 @@ struct sFieldScriptEntityScriptSlot
     u8 m3_scriptIndex;
     struct {
         u32 m0 : 16;
-        u32 m2 : 16;
+        u32 m16 : 2;
+        u32 m18 : 4;
+        u32 m22 : 1;
+        u32 m23_walkMode : 2;
+        u32 m25X : 5;
     } m4_flags; // bit 18, size 4
     // size 8
 };
@@ -83,25 +102,40 @@ struct sFieldScriptEntity
 {
     u32 m0_flags;
     u32 m4_flags;
-    u16 m10;
-    s16 m18[4];
+    std::array<s16, 4> m8_currentWalkMeshTriangle;
+    u16 m10_walkmeshId;
+    s32 m14_currentTriangleFlag;
+    std::array<s16, 4> m18;
     VECTOR m20_position;
-    std::array<int, 7> m30;
-    s16 m5A;
-    s16 m60;
-    s16 m64;
+    VECTOR m30_stepVector;
+    VECTOR m40;
+    VECTOR m50;
+    std::array<s16, 3> m60;
+    std::array<s16, 3> m68_oldPosition;
+    s16 m6E;
     s16 m72_elevation;
+    s8 m74;
     s16 m76;
     std::array<u16, 4> m78_stack;
     s8 m80_DialogAvatarFace;
+    std::array<s8, 2> m82;
+    s32 m84;
+    std::array<s16, 2> m88;
     std::array<sFieldScriptEntityScriptSlot, 8> m8C_scriptSlots;
     u16 mCC_scriptPC;
     s8 mCE_currentScriptSlot;
     s8 mCF;
+    std::array<s32, 3> mD0_targetPositionOffset;
+    s8 mE2;
+    s8 mE3;
     s16 mE4_playableCharacterId;
+    s16 mE6;
+    s16 mE8;
     s16 mEA_currentAnimationPlaying;
     s16 mEC_elevation;
+    s32 mF0;
     std::array<s16, 3> mF4_scale3d;
+    std::array<s8, 6> mFC;
     s16 m102_rotationCount;
     s16 m104_rotation;
     s16 m106_currentRotation;
@@ -109,20 +143,30 @@ struct sFieldScriptEntity
     s16 m10A;
     s8 m10C;
     s8 m10D;
-    std::vector<u16> m114;
+    std::vector<sVec2_s16> m114_movementBoundingZone;
     std::vector<s32> m118;
+    s16 m11C;
+    s16 m11E;
+    sFieldActorSetupParams* m120_special2dAnimation;
+    std::vector<u8> m120_special2dAnimationRaw;
+    s16 m124_special2dAnimationId;
     u8 m126;
     u8 m127;
+    s16 m128;
     u32 m12C_flags;
     struct
     {
+        u32 m0 : 28;
         u32 m28 : 2;
+        u32 m30_stepVector : 2;
     }m130;
 
     struct
     {
         u32 m0 : 4;
         u32 m4 : 1;
+        u32 m5 : 2;
+        u32 m7 : 1;
     }m134;
 
     // size 0x138
@@ -157,7 +201,7 @@ struct sFieldEntitySub4_B4
     MATRIX m20;
     u8* m2C;
     u8* m30;
-    sFieldEntitySub4_124* m34;
+    std::array<sFieldEntitySub4_124,8>* m34;
     s32 m38;
     s8 m3C;
     s8 m3D;
@@ -166,20 +210,18 @@ struct sFieldEntitySub4_B4
 
 struct sFieldEntitySub4_110
 {
-    u8* m0;
+    sPS1Pointer m0;
     sVec2_s16 m4_vramLocation;
     sFP1616 m8;
-    u8* mC;
-    u8* m10;
+    sPS1Pointer mC;
+    sPS1Pointer m10;
     // size ???
 };
 
 struct sFieldEntitySub4
 {
-    VECTOR m0_position;
-    s32 mC;
-    s32 m10;
-    s32 m14;
+    sVec3 m0_position;
+    sVec3 mC;
     s32 m18;
     s32 m1C;
     sFieldEntitySub4_B4* m20;
@@ -194,12 +236,12 @@ struct sFieldEntitySub4
     u32 m40;
     sFieldActorSetupParams* m44;
     sFieldActorSetupParams* m48;
-    sFieldActorSetupParams* m4C;
+    sFieldActorSetupParams* m4C_specialAnimation;
     s32 m50;
-    u8* m54;
-    u16* m58;
-    void* m60;
-    u8* m64_spriteByteCode;
+    sPS1Pointer m54;
+    sPS1Pointer m58;
+    sPS1Pointer m60;
+    sPS1Pointer m64_spriteByteCode;
     void(*m68)(sFieldEntitySub4*);
     sFieldEntitySub4* m6C;
     s32 m70;
@@ -216,7 +258,7 @@ struct sFieldEntitySub4
     sFieldEntitySub4_B4 mB4;
     sFieldEntitySub4_F4 mF4;
     sFieldEntitySub4_110 m110;
-    sFieldEntitySub4_124 m124;
+    std::array<sFieldEntitySub4_124,8> m124;
     //size 0x164
 };
 
@@ -235,7 +277,7 @@ struct sFieldEntity
 };
 extern std::vector<sFieldEntity> fieldEntityArray;
 
-extern s32 requestFieldId0;
+extern s32 fieldMapNumber;
 extern s32 fieldChangePrevented;
 extern s32 fieldChangePrevented2;
 extern s32 currentFieldId0;

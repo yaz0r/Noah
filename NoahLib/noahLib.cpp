@@ -57,6 +57,16 @@ void noahExit()
     deleteBgfxGlue();
 }
 
+u16 READ_LE_U16(const sPS1Pointer& ptr)
+{
+    return READ_LE_U16(ptr.getPointer());
+}
+
+u8 READ_LE_U8(const sPS1Pointer& ptr)
+{
+    return *(u8*)(ptr.getPointer());
+}
+
 u16 READ_LE_U16(const void* ptr)
 {
     return *(u16*)ptr;

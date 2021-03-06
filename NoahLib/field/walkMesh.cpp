@@ -8,7 +8,9 @@ sWalkMesh walkMesh;
 void sWalkMesh::init(const std::vector<u8>& input)
 {
     m0_count = READ_LE_U32(input.begin());
-    //assert(m0_count == 2);
+    assert(m0_count <= 4);
+
+    int numMaxMaterials = -1;
 
     m_blocks.resize(m0_count);
     for (int i=0; i<m0_count; i++)
@@ -40,21 +42,31 @@ void sWalkMesh::init(const std::vector<u8>& input)
             {
                 newTriangleData.m6_connectivity[j] = READ_LE_S16(startOfTriangleBlock + 6 + j * 2);
             }
-            newTriangleData.mC_flags = READ_LE_U16(startOfTriangleBlock + 0xC);
+            newTriangleData.mC_indexInWalkmeshData1 = READ_LE_U8(startOfTriangleBlock + 0xC);
+            newTriangleData.mD = READ_LE_U8(startOfTriangleBlock + 0xD);
+
+            numMaxMaterials = std::max<int>(numMaxMaterials, newTriangleData.mC_indexInWalkmeshData1);
         }
 
         newBlock.m_vertices.resize(maxVertexIndex + 1);
         for (int vertexId = 0; vertexId < maxVertexIndex + 1; vertexId ++)
         {
-            std::array<s16, 3>& vertice = newBlock.m_vertices[vertexId];
+            SVECTOR& vertice = newBlock.m_vertices[vertexId];
 
-            for (int j=0; j<3; j++)
-            {
-                vertice[j] = READ_LE_S16(input.begin() + block_vertex_start + vertexId * 4 * 2 + j * 2);
-            }
+            vertice.vx = READ_LE_S16(input.begin() + block_vertex_start + vertexId * 4 * 2 + 0);
+            vertice.vy = READ_LE_S16(input.begin() + block_vertex_start + vertexId * 4 * 2 + 2);
+            vertice.vz = READ_LE_S16(input.begin() + block_vertex_start + vertexId * 4 * 2 + 4);
+            vertice.pad = READ_LE_S16(input.begin() + block_vertex_start + vertexId * 4 * 2 + 6);
         }
     }
 
+    m_materials.reserve(numMaxMaterials);
+    u32 material_offset = READ_LE_U32(input.begin() + 4 + 0x10);
+    std::vector<u8>::const_iterator material_data = input.begin() + material_offset;
+    for (int i=0; i<numMaxMaterials; i++)
+    {
+        m_materials.push_back(READ_LE_U32(material_data + 4 * i));
+    }
 }
 
 
@@ -155,9 +167,9 @@ void sWalkMesh::bgfxRender(int viewIndex)
 
         for (int i=0; i<newBlock.m_vertices.size(); i++)
         {
-            pVertices[i].v[0] = newBlock.m_vertices[i][0];
-            pVertices[i].v[1] = newBlock.m_vertices[i][1];
-            pVertices[i].v[2] = newBlock.m_vertices[i][2];
+            pVertices[i].v[0] = newBlock.m_vertices[i].vx;
+            pVertices[i].v[1] = newBlock.m_vertices[i].vy;
+            pVertices[i].v[2] = newBlock.m_vertices[i].vz;
 
             pVertices[i].color[0] = 1.f;
             pVertices[i].color[1] = 0.f;

@@ -1444,7 +1444,7 @@ void fieldInspector_frame()
         if (ImGui::Button("Go!"))
         {
             fieldChangePrevented = 0;
-            requestFieldId0 = selectedField;
+            fieldMapNumber = selectedField;
             setVar(2, 0); // set boot var
             gInspectedFields[0]->reset();
             ImGui::CloseCurrentPopup();

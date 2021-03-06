@@ -21,6 +21,117 @@ bgfx::TextureHandle fieldDebugger_Depth = BGFX_INVALID_HANDLE;
 
 ImVec2 oldWindowSize = { -1,-1 };
 
+bgfx::ProgramHandle getLineShader();
+
+void drawCube(int viewIndex, float* modelMatrix)
+{
+    bgfx::setTransform(modelMatrix);
+    {
+        bgfx::VertexLayout layout;
+        layout
+            .begin()
+            .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
+            .add(bgfx::Attrib::Color0, 4, bgfx::AttribType::Float)
+            .end();
+
+        bgfx::TransientVertexBuffer vertexBuffer;
+        bgfx::TransientIndexBuffer indexBuffer;
+        bgfx::allocTransientBuffers(&vertexBuffer, layout, 8, &indexBuffer, 8 * 3);
+
+        struct sVertice
+        {
+            float v[3];
+            float color[4];
+        };
+
+        sVertice* pVertices = (sVertice*)vertexBuffer.data;
+        u16* pIndices = (u16*)indexBuffer.data;
+
+        for (int i=0; i<8; i++)
+        {
+            pVertices[i].color[0] = 1.f;
+            pVertices[i].color[1] = 1.f;
+            pVertices[i].color[2] = 0.f;
+            pVertices[i].color[3] = 1.f;
+        }
+
+        float halfScale = 10;
+
+        pVertices[0].v[0] = -halfScale;
+        pVertices[0].v[1] = 0;
+        pVertices[0].v[2] = -halfScale;
+
+        pVertices[1].v[0] = halfScale;
+        pVertices[1].v[1] = 0;
+        pVertices[1].v[2] = -halfScale;
+
+        pVertices[2].v[0] = halfScale;
+        pVertices[2].v[1] = 0;
+        pVertices[2].v[2] = halfScale;
+
+        pVertices[3].v[0] = -halfScale;
+        pVertices[3].v[1] = 0;
+        pVertices[3].v[2] = halfScale;
+
+        pVertices[4].v[0] = -halfScale;
+        pVertices[4].v[1] = -2 * halfScale;
+        pVertices[4].v[2] = -halfScale;
+
+        pVertices[5].v[0] = halfScale;
+        pVertices[5].v[1] = -2 * halfScale;
+        pVertices[5].v[2] = -halfScale;
+
+        pVertices[6].v[0] = halfScale;
+        pVertices[6].v[1] = -2 * halfScale;
+        pVertices[6].v[2] = halfScale;
+
+        pVertices[7].v[0] = -halfScale;
+        pVertices[7].v[1] = -2 * halfScale;
+        pVertices[7].v[2] = halfScale;
+
+        pIndices[0] = 0;
+        pIndices[1] = 1;
+        pIndices[2] = 1;
+        pIndices[3] = 2;
+        pIndices[4] = 2;
+        pIndices[5] = 3;
+        pIndices[6] = 3;
+        pIndices[7] = 0;
+
+        pIndices[8+0] = 4+0;
+        pIndices[8+1] = 4+1;
+        pIndices[8+2] = 4+1;
+        pIndices[8+3] = 4+2;
+        pIndices[8+4] = 4+2;
+        pIndices[8+5] = 4+3;
+        pIndices[8+6] = 4+3;
+        pIndices[8+7] = 4+0;
+
+        pIndices[16 + 0] = 0;
+        pIndices[16 + 1] = 4 + 0;
+        pIndices[16 + 2] = 1;
+        pIndices[16 + 3] = 4 + 1;
+        pIndices[16 + 4] = 2;
+        pIndices[16 + 5] = 4 + 2;
+        pIndices[16 + 6] = 3;
+        pIndices[16 + 7] = 4 + 3;
+
+        bgfx::setState(0 | BGFX_STATE_WRITE_RGB
+            | BGFX_STATE_WRITE_A
+            | BGFX_STATE_WRITE_Z
+            | BGFX_STATE_DEPTH_TEST_LEQUAL
+            | BGFX_STATE_CULL_CW
+            | BGFX_STATE_MSAA
+            | BGFX_STATE_PT_LINES
+        );
+
+        bgfx::setVertexBuffer(0, &vertexBuffer);
+        bgfx::setIndexBuffer(&indexBuffer);
+
+        bgfx::submit(viewIndex, getLineShader());
+    }
+}
+
 void fieldViewDebug_step()
 {
     if (ImGui::Begin("Field 3d view"))
@@ -221,20 +332,38 @@ void fieldViewDebug_step()
 
         for (int i=0; i<fieldEntityArray.size(); i++)
         {
+            float rot[3];
+            rot[0] = bx::kPi * -fieldEntityArray[i].m50_modelRotation[0] / (float)(0x800);
+            rot[1] = bx::kPi * -fieldEntityArray[i].m50_modelRotation[1] / (float)(0x800);
+            rot[2] = bx::kPi * -fieldEntityArray[i].m50_modelRotation[2] / (float)(0x800);
+
+            float rotationMatrix[16];
+            bx::mtxRotateXYZ(rotationMatrix, rot[0], rot[1], rot[2]);
+
+            float position[3];
+            if (fieldEntityArray[i].m4C_scriptEntity)
+            {
+                position[0] = fieldEntityArray[i].m4C_scriptEntity->m20_position.vx >> 16;
+                position[1] = fieldEntityArray[i].m4C_scriptEntity->m20_position.vy >> 16;
+                position[2] = fieldEntityArray[i].m4C_scriptEntity->m20_position.vz >> 16;
+            }
+            else
+            {
+                position[0] = fieldEntityArray[i].mC_matrix.t[0];
+                position[1] = fieldEntityArray[i].mC_matrix.t[1];
+                position[2] = fieldEntityArray[i].mC_matrix.t[2];
+            }
+
+            float finalMatrix[16];
+            bx::mtxSRT(finalMatrix, 1, 1, 1, rot[0], rot[1], rot[2], position[0], position[1], position[2]);
+
             if (!(fieldEntityArray[i].m58_flags & 0x40))
             {
-                float rot[3];
-                rot[0] = bx::kPi * -fieldEntityArray[i].m50_modelRotation[0] / (float)(0x800);
-                rot[1] = bx::kPi * -fieldEntityArray[i].m50_modelRotation[1] / (float)(0x800);
-                rot[2] = bx::kPi * -fieldEntityArray[i].m50_modelRotation[2] / (float)(0x800);
-
-                float rotationMatrix[16];
-                bx::mtxRotateXYZ(rotationMatrix, rot[0], rot[1], rot[2]);
-
-                float finalMatrix[16];
-                bx::mtxSRT(finalMatrix, 1, 1, 1, rot[0], rot[1], rot[2], fieldEntityArray[i].mC_matrix.t[0], fieldEntityArray[i].mC_matrix.t[1], fieldEntityArray[i].mC_matrix.t[2]);
-
                 fieldEntityArray[i].m0->m4_pModelBlock->bgfxRender(fieldDebugger_bgfxView, finalMatrix);
+            }
+            else
+            {
+                drawCube(fieldDebugger_bgfxView, finalMatrix);
             }
         }
     }
