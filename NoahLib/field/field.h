@@ -276,12 +276,119 @@ struct sFieldEntity
     //size 0x5C
 };
 extern std::vector<sFieldEntity> fieldEntityArray;
+extern std::array<s32, 3> currentParty;
+extern std::vector<sFieldActorSetupParams> fieldActorSetupParams;
 
 extern s32 fieldMapNumber;
 extern s32 fieldChangePrevented;
 extern s32 fieldChangePrevented2;
 extern s32 currentFieldId0;
 
-void setVar(int varIndex, s16 value);
+extern std::array<s16, 1024> fieldVars;
+extern std::vector<u8> rawFieldScriptData;
 
+extern int breakCurrentScript;
+extern int fieldExectuteMaxCycles;
+extern int fieldDebugDisable;
+
+extern sFieldEntity* pCurrentFieldEntity;
+extern int fieldScriptInitVar0;
+extern int currentScriptFinished;
+
+extern int asyncLoadingVar1;
+extern int asyncLoadingVar2;
+extern int fieldExecuteVar1;
+
+extern const std::array<u16, 8> actorDirectionTable3;
+extern std::array<sFieldActorSetupParams, 3> partyCharacterBuffers;
+extern s16 pcInitVar0;
+extern s32 pcInitVar1;
+extern std::array<int, 11> PCToActorArray;
+extern const std::array<s8, 12> characterMappingTable;
+extern s16 pcInitVar2;
+extern std::array<int, 3> unkPartyTable;
+
+extern s32 opA0_var0;
+extern s32 opA0_var1;
+extern s32 desiredCameraPosition[3];
+extern s32 cameraTargetOverride[3];
+extern s32 desiredCameraTarget[3];
+extern s32 cameraPositionOverride[3];
+extern s32 cameraInterpolationTargetStep[3];
+extern s32 cameraInterpolationTargetStartPosition[3];
+extern s32 cameraInterpolationPositionStep[3];
+extern s32 cameraInterpolationStartPosition[3];
+extern s32 cameraEye[3];
+extern s32 cameraAt[3];
+extern u16 cameraInterpolationFlags;
+extern s32 cameraInterpolationTargetNumSteps;
+extern s32 cameraInterpolationPositionNumSteps;
+
+extern u8 OPX_50Param;
+extern u8 OPX_52Param;
+extern u16 OPX_80Params[8];
+extern s32 OPX_81Params[3];
+extern s8 OPX_82Param0[4];
+extern s8 OPX_82Param1[4];
+extern s8 OPX_82Param2[4];
+extern s16 OPX_82Param3[3];
+extern s16 OPX_82Param4;
+extern s32 OPX_86Param;
+extern s32 OPX8E_param0;
+extern s32 OPX8E_param1;
+extern s8 OPX_E0Param;
+extern u8 OPE7_param[3];
+
+extern int playMusicAuthorized;
+extern int musicVar1;
+extern int musicVar2;
+extern int currentlyPlayingMusic;
+
+extern s32 fieldExecuteVar2;
+extern s32 fieldExecuteVar3;
+extern s16 fieldRandomBattleVar;
+
+extern const std::array<u16, 8> actorDirectionTable;
+extern const std::array<u16, 8> actorDirectionTable3;
+
+extern s32 load2dAnimVar;
+extern s32 loadCompleted;
+
+extern u16 padButtonForScripts;
+extern std::array<s16, 4> fieldInitVar1;
+
+void playMusic(int musicId, int);
+void setupRGBCalcMode(int, int, int, int, int, int);
+u16 getScriptEntryPoint(int entityId, int scriptIndex);
+int isScriptAlreadyRunning(sFieldScriptEntity* pEntity, int scriptIndex);
+int findDialogWindowForCurrentActor(int*);
+void clearMusic();
+void clearMusic2();
+void OPX_13Sub(int);
+void updateGearState(int param_1);
+int getCurrentDiscNumber();
+int isLoadCompleted();
+void SetGeomScreen(s32);
+int getCharacter(int param_1);
+int findCharacterInParty(int param_1);
+
+int isAsyncLoadingProhibited();
+int findFreePartySlot(int param_1, int* param_2);
+void setVar(int varIndex, s16 value);
+void startPartyCharacterASyncLoading(int partyCharacter, int partySlot);
 void fieldEntryPoint();
+
+void setupSpecialAnimation(sFieldEntitySub4* param_1, sFieldActorSetupParams* param_2);
+void OP_INIT_ENTITY_SCRIPT_sub0(int actorId, int param_2, sFieldActorSetupParams* pSetup, int param_4, int param_5, int param_6, int param_7);
+void OP_INIT_ENTITY_SCRIPT_sub1();
+void setCurrentActor2DPosition(int posX, int posZ);
+void updateScriptActor3dRotation(int index);
+int getAngleSin(u32 param_1);
+int getAngleCos(u32 param_1);
+int spriteWalkToPositionOrActor(int param_1);
+void setCurrentActorRotation2(s16 param_1);
+int getCurrentActorRotation();
+void setCurrentActorTargetRotation(s16 param_1);
+void OP_21_sub(sFieldEntitySub4* param_1, int param_2);
+void setCurrentActorElevation(short param_1);
+

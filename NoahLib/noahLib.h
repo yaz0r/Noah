@@ -30,6 +30,10 @@ public:
         return m_pointer;
     }
 
+    bool operator == (const sPS1Pointer& other) {
+        return (other.m_pointer == m_pointer);
+    }
+
     sPS1Pointer operator + (unsigned int i) const
     {
         sPS1Pointer newPtr = *this;
