@@ -1,72 +1,7 @@
 #pragma once
 
 #include "fieldModel.h"
-
-struct sFP1616
-{
-    u32 value;
-
-    void set(s16 x, s16 y)
-    {
-        value = ((u16)x) * 0x10000 + (u16)y;
-    }
-
-    void get(s16& x, s16& y)
-    {
-        x = (s16)(value >> 16);
-        y = (s16)(value & 0xFFFF);
-    }
-};
-
-struct MATRIX
-{
-    std::array<std::array<s16, 3>, 3> m;
-    std::array<s32, 3> t;
-};
-
-struct sVec3
-{
-    s32 vx;
-    s32 vy;
-    s32 vz;
-};
-
-struct sVec2_s16
-{
-    s32 vx;
-    s32 vy;
-};
-
-typedef MATRIX sMatrix;
-
-struct sFieldActorSetupParams
-{
-    void init(std::vector<u8>::iterator& inputData)
-    {
-        rawData = &inputData[0];
-
-        m4_offset = READ_LE_U32(inputData + 4);
-        m4_pData.setPointer(&(*(inputData + m4_offset)));
-
-        m8_offset = READ_LE_U32(inputData + 8);
-        m8_pData.setPointer(&(*(inputData + m8_offset)));
-
-        mC_offset = READ_LE_U32(inputData + 0xC);
-        mC_pData.setPointer(&(*(inputData + mC_offset)));
-
-        u32 end = READ_LE_U32(inputData + 0x10);
-    }
-
-    u8* rawData;
-
-    u32 m4_offset;
-    sPS1Pointer m4_pData;
-    u32 m8_offset;
-    sPS1Pointer m8_pData;
-    u32 mC_offset;
-    sPS1Pointer mC_pData;
-
-};
+#include "kernel/math.h"
 
 struct sFieldEntitySub0
 {
@@ -147,7 +82,7 @@ struct sFieldScriptEntity
     std::vector<s32> m118;
     s16 m11C;
     s16 m11E;
-    sFieldActorSetupParams* m120_special2dAnimation;
+    struct sFieldActorSetupParams* m120_special2dAnimation;
     std::vector<u8> m120_special2dAnimationRaw;
     s16 m124_special2dAnimationId;
     u8 m126;
@@ -172,100 +107,10 @@ struct sFieldScriptEntity
     // size 0x138
 };
 
-struct sFieldEntitySub4_F4
-{
-    s32 m0;
-    s32 m4;
-    s32 m8;
-    s16 mC;
-    sVec2_s16 mE_vramLocation;
-    s16 m14_actorId;
-    s32 m18;
-    //size ???
-};
-
-struct sFieldEntitySub4_124
-{
-    s8 m0;
-    s8 m1;
-    s16 m2;
-    s16 m4;
-    s16 m6;
-    //size 8
-};
-
-struct sFieldEntitySub4_B4
-{
-    SVECTOR m0_rotation;
-    SVECTOR m6_scale;
-    MATRIX m20;
-    u8* m2C;
-    u8* m30;
-    std::array<sFieldEntitySub4_124,8>* m34;
-    s32 m38;
-    s8 m3C;
-    s8 m3D;
-    //size ???
-};
-
-struct sFieldEntitySub4_110
-{
-    sPS1Pointer m0;
-    sVec2_s16 m4_vramLocation;
-    sFP1616 m8;
-    sPS1Pointer mC;
-    sPS1Pointer m10;
-    // size ???
-};
-
-struct sFieldEntitySub4
-{
-    sVec3 m0_position;
-    sVec3 mC;
-    s32 m18;
-    s32 m1C;
-    sFieldEntitySub4_B4* m20;
-    sFieldEntitySub4_110* m24;
-    s8 m2B;
-    s16 m2C_scale;
-    s16 m30;
-    s16 m32;
-    s16 m34;
-    s16 m3A;
-    u32 m3C;
-    u32 m40;
-    sFieldActorSetupParams* m44;
-    sFieldActorSetupParams* m48;
-    sFieldActorSetupParams* m4C_specialAnimation;
-    s32 m50;
-    sPS1Pointer m54;
-    sPS1Pointer m58;
-    sPS1Pointer m60;
-    sPS1Pointer m64_spriteByteCode;
-    void(*m68)(sFieldEntitySub4*);
-    sFieldEntitySub4* m6C;
-    s32 m70;
-    sFieldEntitySub4_F4* m7C;
-    s16 m80;
-    s16 m82;
-    s16 m84;
-    u16 m86_thisSize;
-    s8 m8C;
-    u16 m9E;
-    u32 mAC;
-    u32 mA8;
-    u32 mB0;
-    sFieldEntitySub4_B4 mB4;
-    sFieldEntitySub4_F4 mF4;
-    sFieldEntitySub4_110 m110;
-    std::array<sFieldEntitySub4_124,8> m124;
-    //size 0x164
-};
-
 struct sFieldEntity
 {
     sFieldEntitySub0* m0;
-    sFieldEntitySub4* m4_pVramSpriteSheet;
+    struct sFieldEntitySub4* m4_pVramSpriteSheet;
     sFieldEntity2dSprite* m8_2dSprite;
     sMatrix mC_matrix;
     sMatrix m2C_matrixBackup;
@@ -378,8 +223,8 @@ void setVar(int varIndex, s16 value);
 void startPartyCharacterASyncLoading(int partyCharacter, int partySlot);
 void fieldEntryPoint();
 
-void setupSpecialAnimation(sFieldEntitySub4* param_1, sFieldActorSetupParams* param_2);
-void OP_INIT_ENTITY_SCRIPT_sub0(int actorId, int param_2, sFieldActorSetupParams* pSetup, int param_4, int param_5, int param_6, int param_7);
+void setupSpecialAnimation(sFieldEntitySub4* param_1, struct sFieldActorSetupParams* param_2);
+void OP_INIT_ENTITY_SCRIPT_sub0(int actorId, int param_2, struct sFieldActorSetupParams* pSetup, int param_4, int param_5, int param_6, int param_7);
 void OP_INIT_ENTITY_SCRIPT_sub1();
 void setCurrentActor2DPosition(int posX, int posZ);
 void updateScriptActor3dRotation(int index);
@@ -389,6 +234,5 @@ int spriteWalkToPositionOrActor(int param_1);
 void setCurrentActorRotation2(s16 param_1);
 int getCurrentActorRotation();
 void setCurrentActorTargetRotation(s16 param_1);
-void OP_21_sub(sFieldEntitySub4* param_1, int param_2);
 void setCurrentActorElevation(short param_1);
 

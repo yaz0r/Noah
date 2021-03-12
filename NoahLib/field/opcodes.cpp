@@ -4,6 +4,8 @@
 #include "kernel/filesystem.h"
 #include "kernel/gameState.h"
 #include "opcodeTables.h"
+#include "fieldGraphicObject.h"
+#include "sprite/spriteSetup.h"
 
 void OP_JUMP_IF()
 {

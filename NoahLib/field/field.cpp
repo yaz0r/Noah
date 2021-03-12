@@ -10,6 +10,8 @@
 #include "fieldDebugger/fieldInspector.h"
 #include "fieldScriptSupport.h"
 #include "opcodeTables.h"
+#include "fieldGraphicObject.h"
+#include "sprite/spriteSetup.h"
 
 #include <array>
 
@@ -4032,12 +4034,6 @@ void playMusic(int musicId, int)
 s32 fieldExecuteVar2 = 0;
 s32 fieldExecuteVar3 = 0;
 s16 fieldRandomBattleVar = 0;
-
-void OP_21_sub(sFieldEntitySub4* param_1, int param_2)
-{
-    param_1->mAC = param_1->mAC & 0xfff8007f | (param_2 & 0xfff) << 7;
-}
-
 
 
 void setCurrentActorElevation(short param_1)
