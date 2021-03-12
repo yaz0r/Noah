@@ -92,4 +92,19 @@ struct sFieldEntitySub4
 };
 
 void OP_21_sub(sFieldEntitySub4* param_1, int param_2);
+void OP_INIT_ENTITY_SCRIPT_sub0Sub9(sFieldEntitySub4* param_1);
+sFieldEntitySub4* initFieldEntitySub4(sFieldEntitySub4* param_1, sFieldActorSetupParams* pSetup, int param_3, int param_4, int vramX, int vramY, int param_7);
+void OP_INIT_ENTITY_SCRIPT_sub0Sub6(sFieldEntitySub4* param_1, int param_2);
+void OP_INIT_ENTITY_SCRIPT_sub0Sub7(sFieldEntitySub4* param1, int param2);
+
+void deleteFieldEntitySub4(sFieldEntitySub4* param_1);
+sFieldEntitySub4* createFieldEntitySub4(sFieldActorSetupParams* pSetup, int param_2, int param_3, int vramX, int vramY, int param_6);
+sFieldEntitySub4* createFieldEntitySub4Ext(sFieldActorSetupParams* pSetup, int param_2, int param_3, int vramX, int vramY, int param_6, int param_7);
+
+void OP_INIT_ENTITY_SCRIPT_sub0Sub3(sFieldEntitySub4* param_1, int param_2);
+void OP_INIT_ENTITY_SCRIPT_sub0Sub4(sFieldEntitySub4* param_1, int param_2, int* param_3, int* param_4, int* param_5);
+void OP_INIT_ENTITY_SCRIPT_sub0Sub5(sFieldEntitySub4* param1, int param2);
+
+void OP_INIT_ENTITY_SCRIPT_sub0Sub8(sFieldEntitySub4* param1, void(*callback)(sFieldEntitySub4*));
+void fieldActorCallback(sFieldEntitySub4* pThis);
 

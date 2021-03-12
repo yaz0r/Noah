@@ -1,8 +1,5 @@
 #pragma once
 
-#include <vector>
-#include <array>
-
 struct sWalkMesh
 {
     u32 m0_count;

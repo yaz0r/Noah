@@ -1,8 +1,5 @@
 #pragma once
 
-#include <vector>
-#include <array>
-
 #include "bgfx/bgfx.h"
 
 struct sDrawCall

@@ -28,3 +28,6 @@ struct sFieldActorSetupParams
     sPS1Pointer mC_pData;
 
 };
+
+extern std::vector<sFieldActorSetupParams> fieldActorSetupParams;
+

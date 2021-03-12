@@ -1,8 +1,5 @@
 #pragma once
 
-#include <string.h>
-#include <array>
-
 struct sOpcodeArg
 {
     enum type

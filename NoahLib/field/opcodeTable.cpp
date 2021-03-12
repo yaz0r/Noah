@@ -2,8 +2,6 @@
 #include "opcodeTables.h"
 #include "opcodes.h"
 
-#include <array>
-
 std::array<tOpcode, 256> fieldScriptOpcodes;
 std::array<tOpcode, 256> fieldScriptOpcodes_EX;
 
@@ -124,3 +122,13 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0xA2] = OPX_A2;
     fieldScriptOpcodes_EX[0xE0] = OPX_E0;
 }
+
+class fakeConstructor
+{
+public:
+    fakeConstructor()
+    {
+        initOpcodes();
+    }
+} gFakeConstructor;
+

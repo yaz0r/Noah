@@ -1,7 +1,5 @@
 #pragma once
 
-#include <array>
-
 struct sFP1616
 {
     u32 value;
@@ -38,3 +36,9 @@ struct sVec2_s16
 };
 
 typedef MATRIX sMatrix;
+
+void createRotationMatrix(SVECTOR*, MATRIX*);
+MATRIX* ScaleMatrixL(MATRIX* m, VECTOR* v);
+MATRIX* ScaleMatrix(MATRIX* m, VECTOR* v);
+void MulMatrix0(MATRIX* m0, MATRIX* m1, MATRIX* m2);
+

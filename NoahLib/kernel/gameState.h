@@ -1,7 +1,5 @@
 #pragma once
 
-#include <array>
-
 struct sGameStateA4
 {
     s16 m24_HP;

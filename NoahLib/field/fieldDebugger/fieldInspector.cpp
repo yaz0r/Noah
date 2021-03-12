@@ -15,9 +15,6 @@
 
 #include "../imgui_club/imgui_memory_editor/imgui_memory_editor.h"
 
-#include <array>
-#include <vector>
-
 #include "fieldDebugInfo.h"
 
 int fieldIdForDebugger = -1;

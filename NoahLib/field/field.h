@@ -122,7 +122,6 @@ struct sFieldEntity
 };
 extern std::vector<sFieldEntity> fieldEntityArray;
 extern std::array<s32, 3> currentParty;
-extern std::vector<sFieldActorSetupParams> fieldActorSetupParams;
 
 extern s32 fieldMapNumber;
 extern s32 fieldChangePrevented;
@@ -189,6 +188,7 @@ extern int musicVar1;
 extern int musicVar2;
 extern int currentlyPlayingMusic;
 
+extern int initFieldVar3;
 extern s32 fieldExecuteVar2;
 extern s32 fieldExecuteVar3;
 extern s16 fieldRandomBattleVar;

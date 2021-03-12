@@ -7,8 +7,6 @@
 
 #include "field/walkMesh.h"
 
-#include <array>
-
 #include "ImGuizmo.h"
 #include "SDL_scancode.h"
 #include "field/fieldModel.h"
