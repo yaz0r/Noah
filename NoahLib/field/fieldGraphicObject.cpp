@@ -5,15 +5,382 @@
 
 int OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1_var = 0x2000;
 int initFieldVar3 = 0;
-s8 initFieldVar1 = 0;
+s8 isBattleOverlayLoaded = 0;
 s32 initFieldVar2 = 0;
 int initFieldVar4 = 0;
 int initFieldVar5 = 0;
 int loadVramSpriteParam = 0;
 
+sFieldEntitySub4* executeSpriteBytecode2Sub0Var = nullptr;
+sFieldEntitySub4_110 sFieldEntitySub4_110_8005a474;
+sFieldEntitySub4_110 sFieldEntitySub4_110_8006be10;
+
 void OP_21_sub(sFieldEntitySub4* param_1, int param_2)
 {
     param_1->mAC = param_1->mAC & 0xfff8007f | (param_2 & 0xfff) << 7;
+}
+
+void OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1Sub1(sFieldEntitySub4* param_1)
+{
+    int iVar1;
+    int iVar2;
+
+    iVar1 = 0;
+    do {
+        (*param_1->m20->m34)[iVar1].m0 = 0;
+        (*param_1->m20->m34)[iVar1].m1 = 0;
+        (*param_1->m20->m34)[iVar1].m2 = 0;
+        (*param_1->m20->m34)[iVar1].m4 = 0;
+        (*param_1->m20->m34)[iVar1].m6 = 0;
+        iVar2 = iVar1 + 1;
+        iVar1 = iVar2;
+    } while (iVar2 != 8);
+    return;
+}
+
+void executeSpriteBytecode2Sub0Sub0sub0(sFieldEntitySub4* param_1, int param_2, sFieldEntitySub4_110* param_3)
+{
+    sPS1Pointer psVar4 = param_3->m0 + READ_LE_U16(param_3->m0 + param_2 * 2);
+    u32 bVar1 = READ_LE_U8(psVar4);
+    u32 uVar7 = 0;
+    sPS1Pointer pbVar4 = psVar4 + (bVar1 & 0x3f) * 2 + 4;
+    if ((bVar1 & 0x3f) != 0) {
+        do {
+            while (true) {
+                u8 bVar2 = READ_LE_U8(psVar4);
+                if ((bVar2 & 0x80) == 0) break;
+                sPS1Pointer pbVar5 = pbVar4 + 1;
+                if ((bVar2 & 0x40) == 0) {
+                    if ((bVar2 & 1) != 0) {
+                        pbVar5 = pbVar4 + 2;
+                    }
+                    pbVar4 = pbVar5;
+                    if ((bVar2 & 2) != 0) {
+                        pbVar4 = pbVar4 + 1;
+                    }
+                }
+                else {
+                    u32 uVar6 = bVar2 & 7;
+                    if (param_1->m20->m34 == nullptr) {
+                        param_1->m20->m34 = new std::array<sFieldEntitySub4_124, 8>;
+                        OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1Sub1(param_1);
+                    }
+                    if ((bVar2 & 0x20) != 0) {
+                        (*param_1->m20->m34)[uVar6].m0 = READ_LE_U8(pbVar5);
+                        (*param_1->m20->m34)[uVar6].m1 = READ_LE_U8(pbVar4 + 2);
+                        pbVar5 = pbVar4 + 3;
+                    }
+                    pbVar4 = pbVar5;
+                    if ((bVar2 & 0x10) == 0) {
+                        (*param_1->m20->m34)[uVar6].m6 = 0;
+                    }
+                    else {
+                        bVar2 = READ_LE_U8(pbVar4);
+                        pbVar4 = pbVar4 + 1;
+                        (*param_1->m20->m34)[uVar6].m6 = (ushort)bVar2 << 4;
+                    }
+                }
+            }
+            if ((bVar1 & 0x80) != 0) {
+                pbVar4 = pbVar4 + 2;
+            }
+            uVar7 = uVar7 + 1;
+            pbVar4 = pbVar4 + 3;
+        } while (uVar7 != (bVar1 & 0x3f));
+    }
+}
+
+void executeSpriteBytecode2Sub0Sub0(sFieldEntitySub4* param_1, int param_2, sFieldEntitySub4_110* param_3)
+{
+    sPS1Pointer puVar4 = param_3->m0;
+    if (param_2 < (int)((READ_LE_U16(puVar4) & 0x1ff) + 1)) {
+        if ((READ_LE_U16(puVar4) & 0x8000) == 0) {
+            u8 bVar1 = READ_LE_U8(puVar4 + READ_LE_U16(puVar4 + param_2 * 2));
+            uint uVar7 = 0;
+            sPS1Pointer pbVar5 = puVar4 + READ_LE_U16(puVar4 + param_2 * 2) + (bVar1 & 0x3f) * 4 + 6;
+            if ((bVar1 & 0x3f) != 0) {
+                do {
+                    while (true) {
+                        u8 bVar2 = READ_LE_U8(pbVar5);
+                        if ((bVar2 & 0x80) == 0) break;
+                        sPS1Pointer pbVar6 = pbVar5 + 1;
+                        if ((bVar2 & 0x40) == 0) {
+                            if ((bVar2 & 1) != 0) {
+                                pbVar6 = pbVar5 + 2;
+                            }
+                            pbVar5 = pbVar6;
+                            if ((bVar2 & 2) != 0) {
+                                pbVar5 = pbVar5 + 1;
+                            }
+                        }
+                        else {
+                            if (param_1->m20->m34 == nullptr) {
+                                param_1->m20->m34 = new std::array<sFieldEntitySub4_124, 8>;
+                                OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1Sub1(param_1);
+                            }
+                            u32 uVar4 = bVar2 & 7;
+                            if ((bVar2 & 0x20) != 0) {
+                                (*param_1->m20->m34)[uVar4].m0 = READ_LE_U8(pbVar6);
+                                (*param_1->m20->m34)[uVar4].m1 = READ_LE_U8(pbVar5+ 2);
+                                pbVar6 = pbVar5 + 3;
+                            }
+                            pbVar5 = pbVar6;
+                            if ((bVar2 & 0x10) == 0) {
+                                (*param_1->m20->m34)[uVar4].m6 = 0;
+                            }
+                            else {
+                                bVar2 = READ_LE_U8(pbVar5);
+                                pbVar5 = pbVar5 + 1;
+                                (*param_1->m20->m34)[uVar4].m6 = (ushort)bVar2 << 4;
+                            }
+                        }
+                    }
+                    if ((bVar1 & 0x80) != 0) {
+                        pbVar5 = pbVar5 + 2;
+                    }
+                    uVar7 = uVar7 + 1;
+                    pbVar5 = pbVar5 + 3;
+                } while (uVar7 != (bVar1 & 0x3f));
+            }
+        }
+        else {
+            executeSpriteBytecode2Sub0Sub0sub0(param_1, param_2, param_3);
+        }
+    }
+}
+
+void executeSpriteBytecode2Sub0(sFieldEntitySub4* param_1, short param_2)
+{
+    sFieldEntitySub4* psVar1;
+    sFieldEntitySub4* psVar2;
+
+    if ((param_1->m3C & 3) == 1) {
+        if (((param_1->m40 >> 0x14 & 1) != 0) && (param_1->m40 = param_1->m40 & 0xffefffff, param_1->m20->m34 != nullptr)) {
+            OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1Sub1(param_1);
+        }
+        psVar2 = executeSpriteBytecode2Sub0Var;
+        psVar1 = executeSpriteBytecode2Sub0Var;
+        if ((param_1->m40 >> 0x11 & 1) != 0) {
+            while (psVar1 != nullptr) {
+                if (psVar1 == param_1) {
+                    sFieldEntitySub4_110* psVar3 = param_1->m24;
+                    if (((psVar3 != &sFieldEntitySub4_110_8005a474) && (psVar3 != &sFieldEntitySub4_110_8006be10)) && ((param_1->m40 >> 0x13 & 1) == 0)) {
+                        executeSpriteBytecode2Sub0Sub0(param_1, param_1->m34, psVar3);
+                    }
+                    param_1->m34 = param_2;
+                    return;
+                }
+                psVar1 = psVar1->m20->m38;
+            }
+        }
+        param_1->m34 = param_2;
+        executeSpriteBytecode2Sub0Var = param_1;
+        param_1->m40 = param_1->m40 | 0x20000;
+        param_1->m20->m38 = psVar2;
+    }
+    else {
+        param_1->m34 = 0;
+    }
+}
+
+void executeSpriteBytecode2Sub1(sFieldEntitySub4* param_1)
+{
+    ushort uVar1;
+    uint uVar2;
+
+    uVar2 = param_1->mA8 >> 0xb & 0x3f;
+    if (false) {
+        uVar2 = 0;
+    }
+    uVar1 = READ_LE_U16(param_1->m54 + uVar2 * 2);
+    if ((uVar1 & 0x200) == 0) {
+        uVar2 = param_1->mAC & 0xfffffff7;
+    }
+    else {
+        uVar2 = param_1->mAC | 8;
+    }
+    param_1->mAC = uVar2;
+    param_1->m3C = param_1->m3C & 0xfffffff7 | (param_1->mAC >> 3 & 1 ^ param_1->mAC >> 2 & 1) << 3;
+    executeSpriteBytecode2Sub0(param_1, uVar1 & 0x1ff);
+    return;
+}
+
+void executeSpriteBytecode2Sub5(sFieldEntitySub4* param_1, u8 param)
+{
+    param_1->m8E[--param_1->m8C] = param;
+}
+
+void executeSpriteBytecode2Extended(sFieldEntitySub4* param_1, int bytecode, sPS1Pointer& param_3)
+{
+    switch (bytecode & 0xff) {
+    case 0xB4:
+        executeSpriteBytecode2Sub5(param_1, READ_LE_U8(param_3));
+        break;
+    default:
+        assert(0);
+    }
+}
+
+const std::array<u8, 256> sizePerBytecodeTable = {
+    0x10, 0xE7, 0x2E, 0x70,
+    0x50, 0x10, 0x3C, 0x70,
+    0xFF, 0x7F, 0x50, 0x90,
+    0xA0, 0x10, 0x58, 0x10,
+    0xFB, 0x50, 0x90, 0x9C,
+    0x10, 0x16, 0x50, 0xA0,
+    0xE, 0x30, 0xA0, 0x30,
+    0x52, 0x30, 0x86, 0x30,
+    0x1F, 0xA2, 0xB0, 0x50,
+    0xD0, 0x9C, 0x30, 0x90,
+    0x30, 0x50, 0x30, 0x19,
+    0x0, 0x19, 0x3F, 0x50,
+    0x80, 0xBC, 0x30, 0xF2,
+    0x30, 0xA0, 0x90, 0x50,
+    0x90, 0xF0, 0x90, 0xFF,
+    0x7F, 0xFB, 0x3E, 0x31,
+    0x50, 0xF0, 0x18, 0x44,
+    0x41, 0x22, 0x31, 0x50,
+    0x50, 0xA0, 0xF0, 0xF0,
+    0x30, 0xFF, 0x8E, 0x31,
+    0x12, 0x91, 0xE2, 0x50,
+    0xF0, 0xF0, 0xF0, 0xF0,
+    0x50, 0xF0, 0x50, 0x70,
+    0xA0, 0x50, 0xBF, 0xA2,
+    0x70, 0x4E, 0x30, 0xE6,
+    0x11, 0x90, 0xF1, 0x90,
+    0xD1, 0x30, 0x92, 0xE,
+    0x30, 0x22, 0xFE, 0x11,
+    0x30, 0x62, 0x2E, 0x52,
+    0x4, 0x30, 0x30, 0x12,
+    0x32, 0x32, 0x30, 0xF2,
+    0x7C, 0x32, 0x0, 0x0,
+    0x1, 0x1, 0x1, 0x1,
+    0x1, 0x1, 0x1, 0x1,
+    0x1, 0x1, 0x1, 0x1,
+    0x1, 0x1, 0x1, 0x1,
+    0x1, 0x1, 0x1, 0x1,
+    0x1, 0x1, 0x1, 0x1,
+    0x1, 0x1, 0x1, 0x1,
+    0x1, 0x1, 0x1, 0x1,
+    0x2, 0x2, 0x2, 0x2,
+    0x2, 0x2, 0x2, 0x2,
+    0x2, 0x2, 0x2, 0x2,
+    0x2, 0x2, 0x2, 0x2,
+    0x2, 0x2, 0x2, 0x2,
+    0x2, 0x2, 0x2, 0x2,
+    0x2, 0x2, 0x2, 0x2,
+    0x2, 0x2, 0x2, 0x2,
+    0x2, 0x2, 0x2, 0x2,
+    0x2, 0x2, 0x2, 0x2,
+    0x3, 0x3, 0x3, 0x3,
+    0x3, 0x3, 0x3, 0x3,
+    0x3, 0x3, 0x3, 0x3,
+    0x3, 0x3, 0x3, 0x3,
+    0x3, 0x3, 0x3, 0x3,
+    0x3, 0x3, 0x3, 0x3,
+    0x3, 0x3, 0x3, 0x3,
+    0x3, 0x3, 0x3, 0x3,
+    0x3, 0x3, 0x3, 0x3,
+    0x3, 0x3, 0x3, 0x3,
+    0x3, 0x4, 0x4, 0x4,
+    0x4, 0x4, 0x4, 0x4,
+    0x4, 0x4, 0x4, 0x4,
+    0x4, 0x4, 0x4, 0x4,
+};
+
+void executeSpriteBytecode2(sFieldEntitySub4* param_1)
+{
+    if (isBattleOverlayLoaded != '\0') {
+        assert(0);
+        return;
+    }
+
+    do
+    {
+        if (param_1->m9E != 0)
+        {
+            return;
+        }
+
+        u8 bytecode = READ_LE_U8(param_1->m64_spriteByteCode);
+        sPS1Pointer psVar15 = param_1->m64_spriteByteCode + 1;
+        if (bytecode < 0x80)
+        {
+            param_1->m64_spriteByteCode = psVar15;
+
+            int unaff_s3;
+            if (bytecode < 0x10)
+            {
+                assert(0);
+            }
+            else if (bytecode < 0x20)
+            {
+                param_1->mA8 = param_1->mA8 & 0xfffe07ff | ((param_1->mA8 >> 0xb & 0x3f) + 1 & 0x3f) << 0xb;
+                executeSpriteBytecode2Sub1(param_1);
+                unaff_s3 = (bytecode & 0xf) + 1;
+            }
+            else if (bytecode < 0x30)
+            {
+                assert(0);
+            }
+
+            if (bytecode < 0x40)
+            {
+                unaff_s3 = (bytecode & 0xf) + 1;
+            }
+
+            int iVar12 = unaff_s3 * (param_1->mAC >> 7 & 0xfff);
+            if (iVar12 < 0) {
+                iVar12 = iVar12 + 0xff;
+            }
+            iVar12 = iVar12 >> 8;
+            if (iVar12 == 0) {
+                iVar12 = 1;
+            }
+
+            int temp1 = param_1->mA8 & 0xf03fffff;
+            int temp2 = (param_1->mA8 >> 0x16 & 0x3f) + 1 & 0x3f;
+            param_1->m9E = param_1->m9E + (short)iVar12;
+            param_1->mA8 = temp1 | temp2 << 0x16;
+
+            if (temp2 != 0)
+            {
+                return;
+            }
+
+            param_1->mA8 = temp1 | 0xfc00000;
+            return;
+        }
+
+        if ((bytecode - 0x80) > 0x7B)
+        {
+            assert(0);
+        }
+
+        switch (bytecode)
+        {
+        case 0x80:
+        case 0x81:
+        case 0x82:
+        case 0x85:
+        case 0x87:
+        case 0x8E:
+        case 0x98:
+        case 0xA7:
+        case 0xBE:
+        case 0xC8:
+        case 0xD4:
+        case 0xE1:
+        case 0xE2:
+        case 0xE4:
+        case 0xFA:
+            assert(0);
+        default:
+            executeSpriteBytecode2Extended(param_1, bytecode, psVar15);
+            param_1->m64_spriteByteCode = param_1->m64_spriteByteCode + sizePerBytecodeTable[bytecode];
+            break;
+        }
+    } while (1);
 }
 
 void OP_INIT_ENTITY_SCRIPT_sub0Sub9(sFieldEntitySub4* param_1)
@@ -26,8 +393,7 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub9(sFieldEntitySub4* param_1)
         do {
             sVar1 = param_1->m9E;
             if ((param_1->m9E != 0) && (param_1->m9E = sVar1 + -1, sVar1 == 1)) {
-                //executeSpriteBytecode2(param_1);
-                MissingCode();
+                executeSpriteBytecode2(param_1);
             }
             iVar2 = iVar2 + 1;
         } while (iVar2 != initFieldVar3 + 1);
@@ -47,8 +413,8 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1Sub0(sFieldEntitySub4* param_1)
         local_70.vx = param_1->m20->m6_scale.vx;
         local_70.vy = param_1->m20->m6_scale.vy;
         local_70.vz = param_1->m20->m6_scale.vz;
-        createRotationMatrix(&param_1->m20->m0_rotation, &param_1->m20->m20);
-        ScaleMatrixL(&param_1->m20->m20, &local_70);
+        createRotationMatrix(&param_1->m20->m0_rotation, &param_1->m20->mC);
+        ScaleMatrixL(&param_1->m20->mC, &local_70);
     }
     else {
         tempMatrix.m[0][0] = 0x1000;
@@ -64,32 +430,14 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1Sub0(sFieldEntitySub4* param_1)
         local_60.vz = (int)param_1->m20->m6_scale.vz;
         ScaleMatrixL(&tempMatrix, &local_60);
         createRotationMatrix(&param_1->m20->m0_rotation, &tempMatrix2);
-        MulMatrix0(&tempMatrix2, &tempMatrix, &param_1->m20->m20);
+        MulMatrix0(&tempMatrix2, &tempMatrix, &param_1->m20->mC);
     }
     local_70.vx = (uint)((ushort)param_1->m3A >> 1);
     if (param_1->m3A != 0) {
         local_70.vy = (uint)((ushort)param_1->m3A >> 1);
         local_70.vz = (uint)((ushort)param_1->m3A >> 1);
-        ScaleMatrix(&param_1->m20->m20, &local_70);
+        ScaleMatrix(&param_1->m20->mC, &local_70);
     }
-}
-
-void OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1Sub1(sFieldEntitySub4* param_1)
-{
-    int iVar1;
-    int iVar2;
-
-    iVar1 = 0;
-    do {
-        (*param_1->m20->m34)[iVar1].m0 = 0;
-        (*param_1->m20->m34)[iVar1].m1 = 0;
-        (*param_1->m20->m34)[iVar1].m2 = 0;
-        (*param_1->m20->m34)[iVar1].m4 = 0;
-        (*param_1->m20->m34)[iVar1].m6 = 0;
-        iVar2 = iVar1 + 1;
-        iVar1 = iVar2;
-    } while (iVar2 != 8);
-    return;
 }
 
 void initFieldEntitySub4Sub3(sFieldEntitySub4* param_1, int param_2)
@@ -169,14 +517,14 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1(sFieldEntitySub4* param_1, const sPS1Poi
             OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1Sub0(param_1);
         }
         if ((flags >> 0xd & 1) == 0) {
-            if (initFieldVar1 != '\0') {
+            if (isBattleOverlayLoaded != '\0') {
                 initFieldEntitySub4Sub3(param_1, (short)OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1_var);
                 goto LAB_800236f4;
             }
         }
         else {
         LAB_800236f4:
-            if (initFieldVar1 != '\0') {
+            if (isBattleOverlayLoaded != '\0') {
                 OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1Sub0(param_1);
             }
         }
@@ -291,7 +639,7 @@ void initFieldEntitySub4Sub5Sub0(sFieldEntitySub4_110* param_1, sFieldActorSetup
     param_1->m4_vramLocation = param_3_vramLocation;
     param_1->m8 = param_4;
     param_1->mC = param_2->mC_pData;
-    cVar2 = initFieldVar1;
+    cVar2 = isBattleOverlayLoaded;
     param_1->m0 = param_2->m8_pData;
     initFieldVar4 = 0;
     param_1->m10 = param_2->m4_pData;
@@ -335,7 +683,7 @@ void initFieldEntitySub4Sub5(sFieldEntitySub4* param_1, sFieldActorSetupParams* 
             param_1->m44 = param_2;
             param_1->m3C = param_1->m3C | 0x40000000;
         }
-        if (initFieldVar1 != '\0') {
+        if (isBattleOverlayLoaded != '\0') {
             if (initFieldEntitySub4Sub5Sub1(psVar2->m0) == 0) {
                 psVar2->m4_vramLocation.vx = 0x300;
                 psVar2->m4_vramLocation.vy = 0x100;
@@ -367,7 +715,7 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub6(sFieldEntitySub4* param_1, int param_2)
         param_1->mB0 = uVar2;
         if (param_2 < 0) {
             initFieldEntitySub4Sub5(param_1, param_1->m4C_specialAnimation);
-            if ((initFieldVar1 != '\0') &&
+            if ((isBattleOverlayLoaded != '\0') &&
                 (iVar3 = initFieldEntitySub4Sub5Sub1(param_1->m24->m0), iVar3 == 0)) {
                 param_1->m24->m4_vramLocation.vx = 0x100;
                 param_1->m24->m4_vramLocation.vy = 0x300;
@@ -375,7 +723,7 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub6(sFieldEntitySub4* param_1, int param_2)
         }
         else {
             initFieldEntitySub4Sub5(param_1, param_1->m48);
-            if (initFieldVar1 != '\0') {
+            if (isBattleOverlayLoaded != '\0') {
                 param_1->m24->m4_vramLocation = param_1->m7C->mE_vramLocation;
             }
         }
@@ -443,7 +791,7 @@ sFieldEntitySub4* initFieldEntitySub4(sFieldEntitySub4* param_1, sFieldActorSetu
     param_1->m3C = (param_1->m3C & ~0x3) | 1;
     param_1->m40 &= ~0x0001E000;
 
-    if (initFieldVar1 == 0)
+    if (isBattleOverlayLoaded == 0)
     {
         param_1->mA8 |= 1;
         param_1->m7C->m18 = 0;

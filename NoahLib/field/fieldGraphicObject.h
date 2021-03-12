@@ -27,11 +27,11 @@ struct sFieldEntitySub4_B4
 {
     SVECTOR m0_rotation;
     SVECTOR m6_scale;
-    MATRIX m20;
+    MATRIX mC;
     u8* m2C;
     u8* m30;
     std::array<sFieldEntitySub4_124, 8>* m34;
-    s32 m38;
+    struct sFieldEntitySub4* m38;
     s8 m3C;
     s8 m3D;
     //size ???
@@ -80,6 +80,7 @@ struct sFieldEntitySub4
     s16 m84;
     u16 m86_thisSize;
     s8 m8C;
+    std::array<u8, 16> m8E;
     u16 m9E;
     u32 mAC;
     u32 mA8;
