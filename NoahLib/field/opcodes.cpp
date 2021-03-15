@@ -241,11 +241,11 @@ void OP_GET_ACTOR_POSITION(void)
     iVar2 = readCharacter(1);
     if (iVar2 != 0xff) {
         uVar1 = readU16FromScript(2);
-        setVar((uint)uVar1, fieldEntityArray[iVar2].m2C_matrixBackup.t[0]);
+        setVar((uint)uVar1, actorArray[iVar2].m2C_matrixBackup.t[0]);
         uVar1 = readU16FromScript(4);
-        setVar((uint)uVar1, fieldEntityArray[iVar2].m2C_matrixBackup.t[2]);
+        setVar((uint)uVar1, actorArray[iVar2].m2C_matrixBackup.t[2]);
         uVar1 = readU16FromScript(6);
-        setVar((uint)uVar1, fieldEntityArray[iVar2].m2C_matrixBackup.t[1]);
+        setVar((uint)uVar1, actorArray[iVar2].m2C_matrixBackup.t[1]);
     }
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 8;
     return;
@@ -268,7 +268,7 @@ void OPX_15()
     uint uVar4;
     int uVar5;
 
-    fieldEntityArray[currentFieldActorId].m58_flags = fieldEntityArray[currentFieldActorId].m58_flags & 0xf07f | 0x200;
+    actorArray[currentFieldActorId].m58_flags = actorArray[currentFieldActorId].m58_flags & 0xf07f | 0x200;
     uVar4 = getImmediateOrVariableUnsigned(1);
     uVar5 = getImmediateOrVariableUnsigned(3);
     OP_INIT_ENTITY_SCRIPT_sub0(currentFieldActorId, uVar4, &fieldActorSetupParams[uVar4], 0, uVar5, uVar4 | 0x80, 1);
@@ -279,7 +279,7 @@ void OPX_15()
     psVar3->m0_flags = *puVar1 & 0xffffff7f | 0x100;
     iVar2 = currentFieldActorId;
     psVar3->m4_flags = psVar3->m4_flags & 0xfffff7ff;
-    fieldEntityArray[iVar2].m58_flags = fieldEntityArray[iVar2].m58_flags & 0xffdf;
+    actorArray[iVar2].m58_flags = actorArray[iVar2].m58_flags & 0xffdf;
 }
 
 void OP_INIT_ENTITY_NPC(void)
@@ -290,7 +290,7 @@ void OP_INIT_ENTITY_NPC(void)
     sFieldScriptEntity* psVar3;
     uint uVar4;
 
-    fieldEntityArray[currentFieldActorId].m58_flags = fieldEntityArray[currentFieldActorId].m58_flags & 0xf07f | 0x200;
+    actorArray[currentFieldActorId].m58_flags = actorArray[currentFieldActorId].m58_flags & 0xf07f | 0x200;
     uVar4 = getImmediateOrVariableUnsigned(1);
     OP_INIT_ENTITY_SCRIPT_sub0(currentFieldActorId, uVar4, &fieldActorSetupParams[uVar4], 0, 0, uVar4 | 0x80, 0);
     OP_INIT_ENTITY_SCRIPT_sub1();
@@ -300,7 +300,7 @@ void OP_INIT_ENTITY_NPC(void)
     psVar3->m0_flags = *puVar1 & 0xffffff7f | 0x100;
     iVar2 = currentFieldActorId;
     psVar3->m4_flags = psVar3->m4_flags & 0xfffff7ff;
-    fieldEntityArray[iVar2].m58_flags = fieldEntityArray[iVar2].m58_flags & 0xffdf;
+    actorArray[iVar2].m58_flags = actorArray[iVar2].m58_flags & 0xffdf;
     return;
 }
 
@@ -338,7 +338,7 @@ void OP_SET_ACTOR_POSITION_2D(void)
 void OP_1A()
 {
     pCurrentFieldScriptActor->m10_walkmeshId = (ushort)pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1];
-    setCurrentActor2DPosition((int)(fieldEntityArray[currentFieldActorId].m4C_scriptEntity)->m20_position.vx, (int)(fieldEntityArray[currentFieldActorId].m4C_scriptEntity)->m20_position.vz);
+    setCurrentActor2DPosition((int)(actorArray[currentFieldActorId].m4C_scriptEntity)->m20_position.vx, (int)(actorArray[currentFieldActorId].m4C_scriptEntity)->m20_position.vz);
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 2;
 }
 
@@ -378,7 +378,7 @@ void OP_INIT_ENTITY_PC(void)
     sFieldScriptEntity* psVar7;
     sFieldEntity* psVar8;
 
-    psVar8 = &fieldEntityArray[currentFieldActorId];
+    psVar8 = &actorArray[currentFieldActorId];
     local_v0_60 = getImmediateOrVariableUnsigned(1);
     iVar3 = getCharacter(local_v0_60);
     iVar4 = findCharacterInParty(iVar3);
@@ -396,7 +396,7 @@ void OP_INIT_ENTITY_PC(void)
     else {
         if (iVar4 == 0) {
             PCToActorArray[0] = currentFieldActorId;
-            pcInitVar0 = currentFieldActorId;
+            actorCameraTracked = currentFieldActorId;
             psVar7->m0_flags = psVar7->m0_flags & 0xffffff7f | 0x4400;
         }
         iVar2 = currentFieldActorId;
@@ -413,14 +413,14 @@ void OP_INIT_ENTITY_PC(void)
             psVar1 = pKernelGameState;
             pCurrentFieldScriptActor->m0_flags = pCurrentFieldScriptActor->m0_flags & 0xfffffcff | 0x400;
             if (psVar1->m22B1_isOnGear[iVar4] != 0) {
-                psVar6 = fieldEntityArray[currentFieldActorId].m4_pVramSpriteSheet;
-                fieldEntityArray[currentFieldActorId].m4_pVramSpriteSheet = fieldEntityArray[unkPartyTable[iVar4]].m4_pVramSpriteSheet;
-                fieldEntityArray[unkPartyTable[iVar4]].m4_pVramSpriteSheet = psVar6;
+                psVar6 = actorArray[currentFieldActorId].m4_pVramSpriteSheet;
+                actorArray[currentFieldActorId].m4_pVramSpriteSheet = actorArray[unkPartyTable[iVar4]].m4_pVramSpriteSheet;
+                actorArray[unkPartyTable[iVar4]].m4_pVramSpriteSheet = psVar6;
                 psVar7->m0_flags = psVar7->m0_flags & 0xfffffaff | 0x200;
             }
         }
         pcInitVar2 = -0xc0;
-        fieldEntityArray[currentFieldActorId].m58_flags = fieldEntityArray[currentFieldActorId].m58_flags & 0xffdf;
+        actorArray[currentFieldActorId].m58_flags = actorArray[currentFieldActorId].m58_flags & 0xffdf;
         local_v0_684 = getVariable(2);
         OP_INIT_ENTITY_PC_Sub0(local_v0_684);
         OP_INIT_ENTITY_SCRIPT_sub1();
@@ -461,7 +461,7 @@ void OP_SET_DIALOG_AVATAR(void)
 void OP_SET_CURRENT_ACTOR_SCALE()
 {
     int iVar3 = getImmediateOrVariableUnsigned(1);
-    fieldEntityArray[currentFieldActorId].m4_pVramSpriteSheet->m2C_scale = (short)((uint)(iVar3 * 3) >> 2);
+    actorArray[currentFieldActorId].m4_pVramSpriteSheet->m2C_scale = (short)((uint)(iVar3 * 3) >> 2);
     s16 sVar2 = (short)iVar3;
     pCurrentFieldScriptActor->mF4_scale3d[0] = sVar2;
     pCurrentFieldScriptActor->mF4_scale3d[1] = sVar2;
@@ -625,7 +625,7 @@ void OP_5A()
 
 void OP_99(void)
 {
-    op99Var0 = 1;
+    cameraInterpolationMode = 1;
     fieldExectuteMaxCycles = fieldExectuteMaxCycles + 4;
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 1;
     op99Var1 = sceneSCRZ * sceneScale >> 0xc;
@@ -890,7 +890,7 @@ void OP_21()
 {
     int sVar2 = getImmediateOrVariableUnsigned(1);
     pCurrentFieldScriptActor->m76 = sVar2;
-    OP_21_sub(fieldEntityArray[currentFieldActorId].m4_pVramSpriteSheet, sVar2);
+    OP_21_sub(actorArray[currentFieldActorId].m4_pVramSpriteSheet, sVar2);
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
 }
 
@@ -1012,7 +1012,7 @@ void OP_WAIT_LOADING_SPECIAL_2D_ANIMATION()
     iVar2 = isLoadCompleted();
     if (iVar2 == 0) {
         load2dAnimVar = 0;
-        setupSpecialAnimation(fieldEntityArray[currentFieldActorId].m4_pVramSpriteSheet, pCurrentFieldScriptActor->m120_special2dAnimation);
+        setupSpecialAnimation(actorArray[currentFieldActorId].m4_pVramSpriteSheet, pCurrentFieldScriptActor->m120_special2dAnimation);
         uVar1 = pCurrentFieldScriptActor->mCC_scriptPC + 1;
     }
     else {
@@ -1216,7 +1216,7 @@ void OPX_1C(void)
     sFieldEntitySub4* psVar7;
 
     psVar4 = pCurrentFieldScriptActor;
-    psVar7 = fieldEntityArray[currentFieldActorId].m4_pVramSpriteSheet;
+    psVar7 = actorArray[currentFieldActorId].m4_pVramSpriteSheet;
     puVar1 = &pCurrentFieldScriptActor->m4_flags;
     pCurrentFieldScriptActor->m0_flags = pCurrentFieldScriptActor->m0_flags | 0x10000;
     pbVar3 = &pCurrentFieldScriptFile[0];
@@ -1233,9 +1233,9 @@ void OPX_1C(void)
     psVar4 = pCurrentFieldScriptActor;
     iVar5 = currentFieldActorId;
     (pCurrentFieldScriptActor->m20_position).vy = iVar6 << 0x10;
-    fieldEntityArray[iVar5].mC_matrix.t[0] = (psVar4->m20_position.vx >> 0x10);
-    fieldEntityArray[iVar5].mC_matrix.t[1] = (psVar4->m20_position.vy >> 0x10);
-    fieldEntityArray[iVar5].mC_matrix.t[2] = (psVar4->m20_position.vz >> 0x10);
+    actorArray[iVar5].mC_matrix.t[0] = (psVar4->m20_position.vx >> 0x10);
+    actorArray[iVar5].mC_matrix.t[1] = (psVar4->m20_position.vy >> 0x10);
+    actorArray[iVar5].mC_matrix.t[2] = (psVar4->m20_position.vz >> 0x10);
     psVar7->m0_position.vx = (psVar4->m20_position).vx;
     psVar7->m0_position.vy = (psVar4->m20_position).vy;
     psVar7->m0_position.vz = (psVar4->m20_position).vz;
@@ -1248,7 +1248,7 @@ void OP_23(void)
     sFieldScriptEntity* psVar1;
 
     psVar1 = pCurrentFieldScriptActor;
-    fieldEntityArray[currentFieldActorId].m58_flags = fieldEntityArray[currentFieldActorId].m58_flags | 0x20;
+    actorArray[currentFieldActorId].m58_flags = actorArray[currentFieldActorId].m58_flags | 0x20;
     psVar1->mCC_scriptPC = psVar1->mCC_scriptPC + 1;
     return;
 }
@@ -1442,7 +1442,7 @@ void OP_RESET_CHARACTER()
     iVar1 = readCharacter(1);
     if (iVar1 != 0xff) {
         iVar1 = readCharacter(1);
-        psVar3 = fieldEntityArray[iVar1].m4C_scriptEntity;
+        psVar3 = actorArray[iVar1].m4C_scriptEntity;
         uVar4 = psVar3->m104_rotation;
         uVar2 = psVar3->m0_flags;
         psVar3->m30_stepVector.vx = 0;
@@ -1474,7 +1474,7 @@ void OP_DB()
     if (0xfff < iVar2) {
         iVar2 = 0xfff;
     }
-    if ((fieldEntityArray[currentFieldActorId].m58_flags & 0x2000) != 0) {
+    if ((actorArray[currentFieldActorId].m58_flags & 0x2000) != 0) {
         pCurrentFieldScriptActor->m118[iVar1] = iVar2;
     }
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 5;
@@ -1498,7 +1498,7 @@ void OP_ROTATION_3D_PITCH_ADD()
     sVar3 = getImmediateOrVariableUnsigned(1);
     psVar2 = pCurrentFieldScriptActor;
     iVar1 = currentFieldActorId;
-    fieldEntityArray[currentFieldActorId].m50_modelRotation[1] = fieldEntityArray[currentFieldActorId].m50_modelRotation[1] + sVar3;
+    actorArray[currentFieldActorId].m50_modelRotation[1] = actorArray[currentFieldActorId].m50_modelRotation[1] + sVar3;
     psVar2->mCC_scriptPC = psVar2->mCC_scriptPC + 3;
     updateScriptActor3dRotation(iVar1);
 }
@@ -1512,7 +1512,7 @@ void OP_ROTATION_3D_PITCH_SUBSTRACT()
     sVar3 = getImmediateOrVariableUnsigned(1);
     psVar2 = pCurrentFieldScriptActor;
     iVar1 = currentFieldActorId;
-    fieldEntityArray[currentFieldActorId].m50_modelRotation[1] = fieldEntityArray[currentFieldActorId].m50_modelRotation[1] - sVar3;
+    actorArray[currentFieldActorId].m50_modelRotation[1] = actorArray[currentFieldActorId].m50_modelRotation[1] - sVar3;
     psVar2->mCC_scriptPC = psVar2->mCC_scriptPC + 3;
     updateScriptActor3dRotation(iVar1);
 }
@@ -1526,7 +1526,7 @@ void OP_ROTATION_3D_ROLL_ADD()
     sVar3 = getImmediateOrVariableUnsigned(1);
     psVar2 = pCurrentFieldScriptActor;
     iVar1 = currentFieldActorId;
-    fieldEntityArray[currentFieldActorId].m50_modelRotation[2] = fieldEntityArray[currentFieldActorId].m50_modelRotation[2] + sVar3;
+    actorArray[currentFieldActorId].m50_modelRotation[2] = actorArray[currentFieldActorId].m50_modelRotation[2] + sVar3;
     psVar2->mCC_scriptPC = psVar2->mCC_scriptPC + 3;
     updateScriptActor3dRotation(iVar1);
 }
@@ -1540,7 +1540,7 @@ void OP_ROTATION_3D_ROLL_SUBSTRACT()
     sVar3 = getImmediateOrVariableUnsigned(1);
     psVar2 = pCurrentFieldScriptActor;
     iVar1 = currentFieldActorId;
-    fieldEntityArray[currentFieldActorId].m50_modelRotation[2] = fieldEntityArray[currentFieldActorId].m50_modelRotation[2] - sVar3;
+    actorArray[currentFieldActorId].m50_modelRotation[2] = actorArray[currentFieldActorId].m50_modelRotation[2] - sVar3;
     psVar2->mCC_scriptPC = psVar2->mCC_scriptPC + 3;
     updateScriptActor3dRotation(iVar1);
 }
@@ -1550,7 +1550,7 @@ void OP_RUN_ENTITY_SCRIPT_ASYNC()
     if (readCharacter(1) != 0xFF)
     {
         int entityId = readCharacter(1);
-        sFieldScriptEntity* pEntity = fieldEntityArray[entityId].m4C_scriptEntity;
+        sFieldScriptEntity* pEntity = actorArray[entityId].m4C_scriptEntity;
 
         if ((pEntity->m4_flags & 0x100000) == 0)
         {
@@ -1593,7 +1593,7 @@ void OP_RUN_ENTITY_SCRIPT_UNKMODE()
     if (readCharacter(1) != 0xFF)
     {
         int entityId = readCharacter(1);
-        sFieldScriptEntity* pEntity = fieldEntityArray[entityId].m4C_scriptEntity;
+        sFieldScriptEntity* pEntity = actorArray[entityId].m4C_scriptEntity;
 
         if ((pEntity->m4_flags & 0x100000) == 0)
         {

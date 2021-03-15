@@ -23,13 +23,18 @@ struct sFieldEntitySub4_124
     //size 8
 };
 
+struct sFieldEntitySub4_B4_sub
+{
+    //size 0x18
+};
+
 struct sFieldEntitySub4_B4
 {
     SVECTOR m0_rotation;
     SVECTOR m6_scale;
-    MATRIX mC;
-    u8* m2C;
-    u8* m30;
+    MATRIX mC_spriteMatrix;
+    sFieldEntitySub4_B4_sub* m2C;
+    sFieldEntitySub4_B4_sub* m30;
     std::array<sFieldEntitySub4_124, 8>* m34;
     struct sFieldEntitySub4* m38;
     s8 m3C;
@@ -41,10 +46,10 @@ struct sFieldEntitySub4_110
 {
     sPS1Pointer m0;
     sVec2_s16 m4_vramLocation;
-    sFP1616 m8;
+    sVec2_s16 m8_clut;
     sPS1Pointer mC;
     sPS1Pointer m10;
-    // size ???
+    // size 0x14 (guessed, but seems to make sense)
 };
 
 struct sFieldEntitySub4
@@ -92,9 +97,11 @@ struct sFieldEntitySub4
     //size 0x164
 };
 
+extern sFieldEntitySub4* spriteTransfertListHead;
+
 void OP_21_sub(sFieldEntitySub4* param_1, int param_2);
 void OP_INIT_ENTITY_SCRIPT_sub0Sub9(sFieldEntitySub4* param_1);
-sFieldEntitySub4* initFieldEntitySub4(sFieldEntitySub4* param_1, sFieldActorSetupParams* pSetup, int param_3, int param_4, int vramX, int vramY, int param_7);
+sFieldEntitySub4* setupSpriteAreaInVram(sFieldEntitySub4* param_1, sFieldActorSetupParams* pSetup, int clutX, int clutY, int vramX, int vramY, int param_7);
 void OP_INIT_ENTITY_SCRIPT_sub0Sub6(sFieldEntitySub4* param_1, int param_2);
 void OP_INIT_ENTITY_SCRIPT_sub0Sub7(sFieldEntitySub4* param1, int param2);
 
@@ -109,3 +116,4 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub5(sFieldEntitySub4* param1, int param2);
 void OP_INIT_ENTITY_SCRIPT_sub0Sub8(sFieldEntitySub4* param1, void(*callback)(sFieldEntitySub4*));
 void fieldActorCallback(sFieldEntitySub4* pThis);
 
+void OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub2(sFieldEntitySub4* param_1, short param_2);

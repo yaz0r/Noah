@@ -120,7 +120,7 @@ struct sFieldEntity
     u16 m5A;
     //size 0x5C
 };
-extern std::vector<sFieldEntity> fieldEntityArray;
+extern std::vector<sFieldEntity> actorArray;
 extern std::array<s32, 3> currentParty;
 
 extern s32 fieldMapNumber;
@@ -134,6 +134,7 @@ extern std::vector<u8> rawFieldScriptData;
 extern int breakCurrentScript;
 extern int fieldExectuteMaxCycles;
 extern int fieldDebugDisable;
+extern int renderCharsDisabled;
 
 extern sFieldEntity* pCurrentFieldEntity;
 extern int fieldScriptInitVar0;
@@ -145,7 +146,7 @@ extern int fieldExecuteVar1;
 
 extern const std::array<u16, 8> actorDirectionTable3;
 extern std::array<sFieldActorSetupParams, 3> partyCharacterBuffers;
-extern s16 pcInitVar0;
+extern s16 actorCameraTracked;
 extern s32 pcInitVar1;
 extern std::array<int, 11> PCToActorArray;
 extern const std::array<s8, 12> characterMappingTable;
@@ -163,7 +164,9 @@ extern s32 cameraInterpolationTargetStartPosition[3];
 extern s32 cameraInterpolationPositionStep[3];
 extern s32 cameraInterpolationStartPosition[3];
 extern s32 cameraEye[3];
+extern VECTOR cameraEye2;
 extern s32 cameraAt[3];
+extern VECTOR cameraAt2;
 extern u16 cameraInterpolationFlags;
 extern s32 cameraInterpolationTargetNumSteps;
 extern s32 cameraInterpolationPositionNumSteps;

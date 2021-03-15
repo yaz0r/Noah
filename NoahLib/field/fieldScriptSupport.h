@@ -11,7 +11,7 @@ extern s32 sceneSCRZ;
 extern s32 op99Var5;
 extern s32 op99Var6;
 extern s32 op99Var7;
-extern s16 op99Var0;
+extern s16 cameraInterpolationMode;
 extern s16 op99Var2;
 extern s16 op99Var3;
 extern s16 op99Var4;

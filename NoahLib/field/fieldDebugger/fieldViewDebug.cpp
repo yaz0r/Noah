@@ -328,36 +328,36 @@ void fieldViewDebug_step()
 
         walkMesh.bgfxRender(fieldDebugger_bgfxView);
 
-        for (int i=0; i<fieldEntityArray.size(); i++)
+        for (int i=0; i<actorArray.size(); i++)
         {
             float rot[3];
-            rot[0] = bx::kPi * -fieldEntityArray[i].m50_modelRotation[0] / (float)(0x800);
-            rot[1] = bx::kPi * -fieldEntityArray[i].m50_modelRotation[1] / (float)(0x800);
-            rot[2] = bx::kPi * -fieldEntityArray[i].m50_modelRotation[2] / (float)(0x800);
+            rot[0] = bx::kPi * -actorArray[i].m50_modelRotation[0] / (float)(0x800);
+            rot[1] = bx::kPi * -actorArray[i].m50_modelRotation[1] / (float)(0x800);
+            rot[2] = bx::kPi * -actorArray[i].m50_modelRotation[2] / (float)(0x800);
 
             float rotationMatrix[16];
             bx::mtxRotateXYZ(rotationMatrix, rot[0], rot[1], rot[2]);
 
             float position[3];
-            if (fieldEntityArray[i].m4C_scriptEntity)
+            if (actorArray[i].m4C_scriptEntity)
             {
-                position[0] = fieldEntityArray[i].m4C_scriptEntity->m20_position.vx >> 16;
-                position[1] = fieldEntityArray[i].m4C_scriptEntity->m20_position.vy >> 16;
-                position[2] = fieldEntityArray[i].m4C_scriptEntity->m20_position.vz >> 16;
+                position[0] = actorArray[i].m4C_scriptEntity->m20_position.vx >> 16;
+                position[1] = actorArray[i].m4C_scriptEntity->m20_position.vy >> 16;
+                position[2] = actorArray[i].m4C_scriptEntity->m20_position.vz >> 16;
             }
             else
             {
-                position[0] = fieldEntityArray[i].mC_matrix.t[0];
-                position[1] = fieldEntityArray[i].mC_matrix.t[1];
-                position[2] = fieldEntityArray[i].mC_matrix.t[2];
+                position[0] = actorArray[i].mC_matrix.t[0];
+                position[1] = actorArray[i].mC_matrix.t[1];
+                position[2] = actorArray[i].mC_matrix.t[2];
             }
 
             float finalMatrix[16];
             bx::mtxSRT(finalMatrix, 1, 1, 1, rot[0], rot[1], rot[2], position[0], position[1], position[2]);
 
-            if (!(fieldEntityArray[i].m58_flags & 0x40))
+            if (!(actorArray[i].m58_flags & 0x40))
             {
-                fieldEntityArray[i].m0->m4_pModelBlock->bgfxRender(fieldDebugger_bgfxView, finalMatrix);
+                actorArray[i].m0->m4_pModelBlock->bgfxRender(fieldDebugger_bgfxView, finalMatrix);
             }
             else
             {
