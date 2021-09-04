@@ -9,7 +9,7 @@ struct sFieldEntitySub4_F4
     s16 mC;
     sVec2_s16 mE_vramLocation;
     s16 m14_actorId;
-    s32 m18;
+    sPS1Pointer m18;
     //size ???
 };
 
@@ -25,6 +25,18 @@ struct sFieldEntitySub4_124
 
 struct sFieldEntitySub4_B4_sub
 {
+    s16 m0;
+    s16 m2;
+    s8 m4;
+    s8 m5;
+    s8 m6;
+    s8 m7;
+    s8 m8;
+    s8 m9;
+    s16 mA_tpage;
+    u16 mC_clut;
+    u32 m10;
+    u32 m14;
     //size 0x18
 };
 
@@ -52,6 +64,12 @@ struct sFieldEntitySub4_110
     // size 0x14 (guessed, but seems to make sense)
 };
 
+struct sStackElement
+{
+    u8 asU8;
+    sPS1Pointer asPs1Pointer;
+};
+
 struct sFieldEntitySub4
 {
     sVec3 m0_position;
@@ -60,11 +78,14 @@ struct sFieldEntitySub4
     s32 m1C;
     sFieldEntitySub4_B4* m20;
     sFieldEntitySub4_110* m24;
+    int m28;
     s8 m2B;
     s16 m2C_scale;
     s16 m30;
     s16 m32;
     s16 m34;
+    s16 m36;
+    s16 m38;
     s16 m3A;
     u32 m3C;
     u32 m40;
@@ -74,6 +95,7 @@ struct sFieldEntitySub4
     s32 m50;
     sPS1Pointer m54;
     sPS1Pointer m58;
+    sPS1Pointer m5C;
     sPS1Pointer m60;
     sPS1Pointer m64_spriteByteCode;
     void(*m68)(sFieldEntitySub4*);
@@ -84,8 +106,8 @@ struct sFieldEntitySub4
     s16 m82;
     s16 m84;
     u16 m86_thisSize;
-    s8 m8C;
-    std::array<u8, 16> m8E;
+    s8 m8C_stackPosition;
+    std::array<sStackElement, 16> m8E_stack;
     u16 m9E;
     u32 mAC;
     u32 mA8;
@@ -117,3 +139,4 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub8(sFieldEntitySub4* param1, void(*callback)(sF
 void fieldActorCallback(sFieldEntitySub4* pThis);
 
 void OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub2(sFieldEntitySub4* param_1, short param_2);
+void OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1Sub1(sFieldEntitySub4* param_1);

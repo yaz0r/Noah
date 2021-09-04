@@ -206,7 +206,7 @@ void initOpcodeTable()
         .end();
 
     m_opcode[0x2E]
-        .setComment("Get the facing angle?")
+        .setName("GET_ACTOR_FACING_ANGLE")
         .addArgumentVarIndex()
         .end();
 

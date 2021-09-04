@@ -10,6 +10,7 @@ void initOpcodes()
     fieldScriptOpcodes[0x00] = OP_STOP;
     fieldScriptOpcodes[0x01] = OP_JUMP;
     fieldScriptOpcodes[0x02] = OP_JUMP_IF;
+    fieldScriptOpcodes[0x04] = OP_4;
     fieldScriptOpcodes[0x05] = OP_CALL;
     fieldScriptOpcodes[0x07] = OP_RUN_ENTITY_SCRIPT_ASYNC;
     fieldScriptOpcodes[0x08] = OP_RUN_ENTITY_SCRIPT_UNKMODE;
@@ -34,6 +35,7 @@ void initOpcodes()
     fieldScriptOpcodes[0x2A] = OP_2A;
     fieldScriptOpcodes[0x2C] = OP_PLAY_ANIMATION;
     fieldScriptOpcodes[0x2D] = OP_GET_ACTOR_POSITION;
+    fieldScriptOpcodes[0x2E] = OP_GET_ACTOR_FACING_ANGLE;
     fieldScriptOpcodes[0x31] = OP_JUMP_IF_PAD_MASK;
     fieldScriptOpcodes[0x35] = OP_SET_VAR_FROM_S16;
     fieldScriptOpcodes[0x36] = OP_SET_VAR_TRUE;
@@ -43,11 +45,13 @@ void initOpcodes()
     fieldScriptOpcodes[0x3C] = OP_SET_VAR_INC;
     fieldScriptOpcodes[0x3D] = OP_SET_VAR_DEC;
     fieldScriptOpcodes[0x43] = OP_SET_VAR_RANDOM;
+    fieldScriptOpcodes[0x44] = OP_44;
     fieldScriptOpcodes[0x46] = OP_46;
     fieldScriptOpcodes[0x4A] = OP_4A;
     fieldScriptOpcodes[0x4B] = OP_4B;
     fieldScriptOpcodes[0x52] = OP_52;
     fieldScriptOpcodes[0x53] = OP_53;
+    fieldScriptOpcodes[0x57] = OP_57;
     fieldScriptOpcodes[0x59] = OP_59;
     fieldScriptOpcodes[0x5A] = OP_5A;
     fieldScriptOpcodes[0x5B] = resetFieldScriptActor;
@@ -79,6 +83,7 @@ void initOpcodes()
     fieldScriptOpcodes[0xA8] = OP_A8;
     fieldScriptOpcodes[0xAC] = OP_AC;
     fieldScriptOpcodes[0xBC] = OP_INIT_ENTITY_SCRIPT;
+    fieldScriptOpcodes[0xBE] = OP_ROTATION_3D_YAW_SUBSTRACT;
     fieldScriptOpcodes[0xBF] = OP_ROTATION_3D_PITCH_ADD;
     fieldScriptOpcodes[0xC0] = OP_ROTATION_3D_PITCH_SUBSTRACT;
     fieldScriptOpcodes[0xC1] = OP_ROTATION_3D_ROLL_ADD;
@@ -89,8 +94,10 @@ void initOpcodes()
     fieldScriptOpcodes[0xE5] = OP_SETUP_FOG;
     fieldScriptOpcodes[0xE6] = OP_E6;
     fieldScriptOpcodes[0xE7] = OP_E7;
+    fieldScriptOpcodes[0xEF] = OP_EF;
     fieldScriptOpcodes[0xF1] = OP_SETUP_SCREEN_EFFECT1;
     fieldScriptOpcodes[0xF8] = OP_SET_FLAGS_DYNAMIC;
+    fieldScriptOpcodes[0xFC] = OP_FC;
     fieldScriptOpcodes[0xFE] = OP_EXTENDED_OPCODE;
 
     fieldScriptOpcodes_EX[0x01] = OP_RAND_ROTATION;

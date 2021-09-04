@@ -62,9 +62,19 @@ u16 READ_LE_U16(const sPS1Pointer& ptr)
     return READ_LE_U16(ptr.getPointer());
 }
 
+s16 READ_LE_S16(const sPS1Pointer& ptr)
+{
+	return READ_LE_S16(ptr.getPointer());
+}
+
 u8 READ_LE_U8(const sPS1Pointer& ptr)
 {
     return *(u8*)(ptr.getPointer());
+}
+
+s8 READ_LE_S8(const sPS1Pointer& ptr)
+{
+    return *(s8*)(ptr.getPointer());
 }
 
 u16 READ_LE_U16(const void* ptr)

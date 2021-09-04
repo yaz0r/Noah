@@ -60,7 +60,8 @@ struct sFieldScriptEntity
     u16 mCC_scriptPC;
     s8 mCE_currentScriptSlot;
     s8 mCF;
-    std::array<s32, 3> mD0_targetPositionOffset;
+    sVec3 mD0_targetPositionOffset;
+    s16 mE0_rotationLimit;
     s8 mE2;
     s8 mE3;
     s16 mE4_playableCharacterId;
@@ -217,6 +218,7 @@ void updateGearState(int param_1);
 int getCurrentDiscNumber();
 int isLoadCompleted();
 void SetGeomScreen(s32);
+void SetGeomOffset(s32, s32);
 int getCharacter(int param_1);
 int findCharacterInParty(int param_1);
 
