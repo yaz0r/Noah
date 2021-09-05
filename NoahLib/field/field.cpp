@@ -3982,7 +3982,7 @@ void uploadCharacterSpriteSub1(sFieldEntitySub4* param_1, int param_2, sFieldEnt
 			}
 			if (((int)uVar17 >> 4 & 1U) == 0) {
 				sPS1Pointer iVar12;
-				if (((param_1->mA8 & 1) == 1) && (iVar12 = param_1->m7C->m18, iVar12.getPointer() != 0)) {
+				if (((param_1->mA8.m0) == 1) && (iVar12 = param_1->m7C->m18, iVar12.getPointer() != 0)) {
 					sPS1Pointer puVar11 = iVar12 + ((uVar17 & 0xe) * 2);
 					u16 uVar6 = READ_LE_U16(puVar11 + 2);
 					u16 uVar14 = READ_LE_U16(puVar11);

@@ -184,7 +184,7 @@ void executeSpriteBytecode2Sub1(sFieldEntitySub4* param_1)
 {
 	ushort uVar1;
 
-	int uVar2 = (param_1->mA8 >> 0xb) & 0x3f;
+	int uVar2 = param_1->mA8.m11;
 	if (uVar2 < 0) {
 		uVar2 = 0;
 	}
@@ -215,7 +215,7 @@ void executeSpriteBytecode2Extended(sFieldEntitySub4* param_1, int bytecode, sPS
 		pushByteOnAnimationStack(param_1, READ_LE_U8(param_3));
 		break;
 	case 0xc6:
-		if ((param_1->mA8 & 1) == 1) {
+		if (param_1->mA8.m0) {
 			param_1->m7C->mC = READ_LE_U16(param_3);
 		}
 		break;
@@ -332,7 +332,7 @@ void executeSpriteBytecode2(sFieldEntitySub4* param_1)
 			}
 			else if (bytecode < 0x20)
 			{
-				param_1->mA8 = param_1->mA8 & 0xfffe07ff | ((param_1->mA8 >> 0xb & 0x3f) + 1 & 0x3f) << 0xb;
+				param_1->mA8.m11++;
 				executeSpriteBytecode2Sub1(param_1);
 				unaff_s3 = (bytecode & 0xf) + 1;
 			}
@@ -355,17 +355,15 @@ void executeSpriteBytecode2(sFieldEntitySub4* param_1)
 				iVar12 = 1;
 			}
 
-			int temp1 = param_1->mA8 & 0xf03fffff;
-			int temp2 = (param_1->mA8 >> 0x16 & 0x3f) + 1 & 0x3f;
-			param_1->m9E = param_1->m9E + (short)iVar12;
-			param_1->mA8 = temp1 | temp2 << 0x16;
+			param_1->m9E += iVar12;
+			param_1->mA8.m22++;
 
-			if (temp2 != 0)
+			if (param_1->mA8.m22 != 0)
 			{
 				return;
 			}
 
-			param_1->mA8 = temp1 | 0xfc00000;
+			param_1->mA8.m22 = 0x3F;
 			return;
 		}
 
@@ -395,11 +393,11 @@ void executeSpriteBytecode2(sFieldEntitySub4* param_1)
 			break;
 		case 0xE2: // Looks like a call
 			pushBytecodePointerOnAnimationStack(param_1, param_1->m64_spriteByteCode + 3);
-			param_1->m64_spriteByteCode = param_1->m64_spriteByteCode + READ_LE_S16(param_1->m64_spriteByteCode);
+			param_1->m64_spriteByteCode += READ_LE_S16(param_1->m64_spriteByteCode);
 			break;
 		default:
 			executeSpriteBytecode2Extended(param_1, bytecode, param_1->m64_spriteByteCode);
-			param_1->m64_spriteByteCode = param_1->m64_spriteByteCode + sizePerBytecodeTable[bytecode];
+			param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
 			break;
 		}
 	} while (1);
@@ -503,7 +501,7 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1(sFieldEntitySub4* param_1, const sPS1Poi
 
 	param_1->m58 = param_2;
 	param_1->m64_spriteByteCode = param_2 + offsetToByteCode + 2;
-	param_1->mA8 = param_1->mA8 & 0xffcfffff | (flags & 3) << 0x14;
+	param_1->mA8.m20 = flags;
 	param_1->m54 = param_2 + offset2 + 4;
 
 	uVar1 = (uint)(flags >> 2) & 0x3f;
@@ -567,15 +565,16 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1(sFieldEntitySub4* param_1, const sPS1Poi
 		}
 	}
 	param_1->m8C_stackPosition = 0x10;
-	uVar1 = param_1->mA8;
 	param_1->m30 = 0;
-	param_1->mA8 = uVar1 & 0xfffff801;
+	param_1->mA8.m1 = 0;
 	param_1->m9E = 1;
-	psVar3 = param_1->m7C;
-	param_1->mA8 = uVar1 & 0xc03ff801 | 0x2001f800;
-	if ((psVar3 != (sFieldEntitySub4_F4*)0x0) && ((uVar1 & 1) == 1)) {
-		psVar3->m4 = 0;
-		psVar3->m0 = 0;
+	param_1->mA8.m22 = 0;
+	param_1->mA8.m28 = 0;
+	param_1->mA8.m11 = 0x3F;
+	param_1->mA8.m28 = 2;
+	if ((param_1->m7C != nullptr) && (param_1->mA8.m0)) {
+		param_1->m7C->m4 = 0;
+		param_1->m7C->m0 = 0;
 		param_1->m7C->mC = 0;
 	}
 	return;
@@ -588,7 +587,7 @@ LAB_8002268c:
 	while (true)
 	{
 		sPS1Pointer pBytecode = param_1->m64_spriteByteCode;
-		if ((pBytecode == param_2) && ((param_1->mA8 >> 0x16 & 0x3f) == param_3)) {
+		if ((pBytecode == param_2) && (param_1->mA8.m22 == param_3)) {
 			return;
 		}
 		bytecode = READ_LE_U8(pBytecode);
@@ -605,7 +604,7 @@ LAB_8002268c:
 			}
 			else if (bytecode < 0x20)
 			{
-				param_1->mA8 = param_1->mA8 & 0xfffe07ff | ((param_1->mA8 >> 0xb & 0x3f) + 1 & 0x3f) << 0xb;
+				param_1->mA8.m11++;
 				executeSpriteBytecode2Sub1(param_1);
 				unaff_s3 = (bytecode & 0xf) + 1;
 			}
@@ -617,12 +616,11 @@ LAB_8002268c:
 			if (bytecode < 0x40) {
 				unaff_s3 = (bytecode & 0xf) + 1;
 			}
-			int uVar5 = param_1->mA8 & 0xf03fffff;
-			bytecode = (param_1->mA8 >> 0x16 & 0x3f) + 1 & 0x3f;
-			param_1->m9E = param_1->m9E + (short)unaff_s3;
-			param_1->mA8 = uVar5 | bytecode << 0x16;
-			if (bytecode == 0) {
-				param_1->mA8 = uVar5 | 0xfc00000;
+
+			param_1->m9E += unaff_s3;
+			param_1->mA8.m22++;
+			if (param_1->mA8.m22 == 0) {
+				param_1->mA8.m22 = 0x3F;
 			}
 		}
 		else
@@ -644,7 +642,7 @@ LAB_8002268c:
 				}
 				else {
 					if (bytecode == 0xb3) {
-						param_1->mA8 = param_1->mA8 & 0xfffe07ff | (READ_LE_U8(pBytecode + 1) & 0x3fU) << 0xb;
+						param_1->mA8.m11 = READ_LE_U8(pBytecode + 1);
 					}
 					else {
 						if (bytecode < 0xb4) {
@@ -684,65 +682,64 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub2(sFieldEntitySub4* param_1, short param_2
 {
 	short sVar1;
 	ushort uVar2;
-	uint uVar3;
-	uint uVar4;
+	uint originalM17;
 
 	param_1->m80 = param_2;
-	uVar3 = param_1->mA8;
+	originalM17 = param_1->mA8.m17;
 	if (((int)param_2 + 0x400U & 1) == 0) {
-		uVar4 = param_1->mAC & 0xfffffffb;
+		param_1->mAC &= ~4;
 	}
 	else {
-		uVar4 = param_1->mAC | 4;
+		param_1->mAC |= 4;
 	}
-	param_1->mAC = uVar4;
+
 	if (param_1->m48 == nullptr) {
 		return;
 	}
-	uVar4 = param_1->mA8 >> 0x14 & 3;
-	switch (uVar4)
+	switch (param_1->mA8.m20)
 	{
 	case 0:
 		if ((param_2 + 0x400U & 0xfff) < 0x801) {
-			uVar4 = param_1->mAC & 0xfffffffb;
+			param_1->mAC &= ~4;
 		}
 		else {
-			uVar4 = param_1->mAC | 4;
+			param_1->mAC |= 4;
 		}
-		param_1->mAC = uVar4;
-		param_1->mA8 = param_1->mA8 & 0xfff1ffff;
+		param_1->mA8.m17 = 0;
 		param_1->m5C = param_1->m58 + 6;
 		param_1->m54 = param_1->m58 + READ_LE_U16(param_1->m58 + 4) + 4;
 		break;
 	case 2:
-		uVar4 = param_2 + 0x500 >> 9 & 7;
+	{
+		int uVar4 = param_2 + 0x500 >> 9 & 7;
 		if (uVar4 > 7)
 		{
 			uVar4 = uVar4 - 5 ^ 3;
 			uVar2 = READ_LE_U16(param_1->m58 + uVar4 * 2 + 4);
-			param_1->mAC = param_1->mAC | 4;
+			param_1->mAC |= 4;
 			param_1->m54 = param_1->m58 + (uint)uVar2 + uVar4 * 2 + 4;
 		}
 		else
 		{
 			uVar2 = READ_LE_U16(param_1->m58 + uVar4 * 2 + 4);
-			param_1->mAC = param_1->mAC & 0xfffffffb;
+			param_1->mAC &= ~4;
 			param_1->m54 = param_1->m58 + (uint)uVar2 + uVar4 * 2 + 4;
 		}
-		param_1->mA8 = param_1->mA8 & 0xfff1ffff | (uVar4 & 7) << 0x11;
+		param_1->mA8.m17 = uVar4;
 		break;
+	}
 	default:
 		assert(0);
 	}
 
-	uVar4 = param_1->mA8;
-	if ((uVar3 >> 0x11 & 7) != (uVar4 >> 0x11 & 7)) {
+	if (originalM17 != param_1->mA8.m11) {
 		sVar1 = param_1->m9E;
 		uVar2 = READ_LE_U16(param_1->m58 + 2);
 		sPS1Pointer puVar5 = param_1->m64_spriteByteCode;
-		param_1->mA8 = param_1->mA8 & 0xf03fffff | 0x1f800;
+		param_1->mA8.m22 = 0;
+		param_1->mA8.m11 = 0x3F;
 		param_1->m64_spriteByteCode = param_1->m58 + uVar2 + 2;
-		executeSpriteBytecode(param_1, puVar5, uVar4 >> 0x16 & 0x3f);
+		executeSpriteBytecode(param_1, puVar5, param_1->mA8.m22);
 		param_1->m9E = sVar1;
 	}
 
@@ -867,14 +864,14 @@ void initFieldEntitySub4Sub1(sFieldEntitySub4* param_1)
 	param_1->m30 = 0;
 	param_1->m32 = 0;
 	param_1->m34 = 0;
-	param_1->mA8 = 0;
+	param_1->mA8.clear();
 	param_1->m3C = param_1->m3C & 0xfe00ffe3;
 	param_1->m40 = param_1->m40 & 0xfffe0003;
 	param_1->mAC = 0;
 	param_1->mB0 = 0;
 	int iVar1 = (initFieldVar3 + 1) * (initFieldVar3 + 1) * 0x4000 * param_1->m82;
 	param_1->mAC = param_1->mAC & 0xfff8007f | 0x8000;
-	param_1->mA8 = param_1->mA8 & 0xfff1ffff;
+	param_1->mA8.m17 = 0;
 	if (iVar1 < 0) {
 		iVar1 = iVar1 + 0xfff;
 	}
@@ -911,12 +908,12 @@ sFieldEntitySub4* setupSpriteAreaInVram(sFieldEntitySub4* param_1, sFieldActorSe
 
 	if (isBattleOverlayLoaded == 0)
 	{
-		param_1->mA8 |= 1;
+		param_1->mA8.m0 = 1;
 		param_1->m7C->m18.makeNull();
 	}
 	else
 	{
-		param_1->mA8 &= ~1;
+		param_1->mA8.m0 = 0;
 		param_1->m7C->m8 = 0;
 		param_1->m7C->mC = 0;
 	}

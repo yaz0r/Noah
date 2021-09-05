@@ -35,12 +35,18 @@ public:
         return (other.m_pointer == m_pointer);
     }
 
-    sPS1Pointer operator + (unsigned int i) const
+    sPS1Pointer operator + (size_t i) const
     {
         sPS1Pointer newPtr = *this;
         newPtr.m_pointer += i;
         return newPtr;
     }
+	sPS1Pointer& operator += (size_t i)
+	{
+		m_pointer += i;
+		return *this;
+	}
+
     void makeNull()
     {
         m_pointer = nullptr;
