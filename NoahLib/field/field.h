@@ -169,7 +169,7 @@ extern VECTOR cameraEye2;
 extern s32 cameraAt[3];
 extern VECTOR cameraAt2;
 extern u16 cameraInterpolationFlags;
-extern s32 cameraInterpolationTargetNumSteps;
+extern s16 cameraInterpolationTargetNumSteps;
 extern s32 cameraInterpolationPositionNumSteps;
 
 extern u8 OPX_50Param;
@@ -205,6 +205,12 @@ extern s32 loadCompleted;
 
 extern u16 padButtonForScripts;
 extern std::array<s16, 4> fieldInitVar1;
+
+extern bool g_LogOpcodes;
+extern bool g_BreakOnMissingOpcode;
+
+void LogOpcode(int actorId, u16 scriptOffset, u16 opcode);
+void LogMissingOpcode(int actorId, u16 scriptOffset, u16 opcode);
 
 void playMusic(int musicId, int);
 void setupRGBCalcMode(int, int, int, int, int, int);

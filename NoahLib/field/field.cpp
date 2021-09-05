@@ -95,6 +95,25 @@ void resetFieldDefault()
 	MissingCode();
 }
 
+bool g_LogOpcodes = false;
+bool g_BreakOnMissingOpcode = false;
+
+void LogOpcode(int actorId, u16 scriptOffset, u16 opcode)
+{
+	if (g_LogOpcodes)
+	{
+		printf("Actor0x%02X: offset 0x%04X OP_%02X\n", actorId, scriptOffset, opcode);
+	}
+}
+
+void LogMissingOpcode(int actorId, u16 scriptOffset, u16 opcode)
+{
+	if (g_BreakOnMissingOpcode)
+	{
+		__debugbreak();
+	}
+}
+
 void uploadFieldImages(std::vector<u8>::iterator& pImageData)
 {
 	MissingCode();
@@ -760,29 +779,61 @@ u8 OPE7_param[3];
 
 void setCurrentActor2DPosition(int posX, int posZ)
 {
-	VECTOR alStack136[4];
-	SVECTOR auStack72[4];
+	std::array<VECTOR, 4> alStack136;
+	std::array<SVECTOR, 4> auStack72;
 	for (int i = 0; i < numWalkMesh; i++)
 	{
 		pCurrentFieldScriptActor->m8_currentWalkMeshTriangle[i] = findTriangleInWalkMesh(posX, posZ, i, &auStack72[i], &alStack136[i]);
 	}
 
-	MissingCode();
+	pCurrentFieldScriptActor->m14_currentTriangleFlag = getWalkmeshTriangleFlag(pCurrentFieldScriptActor);
+	pCurrentFieldScriptActor->m50 = alStack136[pCurrentFieldScriptActor->m10_walkmeshId];
+
 
 	actorArray[currentFieldActorId].mC_matrix.t[0] = posX;
 	actorArray[currentFieldActorId].m2C_matrixBackup.t[0] = posX;
 
-	MissingCode();
+	actorArray[currentFieldActorId].mC_matrix.t[1] = auStack72[pCurrentFieldScriptActor->m10_walkmeshId].vy;
+	actorArray[currentFieldActorId].m2C_matrixBackup.t[1] = auStack72[pCurrentFieldScriptActor->m10_walkmeshId].vy;
 
 	actorArray[currentFieldActorId].mC_matrix.t[2] = posZ;
 	actorArray[currentFieldActorId].m2C_matrixBackup.t[2] = posZ;
 
-	MissingCode();
+	actorArray[currentFieldActorId].m4_pVramSpriteSheet->m84 = auStack72[pCurrentFieldScriptActor->m10_walkmeshId].vy;
 
 	pCurrentFieldScriptActor->m20_position.vx = posX << 16;
 	pCurrentFieldScriptActor->m20_position.vz = posZ << 16;
+	pCurrentFieldScriptActor->m20_position.vy = auStack72[pCurrentFieldScriptActor->m10_walkmeshId].vy << 16;
+	pCurrentFieldScriptActor->m72_elevation = auStack72[pCurrentFieldScriptActor->m10_walkmeshId].vy;
 
-	MissingCode();
+	actorArray[currentFieldActorId].m4_pVramSpriteSheet->m0_position.vx = pCurrentFieldScriptActor->m20_position.vx;
+	actorArray[currentFieldActorId].m4_pVramSpriteSheet->m0_position.vy = pCurrentFieldScriptActor->m20_position.vy;
+	actorArray[currentFieldActorId].m4_pVramSpriteSheet->m0_position.vz = pCurrentFieldScriptActor->m20_position.vz;
+
+	pCurrentFieldScriptActor->m40.vx = 0;
+	pCurrentFieldScriptActor->m40.vy = 0;
+	pCurrentFieldScriptActor->m40.vz = 0;
+
+	pCurrentFieldScriptActor->m30_stepVector.vx = 0;
+	pCurrentFieldScriptActor->m30_stepVector.vy = 0;
+	pCurrentFieldScriptActor->m30_stepVector.vz = 0;
+
+	pCurrentFieldScriptActor->mD0_targetPositionOffset.vx = 0;
+	pCurrentFieldScriptActor->mD0_targetPositionOffset.vy = 0;
+	pCurrentFieldScriptActor->mD0_targetPositionOffset.vz = 0;
+
+	pCurrentFieldScriptActor->m60[0] = 0;
+	pCurrentFieldScriptActor->m60[1] = 0;
+	pCurrentFieldScriptActor->m60[2] = 0;
+
+	actorArray[currentFieldActorId].m4_pVramSpriteSheet->mC.vx = 0;
+	actorArray[currentFieldActorId].m4_pVramSpriteSheet->mC.vy = 0;
+	actorArray[currentFieldActorId].m4_pVramSpriteSheet->mC.vz = 0;
+
+	pCurrentFieldScriptActor->mF0 = 0;
+	pCurrentFieldScriptActor->mEC_elevation = 0;
+	pCurrentFieldScriptActor->m72_elevation = pCurrentFieldScriptActor->m20_position.vy >> 0x10;
+	pCurrentFieldScriptActor->m0_flags = pCurrentFieldScriptActor->m0_flags & 0xfffbffff | 0x400000;
 }
 
 
@@ -1001,7 +1052,7 @@ s32 cameraAt[3] = { 0,0,0 };
 VECTOR cameraEye2;
 VECTOR cameraAt2;
 u16 cameraInterpolationFlags = 0;
-s32 cameraInterpolationTargetNumSteps = 0;
+s16 cameraInterpolationTargetNumSteps = 0;
 s32 cameraInterpolationPositionNumSteps = 0;
 
 s16 cameraRotation = 0;
@@ -1212,10 +1263,11 @@ void executeFieldScript(int param)
 			//printf("PC: 0x%04X ", pCurrentFieldScriptActor->mCC_scriptPC);
 			u8 opcodeId = pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC];
 
-			printf("Actor0x%02X: offset 0x%04X OP_%02X\n", currentFieldActorId, pCurrentFieldScriptActor->mCC_scriptPC, opcodeId);
+			LogOpcode(currentFieldActorId, pCurrentFieldScriptActor->mCC_scriptPC, opcodeId);
 
 			if (fieldScriptOpcodes[opcodeId] == nullptr)
 			{
+				LogMissingOpcode(currentFieldActorId, pCurrentFieldScriptActor->mCC_scriptPC, opcodeId);
 				breakCurrentScript = 1;
 				return;
 			}
@@ -3298,7 +3350,7 @@ void updateCameraInterpolationSub2()
 	if (op9DVar1 != 0) {
 		op99Var5 = 1;
 		op99Var6 = 1;
-		op9DVar1 = op9DVar1 + -1;
+		op9DVar1--;
 	}
 
 	s32 iVar2;
@@ -3339,9 +3391,8 @@ void updateCameraInterpolation(void)
 				cameraInterpolationTargetStartPosition[1] = cameraInterpolationTargetStartPosition[1] + cameraInterpolationTargetStep[1];
 				cameraInterpolationTargetStartPosition[2] = cameraInterpolationTargetStartPosition[2] + cameraInterpolationTargetStep[2];
 			}
-			cameraInterpolationTargetNumSteps--;
-			if ((cameraInterpolationTargetNumSteps & 0xffff) == 0) {
-				cameraInterpolationFlags = cameraInterpolationFlags & 0xfffe;
+			if ((--cameraInterpolationTargetNumSteps) == 0) {
+				cameraInterpolationFlags &= ~1;
 			}
 			cameraAt2.vx = cameraInterpolationTargetStartPosition[0];
 			cameraAt2.vy = cameraInterpolationTargetStartPosition[1];
@@ -3353,9 +3404,8 @@ void updateCameraInterpolation(void)
 				cameraInterpolationStartPosition[1] = cameraInterpolationStartPosition[1] + cameraInterpolationPositionStep[1];
 				cameraInterpolationStartPosition[2] = cameraInterpolationStartPosition[2] + cameraInterpolationPositionStep[2];
 			}
-			cameraInterpolationTargetNumSteps--;
-			if ((cameraInterpolationTargetNumSteps & 0xffff) == 0) {
-				cameraInterpolationFlags = cameraInterpolationFlags & 0xfffd;
+			if ((--cameraInterpolationPositionNumSteps) == 0) {
+				cameraInterpolationFlags &= ~2;
 			}
 			cameraEye2.vx = cameraInterpolationStartPosition[0];
 			cameraEye2.vy = cameraInterpolationStartPosition[1];

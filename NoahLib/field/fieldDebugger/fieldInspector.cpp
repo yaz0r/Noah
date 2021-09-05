@@ -1417,6 +1417,9 @@ void fieldInspector_frame()
                 fieldDebugInfo_save();
             }
 
+            ImGui::Checkbox("Log opcodes", &g_LogOpcodes);
+            ImGui::Checkbox("Break on missing opcodes", &g_BreakOnMissingOpcode);
+
             ImGui::EndMenu();
         }
 

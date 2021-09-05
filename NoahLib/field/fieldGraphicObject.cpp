@@ -320,9 +320,10 @@ void executeSpriteBytecode2(sFieldEntitySub4* param_1)
 		}
 
 		u8 bytecode = READ_LE_U8(param_1->m64_spriteByteCode);
+		sPS1Pointer pEndOfOpcode = param_1->m64_spriteByteCode + 1;
 		if (bytecode < 0x80)
 		{
-			param_1->m64_spriteByteCode = param_1->m64_spriteByteCode + 1;
+			param_1->m64_spriteByteCode = pEndOfOpcode;
 
 			int unaff_s3;
 			if (bytecode < 0x10)
@@ -367,12 +368,6 @@ void executeSpriteBytecode2(sFieldEntitySub4* param_1)
 			return;
 		}
 
-		/* TODO: really figure if the fallback in later switch is good enough here
-		if ((bytecode - 0x80) > 0x7B)
-		{
-
-		}
-		*/
 		switch (bytecode)
 		{
 		case 0x80:
@@ -393,10 +388,10 @@ void executeSpriteBytecode2(sFieldEntitySub4* param_1)
 			break;
 		case 0xE2: // Looks like a call
 			pushBytecodePointerOnAnimationStack(param_1, param_1->m64_spriteByteCode + 3);
-			param_1->m64_spriteByteCode += READ_LE_S16(param_1->m64_spriteByteCode);
+			param_1->m64_spriteByteCode += READ_LE_S16(pEndOfOpcode);
 			break;
 		default:
-			executeSpriteBytecode2Extended(param_1, bytecode, param_1->m64_spriteByteCode);
+			executeSpriteBytecode2Extended(param_1, bytecode, pEndOfOpcode);
 			param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
 			break;
 		}
@@ -582,16 +577,14 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1(sFieldEntitySub4* param_1, const sPS1Poi
 
 void executeSpriteBytecode(sFieldEntitySub4* param_1, sPS1Pointer param_2, uint param_3)
 {
-LAB_8002268c:
-	u8 bytecode;
 	while (true)
 	{
 		sPS1Pointer pBytecode = param_1->m64_spriteByteCode;
 		if ((pBytecode == param_2) && (param_1->mA8.m22 == param_3)) {
 			return;
 		}
-		bytecode = READ_LE_U8(pBytecode);
 
+		u8 bytecode = READ_LE_U8(pBytecode);
 		if (bytecode < 0x80)
 		{
 			param_1->m64_spriteByteCode = pBytecode + 1;
@@ -625,6 +618,25 @@ LAB_8002268c:
 		}
 		else
 		{
+			switch (bytecode)
+			{
+			case 0x81:
+			case 0x82:
+				return;
+			case 0xB3:
+				param_1->mA8.m11 = READ_LE_U8(pBytecode + 1);
+				break;
+			case 0xA7:
+			case 0xB4:
+			case 0xE4:
+				break;
+			default:
+				assert(0);
+			}
+
+			param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
+
+#if 0
 			if (bytecode == 0x87) {
 			LAB_80022920:
 				if (pBytecode == param_2) {
@@ -673,7 +685,8 @@ LAB_8002268c:
 					}
 				}
 			}
-			param_1->m64_spriteByteCode = param_1->m64_spriteByteCode + sizePerBytecodeTable[bytecode];
+			param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
+#endif
 		}
 	}
 }

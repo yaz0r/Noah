@@ -90,12 +90,14 @@ void initOpcodes()
     fieldScriptOpcodes[0xC2] = OP_ROTATION_3D_ROLL_SUBSTRACT;
     fieldScriptOpcodes[0xC6] = OP_INCREASE_FIELD_EXECUTION_MAX_CYCLES;
     fieldScriptOpcodes[0xCB] = OP_IF_PLAYER_IN_TRIGGER;
+    fieldScriptOpcodes[0xD0] = OP_SET_DIALOG_WINDOW_PARAM;
     fieldScriptOpcodes[0xDB] = OP_DB;
     fieldScriptOpcodes[0xE5] = OP_SETUP_FOG;
     fieldScriptOpcodes[0xE6] = OP_E6;
     fieldScriptOpcodes[0xE7] = OP_E7;
-    fieldScriptOpcodes[0xEF] = OP_EF;
+    fieldScriptOpcodes[0xEF] = OP_WAIT_CAMERA;
     fieldScriptOpcodes[0xF1] = OP_SETUP_SCREEN_EFFECT1;
+    fieldScriptOpcodes[0xF5] = OP_SHOW_DIALOG_WINDOW_FOR_CURRENT_ACTOR_MODE3;
     fieldScriptOpcodes[0xF8] = OP_SET_FLAGS_DYNAMIC;
     fieldScriptOpcodes[0xFC] = OP_FC;
     fieldScriptOpcodes[0xFE] = OP_EXTENDED_OPCODE;

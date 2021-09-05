@@ -266,7 +266,29 @@
     <fieldInfo ID="16" Name="Outside Lahan - Gears fly over Citan&apos;s"/>
     <fieldInfo ID="17" Name="Citan&apos;s House"/>
     <fieldInfo ID="18" Name="Citan&apos;s house - Bedroom"/>
-    <fieldInfo ID="19" Name="Citan&apos;s house - Kitchen"/>
+    <fieldInfo ID="19" Name="Citan&apos;s house - Kitchen">
+        <scriptEntity ID="0" Name=""/>
+        <scriptEntity ID="1" Name="Fei"/>
+        <scriptEntity ID="2" Name="Citan"/>
+        <scriptEntity ID="3" Name=""/>
+        <scriptEntity ID="4" Name=""/>
+        <scriptEntity ID="5" Name=""/>
+        <scriptEntity ID="6" Name=""/>
+        <scriptEntity ID="7" Name=""/>
+        <scriptEntity ID="8" Name=""/>
+        <scriptEntity ID="9" Name=""/>
+        <scriptEntity ID="10" Name=""/>
+        <scriptEntity ID="11" Name=""/>
+        <scriptEntity ID="12" Name="Citan NPC"/>
+        <scriptEntity ID="13" Name="Yui"/>
+        <scriptEntity ID="14" Name="Midori"/>
+        <scriptEntity ID="15" Name=""/>
+        <scriptEntity ID="16" Name=""/>
+        <scriptEntity ID="17" Name=""/>
+        <scriptEntity ID="18" Name=""/>
+        <scriptEntity ID="19" Name=""/>
+        <scriptEntity ID="20" Name=""/>
+    </fieldInfo>
     <fieldInfo ID="20" Name="Citan&apos;s House - Upstairs room"/>
     <fieldInfo ID="21" Name="Citan&apos;s House - Workshop (with music box)">
         <scriptEntity ID="0" Name="Director"/>
