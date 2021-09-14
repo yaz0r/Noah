@@ -13,6 +13,7 @@
 #include "fieldGraphicObject.h"
 #include "sprite/spriteSetup.h"
 #include "kernel/trigo.h"
+#include "dialogWindows.h"
 
 struct sFieldVramMapping
 {
@@ -69,6 +70,8 @@ int playerControlledEntity = 0;
 
 s16 entityMoveSpeedFactor = 0;
 
+int g_frameOddOrEven = 0;
+
 void fieldModelRelocation(std::vector<u8>::iterator& pModelData)
 {
 	MissingCode();
@@ -91,6 +94,10 @@ void resetFieldDefault()
 	MissingCode();
 
 	fieldChangePrevented = -1;
+
+	MissingCode();
+
+	dialogWindowFlag1 = 8;
 
 	MissingCode();
 }
@@ -119,14 +126,6 @@ void uploadFieldImages(std::vector<u8>::iterator& pImageData)
 	MissingCode();
 }
 
-struct RECT
-{
-	s16 m0_x;
-	s16 m2_y;
-	s16 m4_w;
-	s16 m6_h;
-};
-
 RECT* currentNpcSpriteUploadRect = nullptr;
 std::vector<u8>::iterator currentNpcSpriteUploadDataPtr;
 
@@ -147,10 +146,10 @@ void uploadNpcSpriteSheet(std::vector<u8>::iterator& pImageData, int x, int y)
 		std::vector<u8>::iterator data = pImageData + offset;
 
 		RECT rect;
-		rect.m0_x = x + xOffset;
-		rect.m2_y = y;
-		rect.m4_w = READ_LE_U16(data);
-		rect.m6_h = READ_LE_U16(data + 2);
+		rect.x = x + xOffset;
+		rect.y = y;
+		rect.w = READ_LE_U16(data);
+		rect.h = READ_LE_U16(data + 2);
 
 		xOffset += 0x40;
 
@@ -477,14 +476,14 @@ void initFieldScriptEntity(int index)
 	}
 }
 
-void traceModelFunctionState(int state)
+void traceNextAlloc(int state)
 {
 	MissingCode();
 }
 
 void initModel1(sModelBlock& pModelBlock, std::vector<s16>& outputBuffer, std::vector<s16>::iterator& outputBufferEnd)
 {
-	traceModelFunctionState(0x25);
+	traceNextAlloc(0x25);
 
 	outputBuffer.resize(pModelBlock.m34_count);
 	outputBufferEnd = outputBuffer.end();
@@ -1224,14 +1223,6 @@ void OPX_13Sub(int)
 u16 padButtonForScripts = 0;
 
 
-int findDialogWindowForCurrentActor(int*)
-{
-	MissingCode();
-	return -1;
-}
-
-
-
 int isScriptAlreadyRunning(sFieldScriptEntity* pEntity, int scriptIndex)
 {
 	for (int i = 0; i < 8; i++)
@@ -1243,7 +1234,6 @@ int isScriptAlreadyRunning(sFieldScriptEntity* pEntity, int scriptIndex)
 	}
 	return 0;
 }
-
 
 
 void setupRGBCalcMode(int, int, int, int, int, int)
@@ -1404,10 +1394,10 @@ void addToShapeTransfertTable(sPS1Pointer pData, short x, short y, short w, shor
 	psVar3 = shapeTransfertTableCurrentEntry;
 	iVar2 = shapeTransfertDoubleBufferIndex;
 	if (shapeTransfertTableCurrentEntry + 1 < shapeTransfertTableEnd) {
-		shapeTransfertTableCurrentEntry->m0_rect.m0_x = x;
-		shapeTransfertTableCurrentEntry->m0_rect.m2_y = y;
-		shapeTransfertTableCurrentEntry->m0_rect.m4_w = w;
-		shapeTransfertTableCurrentEntry->m0_rect.m6_h = h;
+		shapeTransfertTableCurrentEntry->m0_rect.x = x;
+		shapeTransfertTableCurrentEntry->m0_rect.y = y;
+		shapeTransfertTableCurrentEntry->m0_rect.w = w;
+		shapeTransfertTableCurrentEntry->m0_rect.h = h;
 		shapeTransfertTableCurrentEntry->m8_pData = pData;
 		ppsVar1 = &shapeTransfertTableCurrentEntry->mC_pNext;
 		shapeTransfertTableCurrentEntry = shapeTransfertTableCurrentEntry + 1;
@@ -1417,6 +1407,59 @@ void addToShapeTransfertTable(sPS1Pointer pData, short x, short y, short w, shor
 	return;
 }
 
+struct sRGB32
+{
+	s32 R;
+	s32 G;
+	s32 B;
+};
+
+struct sScreenEffectSlot
+{
+	TILE m18_tile[2];
+	sRGB32 m38_Current;
+	sRGB32 m44_step;
+	s16 m50_mode;
+	s16 m52_isActive;
+	s16 m54_duration;
+};
+
+std::array<sScreenEffectSlot, 2> screenEffects;
+
+void resetRGBFaderToBlack(int index)
+{
+	TILE* p = &screenEffects[index].m18_tile[0];
+	SetTile(p);
+	SetSemiTrans(p, 1);
+	screenEffects[index].m18_tile[0].w = 0x140;
+	screenEffects[index].m18_tile[0].h = 0xe0;
+	screenEffects[index].m18_tile[0].x0 = 0;
+	screenEffects[index].m18_tile[0].y0 = 0;
+	screenEffects[index].m18_tile[1] = screenEffects[index].m18_tile[0];
+
+	screenEffects[index].m52_isActive = 0;
+	screenEffects[index].m54_duration = 0;
+	screenEffects[index].m38_Current.B = 0;
+	screenEffects[index].m38_Current.G = 0;
+	screenEffects[index].m38_Current.R = 0;
+	screenEffects[index].m50_mode = 2;
+}
+
+void resetAllRGBFadersToBlack()
+{
+	resetRGBFaderToBlack(0);
+	resetRGBFaderToBlack(1);
+}
+
+void flagAllocation(std::vector<u8>&)
+{
+	MissingCode();
+}
+
+void unflagAllocation(std::vector<u8>&)
+{
+	MissingCode();
+}
 
 void initFieldData()
 {
@@ -1637,6 +1680,14 @@ void initFieldData()
 	}
 
 	MissingCode();
+	
+	initDialogWindows();
+	resetAllRGBFadersToBlack();
+
+	unflagAllocation(rawFieldBundle);
+	rawFieldBundle.clear();
+
+	initModel3(5, 0);
 
 	allocateShapeTransfert(0x3c00);
 
@@ -1648,16 +1699,6 @@ void initFieldData()
 
 	// hack!
 	fieldIdForDebugger = currentFieldId0 / 2;
-}
-
-void flagAllocation(std::vector<u8>&)
-{
-	MissingCode();
-}
-
-void unflagAllocation(std::vector<u8>&)
-{
-	MissingCode();
 }
 
 int isCDBusy()
@@ -1771,6 +1812,104 @@ void loadFieldGraphics()
 	}
 }
 
+struct sFieldRenderContext
+{
+	DRAWENV m0_drawEnv;
+	DRAWENV m5C_backgroundRect;
+	DISPENV mB8_displayEnv;
+	std::array<sTag, 4096> mCC_OT;
+	std::array<sTag, 4096> m40D0_secondaryOT;
+	std::array<sTag, 8> m80D4_uiOT;
+};
+
+std::array<sFieldRenderContext, 2> fieldRenderContext;
+
+void setFieldDrawEnvClip(short x, short y, short w, short h)
+{
+	fieldRenderContext[0].m0_drawEnv.clip.x = x;
+	fieldRenderContext[0].m0_drawEnv.clip.y = y;
+	fieldRenderContext[0].m0_drawEnv.clip.w = w;
+	fieldRenderContext[0].m0_drawEnv.clip.h = h;
+	fieldRenderContext[1].m0_drawEnv.clip.x = x;
+	fieldRenderContext[1].m0_drawEnv.clip.y = y + 0x100;
+	fieldRenderContext[1].m0_drawEnv.clip.w = w;
+	fieldRenderContext[1].m0_drawEnv.clip.h = h;
+}
+
+void setupFieldDisplayEnv(void)
+{
+	fieldRenderContext[0].mB8_displayEnv.screen.x = 0;
+	fieldRenderContext[0].mB8_displayEnv.screen.y = 10;
+	fieldRenderContext[0].mB8_displayEnv.screen.w = 0x100;
+	fieldRenderContext[0].mB8_displayEnv.screen.h = 0xd8;
+	fieldRenderContext[1].mB8_displayEnv.screen.x = 0;
+	fieldRenderContext[1].mB8_displayEnv.screen.y = 10;
+	fieldRenderContext[1].mB8_displayEnv.screen.w = 0x100;
+	fieldRenderContext[1].mB8_displayEnv.screen.h = 0xd8;
+}
+
+s32 initFieldDrawEnvsSub0Var0 = 319;
+s32 initFieldDrawEnvsSub0Var1 = 0xEE0000;
+
+void initFieldDrawEnvsSub0(int param_1, int param_2)
+{
+	initFieldDrawEnvsSub0Var0 = param_1;
+	initFieldDrawEnvsSub0Var1 = (param_2 + -1) * 0x10000;
+	return;
+}
+
+void initFieldDrawEnvs()
+{
+	fieldDrawEnvsInitialized = 1;
+	DrawSync(0);
+	VSync(0);
+	InitGeom();
+	SetGeomOffset(0xa0, 0x70);
+	SetDefDrawEnv(&fieldRenderContext[0].m0_drawEnv, 0, 0, 0x140, 0xe0);
+	SetDefDrawEnv(&fieldRenderContext[1].m0_drawEnv, 0, 0x100, 0x140, 0xe0);
+	SetDefDrawEnv(&fieldRenderContext[0].m5C_backgroundRect, 0, 0, 0x140, 0xe0);
+	SetDefDrawEnv(&fieldRenderContext[1].m5C_backgroundRect, 0, 0x100, 0x140, 0xe0);
+	SetDefDispEnv(&fieldRenderContext[0].mB8_displayEnv, 0, 0x100, 0x140, 0xe0);
+	SetDefDispEnv(&fieldRenderContext[1].mB8_displayEnv, 0, 0, 0x140, 0xe0);
+	setFieldDrawEnvClip(0, 0, 0x140, 0xe0);
+	setupFieldDisplayEnv();
+	fieldRenderContext[0].m0_drawEnv.r0 = 0;
+	fieldRenderContext[0].m0_drawEnv.g0 = 0;
+	fieldRenderContext[0].m0_drawEnv.b0 = 0;
+	fieldRenderContext[1].m0_drawEnv.r0 = 0;
+	fieldRenderContext[1].m0_drawEnv.g0 = 0;
+	fieldRenderContext[1].m0_drawEnv.b0 = 0;
+	fieldRenderContext[0].m0_drawEnv.dtd = 1;
+	fieldRenderContext[1].m0_drawEnv.dtd = 1;
+	VSync(0);
+	PutDispEnv(&fieldRenderContext[1].mB8_displayEnv);
+	PutDrawEnv(&fieldRenderContext[1].m0_drawEnv);
+	initFieldDrawEnvsSub0(0x140, 0xf0);
+}
+
+sFieldRenderContext* pCurrentFieldRenderingContext = nullptr;
+
+void setupFieldRenderingContext(void)
+{
+	if (fieldDebugDisable == 0) {
+		assert(0);
+	}
+	g_frameOddOrEven = (g_frameOddOrEven + 1) % 2;
+	pCurrentFieldRenderingContext = &fieldRenderContext[g_frameOddOrEven];
+	ClearOTagR(&fieldRenderContext[g_frameOddOrEven].m80D4_uiOT[0], 8);
+	return;
+}
+
+int fieldUseGroundOT = 0;
+
+void clearFieldOrderingTable()
+{
+	setupFieldRenderingContext();
+	ClearOTagR(&pCurrentFieldRenderingContext->mCC_OT[0], 0x1000);
+	if (fieldUseGroundOT != 0) {
+		ClearOTagR(&pCurrentFieldRenderingContext->m40D0_secondaryOT[0], 0x1000);
+	}
+}
 
 void bootField()
 {
@@ -1778,6 +1917,18 @@ void bootField()
 
 	setCurrentDirectory(4, 0);
 	loadInitialField();
+
+	MissingCode();
+
+	initFieldDrawEnvs();
+
+	MissingCode();
+
+	g_frameOddOrEven = 1;
+
+	MissingCode();
+
+	clearFieldOrderingTable();
 
 	MissingCode();
 
@@ -2012,6 +2163,7 @@ void exectueEntitiesUpdateFunction()
 
 	MissingCode();
 
+	numDialogWindowsCreatedThisFrame = 0;
 	for (int i = 0; i < numEntitiesToUpdate; i++)
 	{
 		sFieldEntity* pFieldEntity = &actorArray[i];
@@ -3337,7 +3489,9 @@ MATRIX renderModelRotationMatrix;
 s16 camera2Tan;
 s32 cameraDeltaTan;
 
-std::vector<s32>* updateAllEntitiesVar0 = nullptr;
+MATRIX currentProjectionMatrix;
+
+std::vector<RECT>* updateAllEntitiesVar0 = nullptr;
 
 s32 updateCameraInterpolationVar0 = 0;
 s32 updateCameraInterpolationVar1 = 0;
@@ -3433,8 +3587,7 @@ void updateAllEntities()
 	camera2Tan = ratan2(cameraAt2.vz - cameraEye2.vz, cameraAt2.vx - cameraEye2.vx) + -0x400;
 	cameraDeltaTan = ratan2(length2d(cameraAt[0] - cameraEye[0] >> 0x10, cameraAt[2] - cameraEye[2] >> 0x10), cameraAt[1] - cameraEye[1] >> 0x10);
 
-	std::vector<s32> aiStack72;
-	aiStack72.resize(14);
+	std::vector<RECT> aiStack72(7);
 	updateAllEntitiesVar0 = &aiStack72;
 
 	updateCameraInterpolation();
@@ -3621,158 +3774,7 @@ void setIdentityMatrix(MATRIX* param_1)
 s16 compassArrowTargetDirection = 0;
 s16 compassArrowCurrentDirection = 0;
 
-void setCopControlWord(int, int, s32)
-{
-	MissingCode();
-}
-
-void setCopControlWord(int, int, sFP1616)
-{
-	MissingCode();
-}
-
-void SetRotMatrix(const MATRIX* m)
-{
-	setCopControlWord(2, 0, sFP1616::fromValue(m->m[0][0], m->m[0][1]));
-	setCopControlWord(2, 0x800, sFP1616::fromValue(m->m[0][2], m->m[1][0]));
-	setCopControlWord(2, 0x1000, sFP1616::fromValue(m->m[1][1], m->m[1][2]));
-	setCopControlWord(2, 0x1800, sFP1616::fromValue(m->m[2][0], m->m[2][1]));
-	setCopControlWord(2, 0x2000, sFP1616::fromValue(m->m[2][2], 0));
-}
-
-void SetTransMatrix(const MATRIX* m)
-{
-	setCopControlWord(2, 0x2800, m->t[0]);
-	setCopControlWord(2, 0x3000, m->t[1]);
-	setCopControlWord(2, 0x3800, m->t[2]);
-}
-
-void resetMatrixTranslation(MATRIX* m)
-{
-	m->t[0] = 0;
-	m->t[1] = 0;
-	m->t[2] = 0;
-}
-
-void setCopReg(int, int, sFP1616)
-{
-	MissingCode();
-}
-
-void copFunction(int, u32)
-{
-	MissingCode();
-}
-
-s32 getCopReg(int, int)
-{
-	MissingCode();
-	return 0;
-}
-
-MATRIX* MulRotationMatrix(const MATRIX* m0, MATRIX* m1)
-{
-	SetRotMatrix(m0);
-
-	setCopReg(2, 0, sFP1616::fromValue(m1->m[0][0], m1->m[1][0]));
-	setCopReg(2, 0x800, sFP1616::fromValue(m1->m[2][0], 0));
-	copFunction(2, 0x486012);
-	s32 Var2 = getCopReg(2, 0x4800);
-	s32 Var3 = getCopReg(2, 0x5000);
-	s32 Var4 = getCopReg(2, 0x5800);
-
-	setCopReg(2, 0, sFP1616::fromValue(m1->m[0][1], m1->m[1][1]));
-	setCopReg(2, 0x800, sFP1616::fromValue(m1->m[2][1], 0));
-	copFunction(2, 0x486012);
-	s32 Var5 = getCopReg(2, 0x4800);
-	s32 Var6 = getCopReg(2, 0x5000);
-	s32 Var7 = getCopReg(2, 0x5800);
-
-	setCopReg(2, 0, sFP1616::fromValue(m1->m[0][2], m1->m[1][2]));
-	setCopReg(2, 0x800, sFP1616::fromValue(m1->m[2][2], 0));
-	copFunction(2, 0x486012);
-
-	m1->m[0][0] = Var2;
-	m1->m[0][1] = Var5;
-	m1->m[2][0] = Var4;
-	m1->m[2][1] = Var7;
-
-	Var2 = getCopReg(2, 0x4800);
-	Var5 = getCopReg(2, 0x5000);
-	m1->m[0][2] = Var2;
-	m1->m[1][0] = Var3;
-	m1->m[1][1] = Var6;
-	m1->m[1][2] = Var5;
-
-	m1->m[2][2] = getCopReg(2, 0xb);
-
-	return m1;
-}
-
-MATRIX* CompMatrix(const MATRIX* m0, const MATRIX* m1, MATRIX* m2)
-{
-	SetRotMatrix(m0);
-
-	setCopReg(2, 0, sFP1616::fromValue(m1->m[0][0], m1->m[1][0]));
-	setCopReg(2, 0x800, sFP1616::fromValue(m1->m[2][0], 0));
-	copFunction(2, 0x486012);
-	s32 Var2 = getCopReg(2, 0x4800);
-	s32 Var3 = getCopReg(2, 0x5000);
-	s32 Var5 = getCopReg(2, 0x5800);
-
-	setCopReg(2, 0, sFP1616::fromValue(m1->m[0][1], m1->m[1][1]));
-	setCopReg(2, 0x800, sFP1616::fromValue(m1->m[2][1], 0));
-	copFunction(2, 0x486012);
-	s32 Var7 = getCopReg(2, 0x4800);
-	s32 Var8 = getCopReg(2, 0x5000);
-	s32 Var9 = getCopReg(2, 0x5800);
-
-	setCopReg(2, 0, sFP1616::fromValue(m1->m[0][2], m1->m[1][2]));
-	setCopReg(2, 0x800, sFP1616::fromValue(m1->m[2][2], 0));
-	copFunction(2, 0x486012);
-
-	m2->m[0][0] = Var2;
-	m2->m[0][1] = Var7;
-	m2->m[2][0] = Var5;
-	m2->m[2][1] = Var9;
-
-	Var2 = getCopReg(2, 0x4800);
-	Var7 = getCopReg(2, 0x5000);
-	m2->m[0][2] = Var2;
-	m2->m[1][0] = Var3;
-	m2->m[1][1] = Var8;
-	m2->m[1][2] = Var7;
-
-	m2->m[2][2] = getCopReg(2, 0xb);
-
-	// translation
-	setCopReg(2, 0, sFP1616::fromValue(m1->t[0], m1->t[1]));
-	setCopReg(2, 0x800, sFP1616::fromValue(m1->t[2], 0));
-	copFunction(2, 0x486012);
-
-	Var7 = getCopReg(2, 0xc800);
-	Var3 = getCopReg(2, 0xd000);
-	Var9 = getCopReg(2, 0xd800);
-	s32 Var4 = m0->t[1];
-	s32 Var6 = m0->t[2];
-	m2->t[0] = Var7 + m0->t[0];
-	m2->t[1] = Var3 + Var4;
-	m2->t[2] = Var9 + Var6;
-
-	return m2;
-}
-
 int fieldCompassVar = 0;
-
-struct sFieldCompassVar2Sub
-{
-	u32 m0;
-	std::array<s32, 2> m8;
-	std::array<s32, 2> m10;
-	std::array<s32, 2> m18;
-	std::array<s32, 2> m20;
-	//size 0x28
-};
 
 struct sFieldCompassVar2
 {
@@ -3780,16 +3782,11 @@ struct sFieldCompassVar2
 	SVECTOR m8;
 	SVECTOR m10;
 	SVECTOR m18;
-	std::array<sFieldCompassVar2Sub,2> m20;
+	std::array<POLY_FT4,2> m20;
 	// size 0x70
 };
 
 std::array<sFieldCompassVar2, 21> fieldCompassVar2;
-
-struct sDrawCommand
-{
-	u32 m4;
-};
 
 void PushMatrix()
 {
@@ -3801,60 +3798,57 @@ void PopMatrix()
 	MissingCode();
 }
 
-long RotAverage4(SVECTOR* $2, SVECTOR* $3, SVECTOR* v2, SVECTOR* v3, std::array<s32, 2>* sxy0, std::array<s32, 2>* sxy1, std::array<s32, 2>* sxy2, std::array<s32, 2>* sxy3, long* p, long* flag)
+long RotAverage4(SVECTOR* $2, SVECTOR* $3, SVECTOR* v2, SVECTOR* v3, s16* sxy0, s16* sxy1, s16* sxy2, s16* sxy3, long* p, long* flag)
 {
 	MissingCode();
 	return(0);
 }
 
-void drawCompassArrowSegment(sDrawCommand* param_1, sFieldCompassVar2* param_2, MATRIX* param_3, int frameOddOrEven)
+void drawCompassArrowSegment(sTag* param_1, sFieldCompassVar2* param_2, MATRIX* param_3, int frameOddOrEven)
 {
-	sFieldCompassVar2Sub* psVar1;
 	long lStack32;
 	long lStack28;
 
-	psVar1 = &param_2->m20[frameOddOrEven];
+	POLY_FT4* pPrim = &param_2->m20[frameOddOrEven];
 	PushMatrix();
 	SetRotMatrix(param_3);
 	SetTransMatrix(param_3);
-	RotAverage4(&param_2->m0, &param_2->m8, &param_2->m10, &param_2->m18, &psVar1->m8, &psVar1->m10, &psVar1->m18, &psVar1->m20, &lStack32, &lStack28);
-	psVar1->m0 = psVar1->m0 & 0xff000000 | param_1->m4 & 0xffffff;
-	param_1->m4 = param_1->m4 & 0xff000000 | (uint)psVar1 & 0xffffff;
+	RotAverage4(&param_2->m0, &param_2->m8, &param_2->m10, &param_2->m18, &pPrim->x0, &pPrim->x1, &pPrim->x2, &pPrim->x3, &lStack32, &lStack28);
+
+	pPrim->tag.m0_pNext = &param_1[1];
+	param_1[1].m0_pNext = &pPrim->tag;
+
 	PopMatrix();
 }
 
-u8 _drawList[0x80000];
-
-int g_frameOddOrEven = 0;
-
 void LoadImage(RECT* pRect, u8* data)
 {
-	auto vramIterator = gVram.begin() + pRect->m2_y * 2048 + pRect->m0_x;
-	for (int y = 0; y < pRect->m6_h; y++)
+	auto vramIterator = gVram.begin() + pRect->y * 2048 + pRect->x;
+	for (int y = 0; y < pRect->h; y++)
 	{
-		for (int x = 0; x < pRect->m4_w; x++)
+		for (int x = 0; x < pRect->w; x++)
 		{
 			*vramIterator = *(data++);
 			vramIterator++;
 		}
 
-		vramIterator += 2048 - pRect->m4_w;
+		vramIterator += 2048 - pRect->w;
 	}
 }
 
 void LoadImage(RECT* pRect, sPS1Pointer data)
 {
-	auto vramIterator = gVram.begin() + pRect->m2_y * 2048 + pRect->m0_x;
-	for (int y = 0; y < pRect->m6_h; y++)
+	auto vramIterator = gVram.begin() + pRect->y * 2048 + pRect->x;
+	for (int y = 0; y < pRect->h; y++)
 	{
-		for (int x = 0; x < pRect->m4_w; x++)
+		for (int x = 0; x < pRect->w; x++)
 		{
 			*vramIterator = READ_LE_U8(data);
 			vramIterator++;
 			data = data + 1;
 		}
 
-		vramIterator += 2048 - pRect->m4_w;
+		vramIterator += 2048 - pRect->w;
 	}
 }
 
@@ -3878,7 +3872,7 @@ void renderCompass()
 		}
 	}
 
-	compassDataRect.m4_w = 0x80;
+	compassDataRect.w = 0x80;
 	LoadImage(&compassDataRect, (u8*)&compassData1[0][0]);
 	SetGeomScreen(0x80);
 	SetGeomOffset(0x10a, 0xa6);
@@ -3924,7 +3918,7 @@ void renderCompass()
 		{
 			for (int i = 0x14; i < 0x15; i++)
 			{
-				drawCompassArrowSegment((sDrawCommand*)(_drawList + 0x80d4), &fieldCompassVar2[i], &MStack136, g_frameOddOrEven);
+				drawCompassArrowSegment(&pCurrentFieldRenderingContext->m80D4_uiOT[0], &fieldCompassVar2[i], &MStack136, g_frameOddOrEven);
 			}
 		}
 	}
@@ -4206,6 +4200,11 @@ void updateAndRenderField()
 	renderObjects();
 	renderChars();
 	renderParticles();
+	MissingCode();
+	DrawSync(0);
+	stepDialogWindows();
+	addDialogWindowsToOT(&pCurrentFieldRenderingContext->m80D4_uiOT[0], g_frameOddOrEven);
+	VSync(0);
 	MissingCode();
 	shapeTransfert();
 	MissingCode();

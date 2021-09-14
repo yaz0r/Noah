@@ -53,6 +53,7 @@ struct sFieldScriptEntity
     s16 m76;
     std::array<u16, 4> m78_stack;
     s8 m80_DialogAvatarFace;
+    s8 m81_selectedMultichoiceLine;
     std::array<s8, 2> m82;
     s32 m84;
     std::array<s16, 2> m88;
@@ -172,6 +173,8 @@ extern u16 cameraInterpolationFlags;
 extern s16 cameraInterpolationTargetNumSteps;
 extern s32 cameraInterpolationPositionNumSteps;
 
+extern s16 camera2Tan;
+
 extern u8 OPX_50Param;
 extern u8 OPX_52Param;
 extern u16 OPX_80Params[8];
@@ -192,7 +195,9 @@ extern int musicVar1;
 extern int musicVar2;
 extern int currentlyPlayingMusic;
 
-extern int initFieldVar3;
+extern int g_frameOddOrEven;
+
+extern int fieldDrawEnvsInitialized;
 extern s32 fieldExecuteVar2;
 extern s32 fieldExecuteVar3;
 extern s16 fieldRandomBattleVar;
@@ -209,6 +214,12 @@ extern std::array<s16, 4> fieldInitVar1;
 extern bool g_LogOpcodes;
 extern bool g_BreakOnMissingOpcode;
 
+extern std::vector<u8> rawFieldDialogBundle;
+
+extern MATRIX currentProjectionMatrix;
+
+void traceNextAlloc(int state);
+
 void LogOpcode(int actorId, u16 scriptOffset, u16 opcode);
 void LogMissingOpcode(int actorId, u16 scriptOffset, u16 opcode);
 
@@ -216,7 +227,6 @@ void playMusic(int musicId, int);
 void setupRGBCalcMode(int, int, int, int, int, int);
 u16 getScriptEntryPoint(int entityId, int scriptIndex);
 int isScriptAlreadyRunning(sFieldScriptEntity* pEntity, int scriptIndex);
-int findDialogWindowForCurrentActor(int*);
 void clearMusic();
 void clearMusic2();
 void OPX_13Sub(int);

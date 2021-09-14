@@ -4,7 +4,7 @@
 #include "sprite/spriteSetup.h"
 
 int OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1_var = 0x2000;
-int initFieldVar3 = 0;
+int fieldDrawEnvsInitialized = 0;
 s8 isBattleOverlayLoaded = 0;
 s32 initFieldVar2 = 0;
 int initFieldVar4 = 0;
@@ -404,14 +404,14 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub9(sFieldEntitySub4* param_1)
 	int iVar2;
 
 	iVar2 = 0;
-	if (initFieldVar3 != -1) {
+	if (fieldDrawEnvsInitialized != -1) {
 		do {
 			sVar1 = param_1->m9E;
 			if ((param_1->m9E != 0) && (param_1->m9E = sVar1 + -1, sVar1 == 1)) {
 				executeSpriteBytecode2(param_1);
 			}
 			iVar2 = iVar2 + 1;
-		} while (iVar2 != initFieldVar3 + 1);
+		} while (iVar2 != fieldDrawEnvsInitialized + 1);
 	}
 	return;
 }
@@ -505,7 +505,7 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1(sFieldEntitySub4* param_1, const sPS1Poi
 	}
 
 	param_1->m1C = uVar1 * 0x400;
-	int iVar4 = (initFieldVar3 + 1) * (initFieldVar3 + 1) * param_1->m82;
+	int iVar4 = (fieldDrawEnvsInitialized + 1) * (fieldDrawEnvsInitialized + 1) * param_1->m82;
 	if (iVar4 < 0) {
 		iVar4 = iVar4 + 0xfff;
 	}
@@ -882,7 +882,7 @@ void initFieldEntitySub4Sub1(sFieldEntitySub4* param_1)
 	param_1->m40 = param_1->m40 & 0xfffe0003;
 	param_1->mAC = 0;
 	param_1->mB0 = 0;
-	int iVar1 = (initFieldVar3 + 1) * (initFieldVar3 + 1) * 0x4000 * param_1->m82;
+	int iVar1 = (fieldDrawEnvsInitialized + 1) * (fieldDrawEnvsInitialized + 1) * 0x4000 * param_1->m82;
 	param_1->mAC = param_1->mAC & 0xfff8007f | 0x8000;
 	param_1->mA8.m17 = 0;
 	if (iVar1 < 0) {

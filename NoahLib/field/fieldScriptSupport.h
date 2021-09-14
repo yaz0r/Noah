@@ -41,3 +41,11 @@ uint readCharacter(int param_1);
 uint getImmediateOrVariableUnsigned(int param_1);
 void playMusicFromScript();
 void jumpIfMask(u16 mask);
+
+int isDialogAvatarLoaded(int faceId);
+int showDialogWindowForActor(int, int);
+
+void projectActorToScreen(int param_1, int* param_2, int* param_3, short param_4);
+
+extern s32 numDialogWindowsCreatedThisFrame;
+

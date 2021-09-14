@@ -76,6 +76,7 @@ void initOpcodes()
     fieldScriptOpcodes[0x93] = OP_ADD_ENDITY_TO_FIELD1721_LIST;
     fieldScriptOpcodes[0x99] = OP_99;
     fieldScriptOpcodes[0x9B] = OP_SET_CAMERA_INTERPOLATION_RATE;
+    fieldScriptOpcodes[0x9C] = OP_WAIT_DIALOG;
     fieldScriptOpcodes[0x9D] = OP_9D;
     fieldScriptOpcodes[0xA0] = OP_SET_SCREEN_GEOMETRY;
     fieldScriptOpcodes[0xA3] = OP_SET_DESIRED_CAMERA_POSITION;

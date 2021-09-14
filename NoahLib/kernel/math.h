@@ -70,8 +70,8 @@ struct sVec3
 
 struct sVec2_s16
 {
-	s32 vx;
-	s32 vy;
+	s16 vx;
+	s16 vy;
 };
 
 typedef MATRIX sMatrix;
@@ -80,4 +80,9 @@ void createRotationMatrix(SVECTOR*, MATRIX*);
 MATRIX* ScaleMatrixL(MATRIX* m, VECTOR* v);
 MATRIX* ScaleMatrix(MATRIX* m, VECTOR* v);
 void MulMatrix0(MATRIX* m0, MATRIX* m1, MATRIX* m2);
-
+MATRIX* CompMatrix(const MATRIX* m0, const MATRIX* m1, MATRIX* m2);
+void SetRotMatrix(const MATRIX* m);
+void SetTransMatrix(const MATRIX* m);
+long RotTransPers(SVECTOR* $2, sVec2_s16* sxy, long* p, long* flag);
+void resetMatrixTranslation(MATRIX* m);
+MATRIX* MulRotationMatrix(const MATRIX* m0, MATRIX* m1);

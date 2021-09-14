@@ -7,6 +7,7 @@
 #include "opcodeTables.h"
 #include "fieldGraphicObject.h"
 #include "sprite/spriteSetup.h"
+#include "dialogWindows.h"
 
 // TODO: Cleanup
 s16 findTriangleInWalkMesh(int posX, int posZ, int walkmeshId, SVECTOR* param_4, VECTOR* param_5);
@@ -522,12 +523,6 @@ void OP_RAND_ROTATION()
 	pCurrentFieldScriptActor->mCC_scriptPC++;
 }
 
-int showDialogWindowForActor(int, int)
-{
-	MissingCode();
-	return  -1;
-}
-
 void OP_SHOW_DIALOG_WINDOW_FOR_CURRENT_ACTOR_MODE3()
 {
 	showDialogWindowForActor(currentFieldActorId, 3);
@@ -837,6 +832,32 @@ void OP_SET_CAMERA_INTERPOLATION_RATE(void)
 	}
 	fieldExectuteMaxCycles = fieldExectuteMaxCycles + 1;
 	pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 5;
+}
+
+void OP_WAIT_DIALOG()
+{
+	int windowIndex;
+	if (findDialogWindowForCurrentActor(&windowIndex) == -1) {
+		fieldExectuteMaxCycles = fieldExectuteMaxCycles + 8;
+		assert(0);
+		//setVar(0x14, (ushort) * (byte*)&pCurrentFieldScriptActor->field_0x81);
+		pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 1;
+	}
+	else {
+		if (((actorArray[gDialogWindows[windowIndex].m418_actorId].m4C_scriptEntity)->m4_flags & 0x200) != 0) {
+			int uVar2 = (uint)pCurrentFieldScriptActor->m84 >> 0x10;
+			if (uVar2 == 0) {
+				uVar2 = pCurrentFieldScriptActor->m84 & 0xffff;
+			}
+			if ((uVar2 & 1) == 0) {
+				if ((pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m18) != 7) {
+					OP_STOP();
+				}
+				gDialogWindows[windowIndex].m414 = 0;
+			}
+		}
+		breakCurrentScript = 1;
+	}
 }
 
 void OP_9D()
@@ -1619,7 +1640,6 @@ void OP_RESET_CHARACTER()
 	uint uVar2;
 	sFieldScriptEntity* psVar3;
 	ushort uVar4;
-	int local_10[2];
 
 	iVar1 = readCharacter(1);
 	if (iVar1 != 0xff) {
@@ -1637,10 +1657,10 @@ void OP_RESET_CHARACTER()
 		psVar3->m0_flags = uVar2 | 1;
 		psVar3->m106_currentRotation = uVar4;
 		psVar3->m104_rotation = uVar4;
-		iVar1 = findDialogWindowForCurrentActor(local_10);
-		if (iVar1 == 0) {
-			assert(0);
-			//(&DAT_Field__800c2aac)[local_10[0] * 0x24c] = 0;
+
+		int dialogWindow;
+		if (findDialogWindowForCurrentActor(&dialogWindow) == 0) {
+			gDialogWindows[dialogWindow].m414 = 0;
 		}
 	}
 	pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 2;
