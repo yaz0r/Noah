@@ -4,6 +4,8 @@
 #include "kernel/isoManager.h"
 #include "kernel/fileSystem.h"
 #include "kernel/gameState.h"
+#include "kernel/decompress.h"
+#include "kernel/font.h"
 #include "field/field.h"
 #include "field/fieldDebugger/fieldInspector.h"
 #include "field/fieldDebugger/fieldViewDebug.h"
@@ -21,6 +23,21 @@ bool noahInit(int argc, char* argv[])
     MissingCode();
 
     initCDAndFileSystem(&fatFileTableBuffer, &fatDirectoryTableBuffer, -1);
+
+    MissingCode();
+
+    setCurrentDirectory(0, 1);
+
+    MissingCode();
+
+    // load and init font
+	{
+        std::vector<u8> compressedFontData;
+		readFile(6, compressedFontData, 0, 0);
+		waitReadCompletion(0);
+		traceNextAlloc(0x30);
+		initFont(mallocAndDecompress(compressedFontData));
+	}
 
     MissingCode();
 

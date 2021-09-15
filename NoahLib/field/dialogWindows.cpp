@@ -1,5 +1,6 @@
 #include "noahLib.h"
 #include "kernel/graphics.h"
+#include "kernel/font.h"
 #include "dialogWindows.h"
 #include "fieldScriptSupport.h"
 
@@ -211,6 +212,21 @@ int allocateDialogWindow()
 	return -1;
 }
 
+int getWindowWithLowestPriority()
+{
+	int bestValue = 0;
+	s16 index =-1;
+	for (int i = 0; i < 4; i++)
+	{
+		s16 currentValue = gDialogWindows[0].m410;
+		if ((currentValue != -1) && (bestValue <= currentValue)) {
+			index = i;
+			bestValue = currentValue;
+		}
+	}
+	return index;
+}
+
 s32 createDialogWindowCounter = 0;
 
 void setupDialogWindowFacePoly(int windowIndex, int setupIndex)
@@ -289,7 +305,7 @@ void setupWindowSize2(sDialogWindow18* param_1, int x1, int y1, short x2, short 
 	param_1->m28_perLineBuffer.resize(param_1->mC_height);
 
 	traceNextAlloc(0x28);
-	param_1->m2C_inRamDialogTextImage.resize(param_1->m12_widthPadded * 0x1c);
+	param_1->m2C_inRamDialogTextImage.resize(param_1->m12_widthPadded * 14);
 
 	param_1->m48_textTile[0].tag.m3_size = 3;
 	param_1->m48_textTile[0].r0 = 0;
@@ -346,10 +362,10 @@ void setupWindowSize2(sDialogWindow18* param_1, int x1, int y1, short x2, short 
 			param_1->m28_perLineBuffer[i].m0[1][0] = param_1->m28_perLineBuffer[i].m0[0][0];
 			param_1->m28_perLineBuffer[i].m0[1][1] = param_1->m28_perLineBuffer[i].m0[0][1];
 
-			param_1->m28_perLineBuffer[i].m50_x = x1;
-			param_1->m28_perLineBuffer[i].m52_y = yFraq;
-			param_1->m28_perLineBuffer[i].m54_width = param_1->m12_widthPadded;
-			param_1->m28_perLineBuffer[i].m56_height = 0xD;
+			param_1->m28_perLineBuffer[i].m50.x = x1;
+			param_1->m28_perLineBuffer[i].m50.y = yFraq;
+			param_1->m28_perLineBuffer[i].m50.w = param_1->m12_widthPadded;
+			param_1->m28_perLineBuffer[i].m50.h = 0xD;
 			param_1->m28_perLineBuffer[i].m58 = 0;
 			if ((i & 1) == 0)
 			{
@@ -363,7 +379,6 @@ void setupWindowSize2(sDialogWindow18* param_1, int x1, int y1, short x2, short 
 			param_1->m28_perLineBuffer[i].m5A = i & 1;
 			param_1->m28_perLineBuffer[i].m5B = i;
 		}
-		assert(0);
 	}
 
 	SetDrawMode(&param_1->m30_textTileDrawMode[0], 0, 0, GetTPage(0, 0, x1, y1), nullptr);
@@ -745,10 +760,217 @@ void addDialogWindowsToOTSub1(sDialogWindow18* param_1)
 	return;
 }
 
+void addDialogWindowsToOTSub2(sDialogWindow18* param_1, const std::vector<u8>::iterator& param_2)
+{
+	sDialogWindow18_8C* psVar1;
+	sDialogWindow18_8C* psVar2;
+
+	psVar2 = param_1->m8C;
+	param_1->m82 = param_1->m82 + 1;
+	traceNextAlloc(0x2a);
+	psVar1 = new sDialogWindow18_8C;
+	psVar1->m4_dialogPointer = param_2;
+	psVar1->m0_pNext = nullptr;
+	if (psVar2 == nullptr) {
+		param_1->m8C = psVar1;
+	}
+	else {
+		for (; psVar2->m0_pNext != nullptr; psVar2 = psVar2->m0_pNext) {
+		}
+		psVar2->m0_pNext = psVar1;
+	}
+}
+
+void AddPrim(sTag* ot, sTag* p)
+{
+	p->m0_pNext = ot->m0_pNext;
+	ot->m0_pNext = p;
+}
+
+void addSPRT(sTag* ot, sTag* p)
+{
+	p->m0_pNext = ot->m0_pNext;
+	p->m3_size |= 4;
+	ot->m0_pNext = p;
+}
+
+int getDialogFontCharacterWidth(uint param_1, uint param_2)
+{
+	MissingCode();
+	return 1;
+}
+
+void printDialogCharacter(ushort param_1, ushort xenoChar, ushort* param_3, short param_4, int param_5)
+{
+	{
+		std::string decodedString;
+		if (xenoChar == 0x10)
+		{
+			decodedString += ' ';
+		}
+		else if ((xenoChar >= 0x16) && (xenoChar <= 0x1F))
+		{
+			decodedString += (char)(xenoChar - 0x16 + '0');
+		}
+		else if ((xenoChar >= 0x20) && (xenoChar <= 0x39))
+		{
+			decodedString += (char)(xenoChar - 0x20 + 'A');
+		}
+		else if ((xenoChar >= 0x3D) && (xenoChar <= 0x56))
+		{
+			decodedString += (char)(xenoChar - 0x3D + 'a');
+		}
+		printf("%s", decodedString.c_str());
+	}
+
+	MissingCode();
+}
+
+int printDialogTextVar = 0;
+void updateDialogTextImage(sDialogWindow18* param_1)
+{
+	if (param_1->mA_width1 < (param_1->m0).vx) // go to next line?
+	{
+		int sVar3 = param_1->mC_height;
+		(param_1->m0).vx = 0;
+		(param_1->m0).vy = (param_1->m0).vy + 1;
+		int sVar8 = (param_1->m0).vy;
+		param_1->m18 = param_1->m18 + 1;
+		if (sVar3 <= sVar8) {
+			int uVar5 = param_1->m10_flags;
+			(param_1->m0).vy = 0;
+			param_1->m10_flags = uVar5 | 1;
+		}
+		if ((param_1->m10_flags & 1) != 0) {
+			param_1->m28_perLineBuffer[(param_1->m14).vy].m58 = 0;
+			sVar3 = param_1->mC_height;
+			sVar8 = (param_1->m14).vy + 1;
+			(param_1->m14).vy = sVar8;
+			if (sVar3 <= sVar8) {
+				(param_1->m14).vy = 0;
+			}
+		}
+		int characterToPrint = (int)param_1->m18 % (param_1->mC_height + 1);
+		int iVar13 = (int)(param_1->m0).vy;
+		param_1->m28_perLineBuffer[iVar13].m5C = (char)((int)characterToPrint / 2) * '\r' + *(char*)&param_1->mE;
+		if ((characterToPrint & 1) == 0) {
+			param_1->m28_perLineBuffer[iVar13].m5E = textSpriteMode0;
+		}
+		else {
+			param_1->m28_perLineBuffer[iVar13].m5E = textSpriteMode1;
+		}
+		param_1->m28_perLineBuffer[iVar13].m5A = (byte)characterToPrint & 1;
+		param_1->m28_perLineBuffer[iVar13].m5B = (byte)characterToPrint;
+		param_1->m28_perLineBuffer[iVar13].m50.y = param_1->mE + (short)((int)characterToPrint / 2) * 0xd;
+	}
+
+	if (param_1->m6C != 0) {
+		param_1->m6C = 0;
+		param_1->m10_flags = param_1->m10_flags & 0xfffb;
+		return;
+	}
+
+	int bVar1 = param_1->m69;
+	int iVar13 = bVar1 - 1;
+	int iVar14 = printDialogTextVar;
+
+	while (1)
+	{
+		if (iVar13 == -1)
+		{
+			printDialogTextVar = iVar14;
+			return;
+		}
+
+		u8* pCharacterToPrint = &(*param_1->m1C);
+		u8 characterToPrint = *pCharacterToPrint;
+		printDialogTextVar = iVar14;
+
+		switch (characterToPrint)
+		{
+		case 0:
+			assert(0);
+			break;
+		case 1: // end of line
+			printf("\n");
+			(param_1->m0).vx = 100;
+			param_1->m1C++;
+			return;
+		case 2:
+			assert(0);
+			break;
+		case 3:
+			assert(0);
+			break;
+		case 0xF:
+			// escape character;
+			switch (pCharacterToPrint[1])
+			{
+			case 0:
+				param_1->m84 = param_1->m1C[2];
+				param_1->m1C += 3;
+				return;
+			default:
+				assert(0);
+			}
+			break;
+		default:
+		{
+			// normal character
+			int iVar13 = 1;
+			int uVar10;
+			if ((int)characterToPrint < dialogFontVar0) {
+				uVar10 = characterToPrint;
+				characterToPrint = 0;
+			}
+			else {
+				uVar10 = (uint)pCharacterToPrint[1];
+				iVar13 = 2;
+			}
+			int uVar4 = getDialogFontCharacterWidth(characterToPrint, uVar10);
+			int sVar3 = (param_1->m0).vx;
+			if ((int)param_1->mA_width1 < (int)((int)sVar3 + (uint)uVar4)) {
+				(param_1->m0).vx = sVar3 + uVar4;
+				return;
+			}
+			printDialogCharacter(characterToPrint, uVar10, &param_1->m2C_inRamDialogTextImage[sVar3], (int)param_1->m12_widthPadded, param_1->m28_perLineBuffer[(param_1->m0).vy].m5A);
+			sVar3 = (param_1->m0).vy;
+			int sVar7 = (param_1->m0).vx + uVar4;
+			param_1->m1C += iVar13;
+			(param_1->m0).vx = sVar7;
+			param_1->m28_perLineBuffer[sVar3].m58 = sVar7;
+			break;
+		}
+		}
+
+		iVar13--;
+		iVar14 = printDialogTextVar;
+	}
+
+	MissingCode();
+}
+
 void updateAndRenderTextForDialogWindow(sDialogWindow18* param_1, sTag* OT, int oddOrEven)
 {
 	if ((param_1->m10_flags & 4) == 0) {
-		assert(0);
+		if (param_1->m82 == 0) {
+			return;
+		}
+		sDialogWindow18_8C* psVar8 = param_1->m8C;
+		param_1->m1C = psVar8->m4_dialogPointer;
+		param_1->m8C = param_1->m8C->m0_pNext;
+		delete psVar8;
+		param_1->m82 = param_1->m82 + -1;
+		param_1->m10_flags = param_1->m10_flags & 2 | 0x24;
+		if (param_1->m6A != 0) {
+			u8 bVar3 = param_1->m6A;
+			param_1->m68 = param_1->m6A;
+			param_1->m6A = 0;
+			param_1->m69 = bVar3;
+		}
+		param_1->m88_delayBetweenCharacters = 0;
+		param_1->m86_currentDelayForNextCharacter = 0;
+		param_1->m69 = param_1->m68;
 	}
 	if ((param_1->m10_flags & 0x100) == 0) {
 		param_1->m69 = param_1->m68;
@@ -762,12 +984,117 @@ void updateAndRenderTextForDialogWindow(sDialogWindow18* param_1, sTag* OT, int 
 	}
 
 	if ((param_1->m10_flags & 0x20) != 0) {
-		assert(0);
+		sDialogWindow18PerLineBufferEntry* psVar5 = &param_1->m28_perLineBuffer[0];
+		short sVar2 = param_1->mE;
+		(param_1->m14).vy = 0;
+		param_1->m18 = 0;
+		(param_1->m0).vy = 0;
+		(param_1->m0).vx = 0;
+		psVar5->m5C = (byte)sVar2;
+		param_1->m28_perLineBuffer[0].m5E = textSpriteMode0;
+		param_1->m28_perLineBuffer[0].m5A = 0;
+		param_1->m28_perLineBuffer[0].m50.y = param_1->mE;
+		if (0 < param_1->mC_height) {
+			for (int i=0; i< param_1->mC_height; i++)
+			{
+				param_1->m28_perLineBuffer[i].m58 = 0;
+			}
+		}
+		param_1->m10_flags &= ~0x20;
 	}
 
 	if (0 < param_1->mC_height) {
+		int iVar11 = param_1->m14.vy;
+		int iVar6 = param_1->m14.vy;
+		for (int i=0; i< param_1->mC_height; i++)
+		{
+			if (iVar11 >= param_1->mC_height)
+			{
+				iVar6 = 0;
+				iVar11 = 0;
+			}
+
+			if (param_1->m6E_selectedLineForMultiChoice == i) {
+				param_1->m28_perLineBuffer[iVar6].m0[oddOrEven][1].code &= ~1;
+			}
+			else {
+				param_1->m28_perLineBuffer[iVar6].m0[oddOrEven][1].code |= 1;
+			}
+
+			if (param_1->m28_perLineBuffer[iVar6].m58 > 0x40)
+			{
+				assert(0);
+			}
+		}
+	}
+
+	AddPrim(OT, &param_1->m30_textTileDrawMode[1].tag);
+
+	if (0 < param_1->mC_height) {
+		int iVar11 = param_1->m14.vy;
+		int iVar6 = param_1->m14.vy;
+		for (int i = 0; i < param_1->mC_height; i++)
+		{
+			if (iVar11 >= param_1->mC_height)
+			{
+				iVar6 = 0;
+				iVar11 = 0;
+			}
+
+			if (param_1->m6E_selectedLineForMultiChoice == i) {
+				param_1->m28_perLineBuffer[iVar6].m0[oddOrEven][1].code &= ~1;
+			}
+			else {
+				param_1->m28_perLineBuffer[iVar6].m0[oddOrEven][1].code |= 1;
+			}
+
+			// do we overflow in the second sprite?
+			if (param_1->m28_perLineBuffer[iVar6].m58)
+			{
+				param_1->m28_perLineBuffer[iVar6].m0[oddOrEven][0].v0 = param_1->m28_perLineBuffer[iVar6].m5C;
+				param_1->m28_perLineBuffer[iVar6].m0[oddOrEven][0].clut = param_1->m28_perLineBuffer[iVar6].m5E;
+				param_1->m28_perLineBuffer[iVar6].m0[oddOrEven][0].y0 = (param_1->m4).vy + (param_1->m14).vx * i;
+				int uVar4 = param_1->m28_perLineBuffer[iVar6].m58;
+				if (0x40 < uVar4) {
+					uVar4 = 0x40;
+				}
+				param_1->m28_perLineBuffer[iVar6].m0[oddOrEven][0].w = uVar4 * 4;
+				addSPRT(OT, &param_1->m28_perLineBuffer[iVar6].m0[oddOrEven][0].tag);
+			}
+		}
+	}
+
+	if (param_1->m84 == 0) {
+		if (param_1->m86_currentDelayForNextCharacter == 0) {
+			param_1->m86_currentDelayForNextCharacter = param_1->m88_delayBetweenCharacters;
+			if ((param_1->m10_flags & 0x58) == 0) {
+				updateDialogTextImage(param_1);
+				LoadImage(&param_1->m28_perLineBuffer[(param_1->m0).vy].m50, (u8*)&param_1->m2C_inRamDialogTextImage[0]);
+			}
+		}
+		else {
+			param_1->m86_currentDelayForNextCharacter = param_1->m86_currentDelayForNextCharacter + -1;
+		}
+	}
+	else {
+		param_1->m84 = param_1->m84 + -1;
+	}
+
+	if (param_1->m84 != 0)
+	{
+		--param_1->m84;
+		if (--param_1->m84 == -1)
+		{
+			param_1->m10_flags = param_1->m10_flags & 0xffef;
+		}
+	}
+
+	if ((param_1->m10_flags & 2) == 0) {
 		assert(0);
 	}
+
+	param_1->m10_flags = param_1->m10_flags & 0xfeff;
+	AddPrim(OT, &param_1->m30_textTileDrawMode->tag);
 }
 
 void addDialogWindowsToOT(sTag* OT, int oddOrEven)
@@ -789,7 +1116,8 @@ void addDialogWindowsToOT(sTag* OT, int oddOrEven)
 		}
 	}
 
-	MissingCode();
+	std::array<s32, 4> processedWindowsArray;
+	processedWindowsArray.fill(-1);
 
 	for (int i=0; i<4; i++)
 	{
@@ -819,7 +1147,6 @@ void addDialogWindowsToOT(sTag* OT, int oddOrEven)
 		}
 	}
 
-	std::array<s32, 4> processedWindowsArray = { 0,0,0,0 };
 	int  counterOfProcessedWindows = 0;
 
 	for (int j = 0; j < 4; j++)
@@ -846,7 +1173,7 @@ void addDialogWindowsToOT(sTag* OT, int oddOrEven)
 							addDialogWindowsToOTSub1(&gDialogWindows[i].m18);
 						}
 						if (gDialogWindows[i].m18.m82 == 0) {
-							assert(0);
+							addDialogWindowsToOTSub2(&gDialogWindows[i].m18, gDialogWindows[i].m18.m90_dialogPointer);
 						}
 						updateAndRenderTextForDialogWindow(&gDialogWindows[i].m18, OT, oddOrEven);
 

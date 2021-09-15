@@ -319,7 +319,12 @@ int showDialogWindowForActor(int actorId, int mode)
 	}
     else
     {
-        assert(0);
+		windowIndex = getWindowWithLowestPriority();
+		if (windowIndex != -1) {
+			gDialogWindows[windowIndex].m414 = 0;
+			breakCurrentScript = 1;
+			return -1;
+		}
     }
 
     // get the combined flags of all active windows

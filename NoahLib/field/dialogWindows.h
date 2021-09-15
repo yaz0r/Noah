@@ -6,16 +6,20 @@
 struct sDialogWindow18PerLineBufferEntry
 {
 	SPRT m0[2][2];
-	s16 m50_x;
-	s16 m52_y;
-	s16 m54_width;
-	s16 m56_height;
+	RECT m50;
 	s16 m58;
 	s8 m5A;
 	s8 m5B;
 	s16 m5C;
 	s16 m5E;
 	// size 0x60
+};
+
+struct sDialogWindow18_8C
+{
+	sDialogWindow18_8C* m0_pNext;
+	std::vector<u8>::iterator m4_dialogPointer;
+	// size 0x8
 };
 
 struct sDialogWindow18
@@ -29,8 +33,10 @@ struct sDialogWindow18
 	u16 m10_flags;
 	s16 m12_widthPadded;
 	sVec2_s16 m14;
+	s16 m18;
+	std::vector<u8>::iterator m1C;
 	std::vector<sDialogWindow18PerLineBufferEntry> m28_perLineBuffer;
-	std::vector<u8> m2C_inRamDialogTextImage;
+	std::vector<u16> m2C_inRamDialogTextImage;
 	DR_MODE m30_textTileDrawMode[2];
 	TILE m48_textTile[2];
 	s8 m68;
@@ -44,7 +50,9 @@ struct sDialogWindow18
 	s16 m80;
 	s16 m82;
 	s16 m84;
-	void* m8C;
+	s16 m86_currentDelayForNextCharacter;
+	s16 m88_delayBetweenCharacters;
+	sDialogWindow18_8C* m8C;
 	std::vector<u8>::iterator m90_dialogPointer;
 };
 
@@ -92,5 +100,6 @@ void initDialogWindows();
 int findDialogWindowForCurrentActor(int* outputId);
 int findFreeDialogWindow();
 int allocateDialogWindow();
+int getWindowWithLowestPriority();
 void stepDialogWindows();
 void addDialogWindowsToOT(sTag* OT, int oddOrEven);
