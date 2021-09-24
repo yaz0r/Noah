@@ -298,7 +298,7 @@ int showDialogWindowForActor(int actorId, int mode)
 	int iVar6;
 	if (((((loadCompleted != 0) || (iRam800afd04 != 0)) || (numDialogWindowsCreatedThisFrame != 0)) || (iRam800adb64 != 0xff)) ||
 		(((iRam800adb70 == 0 && (iVar6 = isLoadCompleted(), iVar6 != 0)) ||
-			((pCurrentFieldScriptActor->m80_DialogAvatarFace != 0xff && (iVar6 = isDialogAvatarLoaded((uint)pCurrentFieldScriptActor->m80_DialogAvatarFace), iVar6 == -1)))))) {
+			((pCurrentFieldScriptActor->m80_DialogAvatarFace != -1 && (iVar6 = isDialogAvatarLoaded((uint)pCurrentFieldScriptActor->m80_DialogAvatarFace), iVar6 == -1)))))) {
 		breakCurrentScript = 1;
 		return -1;
 	}
@@ -375,7 +375,7 @@ int showDialogWindowForActor(int actorId, int mode)
 		else {
             projectedPosition[0] = 0xa0;
 		}
-		if ((pCurrentFieldScriptActor->m80_DialogAvatarFace != 0xff) && (((pCurrentFieldScriptActor->m84>>16) & 2) == 0)) {
+		if ((pCurrentFieldScriptActor->m80_DialogAvatarFace != -1) && (((pCurrentFieldScriptActor->m84>>16) & 2) == 0)) {
 			dialogBoxHeight = 4;
 			if ((int)dialogBoxWidth < 0x18) {
 				dialogBoxWidth = 0x18;
@@ -415,7 +415,7 @@ int showDialogWindowForActor(int actorId, int mode)
 		if (pCurrentFieldScriptActor->m82[1] != 0) {
 			dialogBoxHeight = (uint)pCurrentFieldScriptActor->m82[1];
 		}
-		if ((pCurrentFieldScriptActor->m80_DialogAvatarFace != 0xff) && (((pCurrentFieldScriptActor->m84 >> 16) & 2) == 0)) {
+		if ((pCurrentFieldScriptActor->m80_DialogAvatarFace != -1) && (((pCurrentFieldScriptActor->m84 >> 16) & 2) == 0)) {
 			dialogBoxHeight = 4;
 		}
 	}

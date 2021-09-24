@@ -8,7 +8,7 @@ int dialogFontVar3 = 0;
 int dialogFontVar4 = 0;
 
 std::vector<u8> dialogFontVarPtr;
-std::vector<u8>::iterator dialogFontVarPtr2;
+u8* dialogFontVarPtr2;
 
 void initFont(std::vector<u8>& fontData)
 {
@@ -20,6 +20,6 @@ void initFont(std::vector<u8>& fontData)
 	dialogFontVar3 = READ_LE_U16(fontData.begin() + 10);
 	dialogFontVar1 = READ_LE_U16(fontData.begin() + 0xC);
 	dialogFontVarPtr = fontData;
-	dialogFontVarPtr2 = fontData.begin() + READ_LE_U16(fontData.begin() + 2);
+	dialogFontVarPtr2 = &dialogFontVarPtr[0] + READ_LE_U16(dialogFontVarPtr.begin() + 2);
 
 }

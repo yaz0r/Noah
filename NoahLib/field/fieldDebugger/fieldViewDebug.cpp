@@ -136,6 +136,9 @@ void fieldViewDebug_step()
     {
         ImVec2 currentWindowSize = ImGui::GetContentRegionAvail();
 
+        currentWindowSize[0] = std::max<int>(currentWindowSize[0], 1);
+        currentWindowSize[1] = std::max<int>(currentWindowSize[1], 1);
+
         if ((currentWindowSize[0] != oldWindowSize[0]) || (currentWindowSize[1] != oldWindowSize[1]))
         {
             oldWindowSize = currentWindowSize;

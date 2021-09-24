@@ -112,7 +112,7 @@ struct POLY_FT4
 void SetPolyFT4(POLY_FT4* p);
 
 void DrawSync(int);
-void VSync(int);
+int VSync(int);
 void InitGeom();
 
 u16 GetClut(int x, int y);
@@ -129,6 +129,7 @@ void SetSprt(SPRT* p);
 void SetSemiTrans(SPRT* p, int abe);
 
 sTag* ClearOTagR(sTag* ot, int n);
+void DrawOTag(sTag* ot);
 
 DISPENV* PutDispEnv(DISPENV* env);
 DRAWENV* PutDrawEnv(DRAWENV* env);

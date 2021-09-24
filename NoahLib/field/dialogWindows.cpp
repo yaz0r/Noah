@@ -442,7 +442,7 @@ void createDialogWindow(short x, short y, int dialogIndex, int windowIndex, int 
 	}
 
 	sFieldScriptEntity* pScriptEntity = actorArray[fieldActorId].m4C_scriptEntity;
-	if ((pScriptEntity->m80_DialogAvatarFace == 0xff) || ((flagUpper & 2) != 0)) {
+	if ((pScriptEntity->m80_DialogAvatarFace == -1) || ((flagUpper & 2) != 0)) {
 		gDialogWindows[windowIndex].m495_dialogFaceId = 0x80;
 		gDialogWindows[windowIndex].m494_hasDialogFace = 0;
 	}
@@ -796,34 +796,318 @@ void addSPRT(sTag* ot, sTag* p)
 
 int getDialogFontCharacterWidth(uint param_1, uint param_2)
 {
-	MissingCode();
-	return 1;
+	bool bVar1;
+	int iVar2;
+
+	if ((param_1 & 0xffff) == 0) {
+		bVar1 = (int)((param_2 & 0xffff) - dialogFontVar1) < dialogFontVar2;
+	}
+	else {
+		if ((param_1 & 0xffff) != dialogFontVar0) {
+			return 3;
+		}
+		bVar1 = (int)(param_2 & 0xffff) < dialogFontVar3;
+	}
+	iVar2 = 3;
+	if (bVar1) {
+		iVar2 = 2;
+	}
+	return iVar2;
 }
 
-void printDialogCharacter(ushort param_1, ushort xenoChar, ushort* param_3, short param_4, int param_5)
+void printDialogCharacter(ushort characterType, ushort characterId, ushort* outputBuffer, short outputBufferStride, int oddOrEvenLine)
 {
 	{
 		std::string decodedString;
-		if (xenoChar == 0x10)
+		if (characterId == 0x10)
 		{
 			decodedString += ' ';
 		}
-		else if ((xenoChar >= 0x16) && (xenoChar <= 0x1F))
+		else if ((characterId >= 0x16) && (characterId <= 0x1F))
 		{
-			decodedString += (char)(xenoChar - 0x16 + '0');
+			decodedString += (char)(characterId - 0x16 + '0');
 		}
-		else if ((xenoChar >= 0x20) && (xenoChar <= 0x39))
+		else if ((characterId >= 0x20) && (characterId <= 0x39))
 		{
-			decodedString += (char)(xenoChar - 0x20 + 'A');
+			decodedString += (char)(characterId - 0x20 + 'A');
 		}
-		else if ((xenoChar >= 0x3D) && (xenoChar <= 0x56))
+		else if ((characterId >= 0x3D) && (characterId <= 0x56))
 		{
-			decodedString += (char)(xenoChar - 0x3D + 'a');
+			decodedString += (char)(characterId - 0x3D + 'a');
 		}
 		printf("%s", decodedString.c_str());
 	}
 
-	MissingCode();
+	u16* pCharacterData = nullptr;
+	if (characterType == 0) {
+		pCharacterData = (ushort*)(dialogFontVarPtr2 + ((uint)characterId - dialogFontVar1) * 0x16);
+	}
+	else {
+		assert(0);
+	}
+
+	ushort uVar1;
+	ushort uVar2;
+	int iVar3;
+	ushort uVar4;
+	ushort* puVar5;
+	ushort* puVar6;
+	ushort* puVar7;
+	ushort* puVar8;
+	int iVar9;
+
+	iVar9 = 0;
+	if (oddOrEvenLine == 0) {
+		outputBuffer[2] = outputBuffer[2] & 0xcccc;
+		*outputBuffer = *outputBuffer & 0xcccc;
+		iVar3 = (int)outputBufferStride;
+		outputBuffer[1] = outputBuffer[1] & 0xcccc;
+		puVar5 = outputBuffer + iVar3;
+		puVar8 = puVar5 + 2;
+		puVar7 = puVar5 + -iVar3;
+		*puVar5 = *puVar5 & 0xcccc;
+		puVar5[2] = puVar5[2] & 0xcccc;
+		puVar5[1] = puVar5[1] & 0xcccc;
+		puVar6 = puVar5;
+		do {
+			puVar6 = puVar6 + iVar3;
+			*puVar6 = *puVar6 & 0xcccc;
+			puVar6[2] = puVar6[2] & 0xcccc;
+			puVar6[1] = puVar6[1] & 0xcccc;
+			uVar1 = *pCharacterData;
+			uVar2 = -(ushort)((uVar1 & 0x80) != 0) & 0x222;
+			pCharacterData = pCharacterData + 1;
+			if ((uVar1 & 0x40) != 0) {
+				uVar2 = uVar2 | 0x2220;
+			}
+			if ((uVar1 & 0x20) != 0) {
+				uVar2 = uVar2 | 0x2200;
+			}
+			uVar4 = uVar2 | 0x2000;
+			if ((uVar1 & 0x10) == 0) {
+				uVar4 = uVar2;
+			}
+			*puVar7 = *puVar7 | uVar4;
+			uVar2 = -(ushort)((uVar1 & 0x80) != 0) & 0x212;
+			*puVar6 = *puVar6 | uVar4;
+			if ((uVar1 & 0x40) != 0) {
+				uVar2 = uVar2 | 0x2120;
+			}
+			if ((uVar1 & 0x20) != 0) {
+				uVar2 = uVar2 | 0x1200;
+			}
+			uVar4 = *puVar5;
+			if ((uVar1 & 0x10) != 0) {
+				uVar4 = uVar4 | 0x2000;
+			}
+			*puVar5 = uVar4 | uVar2;
+			uVar2 = 0x222;
+			if ((uVar1 & 8) == 0) {
+				if ((uVar1 & 0x10) == 0) {
+					uVar2 = uVar1 >> 4 & 2;
+				}
+				else {
+					uVar2 = 0x22;
+				}
+			}
+			if ((uVar1 & 4) != 0) {
+				uVar2 = uVar2 | 0x2220;
+			}
+			if ((uVar1 & 2) != 0) {
+				uVar2 = uVar2 | 0x2200;
+			}
+			uVar4 = uVar2 | 0x2000;
+			if ((uVar1 & 1) == 0) {
+				uVar4 = uVar2;
+			}
+			puVar7[1] = puVar7[1] | uVar4;
+			puVar6[1] = puVar6[1] | uVar4;
+			uVar2 = uVar1 >> 4 & 2;
+			if ((uVar1 & 0x10) != 0) {
+				uVar2 = uVar2 | 0x21;
+			}
+			if ((uVar1 & 8) != 0) {
+				uVar2 = uVar2 | 0x212;
+			}
+			if ((uVar1 & 4) != 0) {
+				uVar2 = uVar2 | 0x2120;
+			}
+			if ((uVar1 & 2) != 0) {
+				uVar2 = uVar2 | 0x1200;
+			}
+			uVar4 = puVar8[-1];
+			if ((uVar1 & 1) != 0) {
+				uVar4 = uVar4 | 0x2000;
+			}
+			puVar8[-1] = uVar4 | uVar2;
+			uVar2 = 0x222;
+			if (((uVar1 & 0x8000) == 0) && (uVar2 = 0x22, (uVar1 & 1) == 0)) {
+				uVar2 = uVar1 & 2;
+			}
+			if ((uVar1 & 0x4000) != 0) {
+				uVar2 = uVar2 | 0x2220;
+			}
+			if ((uVar1 & 0x2000) != 0) {
+				uVar2 = uVar2 | 0x2200;
+			}
+			uVar4 = uVar2 | 0x2000;
+			if ((uVar1 & 0x1000) == 0) {
+				uVar4 = uVar2;
+			}
+			puVar7[2] = puVar7[2] | uVar4;
+			puVar6[2] = puVar6[2] | uVar4;
+			uVar2 = uVar1 & 2;
+			if ((uVar1 & 1) != 0) {
+				uVar2 = uVar2 | 0x21;
+			}
+			if ((uVar1 & 0x8000) != 0) {
+				uVar2 = uVar2 | 0x212;
+			}
+			if ((uVar1 & 0x4000) != 0) {
+				uVar2 = uVar2 | 0x2120;
+			}
+			if ((uVar1 & 0x2000) != 0) {
+				uVar2 = uVar2 | 0x1200;
+			}
+			uVar4 = *puVar8;
+			if ((uVar1 & 0x1000) != 0) {
+				uVar4 = uVar4 | 0x2000;
+			}
+			*puVar8 = uVar4 | uVar2;
+			puVar8 = puVar8 + iVar3;
+			puVar7 = puVar7 + iVar3;
+			iVar9 = iVar9 + 1;
+			puVar5 = puVar5 + iVar3;
+		} while (iVar9 < 0xb);
+	}
+	else {
+		outputBuffer[2] = outputBuffer[2] & 0x3333;
+		*outputBuffer = *outputBuffer & 0x3333;
+		iVar3 = (int)outputBufferStride;
+		outputBuffer[1] = outputBuffer[1] & 0x3333;
+		puVar5 = outputBuffer + iVar3;
+		puVar8 = puVar5 + 2;
+		puVar7 = puVar5 + -iVar3;
+		*puVar5 = *puVar5 & 0x3333;
+		puVar5[2] = puVar5[2] & 0x3333;
+		puVar5[1] = puVar5[1] & 0x3333;
+		puVar6 = puVar5;
+		do {
+			puVar6 = puVar6 + iVar3;
+			*puVar6 = *puVar6 & 0x3333;
+			puVar6[2] = puVar6[2] & 0x3333;
+			puVar6[1] = puVar6[1] & 0x3333;
+			uVar1 = *pCharacterData;
+			uVar2 = -(ushort)((uVar1 & 0x80) != 0) & 0x888;
+			pCharacterData = pCharacterData + 1;
+			if ((uVar1 & 0x40) != 0) {
+				uVar2 = uVar2 | 0x8880;
+			}
+			if ((uVar1 & 0x20) != 0) {
+				uVar2 = uVar2 | 0x8800;
+			}
+			uVar4 = uVar2 | 0x8000;
+			if ((uVar1 & 0x10) == 0) {
+				uVar4 = uVar2;
+			}
+			*puVar7 = *puVar7 | uVar4;
+			uVar2 = -(ushort)((uVar1 & 0x80) != 0) & 0x848;
+			*puVar6 = *puVar6 | uVar4;
+			if ((uVar1 & 0x40) != 0) {
+				uVar2 = uVar2 | 0x8480;
+			}
+			if ((uVar1 & 0x20) != 0) {
+				uVar2 = uVar2 | 0x4800;
+			}
+			uVar4 = *puVar5;
+			if ((uVar1 & 0x10) != 0) {
+				uVar4 = uVar4 | 0x8000;
+			}
+			*puVar5 = uVar4 | uVar2;
+			uVar2 = 0x888;
+			if ((uVar1 & 8) == 0) {
+				if ((uVar1 & 0x10) == 0) {
+					uVar2 = uVar1 >> 2 & 8;
+				}
+				else {
+					uVar2 = 0x88;
+				}
+			}
+			if ((uVar1 & 4) != 0) {
+				uVar2 = uVar2 | 0x8880;
+			}
+			if ((uVar1 & 2) != 0) {
+				uVar2 = uVar2 | 0x8800;
+			}
+			uVar4 = uVar2 | 0x8000;
+			if ((uVar1 & 1) == 0) {
+				uVar4 = uVar2;
+			}
+			puVar7[1] = puVar7[1] | uVar4;
+			puVar6[1] = puVar6[1] | uVar4;
+			uVar2 = uVar1 >> 2 & 8;
+			if ((uVar1 & 0x10) != 0) {
+				uVar2 = uVar2 | 0x84;
+			}
+			if ((uVar1 & 8) != 0) {
+				uVar2 = uVar2 | 0x848;
+			}
+			if ((uVar1 & 4) != 0) {
+				uVar2 = uVar2 | 0x8480;
+			}
+			if ((uVar1 & 2) != 0) {
+				uVar2 = uVar2 | 0x4800;
+			}
+			uVar4 = puVar8[-1];
+			if ((uVar1 & 1) != 0) {
+				uVar4 = uVar4 | 0x8000;
+			}
+			puVar8[-1] = uVar4 | uVar2;
+			uVar2 = 0x888;
+			if ((uVar1 & 0x8000) == 0) {
+				if ((uVar1 & 1) == 0) {
+					uVar2 = (ushort)((uVar1 & 2) << 2);
+				}
+				else {
+					uVar2 = 0x88;
+				}
+			}
+			if ((uVar1 & 0x4000) != 0) {
+				uVar2 = uVar2 | 0x8880;
+			}
+			if ((uVar1 & 0x2000) != 0) {
+				uVar2 = uVar2 | 0x8800;
+			}
+			uVar4 = uVar2 | 0x8000;
+			if ((uVar1 & 0x1000) == 0) {
+				uVar4 = uVar2;
+			}
+			puVar7[2] = puVar7[2] | uVar4;
+			puVar6[2] = puVar6[2] | uVar4;
+			uVar2 = (ushort)((uVar1 & 2) << 2);
+			if ((uVar1 & 1) != 0) {
+				uVar2 = uVar2 | 0x84;
+			}
+			if ((uVar1 & 0x8000) != 0) {
+				uVar2 = uVar2 | 0x848;
+			}
+			if ((uVar1 & 0x4000) != 0) {
+				uVar2 = uVar2 | 0x8480;
+			}
+			if ((uVar1 & 0x2000) != 0) {
+				uVar2 = uVar2 | 0x4800;
+			}
+			uVar4 = *puVar8;
+			if ((uVar1 & 0x1000) != 0) {
+				uVar4 = uVar4 | 0x8000;
+			}
+			*puVar8 = uVar4 | uVar2;
+			puVar8 = puVar8 + iVar3;
+			puVar7 = puVar7 + iVar3;
+			iVar9 = iVar9 + 1;
+			puVar5 = puVar5 + iVar3;
+		} while (iVar9 < 0xb);
+	}
 }
 
 int printDialogTextVar = 0;
@@ -889,7 +1173,16 @@ void updateDialogTextImage(sDialogWindow18* param_1)
 		switch (characterToPrint)
 		{
 		case 0:
-			assert(0);
+			if ((param_1->m10_flags & 0x80) == 0) {
+				param_1->m10_flags |= 8;
+				param_1->m6B = '\x01';
+				param_1->m6C = 1;
+				return;
+			}
+			param_1->m10_flags &= ~0x80;
+			param_1->m1C = param_1->m20 + 1;
+			iVar13 = iVar13 + -1;
+			iVar14 = printDialogTextVar;
 			break;
 		case 1: // end of line
 			printf("\n");
@@ -1023,7 +1316,8 @@ void updateAndRenderTextForDialogWindow(sDialogWindow18* param_1, sTag* OT, int 
 
 			if (param_1->m28_perLineBuffer[iVar6].m58 > 0x40)
 			{
-				assert(0);
+				MissingCode();
+				//assert(0);
 			}
 		}
 	}
@@ -1061,6 +1355,7 @@ void updateAndRenderTextForDialogWindow(sDialogWindow18* param_1, sTag* OT, int 
 				param_1->m28_perLineBuffer[iVar6].m0[oddOrEven][0].w = uVar4 * 4;
 				addSPRT(OT, &param_1->m28_perLineBuffer[iVar6].m0[oddOrEven][0].tag);
 			}
+			iVar6++;
 		}
 	}
 

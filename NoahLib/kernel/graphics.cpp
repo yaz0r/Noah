@@ -6,9 +6,10 @@ void DrawSync(int)
     MissingCode();
 }
 
-void VSync(int)
+int VSync(int)
 {
     MissingCode();
+	return 0;
 }
 
 void InitGeom()
@@ -160,6 +161,15 @@ sTag* ClearOTagR(sTag* ot, int n)
 	ot->m3_size = 0;
 
 	return ot;
+}
+
+void DrawOTag(sTag* ot)
+{
+	while (ot)
+	{
+
+		ot = ot->m0_pNext;
+	}
 }
 
 u32 get_mode(int dfe, int dtd, int tpage)

@@ -24,6 +24,7 @@ struct sFieldVramMapping
 };
 std::array<sFieldVramMapping, 32> fieldVramMapping;
 
+std::vector<u8> rawFieldBundleForDebug;
 std::vector<u8> rawFieldBundle;
 std::vector<u8> rawFieldModels;
 std::vector<u8> rawFieldScriptData;
@@ -395,7 +396,7 @@ void initFieldScriptEntityValues(int index)
 	pFieldScriptEntity->mF4_scale3d[1] = 0x1000;
 	pFieldScriptEntity->mF4_scale3d[2] = 0x1000;
 	pFieldScriptEntity->m10D = 0xff;
-	pFieldScriptEntity->m80_DialogAvatarFace = 0xff;
+	pFieldScriptEntity->m80_DialogAvatarFace = -1;
 	pFieldScriptEntity->m106_currentRotation = -0x8000;
 	pFieldScriptEntity->m104_rotation = -0x8000;
 	pFieldScriptEntity->m108_rotation3 = -0x8000;
@@ -1685,6 +1686,7 @@ void initFieldData()
 	resetAllRGBFadersToBlack();
 
 	unflagAllocation(rawFieldBundle);
+	rawFieldBundleForDebug = rawFieldBundle;
 	rawFieldBundle.clear();
 
 	initModel3(5, 0);
@@ -1733,6 +1735,7 @@ int loadNewField(int fieldId, int param)
 	if (currentFieldId1 != -1)
 	{
 		unflagAllocation(rawFieldBundle);
+		rawFieldBundleForDebug = rawFieldBundle;
 		rawFieldBundle.clear();
 	}
 	loadRawFieldBundle(fieldId);
@@ -4208,6 +4211,10 @@ void updateAndRenderField()
 	MissingCode();
 	shapeTransfert();
 	MissingCode();
+
+	DrawOTag(&pCurrentFieldRenderingContext->m80D4_uiOT[7]);
+
+	MissingCode();
 }
 
 int runningOnDTL = -1;
@@ -4229,6 +4236,34 @@ void initCompassData()
 	compassGraphicDataLoaded = 0;
 
 	MissingCode();
+}
+
+int startOfUpdateFieldTime = 0;
+
+void logFieldRenderingEvent(char* param_1)
+{
+	MissingCode();
+}
+
+void updateFieldInputs()
+{
+	MissingCode();
+}
+
+void syncKernelAndFieldStates()
+{
+	MissingCode();
+}
+
+void fieldPerFrameReset()
+{
+	startOfUpdateFieldTime = VSync(1);
+	clearFieldOrderingTable();
+	updateFieldInputs();
+	if (fieldDebugDisable == 0) {
+		logFieldRenderingEvent("Clear OTAG");
+	}
+	syncKernelAndFieldStates();
 }
 
 void fieldEntryPoint()
@@ -4276,6 +4311,7 @@ void fieldEntryPoint()
 
 		MissingCode();
 		////
+		fieldPerFrameReset();
 		updateAndRenderField();
 
 		MissingCode();

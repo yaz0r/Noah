@@ -35,6 +35,7 @@ struct sDialogWindow18
 	sVec2_s16 m14;
 	s16 m18;
 	std::vector<u8>::iterator m1C;
+	std::vector<u8>::iterator m20;
 	std::vector<sDialogWindow18PerLineBufferEntry> m28_perLineBuffer;
 	std::vector<u16> m2C_inRamDialogTextImage;
 	DR_MODE m30_textTileDrawMode[2];
