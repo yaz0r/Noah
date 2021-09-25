@@ -3818,8 +3818,8 @@ void drawCompassArrowSegment(sTag* param_1, sFieldCompassVar2* param_2, MATRIX* 
 	SetTransMatrix(param_3);
 	RotAverage4(&param_2->m0, &param_2->m8, &param_2->m10, &param_2->m18, &pPrim->x0, &pPrim->x1, &pPrim->x2, &pPrim->x3, &lStack32, &lStack28);
 
-	pPrim->tag.m0_pNext = &param_1[1];
-	param_1[1].m0_pNext = &pPrim->tag;
+	pPrim->m0_pNext = &param_1[1];
+	param_1[1].m0_pNext = pPrim;
 
 	PopMatrix();
 }

@@ -5,6 +5,7 @@
 #include "kernel/fileSystem.h"
 #include "kernel/gameState.h"
 #include "kernel/decompress.h"
+#include "kernel/graphics.h"
 #include "kernel/font.h"
 #include "field/field.h"
 #include "field/fieldDebugger/fieldInspector.h"
@@ -54,6 +55,8 @@ bool noahInit(int argc, char* argv[])
 void noahFrame_start()
 {
     StartFrame();
+
+    initPSXFB();
 }
 
 bool noahFrame_end()
@@ -63,6 +66,8 @@ bool noahFrame_end()
     fieldInspector_frame();
 
     fieldViewDebug_step();
+
+    drawPSXFB();
 
     EndFrame();
 

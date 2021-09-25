@@ -307,7 +307,7 @@ void setupWindowSize2(sDialogWindow18* param_1, int x1, int y1, short x2, short 
 	traceNextAlloc(0x28);
 	param_1->m2C_inRamDialogTextImage.resize(param_1->m12_widthPadded * 14);
 
-	param_1->m48_textTile[0].tag.m3_size = 3;
+	param_1->m48_textTile[0].m3_size = 3;
 	param_1->m48_textTile[0].r0 = 0;
 	param_1->m48_textTile[0].g0 = 0;
 	param_1->m48_textTile[0].b0 = 0;
@@ -353,7 +353,7 @@ void setupWindowSize2(sDialogWindow18* param_1, int x1, int y1, short x2, short 
 			param_1->m28_perLineBuffer[i].m0[0][1].u0 = param_1->m28_perLineBuffer[i].m0[0][0].u0 = (x1 & 0x3F) << 2;
 			param_1->m28_perLineBuffer[i].m0[0][1].v0 = param_1->m28_perLineBuffer[i].m0[0][0].v0 = (yFraq & 0xFF) << 8;
 
-			param_1->m28_perLineBuffer[i].m0[0][1].tag.m3_size = param_1->m28_perLineBuffer[i].m0[0][0].tag.m3_size = 4;
+			param_1->m28_perLineBuffer[i].m0[0][1].m3_size = param_1->m28_perLineBuffer[i].m0[0][0].m3_size = 4;
 			param_1->m28_perLineBuffer[i].m0[0][1].code = param_1->m28_perLineBuffer[i].m0[0][0].code = 0x64; // setup as Textured Rectangle, variable size, opaque, texture-blending
 
 			param_1->m28_perLineBuffer[i].m0[0][0].code |= 1; // switch to Textured Rectangle, variable size, opaque, raw-texture
@@ -611,11 +611,11 @@ void dialogWindowSetupForRendering(sTag* OT, int oddOrEven, int windowIndex)
 				gDialogWindows[windowIndex].m3E0_Sprt[oddOrEven].x0 = sVar2;
 				gDialogWindows[windowIndex].m3E0_Sprt[oddOrEven].y0 = sVar3 + 4;
 
-				gDialogWindows[windowIndex].m3E0_Sprt[oddOrEven].tag.m0_pNext = OT->m0_pNext;
-				OT->m0_pNext = &gDialogWindows[windowIndex].m3E0_Sprt[oddOrEven].tag;
+				gDialogWindows[windowIndex].m3E0_Sprt[oddOrEven].m0_pNext = OT->m0_pNext;
+				OT->m0_pNext = &gDialogWindows[windowIndex].m3E0_Sprt[oddOrEven];
 
-				gDialogWindows[windowIndex].m3C8[oddOrEven].tag.m0_pNext = &gDialogWindows[windowIndex].m3E0_Sprt[oddOrEven].tag;
-				OT->m0_pNext = &gDialogWindows[windowIndex].m3C8[oddOrEven].tag;
+				gDialogWindows[windowIndex].m3C8[oddOrEven].m0_pNext = &gDialogWindows[windowIndex].m3E0_Sprt[oddOrEven];
+				OT->m0_pNext = &gDialogWindows[windowIndex].m3C8[oddOrEven];
 			}
 			else {
 				gDialogWindows[windowIndex].m40A--;
@@ -660,11 +660,11 @@ void dialogWindowSetupForRendering(sTag* OT, int oddOrEven, int windowIndex)
 			if ((gDialogWindows[windowIndex].m40C_flags & 0x40U) == 0) {
 				for (int i = 0; i < 8; i++)
 				{
-					gDialogWindows[windowIndex].m1EC[oddOrEven][i].tag.m0_pNext = OT->m0_pNext;
-					OT->m0_pNext = &gDialogWindows[windowIndex].m1EC[oddOrEven][i].tag;
+					gDialogWindows[windowIndex].m1EC[oddOrEven][i].m0_pNext = OT->m0_pNext;
+					OT->m0_pNext = &gDialogWindows[windowIndex].m1EC[oddOrEven][i];
 
-					gDialogWindows[windowIndex].mFC[oddOrEven][i].tag.m0_pNext = &gDialogWindows[windowIndex].m1EC[oddOrEven][i].tag;
-					OT->m0_pNext = &gDialogWindows[windowIndex].mFC[oddOrEven][i].tag;
+					gDialogWindows[windowIndex].mFC[oddOrEven][i].m0_pNext = &gDialogWindows[windowIndex].m1EC[oddOrEven][i];
+					OT->m0_pNext = &gDialogWindows[windowIndex].mFC[oddOrEven][i];
 				}
 			}
 		}
@@ -688,11 +688,11 @@ void dialogWindowSetupForRendering(sTag* OT, int oddOrEven, int windowIndex)
 
 			// chain the face poly
 			if (gDialogWindows[windowIndex].m494_hasDialogFace == 1) {
-				gDialogWindows[windowIndex].m444_FacePoly[oddOrEven].tag.m0_pNext = OT->m0_pNext;
-				OT->m0_pNext = &gDialogWindows[windowIndex].m444_FacePoly[oddOrEven].tag;
+				gDialogWindows[windowIndex].m444_FacePoly[oddOrEven].m0_pNext = OT->m0_pNext;
+				OT->m0_pNext = &gDialogWindows[windowIndex].m444_FacePoly[oddOrEven];
 
-				gDialogWindows[windowIndex].m42C_FaceDrawMode[oddOrEven].tag.m0_pNext = &gDialogWindows[windowIndex].m444_FacePoly[oddOrEven].tag;
-				OT->m0_pNext = &gDialogWindows[windowIndex].m42C_FaceDrawMode[oddOrEven].tag;
+				gDialogWindows[windowIndex].m42C_FaceDrawMode[oddOrEven].m0_pNext = &gDialogWindows[windowIndex].m444_FacePoly[oddOrEven];
+				OT->m0_pNext = &gDialogWindows[windowIndex].m42C_FaceDrawMode[oddOrEven];
 			}
 		}
 
@@ -708,11 +708,11 @@ void dialogWindowSetupForRendering(sTag* OT, int oddOrEven, int windowIndex)
 		gDialogWindows[windowIndex].mDC_backgroundTile[oddOrEven].h = (short)windowHeight + -2;
 
 		if ((gDialogWindows[windowIndex].m40C_flags & 0x40U) == 0) {
-			gDialogWindows[windowIndex].mDC_backgroundTile[oddOrEven].tag.m0_pNext = OT->m0_pNext;
-			OT->m0_pNext = &gDialogWindows[windowIndex].mDC_backgroundTile[oddOrEven].tag;
+			gDialogWindows[windowIndex].mDC_backgroundTile[oddOrEven].m0_pNext = OT->m0_pNext;
+			OT->m0_pNext = &gDialogWindows[windowIndex].mDC_backgroundTile[oddOrEven];
 
-			gDialogWindows[windowIndex].mC4[oddOrEven].tag.m0_pNext = &gDialogWindows[windowIndex].mDC_backgroundTile[oddOrEven].tag;
-			OT->m0_pNext = &gDialogWindows[windowIndex].mC4[oddOrEven].tag;
+			gDialogWindows[windowIndex].mC4[oddOrEven].m0_pNext = &gDialogWindows[windowIndex].mDC_backgroundTile[oddOrEven];
+			OT->m0_pNext = &gDialogWindows[windowIndex].mC4[oddOrEven];
 		}
 	}
 }
@@ -1322,7 +1322,7 @@ void updateAndRenderTextForDialogWindow(sDialogWindow18* param_1, sTag* OT, int 
 		}
 	}
 
-	AddPrim(OT, &param_1->m30_textTileDrawMode[1].tag);
+	AddPrim(OT, &param_1->m30_textTileDrawMode[1]);
 
 	if (0 < param_1->mC_height) {
 		int iVar11 = param_1->m14.vy;
@@ -1353,7 +1353,7 @@ void updateAndRenderTextForDialogWindow(sDialogWindow18* param_1, sTag* OT, int 
 					uVar4 = 0x40;
 				}
 				param_1->m28_perLineBuffer[iVar6].m0[oddOrEven][0].w = uVar4 * 4;
-				addSPRT(OT, &param_1->m28_perLineBuffer[iVar6].m0[oddOrEven][0].tag);
+				addSPRT(OT, &param_1->m28_perLineBuffer[iVar6].m0[oddOrEven][0]);
 			}
 			iVar6++;
 		}
@@ -1389,7 +1389,7 @@ void updateAndRenderTextForDialogWindow(sDialogWindow18* param_1, sTag* OT, int 
 	}
 
 	param_1->m10_flags = param_1->m10_flags & 0xfeff;
-	AddPrim(OT, &param_1->m30_textTileDrawMode->tag);
+	AddPrim(OT, &param_1->m30_textTileDrawMode[0]);
 }
 
 void addDialogWindowsToOT(sTag* OT, int oddOrEven)
@@ -1435,8 +1435,8 @@ void addDialogWindowsToOT(sTag* OT, int oddOrEven)
 				}
 				updateAndRenderTextForDialogWindow(&gDialogWindows[i].m18, OT, oddOrEven);
 			}
-			gDialogWindows[i].m0[oddOrEven].tag.m0_pNext = OT->m0_pNext;
-			OT->m0_pNext = &gDialogWindows[i].m0[oddOrEven].tag;
+			gDialogWindows[i].m0[oddOrEven].m0_pNext = OT->m0_pNext;
+			OT->m0_pNext = &gDialogWindows[i].m0[oddOrEven];
 			dialogWindowSetupForRendering(OT, oddOrEven, i);
 			updateMultiChoice(i);
 		}
@@ -1476,8 +1476,8 @@ void addDialogWindowsToOT(sTag* OT, int oddOrEven)
 							gDialogWindows[i].m3C4 = 0;
 						}
 					}
-					gDialogWindows[i].m0[oddOrEven].tag.m0_pNext = OT->m0_pNext;
-					OT->m0_pNext = &gDialogWindows[i].m0[oddOrEven].tag;
+					gDialogWindows[i].m0[oddOrEven].m0_pNext = OT->m0_pNext;
+					OT->m0_pNext = &gDialogWindows[i].m0[oddOrEven];
 					dialogWindowSetupForRendering(OT, oddOrEven, i);
 					updateMultiChoice(i);
 				}
@@ -1495,6 +1495,6 @@ void addDialogWindowsToOT(sTag* OT, int oddOrEven)
 		gDialogWindows[i].m410 = processedWindowsArray[i];
 	}
 
-	gDialogDrModes[g_frameOddOrEven].tag.m0_pNext = OT->m0_pNext;
-	OT->m0_pNext = &gDialogDrModes[g_frameOddOrEven].tag;
+	gDialogDrModes[g_frameOddOrEven].m0_pNext = OT->m0_pNext;
+	OT->m0_pNext = &gDialogDrModes[g_frameOddOrEven];
 }

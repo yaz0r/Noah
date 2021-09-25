@@ -2,13 +2,14 @@
 
 struct sTag
 {
-	sTag* m0_pNext;
-	u8 m3_size;
+	sTag* m0_pNext = nullptr;
+	u8 m3_size = 0;
+
+	virtual void execute() {}
 };
 
-struct TILE
+struct TILE : public sTag
 {
-	sTag tag;
 	u8 r0;
 	u8 g0;
 	u8 b0;
@@ -17,11 +18,12 @@ struct TILE
 	s16 y0;
 	s16 w;
 	s16 h;
+
+	virtual void execute() override;
 };
 
-struct SPRT
+struct SPRT : public sTag
 {
-	sTag tag;
 	u8 r0;
 	u8 g0;
 	u8 b0;
@@ -33,6 +35,8 @@ struct SPRT
 	u16 clut;
 	s16 w;
 	s16 h;
+
+	virtual void execute() override;
 };
 
 struct RECT
@@ -53,16 +57,18 @@ struct DISPENV
 	u8 pad1;
 };
 
-struct DR_ENV
+struct DR_ENV : public sTag
 {
-	sTag tag;
 	u32 code[15];
+
+	virtual void execute() override;
 };
 
-struct DR_MODE
+struct DR_MODE : public sTag
 {
-	sTag tag;
 	u32 code[2];
+
+	virtual void execute() override;
 };
 
 struct DRAWENV
@@ -80,9 +86,8 @@ struct DRAWENV
 	DR_ENV dr_env;
 };
 
-struct POLY_FT4
+struct POLY_FT4 : public sTag
 {
-	sTag tag;
 	u8 r0;
 	u8 g0;
 	u8 b0;
@@ -107,7 +112,12 @@ struct POLY_FT4
 	u8 u3;
 	u8 v3;
 	u16 pad2;
+
+	virtual void execute() override;
 };
+
+void initPSXFB();
+void drawPSXFB();
 
 void SetPolyFT4(POLY_FT4* p);
 

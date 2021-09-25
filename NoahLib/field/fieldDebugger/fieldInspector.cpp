@@ -630,36 +630,6 @@ public:
                 m_vramTextureHandle = BGFX_INVALID_HANDLE;
             }
 
-            std::vector<u8> textureBuffer;
-
-            textureBuffer.resize(textureHeight * textureWidth * 4);
-
-            int xOffset = 0;
-
-            std::array<u8, 2048 * 512>::iterator vramIterator = gVram.begin();
-
-            for (int outputY = 0; outputY < textureHeight; outputY++)
-            {
-                for (int outputX = 0; outputX < textureWidth; outputX++)
-                {
-                    u8 colorValue = *vramIterator;
-                    if (!(outputX & 1))
-                    {
-                        colorValue &= 0xF;
-                    }
-                    else
-                    {
-                        colorValue >>= 4;
-                        vramIterator++;
-                    }
-
-                    textureBuffer[(outputY * textureWidth + outputX) * 4 + 0] = colorValue << 4;
-                    textureBuffer[(outputY * textureWidth + outputX) * 4 + 1] = colorValue << 4;
-                    textureBuffer[(outputY * textureWidth + outputX) * 4 + 2] = colorValue << 4;
-                    textureBuffer[(outputY * textureWidth + outputX) * 4 + 3] = 0xFF;
-                }
-            }
-
             m_vramTextureHandle = bgfx::createTexture2D(textureWidth, textureHeight, false, 1, bgfx::TextureFormat::R8, 0, bgfx::copy(&gVram[0], textureWidth * textureHeight));
         }
 
