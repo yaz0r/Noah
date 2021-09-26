@@ -116,6 +116,8 @@ struct POLY_FT4 : public sTag
 	virtual void execute() override;
 };
 
+void updatePSXVram();
+
 void initPSXFB();
 void drawPSXFB();
 
@@ -143,3 +145,4 @@ void DrawOTag(sTag* ot);
 
 DISPENV* PutDispEnv(DISPENV* env);
 DRAWENV* PutDrawEnv(DRAWENV* env);
+

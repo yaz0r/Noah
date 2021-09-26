@@ -4,6 +4,9 @@
 #include "dialogWindows.h"
 #include "fieldScriptSupport.h"
 
+u16 textSpriteMode0 = 0;
+u16 textSpriteMode1 = 0;
+
 std::array<sDialogWindow, 4> gDialogWindows;
 std::array<s32, 4> dialogWindowVar1;
 
@@ -273,9 +276,6 @@ void setupWindowSize1(int windowIndex, short x, short y, short width, short heig
 	gDialogWindows[windowIndex].mB0_Size.vx = width;
 	gDialogWindows[windowIndex].mB0_Size.vy = height;
 }
-
-s16 textSpriteMode0 = 0;
-s16 textSpriteMode1 = 0;
 
 void setupWindowSize2(sDialogWindow18* param_1, int x1, int y1, short x2, short y2, short width, short height)
 {

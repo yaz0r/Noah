@@ -218,7 +218,7 @@ extern std::vector<u8> rawFieldDialogBundle;
 
 extern MATRIX currentProjectionMatrix;
 
-void LoadImage(struct RECT* pRect, u8* data);
+void LoadImage(struct RECT* pRect, const u8* data);
 
 void traceNextAlloc(int state);
 

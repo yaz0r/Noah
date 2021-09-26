@@ -4,7 +4,41 @@
 #include <bx/math.h>
 #include "imguiBGFX.h"
 
-bgfx::ProgramHandle getLineShader();
+bgfx::TextureHandle m_vramTextureHandle = BGFX_INVALID_HANDLE;
+
+const bgfx::TextureHandle& getPSXVramTextureHandle()
+{
+	return m_vramTextureHandle;
+}
+
+void updatePSXVram()
+{
+	int textureHeight = 512;
+	int textureWidth = 2048;
+
+	extern std::array<u8, 2048 * 512> gVram;
+	//if (m_isVramDirty)
+	{
+		if (!bgfx::isValid(m_vramTextureHandle))
+		{
+			m_vramTextureHandle = bgfx::createTexture2D(textureWidth, textureHeight, false, 1, bgfx::TextureFormat::R8U, 0, nullptr);
+		}
+		bgfx::updateTexture2D(m_vramTextureHandle, 0, 0, 0, 0, textureWidth, textureHeight, bgfx::copy(&gVram[0], textureWidth * textureHeight));
+	}
+}
+
+bgfx::ProgramHandle loadBgfxProgram(const std::string& VSFile, const std::string& PSFile);
+
+bgfx::ProgramHandle getSPRTShader()
+{
+	static bgfx::ProgramHandle programHandle = BGFX_INVALID_HANDLE;
+	if (!bgfx::isValid(programHandle))
+	{
+		programHandle = loadBgfxProgram("SPRT_vs", "SPRT_ps");
+	}
+
+	return programHandle;
+}
 
 ImVec2 PSXResolution = { 320,240 };
 
@@ -172,6 +206,7 @@ sTag* ClearOTagR(sTag* ot, int n)
 
 void DrawOTag(sTag* ot)
 {
+	updatePSXVram();
 	while (ot)
 	{
 		ot->execute();
@@ -179,10 +214,33 @@ void DrawOTag(sTag* ot)
 	}
 }
 
+u8 graphType = 0;
+
 u32 get_mode(int dfe, int dtd, int tpage)
 {
-	MissingCode();
-	return 0;
+	uint uVar1;
+
+	if (graphType - 1 < 2) {
+		uVar1 = 0xe1000000;
+		if (dtd != 0) {
+			uVar1 = 0xe1000800;
+		}
+		tpage = tpage & 0x27ff;
+		if (dfe != 0) {
+			tpage = tpage | 0x1000;
+		}
+	}
+	else {
+		uVar1 = 0xe1000000;
+		if (dtd != 0) {
+			uVar1 = 0xe1000200;
+		}
+		tpage = tpage & 0x9ff;
+		if (dfe != 0) {
+			tpage = tpage | 0x400;
+		}
+	}
+	return uVar1 | tpage;
 }
 
 u32 get_tw(RECT* param_1)
@@ -258,8 +316,11 @@ void drawPSXFB()
 	ImGui::End();
 }
 
+DR_MODE* pCurrentDrMode = nullptr;
+
 void DR_MODE::execute()
 {
+	pCurrentDrMode = this;
 }
 
 void DR_ENV::execute()
@@ -277,68 +338,86 @@ void SPRT::execute()
 		layout
 			.begin()
 			.add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
-			.add(bgfx::Attrib::Color0, 4, bgfx::AttribType::Float)
+			.add(bgfx::Attrib::Color0, 3, bgfx::AttribType::Float)
+			.add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
+			.add(bgfx::Attrib::TexCoord1, 2, bgfx::AttribType::Int16) // CLUT
+			.add(bgfx::Attrib::TexCoord2, 4, bgfx::AttribType::Uint8) // Texpage
 			.end();
 
 		bgfx::TransientVertexBuffer vertexBuffer;
 		bgfx::TransientIndexBuffer indexBuffer;
-		bgfx::allocTransientBuffers(&vertexBuffer, layout, 4, &indexBuffer, 2 * 4);
+		bgfx::allocTransientBuffers(&vertexBuffer, layout, 4, &indexBuffer, 4);
 
 		struct sVertice
 		{
 			float v[3];
-			float color[4];
+			float color[3];
+			float texcoord[2];
+			u16 CLUT[2];
+			u8 Texpage[4];
 		};
 
 		sVertice* pVertices = (sVertice*)vertexBuffer.data;
 		u16* pIndices = (u16*)indexBuffer.data;
 
-		for (int i = 0; i < 4; i++)
+		for (int i=0; i<4; i++)
 		{
-			pVertices[i].color[0] = 1.f;
-			pVertices[i].color[1] = 1.f;
-			pVertices[i].color[2] = 0.f;
-			pVertices[i].color[3] = 1.f;
+			pVertices[i].CLUT[0] = clut & 0x3F;
+			pVertices[i].CLUT[1] = (clut >> 6) & 0x1FF;
+
+			assert(((pCurrentDrMode->code[0] >> 24) & 0xFF) == 0xE1);
+			pVertices[i].Texpage[0] = pCurrentDrMode->code[0] & 0xFF;
+			pVertices[i].Texpage[1] = (pCurrentDrMode->code[0] >> 8) & 0xFF;
+			pVertices[i].Texpage[2] = (pCurrentDrMode->code[0] >> 16) & 0xFF;
+			pVertices[i].Texpage[3] = 0xE1;
 		}
 
 		pVertices[0].v[0] = x0;
 		pVertices[0].v[1] = y0;
 		pVertices[0].v[2] = 0;
+		pVertices[0].texcoord[0] = u0;
+		pVertices[0].texcoord[1] = v0;
 
 		pVertices[1].v[0] = x0 + w;
 		pVertices[1].v[1] = y0;
 		pVertices[1].v[2] = 0;
+		pVertices[1].texcoord[0] = u0 + w;
+		pVertices[1].texcoord[1] = v0;
 
 		pVertices[2].v[0] = x0 + w;
 		pVertices[2].v[1] = y0 + h;
 		pVertices[2].v[2] = 0;
+		pVertices[2].texcoord[0] = u0 + w;
+		pVertices[2].texcoord[1] = v0 + h;
 
 		pVertices[3].v[0] = x0;
 		pVertices[3].v[1] = y0 + h;
 		pVertices[3].v[2] = 0;
+		pVertices[3].texcoord[0] = u0;
+		pVertices[3].texcoord[1] = v0 + h;
 
 		pIndices[0] = 0;
 		pIndices[1] = 1;
-		pIndices[2] = 1;
+		pIndices[2] = 3;
 		pIndices[3] = 2;
-		pIndices[4] = 2;
-		pIndices[5] = 3;
-		pIndices[6] = 3;
-		pIndices[7] = 0;
 
 		bgfx::setState(0 | BGFX_STATE_WRITE_RGB
 			| BGFX_STATE_WRITE_A
-			| BGFX_STATE_WRITE_Z
-			| BGFX_STATE_DEPTH_TEST_LEQUAL
-			| BGFX_STATE_CULL_CW
+			| BGFX_STATE_DEPTH_TEST_ALWAYS
 			| BGFX_STATE_MSAA
-			| BGFX_STATE_PT_LINES
+			| BGFX_STATE_PT_TRISTRIP
 		);
 
 		bgfx::setVertexBuffer(0, &vertexBuffer);
 		bgfx::setIndexBuffer(&indexBuffer);
 
-		bgfx::submit(PSXOutput_bgfxView, getLineShader());
+		bgfx::UniformHandle s_PSXVramUniformHandle = BGFX_INVALID_HANDLE;
+		if (!bgfx::isValid(s_PSXVramUniformHandle))
+		{
+			s_PSXVramUniformHandle = bgfx::createUniform("s_PSXVram", bgfx::UniformType::Sampler);
+		}
+		bgfx::setTexture(0, s_PSXVramUniformHandle, m_vramTextureHandle);
+		bgfx::submit(PSXOutput_bgfxView, getSPRTShader());
 	}
 
 }

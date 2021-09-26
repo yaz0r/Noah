@@ -96,6 +96,9 @@ struct sDialogWindow
 extern std::array<sDialogWindow, 4> gDialogWindows;
 extern s16 dialogWindowFlag1;
 
+extern u16 textSpriteMode0;
+extern u16 textSpriteMode1;
+
 void createDialogWindow(short x, short y, int dialogIndex, int windowIndex, int width, int height, int fieldActorId, int actorId, int mode, uint param_10, uint param_11);
 void initDialogWindows();
 int findDialogWindowForCurrentActor(int* outputId);

@@ -120,6 +120,7 @@ endmacro()
 
 addShaderProgram(vertexColor_vs vertexColor_ps vertexColor.varying.def)
 addShaderProgram(model3d_vs model3d_ps model3d.varying.def)
+addShaderProgram(SPRT_vs SPRT_ps SPRT.varying.def)
 
 assign_source_group(${SOURCES})
 

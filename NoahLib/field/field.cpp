@@ -1914,8 +1914,54 @@ void clearFieldOrderingTable()
 	}
 }
 
+const std::vector<u8> fontPalettes = {
+	{
+		 0x0,  0x0, 0xBD, 0xF7,
+		0x86, 0xC0, 0xBD, 0xF7,
+		 0x0,  0x0, 0xBD, 0xF7,
+		0x86, 0xC0, 0xBD, 0xF7,
+		 0x0,  0x0, 0xBD, 0xF7,
+		0x86, 0xC0, 0xBD, 0xF7,
+		 0x0,  0x0, 0xBD, 0xF7,
+		0x86, 0xC0, 0xBD, 0xF7,
+		 0x0,  0x0,  0x0,  0x0,
+		 0x0,  0x0,  0x0,  0x0,
+		0xBD, 0xF7, 0xBD, 0xF7,
+		0xBD, 0xF7, 0xBD, 0xF7,
+		0x86, 0xC0, 0x86, 0xC0,
+		0x86, 0xC0, 0x86, 0xC0,
+		0xBD, 0xF7, 0xBD, 0xF7,
+		0xBD, 0xF7, 0xBD, 0xF7,
+	}
+};
+
+void initFontPalettes(short param_1, short param_2)
+{
+	RECT local_18;
+
+	local_18.w = 0x20;
+	local_18.h = 1;
+	local_18.x = param_1;
+	local_18.y = param_2;
+	LoadImage(&local_18, &fontPalettes[0]);
+	textSpriteMode0 = GetClut((int)param_1, (int)param_2);
+	textSpriteMode1 = GetClut(param_1 + 0x10, (int)param_2);
+	return;
+}
+
+void initFontSystem()
+{
+	if (fieldDebugDisable == 0) {
+		assert(0);
+	}
+
+	initFontPalettes(0x100, 0xf0);
+}
+
 void bootField()
 {
+	initFontSystem();
+
 	MissingCode();
 
 	setCurrentDirectory(4, 0);
@@ -3824,34 +3870,34 @@ void drawCompassArrowSegment(sTag* param_1, sFieldCompassVar2* param_2, MATRIX* 
 	PopMatrix();
 }
 
-void LoadImage(RECT* pRect, u8* data)
+void LoadImage(RECT* pRect, const u8* data)
 {
-	auto vramIterator = gVram.begin() + pRect->y * 2048 + pRect->x;
+	auto vramIterator = gVram.begin() + pRect->y * 2048 + pRect->x * 2;
 	for (int y = 0; y < pRect->h; y++)
 	{
-		for (int x = 0; x < pRect->w; x++)
+		for (int x = 0; x < pRect->w * 2; x++)
 		{
 			*vramIterator = *(data++);
 			vramIterator++;
 		}
 
-		vramIterator += 2048 - pRect->w;
+		vramIterator += 2048 - pRect->w * 2;
 	}
 }
 
 void LoadImage(RECT* pRect, sPS1Pointer data)
 {
-	auto vramIterator = gVram.begin() + pRect->y * 2048 + pRect->x;
+	auto vramIterator = gVram.begin() + pRect->y * 2048 + pRect->x * 2;
 	for (int y = 0; y < pRect->h; y++)
 	{
-		for (int x = 0; x < pRect->w; x++)
+		for (int x = 0; x < pRect->w * 2; x++)
 		{
 			*vramIterator = READ_LE_U8(data);
 			vramIterator++;
 			data = data + 1;
 		}
 
-		vramIterator += 2048 - pRect->w;
+		vramIterator += 2048 - pRect->w * 2;
 	}
 }
 
