@@ -11,7 +11,7 @@ struct sDialogWindow18PerLineBufferEntry
 	s8 m5A;
 	s8 m5B;
 	s16 m5C;
-	s16 m5E;
+	u16 m5E_clut;
 	// size 0x60
 };
 

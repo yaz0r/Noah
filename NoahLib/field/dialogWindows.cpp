@@ -369,11 +369,11 @@ void setupWindowSize2(sDialogWindow18* param_1, int x1, int y1, short x2, short 
 			param_1->m28_perLineBuffer[i].m58 = 0;
 			if ((i & 1) == 0)
 			{
-				param_1->m28_perLineBuffer[i].m5E = textSpriteMode0;
+				param_1->m28_perLineBuffer[i].m5E_clut = textSpriteMode0;
 			}
 			else
 			{
-				param_1->m28_perLineBuffer[i].m5E = textSpriteMode1;
+				param_1->m28_perLineBuffer[i].m5E_clut = textSpriteMode1;
 			}
 			param_1->m28_perLineBuffer[i].m5C = y1 + (i / 2) * 0xD;
 			param_1->m28_perLineBuffer[i].m5A = i & 1;
@@ -1138,10 +1138,10 @@ void updateDialogTextImage(sDialogWindow18* param_1)
 		int iVar13 = (int)(param_1->m0).vy;
 		param_1->m28_perLineBuffer[iVar13].m5C = (char)((int)characterToPrint / 2) * '\r' + *(char*)&param_1->mE;
 		if ((characterToPrint & 1) == 0) {
-			param_1->m28_perLineBuffer[iVar13].m5E = textSpriteMode0;
+			param_1->m28_perLineBuffer[iVar13].m5E_clut = textSpriteMode0;
 		}
 		else {
-			param_1->m28_perLineBuffer[iVar13].m5E = textSpriteMode1;
+			param_1->m28_perLineBuffer[iVar13].m5E_clut = textSpriteMode1;
 		}
 		param_1->m28_perLineBuffer[iVar13].m5A = (byte)characterToPrint & 1;
 		param_1->m28_perLineBuffer[iVar13].m5B = (byte)characterToPrint;
@@ -1284,7 +1284,7 @@ void updateAndRenderTextForDialogWindow(sDialogWindow18* param_1, sTag* OT, int 
 		(param_1->m0).vy = 0;
 		(param_1->m0).vx = 0;
 		psVar5->m5C = (byte)sVar2;
-		param_1->m28_perLineBuffer[0].m5E = textSpriteMode0;
+		param_1->m28_perLineBuffer[0].m5E_clut = textSpriteMode0;
 		param_1->m28_perLineBuffer[0].m5A = 0;
 		param_1->m28_perLineBuffer[0].m50.y = param_1->mE;
 		if (0 < param_1->mC_height) {
@@ -1316,9 +1316,13 @@ void updateAndRenderTextForDialogWindow(sDialogWindow18* param_1, sTag* OT, int 
 
 			if (param_1->m28_perLineBuffer[iVar6].m58 > 0x40)
 			{
-				MissingCode();
-				//assert(0);
+				param_1->m28_perLineBuffer[iVar6].m0[oddOrEven][1].v0 = param_1->m28_perLineBuffer[iVar6].m5C;
+				param_1->m28_perLineBuffer[iVar6].m0[oddOrEven][1].clut = param_1->m28_perLineBuffer[iVar6].m5E_clut;
+				param_1->m28_perLineBuffer[iVar6].m0[oddOrEven][1].y0 = (param_1->m4).vy + (param_1->m14).vx * i;
+				param_1->m28_perLineBuffer[iVar6].m0[oddOrEven][1].w = (param_1->m28_perLineBuffer[iVar6].m58 - 0x40) * 4;
+				addSPRT(OT, &param_1->m28_perLineBuffer[iVar6].m0[oddOrEven][1]);
 			}
+			iVar6++;
 		}
 	}
 
@@ -1346,7 +1350,7 @@ void updateAndRenderTextForDialogWindow(sDialogWindow18* param_1, sTag* OT, int 
 			if (param_1->m28_perLineBuffer[iVar6].m58)
 			{
 				param_1->m28_perLineBuffer[iVar6].m0[oddOrEven][0].v0 = param_1->m28_perLineBuffer[iVar6].m5C;
-				param_1->m28_perLineBuffer[iVar6].m0[oddOrEven][0].clut = param_1->m28_perLineBuffer[iVar6].m5E;
+				param_1->m28_perLineBuffer[iVar6].m0[oddOrEven][0].clut = param_1->m28_perLineBuffer[iVar6].m5E_clut;
 				param_1->m28_perLineBuffer[iVar6].m0[oddOrEven][0].y0 = (param_1->m4).vy + (param_1->m14).vx * i;
 				int uVar4 = param_1->m28_perLineBuffer[iVar6].m58;
 				if (0x40 < uVar4) {

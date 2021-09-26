@@ -4196,7 +4196,7 @@ void clearShapeTransfertTableEntry(int param_1)
 
 void renderChars()
 {
-	if (renderCharsDisabled != '\x01') {
+	if (renderCharsDisabled != 1) {
 		clearShapeTransfertTableEntry(frameOddOrEven);
 		MissingCode();
 		uploadCharacterSprites();
