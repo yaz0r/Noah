@@ -43,7 +43,7 @@
         <scriptEntity ID="11" Name=""/>
         <scriptEntity ID="12" Name="Tavern sign"/>
         <scriptEntity ID="13" Name="Store sign"/>
-        <scriptEntity ID="14" Name=""/>
+        <scriptEntity ID="14" Name="Well"/>
         <scriptEntity ID="15" Name=""/>
         <scriptEntity ID="16" Name=""/>
         <scriptEntity ID="17" Name=""/>
@@ -80,14 +80,14 @@
         <scriptEntity ID="48" Name=""/>
         <scriptEntity ID="49" Name=""/>
         <scriptEntity ID="50" Name=""/>
-        <scriptEntity ID="51" Name=""/>
+        <scriptEntity ID="51" Name="To Alice House"/>
         <scriptEntity ID="52" Name=""/>
-        <scriptEntity ID="53" Name=""/>
+        <scriptEntity ID="53" Name="To beginner&apos;s hall"/>
         <scriptEntity ID="54" Name=""/>
-        <scriptEntity ID="55" Name=""/>
+        <scriptEntity ID="55" Name="To item shop"/>
         <scriptEntity ID="56" Name=""/>
         <scriptEntity ID="57" Name=""/>
-        <scriptEntity ID="58" Name=""/>
+        <scriptEntity ID="58" Name="To pub"/>
         <scriptEntity ID="59" Name=""/>
         <scriptEntity ID="60" Name=""/>
         <scriptEntity ID="61" Name=""/>

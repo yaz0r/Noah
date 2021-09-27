@@ -127,7 +127,7 @@ extern std::array<s32, 3> currentParty;
 
 extern s32 fieldMapNumber;
 extern s32 fieldChangePrevented;
-extern s32 fieldChangePrevented2;
+extern s32 fieldMusicLoadPending;
 extern s32 currentFieldId0;
 
 extern std::array<s16, 1024> fieldVars;
@@ -208,7 +208,7 @@ extern const std::array<u16, 8> actorDirectionTable3;
 extern s32 load2dAnimVar;
 extern s32 loadCompleted;
 
-extern u16 padButtonForScripts;
+extern sVec2_s16 padButtonForScripts[2];
 extern std::array<s16, 4> fieldInitVar1;
 
 extern bool g_LogOpcodes;
@@ -218,12 +218,23 @@ extern std::vector<u8> rawFieldDialogBundle;
 
 extern MATRIX currentProjectionMatrix;
 
+extern int playerControlledEntity;
+extern std::array<std::vector<u8>, 3> partyCharacterBuffersRaw;
+extern std::array<int, 3> asyncPartyCharacterLoadingTable;
+
+void emptyPartySlot(int param_1);
+void copyPartySlotFromNext(uint param_1);
+
+void vsyncCallback(void);
+
 void LoadImage(struct RECT* pRect, const u8* data);
 
 void traceNextAlloc(int state);
 
 void LogOpcode(int actorId, u16 scriptOffset, u16 opcode);
 void LogMissingOpcode(int actorId, u16 scriptOffset, u16 opcode);
+
+void initFieldScriptEntityValues(int index);
 
 void playMusic(int musicId, int);
 void setupRGBCalcMode(int, int, int, int, int, int);
@@ -258,4 +269,8 @@ void setCurrentActorRotation2(s16 param_1);
 int getCurrentActorRotation();
 void setCurrentActorTargetRotation(s16 param_1);
 void setCurrentActorElevation(short param_1);
+
+void resetRGBFaderToBlack(int index);
+void setupRGBFaderSlot0_fadeIn(int);
+void setupRGBCalcSlot0_fadeToBlack(int);
 

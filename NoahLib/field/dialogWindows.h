@@ -7,7 +7,7 @@ struct sDialogWindow18PerLineBufferEntry
 {
 	SPRT m0[2][2];
 	RECT m50;
-	s16 m58;
+	s16 m58_widthDiv4;
 	s8 m5A;
 	s8 m5B;
 	s16 m5C;
@@ -44,13 +44,13 @@ struct sDialogWindow18
 	s8 m69;
 	s8 m6A;
 	s8 m6B;
-	s8 m6C;
+	s8 m6C_autoClose;
 	s8 m6D;
 	s8 m6E_selectedLineForMultiChoice;
 	s32 m70[4];
 	s16 m80;
 	s16 m82;
-	s16 m84;
+	s16 m84_delay;
 	s16 m86_currentDelayForNextCharacter;
 	s16 m88_delayBetweenCharacters;
 	sDialogWindow18_8C* m8C;
@@ -99,6 +99,10 @@ extern s16 dialogWindowFlag1;
 extern u16 textSpriteMode0;
 extern u16 textSpriteMode1;
 
+extern u16 padButtonForDialogs;
+extern u16 padButtonForDialogs2;
+
+void flagWindowOpenBF(uint param_1);
 void createDialogWindow(short x, short y, int dialogIndex, int windowIndex, int width, int height, int fieldActorId, int actorId, int mode, uint param_10, uint param_11);
 void initDialogWindows();
 int findDialogWindowForCurrentActor(int* outputId);

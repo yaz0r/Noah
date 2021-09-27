@@ -57,6 +57,8 @@ void noahFrame_start()
     StartFrame();
 
     initPSXFB();
+
+    vsyncCallback();
 }
 
 bool noahFrame_end()

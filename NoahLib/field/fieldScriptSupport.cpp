@@ -200,7 +200,7 @@ void playMusicFromScript()
         clearMusic2();
         if (iVar2 != currentlyPlayingMusic) {
             clearMusic();
-            fieldChangePrevented2 = -1;
+            fieldMusicLoadPending = -1;
         }
         uVar1 = pCurrentFieldScriptActor->mCC_scriptPC;
         currentlyPlayingMusic = iVar2;
@@ -211,13 +211,13 @@ void playMusicFromScript()
             breakCurrentScript = 1;
             return;
         }
-        if ((musicVar2 == 1) || (fieldChangePrevented2 == -1)) {
+        if ((musicVar2 == 1) || (fieldMusicLoadPending == -1)) {
             breakCurrentScript = 1;
             return;
         }
         if (iVar2 != currentlyPlayingMusic) {
             clearMusic();
-            fieldChangePrevented2 = -1;
+            fieldMusicLoadPending = -1;
             currentlyPlayingMusic = iVar2;
             playMusic(iVar2, 0);
         }
@@ -262,14 +262,6 @@ s32 iRam800adb70 = 0;
 u32 getCameraDirection(void)
 {
 	return 7U - (camera2Tan + -0x100 >> 9) & 7;
-}
-
-u16 windowOpenBF = 0;
-
-void flagWindowOpenBF(uint param_1)
-{
-	windowOpenBF = windowOpenBF | (ushort)(1 << (param_1 & 0x1f));
-	return;
 }
 
 void projectActorToScreen(int param_1, int* param_2, int* param_3, short param_4)

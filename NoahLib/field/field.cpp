@@ -15,6 +15,8 @@
 #include "kernel/trigo.h"
 #include "dialogWindows.h"
 
+#include "SDL_keyboard.h"
+
 struct sFieldVramMapping
 {
 	s16 m0_vramX;
@@ -73,17 +75,91 @@ s16 entityMoveSpeedFactor = 0;
 
 int g_frameOddOrEven = 0;
 
+std::array<std::vector<u8>, 3> partyCharacterBuffersRaw;
+std::array<std::vector<u8>, 3> partyCharacterBuffersCompressed;
+std::array<sFieldActorSetupParams, 3> partyCharacterBuffers;
+s16 actorCameraTracked = 0;
+s32 pcInitVar1 = 0;
+std::array<int, 11> PCToActorArray;
+
+const std::array<s8, 12> characterMappingTable = {
+	0,1,2,3,4,5,6,7,8,2,6,0
+};
+
+s16 pcInitVar2 = 0;
+std::array<int, 3> unkPartyTable;
+
+
+u8 OPE7_param[3];
+
 void fieldModelRelocation(std::vector<u8>::iterator& pModelData)
 {
 	MissingCode();
 }
 
 s32 fieldChangePrevented = -1;
-s32 fieldChangePrevented2 = -1;
+s32 fieldMusicLoadPending = -1;
 s32 fieldTransitionMode = 0;
+
+u16 inputAllowedMask = 0xFFFF;
+u16 padButtonForField;
+u16 padButtonForField2;
+sVec2_s16 newPadButtonForScripts[2];
+u16 inputAllowedMask2;
+u16 newPadButtonForDialogs;
+u16 newPadButtonForDialogs2;
+u16 newPadButtonForField;
+u16 newPadButtonForField2;
+
+struct sInputReplayEntry
+{
+	u16 m0_newPadButtonForScripts0[16];
+	u16 m20_newPadButtonForScripts1[16];
+	u16 m40_newPadButtonForDialogs[16];
+	u16 m60_newPadButtonForDialogs2[16];
+	u16 m80_newPadButtonForField[16];
+	u16 mA0_newPadButtonForField2[16];
+} inputReplayBuffer;
+
+int inputReplayPosition = 0;
+int inputReplayPosition2 = 0;
+int inputOverflowed = 0;
+int inputReplayOffset = 0;
+
+void resetInputs()
+{
+	MissingCode();
+
+	inputOverflowed = 0;
+	inputReplayPosition = 0;
+	inputReplayPosition2 = 0;
+	inputReplayOffset = 0;
+	newPadButtonForDialogs = 0;
+	newPadButtonForDialogs2 = 0;
+	newPadButtonForField = 0;
+	newPadButtonForField2 = 0;
+
+	MissingCode();
+
+	newPadButtonForScripts[0].vx = 0;
+	newPadButtonForScripts[1].vx = 0;
+
+	MissingCode();
+}
 
 void resetFieldDefault()
 {
+	MissingCode();
+
+	resetInputs();
+	inputAllowedMask = 0xffff;
+	padButtonForScripts[0].vx = 0;
+	padButtonForScripts[1].vx = 0;
+	padButtonForDialogs = 0;
+	padButtonForDialogs2 = 0;
+	padButtonForField = 0;
+	padButtonForField2 = 0;
+
 	MissingCode();
 
 	fieldTransitionMode = 2;
@@ -95,6 +171,8 @@ void resetFieldDefault()
 	MissingCode();
 
 	fieldChangePrevented = -1;
+	op9DVar1 = 2;
+	inputAllowedMask2 = 0xFFFF;
 
 	MissingCode();
 
@@ -715,6 +793,81 @@ int fieldExecuteVar1 = 0;
 std::array<int, 3> asyncPartyCharacterLoadingTable;
 std::vector<u8> asyncPartyCharacterLoadingBuffer;
 
+void copyPartySlotFromNext(uint param_1)
+{
+	s32* piVar7 = &partyToFieldEntityArrayMapping[param_1 + 1];
+	int iVar13 = *piVar7;
+	if (iVar13 == 0xff) {
+		asyncPartyCharacterLoadingTable[param_1] = asyncPartyCharacterLoadingTable[param_1 + 1];
+		currentParty[param_1] = currentParty[param_1 + 1];
+		partyToFieldEntityArrayMapping[param_1] = *piVar7;
+		currentParty[param_1 + 1] = 0xff;
+		asyncPartyCharacterLoadingTable[param_1 + 1] = 0xff;
+		*piVar7 = 0xff;
+	}
+	else {
+		partyCharacterBuffers[param_1] = partyCharacterBuffers[param_1 + 1];
+		asyncPartyCharacterLoadingTable[param_1] = asyncPartyCharacterLoadingTable[param_1 + 1];
+		currentParty[param_1] = currentParty[param_1 + 1];
+		partyToFieldEntityArrayMapping[param_1] = partyToFieldEntityArrayMapping[param_1 + 1];
+		sFieldScriptEntity* psVar3 = actorArray[iVar13].m4C_scriptEntity;
+		if ((psVar3->m126 & 0x80) == 0) {
+			OP_INIT_ENTITY_SCRIPT_sub0(iVar13, param_1, &partyCharacterBuffers[param_1], 1, 0, param_1, 1);
+		}
+		else {
+			OP_INIT_ENTITY_SCRIPT_sub0(iVar13, psVar3->m127, &fieldActorSetupParams[psVar3->m126 & 0x7f], psVar3->m130.m28, psVar3->m134.m0, actorArray[iVar13].m4C_scriptEntity->m126, actorArray[iVar13].m4C_scriptEntity->m134.m4);
+		}
+		currentParty[param_1 + 1] = 0xff;
+		asyncPartyCharacterLoadingTable[param_1 + 1] = 0xff;
+		partyToFieldEntityArrayMapping[param_1 + 1] = 0xff;
+	}
+	return;
+}
+
+void emptyPartySlot(int param_1)
+{
+	uint* puVar1;
+	ushort* puVar2;
+	ushort uVar3;
+	int iVar4;
+	sFieldScriptEntity* psVar5;
+	sFieldScriptEntity* psVar6;
+	sFieldEntity* psVar7;
+	int iVar8;
+	int* piVar9;
+
+	psVar7 = pCurrentFieldEntity;
+	psVar5 = pCurrentFieldScriptActor;
+	iVar4 = currentFieldActorId;
+	piVar9 = &partyToFieldEntityArrayMapping[param_1];
+	if (*piVar9 != 0xff) {
+		pCurrentFieldEntity = &actorArray[*piVar9];
+		uVar3 = pCurrentFieldScriptActor->mCC_scriptPC;
+		pCurrentFieldScriptActor = pCurrentFieldEntity->m4C_scriptEntity;
+		initFieldScriptEntityValues(*piVar9);
+		iVar8 = *piVar9;
+		currentFieldActorId = iVar8;
+		actorArray[iVar8].m58_flags = actorArray[iVar8].m58_flags & 0xf07f | 0x200;
+		OP_INIT_ENTITY_SCRIPT_sub0(iVar8, 0, &partyCharacterBuffers[0], 1, 0, 0, 1);
+		psVar6 = pCurrentFieldScriptActor;
+		pCurrentFieldScriptActor->m0_flags = pCurrentFieldScriptActor->m0_flags | 1;
+		puVar1 = &pCurrentFieldScriptActor->m4_flags;
+		breakCurrentScript = 0;
+		puVar2 = &pCurrentFieldScriptActor->mCC_scriptPC;
+		currentFieldActorId = iVar4;
+		pCurrentFieldScriptActor = psVar5;
+		pCurrentFieldEntity = psVar7;
+		*puVar2 = uVar3;
+		psVar6->m4_flags = *puVar1 | 0x100000;
+		psVar6->m0_flags = psVar6->m0_flags | 0x20000;
+		psVar6->m4_flags = psVar6->m4_flags | 0x400;
+		*piVar9 = 0xff;
+	}
+	currentParty[param_1] = 0xff;
+	asyncPartyCharacterLoadingTable[param_1] = 0xff;
+	return;
+}
+
 int getGearForCharacter(int param_1)
 {
 	return pKernelGameState->m294[param_1].m78_partyData_gearNum;
@@ -758,24 +911,6 @@ void startPartyCharacterASyncLoading(int partyCharacter, int partySlot)
 	asyncLoadingVar1 = 1;
 	return;
 }
-
-std::array<std::vector<u8>, 3> partyCharacterBuffersRaw;
-std::array<std::vector<u8>, 3> partyCharacterBuffersCompressed;
-std::array<sFieldActorSetupParams, 3> partyCharacterBuffers;
-s16 actorCameraTracked = 0;
-s32 pcInitVar1 = 0;
-std::array<int, 11> PCToActorArray;
-
-const std::array<s8, 12> characterMappingTable = {
-	0,1,2,3,4,5,6,7,8,2,6,0
-};
-
-s16 pcInitVar2 = 0;
-std::array<int, 3> unkPartyTable;
-
-
-u8 OPE7_param[3];
-
 
 void setCurrentActor2DPosition(int posX, int posZ)
 {
@@ -1221,7 +1356,7 @@ void OPX_13Sub(int)
 }
 
 
-u16 padButtonForScripts = 0;
+sVec2_s16 padButtonForScripts[2];
 
 
 int isScriptAlreadyRunning(sFieldScriptEntity* pEntity, int scriptIndex)
@@ -1426,6 +1561,16 @@ struct sScreenEffectSlot
 };
 
 std::array<sScreenEffectSlot, 2> screenEffects;
+
+void setupRGBFaderSlot0_fadeIn(int)
+{
+	MissingCode();
+}
+
+void setupRGBCalcSlot0_fadeToBlack(int)
+{
+	MissingCode();
+}
 
 void resetRGBFaderToBlack(int index)
 {
@@ -1994,6 +2139,11 @@ void bootField()
 		fieldGraphicsUploaded = 0;
 		MissingCode();
 	}
+
+	MissingCode();
+
+	resetInputs();
+	fieldMusicLoadPending = 0;
 
 	MissingCode();
 }
@@ -2899,7 +3049,7 @@ void updateEntityEventCode3(int index, sFieldEntity* pFieldEntity, sFieldScriptE
 	}
 
 	int walkSpeed = 1;
-	if ((((pFieldScriptEntity->m0_flags & 0x4000) != 0) && ((padButtonForScripts & 0x40) != 0)) && (playerCanRun == 1)) {
+	if ((((pFieldScriptEntity->m0_flags & 0x4000) != 0) && ((padButtonForScripts[0].vx & 0x40) != 0)) && (playerCanRun == 1)) {
 		walkSpeed = 2;
 	}
 	if (((pFieldScriptEntity->m0_flags & 0x1800) != 0) && (pFieldScriptEntity->mE8 != walkSpeed)) {
@@ -3238,13 +3388,12 @@ s32 EntityMoveCheck1Sub1(sFieldScriptEntity* pFieldScriptEntity, int walkmeshId,
 	return 0;
 }
 
-s16 EntityMoveCheck1Var0 = -1;
 s8 EntityMoveCheck1Var1 = 0;
 int EntityMoveCheck1(int entityIndex, int mask, sFieldEntity* pFieldEntity, sFieldScriptEntity* pFieldScriptEntity, uint param_5)
 {
 	sFieldEntitySub4* psVar17 = actorArray[entityIndex].m4_pVramSpriteSheet;
 	if (entityIndex == playerControlledEntity) {
-		EntityMoveCheck1Var0 = -1;
+		inputAllowedMask = 0xFFFF;
 	}
 	if ((pFieldScriptEntity->m0_flags & 0x1000000) != 0) {
 		return -1;
@@ -4291,9 +4440,179 @@ void logFieldRenderingEvent(char* param_1)
 	MissingCode();
 }
 
-void updateFieldInputs()
+int loadInputFromVSyncBuffer()
+{
+	int iVar1;
+	uint uVar2;
+
+	if (inputReplayPosition == 0) {
+		iVar1 = 0;
+	}
+	else {
+		uVar2 = inputReplayOffset & 0xf;
+		newPadButtonForScripts[0].vx = inputReplayBuffer.m0_newPadButtonForScripts0[uVar2];
+		newPadButtonForScripts[1].vx = inputReplayBuffer.m20_newPadButtonForScripts1[uVar2];
+		newPadButtonForDialogs = inputReplayBuffer.m40_newPadButtonForDialogs[uVar2];
+		newPadButtonForDialogs2 = inputReplayBuffer.m60_newPadButtonForDialogs2[uVar2];
+		newPadButtonForField = inputReplayBuffer.m80_newPadButtonForField[uVar2];
+		newPadButtonForField2 = inputReplayBuffer.mA0_newPadButtonForField2[uVar2];
+		inputReplayOffset = inputReplayOffset + 1;
+		iVar1 = inputReplayPosition;
+		inputReplayPosition = inputReplayPosition + -1;
+	}
+	return iVar1;
+}
+
+/*
+
+// Pad terminal type masks. First four bits of padData[1]
+#define PADTT_DIG 0x40 // 16 button controller (no analog)
+#define PADTT_ANA 0x70 // Analog controller
+
+// All 16 16bit button bit masks. Button state bit is 0 if pressed.
+#define PADLeft 0x8000
+#define PADDown 0x4000
+#define PADRight 0x2000
+#define PADUp 0x1000
+#define PADStart 0x800
+#define PADR3 0x400
+#define PADL3 0x200
+#define PADSelect 0x100
+#define PADSquare 0x80
+#define PADCross 0x40
+#define PADCircle 0x20
+#define PADTriangle 0x10
+#define PADRB1 0x8
+#define PADLB1 0x4
+#define PADRB2 0x2
+#define PADLB2 0x1
+
+*/
+
+void getInputDuringVsync(void)
 {
 	MissingCode();
+
+	const Uint8* keyState = SDL_GetKeyboardState(NULL);
+
+	for (int i = 0; i < SDL_NUM_SCANCODES; i++)
+	{
+		if (keyState[i])
+		{
+			u16 buttonMask = 0;
+			switch (i)
+			{
+			case SDL_SCANCODE_Z:
+				buttonMask = 0x40; // CROSS
+				break;
+			case SDL_SCANCODE_X:
+				buttonMask = 0x20; // CIRCLE
+				break;
+			case SDL_SCANCODE_A:
+				buttonMask = 0x80; // SQUARE
+				break;
+			case SDL_SCANCODE_S:
+				buttonMask = 0x10; // TRIANGLE
+				break;
+			case SDL_SCANCODE_UP:
+				buttonMask = 0x1000;
+				break;
+			case SDL_SCANCODE_RIGHT:
+				buttonMask = 0x2000;
+				break;
+			case SDL_SCANCODE_DOWN:
+				buttonMask = 0x4000;
+				break;
+			case SDL_SCANCODE_LEFT:
+				buttonMask = 0x8000;
+				break;
+			default:
+				break;
+			}
+
+			newPadButtonForScripts[0].vx |= buttonMask;
+		}
+	}
+}
+
+void saveInputs()
+{
+	ushort uVar1;
+	ushort uVar2;
+	ushort uVar3;
+	ushort uVar4;
+	short sVar5;
+	uint uVar6;
+
+	sVar5 = newPadButtonForScripts[1].vx;
+	uVar4 = newPadButtonForField2;
+	uVar3 = newPadButtonForField;
+	uVar2 = newPadButtonForDialogs2;
+	uVar1 = newPadButtonForDialogs;
+	if (inputReplayPosition < 0x10) {
+		uVar6 = inputReplayPosition2 & 0xf;
+		inputReplayPosition2 = inputReplayPosition2 + 1;
+		inputReplayPosition = inputReplayPosition + 1;
+		inputReplayBuffer.m0_newPadButtonForScripts0[uVar6] = newPadButtonForScripts[0].vx;
+		inputReplayBuffer.m20_newPadButtonForScripts1[uVar6] = sVar5;
+		inputReplayBuffer.m40_newPadButtonForDialogs[uVar6] = uVar1;
+		inputReplayBuffer.m60_newPadButtonForDialogs2[uVar6] = uVar2;
+		inputReplayBuffer.m80_newPadButtonForField[uVar6] = uVar3;
+		inputReplayBuffer.mA0_newPadButtonForField2[uVar6] = uVar4;
+	}
+	else {
+		inputOverflowed = 1;
+	}
+}
+
+void incrementTime()
+{
+	MissingCode();
+}
+
+u32 numVsync = 0;
+void vsyncCallback(void)
+{
+	numVsync++;
+	getInputDuringVsync();
+	saveInputs();
+	incrementTime();
+	MissingCode();
+}
+
+void updateFieldInputs()
+{
+	padButtonForScripts[0].vx = 0;
+	padButtonForScripts[1].vx = 0;
+	padButtonForDialogs = 0;
+	padButtonForDialogs2 = 0;
+	padButtonForField = 0;
+	padButtonForField2 = 0;
+	while (loadInputFromVSyncBuffer()) {
+		padButtonForScripts[0].vx |= newPadButtonForScripts[0].vx & inputAllowedMask2;
+		padButtonForScripts[1].vx |= newPadButtonForScripts[1].vx;
+		padButtonForDialogs |= newPadButtonForDialogs & inputAllowedMask2;
+		padButtonForDialogs2 |= newPadButtonForDialogs2;
+		padButtonForField |= newPadButtonForField & inputAllowedMask2;
+		padButtonForField2 |= newPadButtonForField2;
+	}
+	padButtonForScripts[0].vx &= inputAllowedMask;
+	padButtonForField &= inputAllowedMask;
+	padButtonForDialogs &= inputAllowedMask;
+	resetInputs();
+	//FUN_Field__8007ae78(1, &DAT_80065848);
+	MissingCode();
+	if (updateAllEntitiesSub2Var0 != 0) {
+		padButtonForScripts[0].vx = 0;
+		padButtonForScripts[1].vx = 0;
+		padButtonForDialogs = 0;
+		padButtonForDialogs2 = 0;
+		padButtonForField = 0;
+		padButtonForField2 = 0;
+	}
+	if (playMusicAuthorized == 0) {
+		padButtonForDialogs = padButtonForDialogs & 0xff7f;
+	}
 }
 
 void syncKernelAndFieldStates()
@@ -4310,6 +4629,23 @@ void fieldPerFrameReset()
 		logFieldRenderingEvent("Clear OTAG");
 	}
 	syncKernelAndFieldStates();
+}
+
+int updateMusicState2(int param_1)
+{
+	MissingCode();
+	return 0;
+}
+
+void updateMusicState()
+{
+	rand();
+	if (fieldMusicLoadPending == -1) {
+		fieldMusicLoadPending = updateMusicState2(currentlyPlayingMusic);
+	}
+	if (updateAllEntitiesSub2Var0 != 0) {
+		updateAllEntitiesSub2Var0 = updateAllEntitiesSub2Var0 + -1;
+	}
 }
 
 void fieldEntryPoint()
@@ -4340,6 +4676,10 @@ void fieldEntryPoint()
 
 	MissingCode();
 
+	if (fieldDebugDisable == 1) {
+		gameState.m1930_fieldVarsBackup[41] = 1;
+		setVar(0x50, 1);
+	}
 	initCompassData();
 	fieldRequestedGears = 0;
 	startLoadingPlayableCharacters();
@@ -4386,5 +4726,7 @@ void fieldEntryPoint()
 		}
 		////
 		MissingCode();
+
+		updateMusicState();
 	}
 }

@@ -85,6 +85,14 @@ void initOpcodeTable()
 		.setComment("Doesn't do anything")
 		.end();
 
+	m_opcode[0x12]
+		.addArgumentByte()
+		.addArgumentU16OrVar()
+		.addArgumentU16OrVar()
+		.addArgumentU16OrVar()
+		.addArgumentU16OrVar()
+		.end();
+
 	m_opcode[0x14]
 		.setName("DISABLE_RANDOM_BATTLE")
 		.end();
@@ -587,6 +595,11 @@ void initOpcodeTable()
 		.addSignControlByte()
 		.end();
 
+	m_opcode[0xA4]
+		.addArgumentS16OrVar(0x80)
+		.addSignControlByte()
+		.end();
+
 	m_opcode[0xA7]
 		.setName("UPDATE_CHARACTER")
 		.end();
@@ -814,6 +827,7 @@ void initOpcodeTable()
 		.end();
 
 	m_opcode[0xF4]
+		.setName("CLOSE_CURRENT_ACTOR_DIALOG")
 		.addArgumentByte()
 		.end();
 
@@ -1106,6 +1120,13 @@ void initExtendedOpcodeTable()
 
 	m_extendedOpcode[0x87]
 		.setComment("Wait for something")
+		.end();
+
+
+	m_extendedOpcode[0x8C]
+		.addArgumentU16OrVar()
+		.addArgumentU16OrVar()
+		.addArgumentU16OrVar()
 		.end();
 
 	m_extendedOpcode[0x8E]

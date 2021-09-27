@@ -229,6 +229,109 @@ void OP_ADD_TO_CURRENT_PARTY()
 	}
 }
 
+void  OP_REMOVE_FROM_CURRENT_PARTY()
+{
+	int iVar1 = asyncLoadingVar1;
+	if (asyncLoadingVar1 != 0xff) {
+		breakCurrentScript = 1;
+		pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC - 1;
+		return;
+	}
+	DrawSync(0);
+	int uVar2 = getCharacter(pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1]);
+	int iVar3 = findCharacterInParty(uVar2);
+
+	if (iVar3 == -1)
+	{
+		pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 2;
+		return;
+	}
+
+	if (fieldExecuteVar1 == 0) {
+		switch(iVar3)
+		{
+		case 0:
+			if (currentParty[1] == 0xff) {
+				currentParty[0] = iVar1;
+				asyncPartyCharacterLoadingTable[0] = iVar1;
+				pKernelGameState->m22B1_isOnGear[2] = 0;
+			}
+			else {
+				partyCharacterBuffers[0] = partyCharacterBuffers[1];
+				asyncPartyCharacterLoadingTable[0] = asyncPartyCharacterLoadingTable[1];
+				currentParty[0] = currentParty[1];
+				currentParty[1] = 0xff;
+				asyncPartyCharacterLoadingTable[1] = 0xff;
+				pKernelGameState->m22B1_isOnGear[2] = pKernelGameState->m22B1_isOnGear[3];
+				if (currentParty[2] != 0xff) {
+					partyCharacterBuffers[1] = partyCharacterBuffers[2];
+					asyncPartyCharacterLoadingTable[1] = asyncPartyCharacterLoadingTable[2];
+					currentParty[1] = currentParty[2];
+					currentParty[2] = 0xff;
+					asyncPartyCharacterLoadingTable[2] = 0xff;
+					pKernelGameState->m22B1_isOnGear[3] = pKernelGameState->m22B1_isOnGear[4];
+				}
+			}
+			break;
+		case 1:
+			if (currentParty[2] == 0xff) {
+				currentParty[1] = iVar1;
+				asyncPartyCharacterLoadingTable[1] = iVar1;
+				pKernelGameState->m22B1_isOnGear[3] = 0;
+			}
+			else {
+				partyCharacterBuffers[1] = partyCharacterBuffers[2];
+				asyncPartyCharacterLoadingTable[1] = asyncPartyCharacterLoadingTable[2];
+				currentParty[1] = currentParty[2];
+				currentParty[2] = 0xff;
+				asyncPartyCharacterLoadingTable[2] = 0xff;
+				pKernelGameState->m22B1_isOnGear[3] = pKernelGameState->m22B1_isOnGear[4];
+				pKernelGameState->m22B1_isOnGear[4] = 0;
+			}
+			break;
+		case 2:
+			currentParty[2] = iVar1;
+			asyncPartyCharacterLoadingTable[2] = iVar1;
+			pKernelGameState->m22B1_isOnGear[4] = 0;
+		}
+	}
+	else
+	{
+		switch (iVar3)
+		{
+		case 0:
+			pKernelGameState->m22B1_isOnGear[2] = pKernelGameState->m22B1_isOnGear[3];
+			pKernelGameState->m22B1_isOnGear[3] = pKernelGameState->m22B1_isOnGear[4];
+			pKernelGameState->m22B1_isOnGear[4] = 0;
+			emptyPartySlot(0);
+			copyPartySlotFromNext(0);
+			copyPartySlotFromNext(1);
+			break;
+		case 1:
+			pKernelGameState->m22B1_isOnGear[3] = pKernelGameState->m22B1_isOnGear[4];
+			pKernelGameState->m22B1_isOnGear[4] = 0;
+			emptyPartySlot(1);
+			copyPartySlotFromNext(1);
+			break;
+		case 2:
+			pKernelGameState->m22B1_isOnGear[4] = 0;
+			emptyPartySlot(2);
+			break;
+		default:
+			assert(0);
+		}
+
+		if ((currentParty[0] == 0xff) || (partyToFieldEntityArrayMapping[0] == 0xff)) {
+			playerControlledEntity = 0;
+		}
+		else {
+			playerControlledEntity = partyToFieldEntityArrayMapping[0];
+			(actorArray[partyToFieldEntityArrayMapping[0]].m4C_scriptEntity)->m0_flags = (actorArray[partyToFieldEntityArrayMapping[0]].m4C_scriptEntity)->m0_flags & 0xffffff7f | 0x4400;
+		}
+	}
+	pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 2;
+}
+
 void OP_2A(void)
 {
 	ushort* puVar1;
@@ -387,9 +490,37 @@ void OP_SET_CURRENT_ACTOR_CARDINAL_DIRECTION(void)
 	return;
 }
 
-void OP_INIT_ENTITY_PC_Sub0(int)
+int readS16FromScriptFile(int param_1)
 {
-	MissingCode();
+	return (int)(((uint)pCurrentFieldScriptFile[param_1] + (uint)(pCurrentFieldScriptFile + param_1)[1] * 0x100) * 0x10000) >> 0x10;
+}
+
+void OP_INIT_ENTITY_PC_Sub0(int param_1)
+{
+	if (*pCurrentFieldScriptFile == 0xff) {
+		param_1 = param_1 * 7;
+		pCurrentFieldScriptActor->m10_walkmeshId = (ushort)pCurrentFieldScriptFile[param_1 + 5];
+		int sVar2 = readS16FromScriptFile(param_1 + 1);
+		int sVar3 = readS16FromScriptFile(param_1 + 3);
+		setCurrentActor2DPosition((int)sVar2, (int)sVar3);
+		int uVar5 = (uint)pCurrentFieldScriptFile[param_1 + 6];
+		if (uVar5 == 0xff) {
+			uVar5 = getVariable(8);
+		}
+		uVar5 = uVar5 + 4 & 7;
+		opA0_var1 = uVar5 << 0x19;
+		opA0_var0 = opA0_var1 >> 0x10;
+		op99VarB = (s16)(uVar5 << 9);
+		uVar5 = (uint)pCurrentFieldScriptFile[param_1 + 7];
+		if (uVar5 == 0xff) {
+			uVar5 = getVariable(6);
+		}
+		sFieldScriptEntity* psVar1 = pCurrentFieldScriptActor;
+		uint uVar4 = (ushort)((uVar5 - 2 & 7) << 9) | 0x8000;
+		pCurrentFieldScriptActor->m104_rotation = uVar4;
+		psVar1->m106_currentRotation = uVar4;
+		psVar1->m108_rotation3 = uVar4;
+	}
 }
 
 void OP_INIT_ENTITY_PC(void)
@@ -521,6 +652,42 @@ void OP_RAND_ROTATION()
 	breakCurrentScript = 1;
 	pCurrentFieldScriptActor->m104_rotation = uVar5;
 	pCurrentFieldScriptActor->mCC_scriptPC++;
+}
+
+void OP_CLOSE_CURRENT_ACTOR_DIALOG()
+{
+	ushort* puVar1;
+	sFieldScriptEntity* psVar2;
+	ushort uVar3;
+	int iVar4;
+	sFieldScriptEntity* psVar5;
+	int local_10[2];
+
+	psVar5 = pCurrentFieldScriptActor;
+	if (pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1] == 0) {
+		iVar4 = findDialogWindowForCurrentActor(local_10);
+		psVar5 = pCurrentFieldScriptActor;
+		if (iVar4 == 0) {
+			gDialogWindows[local_10[0]].m414 = 0;
+			uVar3 = psVar5->mCC_scriptPC + 2;
+		}
+		else {
+			uVar3 = pCurrentFieldScriptActor->mCC_scriptPC + 2;
+		}
+	}
+	else {
+		pCurrentFieldScriptActor->m82[0] = 0;
+		psVar2 = pCurrentFieldScriptActor;
+		psVar5->m88[0] = 0;
+		psVar5->m88[1] = 0;
+		psVar2->m82[1] = 0;
+		psVar5 = pCurrentFieldScriptActor;
+		puVar1 = &pCurrentFieldScriptActor->mCC_scriptPC;
+		pCurrentFieldScriptActor->m84 = 0;
+		uVar3 = *puVar1 + 2;
+	}
+	psVar5->mCC_scriptPC = uVar3;
+	breakCurrentScript = 1;
 }
 
 void OP_SHOW_DIALOG_WINDOW_FOR_CURRENT_ACTOR_MODE3()
@@ -814,10 +981,30 @@ void OP_IF_GAMEPROGRESS_LESS()
 	pCurrentFieldScriptActor->mCC_scriptPC = uVar1;
 }
 
+void OP_SET_GAMEPROGRESS()
+{
+	fieldExectuteMaxCycles = fieldExectuteMaxCycles + 0x20;
+	setVar(0, getImmediateOrVariableUnsigned(1));
+	pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
+}
+
 void OP_ADD_ENDITY_TO_FIELD1721_LIST()
 {
+	actorArray[currentFieldActorId].m58_flags = actorArray[currentFieldActorId].m58_flags & 0xf07f | 0x200;
+	int iVar3 = getImmediateOrVariableUnsigned(1);
+	OP_INIT_ENTITY_SCRIPT_sub0(currentFieldActorId, 0, &fieldActorSetupParams[0], 0, 0, 0x80, 1);
+	OP_INIT_ENTITY_SCRIPT_sub1();
+	sFieldScriptEntity* psVar2 = pCurrentFieldScriptActor;
+	pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
+	int iVar1 = currentFieldActorId;
+	psVar2->m0_flags = psVar2->m0_flags | 0x100;
+	actorArray[iVar1].m58_flags = actorArray[iVar1].m58_flags & 0xffdf;
+	psVar2->m4_flags = psVar2->m4_flags & 0xfffff7ff | 0x2000;
+	//(&field1721EntityList)[NumEntityInField1721List] = (short)(iVar3 << 1);
+	//(&DAT_Field__800b225f)[NumEntityInField1721List] = 0;
+	//pCurrentFieldScriptActor->m12C_flags = pCurrentFieldScriptActor->m12C_flags & 0xffff1fff | (NumEntityInField1721List & 7) << 0xd;
+	//NumEntityInField1721List = NumEntityInField1721List + 1;
 	MissingCode();
-	pCurrentFieldScriptActor->mCC_scriptPC += 3;
 }
 
 void OP_SET_CAMERA_INTERPOLATION_RATE(void)
@@ -839,8 +1026,7 @@ void OP_WAIT_DIALOG()
 	int windowIndex;
 	if (findDialogWindowForCurrentActor(&windowIndex) == -1) {
 		fieldExectuteMaxCycles = fieldExectuteMaxCycles + 8;
-		assert(0);
-		//setVar(0x14, (ushort) * (byte*)&pCurrentFieldScriptActor->field_0x81);
+		setVar(0x14, pCurrentFieldScriptActor->m81_selectedMultichoiceLine);
 		pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 1;
 	}
 	else {
@@ -1267,6 +1453,12 @@ void OPX_54(void)
 	return;
 }
 
+void OPX_66(void)
+{
+	MissingCode();
+	pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 9;
+}
+
 void OPX_80(void)
 {
 	OPX_80Params[0] = readU16FromScript(1);
@@ -1325,9 +1517,41 @@ void OPX_8E()
 	pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 5;
 }
 
-void OP_RESTORE_GEAR()
+void OPX_8F()
 {
 	MissingCode();
+	pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 8;
+	MissingCode();
+	fieldExectuteMaxCycles = fieldExectuteMaxCycles + 4;
+}
+
+void OPX_90()
+{
+	MissingCode();
+	fieldExectuteMaxCycles = fieldExectuteMaxCycles + 4;
+	pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 9;
+}
+
+void OPX_97()
+{
+	fieldExectuteMaxCycles = fieldExectuteMaxCycles + 4;
+	MissingCode();
+	pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 2;
+}
+
+void OPX_98()
+{
+	MissingCode();
+	pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
+}
+
+void OP_RESTORE_GEAR()
+{
+	for (int i=0; i<20; i++)
+	{
+		pKernelGameState->m9A0_gears[i].m38_HP = pKernelGameState->m9A0_gears[i].m3C_maxHP;
+		pKernelGameState->m9A0_gears[i].m10_ether = pKernelGameState->m9A0_gears[i].m12_maxEther;
+	}
 	pCurrentFieldScriptActor->mCC_scriptPC++;
 }
 
@@ -1347,7 +1571,7 @@ void OPX_A2(void)
 {
 	ushort uVar1;
 
-	if (fieldChangePrevented2 == -1) {
+	if (fieldMusicLoadPending == -1) {
 		uVar1 = pCurrentFieldScriptActor->mCC_scriptPC - 1;
 	}
 	else {
@@ -1376,6 +1600,12 @@ void OPX_13()
 	if (pCurrentFieldScriptActor->m10A == 0) {
 		pCurrentFieldScriptActor->m10D = 0xff;
 	}
+}
+
+void OP_SETUP_SCREEN_DISTORTION()
+{
+	MissingCode();
+	pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 0xf;
 }
 
 void OPX_3C()
@@ -1439,6 +1669,19 @@ void OP_23(void)
 	return;
 }
 
+void OP_START_FADE_IN()
+{
+	resetRGBFaderToBlack(0);
+	setupRGBFaderSlot0_fadeIn(getImmediateOrVariableUnsigned(1));
+	pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
+}
+
+void OP_START_FADE_TO_BLACK()
+{
+	setupRGBCalcSlot0_fadeToBlack(getImmediateOrVariableUnsigned(1));
+	pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
+}
+
 void OP_INIT_ENTITY_SCRIPT()
 {
 	OP_INIT_ENTITY_SCRIPT_sub0(currentFieldActorId, 0, &fieldActorSetupParams[0], 0, 0, 0x80, 1);
@@ -1453,6 +1696,13 @@ void OP_INCREASE_FIELD_EXECUTION_MAX_CYCLES()
 {
 	fieldExectuteMaxCycles = fieldExectuteMaxCycles + 0x20;
 	pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 1;
+}
+
+void OP_IF_PLAYER_IN_TRIGGER2()
+{
+	s32 sxy2 = (actorArray[playerControlledEntity].m4C_scriptEntity->m20_position.vz >> 16) * 0x10000 + (actorArray[playerControlledEntity].m4C_scriptEntity->m20_position.vx >> 16);
+	MissingCode();
+	pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 4;
 }
 
 void OP_IF_PLAYER_IN_TRIGGER()
@@ -1587,7 +1837,7 @@ void OP_SET_VAR_TRUE(void)
 
 void OP_JUMP_IF_PAD_MASK()
 {
-	jumpIfMask(padButtonForScripts);
+	jumpIfMask(padButtonForScripts[0].vx);
 }
 
 void OP_SET_CURRENT_ACTOR_FLAGS()
@@ -1674,6 +1924,11 @@ void OP_SET_DIALOG_WINDOW_PARAM()
 	pCurrentFieldScriptActor->m82[1] = getImmediateOrVariableUnsigned(7);
 	pCurrentFieldScriptActor->m84 = getImmediateOrVariableUnsigned(9);
 	pCurrentFieldScriptActor->mCC_scriptPC += 0xB;
+}
+
+void OP_SHOW_DIALOG_WINDOW_MODE0()
+{
+	showDialogWindowForActor(currentFieldActorId, 0);
 }
 
 void OP_DB()
@@ -1812,6 +2067,79 @@ void OP_RUN_ENTITY_SCRIPT_ASYNC()
 		}
 	}
 	pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
+}
+
+void OP_RUN_ENTITY_SCRIPT_BLOCKING()
+{
+	if (readCharacter(1) != 0xFF)
+	{
+		int entityId = readCharacter(1);
+		sFieldScriptEntity* pEntity = actorArray[entityId].m4C_scriptEntity;
+		if ((pEntity->m4_flags & 0x100000) == 0)
+		{
+			int scriptStatus = pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m16;
+			switch (scriptStatus)
+			{
+			case 0:
+				if (isScriptAlreadyRunning(pEntity, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 2] & 0x1f) != -1)
+				{
+					// find a free slot
+					int foundSlot = -1;
+					for (int i = 0; i < 8; i++)
+					{
+						if ((pEntity->m8C_scriptSlots[i].m4_flags.m18 == 0xf) && !pEntity->m8C_scriptSlots[i].m4_flags.m22)
+						{
+							foundSlot = i;
+							break;
+						}
+					}
+					if (foundSlot == -1)
+					{
+						return;
+					}
+
+					u8 param = pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 2] & 0x1f;
+					u8 scriptId = param & 0x1F;
+
+					pEntity->m8C_scriptSlots[foundSlot].m0_scriptPC = getScriptEntryPoint(entityId, scriptId);
+					pEntity->m8C_scriptSlots[foundSlot].m4_flags.m18 = param >> 5;
+					pEntity->m8C_scriptSlots[pCurrentFieldScriptActor->mCF].m4_flags.m22 = 1;
+					pEntity->m8C_scriptSlots[foundSlot].m3_scriptIndex = scriptId;
+					pCurrentFieldScriptActor->mCF = foundSlot;
+					pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m16 = 1;
+					return;
+				}
+				assert(0);// does this ever happen?
+				pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
+				return;
+			case 1:
+				if ((pEntity->mCE_currentScriptSlot != pCurrentFieldScriptActor->mCF) && (pEntity->m8C_scriptSlots[pCurrentFieldScriptActor->mCF].m4_flags.m18 != 0xf)) {
+					pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m16 = 2;
+				}
+				breakCurrentScript = 1;
+				return;
+			case 2:
+				if (pEntity->m8C_scriptSlots[pCurrentFieldScriptActor->mCF].m4_flags.m18 != 0xF)
+				{
+					breakCurrentScript = 1;
+					return;
+				}
+				pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m16 = 0;
+				pEntity->m8C_scriptSlots[pEntity->mCF].m4_flags.m22 = 0;
+				break;
+			default:
+				assert(0);
+				break;
+			}
+		}
+		else
+		{
+			pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m16 = 0;
+			pEntity->m8C_scriptSlots[pEntity->mCF].m4_flags.m22 = 0;
+		}
+	}
+	pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
+	return;
 }
 
 void OP_RUN_ENTITY_SCRIPT_UNKMODE()
