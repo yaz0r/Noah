@@ -426,6 +426,19 @@ void TILE::execute()
 {
 }
 
+void POLY_F3::execute()
+{
+}
+
+void POLY_F4::execute()
+{
+}
+
 void POLY_FT4::execute()
 {
 }
+
+void POLY_FT3::execute()
+{
+}
+

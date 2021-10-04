@@ -26,14 +26,24 @@ void sModel::init(std::vector<u8>::iterator& input, int dataSize)
 
         std::vector<u8>::iterator blockData = inputData + i * 0x38;
 
+        m10_blocks[i].m0_flags = READ_LE_U16(blockData + 0);
         m10_blocks[i].m2_numVertices = READ_LE_U16(blockData + 2);
-        m10_blocks[i].m4_numMesh = READ_LE_U16(blockData + 4);
+        m10_blocks[i].m4_numPrims = READ_LE_U16(blockData + 4);
         m10_blocks[i].m6_numMeshBlock = READ_LE_U16(blockData + 6);
         m10_blocks[i].m8_offsetVertices = READ_LE_U32(blockData + 8);
         m10_blocks[i].mC_offsetNormals = READ_LE_U32(blockData + 0xC);
         m10_blocks[i].m10_offsetMeshBlocks = READ_LE_U32(blockData + 0x10);
         m10_blocks[i].m14_offsetDisplayList = READ_LE_U32(blockData + 0x14);
-        m10_blocks[i].m34_count = READ_LE_U32(blockData + 0x34);
+        assert(READ_LE_U32(blockData + 0x18) == 0);
+
+		m10_blocks[i].m20 = READ_LE_S16(blockData + 0x20);
+		m10_blocks[i].m22 = READ_LE_S16(blockData + 0x22);
+		m10_blocks[i].m24 = READ_LE_S16(blockData + 0x24);
+		m10_blocks[i].m28 = READ_LE_S16(blockData + 0x28);
+		m10_blocks[i].m2A = READ_LE_S16(blockData + 0x2A);
+		m10_blocks[i].m2C = READ_LE_S16(blockData + 0x2C);
+        m10_blocks[i].m30 = READ_LE_U32(blockData + 0x30);
+        m10_blocks[i].m34_instanceBufferSize = READ_LE_U32(blockData + 0x34);
 
         std::vector<u8>::iterator vertexData = inputData + m10_blocks[i].m8_offsetVertices;
     }

@@ -94,3 +94,4 @@ struct SVECTOR
 };
 
 #define MissingCode()
+#define Hack(x)

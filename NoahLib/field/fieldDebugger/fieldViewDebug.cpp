@@ -334,9 +334,9 @@ void fieldViewDebug_step()
         for (int i=0; i<actorArray.size(); i++)
         {
             float rot[3];
-            rot[0] = bx::kPi * -actorArray[i].m50_modelRotation[0] / (float)(0x800);
-            rot[1] = bx::kPi * -actorArray[i].m50_modelRotation[1] / (float)(0x800);
-            rot[2] = bx::kPi * -actorArray[i].m50_modelRotation[2] / (float)(0x800);
+            rot[0] = bx::kPi * -actorArray[i].m50_modelRotation.vx / (float)(0x800);
+            rot[1] = bx::kPi * -actorArray[i].m50_modelRotation.vy / (float)(0x800);
+            rot[2] = bx::kPi * -actorArray[i].m50_modelRotation.vz / (float)(0x800);
 
             float rotationMatrix[16];
             bx::mtxRotateXYZ(rotationMatrix, rot[0], rot[1], rot[2]);

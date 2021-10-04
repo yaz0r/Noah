@@ -118,6 +118,12 @@ s32 getCopReg(int, int)
 	return 0;
 }
 
+s32 getCopControlWord(int, int)
+{
+	MissingCode();
+	return 0;
+}
+
 MATRIX* MulRotationMatrix(const MATRIX* m0, MATRIX* m1)
 {
 	SetRotMatrix(m0);
@@ -224,4 +230,16 @@ MATRIX* CompMatrix(const MATRIX* m0, const MATRIX* m1, MATRIX* m2)
 	m2->t[2] = Var9 + Var6;
 
 	return m2;
+}
+
+void RotTrans(SVECTOR* rotation, VECTOR* output, long* flag)
+{
+	setCopReg(2, 0, sFP1616::fromValue(rotation->vx, rotation->vy));
+	setCopReg(2, 1, sFP1616::fromValue(rotation->vz, 0));
+	copFunction(2, 0x480012);
+	output->vx = getCopReg(2, 0x19);
+	output->vy = getCopReg(2, 0x1a);
+	output->vz = getCopReg(2, 0x1b);
+	*flag = getCopControlWord(2, 0xF800);
+	MissingCode();
 }

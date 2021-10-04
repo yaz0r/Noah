@@ -82,6 +82,15 @@ s16 actorCameraTracked = 0;
 s32 pcInitVar1 = 0;
 std::array<int, 11> PCToActorArray;
 
+s32 fieldPolyCount;
+s32 fieldPolyCount2;
+s32 worldScaleFactor;
+MATRIX worldScaleMatrix;
+s32 objectClippingMask = 1;
+VECTOR fieldObjectRenderingVar1 = { 0,0,0 };
+SVECTOR fieldObjectRenderingVar2 = { 0,0,0 };
+
+
 const std::array<s8, 12> characterMappingTable = {
 	0,1,2,3,4,5,6,7,8,2,6,0
 };
@@ -177,6 +186,10 @@ void resetFieldDefault()
 	MissingCode();
 
 	dialogWindowFlag1 = 8;
+
+	MissingCode();
+
+	worldScaleFactor = 0x3000;
 
 	MissingCode();
 }
@@ -560,12 +573,462 @@ void traceNextAlloc(int state)
 	MissingCode();
 }
 
-void initModel1(sModelBlock& pModelBlock, std::vector<s16>& outputBuffer, std::vector<s16>::iterator& outputBufferEnd)
+void initModel1(sModelBlock& pModelBlock, std::vector<sTag*>& outputBuffer1, std::vector<sTag*>& outputBuffer2)
 {
 	traceNextAlloc(0x25);
 
-	outputBuffer.resize(pModelBlock.m34_count);
-	outputBufferEnd = outputBuffer.end();
+	outputBuffer1.resize(pModelBlock.m34_instanceBufferSize, nullptr);
+	outputBuffer2.resize(pModelBlock.m34_instanceBufferSize, nullptr);
+}
+
+int initModel2Sub0Var0;
+int initModel2Sub0Var1;
+
+void initModel2Sub0(void)
+{
+	initModel2Sub0Var0 = 0;
+	initModel2Sub0Var1 = 1;
+	return;
+}
+
+s32 primD_initSub0Sub0Var1 = 0;
+s16 primD_initSub0Sub0Var0 = 0;
+
+void setupPrimTexturePage(ushort param_1)
+
+{
+	primD_initSub0Sub0Var0 = (ushort)primD_initSub0Sub0Var1;
+	if (initModel2Sub0Var0 == 1) {
+		primD_initSub0Sub0Var0 = param_1 & 0xffe0 | primD_initSub0Sub0Var0;
+	}
+	else {
+		if (initModel2Sub0Var0 != 2) {
+			primD_initSub0Sub0Var0 = param_1;
+			return;
+		}
+	}
+	return;
+}
+
+s16 primD_initSub0Sub1Var0 = 0;
+s32 primD_initSub0Sub1Var1 = 0;
+
+void setupPrimClut(ushort param_1)
+{
+	primD_initSub0Sub1Var0 = param_1;
+	if (initModel2Sub0Var1 == 0) {
+		primD_initSub0Sub1Var0 = primD_initSub0Sub1Var0 & 0xf | (ushort)primD_initSub0Sub1Var1;
+	}
+	return;
+}
+
+int primD_isValid(std::vector<u8>::iterator displayList)
+{
+	byte bVar1;
+	int iVar2;
+
+	bVar1 = READ_LE_U8(displayList + 3);
+	iVar2 = 1;
+	if ((bVar1 & 0xf0) == 0xc0) {
+		if (bVar1 == 0xc4) {
+			setupPrimTexturePage(READ_LE_U16(displayList));
+			iVar2 = 0;
+		}
+		else {
+			iVar2 = 1;
+			if (bVar1 == 0xc8) {
+				setupPrimClut(READ_LE_U16(displayList));
+				iVar2 = 0;
+			}
+		}
+	}
+	return iVar2;
+}
+
+std::vector<sTag*>::iterator currentModelInstanceArray8;
+
+std::vector<u8>::iterator currentModelBlockDisplayLists;
+std::vector<u8>::iterator g_currentModelBlockSubBlocks;
+std::vector<u8>::iterator currentModelBlockNormals;
+std::vector<u8>::iterator currentModelBlockVertices;
+std::vector<u8>::iterator currentModeBlock18;
+
+int prim4_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator meshBlock, int initParam)
+{
+	POLY_FT3* pNewPoly = new POLY_FT3;
+
+	pNewPoly->m3_size = 4;
+	pNewPoly->r0 = READ_LE_U8(displayList + 0);
+	pNewPoly->g0 = READ_LE_U8(displayList + 1);
+	pNewPoly->b0 = READ_LE_U8(displayList + 2);
+	pNewPoly->code = READ_LE_U8(displayList + 3);
+
+	*currentModelInstanceArray8 = pNewPoly;
+	currentModelInstanceArray8++;
+	return 1;
+}
+
+int prim5_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator meshBlock, int initParam)
+{
+	if (primD_isValid(displayList))
+	{
+		POLY_FT3* pNewPoly = new POLY_FT3;
+
+		pNewPoly->m3_size = 7;
+		pNewPoly->code = READ_LE_U8(displayList + 3);
+		pNewPoly->u0 = READ_LE_U8(displayList + 4);
+		pNewPoly->v0 = READ_LE_U8(displayList + 5);
+		pNewPoly->clut = primD_initSub0Sub1Var0;
+		pNewPoly->u1 = READ_LE_U8(displayList + 6);
+		pNewPoly->v1 = READ_LE_U8(displayList + 7);
+		pNewPoly->tpage = primD_initSub0Sub0Var0;
+		pNewPoly->u2 = READ_LE_U8(displayList + 0);
+		pNewPoly->v2 = READ_LE_U8(displayList + 1);
+
+		*currentModelInstanceArray8 = pNewPoly;
+		currentModelInstanceArray8++;
+		return 1;
+	}
+	return 0;
+}
+
+int prim8_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator meshBlock, int initParam)
+{
+	POLY_FT3* pNewPoly = new POLY_FT3;
+
+	pNewPoly->m3_size = 4;
+	*currentModelInstanceArray8 = pNewPoly;
+	currentModelInstanceArray8++;
+
+	if ((initParam & 1) == 0) {
+		if ((initParam & 4) == 0) {
+			pNewPoly->r0 = READ_LE_U8(displayList + 0);
+			pNewPoly->g0 = READ_LE_U8(displayList + 1);
+			pNewPoly->b0 = READ_LE_U8(displayList + 2);
+			pNewPoly->code = READ_LE_U8(displayList + 3);
+			return 1;
+		}
+		currentModeBlock18 = currentModeBlock18 + 4;
+	}
+	else
+	{
+		assert(0);
+	}
+	pNewPoly->code = READ_LE_U8(displayList + 3);
+	return 1;
+}
+
+
+int primC_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator meshBlock, int initParam)
+{
+	POLY_F4* pNewPoly = new POLY_F4;
+
+	pNewPoly->m3_size = 5;
+	pNewPoly->r0 = READ_LE_U8(displayList + 0);
+	pNewPoly->g0 = READ_LE_U8(displayList + 1);
+	pNewPoly->b0 = READ_LE_U8(displayList + 2);
+	pNewPoly->code = READ_LE_U8(displayList + 3);
+
+	*currentModelInstanceArray8 = pNewPoly;
+	currentModelInstanceArray8++;
+	return 1;
+}
+
+s32 initFieldDrawEnvsSub0Var0 = 319;
+s32 initFieldDrawEnvsSub0Var1 = 0xEE0000;
+
+s32 primD_2Var0 = 2;
+std::array<sTag, 4096>* currentOTEntry = nullptr;
+
+
+void gte_ldv0(std::vector<u8>::iterator& pVertices)
+{
+	setCopReg(2, COP2D_XY0, sFP1616::fromValue(READ_LE_S16(pVertices), READ_LE_S16(pVertices + 2)));
+	setCopReg(2, COP2D_Z0, sFP1616::fromValue(READ_LE_S16(pVertices + 4), 0));
+}
+
+void gte_ldv3(std::vector<u8>::iterator& pVertices0, std::vector<u8>::iterator& pVertices1, std::vector<u8>::iterator& pVertices2)
+{
+	setCopReg(2, COP2D_XY0, sFP1616::fromValue(READ_LE_S16(pVertices0), READ_LE_S16(pVertices0 + 2)));
+	setCopReg(2, COP2D_Z0, sFP1616::fromValue(READ_LE_S16(pVertices0 + 4), 0));
+
+	setCopReg(2, COP2D_XY1, sFP1616::fromValue(READ_LE_S16(pVertices1), READ_LE_S16(pVertices1 + 2)));
+	setCopReg(2, COP2D_Z1, sFP1616::fromValue(READ_LE_S16(pVertices1 + 4), 0));
+
+	setCopReg(2, COP2D_XY2, sFP1616::fromValue(READ_LE_S16(pVertices2), READ_LE_S16(pVertices2 + 2)));
+	setCopReg(2, COP2D_Z2, sFP1616::fromValue(READ_LE_S16(pVertices2 + 4), 0));
+}
+
+void gte_stflg(int* pFlag)
+{
+	*pFlag = getCopReg(2, 0xf800);
+}
+
+void gte_stopz(int* pOutput)
+{
+	*pOutput = getCopReg(2, 0xC000);
+}
+
+void gte_stsxy3(sVec2_s16* xy0, sVec2_s16* xy1, sVec2_s16* xy2)
+{
+	*xy0 = sVec2_s16::fromS32(getCopReg(2, 0x6000));
+	*xy1 = sVec2_s16::fromS32(getCopReg(2, 0x6800));
+	*xy2 = sVec2_s16::fromS32(getCopReg(2, 0x7000));
+}
+
+void gte_stsxy2(sVec2_s16* xy)
+{
+	*xy = sVec2_s16::fromS32(getCopReg(2, 0x7000));
+}
+
+void gte_stsz4(int* sz0, int* sz1, int* sz2, int* sz3)
+{
+	*sz0 = getCopReg(2, 0x8000);
+	*sz1 = getCopReg(2, 0x8800);
+	*sz2 = getCopReg(2, 0x9000);
+	*sz3 = getCopReg(2, 0x9800);
+}
+
+void primD_2(std::vector<u8>::iterator meshSubBlock, int count)
+{
+	std::array<sTag, 4096>& pOT = *currentOTEntry;
+	int depthGranularity = primD_2Var0 + 2;
+
+	for (int i = 0; i < count; i++)
+	{
+		POLY_FT4* pOutputPrim = (POLY_FT4*)*currentModelInstanceArray8;
+		currentModelInstanceArray8++;
+
+		std::vector<u8>::iterator pVertices1 = currentModelBlockVertices + READ_LE_U16(meshSubBlock) * 8;
+		std::vector<u8>::iterator pVertices2 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 2) * 8;
+		std::vector<u8>::iterator pVertices3 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 4) * 8;
+		std::vector<u8>::iterator pVertices4 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 6) * 8;
+		meshSubBlock += 8;
+
+		gte_ldv3(pVertices1, pVertices2, pVertices3);
+		gte_rtpt();
+
+		int flagsTriangle0;
+		gte_stflg(&flagsTriangle0);
+
+		sVec2_s16 xy0;
+		sVec2_s16 xy1;
+		sVec2_s16 xy2;
+		gte_stsxy3(&xy0, &xy1, &xy2);
+
+		if (flagsTriangle0 > 0)
+		{
+			gte_nclip();
+
+			int normalMagnitude;
+			gte_stopz(&normalMagnitude);
+
+			if (normalMagnitude > 0) // is first triangle facing screen
+			{
+				gte_ldv0(pVertices4); // load last vertice and compute 3rd point
+				gte_rtps();
+
+				int flagsTriangle1;
+				gte_stflg(&flagsTriangle1);
+
+				sVec2_s16 xy3;
+				gte_stsxy2(&xy3);
+
+				if (flagsTriangle1 > 0)
+				{
+					if (!(((((initFieldDrawEnvsSub0Var1 <= xy0.asS32() && (initFieldDrawEnvsSub0Var1 <= xy1.asS32())) && (initFieldDrawEnvsSub0Var1 <= xy2.asS32())) && (initFieldDrawEnvsSub0Var1 <= xy3.asS32())))))
+					{
+						pOutputPrim->x0 = xy0.vx;
+						pOutputPrim->y0 = xy0.vy;
+						pOutputPrim->x1 = xy1.vx;
+						pOutputPrim->y1 = xy1.vy;
+						pOutputPrim->x2 = xy2.vx;
+						pOutputPrim->y2 = xy2.vy;
+						pOutputPrim->x3 = xy3.vx;
+						pOutputPrim->y3 = xy3.vy;
+
+						if (((initFieldDrawEnvsSub0Var0 <= (xy0.vx)) && (initFieldDrawEnvsSub0Var0 <= (xy1.vx))) && (initFieldDrawEnvsSub0Var0 <= (xy2.vx) && (xy3.vx) < initFieldDrawEnvsSub0Var0))
+						{
+							int sz0, sz1, sz2, sz3;
+							gte_stsz4(&sz0, &sz1, &sz2, &sz3);
+							if (sz0 && sz1 && sz2 && sz3) {
+								int polyz = std::min<int>(sz0, sz1);
+								polyz = std::min<int>(sz2, polyz);
+								polyz = std::min<int>(sz3, polyz);
+								fieldPolyCount = fieldPolyCount + 1;
+								assert(polyz);
+
+								sTag* sDestTag = &pOT[polyz >> (depthGranularity & 0x1f)];
+								sDestTag->m0_pNext = pOutputPrim;
+								pOutputPrim->m0_pNext = sDestTag;
+								pOutputPrim->m3_size = 9;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+int primD_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator meshBlock, int initParam)
+{
+	if (primD_isValid(displayList))
+	{
+		POLY_FT4* pNewPoly = new POLY_FT4;
+
+		pNewPoly->m3_size = 9;
+		pNewPoly->r0 = READ_LE_U8(displayList + 0);
+		pNewPoly->g0 = READ_LE_U8(displayList + 1);
+		pNewPoly->b0 = READ_LE_U8(displayList + 2);
+		pNewPoly->code = READ_LE_U8(displayList + 3);
+		pNewPoly->u0 = READ_LE_U8(displayList + 4);
+		pNewPoly->v0 = READ_LE_U8(displayList + 5);
+		pNewPoly->clut = primD_initSub0Sub1Var0;
+		pNewPoly->u1 = READ_LE_U8(displayList + 6);
+		pNewPoly->v1 = READ_LE_U8(displayList + 7);
+		pNewPoly->tpage = primD_initSub0Sub0Var0;
+		pNewPoly->u2 = READ_LE_U8(displayList + 8);
+		pNewPoly->v2 = READ_LE_U8(displayList + 9);
+		pNewPoly->u3 = READ_LE_U8(displayList + 10);
+		pNewPoly->v3 = READ_LE_U8(displayList + 11);
+
+		*currentModelInstanceArray8 = pNewPoly;
+		currentModelInstanceArray8++;
+		return 1;
+	}
+	return 0;
+}
+
+typedef void(*t_primRenderFunc)(std::vector<u8>::iterator meshSubBlock, int count);
+typedef int(*t_primInitFunc)(std::vector<u8>::iterator displayList, std::vector<u8>::iterator meshBlock, int initParam);
+
+struct sPolyTypeRenderDefinition
+{
+	t_primRenderFunc m0_type0;
+	t_primRenderFunc m4_type1;
+	t_primRenderFunc m8_type2;
+	t_primRenderFunc mC_type3;
+	t_primRenderFunc m10_type4;
+	t_primRenderFunc m14_type5;
+	t_primInitFunc m18_init;
+	int m1C_size;
+	int m20_sizeDisplayList;
+	int m24_sizeInstanceArray;
+};
+
+const std::array<sPolyTypeRenderDefinition, 17> polyRenderDefs = {{
+	{	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x4,	0x04}, // 0x0
+	{	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x8,	0x20}, // 0x1
+	{	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x4,	0x1C}, // 0x2
+	{	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x8,	0x28}, // 0x3
+	{	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	prim4_init,	8,	0x4,	0x14}, // 0x4
+	{	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	prim5_init,	8,	0x8,	0x20}, // 0x5
+	{	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x4,	0x1C}, // 0x6
+	{	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x8,	0x28}, // 0x7
+	{	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	prim8_init,	8,	0x4,	0x18}, // 0x8
+	{	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0xC,	0x28}, // 0x9
+	{	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x4,	0x24}, // 0xA
+	{	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0xC,	0x34}, // 0xB
+	{	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	primC_init,	8,	0x4,	0x18}, // 0xC
+	{	nullptr,	nullptr,	primD_2,	nullptr,	nullptr,	nullptr,	primD_init,	8,	0xC,	0x28}, // 0xD
+	{	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x4,	0x24}, // 0xE
+	{	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0xC,	0x34}, // 0xF
+	{	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x4,	0x20}, // 0x10
+}};
+
+void initModel5(sModelBlock* pModelBlock)
+{
+	MissingCode();
+}
+
+void* initModelDynamicVertices(sModelBlock* pModelBlock)
+{
+	MissingCode();
+	return nullptr;
+}
+
+void initModel2(sModelBlock* pModelBlock, std::vector<sTag*>& outputBuffer, int param_3)
+{
+	currentModelInstanceArray8 = outputBuffer.begin();
+
+	if ((((pModelBlock->m0_flags & 1) == 0) && (pModelBlock->m30 != 0)) && (param_3 != 0)) {
+		traceNextAlloc(0x26);
+		pModelBlock->m18.resize(pModelBlock->m30);
+		pModelBlock->m0_flags = pModelBlock->m0_flags | 1;
+	}
+
+	currentModelBlockDisplayLists = pModelBlock->m_model->mRawData.begin() + pModelBlock->m14_offsetDisplayList;
+	g_currentModelBlockSubBlocks = pModelBlock->m_model->mRawData.begin() + pModelBlock->m10_offsetMeshBlocks;
+	currentModelBlockNormals = pModelBlock->m_model->mRawData.begin() + pModelBlock->mC_offsetNormals;
+	currentModelBlockVertices = pModelBlock->m_model->mRawData.begin() + pModelBlock->m8_offsetVertices;
+	currentModeBlock18 = pModelBlock->m18.begin();
+
+	int initParam;
+	switch (param_3)
+	{
+	case 0:
+		initParam = 0;
+		break;
+	case 1:
+		initParam = 1;
+		break;
+	case 2:
+		if (pModelBlock->m0_flags & 2)
+		{
+			initParam = 1;
+			if (pModelBlock->m0_flags & 1)
+			{
+				initParam = 4;
+			}
+		}
+		else
+		{
+			if (pModelBlock->m0_flags & 1)
+			{
+				initParam = 1;
+			}
+			else
+			{
+				initParam = 3;
+				pModelBlock->m0_flags |= 2;
+			}
+		}
+		break;
+	case 3:
+		initParam = 3;
+		pModelBlock->m0_flags |= 2;
+		break;
+	default:
+		assert(0);
+	}
+
+	fieldPolyCount2 += pModelBlock->m4_numPrims;
+
+	int currentMeshBlockCount = pModelBlock->m6_numMeshBlock;
+	while (currentMeshBlockCount = currentMeshBlockCount - 1, currentMeshBlockCount != 0xffffffff) {
+		int primType = READ_LE_U8(g_currentModelBlockSubBlocks);
+		int numPrims = READ_LE_U16(g_currentModelBlockSubBlocks + 2) - 1;
+
+		t_primInitFunc pInitFunction = polyRenderDefs[primType].m18_init;
+		g_currentModelBlockSubBlocks += 4;
+		while (numPrims != -1)
+		{
+			if (pInitFunction(currentModelBlockDisplayLists, g_currentModelBlockSubBlocks, (int)initParam) == 0)
+			{
+				currentModelBlockDisplayLists += 4;
+			}
+			else
+			{
+				g_currentModelBlockSubBlocks += polyRenderDefs[primType].m1C_size;
+				//currentModelInstanceArray8 += polyRenderDefs[primType].m24_sizeInstanceArray;
+				currentModelBlockDisplayLists += polyRenderDefs[primType].m20_sizeDisplayList;
+				numPrims = numPrims + -1;
+
+			}
+		}
+	}
+
+	initModel2Sub0();
 }
 
 int fieldScriptEntityAlreadyInitialized = 0;
@@ -1607,6 +2070,84 @@ void unflagAllocation(std::vector<u8>&)
 	MissingCode();
 }
 
+void setupObjectRenderModesSub0(sFieldEntitySub0* param_1)
+{
+	short sVar1;
+	short sVar2;
+	sModelBlock* psVar3;
+	int iVar4;
+	int iVar5;
+	int iVar6;
+	int iVar7;
+
+	psVar3 = &(*param_1->m4_pModelBlock);
+	sVar1 = psVar3->m22;
+	sVar2 = psVar3->m24;
+	iVar6 = (int)psVar3->m28 - (int)psVar3->m20;
+	iVar5 = (int)psVar3->m2A - (int)sVar1;
+	iVar4 = (int)psVar3->m2C - (int)sVar2;
+	iVar7 = iVar6;
+	if (iVar6 < iVar5) {
+		iVar7 = iVar5;
+	}
+	if (iVar7 < iVar4) {
+		iVar7 = iVar4;
+	}
+	param_1->m18.vx = (short)(iVar6 / 2) + psVar3->m20;
+	param_1->m18.vy = (short)(iVar5 / 2) + sVar1;
+	param_1->m18.vz = (short)(iVar4 / 2) + sVar2;
+	param_1->m20 = (short)iVar7 * 2 + 1;
+}
+
+void setupObjectRenderModes()
+{
+	for (int i=0; i<totalObjects; i++)
+	{
+		sFieldEntity* pFieldEntity = &actorArray[i];
+		if ((pFieldEntity->m58_flags & 0x40) == 0) {
+			setupObjectRenderModesSub0(pFieldEntity->m0);
+			if (isFogSetup == 0) {
+				if ((pFieldEntity->m58_flags & 0xc) == 0) {
+					if ((pFieldEntity->m58_flags & 0x4000) == 0) {
+						if ((pFieldEntity->m58_flags & 0x10) == 0) {
+							pFieldEntity->m0->m12_renderMode = 0;
+						}
+						else {
+							pFieldEntity->m0->m12_renderMode = 2;
+						}
+					}
+					else {
+						pFieldEntity->m0->m12_renderMode = 3;
+					}
+				}
+				else {
+					pFieldEntity->m0->m12_renderMode = 1;
+				}
+			}
+			else {
+				if ((pFieldEntity->m58_flags & 0x10) == 0) {
+					pFieldEntity->m0->m12_renderMode = 4;
+				}
+				else {
+					pFieldEntity->m0->m12_renderMode = 5;
+				}
+			}
+		}
+	}
+}
+
+SVECTOR renderModelRotationAngles;
+MATRIX renderModelRotationMatrix;
+s16 camera2Tan;
+s32 cameraDeltaTan;
+
+MATRIX currentProjectionMatrix;
+
+std::vector<RECT>* updateAllEntitiesVar0 = nullptr;
+
+s32 updateCameraInterpolationVar0 = 0;
+s32 updateCameraInterpolationVar1 = 0;
+
 void initFieldData()
 {
 	resetFieldDefault();
@@ -1789,9 +2330,9 @@ void initFieldData()
 	for (int i = 0; i < totalObjects; i++)
 	{
 		actorArray[i].m58_flags = READ_LE_U16(fieldEntitySetup);
-		actorArray[i].m50_modelRotation[0] = READ_LE_S16(fieldEntitySetup + 2);
-		actorArray[i].m50_modelRotation[1] = READ_LE_S16(fieldEntitySetup + 4);
-		actorArray[i].m50_modelRotation[2] = READ_LE_S16(fieldEntitySetup + 6);
+		actorArray[i].m50_modelRotation.vx = READ_LE_S16(fieldEntitySetup + 2);
+		actorArray[i].m50_modelRotation.vy = READ_LE_S16(fieldEntitySetup + 4);
+		actorArray[i].m50_modelRotation.vz = READ_LE_S16(fieldEntitySetup + 6);
 
 		actorArray[i].m2C_matrixBackup.t[0] = actorArray[i].mC_matrix.t[0] = READ_LE_S16(fieldEntitySetup + 8);
 		actorArray[i].m2C_matrixBackup.t[1] = actorArray[i].mC_matrix.t[1] = READ_LE_S16(fieldEntitySetup + 10);
@@ -1808,15 +2349,23 @@ void initFieldData()
 
 			actorArray[i].m0->m4_pModelBlock = pModelBlock;
 
-			initModel1(*pModelBlock, actorArray[i].m0->m8, actorArray[i].m0->mC_end);
-
-			MissingCode(); // the whole model init stuff here
+			initModel1(*pModelBlock, actorArray[i].m0->m8[0], actorArray[i].m0->m8[1]);
+			initModel2(&(*actorArray[i].m0->m4_pModelBlock), actorArray[i].m0->m8[0], (actorArray[i].m58_flags & 0xC) >> 2);
+			actorArray[i].m0->m8[1] = actorArray[i].m0->m8[0];
+			if (actorArray[i].m58_flags & 0x2000)
+			{
+				initModel3(3, 0);
+				actorArray[i].m0->m14 = initModelDynamicVertices(&(*actorArray[i].m0->m4_pModelBlock));
+				initModel3(8, 0);
+			}
+			initModel5(&(*actorArray[i].m0->m4_pModelBlock));
 		}
 		else
 		{
-			actorArray[i].m50_modelRotation[0] = 0;
-			actorArray[i].m50_modelRotation[1] = 0;
-			actorArray[i].m50_modelRotation[2] = 0;
+			actorArray[i].m58_flags |= 0x20;
+			actorArray[i].m50_modelRotation.vx = 0;
+			actorArray[i].m50_modelRotation.vy = 0;
+			actorArray[i].m50_modelRotation.vz = 0;
 
 		}
 
@@ -1840,12 +2389,63 @@ void initFieldData()
 
 	MissingCode();
 
+	OPX_80Params[2] = 0x140;
+	OPX_80Params[7] = 0;
+	OPX_82Param2[1] = 0;
+	OPX_82Param2[0] = 0;
+	OPX_82Param1[2] = 0;
+	OPX_82Param1[1] = 0;
+	OPX_82Param1[0] = 0;
+	OPX_82Param0[2] = 0;
+	OPX_82Param0[1] = 0;
+	OPX_82Param0[0] = 0;
+	OPX_81Params[0] = 0;
+	OPX_81Params[2] = 0x1000;
+	OPX_82Param3[2] = 0;
+	OPX_82Param3[1] = 0;
+	OPX_82Param3[0] = 0;
+	OPX_80Params[6] = 0;
+	OPX_80Params[5] = 0;
+	OPX_80Params[4] = 0;
+	OPX_80Params[3] = 0;
+	OPX_80Params[1] = 0;
+	OPX_80Params[0] = 0;
+	OPX_82Param4 = 0;
+	OPX_81Params[1] = 0;
+	OPX_82Param2[2] = 0x20;
+	fieldExecuteVar1 = 0;
 	startAllEntityScripts();
+	fieldExecuteVar1 = 1;
+	createRotationMatrix(&renderModelRotationAngles, &renderModelRotationMatrix);
+	renderModelRotationMatrix.t[2] = 0;
+	renderModelRotationMatrix.t[1] = 0;
+	renderModelRotationMatrix.t[0] = 0;
 
+	if (OPX_82Param4 != 0)
+	{
+		MissingCode();
+	}
+	initModel3(8, 0);
+
+	cameraAt2.vx = actorArray[actorCameraTracked].mC_matrix.t[0] << 16;
+	cameraAt2.vy = actorArray[actorCameraTracked].mC_matrix.t[1] << 16;
+	cameraAt2.vz = actorArray[actorCameraTracked].mC_matrix.t[2] << 16;
+
+	for (int i=0; i<totalObjects; i++)
+	{
+		createRotationMatrix(&actorArray[i].m50_modelRotation, &actorArray[i].mC_matrix);
+		actorArray[i].m2C_matrixBackup = actorArray[i].mC_matrix;
+	}
 	MissingCode();
 
-	// hack!
-	fieldIdForDebugger = currentFieldId0 / 2;
+	fieldIdForDebugger = currentFieldId0 / 2; // hack!
+
+	currentFieldId1 = -1;
+	currentFieldId0 = -1;
+	setupObjectRenderModes();
+	MissingCode();
+
+
 }
 
 int isCDBusy()
@@ -1995,9 +2595,6 @@ void setupFieldDisplayEnv(void)
 	fieldRenderContext[1].mB8_displayEnv.screen.w = 0x100;
 	fieldRenderContext[1].mB8_displayEnv.screen.h = 0xd8;
 }
-
-s32 initFieldDrawEnvsSub0Var0 = 319;
-s32 initFieldDrawEnvsSub0Var1 = 0xEE0000;
 
 void initFieldDrawEnvsSub0(int param_1, int param_2)
 {
@@ -3682,18 +4279,6 @@ uint stepInterpolateDirection(int currentDirection, int targetDirection, int ste
 	}
 }
 
-SVECTOR renderModelRotationAngles;
-MATRIX renderModelRotationMatrix;
-s16 camera2Tan;
-s32 cameraDeltaTan;
-
-MATRIX currentProjectionMatrix;
-
-std::vector<RECT>* updateAllEntitiesVar0 = nullptr;
-
-s32 updateCameraInterpolationVar0 = 0;
-s32 updateCameraInterpolationVar1 = 0;
-
 void updateCameraInterpolationSub2()
 {
 	if ((op99Var7 & 0x10) != 0) {
@@ -4124,9 +4709,204 @@ void renderCompass()
 	MissingCode();
 }
 
-void renderObjects()
+MATRIX occlusionTestMatrix;
+
+bool isObjectOcluded(sFieldEntitySub0* param_1)
+{
+	short sVar1;
+	short sVar2;
+	int iVar3;
+	int iVar4;
+	VECTOR local_48;
+	SVECTOR local_38;
+	long lStack48;
+	sVec2_s16 local_2c;
+	long alStack40[2];
+
+	RotTrans(&param_1->m18, &local_48, &lStack48);
+	occlusionTestMatrix.t[0] = local_48.vx;
+	occlusionTestMatrix.t[1] = local_48.vy;
+	occlusionTestMatrix.t[2] = local_48.vz;
+	SetRotMatrix(&occlusionTestMatrix);
+	SetTransMatrix(&occlusionTestMatrix);
+	sVar1 = param_1->m20;
+	local_38.vz = 0;
+	local_38.vx = -sVar1;
+	local_38.vy = local_38.vx;
+	RotTransPers(&local_38, &local_2c, alStack40, &lStack48);
+	local_38.vz = 0;
+	iVar4 = local_2c.vy;
+	sVar2 = local_2c.vx;
+	local_38.vx = sVar1;
+	local_38.vy = sVar1;
+	RotTransPers(&local_38, &local_2c, alStack40, &lStack48);
+	iVar3 = -1;
+	if (((iVar4 < OPX8E_param1 + 0xe0) && (-OPX8E_param1 < local_2c.vy)) && ((int)sVar2 < OPX8E_param0 + 0x140)) {
+		iVar3 = -(-OPX8E_param0 < local_2c.vx ^ 1);
+	}
+
+	Hack("Force isObjectOcluded to return false");
+	return 0;
+	return iVar3;
+}
+
+int isObjectClipped(sModelBlock* param_1, uint param_2)
 {
 	MissingCode();
+	return 0;
+}
+
+bool submitModelForRendering(sModelBlock* param_1, std::vector<sTag*>& param_2, std::array<sTag, 4096>& OT, int renderMode)
+{
+	if ((objectClippingMask != 0) && (isObjectClipped(param_1, objectClippingMask))) {
+		return 0;
+	}
+
+	currentModeBlock18 = param_1->m18.begin();
+	currentModelBlockNormals = param_1->m_model->mRawData.begin() + param_1->mC_offsetNormals;
+	currentModelBlockVertices = param_1->m_model->mRawData.begin() + param_1->m8_offsetVertices;
+	fieldPolyCount2 += param_1->m4_numPrims;
+	currentModelInstanceArray8 = param_2.begin();
+	currentOTEntry = &OT;
+
+	int numMeshBlockLeft = param_1->m6_numMeshBlock;
+	std::vector<u8>::iterator currentModelBlockSubBlocks = param_1->m_model->mRawData.begin() + param_1->m10_offsetMeshBlocks;
+	while (numMeshBlockLeft = numMeshBlockLeft - 1, numMeshBlockLeft != 0xffffffff) {
+		int primType = READ_LE_U8(currentModelBlockSubBlocks);
+		t_primRenderFunc primRenderFunc = nullptr;
+		switch (renderMode) {
+		case 0:
+			primRenderFunc = polyRenderDefs[primType].m0_type0;
+			break;
+		case 1:
+			primRenderFunc = polyRenderDefs[primType].m4_type1;
+			break;
+		case 2:
+			primRenderFunc = polyRenderDefs[primType].m8_type2;
+			break;
+		case 3:
+			primRenderFunc = polyRenderDefs[primType].mC_type3;
+			break;
+		case 4:
+			primRenderFunc = polyRenderDefs[primType].m10_type4;
+			break;
+		case 5:
+			primRenderFunc = polyRenderDefs[primType].m14_type5;
+			break;
+		default:
+			assert(0);
+		}
+		g_currentModelBlockSubBlocks = currentModelBlockSubBlocks + 4;
+		primRenderFunc(g_currentModelBlockSubBlocks, READ_LE_U16(currentModelBlockSubBlocks +2));
+		currentModelBlockSubBlocks = g_currentModelBlockSubBlocks + READ_LE_U16(currentModelBlockSubBlocks + 2) * polyRenderDefs[primType].m1C_size;
+	}
+	g_currentModelBlockSubBlocks = currentModelBlockSubBlocks;
+	return 1;
+}
+
+void renderObjects()
+{
+	fieldPolyCount = 0;
+	fieldPolyCount2 = 0;
+
+	if (isFogSetup != 0) {
+		MissingCode();
+	}
+
+	VECTOR scale1 = { 0x800, 0x800, 0x800 };
+	VECTOR scale2 = { worldScaleFactor , worldScaleFactor , worldScaleFactor };
+
+	ScaleMatrix(&worldScaleMatrix, &scale2);
+
+	MATRIX fieldLocalWorldMatrix;
+	CompMatrix(&currentProjectionMatrix, &renderModelRotationMatrix, &fieldLocalWorldMatrix);
+
+	objectClippingMask = 0;
+	fieldObjectRenderingVar1.vy = fieldObjectRenderingVar1.vy + fieldObjectRenderingVar2.vz;
+	fieldObjectRenderingVar1.vx = fieldObjectRenderingVar1.vx + fieldObjectRenderingVar2.vx;
+	fieldObjectRenderingVar1.vz = fieldObjectRenderingVar1.vz + fieldObjectRenderingVar2.vy;
+
+	for (int i=0; i<totalObjects; i++)
+	{
+		MATRIX rotationMatrix;
+		MATRIX projectedMatrix;
+
+		sFieldEntity* pFieldEntity = &actorArray[i];
+
+		pFieldEntity->m2C_matrixBackup = pFieldEntity->mC_matrix;
+		bool forceVisibility = false;
+
+		if(!(pFieldEntity->m58_flags & 0x40))
+		{
+			if (i < totalActors)
+			{
+				SVECTOR rotationAxis;
+				switch (pFieldEntity->m4C_scriptEntity->m12C_flags & 3)
+				{
+				case 1:
+					rotationAxis = { pFieldEntity->m4C_scriptEntity->m70_rotationForRendering, 0,0 };
+					createRotationMatrix(&rotationAxis, &rotationMatrix);
+					MulRotationMatrix(&actorArray[i].mC_matrix, &rotationMatrix);
+					rotationMatrix.t = actorArray[i].mC_matrix.t;
+					CompMatrix(&currentProjectionMatrix, &rotationMatrix, &projectedMatrix);
+					break;
+				case 2:
+					rotationAxis = { 0, pFieldEntity->m4C_scriptEntity->m70_rotationForRendering,0 };
+					createRotationMatrix(&rotationAxis, &rotationMatrix);
+					MulRotationMatrix(&actorArray[i].mC_matrix, &rotationMatrix);
+					rotationMatrix.t = actorArray[i].mC_matrix.t;
+					CompMatrix(&currentProjectionMatrix, &rotationMatrix, &projectedMatrix);
+					break;
+				case 3:
+					rotationAxis = { 0, 0, pFieldEntity->m4C_scriptEntity->m70_rotationForRendering };
+					createRotationMatrix(&rotationAxis, &rotationMatrix);
+					MulRotationMatrix(&actorArray[i].mC_matrix, &rotationMatrix);
+					rotationMatrix.t = actorArray[i].mC_matrix.t;
+					CompMatrix(&currentProjectionMatrix, &rotationMatrix, &projectedMatrix);
+					break;
+				default:
+					MissingCode();
+				}
+			}
+			else
+			{
+				MissingCode();
+			}
+
+			if (pFieldEntity->m0->m12_renderMode == 1)
+			{
+				assert(0);
+			}
+			objectClippingMask = 0;
+
+			if (!(actorArray[i].m58_flags & 0x20))
+			{
+				if ((actorArray[i].m58_flags & 0x2000) && (pFieldEntity->m0->m14))
+				{
+					assert(0);
+				}
+
+				SetRotMatrix(&projectedMatrix);
+				SetTransMatrix(&projectedMatrix);
+
+				if (!isObjectOcluded(pFieldEntity->m0) || forceVisibility) {
+					SetRotMatrix(&projectedMatrix);
+					SetTransMatrix(&projectedMatrix);
+
+					if ((pFieldEntity->m58_flags & 0x8000) == 0) {
+						submitModelForRendering(&pFieldEntity->m0->m4_pModelBlock[0], pFieldEntity->m0->m8[g_frameOddOrEven], pCurrentFieldRenderingContext->mCC_OT, pFieldEntity->m0->m12_renderMode);
+					}
+					else {
+						submitModelForRendering(&pFieldEntity->m0->m4_pModelBlock[0], pFieldEntity->m0->m8[g_frameOddOrEven], pCurrentFieldRenderingContext->m40D0_secondaryOT, pFieldEntity->m0->m12_renderMode);
+					}
+				}
+			}
+		}
+	}
+
+	if (fieldDebugDisable == 0) {
+		assert(0);
+	}
 }
 
 void uploadCharacterSpriteSub1(sFieldEntitySub4* param_1, int param_2, sFieldEntitySub4_110* param_3)

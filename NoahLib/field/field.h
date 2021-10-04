@@ -2,12 +2,16 @@
 
 #include "fieldModel.h"
 #include "kernel/math.h"
+#include "kernel/graphics.h"
 
 struct sFieldEntitySub0
 {
     std::vector<sModelBlock>::iterator m4_pModelBlock;
-    std::vector<s16> m8;
-    std::vector<s16>::iterator mC_end;
+    std::array<std::vector<sTag*>,2> m8;
+    s16 m12_renderMode;
+    void* m14;
+    SVECTOR m18;
+    s16 m20;
     //size 0x24
 };
 
@@ -48,6 +52,7 @@ struct sFieldScriptEntity
     std::array<s16, 3> m60;
     std::array<s16, 3> m68_oldPosition;
     s16 m6E;
+    s16 m70_rotationForRendering;
     s16 m72_elevation;
     s8 m74;
     s16 m76;
@@ -117,7 +122,7 @@ struct sFieldEntity
     sMatrix mC_matrix;
     sMatrix m2C_matrixBackup;
     sFieldScriptEntity* m4C_scriptEntity;
-    s16 m50_modelRotation[3];
+    SVECTOR m50_modelRotation;
     u16 m58_flags;
     u16 m5A;
     //size 0x5C

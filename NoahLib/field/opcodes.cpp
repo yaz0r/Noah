@@ -757,10 +757,10 @@ void OP_46(void)
 	sFieldEntity* psVar2;
 	int iVar3;
 
-	iVar3 = getAngleSin((int)pCurrentFieldEntity->m50_modelRotation[1]);
+	iVar3 = getAngleSin((int)pCurrentFieldEntity->m50_modelRotation.vy);
 	psVar2 = pCurrentFieldEntity;
 	pCurrentFieldScriptActor->m60[0] = (short)((uint)(iVar3 * 9) >> 10);
-	iVar3 = getAngleCos((int)psVar2->m50_modelRotation[1]);
+	iVar3 = getAngleCos((int)psVar2->m50_modelRotation.vy);
 	psVar1 = pCurrentFieldScriptActor;
 	pCurrentFieldScriptActor->m60[2] = (short)(iVar3 * -0x24 >> 0xc);
 	psVar1->m4_flags = psVar1->m4_flags | 0x800;
@@ -1965,7 +1965,7 @@ void OP_ROTATION_3D_YAW_SUBSTRACT()
 	sVar3 = getImmediateOrVariableUnsigned(1);
 	psVar2 = pCurrentFieldScriptActor;
 	iVar1 = currentFieldActorId;
-	actorArray[currentFieldActorId].m50_modelRotation[0] = actorArray[currentFieldActorId].m50_modelRotation[0] - sVar3;
+	actorArray[currentFieldActorId].m50_modelRotation.vx = actorArray[currentFieldActorId].m50_modelRotation.vx - sVar3;
 	psVar2->mCC_scriptPC = psVar2->mCC_scriptPC + 3;
 	updateScriptActor3dRotation(iVar1);
 }
@@ -1979,7 +1979,7 @@ void OP_ROTATION_3D_PITCH_ADD()
 	sVar3 = getImmediateOrVariableUnsigned(1);
 	psVar2 = pCurrentFieldScriptActor;
 	iVar1 = currentFieldActorId;
-	actorArray[currentFieldActorId].m50_modelRotation[1] = actorArray[currentFieldActorId].m50_modelRotation[1] + sVar3;
+	actorArray[currentFieldActorId].m50_modelRotation.vy = actorArray[currentFieldActorId].m50_modelRotation.vy + sVar3;
 	psVar2->mCC_scriptPC = psVar2->mCC_scriptPC + 3;
 	updateScriptActor3dRotation(iVar1);
 }
@@ -1993,7 +1993,7 @@ void OP_ROTATION_3D_PITCH_SUBSTRACT()
 	sVar3 = getImmediateOrVariableUnsigned(1);
 	psVar2 = pCurrentFieldScriptActor;
 	iVar1 = currentFieldActorId;
-	actorArray[currentFieldActorId].m50_modelRotation[1] = actorArray[currentFieldActorId].m50_modelRotation[1] - sVar3;
+	actorArray[currentFieldActorId].m50_modelRotation.vy = actorArray[currentFieldActorId].m50_modelRotation.vy - sVar3;
 	psVar2->mCC_scriptPC = psVar2->mCC_scriptPC + 3;
 	updateScriptActor3dRotation(iVar1);
 }
@@ -2007,7 +2007,7 @@ void OP_ROTATION_3D_ROLL_ADD()
 	sVar3 = getImmediateOrVariableUnsigned(1);
 	psVar2 = pCurrentFieldScriptActor;
 	iVar1 = currentFieldActorId;
-	actorArray[currentFieldActorId].m50_modelRotation[2] = actorArray[currentFieldActorId].m50_modelRotation[2] + sVar3;
+	actorArray[currentFieldActorId].m50_modelRotation.vz = actorArray[currentFieldActorId].m50_modelRotation.vz + sVar3;
 	psVar2->mCC_scriptPC = psVar2->mCC_scriptPC + 3;
 	updateScriptActor3dRotation(iVar1);
 }
@@ -2021,7 +2021,7 @@ void OP_ROTATION_3D_ROLL_SUBSTRACT()
 	sVar3 = getImmediateOrVariableUnsigned(1);
 	psVar2 = pCurrentFieldScriptActor;
 	iVar1 = currentFieldActorId;
-	actorArray[currentFieldActorId].m50_modelRotation[2] = actorArray[currentFieldActorId].m50_modelRotation[2] - sVar3;
+	actorArray[currentFieldActorId].m50_modelRotation.vz = actorArray[currentFieldActorId].m50_modelRotation.vz - sVar3;
 	psVar2->mCC_scriptPC = psVar2->mCC_scriptPC + 3;
 	updateScriptActor3dRotation(iVar1);
 }
