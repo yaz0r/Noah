@@ -611,6 +611,8 @@ void initOpcodeTable()
 		.end();
 
 	m_opcode[0xA9]
+		.setName("SETUP_MULTICHOICE")
+		.setComment("Lower nibble is number of entries")
 		.addArgumentByte()
 		.end();
 

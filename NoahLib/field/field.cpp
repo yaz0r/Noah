@@ -4477,9 +4477,9 @@ std::array<u16, 8> compassData0 = {
 
 std::array<std::array<u16, 16>, 8> compassData1;
 
-std::array<u16, 16> compassData2 = {
+std::vector<u16> compassData2 = {
 	0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0
 };
 
 u8 DollyStop = 0;
@@ -4606,16 +4606,16 @@ void drawCompassArrowSegment(sTag* param_1, sFieldCompassVar2* param_2, MATRIX* 
 
 void LoadImage(RECT* pRect, const u8* data)
 {
-	auto vramIterator = gVram.begin() + pRect->y * 2048 + pRect->x * 2;
+	int vramOffset = pRect->y * 2048 + pRect->x * 2;
 	for (int y = 0; y < pRect->h; y++)
 	{
+		auto vramIterator = gVram.begin() + vramOffset;
 		for (int x = 0; x < pRect->w * 2; x++)
 		{
-			*vramIterator = *(data++);
-			vramIterator++;
+			*(vramIterator++) = *(data++);
+			vramOffset++;
 		}
-
-		vramIterator += 2048 - pRect->w * 2;
+		vramOffset += 2048 - pRect->w * 2;
 	}
 }
 
@@ -5197,6 +5197,161 @@ int runningOnDTL = -1;
 int compassGraphicDataLoaded = 0;
 std::vector<u8> compassGraphicDataStaging;
 
+void StoreImage(RECT* rect, std::vector<u16>& output)
+{
+	MissingCode();
+}
+
+std::vector<std::vector<u8>::iterator> doPointerRelocation(std::vector<u8>& inputData)
+{
+	std::vector<std::vector<u8>::iterator> relocatedPointers;
+
+	std::vector<u8>::iterator it = inputData.begin();
+	u32 uVar1 = READ_LE_U32(it);
+	if (uVar1)
+	{
+		it += 4;
+		int uVar3 = 1;
+		do 
+		{
+			uVar3++;
+			relocatedPointers.push_back(inputData.begin() + READ_LE_U32(it));
+			it += 4;
+		} while (uVar3 <= uVar1);
+	}
+	return relocatedPointers;
+}
+
+struct RECT2
+{
+	s16 imageX;
+	s16 imageY;
+	s16 palX;
+	s16 palY;
+	s16 palW;
+	s16 palH;
+	//Size 0xC
+};
+
+static const std::array<RECT2, 8> compassImageRects = {
+	{
+		{0x2A0, 0x1C0, 0, 0xFB, 0x0, 0x0},
+		{0x280, 0x1E0, 0x100, 0xF3, 0x10, 0x1},
+		{0x29C, 0x1C0, 0x100, 0xF5, 0x0, 0x0},
+		{0x280, 0x1C0, 0x100, 0xF2, 0x0, 0x0},
+		{0x280, 0x1F0, 0x100, 0xF4, 0x10, 0x1},
+		{0x3C0, 0x140, 0x100, 0xF7, 0x10, 0x1},
+		{0x298, 0x1C0, 0x100, 0xF6, 0x10, 0x1},
+		{0x288, 0x1C0, 0x100, 0xF6, 0x10, 0x1},
+	}
+};
+
+RECT TIM_crect;
+RECT TIM_prect;
+
+struct TIM_IMAGE
+{
+	u32 mode;
+	RECT* crect;
+	void* caddr;
+	RECT* prect;
+	void* paddr;
+};
+
+std::vector<u8>::iterator currentTIM;
+
+int OpenTIM(std::vector<u8>::iterator ptr)
+{
+	currentTIM = ptr;
+	return 0;
+}
+
+int get_tim_addr(std::vector<u8>::iterator input, TIM_IMAGE* timimg)
+{
+	if (READ_LE_U32(input) == 0x10)
+	{
+		std::vector<u8>::iterator timaddr = input + 8;
+		timimg->mode = READ_LE_U32(input + 4);
+		int uVar3 = 0;
+		if ((timimg->mode & 8) == 0)
+		{
+			timimg->crect = nullptr;
+			timimg->caddr = nullptr;
+		}
+		else
+		{
+			TIM_crect.x = READ_LE_S16(input + 0xC);
+			TIM_crect.y = READ_LE_S16(input + 0xC + 2);
+			TIM_crect.w = READ_LE_S16(input + 0xC + 4);
+			TIM_crect.h = READ_LE_S16(input + 0xC + 6);
+			timimg->crect = &TIM_crect;
+			timimg->caddr = &(*(input + 0x14));
+			uVar3 = READ_LE_U32(timaddr) >> 2;
+			timaddr += READ_LE_U32(timaddr) & ~3;
+
+		}
+		TIM_prect.x = READ_LE_S16(timaddr + 4);
+		TIM_prect.y = READ_LE_S16(timaddr + 4 + 2);
+		TIM_prect.w = READ_LE_S16(timaddr + 4 + 4);
+		TIM_prect.h = READ_LE_S16(timaddr + 4 + 6);
+		timimg->prect = &TIM_prect;
+		timimg->paddr = &(*(timaddr + 0xC));
+		return uVar3 + (READ_LE_U32(timaddr) / 4) + 2;
+	}
+	else
+	{
+		return -1;
+	}
+}
+
+TIM_IMAGE* ReadTIM(TIM_IMAGE* timimg)
+{
+	int timOffset = get_tim_addr(currentTIM, timimg);
+	if (timOffset == -1)
+	{
+		return nullptr;
+	}
+	else
+	{
+		currentTIM += timOffset * 4;
+	}
+	return timimg;
+}
+
+void loadTimToVram(std::vector<u8>::iterator ptr, short imageX, short imageY, short palX, short palY, short palW, short palH)
+{
+	OpenTIM(ptr);
+	
+	TIM_IMAGE timImageData;
+	if (ReadTIM(&timImageData))
+	{
+		if (timImageData.caddr)
+		{
+			if (palY != -1)
+			{
+				timImageData.crect->x = palX;
+				timImageData.crect->y = palY;
+			}
+			if (palW != 0)
+			{
+				timImageData.crect->w = palW;
+			}
+			if (palH != 0)
+			{
+				timImageData.crect->h = palH;
+			}
+			LoadImage(timImageData.crect, (u8*)timImageData.caddr);
+		}
+		if (timImageData.paddr)
+		{
+			timImageData.prect->x = imageX;
+		}
+		// huh? this seems buggy in the original game, as this should have been in the above test
+		timImageData.prect->y = imageY;
+		LoadImage(timImageData.prect, (u8*)timImageData.paddr);
+	}
+}
+
 void initCompassData()
 {
 	if (compassGraphicDataLoaded == 0)
@@ -5211,6 +5366,22 @@ void initCompassData()
 	compassGraphicDataLoaded = 0;
 
 	MissingCode();
+
+	std::vector<std::vector<u8>::iterator> relocatedPointers = doPointerRelocation(compassGraphicDataStaging);
+
+	for (int i=0; i<8; i++)
+	{
+		loadTimToVram(relocatedPointers[i], compassImageRects[i].imageX, compassImageRects[i].imageY, compassImageRects[i].palX, compassImageRects[i].palY, compassImageRects[i].palW, compassImageRects[i].palH);
+		DrawSync(0);
+	}
+
+	compassDataRect.x = 0;
+	compassDataRect.y = 0xfb;
+	compassDataRect.w = 0x10;
+	compassDataRect.h = 1;
+	StoreImage(&compassDataRect, compassData2);
+	DrawSync(0);
+	compassGraphicDataStaging.clear();
 }
 
 int startOfUpdateFieldTime = 0;
