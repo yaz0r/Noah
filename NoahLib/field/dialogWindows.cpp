@@ -3,6 +3,7 @@
 #include "kernel/font.h"
 #include "dialogWindows.h"
 #include "fieldScriptSupport.h"
+#include "kernel/TIM.h"
 
 u16 textSpriteMode0 = 0;
 u16 textSpriteMode1 = 0;
@@ -650,21 +651,21 @@ void setupFacePolyPosition(POLY_FT4* poly, short x, short y, short width, short 
 
 	if (mode == 0) {
 		sVar1 = x + -1;
-		poly->x0 = sVar1;
-		poly->x1 = sVar1 + width;
-		poly->x2 = sVar1;
-		poly->x3 = sVar1 + width;
+		poly->x0y0.vx = sVar1;
+		poly->x1y1.vx = sVar1 + width;
+		poly->x2y2.vx = sVar1;
+		poly->x3y3.vx = sVar1 + width;
 	}
 	else {
-		poly->x1 = x;
-		poly->x0 = x + width;
-		poly->x3 = x;
-		poly->x2 = x + width;
+		poly->x1y1.vx = x;
+		poly->x0y0.vx = x + width;
+		poly->x3y3.vx = x;
+		poly->x2y2.vx = x + width;
 	}
-	poly->y0 = y;
-	poly->y1 = y;
-	poly->y2 = y + height;
-	poly->y3 = y + height;
+	poly->x0y0.vy = y;
+	poly->x1y1.vy = y;
+	poly->x2y2.vy = y + height;
+	poly->x3y3.vy = y + height;
 	return;
 }
 

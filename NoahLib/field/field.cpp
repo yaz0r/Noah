@@ -14,6 +14,9 @@
 #include "sprite/spriteSetup.h"
 #include "kernel/trigo.h"
 #include "dialogWindows.h"
+#include "kernel/gte.h"
+#include "compass.h"
+#include "kernel/TIM.h"
 
 #include "SDL_keyboard.h"
 
@@ -156,6 +159,40 @@ void resetInputs()
 	MissingCode();
 }
 
+std::array<sFieldRenderContext, 2> fieldRenderContext;
+sFieldRenderContext* pCurrentFieldRenderingContext = nullptr;
+
+SVECTOR cameraProjectionAngles;
+SVECTOR cameraRotation;
+VECTOR cameraUp = { 0,0,0,0 };
+
+void resetCameraData()
+{
+	op99Var5 = 8;
+	op99Var6 = 8;
+
+	MissingCode();
+
+	cameraEye[0] = 0;
+	cameraEye[1] = 0;
+	cameraEye[2] = 0;
+	cameraAt[0] = 0;
+	cameraAt[1] = 0;
+	cameraAt[2] = 0;
+	cameraUp.vx = 0;
+	cameraUp.vy = 0x10000000;
+	cameraUp.vz = 0;
+	cameraEye2.vx = 0;
+	cameraEye2.vy = 0;
+	cameraEye2.vz = 0;
+	cameraAt2.vx = 0;
+	cameraAt2.vy = 0;
+	cameraAt2.vz = 0;
+
+	MissingCode();
+
+}
+
 void resetFieldDefault()
 {
 	MissingCode();
@@ -168,6 +205,10 @@ void resetFieldDefault()
 	padButtonForDialogs2 = 0;
 	padButtonForField = 0;
 	padButtonForField2 = 0;
+
+	MissingCode();
+
+	compassDisabled = 0;
 
 	MissingCode();
 
@@ -189,7 +230,19 @@ void resetFieldDefault()
 
 	MissingCode();
 
+	cameraProjectionAngles.vx = 0;
+	cameraProjectionAngles.vy = 0;
+	cameraProjectionAngles.vz = 0;
+
+	cameraRotation.vx = 0;
+	cameraRotation.vy = 0;
+	cameraRotation.vz = 0;
+
 	worldScaleFactor = 0x3000;
+
+	createRotationMatrix(&cameraProjectionAngles, &currentProjectionMatrix);
+	pCurrentFieldRenderingContext = &fieldRenderContext[0];
+	resetCameraData();
 
 	MissingCode();
 }
@@ -260,61 +313,6 @@ void setupField3d(std::vector<u8>::iterator input)
 }
 
 
-long NCLIP(sFP1616 sxy0, sFP1616 sxy1, sFP1616 sxy2)
-{
-	s16 SX0;
-	s16 SY0;
-	s16 SX1;
-	s16 SY1;
-	s16 SX2;
-	s16 SY2;
-
-	sxy0.get(SY0, SX0);
-	sxy1.get(SY1, SX1);
-	sxy2.get(SY2, SX2);
-
-	return ((int64_t)(SX0 * SY1) + (SX1 * SY2) + (SX2 * SY0) - (SX0 * SY2) - (SX1 * SY0) - (SX2 * SY1));
-}
-
-void OuterProduct12(VECTOR* a, VECTOR* b, VECTOR* r)
-{
-	r->vx = a->vy * b->vz - a->vz * b->vy;
-	r->vy = a->vz * b->vx - a->vx * b->vz;
-	r->vz = a->vx * b->vy - a->vy * b->vx;
-}
-
-void toFloat(VECTOR* v0, std::array<float, 3>& output)
-{
-	output[0] = v0->vx / (float)0x10000;
-	output[1] = v0->vy / (float)0x10000;
-	output[2] = v0->vz / (float)0x10000;
-}
-
-void fromFloat(VECTOR* v0, std::array<float, 3>& asFloat)
-{
-	v0->vx = asFloat[0] * (float)0x10000;
-	v0->vy = asFloat[1] * (float)0x10000;
-	v0->vz = asFloat[2] * (float)0x10000;
-}
-
-int VectorNormal(VECTOR* v0, VECTOR* v1)
-{
-	std::array<float, 3> fb0;
-
-	toFloat(v0, fb0);
-
-	float sum = (fb0[0] * fb0[0]) + (fb0[1] * fb0[1]) + (fb0[2] * fb0[2]);
-	float lenght = sqrtf(sum);
-
-	fb0[0] /= lenght;
-	fb0[1] /= lenght;
-	fb0[2] /= lenght;
-
-	fromFloat(v1, fb0);
-
-	return (v0->vx * v0->vx) + (v0->vy * v0->vy) + (v0->vz * v0->vz);
-}
-
 void projectPositionOnTriangle(const SVECTOR& vec0, const SVECTOR& vec1, const SVECTOR& vec2, SVECTOR* outputPosition, VECTOR* inputPosition)
 {
 	VECTOR sStack72;
@@ -350,14 +348,14 @@ s16 findTriangleInWalkMesh(int posX, int posZ, int walkmeshId, SVECTOR* param_4,
 	std::vector<sWalkMesh::sTriangleData>::iterator pTriangle = walkMeshTriangle[walkmeshId]->begin();
 	std::vector<SVECTOR>::iterator pVertices = walkMeshVertices[walkmeshId]->begin();
 
-	sFP1616 refPos;
+	sVec2_s16 refPos;
 	refPos.set(posX, posZ);
 
 	for (int i = 0; i < walkMeshNumTrianglePerBlock[walkmeshId]; i++)
 	{
-		sFP1616 pos0;
-		sFP1616 pos1;
-		sFP1616 pos2;
+		sVec2_s16 pos0;
+		sVec2_s16 pos1;
+		sVec2_s16 pos2;
 
 		pos0.set(pVertices[pTriangle->m0_verticeIndex[0]].vx, pVertices[pTriangle->m0_verticeIndex[0]].vz);
 		pos1.set(pVertices[pTriangle->m0_verticeIndex[1]].vx, pVertices[pTriangle->m0_verticeIndex[1]].vz);
@@ -740,55 +738,6 @@ s32 initFieldDrawEnvsSub0Var1 = 0xEE0000;
 s32 primD_2Var0 = 2;
 std::array<sTag, 4096>* currentOTEntry = nullptr;
 
-
-void gte_ldv0(std::vector<u8>::iterator& pVertices)
-{
-	setCopReg(2, COP2D_XY0, sFP1616::fromValue(READ_LE_S16(pVertices), READ_LE_S16(pVertices + 2)));
-	setCopReg(2, COP2D_Z0, sFP1616::fromValue(READ_LE_S16(pVertices + 4), 0));
-}
-
-void gte_ldv3(std::vector<u8>::iterator& pVertices0, std::vector<u8>::iterator& pVertices1, std::vector<u8>::iterator& pVertices2)
-{
-	setCopReg(2, COP2D_XY0, sFP1616::fromValue(READ_LE_S16(pVertices0), READ_LE_S16(pVertices0 + 2)));
-	setCopReg(2, COP2D_Z0, sFP1616::fromValue(READ_LE_S16(pVertices0 + 4), 0));
-
-	setCopReg(2, COP2D_XY1, sFP1616::fromValue(READ_LE_S16(pVertices1), READ_LE_S16(pVertices1 + 2)));
-	setCopReg(2, COP2D_Z1, sFP1616::fromValue(READ_LE_S16(pVertices1 + 4), 0));
-
-	setCopReg(2, COP2D_XY2, sFP1616::fromValue(READ_LE_S16(pVertices2), READ_LE_S16(pVertices2 + 2)));
-	setCopReg(2, COP2D_Z2, sFP1616::fromValue(READ_LE_S16(pVertices2 + 4), 0));
-}
-
-void gte_stflg(int* pFlag)
-{
-	*pFlag = getCopReg(2, 0xf800);
-}
-
-void gte_stopz(int* pOutput)
-{
-	*pOutput = getCopReg(2, 0xC000);
-}
-
-void gte_stsxy3(sVec2_s16* xy0, sVec2_s16* xy1, sVec2_s16* xy2)
-{
-	*xy0 = sVec2_s16::fromS32(getCopReg(2, 0x6000));
-	*xy1 = sVec2_s16::fromS32(getCopReg(2, 0x6800));
-	*xy2 = sVec2_s16::fromS32(getCopReg(2, 0x7000));
-}
-
-void gte_stsxy2(sVec2_s16* xy)
-{
-	*xy = sVec2_s16::fromS32(getCopReg(2, 0x7000));
-}
-
-void gte_stsz4(int* sz0, int* sz1, int* sz2, int* sz3)
-{
-	*sz0 = getCopReg(2, 0x8000);
-	*sz1 = getCopReg(2, 0x8800);
-	*sz2 = getCopReg(2, 0x9000);
-	*sz3 = getCopReg(2, 0x9800);
-}
-
 void primD_2(std::vector<u8>::iterator meshSubBlock, int count)
 {
 	std::array<sTag, 4096>& pOT = *currentOTEntry;
@@ -809,7 +758,7 @@ void primD_2(std::vector<u8>::iterator meshSubBlock, int count)
 		gte_rtpt();
 
 		int flagsTriangle0;
-		gte_stflg(&flagsTriangle0);
+		gte_stlzc(&flagsTriangle0);
 
 		sVec2_s16 xy0;
 		sVec2_s16 xy1;
@@ -829,7 +778,7 @@ void primD_2(std::vector<u8>::iterator meshSubBlock, int count)
 				gte_rtps();
 
 				int flagsTriangle1;
-				gte_stflg(&flagsTriangle1);
+				gte_stlzc(&flagsTriangle1);
 
 				sVec2_s16 xy3;
 				gte_stsxy2(&xy3);
@@ -838,14 +787,10 @@ void primD_2(std::vector<u8>::iterator meshSubBlock, int count)
 				{
 					if (!(((((initFieldDrawEnvsSub0Var1 <= xy0.asS32() && (initFieldDrawEnvsSub0Var1 <= xy1.asS32())) && (initFieldDrawEnvsSub0Var1 <= xy2.asS32())) && (initFieldDrawEnvsSub0Var1 <= xy3.asS32())))))
 					{
-						pOutputPrim->x0 = xy0.vx;
-						pOutputPrim->y0 = xy0.vy;
-						pOutputPrim->x1 = xy1.vx;
-						pOutputPrim->y1 = xy1.vy;
-						pOutputPrim->x2 = xy2.vx;
-						pOutputPrim->y2 = xy2.vy;
-						pOutputPrim->x3 = xy3.vx;
-						pOutputPrim->y3 = xy3.vy;
+						pOutputPrim->x0y0 = xy0;
+						pOutputPrim->x1y1 = xy1;
+						pOutputPrim->x2y2 = xy2;
+						pOutputPrim->x3y3 = xy3;
 
 						if (((initFieldDrawEnvsSub0Var0 <= (xy0.vx)) && (initFieldDrawEnvsSub0Var0 <= (xy1.vx))) && (initFieldDrawEnvsSub0Var0 <= (xy2.vx) && (xy3.vx) < initFieldDrawEnvsSub0Var0))
 						{
@@ -1481,39 +1426,6 @@ void updateScriptActor3dRotation(int index)
 	MissingCode();
 }
 
-void Square0(sVec3* v0, sVec3* v1)
-{
-	v1->vx = powl(v0->vx, 2);
-	v1->vy = powl(v0->vy, 2);
-	v1->vz = powl(v0->vz, 2);
-}
-
-s32 SquareRoot0(s32 value)
-{
-	return sqrtl(value);
-}
-
-s32 length1d(s32 param_1)
-{
-	sVec3 local_28;
-	sVec3 local_18;
-	local_18.vx = param_1;
-
-	Square0(&local_28, &local_18);
-	return SquareRoot0(local_18.vx);
-}
-
-s32 length2d(s32 param_1, s32 param_2)
-{
-	sVec3 local_28;
-	sVec3 local_18;
-	local_18.vx = param_1;
-	local_18.vy = param_2;
-	local_18.vz = 0;
-	Square0(&local_28, &local_18);
-	return SquareRoot0(local_18.vx + local_18.vy);
-}
-
 int spriteWalkToPositionOrActor(int param_1)
 {
 	if ((actorArray[currentFieldActorId].m4C_scriptEntity->m4_flags & 0x2000) == 0)
@@ -1623,14 +1535,15 @@ void resetFieldScriptActor()
 }
 
 
-void SetGeomScreen(s32)
+void SetGeomScreen(s32 h)
 {
-	MissingCode();
+	setCopControlWord(2, 0xd000, h);
 }
 
-void SetGeomOffset(s32, s32)
+void SetGeomOffset(int ofx, int ofy)
 {
-	MissingCode();
+	setCopControlWord(2, 0xc000, ofx << 0x10);
+	setCopControlWord(2, 0xc800, ofy << 0x10);
 }
 
 s32 opA0_var0 = 0;
@@ -1653,7 +1566,7 @@ u16 cameraInterpolationFlags = 0;
 s16 cameraInterpolationTargetNumSteps = 0;
 s32 cameraInterpolationPositionNumSteps = 0;
 
-s16 cameraRotation = 0;
+s16 camera2Tan = 0;
 void setCurrentActorRotation2(s16 param_1)
 {
 	int iVar1;
@@ -1662,7 +1575,7 @@ void setCurrentActorRotation2(s16 param_1)
 
 	psVar2 = pCurrentFieldScriptActor;
 	iVar1 = fieldExecuteVar1;
-	uVar3 = param_1 - cameraRotation & 0xfffU | 0x8000;
+	uVar3 = param_1 - camera2Tan & 0xfffU | 0x8000;
 	pCurrentFieldScriptActor->m104_rotation = uVar3;
 	psVar2->m106_currentRotation = uVar3;
 	if (iVar1 == 0) {
@@ -1791,7 +1704,7 @@ void updateGearState(int param_1)
 }
 
 u8 OPX_50Param = 0;
-u8 OPX_52Param = 0;
+u8 compassDisabled = 0;
 u16 OPX_80Params[8] = { 0,0,0,0,0,0,0,0 };
 s32 OPX_81Params[3] = { 0,0,0 };
 s8 OPX_82Param0[4] = { 0,0,0,0 };
@@ -2138,7 +2051,6 @@ void setupObjectRenderModes()
 
 SVECTOR renderModelRotationAngles;
 MATRIX renderModelRotationMatrix;
-s16 camera2Tan;
 s32 cameraDeltaTan;
 
 MATRIX currentProjectionMatrix;
@@ -2147,6 +2059,66 @@ std::vector<RECT>* updateAllEntitiesVar0 = nullptr;
 
 s32 updateCameraInterpolationVar0 = 0;
 s32 updateCameraInterpolationVar1 = 0;
+
+void setPolyUV(POLY_FT4* poly, ushort u0, ushort v0, ushort u1, ushort v1, ushort u2, ushort v2, ushort u3, ushort v3)
+{
+	if ((int)((uint)u0 << 0x10) < 0) {
+		u0 = 0;
+	}
+	if ((int)((uint)u1 << 0x10) < 0) {
+		u1 = 0;
+	}
+	if ((int)((uint)u2 << 0x10) < 0) {
+		u2 = 0;
+	}
+	if ((int)((uint)u3 << 0x10) < 0) {
+		u3 = 0;
+	}
+	if ((int)((uint)v0 << 0x10) < 0) {
+		v0 = 0;
+	}
+	if ((int)((uint)v1 << 0x10) < 0) {
+		v1 = 0;
+	}
+	if ((int)((uint)v2 << 0x10) < 0) {
+		v2 = 0;
+	}
+	if ((int)((uint)v3 << 0x10) < 0) {
+		v3 = 0;
+	}
+	if (0xff < (short)u0) {
+		u0 = 0xff;
+	}
+	if (0xff < (short)u1) {
+		u1 = 0xff;
+	}
+	if (0xff < (short)u2) {
+		u2 = 0xff;
+	}
+	if (0xff < (short)u3) {
+		u3 = 0xff;
+	}
+	if (0xff < (short)v0) {
+		v0 = 0xff;
+	}
+	if (0xff < (short)v1) {
+		v1 = 0xff;
+	}
+	if (0xff < (short)v2) {
+		v2 = 0xff;
+	}
+	if (0xff < (short)v3) {
+		v3 = 0xff;
+	}
+	poly->u0 = u0;
+	poly->v0 = v0;
+	poly->u1 = u1;
+	poly->v1 = v1;
+	poly->u2 = u2;
+	poly->v2 = v2;
+	poly->u3 = u3;
+	poly->v3 = v3;
+}
 
 void initFieldData()
 {
@@ -2159,6 +2131,22 @@ void initFieldData()
 		fieldVramMapping[i].m4 = READ_LE_S16(rawFieldBundle.begin() + i * 8 + 4);
 		fieldVramMapping[i].m6 = READ_LE_S16(rawFieldBundle.begin() + i * 8 + 6);
 	}
+
+	MissingCode();
+
+	for (int i=0; i<4; i++)
+	{
+		for (int j=0; j<4; j++)
+		{
+			initCompassPoly(&fieldCompassVar2[i*4+j], j, i, 0);
+		}
+	}
+
+	initCompassPoly(&fieldCompassVar2[16], 4, 4, 1);
+	initCompassPoly(&fieldCompassVar2[17], 5, 5, 1);
+	initCompassPoly(&fieldCompassVar2[18], 6, 6, 1);
+	initCompassPoly(&fieldCompassVar2[19], 7, 7, 1);
+	initCompassPoly(&fieldCompassVar2[20], 8, 8, 1);
 
 	MissingCode();
 
@@ -2560,18 +2548,6 @@ void loadFieldGraphics()
 	}
 }
 
-struct sFieldRenderContext
-{
-	DRAWENV m0_drawEnv;
-	DRAWENV m5C_backgroundRect;
-	DISPENV mB8_displayEnv;
-	std::array<sTag, 4096> mCC_OT;
-	std::array<sTag, 4096> m40D0_secondaryOT;
-	std::array<sTag, 8> m80D4_uiOT;
-};
-
-std::array<sFieldRenderContext, 2> fieldRenderContext;
-
 void setFieldDrawEnvClip(short x, short y, short w, short h)
 {
 	fieldRenderContext[0].m0_drawEnv.clip.x = x;
@@ -2631,8 +2607,6 @@ void initFieldDrawEnvs()
 	PutDrawEnv(&fieldRenderContext[1].m0_drawEnv);
 	initFieldDrawEnvsSub0(0x140, 0xf0);
 }
-
-sFieldRenderContext* pCurrentFieldRenderingContext = nullptr;
 
 void setupFieldRenderingContext(void)
 {
@@ -3206,11 +3180,11 @@ int updateEntityEventCode3Sub2(sVec3* param_1, sFieldScriptEntity* param_2)
 	std::vector<u16>* pasVar3;
 
 	if ((param_2->m12C_flags & 0x1000) != 0) {
-		sFP1616 position;
+		sVec2_s16 position;
 		position.set(((param_2->m20_position).vx + param_1->vx >> 0x10), ((param_2->m20_position).vz + param_1->vz >> 0x10));
 
 		std::vector<sVec2_s16>& pasVar3 = param_2->m114_movementBoundingZone;
-		std::array<sFP1616, 4> boundingZone;
+		std::array<sVec2_s16, 4> boundingZone;
 		boundingZone[0].set(pasVar3[0].vx, pasVar3[0].vx);
 		boundingZone[1].set(pasVar3[1].vx, pasVar3[1].vx);
 		boundingZone[2].set(pasVar3[2].vx, pasVar3[2].vx);
@@ -3293,8 +3267,8 @@ int updateEntityEventCode3Sub4Sub1(sVec3* deltaStep, VECTOR* position, sFieldScr
 		param_5->vy = 0;
 		param_5->vz = (position->vz + deltaStep->vz) >> 0x10;
 
-		sFP1616 startPosition;
-		sFP1616 endPosition;
+		sVec2_s16 startPosition;
+		sVec2_s16 endPosition;
 		startPosition.set((position->vx >> 0x10), (position->vz >> 0x10));
 		endPosition.set((position->vx + deltaStep->vx) >> 0x10, (position->vz + deltaStep->vz) >> 0x10);
 
@@ -3312,9 +3286,9 @@ int updateEntityEventCode3Sub4Sub1(sVec3* deltaStep, VECTOR* position, sFieldScr
 		{
 			sWalkMesh::sTriangleData* pTriangle = &pWalkMeshTriangles[triangleId];
 
-			sFP1616 vert0;
-			sFP1616 vert1;
-			sFP1616 vert2;
+			sVec2_s16 vert0;
+			sVec2_s16 vert1;
+			sVec2_s16 vert2;
 
 			vert0.set(pWalkMeshVertices[pTriangle->m0_verticeIndex[0]].vx, pWalkMeshVertices[pTriangle->m0_verticeIndex[0]].vz);
 			vert1.set(pWalkMeshVertices[pTriangle->m0_verticeIndex[1]].vx, pWalkMeshVertices[pTriangle->m0_verticeIndex[1]].vz);
@@ -3834,8 +3808,8 @@ s32 EntityMoveCheck1Sub1(sFieldScriptEntity* pFieldScriptEntity, int walkmeshId,
 
 	int triangleId = pFieldScriptEntity->m8_currentWalkMeshTriangle[walkmeshId];
 
-	sFP1616 refPos;
-	sFP1616 refPos2;
+	sVec2_s16 refPos;
+	sVec2_s16 refPos2;
 
 	SVECTOR projectedPosition;
 	projectedPosition.vx = (pFieldScriptEntity->m20_position.vx + pFieldScriptEntity->m30_stepVector.vx) >> 16;
@@ -3859,9 +3833,9 @@ s32 EntityMoveCheck1Sub1(sFieldScriptEntity* pFieldScriptEntity, int walkmeshId,
 		std::vector<sWalkMesh::sTriangleData>::iterator pWalkMeshTriangles = walkMeshTriangle[walkmeshId]->begin();
 		std::vector<SVECTOR>::iterator pVertices = walkMeshVertices[walkmeshId]->begin();
 
-		sFP1616 vert0;
-		sFP1616 vert1;
-		sFP1616 vert2;
+		sVec2_s16 vert0;
+		sVec2_s16 vert1;
+		sVec2_s16 vert2;
 
 		vert0.set(pVertices[pTriangle.m0_verticeIndex[0]].vx, pVertices[pTriangle.m0_verticeIndex[0]].vz);
 		vert1.set(pVertices[pTriangle.m0_verticeIndex[1]].vx, pVertices[pTriangle.m0_verticeIndex[1]].vz);
@@ -4470,244 +4444,6 @@ void updateCamera()
 	}
 }
 
-std::array<u16, 8> compassData0 = {
-	0x81, 0xC0, 0x60, 0x30,
-	0x18, 0xC, 0x6, 0x3,
-};
-
-std::array<std::array<u16, 16>, 8> compassData1;
-
-std::vector<u16> compassData2 = {
-	0,0,0,0,0,0,0,0,
-	0,0,0,0,0,0,0,0
-};
-
-u8 DollyStop = 0;
-
-RECT compassDataRect = { 0,0,0,0 };
-
-VECTOR cameraUp = { 0,0,0,0 };
-
-VECTOR* rotateVectorByMatrix(MATRIX* m, SVECTOR* inputVector, VECTOR* outputVector)
-{
-	outputVector->vx = m->m[0][0] * inputVector->vx + m->m[1][0] * inputVector->vy + m->m[2][0] * inputVector->vz;
-	outputVector->vx = m->m[0][1] * inputVector->vx + m->m[1][1] * inputVector->vy + m->m[2][1] * inputVector->vz;
-	outputVector->vx = m->m[0][2] * inputVector->vx + m->m[1][2] * inputVector->vy + m->m[2][2] * inputVector->vz;
-
-	return outputVector;
-}
-
-void computeMatrix(MATRIX* pOutputMatrix, VECTOR* param_2, VECTOR* param_3, VECTOR* param_4)
-{
-	VECTOR local_60 = {
-		(param_3->vx - param_2->vx) >> 16,
-		(param_3->vy - param_2->vy) >> 16,
-		(param_3->vz - param_2->vz) >> 16,
-	};
-	VECTOR local_30 = {
-		(param_4->vx) >> 16,
-		(param_4->vy) >> 16,
-		(param_4->vz) >> 16,
-	};
-
-	VECTOR local_50;
-	VectorNormal(&local_60, &local_50);
-	OuterProduct12(&local_30, &local_50, &local_60);
-
-	VECTOR local_40;
-	VectorNormal(&local_60, &local_40);
-	OuterProduct12(&local_50, &local_40, &local_60);
-
-	VectorNormal(&local_60, &local_30);
-
-	pOutputMatrix->m[0][0] = local_40.vx;
-	pOutputMatrix->m[0][1] = local_40.vy;
-	pOutputMatrix->m[0][2] = local_40.vz;
-
-	pOutputMatrix->m[1][0] = local_30.vx;
-	pOutputMatrix->m[1][1] = local_30.vy;
-	pOutputMatrix->m[1][2] = local_30.vz;
-
-	pOutputMatrix->m[2][0] = local_50.vx;
-	pOutputMatrix->m[2][1] = local_50.vy;
-	pOutputMatrix->m[2][2] = local_50.vz;
-
-	SVECTOR local_20 = {
-		(param_2->vx >> 16) * 3,
-		(param_2->vy >> 16) * 3,
-		(param_2->vz >> 16) * 3,
-	};
-
-	rotateVectorByMatrix(pOutputMatrix, &local_20, &local_60);
-
-	pOutputMatrix->t[0] = -local_60.vx;
-	pOutputMatrix->t[1] = -local_60.vy;
-	pOutputMatrix->t[2] = -local_60.vz;
-}
-
-void setIdentityMatrix(MATRIX* param_1)
-{
-	SVECTOR rotation = { 0,0,0 };
-	createRotationMatrix(&rotation, param_1);
-	param_1->t[0] = 0;
-	param_1->t[1] = 0;
-	param_1->t[2] = 0;
-}
-
-s16 compassArrowTargetDirection = 0;
-s16 compassArrowCurrentDirection = 0;
-
-int fieldCompassVar = 0;
-
-struct sFieldCompassVar2
-{
-	SVECTOR m0;
-	SVECTOR m8;
-	SVECTOR m10;
-	SVECTOR m18;
-	std::array<POLY_FT4,2> m20;
-	// size 0x70
-};
-
-std::array<sFieldCompassVar2, 21> fieldCompassVar2;
-
-void PushMatrix()
-{
-	MissingCode();
-}
-
-void PopMatrix()
-{
-	MissingCode();
-}
-
-long RotAverage4(SVECTOR* $2, SVECTOR* $3, SVECTOR* v2, SVECTOR* v3, s16* sxy0, s16* sxy1, s16* sxy2, s16* sxy3, long* p, long* flag)
-{
-	MissingCode();
-	return(0);
-}
-
-void drawCompassArrowSegment(sTag* param_1, sFieldCompassVar2* param_2, MATRIX* param_3, int frameOddOrEven)
-{
-	long lStack32;
-	long lStack28;
-
-	POLY_FT4* pPrim = &param_2->m20[frameOddOrEven];
-	PushMatrix();
-	SetRotMatrix(param_3);
-	SetTransMatrix(param_3);
-	RotAverage4(&param_2->m0, &param_2->m8, &param_2->m10, &param_2->m18, &pPrim->x0, &pPrim->x1, &pPrim->x2, &pPrim->x3, &lStack32, &lStack28);
-
-	pPrim->m0_pNext = &param_1[1];
-	param_1[1].m0_pNext = pPrim;
-
-	PopMatrix();
-}
-
-void LoadImage(RECT* pRect, const u8* data)
-{
-	int vramOffset = pRect->y * 2048 + pRect->x * 2;
-	for (int y = 0; y < pRect->h; y++)
-	{
-		auto vramIterator = gVram.begin() + vramOffset;
-		for (int x = 0; x < pRect->w * 2; x++)
-		{
-			*(vramIterator++) = *(data++);
-			vramOffset++;
-		}
-		vramOffset += 2048 - pRect->w * 2;
-	}
-}
-
-void LoadImage(RECT* pRect, sPS1Pointer data)
-{
-	auto vramIterator = gVram.begin() + pRect->y * 2048 + pRect->x * 2;
-	for (int y = 0; y < pRect->h; y++)
-	{
-		for (int x = 0; x < pRect->w * 2; x++)
-		{
-			*vramIterator = READ_LE_U8(data);
-			vramIterator++;
-			data = data + 1;
-		}
-
-		vramIterator += 2048 - pRect->w * 2;
-	}
-}
-
-void renderCompass()
-{
-	for (int i = 0; i < 8; i++)
-	{
-		if ((compassData0[i] & DollyStop) == 0)
-		{
-			for (int j = 0; j < 16; j++)
-			{
-				compassData1[i][j] = compassData2[j];
-			}
-		}
-		else
-		{
-			for (int j = 0; j < 16; j++)
-			{
-				compassData1[i][j] = 0;
-			}
-		}
-	}
-
-	compassDataRect.w = 0x80;
-	LoadImage(&compassDataRect, (u8*)&compassData1[0][0]);
-	SetGeomScreen(0x80);
-	SetGeomOffset(0x10a, 0xa6);
-
-	VECTOR local_30 = { 0,0,0 };
-	VECTOR local_40 = {
-		0,
-		cameraEye[1] - cameraAt[1],
-		length2d(cameraEye[0] - cameraAt[0] >> 0x10,cameraEye[2] - cameraAt[2] >> 0x10) * -0x10000,
-	};
-
-	MATRIX MStack200;
-	computeMatrix(&MStack200, &local_40, &local_30, &cameraUp);
-
-	MATRIX MStack232;
-	setIdentityMatrix(&MStack232);
-	MStack232.t[2] = 0x80;
-
-	SetRotMatrix(&MStack232);
-	SetTransMatrix(&MStack232);
-
-	compassArrowTargetDirection = actorArray[actorCameraTracked].m4C_scriptEntity->m106_currentRotation + cameraTan + 0x400;
-	compassArrowCurrentDirection = stepInterpolateDirection(compassArrowCurrentDirection, compassArrowTargetDirection, 0x40);;
-
-	SVECTOR local_48;
-	local_48.vx = 0;
-	local_48.vy = compassArrowCurrentDirection;
-	local_48.vz = 0;
-
-	MATRIX MStack168;
-	resetMatrixTranslation(&MStack168);
-	createRotationMatrix(&local_48, &MStack168);
-
-	MulRotationMatrix(&MStack200, &MStack168);
-
-	MStack168.t[2] = 0x1000;
-
-	MATRIX MStack136;
-	CompMatrix(&MStack232, &MStack168, &MStack136);
-
-	if (((OPX_52Param == '\0') && (updateAllEntitiesSub2Var0 == 0))) {
-		if (fieldCompassVar == 0)
-		{
-			for (int i = 0x14; i < 0x15; i++)
-			{
-				drawCompassArrowSegment(&pCurrentFieldRenderingContext->m80D4_uiOT[0], &fieldCompassVar2[i], &MStack136, g_frameOddOrEven);
-			}
-		}
-	}
-
-	MissingCode();
-}
 
 MATRIX occlusionTestMatrix;
 
@@ -5193,197 +4929,6 @@ void updateAndRenderField()
 }
 
 int runningOnDTL = -1;
-
-int compassGraphicDataLoaded = 0;
-std::vector<u8> compassGraphicDataStaging;
-
-void StoreImage(RECT* rect, std::vector<u16>& output)
-{
-	MissingCode();
-}
-
-std::vector<std::vector<u8>::iterator> doPointerRelocation(std::vector<u8>& inputData)
-{
-	std::vector<std::vector<u8>::iterator> relocatedPointers;
-
-	std::vector<u8>::iterator it = inputData.begin();
-	u32 uVar1 = READ_LE_U32(it);
-	if (uVar1)
-	{
-		it += 4;
-		int uVar3 = 1;
-		do 
-		{
-			uVar3++;
-			relocatedPointers.push_back(inputData.begin() + READ_LE_U32(it));
-			it += 4;
-		} while (uVar3 <= uVar1);
-	}
-	return relocatedPointers;
-}
-
-struct RECT2
-{
-	s16 imageX;
-	s16 imageY;
-	s16 palX;
-	s16 palY;
-	s16 palW;
-	s16 palH;
-	//Size 0xC
-};
-
-static const std::array<RECT2, 8> compassImageRects = {
-	{
-		{0x2A0, 0x1C0, 0, 0xFB, 0x0, 0x0},
-		{0x280, 0x1E0, 0x100, 0xF3, 0x10, 0x1},
-		{0x29C, 0x1C0, 0x100, 0xF5, 0x0, 0x0},
-		{0x280, 0x1C0, 0x100, 0xF2, 0x0, 0x0},
-		{0x280, 0x1F0, 0x100, 0xF4, 0x10, 0x1},
-		{0x3C0, 0x140, 0x100, 0xF7, 0x10, 0x1},
-		{0x298, 0x1C0, 0x100, 0xF6, 0x10, 0x1},
-		{0x288, 0x1C0, 0x100, 0xF6, 0x10, 0x1},
-	}
-};
-
-RECT TIM_crect;
-RECT TIM_prect;
-
-struct TIM_IMAGE
-{
-	u32 mode;
-	RECT* crect;
-	void* caddr;
-	RECT* prect;
-	void* paddr;
-};
-
-std::vector<u8>::iterator currentTIM;
-
-int OpenTIM(std::vector<u8>::iterator ptr)
-{
-	currentTIM = ptr;
-	return 0;
-}
-
-int get_tim_addr(std::vector<u8>::iterator input, TIM_IMAGE* timimg)
-{
-	if (READ_LE_U32(input) == 0x10)
-	{
-		std::vector<u8>::iterator timaddr = input + 8;
-		timimg->mode = READ_LE_U32(input + 4);
-		int uVar3 = 0;
-		if ((timimg->mode & 8) == 0)
-		{
-			timimg->crect = nullptr;
-			timimg->caddr = nullptr;
-		}
-		else
-		{
-			TIM_crect.x = READ_LE_S16(input + 0xC);
-			TIM_crect.y = READ_LE_S16(input + 0xC + 2);
-			TIM_crect.w = READ_LE_S16(input + 0xC + 4);
-			TIM_crect.h = READ_LE_S16(input + 0xC + 6);
-			timimg->crect = &TIM_crect;
-			timimg->caddr = &(*(input + 0x14));
-			uVar3 = READ_LE_U32(timaddr) >> 2;
-			timaddr += READ_LE_U32(timaddr) & ~3;
-
-		}
-		TIM_prect.x = READ_LE_S16(timaddr + 4);
-		TIM_prect.y = READ_LE_S16(timaddr + 4 + 2);
-		TIM_prect.w = READ_LE_S16(timaddr + 4 + 4);
-		TIM_prect.h = READ_LE_S16(timaddr + 4 + 6);
-		timimg->prect = &TIM_prect;
-		timimg->paddr = &(*(timaddr + 0xC));
-		return uVar3 + (READ_LE_U32(timaddr) / 4) + 2;
-	}
-	else
-	{
-		return -1;
-	}
-}
-
-TIM_IMAGE* ReadTIM(TIM_IMAGE* timimg)
-{
-	int timOffset = get_tim_addr(currentTIM, timimg);
-	if (timOffset == -1)
-	{
-		return nullptr;
-	}
-	else
-	{
-		currentTIM += timOffset * 4;
-	}
-	return timimg;
-}
-
-void loadTimToVram(std::vector<u8>::iterator ptr, short imageX, short imageY, short palX, short palY, short palW, short palH)
-{
-	OpenTIM(ptr);
-	
-	TIM_IMAGE timImageData;
-	if (ReadTIM(&timImageData))
-	{
-		if (timImageData.caddr)
-		{
-			if (palY != -1)
-			{
-				timImageData.crect->x = palX;
-				timImageData.crect->y = palY;
-			}
-			if (palW != 0)
-			{
-				timImageData.crect->w = palW;
-			}
-			if (palH != 0)
-			{
-				timImageData.crect->h = palH;
-			}
-			LoadImage(timImageData.crect, (u8*)timImageData.caddr);
-		}
-		if (timImageData.paddr)
-		{
-			timImageData.prect->x = imageX;
-		}
-		// huh? this seems buggy in the original game, as this should have been in the above test
-		timImageData.prect->y = imageY;
-		LoadImage(timImageData.prect, (u8*)timImageData.paddr);
-	}
-}
-
-void initCompassData()
-{
-	if (compassGraphicDataLoaded == 0)
-	{
-		compassGraphicDataStaging.resize(getFileSizeAligned(0xA7));
-		flagAllocation(compassGraphicDataStaging);
-		readFile(0xA7, compassGraphicDataStaging, 0, 0x80);
-		waitReadCompletion(0);
-	}
-
-	unflagAllocation(compassGraphicDataStaging);
-	compassGraphicDataLoaded = 0;
-
-	MissingCode();
-
-	std::vector<std::vector<u8>::iterator> relocatedPointers = doPointerRelocation(compassGraphicDataStaging);
-
-	for (int i=0; i<8; i++)
-	{
-		loadTimToVram(relocatedPointers[i], compassImageRects[i].imageX, compassImageRects[i].imageY, compassImageRects[i].palX, compassImageRects[i].palY, compassImageRects[i].palW, compassImageRects[i].palH);
-		DrawSync(0);
-	}
-
-	compassDataRect.x = 0;
-	compassDataRect.y = 0xfb;
-	compassDataRect.w = 0x10;
-	compassDataRect.h = 1;
-	StoreImage(&compassDataRect, compassData2);
-	DrawSync(0);
-	compassGraphicDataStaging.clear();
-}
-
 int startOfUpdateFieldTime = 0;
 
 void logFieldRenderingEvent(char* param_1)

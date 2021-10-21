@@ -128,7 +128,7 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0x4B] = OP_WAIT_LOADING_SPECIAL_2D_ANIMATION;
     fieldScriptOpcodes_EX[0x4D] = OPX_4D;
     fieldScriptOpcodes_EX[0x50] = OPX_50;
-    fieldScriptOpcodes_EX[0x52] = OPX_52;
+    fieldScriptOpcodes_EX[0x52] = OP_DISABLE_COMPASS;
     fieldScriptOpcodes_EX[0x54] = OPX_54;
     fieldScriptOpcodes_EX[0x66] = OPX_66;
     fieldScriptOpcodes_EX[0x80] = OPX_80;

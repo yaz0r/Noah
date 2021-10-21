@@ -1013,7 +1013,12 @@ void initExtendedOpcodeTable()
 	m_extendedOpcode[0x50]
 		.end();
 
+	m_extendedOpcode[0x51]
+		.setName("ENABLE_COMPASS")
+		.end();
+
 	m_extendedOpcode[0x52]
+		.setName("DISABLE_COMPASS")
 		.end();
 
 	m_extendedOpcode[0x53]

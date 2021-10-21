@@ -1431,9 +1431,9 @@ void OPX_50(void)
 	pCurrentFieldScriptActor->mCC_scriptPC++;
 }
 
-void OPX_52(void)
+void OP_DISABLE_COMPASS(void)
 {
-	OPX_52Param = 1;
+	compassDisabled = 1;
 	pCurrentFieldScriptActor->mCC_scriptPC++;
 }
 
@@ -1441,7 +1441,7 @@ void OPX_54(void)
 {
 	fieldRandomBattleVar = 0xffff;
 	OPX_50Param = 1;
-	OPX_52Param = 1;
+	compassDisabled = 1;
 	op99Var7 = op99Var7 | 0xc000;
 	if ((playMusicAuthorized == 0) || (fieldExecuteVar3 == 0)) {
 		breakCurrentScript = 1;

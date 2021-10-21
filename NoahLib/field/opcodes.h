@@ -121,7 +121,7 @@ void OP_LOAD_SPECIAL_2D_ANIMATION();
 void OP_WAIT_LOADING_SPECIAL_2D_ANIMATION();
 void OPX_4D();
 void OPX_50();
-void OPX_52();
+void OP_DISABLE_COMPASS();
 void OPX_54();
 void OPX_66();
 void OPX_80();

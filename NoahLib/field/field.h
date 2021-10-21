@@ -181,7 +181,7 @@ extern s32 cameraInterpolationPositionNumSteps;
 extern s16 camera2Tan;
 
 extern u8 OPX_50Param;
-extern u8 OPX_52Param;
+extern u8 compassDisabled;
 extern u16 OPX_80Params[8];
 extern s32 OPX_81Params[3];
 extern s8 OPX_82Param0[4];
@@ -227,12 +227,35 @@ extern int playerControlledEntity;
 extern std::array<std::vector<u8>, 3> partyCharacterBuffersRaw;
 extern std::array<int, 3> asyncPartyCharacterLoadingTable;
 
+extern SVECTOR cameraProjectionAngles;
+extern SVECTOR cameraRotation;
+extern VECTOR cameraUp;
+extern s16 cameraTan;
+
+extern int updateAllEntitiesSub2Var0;
+
+struct sFieldRenderContext
+{
+	DRAWENV m0_drawEnv;
+	DRAWENV m5C_backgroundRect;
+	DISPENV mB8_displayEnv;
+	std::array<sTag, 4096> mCC_OT;
+	std::array<sTag, 4096> m40D0_secondaryOT;
+	std::array<sTag, 8> m80D4_uiOT;
+};
+
+extern std::array<sFieldRenderContext, 2> fieldRenderContext;
+extern sFieldRenderContext* pCurrentFieldRenderingContext;
+
+void flagAllocation(std::vector<u8>&);
+void unflagAllocation(std::vector<u8>&);
+
+uint stepInterpolateDirection(int currentDirection, int targetDirection, int step);
+
 void emptyPartySlot(int param_1);
 void copyPartySlotFromNext(uint param_1);
 
 void vsyncCallback(void);
-
-void LoadImage(struct RECT* pRect, const u8* data);
 
 void traceNextAlloc(int state);
 
@@ -279,3 +302,4 @@ void resetRGBFaderToBlack(int index);
 void setupRGBFaderSlot0_fadeIn(int);
 void setupRGBCalcSlot0_fadeToBlack(int);
 
+void setPolyUV(POLY_FT4* poly, ushort u0, ushort v0, ushort u1, ushort v1, ushort u2, ushort v2, ushort u3, ushort v3);
