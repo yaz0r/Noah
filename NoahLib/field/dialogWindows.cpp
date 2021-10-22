@@ -11,8 +11,7 @@ u16 textSpriteMode1 = 0;
 std::array<sDialogWindow, 4> gDialogWindows;
 std::array<s32, 4> dialogWindowVar1;
 
-std::array<DR_MODE, 16> gDialogDrModes;
-std::array<DR_MODE, 16> gDialogDrModes2;
+std::array<std::array<DR_MODE, 16>,2> gDialogDrModes;
 std::array<RECT, 16> gDialogRects;
 
 std::array<u8, 3> dialogWindowColor;
@@ -106,20 +105,20 @@ void initIndividualDialogWindow(int windowIndex)
 		SetDrawMode(&gDialogWindows[windowIndex].mFC[0][i], 0, 0, GetTPage(0, 2, 0x280, 0x1f0), &localRect);
 		SetDrawMode(&gDialogWindows[windowIndex].mFC[1][i], 0, 0, GetTPage(0, 2, 0x280, 0x1f0), &localRect);
 
-		SetSprt(&gDialogWindows[windowIndex].m1EC[0][i]);
-		gDialogWindows[windowIndex].m1EC[0][i].r0 = 0x80;
-		gDialogWindows[windowIndex].m1EC[0][i].g0 = 0x80;
-		gDialogWindows[windowIndex].m1EC[0][i].b0 = 0x80;
-		gDialogWindows[windowIndex].m1EC[0][i].clut = GetClut(0x100, 0xf4);
-		SetSemiTrans(&gDialogWindows[windowIndex].m1EC[0][i], 1);
-		gDialogWindows[windowIndex].m1EC[0][i].u0 = 0x80;
-		gDialogWindows[windowIndex].m1EC[0][i].v0 = 0xC0;
-		gDialogWindows[windowIndex].m1EC[0][i].x0 = 0;
-		gDialogWindows[windowIndex].m1EC[0][i].y0 = 0;
-		gDialogWindows[windowIndex].m1EC[0][i].w = dialogWindowsRectConfigs3[i].w;
-		gDialogWindows[windowIndex].m1EC[0][i].h = dialogWindowsRectConfigs3[i].h;
+		SetSprt(&gDialogWindows[windowIndex].m1EC_windowBorders[0][i]);
+		gDialogWindows[windowIndex].m1EC_windowBorders[0][i].r0 = 0x80;
+		gDialogWindows[windowIndex].m1EC_windowBorders[0][i].g0 = 0x80;
+		gDialogWindows[windowIndex].m1EC_windowBorders[0][i].b0 = 0x80;
+		gDialogWindows[windowIndex].m1EC_windowBorders[0][i].clut = GetClut(0x100, 0xf4);
+		SetSemiTrans(&gDialogWindows[windowIndex].m1EC_windowBorders[0][i], 1);
+		gDialogWindows[windowIndex].m1EC_windowBorders[0][i].u0 = 0x80;
+		gDialogWindows[windowIndex].m1EC_windowBorders[0][i].v0 = 0xC0;
+		gDialogWindows[windowIndex].m1EC_windowBorders[0][i].x0 = 0;
+		gDialogWindows[windowIndex].m1EC_windowBorders[0][i].y0 = 0;
+		gDialogWindows[windowIndex].m1EC_windowBorders[0][i].w = dialogWindowsRectConfigs3[i].w;
+		gDialogWindows[windowIndex].m1EC_windowBorders[0][i].h = dialogWindowsRectConfigs3[i].h;
 
-		gDialogWindows[windowIndex].m1EC[1][i] = gDialogWindows[windowIndex].m1EC[0][i];
+		gDialogWindows[windowIndex].m1EC_windowBorders[1][i] = gDialogWindows[windowIndex].m1EC_windowBorders[0][i];
 	}
 
 	{
@@ -157,8 +156,8 @@ void initDialogWindows()
 		gDialogRects[i].h = 0xff;
 		gDialogRects[i].w = 0xff;
 
-		SetDrawMode(&gDialogDrModes[i], 0, 0, GetTPage(0, 0, 0x380, 0x100), &gDialogRects[i]);
-		SetDrawMode(&gDialogDrModes2[i], 0, 0, GetTPage(0, 0, 0x380, 0x100), &gDialogRects[i]);
+		SetDrawMode(&gDialogDrModes[0][i], 0, 0, GetTPage(0, 0, 0x380, 0x100), &gDialogRects[i]);
+		SetDrawMode(&gDialogDrModes[1][i], 0, 0, GetTPage(0, 0, 0x380, 0x100), &gDialogRects[i]);
 	}
 
 	for (int i=0; i<4; i++)
@@ -717,43 +716,39 @@ void dialogWindowSetupForRendering(sTag* OT, int oddOrEven, int windowIndex)
 
 		// setup the sprites
 		{
-			int sVar8 = windowX + -8;
-			gDialogWindows[windowIndex].m1EC[oddOrEven][0].x0 = sVar8;
-			int sVar10 = windowY + -7;
-			gDialogWindows[windowIndex].m1EC[oddOrEven][0].y0 = sVar10;
-			gDialogWindows[windowIndex].m1EC[oddOrEven][2].y0 = sVar10;
-			gDialogWindows[windowIndex].m1EC[oddOrEven][4].x0 = sVar8;
-			int sVar6 = windowX + windowWidth + -8;
-			gDialogWindows[windowIndex].m1EC[oddOrEven][2].x0 = sVar6;
-			gDialogWindows[windowIndex].m1EC[oddOrEven][6].x0 = sVar6;
-			gDialogWindows[windowIndex].m1EC[oddOrEven][3].x0 = sVar8;
-			gDialogWindows[windowIndex].m1EC[oddOrEven][1].x0 = sVar6;
-			int sVar7 = windowY + (short)windowHeight + -9;
-			gDialogWindows[windowIndex].m1EC[oddOrEven][4].y0 = sVar7;
-			gDialogWindows[windowIndex].m1EC[oddOrEven][6].y0 = sVar7;
-			gDialogWindows[windowIndex].m1EC[oddOrEven][3].y0 = windowY + 9;
-			gDialogWindows[windowIndex].m1EC[oddOrEven][1].y0 = windowY + 9;
+			gDialogWindows[windowIndex].m1EC_windowBorders[oddOrEven][0].x0 = windowX - 8;
+			gDialogWindows[windowIndex].m1EC_windowBorders[oddOrEven][0].y0 = windowY - 7;
+			gDialogWindows[windowIndex].m1EC_windowBorders[oddOrEven][2].y0 = windowY - 7;
+			gDialogWindows[windowIndex].m1EC_windowBorders[oddOrEven][4].x0 = windowX - 8;
+			gDialogWindows[windowIndex].m1EC_windowBorders[oddOrEven][2].x0 = windowX + windowWidth - 8;
+			gDialogWindows[windowIndex].m1EC_windowBorders[oddOrEven][6].x0 = windowX + windowWidth - 8;
+			gDialogWindows[windowIndex].m1EC_windowBorders[oddOrEven][3].x0 = windowX - 8;
+			gDialogWindows[windowIndex].m1EC_windowBorders[oddOrEven][1].x0 = windowX + windowWidth - 8;
+			gDialogWindows[windowIndex].m1EC_windowBorders[oddOrEven][4].y0 = windowY + windowHeight - 9;
+			gDialogWindows[windowIndex].m1EC_windowBorders[oddOrEven][6].y0 = windowY + windowHeight - 9;
+			gDialogWindows[windowIndex].m1EC_windowBorders[oddOrEven][3].y0 = windowY + 9;
+			gDialogWindows[windowIndex].m1EC_windowBorders[oddOrEven][1].y0 = windowY + 9;
 			int windowHeight2 = windowHeight + -0x12;
 			if (windowHeight2 < 0) {
 				windowHeight2 = 0;
 			}
-			gDialogWindows[windowIndex].m1EC[oddOrEven][3].h = (short)windowHeight2;
-			gDialogWindows[windowIndex].m1EC[oddOrEven][1].h = (short)windowHeight2;
-			gDialogWindows[windowIndex].m1EC[oddOrEven][5].y0 = sVar10;
-			gDialogWindows[windowIndex].m1EC[oddOrEven][5].x0 = windowX + 8;
-			gDialogWindows[windowIndex].m1EC[oddOrEven][7].x0 = windowX + 8;
-			gDialogWindows[windowIndex].m1EC[oddOrEven][7].y0 = sVar7;
-			gDialogWindows[windowIndex].m1EC[oddOrEven][5].w = windowWidth + -0x10;
-			gDialogWindows[windowIndex].m1EC[oddOrEven][7].w = windowWidth + -0x10;
+			gDialogWindows[windowIndex].m1EC_windowBorders[oddOrEven][3].h = (short)windowHeight2;
+			gDialogWindows[windowIndex].m1EC_windowBorders[oddOrEven][1].h = (short)windowHeight2;
+			gDialogWindows[windowIndex].m1EC_windowBorders[oddOrEven][5].y0 = windowY - 7;
+			gDialogWindows[windowIndex].m1EC_windowBorders[oddOrEven][5].x0 = windowX + 8;
+			gDialogWindows[windowIndex].m1EC_windowBorders[oddOrEven][7].x0 = windowX + 8;
+			gDialogWindows[windowIndex].m1EC_windowBorders[oddOrEven][7].y0 = windowY + windowHeight - 9;
+			gDialogWindows[windowIndex].m1EC_windowBorders[oddOrEven][5].w = windowWidth + -0x10;
+			gDialogWindows[windowIndex].m1EC_windowBorders[oddOrEven][7].w = windowWidth + -0x10;
 
 			// chain the sprites
 			if ((gDialogWindows[windowIndex].m40C_flags & 0x40U) == 0) {
 				for (int i = 0; i < 8; i++)
 				{
-					gDialogWindows[windowIndex].m1EC[oddOrEven][i].m0_pNext = OT->m0_pNext;
-					OT->m0_pNext = &gDialogWindows[windowIndex].m1EC[oddOrEven][i];
+					gDialogWindows[windowIndex].m1EC_windowBorders[oddOrEven][i].m0_pNext = OT->m0_pNext;
+					OT->m0_pNext = &gDialogWindows[windowIndex].m1EC_windowBorders[oddOrEven][i];
 
-					gDialogWindows[windowIndex].mFC[oddOrEven][i].m0_pNext = &gDialogWindows[windowIndex].m1EC[oddOrEven][i];
+					gDialogWindows[windowIndex].mFC[oddOrEven][i].m0_pNext = &gDialogWindows[windowIndex].m1EC_windowBorders[oddOrEven][i];
 					OT->m0_pNext = &gDialogWindows[windowIndex].mFC[oddOrEven][i];
 				}
 			}
@@ -1595,6 +1590,6 @@ void addDialogWindowsToOT(sTag* OT, int oddOrEven)
 		gDialogWindows[i].m410 = processedWindowsArray[i];
 	}
 
-	gDialogDrModes[g_frameOddOrEven].m0_pNext = OT->m0_pNext;
-	OT->m0_pNext = &gDialogDrModes[g_frameOddOrEven];
+	gDialogDrModes[g_frameOddOrEven][0].m0_pNext = OT->m0_pNext;
+	OT->m0_pNext = &gDialogDrModes[g_frameOddOrEven][0];
 }

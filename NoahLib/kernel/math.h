@@ -123,3 +123,4 @@ void setIdentityMatrix(MATRIX* param_1);
 int VectorNormal(VECTOR* v0, VECTOR* v1);
 void OuterProduct12(VECTOR* a, VECTOR* b, VECTOR* r);
 long NCLIP(sVec2_s16 sxy0, sVec2_s16 sxy1, sVec2_s16 sxy2);
+void copyMatrix(MATRIX* param_1, MATRIX* param_2);

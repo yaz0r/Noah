@@ -7,7 +7,6 @@ extern std::array<int, 3> partyToFieldEntityArrayMapping;
 extern sFieldScriptEntity* pCurrentFieldScriptActor;
 
 extern s32 op99Var1;
-extern s32 sceneSCRZ;
 extern s32 op99Var5;
 extern s32 op99Var6;
 extern s32 op99Var7;

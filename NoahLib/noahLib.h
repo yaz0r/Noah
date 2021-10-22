@@ -91,6 +91,15 @@ struct SVECTOR
     s16 vy;
     s16 vz;
     s16 pad;
+
+    static SVECTOR FromIt(std::vector<u8>::iterator it)
+    {
+        SVECTOR temp;
+        temp.vx = READ_LE_S16(it);
+        temp.vy = READ_LE_S16(it+2);
+        temp.vz = READ_LE_S16(it+4);
+        return temp;
+    }
 };
 
 #define MissingCode()

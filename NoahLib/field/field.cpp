@@ -89,10 +89,11 @@ s32 fieldPolyCount;
 s32 fieldPolyCount2;
 s32 worldScaleFactor;
 MATRIX worldScaleMatrix;
+MATRIX cameraMatrix;
 s32 objectClippingMask = 1;
 VECTOR fieldObjectRenderingVar1 = { 0,0,0 };
 SVECTOR fieldObjectRenderingVar2 = { 0,0,0 };
-
+s32 sceneSCRZ = 0;
 
 const std::array<s8, 12> characterMappingTable = {
 	0,1,2,3,4,5,6,7,8,2,6,0
@@ -309,6 +310,10 @@ void uploadNpcSpriteSheet(std::vector<u8>::iterator& pImageData, int x, int y)
 
 void setupField3d(std::vector<u8>::iterator input)
 {
+	computeMatrix(&cameraMatrix, (VECTOR*)cameraEye, (VECTOR*)cameraAt, &cameraUp);
+	createRotationMatrix(&cameraProjectionAngles, &currentProjectionMatrix);
+	MulRotationMatrix(&cameraMatrix, &currentProjectionMatrix);
+
 	MissingCode();
 }
 
@@ -651,6 +656,64 @@ std::vector<u8>::iterator currentModelBlockNormals;
 std::vector<u8>::iterator currentModelBlockVertices;
 std::vector<u8>::iterator currentModeBlock18;
 
+void computeFaceNormal(const SVECTOR& v0, const SVECTOR& v1, const SVECTOR& v2, SVECTOR* pNormal)
+{
+	MissingCode();
+}
+
+void NormalColorCol(SVECTOR* faceNormal, std::vector<u8>::iterator displayList, POLY_FT3* pNewPoly)
+{
+	MissingCode();
+}
+
+int prim0_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator meshBlock, int initParam)
+{
+	POLY_FT3* pNewPoly = new POLY_FT3;
+	*currentModelInstanceArray8 = pNewPoly;
+	currentModelInstanceArray8++;
+
+	pNewPoly->m3_size = 4;
+
+	if ((initParam & 1) == 0) {
+		if ((initParam & 4) == 0) {
+			pNewPoly->r0 = READ_LE_U8(displayList + 0);
+			pNewPoly->g0 = READ_LE_U8(displayList + 1);
+			pNewPoly->b0 = READ_LE_U8(displayList + 2);
+			pNewPoly->code = READ_LE_U8(displayList + 3);
+			return 1;
+		}
+		currentModeBlock18 = currentModeBlock18 + 4;
+	}
+	else {
+		if ((initParam & 2) == 0) {
+			SVECTOR faceNormal;
+			computeFaceNormal(
+				SVECTOR::FromIt(currentModelBlockVertices + READ_LE_U16(meshBlock) * 8),
+				SVECTOR::FromIt(currentModelBlockVertices + READ_LE_U16(meshBlock + 2) * 8),
+				SVECTOR::FromIt(currentModelBlockVertices + READ_LE_U16(meshBlock + 4) * 8),
+				&faceNormal
+			);
+			NormalColorCol(&faceNormal, displayList, pNewPoly);
+			pNewPoly->code = READ_LE_U8(displayList + 3);
+			return 1;
+		}
+
+		*(u32*)&(*currentModeBlock18) = READ_LE_U32(displayList);
+		currentModeBlock18 = currentModeBlock18 + 4;
+
+		computeFaceNormal(
+			SVECTOR::FromIt(currentModelBlockVertices + READ_LE_U16(meshBlock) * 8),
+			SVECTOR::FromIt(currentModelBlockVertices + READ_LE_U16(meshBlock + 2) * 8),
+			SVECTOR::FromIt(currentModelBlockVertices + READ_LE_U16(meshBlock + 4) * 8),
+			(SVECTOR*)&(*currentModeBlock18)
+		);
+	}
+	NormalColorCol((SVECTOR*)&(*currentModeBlock18), displayList, pNewPoly);
+	currentModeBlock18 = currentModeBlock18 + 4;
+	pNewPoly->code = READ_LE_U8(displayList + 3);
+	return 1;
+}
+
 int prim4_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator meshBlock, int initParam)
 {
 	POLY_FT3* pNewPoly = new POLY_FT3;
@@ -774,7 +837,7 @@ void primD_2(std::vector<u8>::iterator meshSubBlock, int count)
 
 			if (normalMagnitude > 0) // is first triangle facing screen
 			{
-				gte_ldv0(pVertices4); // load last vertice and compute 3rd point
+				gte_ldv0(pVertices4); // load last vertex and compute 3rd point
 				gte_rtps();
 
 				int flagsTriangle1;
@@ -862,7 +925,7 @@ struct sPolyTypeRenderDefinition
 };
 
 const std::array<sPolyTypeRenderDefinition, 17> polyRenderDefs = {{
-	{	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x4,	0x04}, // 0x0
+	{	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	prim0_init,	8,	0x4,	0x04}, // 0x0
 	{	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x8,	0x20}, // 0x1
 	{	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x4,	0x1C}, // 0x2
 	{	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x8,	0x28}, // 0x3

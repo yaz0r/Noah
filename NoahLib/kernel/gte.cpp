@@ -1,71 +1,48 @@
 #include "noahLib.h"
 #include "gte.h"
 
-struct sGTEControlRegisters
+typedef union {
+#if defined(__BIGENDIAN__)
+	struct {
+		uint8_t h3, h2, h, l;
+	} b;
+	struct {
+		int8_t h3, h2, h, l;
+	} sb;
+	struct {
+		uint16_t h, l;
+	} w;
+	struct {
+		int16_t h, l;
+	} sw;
+#else
+	struct {
+		uint8_t l, h, h2, h3;
+	} b;
+	struct {
+		uint16_t l, h;
+	} w;
+	struct {
+		int8_t l, h, h2, h3;
+	} sb;
+	struct {
+		int16_t l, h;
+	} sw;
+#endif
+	uint32_t d;
+	int32_t sd;
+} PAIR;
+
+struct
 {
-	union
-	{
-		struct
-		{
-			sVec2_s16 r0_R11R12;
-			sVec2_s16 r1_R13R21;
-			sVec2_s16 r2_R22R23;
-			sVec2_s16 r3_R31R32;
-			s16 r4_R33;
-			s16 r4_padding;
-			s32 r5_TRX;
-			s32 r6_TRY;
-			s32 r7_TRZ;
-			s32 r8;
-			s32 r9;
-			s32 r10;
-			s32 r11;
-			s32 r12;
-			s32 r13;
-			s32 r14;
-			s32 r15;
-			s32 r16;
-			s32 r17;
-			s32 r18;
-			s32 r19;
-			s32 r20;
-			s32 r21;
-			s32 r22;
-			s32 r23;
-			s32 r24_OFX;
-			s32 r25_OFY;
-			s16 r26_H;
-			s16 r26_padding;
-			s16 r27_DQA;
-			s16 r27_padding;
-			s32 r28_DQB;
-			s32 r29;
-			s16 r30_ZSF4;
-			s16 r30_padding;
-			u32 r31_FLAG;
-		};
+	std::array<PAIR, 32> p;
+} CP2D;
 
-		s32 r_s32[32];
-		sVec2_s16 r_s16[32];
-	};
-
-} GTEControlRegisters;
-
-
-struct sGTEDataRegisters
+struct
 {
-	std::array<SVECTOR, 3> r0_VECTORS;
-	std::array<u8, 4> r6;
-	s16 r7_OTZ;
-	std::array<s32, 4> r8_IR;
-	sVec2_s16 r12_SXY0;
-	sVec2_s16 r13_SXY1;
-	sVec2_s16 r14_SXY2;
-	sVec2_s16 r15_SXYP;
-	std::array<s32, 4> r16_SZ;
-	std::array<s32, 4> r24_MAC;
-	s32 r31_LZCR;
-} GTEDataRegisters;
+	std::array<PAIR, 32> p;
+} CP2C;
+
 
 int normalizeGTERegIndex(int reg)
 {
@@ -79,143 +56,52 @@ int normalizeGTERegIndex(int reg)
 
 void setCopControlWord(int cop, int reg, s32 value)
 {
-	switch (normalizeGTERegIndex(reg))
-	{
-	case 5:
-		GTEControlRegisters.r5_TRX = value;
-		break;
-	case 6:
-		GTEControlRegisters.r6_TRY = value;
-		break;
-	case 7:
-		GTEControlRegisters.r7_TRZ = value;
-		break;
-	case 24:
-		GTEControlRegisters.r24_OFX = value;
-		break;
-	case 25:
-		GTEControlRegisters.r25_OFY = value;
-		break;
-	case 26:
-		GTEControlRegisters.r26_H = value;
-		break;
-	default:
-		assert(0);
-	}
+	CP2C.p[normalizeGTERegIndex(reg)].sd = value;
 }
 
 void setCopControlWord(int cop, int reg, sVec2_s16 value)
 {
+	CP2C.p[normalizeGTERegIndex(reg)].sd = value.asS32();
+}
+
+static uint32_t gte_leadingzerocount(uint32_t lzcs) {
+	uint32_t lzcr = 0;
+
+	if ((lzcs & 0x80000000) == 0) lzcs = ~lzcs;
+
+	while ((lzcs & 0x80000000) != 0) {
+		lzcr++;
+		lzcs <<= 1;
+	}
+
+	return lzcr;
+}
+
+void setCopReg(int cop, int reg, s32 value)
+{
+	CP2D.p[normalizeGTERegIndex(reg)].sd = value;
+
 	switch (normalizeGTERegIndex(reg))
 	{
-	case 0:
-		GTEControlRegisters.r0_R11R12 = value;
+	case 30:
+		CP2D.p[31].sd =  gte_leadingzerocount(value);
 		break;
-	case 1:
-		GTEControlRegisters.r1_R13R21 = value;
-		break;
-	case 2:
-		GTEControlRegisters.r2_R22R23 = value;
-		break;
-	case 3:
-		GTEControlRegisters.r3_R31R32 = value;
-		break;
-	case 4:
-		GTEControlRegisters.r4_R33 = value.vx;
-		break;
-	default:
-		assert(0);
 	}
 }
 
 void setCopReg(int cop, int reg, sVec2_s16 value)
 {
-	reg = normalizeGTERegIndex(reg);
-	switch (reg)
-	{
-	case 0:
-	case 2:
-	case 4:
-		GTEDataRegisters.r0_VECTORS[reg/2].vx = value.vx;
-		GTEDataRegisters.r0_VECTORS[reg/2].vy = value.vy;
-		break;
-	case 1:
-	case 3:
-	case 5:
-		GTEDataRegisters.r0_VECTORS[reg/2].vz = value.vx;
-		break;
-	default:
-		assert(0);
-	}
-
+	CP2D.p[normalizeGTERegIndex(reg)].sd = value.asS32();
 }
 
 s32 getCopControlWord(int cop, int reg)
 {
-	switch (normalizeGTERegIndex(reg))
-	{
-	case 0:
-		return GTEControlRegisters.r0_R11R12.asS32();
-		break;
-	case 1:
-		return GTEControlRegisters.r1_R13R21.asS32();
-		break;
-	case 2:
-		return GTEControlRegisters.r2_R22R23.asS32();
-		break;
-	case 3:
-		return GTEControlRegisters.r3_R31R32.asS32();
-		break;
-	case 4:
-		return GTEControlRegisters.r4_R33;
-		break;
-	case 5:
-		return GTEControlRegisters.r5_TRX;
-	case 6:
-		return GTEControlRegisters.r6_TRY;
-	case 7:
-		return GTEControlRegisters.r7_TRZ;
-	case 31:
-		return GTEControlRegisters.r31_FLAG;
-	default:
-		assert(0);
-		return 0;
-	}
+	return CP2C.p[normalizeGTERegIndex(reg)].sd;
 }
 
 s32 getCopReg(int cop, int reg)
 {
-	switch (normalizeGTERegIndex(reg))
-	{
-	case 7:
-		return GTEDataRegisters.r7_OTZ;
-	case 8:
-		return GTEDataRegisters.r8_IR[0];
-	case 9:
-		return GTEDataRegisters.r8_IR[1];
-	case 10:
-		return GTEDataRegisters.r8_IR[2];
-	case 11:
-		return GTEDataRegisters.r8_IR[3];
-	case 12:
-		return GTEDataRegisters.r12_SXY0.asS32();
-	case 13:
-		return GTEDataRegisters.r13_SXY1.asS32();
-	case 14:
-		return GTEDataRegisters.r14_SXY2.asS32();
-	case 24:
-		return GTEDataRegisters.r24_MAC[0];
-	case 25:
-		return GTEDataRegisters.r24_MAC[1];
-	case 26:
-		return GTEDataRegisters.r24_MAC[2];
-	case 27:
-		return GTEDataRegisters.r24_MAC[3];
-	case 31:
-		return GTEDataRegisters.r31_LZCR;
-	default:
-		assert(0);
-	}
+	return CP2D.p[normalizeGTERegIndex(reg)].sd;
 }
 
 #define GTE_SF(op) ((op >> 19) & 1)
@@ -225,71 +111,125 @@ s32 getCopReg(int cop, int reg)
 #define GTE_LM(op) ((op >> 10) & 1)
 #define GTE_FUNCT(op) (op & 63)
 
-#define VX0 (GTEDataRegisters.r0_VECTORS[0].vx)
-#define VY0 (GTEDataRegisters.r0_VECTORS[0].vy)
-#define VZ0 (GTEDataRegisters.r0_VECTORS[0].vz)
-#define VX1 (GTEDataRegisters.r0_VECTORS[1].vx)
-#define VY1 (GTEDataRegisters.r0_VECTORS[1].vy)
-#define VZ1 (GTEDataRegisters.r0_VECTORS[1].vz)
-#define VX2 (GTEDataRegisters.r0_VECTORS[2].vx)
-#define VY2 (GTEDataRegisters.r0_VECTORS[2].vy)
-#define VZ2 (GTEDataRegisters.r0_VECTORS[2].vz)
-#define R (GTEDataRegisters.r6[0])
+#define VX0 (CP2D.p[0].sw.l)
+#define VY0 (CP2D.p[0].sw.h)
+#define VZ0 (CP2D.p[1].sw.l)
+#define VX1 (CP2D.p[2].w.l)
+#define VY1 (CP2D.p[2].w.h)
+#define VZ1 (CP2D.p[3].w.l)
+#define VX2 (CP2D.p[4].w.l)
+#define VY2 (CP2D.p[4].w.h)
+#define VZ2 (CP2D.p[5].w.l)
+#define R (CP2D.p[6].b.l)
+#define G (CP2D.p[6].b.h)
+#define B (CP2D.p[6].b.h2)
+#define CODE (CP2D.p[6].b.h3)
+#define OTZ (CP2D.p[7].w.l)
+#define IR0 (CP2D.p[8].sw.l)
+#define IR1 (CP2D.p[9].sw.l)
+#define IR2 (CP2D.p[10].sw.l)
+#define IR3 (CP2D.p[11].sw.l)
+#define SXY0 (CP2D.p[12].d)
+#define SX0 (CP2D.p[12].sw.l)
+#define SY0 (CP2D.p[12].sw.h)
+#define SXY1 (CP2D.p[13].d)
+#define SX1 (CP2D.p[13].sw.l)
+#define SY1 (CP2D.p[13].sw.h)
+#define SXY2 (CP2D.p[14].d)
+#define SX2 (CP2D.p[14].sw.l)
+#define SY2 (CP2D.p[14].sw.h)
+#define SXYP (CP2D.p[15].d)
+#define SXP (CP2D.p[15].sw.l)
+#define SYP (CP2D.p[15].sw.h)
+#define SZ0 (CP2D.p[16].w.l)
+#define SZ1 (CP2D.p[17].w.l)
+#define SZ2 (CP2D.p[18].w.l)
+#define SZ3 (CP2D.p[19].w.l)
+#define RGB0 (CP2D.p[20].d)
+#define R0 (CP2D.p[20].b.l)
+#define G0 (CP2D.p[20].b.h)
+#define B0 (CP2D.p[20].b.h2)
+#define CD0 (CP2D.p[20].b.h3)
+#define RGB1 (CP2D.p[21].d)
+#define R1 (CP2D.p[21].b.l)
+#define G1 (CP2D.p[21].b.h)
+#define B1 (CP2D.p[21].b.h2)
+#define CD1 (CP2D.p[21].b.h3)
+#define RGB2 (CP2D.p[22].d)
+#define R2 (CP2D.p[22].b.l)
+#define G2 (CP2D.p[22].b.h)
+#define B2 (CP2D.p[22].b.h2)
+#define CD2 (CP2D.p[22].b.h3)
+#define RES1 (CP2D.p[23].d)
+#define MAC0 (CP2D.p[24].sd)
+#define MAC1 (CP2D.p[25].sd)
+#define MAC2 (CP2D.p[26].sd)
+#define MAC3 (CP2D.p[27].sd)
+#define IRGB (CP2D.p[28].d)
+#define ORGB (CP2D.p[29].d)
+#define LZCS (CP2D.p[30].d)
+#define LZCR (CP2D.p[31].d)
 
-#define OTZ (GTEDataRegisters.r7_OTZ)
-#define IR0 (GTEDataRegisters.r8_IR[0])
-#define IR1 (GTEDataRegisters.r8_IR[1])
-#define IR2 (GTEDataRegisters.r8_IR[2])
-#define IR3 (GTEDataRegisters.r8_IR[3])
-#define SXY0 (GTEDataRegisters.r12_SXY0)
-#define SXY1 (GTEDataRegisters.r13_SXY1)
-#define SXY2 (GTEDataRegisters.r14_SXY2)
-#define SX2 (GTEDataRegisters.r14_SXY2.vx)
-#define SY2 (GTEDataRegisters.r14_SXY2.vy)
-#define SZ0 (GTEDataRegisters.r16_SZ[0])
-#define SZ1 (GTEDataRegisters.r16_SZ[1])
-#define SZ2 (GTEDataRegisters.r16_SZ[2])
-#define SZ3 (GTEDataRegisters.r16_SZ[3])
-#define MAC0 (GTEDataRegisters.r24_MAC[0])
-#define MAC1 (GTEDataRegisters.r24_MAC[1])
-#define MAC2 (GTEDataRegisters.r24_MAC[2])
-#define MAC3 (GTEDataRegisters.r24_MAC[3])
+#define R11 (CP2C.p[0].sw.l)
+#define R12 (CP2C.p[0].sw.h)
+#define R13 (CP2C.p[1].sw.l)
+#define R21 (CP2C.p[1].sw.h)
+#define R22 (CP2C.p[2].sw.l)
+#define R23 (CP2C.p[2].sw.h)
+#define R31 (CP2C.p[3].sw.l)
+#define R32 (CP2C.p[3].sw.h)
+#define R33 (CP2C.p[4].sw.l)
+#define TRX (CP2C.p[5].sd)
+#define TRY (CP2C.p[6].sd)
+#define TRZ (CP2C.p[7].sd)
+#define L11 (CP2C.p[8].sw.l)
+#define L12 (CP2C.p[8].sw.h)
+#define L13 (CP2C.p[9].sw.l)
+#define L21 (CP2C.p[9].sw.h)
+#define L22 (CP2C.p[10].sw.l)
+#define L23 (CP2C.p[10].sw.h)
+#define L31 (CP2C.p[11].sw.l)
+#define L32 (CP2C.p[11].sw.h)
+#define L33 (CP2C.p[12].sw.l)
+#define RBK (CP2C.p[13].sd)
+#define GBK (CP2C.p[14].sd)
+#define BBK (CP2C.p[15].sd)
+#define LR1 (CP2C.p[16].sw.l)
+#define LR2 (CP2C.p[16].sw.h)
+#define LR3 (CP2C.p[17].sw.l)
+#define LG1 (CP2C.p[17].sw.h)
+#define LG2 (CP2C.p[18].sw.l)
+#define LG3 (CP2C.p[18].sw.h)
+#define LB1 (CP2C.p[19].sw.l)
+#define LB2 (CP2C.p[19].sw.h)
+#define LB3 (CP2C.p[20].sw.l)
+#define RFC (CP2C.p[21].sd)
+#define GFC (CP2C.p[22].sd)
+#define BFC (CP2C.p[23].sd)
+#define OFX (CP2C.p[24].sd)
+#define OFY (CP2C.p[25].sd)
+#define H (CP2C.p[26].sw.l)
+#define DQA (CP2C.p[27].sw.l)
+#define DQB (CP2C.p[28].sd)
+#define ZSF3 (CP2C.p[29].sw.l)
+#define ZSF4 (CP2C.p[30].sw.l)
+#define FLAG (CP2C.p[31].d)
 
-#define R11 (GTEControlRegisters.r0_R11R12.vx)
-#define R12 (GTEControlRegisters.r0_R11R12.vy)
-#define R13 (GTEControlRegisters.r1_R13R21.vx)
-#define R21 (GTEControlRegisters.r1_R13R21.vy)
-#define R22 (GTEControlRegisters.r2_R22R23.vx)
-#define R23 (GTEControlRegisters.r2_R22R23.vy)
-#define R31 (GTEControlRegisters.r3_R31R32.vx)
-#define R32 (GTEControlRegisters.r3_R31R32.vy)
-#define R33 (GTEControlRegisters.r4_R33)
-#define TRX (GTEControlRegisters.r5_TRX)
-#define TRY (GTEControlRegisters.r6_TRY)
-#define TRZ (GTEControlRegisters.r7_TRZ)
-#define OFX (GTEControlRegisters.r24_OFX)
-#define OFY (GTEControlRegisters.r25_OFY)
-#define H (GTEControlRegisters.r26_H)
-#define DQA (GTEControlRegisters.r27_DQA)
-#define DQB (GTEControlRegisters.r28_DQB)
-#define ZSF4 (GTEControlRegisters.r30_ZSF4)
-#define FLAG (GTEControlRegisters.r31_FLAG)
-
-#define VX(n) (n < 3 ? GTEDataRegisters.r0_VECTORS[n].vx : IR1)
-#define VY(n) (n < 3 ? GTEDataRegisters.r0_VECTORS[n].vy : IR2)
-#define VZ(n) (n < 3 ? GTEDataRegisters.r0_VECTORS[n].vz : IR3)
-#define MX11(n) (n < 3 ? GTEControlRegisters.r_s16[(n << 3)].vx : -R << 4)
-#define MX12(n) (n < 3 ? GTEControlRegisters.r_s16[(n << 3)].vy : R << 4)
-#define MX13(n) (n < 3 ? GTEControlRegisters.r_s16[(n << 3) + 1].vx : IR0)
-#define MX21(n) (n < 3 ? GTEControlRegisters.r_s16[(n << 3) + 1].vy : R13)
-#define MX22(n) (n < 3 ? GTEControlRegisters.r_s16[(n << 3) + 2].vx : R13)
-#define MX23(n) (n < 3 ? GTEControlRegisters.r_s16[(n << 3) + 2].vy : R13)
-#define MX31(n) (n < 3 ? GTEControlRegisters.r_s16[(n << 3) + 3].vx : R22)
-#define MX32(n) (n < 3 ? GTEControlRegisters.r_s16[(n << 3) + 3].vy : R22)
-#define MX33(n) (n < 3 ? GTEControlRegisters.r_s16[(n << 3) + 4].vx : R22)
-#define CV1(n) (n < 3 ?  GTEControlRegisters.r_s32[(n << 3) + 5] : 0)
-#define CV2(n) (n < 3 ?  GTEControlRegisters.r_s32[(n << 3) + 6] : 0)
-#define CV3(n) (n < 3 ?  GTEControlRegisters.r_s32[(n << 3) + 7] : 0)
+#define VX(n) (n < 3 ? CP2D.p[n << 1].sw.l : IR1)
+#define VY(n) (n < 3 ? CP2D.p[n << 1].sw.h : IR2)
+#define VZ(n) (n < 3 ? CP2D.p[(n << 1) + 1].sw.l : IR3)
+#define MX11(n) (n < 3 ? CP2C.p[(n << 3)].sw.l : -R << 4)
+#define MX12(n) (n < 3 ? CP2C.p[(n << 3)].sw.h : R << 4)
+#define MX13(n) (n < 3 ? CP2C.p[(n << 3) + 1].sw.l : IR0)
+#define MX21(n) (n < 3 ? CP2C.p[(n << 3) + 1].sw.h : R13)
+#define MX22(n) (n < 3 ? CP2C.p[(n << 3) + 2].sw.l : R13)
+#define MX23(n) (n < 3 ? CP2C.p[(n << 3) + 2].sw.h : R13)
+#define MX31(n) (n < 3 ? CP2C.p[(n << 3) + 3].sw.l : R22)
+#define MX32(n) (n < 3 ? CP2C.p[(n << 3) + 3].sw.h : R22)
+#define MX33(n) (n < 3 ? CP2C.p[(n << 3) + 4].sw.l : R22)
+#define CV1(n) (n < 3 ? CP2C.p[(n << 3) + 5].sd : 0)
+#define CV2(n) (n < 3 ? CP2C.p[(n << 3) + 6].sd : 0)
+#define CV3(n) (n < 3 ? CP2C.p[(n << 3) + 7].sd : 0)
 
 
 #define U64(val) val##ULL
@@ -314,19 +254,6 @@ int32_t BOUNDS(/*int44*/ int64_t value, int max_flag, int min_flag) {
 	if (value /*.negative_overflow()*/ < S64(-0x80000000000)) FLAG |= min_flag;
 
 	return gte_shift(value /*.value()*/, s_sf);
-}
-
-static uint32_t gte_leadingzerocount(uint32_t lzcs) {
-	uint32_t lzcr = 0;
-
-	if ((lzcs & 0x80000000) == 0) lzcs = ~lzcs;
-
-	while ((lzcs & 0x80000000) != 0) {
-		lzcr++;
-		lzcs <<= 1;
-	}
-
-	return lzcr;
 }
 
 static uint32_t gte_divide(uint16_t numerator, uint16_t denominator) {
@@ -595,31 +522,116 @@ void MVMVA(u32 function)
 
 }
 
+void OP(u32 function)
+{
+	int lm = GTE_LM(function);
+
+	MAC1 = A1((int64_t)(R22 * IR3) - (R33 * IR2));
+	MAC2 = A2((int64_t)(R33 * IR1) - (R11 * IR3));
+	MAC3 = A3((int64_t)(R11 * IR2) - (R22 * IR1));
+	IR1 = Lm_B1(MAC1, lm);
+	IR2 = Lm_B2(MAC2, lm);
+	IR3 = Lm_B3(MAC3, lm);
+}
+
 void AVSZ4(u32 function)
 {
 	MAC0 = F((int64_t)(ZSF4 * SZ0) + (ZSF4 * SZ1) + (ZSF4 * SZ2) + (ZSF4 * SZ3));
 	OTZ = Lm_D(s_mac0, 1);
 }
 
+void SQR(u32 function)
+{
+	int lm = GTE_LM(function);
+	MAC1 = A1(IR1 * IR1);
+	MAC2 = A2(IR2 * IR2);
+	MAC3 = A3(IR3 * IR3);
+	IR1 = Lm_B1(MAC1, lm);
+	IR2 = Lm_B2(MAC2, lm);
+	IR3 = Lm_B3(MAC3, lm);
+}
+
+float PGXP_NCLIP() {
+	float nclip = ((SX0 * SY1) + (SX1 * SY2) + (SX2 * SY0) - (SX0 * SY2) - (SX1 * SY0) - (SX2 * SY1));
+
+	// ensure fractional values are not incorrectly rounded to 0
+	float nclipAbs = fabs(nclip);
+	if ((0.1f < nclipAbs) && (nclipAbs < 1.f)) nclip += (nclip < 0.f ? -1 : 1);
+
+	// float AX = SX1 - SX0;
+	// float AY = SY1 - SY0;
+
+	// float BX = SX2 - SX0;
+	// float BY = SY2 - SY0;
+
+	//// normalise A and B
+	// float mA = sqrt((AX*AX) + (AY*AY));
+	// float mB = sqrt((BX*BX) + (BY*BY));
+
+	//// calculate AxB to get Z component of C
+	// float CZ = ((AX * BY) - (AY * BX)) * (1 << 12);
+
+	return nclip;
+}
+
+void NCLIP(u32 function)
+{
+	/*if (PGXP_NLCIP_valid(SXY0, SXY1, SXY2))
+		MAC0 = F(PGXP_NCLIP());
+	else*/
+		MAC0 = F((int64_t)(SX0 * SY1) + (SX1 * SY2) + (SX2 * SY0) - (SX0 * SY2) - (SX1 * SY0) - (SX2 * SY1));
+}
+
+
+void GPF(u32 function)
+{
+	int lm = GTE_LM(function);
+	MAC1 = A1(IR0 * IR1);
+	MAC2 = A2(IR0 * IR2);
+	MAC3 = A3(IR0 * IR3);
+	IR1 = Lm_B1(MAC1, lm);
+	IR2 = Lm_B2(MAC2, lm);
+	IR3 = Lm_B3(MAC3, lm);
+	RGB0 = RGB1;
+	RGB1 = RGB2;
+	CD2 = CODE;
+	R2 = Lm_C1(MAC1 >> 4);
+	G2 = Lm_C2(MAC2 >> 4);
+	B2 = Lm_C3(MAC3 >> 4);
+}
+
 void copFunction(int cop, u32 function)
 {
 	int getFunctionCode = GTE_FUNCT(function);
+
+	s_sf = GTE_SF(function);
+	FLAG = 0;
+
 	switch (getFunctionCode)
 	{
 	case 0x1:
 		RTPS(function);
 		return;
-	/*case 0x6:
-		gte_nclip();
-		return;*/
+	case 0x6:
+		NCLIP(function);
+		return;
+	case 0xC:
+		OP(function);
+		return;
 	case 0x12:
 		MVMVA(function);
+		return;
+	case 0x28:
+		SQR(function);
 		return;
 	case 0x2E:
 		AVSZ4(function);
 		return;
 	case 0x30:
 		RTPT(function);
+		return;
+	case 0x3D:
+		GPF(function);
 		return;
 	default:
 		assert(0);

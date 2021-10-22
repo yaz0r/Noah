@@ -40,6 +40,17 @@ bgfx::ProgramHandle getSPRTShader()
 	return programHandle;
 }
 
+bgfx::ProgramHandle getTILEShader()
+{
+	static bgfx::ProgramHandle programHandle = BGFX_INVALID_HANDLE;
+	if (!bgfx::isValid(programHandle))
+	{
+		programHandle = loadBgfxProgram("TILE_vs", "TILE_ps");
+	}
+
+	return programHandle;
+}
+
 ImVec2 PSXResolution = { 320,240 };
 
 void DrawSync(int)
@@ -424,6 +435,83 @@ void SPRT::execute()
 
 void TILE::execute()
 {
+	float matrix[16];
+	bx::mtxIdentity(matrix);
+
+	bgfx::setTransform(matrix);
+	{
+		bgfx::VertexLayout layout;
+		layout
+			.begin()
+			.add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
+			.add(bgfx::Attrib::Color0, 3, bgfx::AttribType::Float)
+			.add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
+			.add(bgfx::Attrib::TexCoord1, 2, bgfx::AttribType::Int16) // CLUT
+			.add(bgfx::Attrib::TexCoord2, 4, bgfx::AttribType::Uint8) // Texpage
+			.end();
+
+		bgfx::TransientVertexBuffer vertexBuffer;
+		bgfx::TransientIndexBuffer indexBuffer;
+		bgfx::allocTransientBuffers(&vertexBuffer, layout, 4, &indexBuffer, 4);
+
+		struct sVertice
+		{
+			float v[3];
+			float color[3];
+			float texcoord[2];
+			u16 CLUT[2];
+			u8 Texpage[4];
+		};
+
+		sVertice* pVertices = (sVertice*)vertexBuffer.data;
+		u16* pIndices = (u16*)indexBuffer.data;
+
+		for (int i = 0; i < 4; i++)
+		{
+			pVertices[i].color[0] = r0 / 256.f;
+			pVertices[i].color[1] = g0 / 256.f;
+			pVertices[i].color[2] = b0 / 256.f;
+		}
+
+		pVertices[0].v[0] = x0;
+		pVertices[0].v[1] = y0;
+		pVertices[0].v[2] = 0;
+
+		pVertices[1].v[0] = x0 + w;
+		pVertices[1].v[1] = y0;
+		pVertices[1].v[2] = 0;
+
+		pVertices[2].v[0] = x0 + w;
+		pVertices[2].v[1] = y0 + h;
+		pVertices[2].v[2] = 0;
+
+		pVertices[3].v[0] = x0;
+		pVertices[3].v[1] = y0 + h;
+		pVertices[3].v[2] = 0;
+
+		pIndices[0] = 0;
+		pIndices[1] = 1;
+		pIndices[2] = 3;
+		pIndices[3] = 2;
+
+		bgfx::setState(0 | BGFX_STATE_WRITE_RGB
+			| BGFX_STATE_WRITE_A
+			| BGFX_STATE_DEPTH_TEST_ALWAYS
+			| BGFX_STATE_MSAA
+			| BGFX_STATE_PT_TRISTRIP
+		);
+
+		bgfx::setVertexBuffer(0, &vertexBuffer);
+		bgfx::setIndexBuffer(&indexBuffer);
+
+		bgfx::UniformHandle s_PSXVramUniformHandle = BGFX_INVALID_HANDLE;
+		if (!bgfx::isValid(s_PSXVramUniformHandle))
+		{
+			s_PSXVramUniformHandle = bgfx::createUniform("s_PSXVram", bgfx::UniformType::Sampler);
+		}
+		bgfx::setTexture(0, s_PSXVramUniformHandle, m_vramTextureHandle);
+		bgfx::submit(PSXOutput_bgfxView, getTILEShader());
+	}
 }
 
 void POLY_F3::execute()

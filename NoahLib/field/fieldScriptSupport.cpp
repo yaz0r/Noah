@@ -8,7 +8,6 @@ sFieldScriptEntity* pCurrentFieldScriptActor;
 std::array<int, 3> partyToFieldEntityArrayMapping;
 
 s32 op99Var1 = 0;
-s32 sceneSCRZ = 0;
 s32 op99Var5 = 0;
 s32 op99Var6 = 0;
 s32 op99Var7 = 0;

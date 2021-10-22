@@ -232,6 +232,10 @@ extern SVECTOR cameraRotation;
 extern VECTOR cameraUp;
 extern s16 cameraTan;
 
+extern MATRIX worldScaleMatrix;
+extern MATRIX cameraMatrix;
+extern s32 sceneSCRZ;
+
 extern int updateAllEntitiesSub2Var0;
 
 struct sFieldRenderContext

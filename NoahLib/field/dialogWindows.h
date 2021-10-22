@@ -66,7 +66,7 @@ struct sDialogWindow
 	DR_MODE mC4[2];
 	TILE mDC_backgroundTile[2];
 	DR_MODE mFC[2][10];
-	SPRT m1EC[2][10];
+	SPRT m1EC_windowBorders[2][10];
 	s16 m37C;
 	s8 m37E_startOfMultiChoice;
 	s8 m382_CurrentMultiChoiceSelection;
@@ -101,6 +101,8 @@ extern u16 textSpriteMode1;
 
 extern u16 padButtonForDialogs;
 extern u16 padButtonForDialogs2;
+
+extern std::array<std::array<DR_MODE, 16>, 2> gDialogDrModes;
 
 void flagWindowOpenBF(uint param_1);
 void createDialogWindow(short x, short y, int dialogIndex, int windowIndex, int width, int height, int fieldActorId, int actorId, int mode, uint param_10, uint param_11);

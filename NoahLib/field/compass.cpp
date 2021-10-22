@@ -3,8 +3,9 @@
 #include "compass.h"
 #include "kernel/filesystem.h"
 #include "kernel/TIM.h"
+#include "dialogWindows.h"
 
-std::array<sFieldCompassVar2, 21> fieldCompassVar2;
+std::array<sFieldCompassVar2, 25> fieldCompassVar2;
 
 const std::array<std::array<s16, 4>, 9> compassInitDataX = { {
 	{0x400, 0x200, 0x400, 0x200},
@@ -170,7 +171,47 @@ void renderCompass()
 		}
 	}
 
-	MissingCode();
+	setIdentityMatrix(&MStack168);
+	MulRotationMatrix(&MStack200, &MStack168);
+	MStack168.t[2] = 0x1000;
+	CompMatrix(&MStack232, &MStack168, &MStack136);
+	MulMatrix0(&MStack232, &MStack168, &worldScaleMatrix);
+	SetRotMatrix(&MStack232);
+	SetTransMatrix(&MStack232);
+	setIdentityMatrix(&MStack168);
+	MulRotationMatrix(&cameraMatrix, &MStack168);
+	MStack168.t[2] = 0x1000;
+	CompMatrix(&MStack232, &MStack168, &MStack136);
+	copyMatrix(&MStack232, &MStack136);
+	local_48.vx = 0x400;
+	local_48.vy = 0;
+	local_48.vz = 0;
+	MATRIX MStack104;
+	createRotationMatrix(&local_48, &MStack104);
+
+	if (((compassDisabled == '\0') && (updateAllEntitiesSub2Var0 == 0))) {
+		for (int i=0x10; i<0x14; i++)
+		{
+			MissingCode(); //compass letters
+		}
+
+		for (int i=0; i<0x10; i++)
+		{
+			drawCompassArrowSegment(&pCurrentFieldRenderingContext->m80D4_uiOT[0], &fieldCompassVar2[i], &MStack232, g_frameOddOrEven);
+		}
+
+		for (int i = 0x15; i < 0x19; i++)
+		{
+			drawCompassArrowSegment(&pCurrentFieldRenderingContext->m80D4_uiOT[0], &fieldCompassVar2[i], &MStack232, g_frameOddOrEven);
+		}
+	}
+
+	
+	gDialogDrModes[g_frameOddOrEven][1].m0_pNext = pCurrentFieldRenderingContext->m80D4_uiOT[0].m0_pNext;
+	pCurrentFieldRenderingContext->m80D4_uiOT[0].m0_pNext = &gDialogDrModes[g_frameOddOrEven][1];
+
+	SetGeomOffset(0xa0, 0x70);
+	SetGeomScreen(sceneSCRZ);
 }
 
 int compassGraphicDataLoaded = 0;
