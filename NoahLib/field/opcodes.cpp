@@ -254,7 +254,7 @@ void  OP_REMOVE_FROM_CURRENT_PARTY()
 			if (currentParty[1] == 0xff) {
 				currentParty[0] = iVar1;
 				asyncPartyCharacterLoadingTable[0] = iVar1;
-				pKernelGameState->m22B1_isOnGear[2] = 0;
+				pKernelGameState->m22B1_isOnGear[0] = 0;
 			}
 			else {
 				partyCharacterBuffers[0] = partyCharacterBuffers[1];
@@ -262,14 +262,14 @@ void  OP_REMOVE_FROM_CURRENT_PARTY()
 				currentParty[0] = currentParty[1];
 				currentParty[1] = 0xff;
 				asyncPartyCharacterLoadingTable[1] = 0xff;
-				pKernelGameState->m22B1_isOnGear[2] = pKernelGameState->m22B1_isOnGear[3];
+				pKernelGameState->m22B1_isOnGear[0] = pKernelGameState->m22B1_isOnGear[1];
 				if (currentParty[2] != 0xff) {
 					partyCharacterBuffers[1] = partyCharacterBuffers[2];
 					asyncPartyCharacterLoadingTable[1] = asyncPartyCharacterLoadingTable[2];
 					currentParty[1] = currentParty[2];
 					currentParty[2] = 0xff;
 					asyncPartyCharacterLoadingTable[2] = 0xff;
-					pKernelGameState->m22B1_isOnGear[3] = pKernelGameState->m22B1_isOnGear[4];
+					pKernelGameState->m22B1_isOnGear[1] = pKernelGameState->m22B1_isOnGear[2];
 				}
 			}
 			break;
@@ -277,7 +277,7 @@ void  OP_REMOVE_FROM_CURRENT_PARTY()
 			if (currentParty[2] == 0xff) {
 				currentParty[1] = iVar1;
 				asyncPartyCharacterLoadingTable[1] = iVar1;
-				pKernelGameState->m22B1_isOnGear[3] = 0;
+				pKernelGameState->m22B1_isOnGear[1] = 0;
 			}
 			else {
 				partyCharacterBuffers[1] = partyCharacterBuffers[2];
@@ -285,14 +285,14 @@ void  OP_REMOVE_FROM_CURRENT_PARTY()
 				currentParty[1] = currentParty[2];
 				currentParty[2] = 0xff;
 				asyncPartyCharacterLoadingTable[2] = 0xff;
-				pKernelGameState->m22B1_isOnGear[3] = pKernelGameState->m22B1_isOnGear[4];
-				pKernelGameState->m22B1_isOnGear[4] = 0;
+				pKernelGameState->m22B1_isOnGear[1] = pKernelGameState->m22B1_isOnGear[2];
+				pKernelGameState->m22B1_isOnGear[2] = 0;
 			}
 			break;
 		case 2:
 			currentParty[2] = iVar1;
 			asyncPartyCharacterLoadingTable[2] = iVar1;
-			pKernelGameState->m22B1_isOnGear[4] = 0;
+			pKernelGameState->m22B1_isOnGear[2] = 0;
 		}
 	}
 	else
@@ -300,21 +300,21 @@ void  OP_REMOVE_FROM_CURRENT_PARTY()
 		switch (iVar3)
 		{
 		case 0:
-			pKernelGameState->m22B1_isOnGear[2] = pKernelGameState->m22B1_isOnGear[3];
-			pKernelGameState->m22B1_isOnGear[3] = pKernelGameState->m22B1_isOnGear[4];
-			pKernelGameState->m22B1_isOnGear[4] = 0;
+			pKernelGameState->m22B1_isOnGear[0] = pKernelGameState->m22B1_isOnGear[1];
+			pKernelGameState->m22B1_isOnGear[1] = pKernelGameState->m22B1_isOnGear[2];
+			pKernelGameState->m22B1_isOnGear[2] = 0;
 			emptyPartySlot(0);
 			copyPartySlotFromNext(0);
 			copyPartySlotFromNext(1);
 			break;
 		case 1:
-			pKernelGameState->m22B1_isOnGear[3] = pKernelGameState->m22B1_isOnGear[4];
-			pKernelGameState->m22B1_isOnGear[4] = 0;
+			pKernelGameState->m22B1_isOnGear[1] = pKernelGameState->m22B1_isOnGear[2];
+			pKernelGameState->m22B1_isOnGear[2] = 0;
 			emptyPartySlot(1);
 			copyPartySlotFromNext(1);
 			break;
 		case 2:
-			pKernelGameState->m22B1_isOnGear[4] = 0;
+			pKernelGameState->m22B1_isOnGear[2] = 0;
 			emptyPartySlot(2);
 			break;
 		default:
@@ -510,7 +510,7 @@ void OP_INIT_ENTITY_PC_Sub0(int param_1)
 		uVar5 = uVar5 + 4 & 7;
 		opA0_var1 = uVar5 << 0x19;
 		opA0_var0 = opA0_var1 >> 0x10;
-		op99VarB = (s16)(uVar5 << 9);
+		cameraRotationBetweenEyeAndAt.vy = (s16)(uVar5 << 9);
 		uVar5 = (uint)pCurrentFieldScriptFile[param_1 + 7];
 		if (uVar5 == 0xff) {
 			uVar5 = getVariable(6);
@@ -957,7 +957,7 @@ void OP_99(void)
 	pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 1;
 	op99Var1 = sceneSCRZ * sceneScale >> 0xc;
 	op99Var2 = sceneDIP;
-	op99Var3 = op99VarB;
+	op99Var3 = cameraRotationBetweenEyeAndAt.vy;
 	op99Var4 = 0x1000;
 	op99Var5 = 0xc;
 	op99Var6 = 0xc;
@@ -1067,7 +1067,7 @@ void OP_SET_SCREEN_GEOMETRY()
 	int uVar2 = iVar1 + 4U & 7;
 	opA0_var0 = uVar2 << 9;
 	opA0_var1 = uVar2 << 0x19;
-	op99VarB = (short)(uVar2 << 9);
+	cameraRotationBetweenEyeAndAt.vy = (short)(uVar2 << 9);
 	sceneSCRZ = getImmediateOrVariableUnsigned(5);
 	SetGeomScreen(sceneSCRZ);
 	pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 7;
@@ -1420,7 +1420,7 @@ void OP_SET_OFF_GEAR()
 	if (2 < iVar1) {
 		iVar1 = 2;
 	}
-	pKernelGameState->m22B1_isOnGear[iVar1 + 2] = 0;
+	pKernelGameState->m22B1_isOnGear[iVar1] = 0;
 	updateGearState(iVar1);
 	pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
 }

@@ -111,40 +111,40 @@ s32 getCopReg(int cop, int reg)
 #define GTE_LM(op) ((op >> 10) & 1)
 #define GTE_FUNCT(op) (op & 63)
 
-#define VX0 (CP2D.p[0].sw.l)
-#define VY0 (CP2D.p[0].sw.h)
-#define VZ0 (CP2D.p[1].sw.l)
-#define VX1 (CP2D.p[2].w.l)
-#define VY1 (CP2D.p[2].w.h)
-#define VZ1 (CP2D.p[3].w.l)
-#define VX2 (CP2D.p[4].w.l)
-#define VY2 (CP2D.p[4].w.h)
-#define VZ2 (CP2D.p[5].w.l)
-#define R (CP2D.p[6].b.l)
-#define G (CP2D.p[6].b.h)
-#define B (CP2D.p[6].b.h2)
-#define CODE (CP2D.p[6].b.h3)
-#define OTZ (CP2D.p[7].w.l)
-#define IR0 (CP2D.p[8].sw.l)
-#define IR1 (CP2D.p[9].sw.l)
-#define IR2 (CP2D.p[10].sw.l)
-#define IR3 (CP2D.p[11].sw.l)
-#define SXY0 (CP2D.p[12].d)
+s16& VX0 = (CP2D.p[0].sw.l);
+s16& VY0 = (CP2D.p[0].sw.h);
+s16& VZ0 = (CP2D.p[1].sw.l);
+u16& VX1 = (CP2D.p[2].w.l);
+u16& VY1 = (CP2D.p[2].w.h);
+u16& VZ1 = (CP2D.p[3].w.l);
+u16& VX2 = (CP2D.p[4].w.l);
+u16& VY2 = (CP2D.p[4].w.h);
+u16& VZ2 = (CP2D.p[5].w.l);
+u8& R = (CP2D.p[6].b.l);
+u8& G = (CP2D.p[6].b.h);
+u8& B = (CP2D.p[6].b.h2);
+u8& CODE = (CP2D.p[6].b.h3);
+u16& OTZ = (CP2D.p[7].w.l);
+s16& IR0 = (CP2D.p[8].sw.l);
+s16& IR1 = (CP2D.p[9].sw.l);
+s16& IR2 = (CP2D.p[10].sw.l);
+s16& IR3 = (CP2D.p[11].sw.l);
+u32& SXY0 = (CP2D.p[12].d);
 #define SX0 (CP2D.p[12].sw.l)
 #define SY0 (CP2D.p[12].sw.h)
-#define SXY1 (CP2D.p[13].d)
+u32& SXY1 = (CP2D.p[13].d);
 #define SX1 (CP2D.p[13].sw.l)
 #define SY1 (CP2D.p[13].sw.h)
-#define SXY2 (CP2D.p[14].d)
+u32& SXY2 = (CP2D.p[14].d);
 #define SX2 (CP2D.p[14].sw.l)
 #define SY2 (CP2D.p[14].sw.h)
-#define SXYP (CP2D.p[15].d)
+u32& SXYP = (CP2D.p[15].d);
 #define SXP (CP2D.p[15].sw.l)
 #define SYP (CP2D.p[15].sw.h)
-#define SZ0 (CP2D.p[16].w.l)
-#define SZ1 (CP2D.p[17].w.l)
-#define SZ2 (CP2D.p[18].w.l)
-#define SZ3 (CP2D.p[19].w.l)
+u16& SZ0 = (CP2D.p[16].w.l);
+u16& SZ1 = (CP2D.p[17].w.l);
+u16& SZ2 = (CP2D.p[18].w.l);
+u16& SZ3 = (CP2D.p[19].w.l);
 #define RGB0 (CP2D.p[20].d)
 #define R0 (CP2D.p[20].b.l)
 #define G0 (CP2D.p[20].b.h)
@@ -161,27 +161,27 @@ s32 getCopReg(int cop, int reg)
 #define B2 (CP2D.p[22].b.h2)
 #define CD2 (CP2D.p[22].b.h3)
 #define RES1 (CP2D.p[23].d)
-#define MAC0 (CP2D.p[24].sd)
-#define MAC1 (CP2D.p[25].sd)
-#define MAC2 (CP2D.p[26].sd)
-#define MAC3 (CP2D.p[27].sd)
+s32& MAC0 = (CP2D.p[24].sd);
+s32& MAC1 = (CP2D.p[25].sd);
+s32& MAC2 = (CP2D.p[26].sd);
+s32& MAC3 = (CP2D.p[27].sd);
 #define IRGB (CP2D.p[28].d)
 #define ORGB (CP2D.p[29].d)
 #define LZCS (CP2D.p[30].d)
 #define LZCR (CP2D.p[31].d)
 
-#define R11 (CP2C.p[0].sw.l)
-#define R12 (CP2C.p[0].sw.h)
-#define R13 (CP2C.p[1].sw.l)
-#define R21 (CP2C.p[1].sw.h)
-#define R22 (CP2C.p[2].sw.l)
-#define R23 (CP2C.p[2].sw.h)
-#define R31 (CP2C.p[3].sw.l)
-#define R32 (CP2C.p[3].sw.h)
-#define R33 (CP2C.p[4].sw.l)
-#define TRX (CP2C.p[5].sd)
-#define TRY (CP2C.p[6].sd)
-#define TRZ (CP2C.p[7].sd)
+s16& R11 = (CP2C.p[0].sw.l);
+s16& R12 = (CP2C.p[0].sw.h);
+s16& R13 = (CP2C.p[1].sw.l);
+s16& R21 = (CP2C.p[1].sw.h);
+s16& R22 = (CP2C.p[2].sw.l);
+s16& R23 = (CP2C.p[2].sw.h);
+s16& R31 = (CP2C.p[3].sw.l);
+s16& R32 = (CP2C.p[3].sw.h);
+s16& R33 = (CP2C.p[4].sw.l);
+s32& TRX = (CP2C.p[5].sd);
+s32& TRY = (CP2C.p[6].sd);
+s32& TRZ = (CP2C.p[7].sd);
 #define L11 (CP2C.p[8].sw.l)
 #define L12 (CP2C.p[8].sw.h)
 #define L13 (CP2C.p[9].sw.l)
@@ -705,7 +705,7 @@ void gte_stlzc(int* pOutput)
 	*pOutput = getCopReg(2, 0xf800);
 }
 
-void gte_stopz(int* pOutput)
+void gte_getMAC0(int* pOutput)
 {
 	*pOutput = getCopReg(2, 0xC000);
 }

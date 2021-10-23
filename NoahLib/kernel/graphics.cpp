@@ -3,6 +3,7 @@
 #include "bgfx/bgfx.h"
 #include <bx/math.h>
 #include "imguiBGFX.h"
+#include "kernel/gte.h"
 
 bgfx::TextureHandle m_vramTextureHandle = BGFX_INVALID_HANDLE;
 
@@ -67,6 +68,14 @@ int VSync(int)
 void InitGeom()
 {
     MissingCode();
+
+	setCopControlWord(2, 0xe800, 0x155);
+	setCopControlWord(2, 0xf000, 0x100);
+	setCopControlWord(2, 0xd000, 1000);
+	setCopControlWord(2, 0xd800, 0xffffef9e);
+	setCopControlWord(2, 0xe000, 0x1400000);
+	setCopControlWord(2, 0xc000, 0);
+	setCopControlWord(2, 0xc800, 0);
 }
 
 void SetPolyFT4(POLY_FT4* p)
@@ -560,10 +569,10 @@ void POLY_FT4::execute()
 			pVertices[i].CLUT[0] = clut & 0x3F;
 			pVertices[i].CLUT[1] = (clut >> 6) & 0x1FF;
 
-			assert(((pCurrentDrMode->code[0] >> 24) & 0xFF) == 0xE1);
-			pVertices[i].Texpage[0] = pCurrentDrMode->code[0] & 0xFF;
-			pVertices[i].Texpage[1] = (pCurrentDrMode->code[0] >> 8) & 0xFF;
-			pVertices[i].Texpage[2] = (pCurrentDrMode->code[0] >> 16) & 0xFF;
+			u32 code = tpage;
+			pVertices[i].Texpage[0] = code & 0xFF;
+			pVertices[i].Texpage[1] = (code >> 8) & 0xFF;
+			pVertices[i].Texpage[2] = (code >> 16) & 0xFF;
 			pVertices[i].Texpage[3] = 0xE1;
 		}
 
@@ -580,7 +589,7 @@ void POLY_FT4::execute()
 		pVertices[1].texcoord[1] = v1;
 
 		pVertices[2].v[0] = x2y2.vx;
-		pVertices[2].v[1] = x2y2.vx;
+		pVertices[2].v[1] = x2y2.vy;
 		pVertices[2].v[2] = 0;
 		pVertices[2].texcoord[0] = u2;
 		pVertices[2].texcoord[1] = v2;
@@ -593,8 +602,8 @@ void POLY_FT4::execute()
 
 		pIndices[0] = 0;
 		pIndices[1] = 1;
-		pIndices[2] = 3;
-		pIndices[3] = 2;
+		pIndices[2] = 2;
+		pIndices[3] = 3;
 
 		bgfx::setState(0 | BGFX_STATE_WRITE_RGB
 			| BGFX_STATE_WRITE_A
@@ -619,5 +628,88 @@ void POLY_FT4::execute()
 
 void POLY_FT3::execute()
 {
+	float matrix[16];
+	bx::mtxIdentity(matrix);
+
+	bgfx::setTransform(matrix);
+	{
+		bgfx::VertexLayout layout;
+		layout
+			.begin()
+			.add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
+			.add(bgfx::Attrib::Color0, 3, bgfx::AttribType::Float)
+			.add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
+			.add(bgfx::Attrib::TexCoord1, 2, bgfx::AttribType::Int16) // CLUT
+			.add(bgfx::Attrib::TexCoord2, 4, bgfx::AttribType::Uint8) // Texpage
+			.end();
+
+		bgfx::TransientVertexBuffer vertexBuffer;
+		bgfx::TransientIndexBuffer indexBuffer;
+		bgfx::allocTransientBuffers(&vertexBuffer, layout, 3, &indexBuffer, 3);
+
+		struct sVertice
+		{
+			float v[3];
+			float color[3];
+			float texcoord[2];
+			u16 CLUT[2];
+			u8 Texpage[4];
+		};
+
+		sVertice* pVertices = (sVertice*)vertexBuffer.data;
+		u16* pIndices = (u16*)indexBuffer.data;
+
+		for (int i = 0; i < 4; i++)
+		{
+			pVertices[i].CLUT[0] = clut & 0x3F;
+			pVertices[i].CLUT[1] = (clut >> 6) & 0x1FF;
+
+			u32 code = tpage;
+			pVertices[i].Texpage[0] = code & 0xFF;
+			pVertices[i].Texpage[1] = (code >> 8) & 0xFF;
+			pVertices[i].Texpage[2] = (code >> 16) & 0xFF;
+			pVertices[i].Texpage[3] = 0xE1;
+		}
+
+		pVertices[0].v[0] = x0y0.vx;
+		pVertices[0].v[1] = x0y0.vy;
+		pVertices[0].v[2] = 0;
+		pVertices[0].texcoord[0] = u0;
+		pVertices[0].texcoord[1] = v0;
+
+		pVertices[1].v[0] = x1y1.vx;
+		pVertices[1].v[1] = x1y1.vy;
+		pVertices[1].v[2] = 0;
+		pVertices[1].texcoord[0] = u1;
+		pVertices[1].texcoord[1] = v1;
+
+		pVertices[2].v[0] = x2y2.vx;
+		pVertices[2].v[1] = x2y2.vy;
+		pVertices[2].v[2] = 0;
+		pVertices[2].texcoord[0] = u2;
+		pVertices[2].texcoord[1] = v2;
+
+		pIndices[0] = 0;
+		pIndices[1] = 1;
+		pIndices[2] = 2;
+
+		bgfx::setState(0 | BGFX_STATE_WRITE_RGB
+			| BGFX_STATE_WRITE_A
+			| BGFX_STATE_DEPTH_TEST_ALWAYS
+			| BGFX_STATE_MSAA
+			| BGFX_STATE_PT_TRISTRIP
+		);
+
+		bgfx::setVertexBuffer(0, &vertexBuffer);
+		bgfx::setIndexBuffer(&indexBuffer);
+
+		bgfx::UniformHandle s_PSXVramUniformHandle = BGFX_INVALID_HANDLE;
+		if (!bgfx::isValid(s_PSXVramUniformHandle))
+		{
+			s_PSXVramUniformHandle = bgfx::createUniform("s_PSXVram", bgfx::UniformType::Sampler);
+		}
+		bgfx::setTexture(0, s_PSXVramUniformHandle, m_vramTextureHandle);
+		bgfx::submit(PSXOutput_bgfxView, getSPRTShader());
+	}
 }
 

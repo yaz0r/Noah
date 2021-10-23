@@ -95,7 +95,8 @@ bgfx::ProgramHandle loadBgfxProgram(const std::string& VSFile, const std::string
     switch (bgfx::getRendererType())
     {
     case bgfx::RendererType::Direct3D11:
-    case bgfx::RendererType::Direct3D12: shaderFileExtension = ".dx11.bin";  break;
+    case bgfx::RendererType::Direct3D12: shaderFileExtension = ".dx11.debug.bin";  break;
+    //case bgfx::RendererType::Direct3D12: shaderFileExtension = ".dx11.bin";  break;
     case bgfx::RendererType::OpenGL:     shaderFileExtension = ".glsl.bin";  break;
     case bgfx::RendererType::Metal:      shaderFileExtension = ".metal.bin";  break;
     case bgfx::RendererType::Vulkan:     shaderFileExtension = ".spirv.bin";  break;

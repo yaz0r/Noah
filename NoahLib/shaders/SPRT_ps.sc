@@ -74,6 +74,8 @@ void main()
     }
     else
     {
-        gl_FragColor = vec4(1.f, 0.0, 0.0, 1.0);
+        int colorIndex = readU8FromPDXVram(getTexturePageXBase(v_texcoord2) * 2 + (v_texcoord0.x), getTexturePageYBase(v_texcoord2) + v_texcoord0.y);
+        float4 color = getCLUTForColor(v_texcoord1, colorIndex);
+        gl_FragColor = color;
     }
 }

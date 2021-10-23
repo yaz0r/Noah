@@ -17,7 +17,8 @@ s16 op99Var3 = 0;
 s16 op99Var4 = 0;
 s16 sceneScale = 0;
 s16 sceneDIP = 0;
-s16 op99VarB = 0;
+
+SVECTOR cameraRotationBetweenEyeAndAt;
 
 s16 op9DVar0 = 0;
 s32 op9DVar1 = 0;

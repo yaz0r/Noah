@@ -90,6 +90,7 @@ s32 fieldPolyCount2;
 s32 worldScaleFactor;
 MATRIX worldScaleMatrix;
 MATRIX cameraMatrix;
+MATRIX cameraMatrix2;
 s32 objectClippingMask = 1;
 VECTOR fieldObjectRenderingVar1 = { 0,0,0 };
 SVECTOR fieldObjectRenderingVar2 = { 0,0,0 };
@@ -192,7 +193,18 @@ void resetCameraData()
 
 	MissingCode();
 
+	cameraInterpolationMode = 0;
+	cameraInterpolationFlags = 0;
+	cameraInterpolationTargetNumSteps = 0;
+	cameraInterpolationPositionNumSteps = 0;
+	sceneSCRZ = 0x200;
+	sceneDIP = 0x1e;
+	sceneScale = 0x1000;
+
+	MissingCode();
 }
+
+int linkOTIndex;
 
 void resetFieldDefault()
 {
@@ -210,6 +222,10 @@ void resetFieldDefault()
 	MissingCode();
 
 	compassDisabled = 0;
+
+	MissingCode();
+
+	linkOTIndex = 0x720;
 
 	MissingCode();
 
@@ -830,10 +846,10 @@ void primD_2(std::vector<u8>::iterator meshSubBlock, int count)
 
 		if (flagsTriangle0 > 0)
 		{
-			gte_nclip();
+			gte_nclip(); // write the normal to mac0
 
 			int normalMagnitude;
-			gte_stopz(&normalMagnitude);
+			gte_getMAC0(&normalMagnitude);
 
 			if (normalMagnitude > 0) // is first triangle facing screen
 			{
@@ -848,14 +864,14 @@ void primD_2(std::vector<u8>::iterator meshSubBlock, int count)
 
 				if (flagsTriangle1 > 0)
 				{
-					if (!(((((initFieldDrawEnvsSub0Var1 <= xy0.asS32() && (initFieldDrawEnvsSub0Var1 <= xy1.asS32())) && (initFieldDrawEnvsSub0Var1 <= xy2.asS32())) && (initFieldDrawEnvsSub0Var1 <= xy3.asS32())))))
+					//if (!(((((initFieldDrawEnvsSub0Var1 <= xy0.asS32() && (initFieldDrawEnvsSub0Var1 <= xy1.asS32())) && (initFieldDrawEnvsSub0Var1 <= xy2.asS32())) && (initFieldDrawEnvsSub0Var1 <= xy3.asS32())))))
 					{
 						pOutputPrim->x0y0 = xy0;
 						pOutputPrim->x1y1 = xy1;
 						pOutputPrim->x2y2 = xy2;
 						pOutputPrim->x3y3 = xy3;
 
-						if (((initFieldDrawEnvsSub0Var0 <= (xy0.vx)) && (initFieldDrawEnvsSub0Var0 <= (xy1.vx))) && (initFieldDrawEnvsSub0Var0 <= (xy2.vx) && (xy3.vx) < initFieldDrawEnvsSub0Var0))
+						//if (((initFieldDrawEnvsSub0Var0 <= (xy0.vx)) && (initFieldDrawEnvsSub0Var0 <= (xy1.vx))) && (initFieldDrawEnvsSub0Var0 <= (xy2.vx) && (xy3.vx) < initFieldDrawEnvsSub0Var0))
 						{
 							int sz0, sz1, sz2, sz3;
 							gte_stsz4(&sz0, &sz1, &sz2, &sz3);
@@ -866,8 +882,8 @@ void primD_2(std::vector<u8>::iterator meshSubBlock, int count)
 								fieldPolyCount = fieldPolyCount + 1;
 								assert(polyz);
 
-								sTag* sDestTag = &pOT[polyz >> (depthGranularity & 0x1f)];
-								sDestTag->m0_pNext = pOutputPrim;
+								sTag* sDestTag = pOT[polyz >> (depthGranularity & 0x1f)].m0_pNext;
+								pOT[polyz >> (depthGranularity & 0x1f)].m0_pNext = pOutputPrim;
 								pOutputPrim->m0_pNext = sDestTag;
 								pOutputPrim->m3_size = 9;
 							}
@@ -2117,8 +2133,6 @@ MATRIX renderModelRotationMatrix;
 s32 cameraDeltaTan;
 
 MATRIX currentProjectionMatrix;
-
-std::vector<RECT>* updateAllEntitiesVar0 = nullptr;
 
 s32 updateCameraInterpolationVar0 = 0;
 s32 updateCameraInterpolationVar1 = 0;
@@ -4316,6 +4330,9 @@ uint stepInterpolateDirection(int currentDirection, int targetDirection, int ste
 	}
 }
 
+short cameraShakeEnabled = 0;
+VECTOR fieldCameraOffset = { 0,0,0,0 };
+
 void updateCameraInterpolationSub2()
 {
 	if ((op99Var7 & 0x10) != 0) {
@@ -4349,13 +4366,188 @@ void updateCameraInterpolationSub2()
 		cameraAt[1] = cameraAt[1] + (cameraAt2.vy - cameraAt[1]) / op99Var5;
 	}
 
+	fieldCameraOffset.vx = 0;
+	fieldCameraOffset.vy = 0;
+	fieldCameraOffset.vz = 0;
+
+	if (cameraShakeEnabled != 0) {
+		assert(0);
+	}
+}
+
+void updateCameraInterpolationSub0()
+{
 	MissingCode();
+}
+
+int checkCameraCollision(VECTOR*, std::array<s16, 6>&, std::array<s16, 4>&)
+{
+	MissingCode();
+	return 0;
+}
+
+int cameraCollisionState = 0;
+
+VECTOR* ApplyMatrixLV(MATRIX* m, VECTOR* v0, VECTOR* v1)
+
+{
+	uint uVar1;
+	int iVar2;
+	uint uVar3;
+	int iVar4;
+	uint uVar5;
+	int iVar6;
+	int iVar7;
+	int iVar8;
+	int iVar9;
+
+	SetRotMatrix(m);
+	uVar1 = v0->vx;
+	uVar3 = v0->vy;
+	uVar5 = v0->vz;
+	iVar7 = (int)uVar1 >> 0xf;
+	if ((int)uVar1 < 0) {
+		iVar7 = -((int)-uVar1 >> 0xf);
+		uVar1 = -(-uVar1 & 0x7fff);
+	}
+	else {
+		uVar1 = uVar1 & 0x7fff;
+	}
+	iVar8 = (int)uVar3 >> 0xf;
+	if ((int)uVar3 < 0) {
+		iVar8 = -((int)-uVar3 >> 0xf);
+		uVar3 = -(-uVar3 & 0x7fff);
+	}
+	else {
+		uVar3 = uVar3 & 0x7fff;
+	}
+	iVar9 = (int)uVar5 >> 0xf;
+	if ((int)uVar5 < 0) {
+		iVar9 = -((int)-uVar5 >> 0xf);
+		uVar5 = -(-uVar5 & 0x7fff);
+	}
+	else {
+		uVar5 = uVar5 & 0x7fff;
+	}
+	setCopReg(2, 0x4800, iVar7);
+	setCopReg(2, 0x5000, iVar8);
+	setCopReg(2, 0x5800, iVar9);
+	copFunction(2, 0x41e012);
+	iVar7 = getCopReg(2, 0xc800);
+	iVar8 = getCopReg(2, 0xd000);
+	iVar9 = getCopReg(2, 0xd800);
+	setCopReg(2, 0x4800, uVar1);
+	setCopReg(2, 0x5000, uVar3);
+	setCopReg(2, 0x5800, uVar5);
+	copFunction(2, 0x49e012);
+	if (iVar7 < 0) {
+		iVar7 = iVar7 * 8;
+	}
+	else {
+		iVar7 = iVar7 << 3;
+	}
+	if (iVar8 < 0) {
+		iVar8 = iVar8 * 8;
+	}
+	else {
+		iVar8 = iVar8 << 3;
+	}
+	if (iVar9 < 0) {
+		iVar9 = iVar9 * 8;
+	}
+	else {
+		iVar9 = iVar9 << 3;
+	}
+	iVar2 = getCopReg(2, 0xc800);
+	iVar4 = getCopReg(2, 0xd000);
+	iVar6 = getCopReg(2, 0xd800);
+	v1->vx = iVar2 + iVar7;
+	v1->vy = iVar4 + iVar8;
+	v1->vz = iVar6 + iVar9;
+	return v1;
+}
+
+void computeCameraEyeFromAt(VECTOR* param_1, VECTOR* param_2)
+{
+	MATRIX MStack80;
+	VECTOR local_30;
+	VECTOR local_20;
+
+	PushMatrix();
+	createRotationMatrix(&cameraRotationBetweenEyeAndAt, &MStack80);
+	local_30.vx = param_2->vx - param_1->vx;
+	local_30.vy = param_2->vy - param_1->vy;
+	local_30.vz = param_2->vz - param_1->vz;
+	ApplyMatrixLV(&MStack80, &local_30, &local_20);
+	param_1->vx = local_20.vx + param_2->vx;
+	param_1->vz = local_20.vz + param_2->vz;
+	PopMatrix();
+	return;
+}
+
+void updateCameraInterpolationSub1(VECTOR* param_1, int elevation)
+{
+	VECTOR local_48;
+	local_48.vx = param_1->vx;
+	local_48.vy = 0;
+	local_48.vz = param_1->vz;
+	std::array<s16, 6> collisionResult;
+	std::array<s16, 4> collisionResult2;
+	if (checkCameraCollision(&local_48, collisionResult, collisionResult2) == -1) {
+		assert(0);
+	}
+	else {
+		cameraAt2.vx = param_1->vx;
+		cameraCollisionState = 0;
+		cameraAt2.vz = param_1->vz;
+		cameraAt2.vy = param_1->vy + -0x200000;
+	}
+
+	cameraEye2.vy = (getAngleSin((sceneDIP * 0x5b >> 3) + 0xc00) * sceneSCRZ * -0x20 >> 0x10) * (int)sceneScale * 0x10 + cameraAt2.vy;
+	cameraEye2.vx = cameraAt2.vx;
+	cameraEye2.vz = (getAngleCos((sceneDIP * 0x5b >> 3) + 0xc00) * sceneSCRZ * 0x20 >> 0x10) * (int)sceneScale * 0x10 + cameraAt2.vz;
+
+	computeCameraEyeFromAt(&cameraEye2, &cameraAt2);
+
+	if ((op99Var7 & 1) != 0) {
+		if (op9DVar0 != 0) {
+			op9DVar3 = op9DVar3 + op9DVar2;
+			sceneScale = (short)((uint)op9DVar3 >> 0x10);
+		}
+		int uVar3 = (int)op9DVar0 - 1;
+		op9DVar0 = (short)uVar3;
+		if ((uVar3 & 0xffff) == 0) {
+			op99Var7 = op99Var7 & 0xfffe;
+		}
+	}
+	if ((op99Var7 & 8) != 0) {
+		assert(0);
+	}
 }
 
 void updateCameraInterpolation(void)
 {
 	switch (cameraInterpolationMode)
 	{
+	case 0:
+		updateCameraInterpolationVar1 = 0;
+		{
+			int iVar1 = op99Var6;
+			if ((updateCameraInterpolationVar0 & 3) == 0) {
+				iVar1 = 8;
+				if (8 < op99Var5) {
+					iVar1 = op99Var5 + -2;
+				}
+				op99Var5 = iVar1;
+				iVar1 = 8;
+				if (8 < op99Var6) {
+					iVar1 = op99Var6 + -2;
+				}
+			}
+			op99Var6 = iVar1;
+			updateCameraInterpolationVar0 = updateCameraInterpolationVar0 + 1;
+		}
+		break;
 	case 1:
 		updateCameraInterpolationVar0 = 0;
 		updateCameraInterpolationVar1 = 0;
@@ -4385,13 +4577,87 @@ void updateCameraInterpolation(void)
 			cameraEye2.vy = cameraInterpolationStartPosition[1];
 			cameraEye2.vz = cameraInterpolationStartPosition[2];
 		}
-		break;
+		updateCameraInterpolationSub2();
+		cameraRotationBetweenEyeAndAt.vy &= 0xfff;
+		return;
 	default:
 		assert(0);
 	}
 
+	updateCameraInterpolationSub0();
+	sFieldEntity* psVar2 = &actorArray[actorCameraTracked];
+	VECTOR localPosition;
+	localPosition.vx = (psVar2->m4C_scriptEntity->m20_position).vx;
+	localPosition.vy = (psVar2->m4C_scriptEntity->m20_position).vy;
+	localPosition.vz = (psVar2->m4C_scriptEntity->m20_position).vz;
+	updateCameraInterpolationSub1(&localPosition, (int)psVar2->m4C_scriptEntity->m72_elevation);
+	if ((op99Var7 & 0x4000) == 0) {
+		SVECTOR walkmeshOutput1;
+		VECTOR walkmeshOutput2;
+		findTriangleInWalkMesh((cameraEye2.vx >> 16), (cameraEye2.vz >> 16), numWalkMesh + -1, &walkmeshOutput1, &walkmeshOutput2);
+		if ((int)walkmeshOutput1.vy < (int)(cameraEye2.vy >> 16)) {
+			cameraEye2.vy = (int)walkmeshOutput1.vy << 0x10;
+		}
+	}
+	if (cameraInterpolationMode == 2) {
+		int lVar3 = length2d((cameraAt2.vx >> 16) - (cameraAt[0] >> 16), (cameraAt2.vz >> 16) - (cameraAt[2] >> 16));
+		int lVar4 = length2d((cameraEye2.vx >> 16) - (cameraEye[0] >> 16), (cameraEye2.vz >> 16) - (cameraEye[2] >> 16));
+		if ((lVar3 < 0x80) && (lVar4 < 0x80)) {
+			cameraInterpolationMode = 0;
+		}
+	}
+
 	updateCameraInterpolationSub2();
-	op99VarB = op99VarB & 0xfff;
+	cameraRotationBetweenEyeAndAt.vy &= 0xfff;
+}
+
+struct sCurrentCameraVectors
+{
+	VECTOR m10_eye;
+	VECTOR m20_at;
+};
+
+sCurrentCameraVectors* pCurrentCameraVectors = nullptr;
+
+SVECTOR computeProjectionMatrixAngles = { 0,0,0 };
+MATRIX computeProjectionMatrixTempMatrix;
+MATRIX computeProjectionMatrixTempMatrix2;
+
+void computeProjectionMatrix(void)
+{
+	VECTOR local_70;
+	MATRIX MStack64;
+	long alStack32[2];
+
+	createRotationMatrix(&computeProjectionMatrixAngles, &computeProjectionMatrixTempMatrix);
+	resetMatrixTranslation(&computeProjectionMatrixTempMatrix);
+	CompMatrix(&computeProjectionMatrixTempMatrix, &cameraMatrix, &MStack64);
+	copyMatrix(&cameraMatrix, &MStack64);
+	createRotationMatrix(&cameraProjectionAngles, &computeProjectionMatrixTempMatrix2);
+	resetMatrixTranslation(&computeProjectionMatrixTempMatrix2);
+	createRotationMatrix(&cameraProjectionAngles, &currentProjectionMatrix);
+	MulRotationMatrix(&cameraMatrix, &currentProjectionMatrix);
+	SetRotMatrix(&cameraMatrix);
+	SetTransMatrix(&cameraMatrix);
+	RotTrans(&cameraRotation, (VECTOR*)&currentProjectionMatrix.t[0], alStack32);
+	local_70.vx = worldScaleFactor;
+	local_70.vy = worldScaleFactor;
+	local_70.vz = worldScaleFactor;
+	ScaleMatrix(&currentProjectionMatrix, &local_70);
+	SetRotMatrix(&currentProjectionMatrix);
+	SetTransMatrix(&currentProjectionMatrix);
+	return;
+}
+
+void setProjectionMatrixForField(void)
+{
+	computeProjectionMatrix();
+	SetRotMatrix(&currentProjectionMatrix);
+	SetTransMatrix(&currentProjectionMatrix);
+	if (fieldDebugDisable == 0) {
+		assert(0);
+	}
+	return;
 }
 
 void updateAllEntities()
@@ -4407,12 +4673,42 @@ void updateAllEntities()
 	camera2Tan = ratan2(cameraAt2.vz - cameraEye2.vz, cameraAt2.vx - cameraEye2.vx) + -0x400;
 	cameraDeltaTan = ratan2(length2d(cameraAt[0] - cameraEye[0] >> 0x10, cameraAt[2] - cameraEye[2] >> 0x10), cameraAt[1] - cameraEye[1] >> 0x10);
 
-	std::vector<RECT> aiStack72(7);
-	updateAllEntitiesVar0 = &aiStack72;
+	sCurrentCameraVectors cameraVectors;
+	pCurrentCameraVectors = &cameraVectors;
 
 	updateCameraInterpolation();
 
-	MissingCode();
+	int lVar6 = fieldCameraOffset.vz;
+	int lVar5 = fieldCameraOffset.vy;
+	int lVar7 = fieldCameraOffset.vx;
+	int iVar9 = cameraEye[2];
+	int iVar11 = cameraEye[1];
+	int iVar12 = cameraEye[0];
+	(pCurrentCameraVectors->m10_eye).vx = cameraEye[0];
+	(pCurrentCameraVectors->m10_eye).vx = iVar12 + lVar7;
+	iVar12 = cameraAt[0];
+	(pCurrentCameraVectors->m10_eye).vy = iVar11;
+	(pCurrentCameraVectors->m10_eye).vy = iVar11 + lVar5;
+	iVar11 = cameraAt[1];
+	(pCurrentCameraVectors->m10_eye).vz = iVar9;
+	int iVar4 = cameraAt[2];
+	(pCurrentCameraVectors->m20_at).vx = iVar12;
+	(pCurrentCameraVectors->m20_at).vx = iVar12 + lVar7;
+	(pCurrentCameraVectors->m10_eye).vz = iVar9 + lVar6;
+	(pCurrentCameraVectors->m20_at).vy = iVar11;
+	(pCurrentCameraVectors->m20_at).vz = iVar4;
+	(pCurrentCameraVectors->m20_at).vy = iVar11 + lVar5;
+	(pCurrentCameraVectors->m20_at).vz = iVar4 + lVar6;
+	if (updateAllEntitiesSub2Var0 == 0) {
+		cameraMatrix = cameraMatrix2;
+		computeMatrix(&cameraMatrix2, &pCurrentCameraVectors->m10_eye, &pCurrentCameraVectors->m20_at, &cameraUp);
+	}
+	else {
+		computeMatrix(&cameraMatrix, &pCurrentCameraVectors->m10_eye, &pCurrentCameraVectors->m20_at, &cameraUp);
+		cameraMatrix2 = cameraMatrix;
+	}
+
+	setProjectionMatrixForField();
 
 	for (int i = 0; i < totalActors; i++)
 	{
@@ -4596,7 +4892,10 @@ bool submitModelForRendering(sModelBlock* param_1, std::vector<sTag*>& param_2, 
 			assert(0);
 		}
 		g_currentModelBlockSubBlocks = currentModelBlockSubBlocks + 4;
-		primRenderFunc(g_currentModelBlockSubBlocks, READ_LE_U16(currentModelBlockSubBlocks +2));
+		if (primRenderFunc)
+		{
+			primRenderFunc(g_currentModelBlockSubBlocks, READ_LE_U16(currentModelBlockSubBlocks + 2));
+		}
 		currentModelBlockSubBlocks = g_currentModelBlockSubBlocks + READ_LE_U16(currentModelBlockSubBlocks + 2) * polyRenderDefs[primType].m1C_size;
 	}
 	g_currentModelBlockSubBlocks = currentModelBlockSubBlocks;
@@ -4642,6 +4941,25 @@ void renderObjects()
 				SVECTOR rotationAxis;
 				switch (pFieldEntity->m4C_scriptEntity->m12C_flags & 3)
 				{
+				case 0:
+					if (pFieldEntity->m4C_scriptEntity->m128 == -1)
+					{
+						if (pFieldEntity->m4C_scriptEntity->m75 == -1)
+						{
+							assert(0);
+						}
+						else
+						{
+							CompMatrix(&currentProjectionMatrix, &actorArray[pFieldEntity->m4C_scriptEntity->m75].m2C_matrixBackup, &rotationMatrix);
+							CompMatrix(&rotationMatrix, &actorArray[i].mC_matrix, &projectedMatrix);
+							CompMatrix(&actorArray[pFieldEntity->m4C_scriptEntity->m75].m2C_matrixBackup, &actorArray[i].mC_matrix, &actorArray[i].m2C_matrixBackup);
+						}
+					}
+					else
+					{
+						assert(0);
+					}
+					break;
 				case 1:
 					rotationAxis = { pFieldEntity->m4C_scriptEntity->m70_rotationForRendering, 0,0 };
 					createRotationMatrix(&rotationAxis, &rotationMatrix);
@@ -4664,7 +4982,7 @@ void renderObjects()
 					CompMatrix(&currentProjectionMatrix, &rotationMatrix, &projectedMatrix);
 					break;
 				default:
-					MissingCode();
+					assert(0); // else projectedMatrix is uninitialized
 				}
 			}
 			else
@@ -4959,6 +5277,16 @@ void shapeTransfert()
 	shapeTransfertTable[shapeTransfertDoubleBufferIndex] = (sShapeTransfert*)0x0;
 }
 
+void AddPrims(sTag* ot, sTag* p0, sTag* p1)
+{
+	p1->m0_pNext = ot->m0_pNext;
+	ot->m0_pNext = p0;
+}
+
+void linkOT(sTag* a, std::array<sTag, 4096>& b, int index)
+{
+	AddPrims(a, &b[index], &b[0]);
+}
 
 void updateAndRenderField()
 {
@@ -4986,6 +5314,12 @@ void updateAndRenderField()
 	shapeTransfert();
 	MissingCode();
 
+	if (updateAllEntitiesSub2Var0 == 0) {
+		if (fieldUseGroundOT != 0) {
+			linkOT(&pCurrentFieldRenderingContext->mCC_OT[linkOTIndex], pCurrentFieldRenderingContext->m40D0_secondaryOT, linkOTIndex);
+		}
+		linkOT(&pCurrentFieldRenderingContext->m80D4_uiOT[7], pCurrentFieldRenderingContext->mCC_OT, linkOTIndex);
+	}
 	DrawOTag(&pCurrentFieldRenderingContext->m80D4_uiOT[7]);
 
 	MissingCode();

@@ -128,18 +128,15 @@ struct POLY_FT3 : public sTag
 	u8 g0;
 	u8 b0;
 	u8 code; //7
-	s16 x0;
-	s16 y0;
+	sVec2_s16 x0y0;
 	u8 u0; //C
 	u8 v0;
 	u16 clut;
-	s16 x1; // 10
-	s16 y1;
+	sVec2_s16 x1y1; // 10
 	u8 u1; // 14
 	u8 v1;
 	u16 tpage;
-	s16 x2; //18
-	s16 y2;
+	sVec2_s16 x2y2; //18
 	u8 u2; //1C
 	u8 v2;
 	u16 pad1;

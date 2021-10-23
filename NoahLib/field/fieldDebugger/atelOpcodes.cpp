@@ -815,10 +815,11 @@ void initOpcodeTable()
 		.end();
 
 	m_opcode[0xF2]
+		.setName("SETUP_CAMERA_SHAKE")
 		.addArgumentU16OrVar("x")
 		.addArgumentU16OrVar("z")
 		.addArgumentU16OrVar("y")
-		.addArgumentU16OrVar("ratio")
+		.addArgumentU16OrVar("duration")
 		.end();
 
 	m_opcode[0xF3]

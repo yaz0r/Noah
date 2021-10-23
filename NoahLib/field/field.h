@@ -55,6 +55,7 @@ struct sFieldScriptEntity
     s16 m70_rotationForRendering;
     s16 m72_elevation;
     s8 m74;
+    s8 m75;
     s16 m76;
     std::array<u16, 4> m78_stack;
     s8 m80_DialogAvatarFace;
