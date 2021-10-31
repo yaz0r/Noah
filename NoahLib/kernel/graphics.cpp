@@ -398,31 +398,6 @@ void SPRT::execute()
 			pVertices[i].TextureWindow[2] = (pCurrentDrMode->code[1] >> 16) & 0xFF;
 			pVertices[i].TextureWindow[3] = 0;
 		}
-		/*
-		RECT textureWindow = { 0,0,256,256 };
-
-		if (pCurrentDrMode->code[1])
-		{
-			textureWindow.x = ((pCurrentDrMode->code[1] >> 0xA) << 3) & 0xFF;
-			textureWindow.y = ((pCurrentDrMode->code[1] >> 0xF) << 3) & 0xFF;
-			textureWindow.h = -((pCurrentDrMode->code[1] >> 0x5) << 3) & 0xFF;
-			textureWindow.w = -((pCurrentDrMode->code[1]) << 3) & 0xFF;
-
-			if (textureWindow.w == 0)
-			{
-				textureWindow.w = 256;
-			}
-			if (textureWindow.h == 0)
-			{
-				textureWindow.h = 256;
-			}
-		}
-
-		float localU0 = textureWindow.x + 256 * ((0 / 256.f) * (textureWindow.w / 256.f));
-		float localV0 = textureWindow.y + 256 * ((0 / 256.f) * (textureWindow.w / 256.f));
-		float localU1 = textureWindow.x + 256 * ((256 / 256.f) * (textureWindow.w / 256.f));
-		float localV1 = textureWindow.y + 256 * ((256 / 256.f) * (textureWindow.w / 256.f));
-		*/
 
 		float localU0 = u0;
 		float localV0 = v0;
@@ -458,12 +433,17 @@ void SPRT::execute()
 		pIndices[2] = 3;
 		pIndices[3] = 2;
 
-		bgfx::setState(0 | BGFX_STATE_WRITE_RGB
-			| BGFX_STATE_WRITE_A
+		u64 State = BGFX_STATE_WRITE_RGB
 			| BGFX_STATE_DEPTH_TEST_ALWAYS
 			| BGFX_STATE_MSAA
-			| BGFX_STATE_PT_TRISTRIP
-		);
+			| BGFX_STATE_PT_TRISTRIP;
+
+		if (code & 2)
+		{
+			State |= BGFX_STATE_BLEND_NORMAL;
+		}
+
+		bgfx::setState(State);
 
 		bgfx::setVertexBuffer(0, &vertexBuffer);
 		bgfx::setIndexBuffer(&indexBuffer);
@@ -490,7 +470,7 @@ void TILE::execute()
 		layout
 			.begin()
 			.add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
-			.add(bgfx::Attrib::Color0, 3, bgfx::AttribType::Float)
+			.add(bgfx::Attrib::Color0, 4, bgfx::AttribType::Float)
 			.add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
 			.add(bgfx::Attrib::TexCoord1, 2, bgfx::AttribType::Int16) // CLUT
 			.add(bgfx::Attrib::TexCoord2, 4, bgfx::AttribType::Uint8) // Texpage
@@ -504,7 +484,7 @@ void TILE::execute()
 		struct sVertice
 		{
 			float v[3];
-			float color[3];
+			float color[4];
 			float texcoord[2];
 			u16 CLUT[2];
 			u8 Texpage[4];
@@ -516,9 +496,10 @@ void TILE::execute()
 
 		for (int i = 0; i < 4; i++)
 		{
-			pVertices[i].color[0] = r0 / 256.f;
-			pVertices[i].color[1] = g0 / 256.f;
-			pVertices[i].color[2] = b0 / 256.f;
+			pVertices[i].color[0] = r0 / 255.f;
+			pVertices[i].color[1] = g0 / 255.f;
+			pVertices[i].color[2] = b0 / 255.f;
+			pVertices[i].color[3] = 1.f - ((r0 & 0x80) / (float)0x80);
 		}
 
 		pVertices[0].v[0] = x0;
@@ -542,12 +523,17 @@ void TILE::execute()
 		pIndices[2] = 3;
 		pIndices[3] = 2;
 
-		bgfx::setState(0 | BGFX_STATE_WRITE_RGB
-			| BGFX_STATE_WRITE_A
+		u64 State = BGFX_STATE_WRITE_RGB
 			| BGFX_STATE_DEPTH_TEST_ALWAYS
 			| BGFX_STATE_MSAA
-			| BGFX_STATE_PT_TRISTRIP
-		);
+			| BGFX_STATE_PT_TRISTRIP;
+
+		if (code & 2)
+		{
+			State |= BGFX_STATE_BLEND_NORMAL;
+		}
+
+		bgfx::setState(State);
 
 		bgfx::setVertexBuffer(0, &vertexBuffer);
 		bgfx::setIndexBuffer(&indexBuffer);
@@ -654,7 +640,6 @@ void POLY_FT4::execute()
 		pIndices[3] = 3;
 
 		bgfx::setState(0 | BGFX_STATE_WRITE_RGB
-			| BGFX_STATE_WRITE_A
 			| BGFX_STATE_DEPTH_TEST_ALWAYS
 			| BGFX_STATE_MSAA
 			| BGFX_STATE_PT_TRISTRIP
@@ -751,7 +736,6 @@ void POLY_FT3::execute()
 		pIndices[2] = 2;
 
 		bgfx::setState(0 | BGFX_STATE_WRITE_RGB
-			| BGFX_STATE_WRITE_A
 			| BGFX_STATE_DEPTH_TEST_ALWAYS
 			| BGFX_STATE_MSAA
 			| BGFX_STATE_PT_TRISTRIP

@@ -58,7 +58,7 @@ float4 getCLUTForColor(int2 clutConfig, int colorIndex)
     result.x = R / (float)0x1F;
     result.y = G / (float)0x1F;
     result.z = B / (float)0x1F;
-    result.w = 1.f;
+    result.w = 1-A;
 
     return result;
 }
