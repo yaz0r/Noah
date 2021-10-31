@@ -83,6 +83,38 @@ struct VECTOR
     s32 vy;
     s32 vz;
     s32 pad;
+
+	s32 operator[](size_t idx) const
+	{
+		switch (idx)
+		{
+		case 0:
+			return vx;
+		case 1:
+			return vy;
+		case 2:
+			return vz;
+		default:
+			assert(0);
+			return 0;
+		}
+	}
+
+	s32& operator[](size_t idx)
+	{
+		switch (idx)
+		{
+		case 0:
+			return vx;
+		case 1:
+			return vy;
+		case 2:
+			return vz;
+		default:
+			assert(0);
+			return vx;
+		}
+	}
 };
 
 struct SVECTOR

@@ -1,6 +1,7 @@
 #include "noahLib.h"
 #include "gameState.h"
 #include "filesystem.h"
+#include "field/dialogWindows.h"
 
 sGameState gameState;
 sGameState* pKernelGameState = nullptr;
@@ -43,6 +44,9 @@ void initGameState()
 
     loadInitialGameState();
     waitReadCompletion(0);
+	dialogWindowColor[0] = 0x88;
+	dialogWindowColor[1] = 0x76;
+	dialogWindowColor[2] = 0x54;
 
     MissingCode();
 }

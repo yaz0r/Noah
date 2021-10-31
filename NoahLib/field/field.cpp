@@ -429,6 +429,7 @@ void initFieldScriptEntityValues(int index)
 	pFieldScriptEntity->m18[2] = 0x10;
 	pFieldScriptEntity->m18[1] = 0x60;
 	pFieldScriptEntity->m74 = -1;
+	pFieldScriptEntity->m75 = -1;
 
 	pFieldScriptEntity->m40.vx = 0;
 	pFieldScriptEntity->m40.vy = 0;
@@ -4639,7 +4640,7 @@ void computeProjectionMatrix(void)
 	MulRotationMatrix(&cameraMatrix, &currentProjectionMatrix);
 	SetRotMatrix(&cameraMatrix);
 	SetTransMatrix(&cameraMatrix);
-	RotTrans(&cameraRotation, (VECTOR*)&currentProjectionMatrix.t[0], alStack32);
+	RotTrans(&cameraRotation, &currentProjectionMatrix.t, alStack32);
 	local_70.vx = worldScaleFactor;
 	local_70.vy = worldScaleFactor;
 	local_70.vz = worldScaleFactor;
@@ -4902,6 +4903,8 @@ bool submitModelForRendering(sModelBlock* param_1, std::vector<sTag*>& param_2, 
 	return 1;
 }
 
+char fieldObjectRenderingVar3 = 0;
+
 void renderObjects()
 {
 	fieldPolyCount = 0;
@@ -4946,7 +4949,7 @@ void renderObjects()
 					{
 						if (pFieldEntity->m4C_scriptEntity->m75 == -1)
 						{
-							assert(0);
+							goto LAB_Field__80074d80;
 						}
 						else
 						{
@@ -4987,7 +4990,43 @@ void renderObjects()
 			}
 			else
 			{
-				MissingCode();
+				if ((fieldObjectRenderingVar3 & 0x7f) == 0) {
+					(pFieldEntity->mC_matrix).t[0] = ((int)(pFieldEntity->mC_matrix).t[0] + (int)fieldObjectRenderingVar2.vx);
+					(pFieldEntity->mC_matrix).t[1] = ((int)(pFieldEntity->mC_matrix).t[1] + (int)fieldObjectRenderingVar2.vz);
+					(pFieldEntity->mC_matrix).t[2] = ((int)(pFieldEntity->mC_matrix).t[2] + (int)fieldObjectRenderingVar2.vy);
+				}
+
+LAB_Field__80074d80:
+				if ((fieldObjectRenderingVar3 & 0x7f) == 1) {
+					(pFieldEntity->mC_matrix).t[0] = ((int)(pFieldEntity->mC_matrix).t[0] + (int)fieldObjectRenderingVar2.vx);
+					(pFieldEntity->mC_matrix).t[1] = ((int)(pFieldEntity->mC_matrix).t[1] + (int)fieldObjectRenderingVar2.vz);
+					(pFieldEntity->mC_matrix).t[2] = ((int)(pFieldEntity->mC_matrix).t[2] + (int)fieldObjectRenderingVar2.vy);
+				}
+
+				forceVisibility = (fieldObjectRenderingVar3 & 0x80) != 0;
+
+				MulMatrix0(&fieldLocalWorldMatrix, &pFieldEntity->mC_matrix, &projectedMatrix);
+				setCopControlWord(2, 0x2800, fieldLocalWorldMatrix.t[0]);
+				setCopControlWord(2, 0x3000, fieldLocalWorldMatrix.t[1]);
+				setCopControlWord(2, 0x3800, fieldLocalWorldMatrix.t[2]);
+
+				setCopReg(2, 0, sVec2_s16::fromValue(pFieldEntity->mC_matrix.t[0], pFieldEntity->mC_matrix.t[1]));
+				setCopReg(2, 1, sVec2_s16::fromValue(pFieldEntity->mC_matrix.t[2], 0));
+				copFunction(2, 0x480012);
+				projectedMatrix.t[0] = getCopReg(2, 0x19);
+				projectedMatrix.t[1] = getCopReg(2, 0x1a);
+				projectedMatrix.t[2] = getCopReg(2, 0x1b);
+
+				if ((actorArray[i].m58_flags & 3) != 0) {
+					if ((actorArray[i].m58_flags & 3) == 1) {
+						MulMatrix0(&worldScaleMatrix, &actorArray[i].mC_matrix, &projectedMatrix);
+					}
+					else {
+						copyRotationMatrix(&projectedMatrix, &actorArray[i].mC_matrix);
+						ScaleMatrix(&projectedMatrix, &scale2);
+					}
+					MulRotationMatrix(&computeProjectionMatrixTempMatrix, &projectedMatrix);
+				}
 			}
 
 			if (pFieldEntity->m0->m12_renderMode == 1)

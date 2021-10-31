@@ -46,7 +46,7 @@ struct sVec2_s16
 struct MATRIX
 {
 	std::array<std::array<s16, 3>, 3> m;
-	std::array<s32, 3> t;
+	VECTOR t;
 };
 
 struct sVec3
@@ -101,6 +101,7 @@ long RotTransPers(SVECTOR* $2, sVec2_s16* sxy, long* p, long* flag);
 void resetMatrixTranslation(MATRIX* m);
 MATRIX* MulRotationMatrix(const MATRIX* m0, MATRIX* m1);
 void RotTrans(SVECTOR* rotation, VECTOR* output, long* flag);
+void copyRotationMatrix(MATRIX* param_1, MATRIX* param_2);
 
 void PopMatrix();
 void PushMatrix();

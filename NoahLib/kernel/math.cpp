@@ -14,12 +14,12 @@ void createRotationMatrix(SVECTOR* param_1, MATRIX* param_2)
     short sVar7;
     int iVar8;
 
-    sVar7 = rcossin_tbl[(param_1->vx & 0xFFF) * 2];
-    iVar4 = rcossin_tbl[(param_1->vx & 0xFFF) * 2 + 1];
+	sVar7 = rcossin_tbl[(param_1->vy & 0xFFF) * 2];
+	iVar4 = rcossin_tbl[(param_1->vy & 0xFFF) * 2 + 1];
     iVar8 = rcossin_tbl[(param_1->vz & 0xFFF) * 2];
     iVar5 = rcossin_tbl[(param_1->vz & 0xFFF) * 2 + 1];
-    iVar2 = rcossin_tbl[(param_1->vy & 0xFFF) * 2];
-    iVar3 = rcossin_tbl[(param_1->vy & 0xFFF) * 2 + 1];
+    iVar2 = rcossin_tbl[(param_1->vx & 0xFFF) * 2];
+    iVar3 = rcossin_tbl[(param_1->vx & 0xFFF) * 2 + 1];
     iVar1 = -(int)sVar7;
     param_2->m[0][0] = (short)(iVar5 * iVar4 >> 0xc);
     iVar6 = (int)(short)iVar2;
@@ -85,33 +85,22 @@ MATRIX* MulMatrix0(MATRIX* m0, MATRIX* m1, MATRIX* m2)
 	setCopReg(2, 0, sVec2_s16::fromValue(m1->m[0][0], m1->m[1][0]));
 	setCopReg(2, 0x800, sVec2_s16::fromValue(m1->m[2][0], 0));
 	copFunction(2, 0x486012);
-	s32 Var2 = getCopReg(2, 0x4800);
-	s32 Var3 = getCopReg(2, 0x5000);
-	s32 Var4 = getCopReg(2, 0x5800);
+	m2->m[0][0] = getCopReg(2, 0x4800);
+	m2->m[1][0] = getCopReg(2, 0x5000);
+	m2->m[2][0] = getCopReg(2, 0x5800);
 
 	setCopReg(2, 0, sVec2_s16::fromValue(m1->m[0][1], m1->m[1][1]));
 	setCopReg(2, 0x800, sVec2_s16::fromValue(m1->m[2][1], 0));
 	copFunction(2, 0x486012);
-	s32 Var5 = getCopReg(2, 0x4800);
-	s32 Var6 = getCopReg(2, 0x5000);
-	s32 Var7 = getCopReg(2, 0x5800);
+	m2->m[0][1] = getCopReg(2, 0x4800);
+	m2->m[1][1] = getCopReg(2, 0x5000);
+	m2->m[2][1] = getCopReg(2, 0x5800);
 
 	setCopReg(2, 0, sVec2_s16::fromValue(m1->m[0][2], m1->m[1][2]));
 	setCopReg(2, 0x800, sVec2_s16::fromValue(m1->m[2][2], 0));
 	copFunction(2, 0x486012);
-
-	m2->m[0][0] = Var2;
-	m2->m[0][1] = Var5;
-	m2->m[2][0] = Var4;
-	m2->m[2][1] = Var7;
-
-	Var2 = getCopReg(2, 0x4800);
-	Var5 = getCopReg(2, 0x5000);
-	m2->m[0][2] = Var2;
-	m2->m[1][0] = Var3;
-	m2->m[1][1] = Var6;
-	m2->m[1][2] = Var5;
-
+	m2->m[0][2] = getCopReg(2, 0x4800);
+	m2->m[1][2] = getCopReg(2, 0x5000);
 	m2->m[2][2] = getCopReg(2, 0xb);
 
 	return m2;
@@ -277,7 +266,7 @@ void RotTrans(SVECTOR* rotation, VECTOR* output, long* flag)
 {
 	setCopReg(2, 0, sVec2_s16::fromValue(rotation->vx, rotation->vy));
 	setCopReg(2, 1, sVec2_s16::fromValue(rotation->vz, 0));
-	gte_rtv0();
+	copFunction(2, 0x480012);
 	output->vx = getCopReg(2, 0x19);
 	output->vy = getCopReg(2, 0x1a);
 	output->vz = getCopReg(2, 0x1b);

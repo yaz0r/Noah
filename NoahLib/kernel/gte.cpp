@@ -43,67 +43,6 @@ struct
 	std::array<PAIR, 32> p;
 } CP2C;
 
-
-int normalizeGTERegIndex(int reg)
-{
-	if (reg >= 32)
-	{
-		reg >>= 8;
-		reg /= 0x8;
-	}
-	return reg;
-}
-
-void setCopControlWord(int cop, int reg, s32 value)
-{
-	CP2C.p[normalizeGTERegIndex(reg)].sd = value;
-}
-
-void setCopControlWord(int cop, int reg, sVec2_s16 value)
-{
-	CP2C.p[normalizeGTERegIndex(reg)].sd = value.asS32();
-}
-
-static uint32_t gte_leadingzerocount(uint32_t lzcs) {
-	uint32_t lzcr = 0;
-
-	if ((lzcs & 0x80000000) == 0) lzcs = ~lzcs;
-
-	while ((lzcs & 0x80000000) != 0) {
-		lzcr++;
-		lzcs <<= 1;
-	}
-
-	return lzcr;
-}
-
-void setCopReg(int cop, int reg, s32 value)
-{
-	CP2D.p[normalizeGTERegIndex(reg)].sd = value;
-
-	switch (normalizeGTERegIndex(reg))
-	{
-	case 30:
-		CP2D.p[31].sd =  gte_leadingzerocount(value);
-		break;
-	}
-}
-
-void setCopReg(int cop, int reg, sVec2_s16 value)
-{
-	CP2D.p[normalizeGTERegIndex(reg)].sd = value.asS32();
-}
-
-s32 getCopControlWord(int cop, int reg)
-{
-	return CP2C.p[normalizeGTERegIndex(reg)].sd;
-}
-
-s32 getCopReg(int cop, int reg)
-{
-	return CP2D.p[normalizeGTERegIndex(reg)].sd;
-}
-
 #define GTE_SF(op) ((op >> 19) & 1)
 #define GTE_MX(op) ((op >> 17) & 3)
 #define GTE_V(op) ((op >> 15) & 3)
@@ -239,6 +178,145 @@ int s_sf;
 int64_t s_mac0;
 int64_t s_mac3;
 
+
+int normalizeGTERegIndex(int reg)
+{
+	if (reg >= 32)
+	{
+		reg >>= 8;
+		reg /= 0x8;
+	}
+	return reg;
+}
+
+void setCopControlWord(int cop, int reg, u32 value)
+{
+	reg = normalizeGTERegIndex(reg);
+
+	switch (reg) {
+	case 4:
+	case 12:
+	case 20:
+	case 26:
+	case 27:
+	case 29:
+	case 30:
+		value = (int32_t)(int16_t)value;
+		break;
+
+	case 31:
+		value = value & 0x7ffff000;
+		if ((value & 0x7f87e000) != 0) value |= 0x80000000;
+		break;
+	}
+
+	CP2C.p[reg].d = value;
+}
+
+void setCopControlWord(int cop, int reg, sVec2_s16 value)
+{
+	setCopControlWord(cop, reg, value.asS32());
+}
+
+static uint32_t gte_leadingzerocount(uint32_t lzcs) {
+	uint32_t lzcr = 0;
+
+	if ((lzcs & 0x80000000) == 0) lzcs = ~lzcs;
+
+	while ((lzcs & 0x80000000) != 0) {
+		lzcr++;
+		lzcs <<= 1;
+	}
+
+	return lzcr;
+}
+
+void setCopReg(int cop, int reg, u32 value)
+{
+	reg = normalizeGTERegIndex(reg);
+
+	switch (reg) {
+	case 15:
+		SXY0 = SXY1;
+		SXY1 = SXY2;
+		SXY2 = value;
+		break;
+
+	case 28:
+		IR1 = (value & 0x1f) << 7;
+		IR2 = (value & 0x3e0) << 2;
+		IR3 = (value & 0x7c00) >> 3;
+		break;
+
+	case 30:
+		LZCR = gte_leadingzerocount(value);
+		break;
+
+	case 31:
+		return;
+	}
+	CP2D.p[reg].d = value;
+}
+
+void setCopReg(int cop, int reg, sVec2_s16 value)
+{
+	setCopReg(cop, reg, value.asS32());
+}
+
+s32 getCopControlWord(int cop, int reg)
+{
+	return CP2C.p[normalizeGTERegIndex(reg)].sd;
+}
+
+static int32_t LIM(int32_t value, int32_t max, int32_t min, uint32_t flag) {
+	if (value > max) {
+		FLAG |= flag;
+		return max;
+	}
+	else if (value < min) {
+		FLAG |= flag;
+		return min;
+	}
+
+	return value;
+}
+
+s32 getCopReg(int cop, int reg)
+{
+	reg = normalizeGTERegIndex(reg);
+
+	switch (reg) {
+	case 1:
+	case 3:
+	case 5:
+	case 8:
+	case 9:
+	case 10:
+	case 11:
+		CP2D.p[reg].d = (int32_t)CP2D.p[reg].sw.l;
+		break;
+
+	case 7:
+	case 16:
+	case 17:
+	case 18:
+	case 19:
+		CP2D.p[reg].d = (uint32_t)CP2D.p[reg].w.l;
+		break;
+
+	case 15:
+		CP2D.p[reg].d = SXY2;
+		break;
+
+	case 28:
+	case 29:
+		CP2D.p[reg].d = LIM(IR1 >> 7, 0x1f, 0, 0) | (LIM(IR2 >> 7, 0x1f, 0, 0) << 5) | (LIM(IR3 >> 7, 0x1f, 0, 0) << 10);
+		break;
+	}
+
+	return CP2D.p[reg].sd;
+}
+
 static inline int64_t gte_shift(int64_t a, int sf) {
 	if (sf > 0)
 		return a >> 12;
@@ -294,19 +372,6 @@ int32_t A2(/*int44*/ int64_t a) { return BOUNDS(a, (1 << 31) | (1 << 29), (1 << 
 int32_t A3(/*int44*/ int64_t a) {
 	s_mac3 = a;
 	return BOUNDS(a, (1 << 31) | (1 << 28), (1 << 31) | (1 << 25));
-}
-
-static int32_t LIM(int32_t value, int32_t max, int32_t min, uint32_t flag) {
-	if (value > max) {
-		FLAG |= flag;
-		return max;
-	}
-	else if (value < min) {
-		FLAG |= flag;
-		return min;
-	}
-
-	return value;
 }
 
 static int32_t Lm_B1(int32_t a, int lm) { return LIM(a, 0x7fff, -0x8000 * !lm, (1 << 31) | (1 << 24)); }

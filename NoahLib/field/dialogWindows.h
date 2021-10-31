@@ -104,6 +104,8 @@ extern u16 padButtonForDialogs2;
 
 extern std::array<std::array<DR_MODE, 16>, 2> gDialogDrModes;
 
+extern std::array<u8, 3> dialogWindowColor;
+
 void flagWindowOpenBF(uint param_1);
 void createDialogWindow(short x, short y, int dialogIndex, int windowIndex, int width, int height, int fieldActorId, int actorId, int mode, uint param_10, uint param_11);
 void initDialogWindows();
