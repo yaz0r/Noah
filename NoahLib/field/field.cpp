@@ -2216,15 +2216,16 @@ void initFieldData()
 	{
 		for (int j=0; j<4; j++)
 		{
-			initCompassPoly(&fieldCompassVar2[i*4+j], j, i, 0);
+			initCompassPoly(&fieldCompassVar2[i*4+j], j, i, 0); // main compass
 		}
 	}
 
-	initCompassPoly(&fieldCompassVar2[16], 4, 4, 1);
-	initCompassPoly(&fieldCompassVar2[17], 5, 5, 1);
-	initCompassPoly(&fieldCompassVar2[18], 6, 6, 1);
-	initCompassPoly(&fieldCompassVar2[19], 7, 7, 1);
-	initCompassPoly(&fieldCompassVar2[20], 8, 8, 1);
+	initCompassPoly(&fieldCompassVar2[0x10], 4, 4, 1); // letters
+	initCompassPoly(&fieldCompassVar2[0x11], 5, 5, 1);
+	initCompassPoly(&fieldCompassVar2[0x12], 6, 6, 1);
+	initCompassPoly(&fieldCompassVar2[0x13], 7, 7, 1);
+
+	initCompassPoly(&fieldCompassVar2[0x14], 8, 8, 1); // arrow
 
 	MissingCode();
 

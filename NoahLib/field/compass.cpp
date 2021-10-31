@@ -16,6 +16,7 @@ const std::array<std::array<s16, 4>, 9> compassInitDataX = { {
 	{-0x100, 0x100, -0x100, 0x100},
 	{-0x100, 0x100, -0x100, 0x100},
 	{-0x100, 0x100, -0x100, 0x100},
+	{-0x100, 0x100, -0x100, 0x100},
 } };
 
 const std::array<std::array<s16, 4>, 9> compassInitDataZ = { {
@@ -27,6 +28,7 @@ const std::array<std::array<s16, 4>, 9> compassInitDataZ = { {
 	{0xA0, 0xA0, -0xA0, -0xA0},
 	{0xA0, 0xA0, -0xA0, -0xA0},
 	{0xA0, 0xA0, -0xA0, -0xA0},
+	{0x300, 0x300, 0x0, 0},
 } };
 
 const std::array<std::array<s16, 6>, 4> compassInitDataTPage = { {
@@ -166,6 +168,7 @@ void renderCompass()
 		{
 			for (int i = 0x14; i < 0x15; i++)
 			{
+				// actual arrow
 				drawCompassArrowSegment(&pCurrentFieldRenderingContext->m80D4_uiOT[0], &fieldCompassVar2[i], &MStack136, g_frameOddOrEven);
 			}
 		}
@@ -195,11 +198,13 @@ void renderCompass()
 			MissingCode(); //compass letters
 		}
 
+		// main compass
 		for (int i=0; i<0x10; i++)
 		{
 			drawCompassArrowSegment(&pCurrentFieldRenderingContext->m80D4_uiOT[0], &fieldCompassVar2[i], &MStack232, g_frameOddOrEven);
 		}
 
+		// compass shadow
 		for (int i = 0x15; i < 0x19; i++)
 		{
 			drawCompassArrowSegment(&pCurrentFieldRenderingContext->m80D4_uiOT[0], &fieldCompassVar2[i], &MStack232, g_frameOddOrEven);
