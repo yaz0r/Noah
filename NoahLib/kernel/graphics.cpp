@@ -362,6 +362,7 @@ void SPRT::execute()
 			.add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
 			.add(bgfx::Attrib::TexCoord1, 2, bgfx::AttribType::Int16) // CLUT
 			.add(bgfx::Attrib::TexCoord2, 4, bgfx::AttribType::Uint8) // Texpage
+			.add(bgfx::Attrib::TexCoord3, 4, bgfx::AttribType::Uint8) // TextureWindow
 			.end();
 
 		bgfx::TransientVertexBuffer vertexBuffer;
@@ -375,6 +376,7 @@ void SPRT::execute()
 			float texcoord[2];
 			u16 CLUT[2];
 			u8 Texpage[4];
+			u8 TextureWindow[4];
 		};
 
 		sVertice* pVertices = (sVertice*)vertexBuffer.data;
@@ -390,31 +392,66 @@ void SPRT::execute()
 			pVertices[i].Texpage[1] = (pCurrentDrMode->code[0] >> 8) & 0xFF;
 			pVertices[i].Texpage[2] = (pCurrentDrMode->code[0] >> 16) & 0xFF;
 			pVertices[i].Texpage[3] = 0xE1;
+
+			pVertices[i].TextureWindow[0] = pCurrentDrMode->code[1] & 0xFF;
+			pVertices[i].TextureWindow[1] = (pCurrentDrMode->code[1] >> 8) & 0xFF;
+			pVertices[i].TextureWindow[2] = (pCurrentDrMode->code[1] >> 16) & 0xFF;
+			pVertices[i].TextureWindow[3] = 0;
 		}
+		/*
+		RECT textureWindow = { 0,0,256,256 };
+
+		if (pCurrentDrMode->code[1])
+		{
+			textureWindow.x = ((pCurrentDrMode->code[1] >> 0xA) << 3) & 0xFF;
+			textureWindow.y = ((pCurrentDrMode->code[1] >> 0xF) << 3) & 0xFF;
+			textureWindow.h = -((pCurrentDrMode->code[1] >> 0x5) << 3) & 0xFF;
+			textureWindow.w = -((pCurrentDrMode->code[1]) << 3) & 0xFF;
+
+			if (textureWindow.w == 0)
+			{
+				textureWindow.w = 256;
+			}
+			if (textureWindow.h == 0)
+			{
+				textureWindow.h = 256;
+			}
+		}
+
+		float localU0 = textureWindow.x + 256 * ((0 / 256.f) * (textureWindow.w / 256.f));
+		float localV0 = textureWindow.y + 256 * ((0 / 256.f) * (textureWindow.w / 256.f));
+		float localU1 = textureWindow.x + 256 * ((256 / 256.f) * (textureWindow.w / 256.f));
+		float localV1 = textureWindow.y + 256 * ((256 / 256.f) * (textureWindow.w / 256.f));
+		*/
+
+		float localU0 = u0;
+		float localV0 = v0;
+		float localU1 = u0 + w;
+		float localV1 = v0 + h;
 
 		pVertices[0].v[0] = x0;
 		pVertices[0].v[1] = y0;
 		pVertices[0].v[2] = 0;
-		pVertices[0].texcoord[0] = u0;
-		pVertices[0].texcoord[1] = v0;
+		pVertices[0].texcoord[0] = localU0;
+		pVertices[0].texcoord[1] = localV0;
 
 		pVertices[1].v[0] = x0 + w;
 		pVertices[1].v[1] = y0;
 		pVertices[1].v[2] = 0;
-		pVertices[1].texcoord[0] = u0 + w;
-		pVertices[1].texcoord[1] = v0;
+		pVertices[1].texcoord[0] = localU1;
+		pVertices[1].texcoord[1] = localV0;
 
 		pVertices[2].v[0] = x0 + w;
 		pVertices[2].v[1] = y0 + h;
 		pVertices[2].v[2] = 0;
-		pVertices[2].texcoord[0] = u0 + w;
-		pVertices[2].texcoord[1] = v0 + h;
+		pVertices[2].texcoord[0] = localU1;
+		pVertices[2].texcoord[1] = localV1;
 
 		pVertices[3].v[0] = x0;
 		pVertices[3].v[1] = y0 + h;
 		pVertices[3].v[2] = 0;
-		pVertices[3].texcoord[0] = u0;
-		pVertices[3].texcoord[1] = v0 + h;
+		pVertices[3].texcoord[0] = localU0;
+		pVertices[3].texcoord[1] = localV1;
 
 		pIndices[0] = 0;
 		pIndices[1] = 1;
@@ -457,6 +494,7 @@ void TILE::execute()
 			.add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
 			.add(bgfx::Attrib::TexCoord1, 2, bgfx::AttribType::Int16) // CLUT
 			.add(bgfx::Attrib::TexCoord2, 4, bgfx::AttribType::Uint8) // Texpage
+			.add(bgfx::Attrib::TexCoord3, 4, bgfx::AttribType::Uint8) // TextureWindow
 			.end();
 
 		bgfx::TransientVertexBuffer vertexBuffer;
@@ -470,6 +508,7 @@ void TILE::execute()
 			float texcoord[2];
 			u16 CLUT[2];
 			u8 Texpage[4];
+			u8 TextureWindow[4];
 		};
 
 		sVertice* pVertices = (sVertice*)vertexBuffer.data;
@@ -546,6 +585,7 @@ void POLY_FT4::execute()
 			.add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
 			.add(bgfx::Attrib::TexCoord1, 2, bgfx::AttribType::Int16) // CLUT
 			.add(bgfx::Attrib::TexCoord2, 4, bgfx::AttribType::Uint8) // Texpage
+			.add(bgfx::Attrib::TexCoord3, 4, bgfx::AttribType::Uint8) // TextureWindow
 			.end();
 
 		bgfx::TransientVertexBuffer vertexBuffer;
@@ -559,6 +599,7 @@ void POLY_FT4::execute()
 			float texcoord[2];
 			u16 CLUT[2];
 			u8 Texpage[4];
+			u8 TextureWindow[4];
 		};
 
 		sVertice* pVertices = (sVertice*)vertexBuffer.data;
@@ -574,6 +615,13 @@ void POLY_FT4::execute()
 			pVertices[i].Texpage[1] = (code >> 8) & 0xFF;
 			pVertices[i].Texpage[2] = (code >> 16) & 0xFF;
 			pVertices[i].Texpage[3] = 0xE1;
+
+			RECT fullTextureWindow = { 0,0,255,255 };
+			u32 textureWindow = get_tw(&fullTextureWindow);
+			pVertices[i].TextureWindow[0] = textureWindow & 0xFF;
+			pVertices[i].TextureWindow[1] = (textureWindow >> 8) & 0xFF;
+			pVertices[i].TextureWindow[2] = (textureWindow >> 16) & 0xFF;
+			pVertices[i].TextureWindow[3] = 0xE2;
 		}
 
 		pVertices[0].v[0] = x0y0.vx;
@@ -641,6 +689,7 @@ void POLY_FT3::execute()
 			.add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
 			.add(bgfx::Attrib::TexCoord1, 2, bgfx::AttribType::Int16) // CLUT
 			.add(bgfx::Attrib::TexCoord2, 4, bgfx::AttribType::Uint8) // Texpage
+			.add(bgfx::Attrib::TexCoord3, 4, bgfx::AttribType::Uint8) // TextureWindow
 			.end();
 
 		bgfx::TransientVertexBuffer vertexBuffer;
@@ -654,6 +703,7 @@ void POLY_FT3::execute()
 			float texcoord[2];
 			u16 CLUT[2];
 			u8 Texpage[4];
+			u8 TextureWindow[4];
 		};
 
 		sVertice* pVertices = (sVertice*)vertexBuffer.data;
@@ -669,6 +719,13 @@ void POLY_FT3::execute()
 			pVertices[i].Texpage[1] = (code >> 8) & 0xFF;
 			pVertices[i].Texpage[2] = (code >> 16) & 0xFF;
 			pVertices[i].Texpage[3] = 0xE1;
+
+			RECT fullTextureWindow = { 0,0,255,255 };
+			u32 textureWindow = get_tw(&fullTextureWindow);
+			pVertices[i].TextureWindow[0] = textureWindow & 0xFF;
+			pVertices[i].TextureWindow[1] = (textureWindow >> 8) & 0xFF;
+			pVertices[i].TextureWindow[2] = (textureWindow >> 16) & 0xFF;
+			pVertices[i].TextureWindow[3] = 0xE2;
 		}
 
 		pVertices[0].v[0] = x0y0.vx;
