@@ -117,6 +117,29 @@ long RotTransPers(SVECTOR* v0, sVec2_s16* sxy, long* p, long* flag)
 	return getCopReg(2, 0x9800) >> 2;
 }
 
+long RotTransPers4(SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, SVECTOR* v3, sVec2_s16* sxy0, sVec2_s16* sxy1, sVec2_s16* sxy2, sVec2_s16* sxy3, long* p, long* flag)
+{
+	setCopReg(2, 0, sVec2_s16::fromValue(v0->vx, v0->vy));
+	setCopReg(2, 1, sVec2_s16::fromValue(v0->vz, 0));
+	setCopReg(2, 2, sVec2_s16::fromValue(v1->vx, v1->vy));
+	setCopReg(2, 3, sVec2_s16::fromValue(v1->vz, 0));
+	setCopReg(2, 4, sVec2_s16::fromValue(v2->vx, v2->vy));
+	setCopReg(2, 5, sVec2_s16::fromValue(v2->vz, 0));
+	copFunction(2, 0x280030);
+	*sxy0 = sVec2_s16::fromS32(getCopReg(2, 0xc));
+	*sxy1 = sVec2_s16::fromS32(getCopReg(2, 0xd));
+	*sxy2 = sVec2_s16::fromS32(getCopReg(2, 0xe));
+
+	setCopReg(2, 0, sVec2_s16::fromValue(v3->vx, v3->vy));
+	setCopReg(2, 1, sVec2_s16::fromValue(v3->vz, 0));
+	copFunction(2, 0x180001);
+	*sxy3 = sVec2_s16::fromS32(getCopReg(2, 0xe));
+
+	*p = getCopReg(2, 8);
+	*flag = getCopControlWord(2, 0xf800);;
+	return getCopReg(2, 0x9800) >> 2;
+}
+
 void resetMatrixTranslation(MATRIX* m)
 {
 	m->t[0] = 0;
@@ -603,5 +626,34 @@ void copyMatrix(MATRIX* param_1, MATRIX* param_2)
 	copyTranslationMatrix(param_1, param_2);
 }
 
+MATRIX* SetMulMatrix(MATRIX* m0, MATRIX* m1)
+{
+	SetRotMatrix(m0);
+
+	setCopReg(2, 0, sVec2_s16::fromValue(m1->m[0][0], m1->m[1][0]));
+	setCopReg(2, 0x800, sVec2_s16::fromValue(m1->m[2][0], 0));
+	copFunction(2, 0x486012);
+	int uVar4 = getCopReg(2, 0x4800);
+	int iVar5 = getCopReg(2, 0x5000);
+	int uVar6 = getCopReg(2, 0x5800);
+	setCopReg(2, 0, sVec2_s16::fromValue(m1->m[0][1], m1->m[1][1]));
+	setCopReg(2, 0x800, sVec2_s16::fromValue(m1->m[2][1], 0));
+	copFunction(2, 0x486012);
+	int iVar7 = getCopReg(2, 0x4800);
+	int uVar8 = getCopReg(2, 0x5000);
+	int iVar9 = getCopReg(2, 0x5800);
+	setCopReg(2, 0, sVec2_s16::fromValue(m1->m[0][2], m1->m[1][2]));
+	setCopReg(2, 0x800, sVec2_s16::fromValue(m1->m[2][2], 0));
+	copFunction(2, 0x486012);
+	int uVar1 = getCopReg(2, 0x4800);
+	int iVar2 = getCopReg(2, 0x5000);
+	int uVar3 = getCopReg(2, 0x5800);
+	setCopControlWord(2, 0, iVar7 << 0x10 | uVar4 & 0xffff);
+	setCopControlWord(2, 0x800, uVar1 & 0xffff | iVar5 << 0x10);
+	setCopControlWord(2, 0x1000, iVar2 << 0x10 | uVar8 & 0xffff);
+	setCopControlWord(2, 0x1800, iVar9 << 0x10 | uVar6 & 0xffff);
+	setCopControlWord(2, 0x2000, uVar3);
+	return m0;
+}
 
 

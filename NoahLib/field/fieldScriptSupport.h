@@ -29,6 +29,8 @@ int getVar10(int param_1, uint param_2);
 int getVar08(int param_1, uint param_2);
 int getVar04(int param_1, uint param_2);
 
+u32 getCameraDirection(void);
+
 uint getVariable(int param_1);
 
 s16 readS16FromScript(int param_1);

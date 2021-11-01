@@ -17,6 +17,8 @@ struct sFieldEntitySub0
 
 struct sFieldEntity2dSprite
 {
+    SVECTOR m0_screenVertices[4];
+    POLY_FT4 m20_Poly[2];
     //size 0x70
 };
 

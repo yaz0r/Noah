@@ -6,6 +6,7 @@
 int OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1_var = 0x2000;
 int fieldDrawEnvsInitialized = 0;
 s8 isBattleOverlayLoaded = 0;
+s8 isOtherOverlayLoaded = 0;
 s32 initFieldVar2 = 0;
 int initFieldVar4 = 0;
 int initFieldVar5 = 0;
@@ -205,11 +206,45 @@ void pushByteOnAnimationStack(sFieldEntitySub4* param_1, u8 param)
 	param_1->m8E_stack[--param_1->m8C_stackPosition].asU8 = param;
 }
 
-void executeSpriteBytecode2Extended(sFieldEntitySub4* param_1, int bytecode, sPS1Pointer& param_3)
+sFieldEntitySub4* spriteBytecode2ExtendedE0(sFieldEntitySub4* param_1, sPS1Pointer param_2, sFieldEntitySub4_110* param_3)
+{
+	assert(0);
+	return nullptr;
+}
+
+void executeSpriteBytecode2Extended92(sFieldEntitySub4* param_1)
+{
+	if ((param_1->m3C & 3) == 1) {
+		int uVar3 = param_1->m3C >> 5 & 7;
+		if (uVar3 != 0) {
+			uVar3 = uVar3 - 1;
+		}
+		int iVar2 = param_1->m28;
+		sFieldEntitySub4_B4_sub* psVar1 = param_1->m20->m30;
+		int uVar4 = 0;
+		if ((param_1->m40 & 0xFF) >> 2 != 0) {
+			do {
+				uVar4 = uVar4 + 1;
+				psVar1->m10 = iVar2;
+				psVar1->mA_tpage = psVar1->mA_tpage & 0xff9fU | (ushort)(uVar3 << 5);
+				psVar1 = psVar1 + 1;
+			} while (uVar4 != (param_1->m40 & 0xFF) >> 2);
+		}
+	}
+}
+
+void executeSpriteBytecode2Extended(sFieldEntitySub4* param_1, int bytecode, sPS1Pointer param_3)
 {
 	switch (bytecode & 0xff) {
+	case 0x92:
+		param_1->m2B |= 1;
+		executeSpriteBytecode2Extended92(param_1);
+		break;
 	case 0x96:
 		MissingCode();
+		break;
+	case 0xB3:
+		param_1->mA8.m11 = READ_LE_U8(param_3) & 0x3F;
 		break;
 	case 0xB4:
 		pushByteOnAnimationStack(param_1, READ_LE_U8(param_3));
@@ -219,7 +254,20 @@ void executeSpriteBytecode2Extended(sFieldEntitySub4* param_1, int bytecode, sPS
 			param_1->m7C->mC = READ_LE_U16(param_3);
 		}
 		break;
+	case 0xd0:
+	case 0xd3:
+	case 0xdd:
+	case 0xde:
+		MissingCode();
+		/*pcVar11 = (char*)executeSpriteBytecode2Sub3(param_1, param_3);
+		pcVar12 = (char*)executeSpriteBytecode2Sub3(param_1, param_3 + 1);
+		*pcVar11 = *pcVar11 + *pcVar12;
+		* */
+		break;
 	case 0xe0:
+		spriteBytecode2ExtendedE0(param_1, param_3 + READ_LE_U16(param_3), param_1->m24);
+		break;
+	case 0xF7:
 		MissingCode();
 		break;
 	case 0xfc:
@@ -227,6 +275,11 @@ void executeSpriteBytecode2Extended(sFieldEntitySub4* param_1, int bytecode, sPS
 		break;
 	default:
 		assert(0);
+
+	// default
+	case 0xB1:
+	case 0xF8:
+		break;
 	}
 }
 
@@ -300,10 +353,17 @@ const std::array<u8, 256> sizePerBytecodeTable = {
 	0x4, 0x4, 0x4, 0x4,
 };
 
+u8 popByteFromAnimationStack(sFieldEntitySub4* param_1)
+{
+	return param_1->m8E_stack[param_1->m8C_stackPosition++].asU8;
+}
+
 void pushBytecodePointerOnAnimationStack(sFieldEntitySub4* param_1, sPS1Pointer param_2)
 {
 	param_1->m8E_stack[--param_1->m8C_stackPosition].asPs1Pointer = param_2;
 }
+
+int spriteCallback2Var0 = 0;
 
 void executeSpriteBytecode2(sFieldEntitySub4* param_1)
 {
@@ -312,6 +372,8 @@ void executeSpriteBytecode2(sFieldEntitySub4* param_1)
 		return;
 	}
 
+	int unaff_s3 = 0;
+
 	do
 	{
 		if (param_1->m9E != 0)
@@ -319,13 +381,13 @@ void executeSpriteBytecode2(sFieldEntitySub4* param_1)
 			return;
 		}
 
+		sPS1Pointer startOfOpcode = param_1->m64_spriteByteCode;
 		u8 bytecode = READ_LE_U8(param_1->m64_spriteByteCode);
 		sPS1Pointer pEndOfOpcode = param_1->m64_spriteByteCode + 1;
 		if (bytecode < 0x80)
 		{
 			param_1->m64_spriteByteCode = pEndOfOpcode;
 
-			int unaff_s3;
 			if (bytecode < 0x10)
 			{
 				executeSpriteBytecode2Sub0(param_1, param_1->m34 + 1);
@@ -339,7 +401,9 @@ void executeSpriteBytecode2(sFieldEntitySub4* param_1)
 			}
 			else if (bytecode < 0x30)
 			{
-				assert(0);
+				param_1->m34--;
+				executeSpriteBytecode2Sub1(param_1);
+				unaff_s3 = (bytecode & 0xf) + 1;
 			}
 
 			if (bytecode < 0x40)
@@ -371,24 +435,71 @@ void executeSpriteBytecode2(sFieldEntitySub4* param_1)
 		switch (bytecode)
 		{
 		case 0x80:
-		case 0x81:
-		case 0x82:
 		case 0x85:
 		case 0x87:
 		case 0x8E:
 		case 0x98:
-		case 0xA7:
 		case 0xBE:
 		case 0xC8:
 		case 0xD4:
 		case 0xE1:
-		case 0xE4:
 		case 0xFA:
 			assert(0);
 			break;
+		case 0x81:
+			if (((param_1->mAC >> 24) & 0xFF) == 0x3F)
+			{
+				assert(0);
+			}
+			param_1->m9E = 0;
+			if (param_1->m68) {
+				param_1->m68(param_1);
+			}
+			param_1->mA8.m28 = 1;
+			return;
+		case 0x82:
+			if (param_1->m68) {
+				param_1->m68(param_1);
+			}
+			{
+				int iVar15 = (param_1->mC).vy;
+				OP_INIT_ENTITY_SCRIPT_sub0Sub6(param_1, (param_1->mAC >> 24) & 0xFF);
+				(param_1->mC).vy = iVar15;
+			}
+			param_1->m9E = 0;
+			executeSpriteBytecode2(param_1);
+			return;
+		case 0xA7:
+			param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
+			if ((READ_LE_U8(pEndOfOpcode) & 0x80) != 0) {
+				spriteCallback2Var0 = (READ_LE_U8(pEndOfOpcode) & 0x7f) + 1;
+				param_1->m9E = param_1->m9E + 1;
+				return;
+			}
+			{
+				int iVar13 = READ_LE_U8(pEndOfOpcode + 2) * (param_1->mAC >> 7 & 0xfff);
+				if (false) {
+					iVar13 = iVar13 + 0xff;
+				}
+				int sVar11 = (short)((uint)iVar13 >> 8);
+				if (iVar13 >> 8 == 0) {
+					sVar11 = 1;
+				}
+				param_1->m9E = param_1->m9E + sVar11;
+			}
+			return;
 		case 0xE2: // Looks like a call
 			pushBytecodePointerOnAnimationStack(param_1, param_1->m64_spriteByteCode + 3);
 			param_1->m64_spriteByteCode += READ_LE_S16(pEndOfOpcode);
+			break;
+		case 0xe4:
+			{
+				u8 cVar4 = popByteFromAnimationStack(param_1);
+				if (cVar4 != 0) {
+					pushByteOnAnimationStack(param_1, cVar4 + 0xff);
+					param_1->m64_spriteByteCode += (u32)READ_LE_U8(pEndOfOpcode) | (((u32)READ_LE_U8(startOfOpcode + 2) << 0x18) >> 0x10);
+				}
+			}
 			break;
 		default:
 			executeSpriteBytecode2Extended(param_1, bytecode, pEndOfOpcode);
@@ -483,7 +594,7 @@ void initFieldEntitySub4Sub3(sFieldEntitySub4* param_1, int param_2)
 //u16 m2: offset to byte code
 //u16 m4: offset to?
 
-void OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1(sFieldEntitySub4* param_1, const sPS1Pointer& param_2)
+void OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1(sFieldEntitySub4* param_1, const sPS1Pointer param_2)
 {
 	uint uVar1;
 	sFieldEntitySub4_B4* psVar2;
@@ -577,6 +688,8 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1(sFieldEntitySub4* param_1, const sPS1Poi
 
 void executeSpriteBytecode(sFieldEntitySub4* param_1, sPS1Pointer param_2, uint param_3)
 {
+	int unaff_s3;
+
 	while (true)
 	{
 		sPS1Pointer pBytecode = param_1->m64_spriteByteCode;
@@ -588,8 +701,6 @@ void executeSpriteBytecode(sFieldEntitySub4* param_1, sPS1Pointer param_2, uint 
 		if (bytecode < 0x80)
 		{
 			param_1->m64_spriteByteCode = pBytecode + 1;
-
-			int unaff_s3;
 			if (bytecode < 0x10)
 			{
 				executeSpriteBytecode2Sub0(param_1, param_1->m34 + 1);
@@ -635,58 +746,6 @@ void executeSpriteBytecode(sFieldEntitySub4* param_1, sPS1Pointer param_2, uint 
 			}
 
 			param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
-
-#if 0
-			if (bytecode == 0x87) {
-			LAB_80022920:
-				if (pBytecode == param_2) {
-					return;
-				}
-			}
-			else {
-				if (bytecode < 0x88) {
-					if (0x7f < bytecode) {
-						if (bytecode < 0x83) {
-							return;
-						}
-						if (bytecode == 0x86) goto LAB_80022920;
-					}
-				}
-				else {
-					if (bytecode == 0xb3) {
-						param_1->mA8.m11 = READ_LE_U8(pBytecode + 1);
-					}
-					else {
-						if (bytecode < 0xb4) {
-							if (bytecode == 0x97) goto LAB_80022920;
-						}
-						else {
-							if (bytecode == 0xbe) {
-								int uVar3 = READ_LE_U16(pBytecode + 1);
-								int uVar5 = uVar3 >> 6 & 8;
-								param_1->m3C = param_1->m3C & 0xfffffff7 | (uVar5 >> 3 ^ (param_1->mAC & 4) >> 2) << 3;
-								int uVar6 = uVar3 & 0x1ff;
-								param_1->mAC = param_1->mAC & 0xfffffff7 | uVar5;
-								if ((ushort)param_1->m34 != uVar6) {
-									executeSpriteBytecode2Sub0(param_1, (short)uVar6);
-								}
-								param_1->m9E = param_1->m9E + 1 + ((ushort)((int)(uint)uVar3 >> 0xb) & 0xf);
-							}
-							else {
-								if (bytecode == 0xe2) {
-									int bVar1 = READ_LE_U8(pBytecode + 2);
-									int bVar2 = READ_LE_U8(pBytecode + 1);
-									pushBytecodePointerOnAnimationStack(param_1, pBytecode + 3);
-									param_1->m64_spriteByteCode = param_1->m64_spriteByteCode + ((int)(((uint)bVar2 + ((int)((uint)bVar1 << 0x18) >> 0x10)) * 0x10000) >> 0x10);
-									goto LAB_8002268c;
-								}
-							}
-						}
-					}
-				}
-			}
-			param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
-#endif
 		}
 	}
 }

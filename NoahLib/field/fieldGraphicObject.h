@@ -1,6 +1,10 @@
 #pragma once
 #include "kernel/math.h"
 
+extern int spriteCallback2Var0;
+extern s8 isBattleOverlayLoaded;
+extern s8 isOtherOverlayLoaded;
+
 struct sFieldEntitySub4_F4
 {
 	s32 m0;

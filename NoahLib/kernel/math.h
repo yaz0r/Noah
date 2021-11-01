@@ -90,6 +90,7 @@ struct sVec3
 
 typedef MATRIX sMatrix;
 
+MATRIX* SetMulMatrix(MATRIX* m0, MATRIX* m1);
 void createRotationMatrix(SVECTOR*, MATRIX*);
 MATRIX* ScaleMatrixL(MATRIX* m, VECTOR* v);
 MATRIX* ScaleMatrix(MATRIX* m, VECTOR* v);
@@ -98,10 +99,12 @@ MATRIX* CompMatrix(const MATRIX* m0, const MATRIX* m1, MATRIX* m2);
 void SetRotMatrix(const MATRIX* m);
 void SetTransMatrix(const MATRIX* m);
 long RotTransPers(SVECTOR* $2, sVec2_s16* sxy, long* p, long* flag);
+long RotTransPers4(SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, SVECTOR* v3, sVec2_s16* sxy0, sVec2_s16* sxy1, sVec2_s16* sxy2, sVec2_s16* sxy3, long* p, long* flag);
 void resetMatrixTranslation(MATRIX* m);
 MATRIX* MulRotationMatrix(const MATRIX* m0, MATRIX* m1);
 void RotTrans(SVECTOR* rotation, VECTOR* output, long* flag);
 void copyRotationMatrix(MATRIX* param_1, MATRIX* param_2);
+VECTOR* rotateVectorByMatrix(MATRIX* m, SVECTOR* inputVector, VECTOR* outputVector);
 
 void PopMatrix();
 void PushMatrix();

@@ -557,9 +557,38 @@ void initFieldScriptEntityValues(int index)
 	pFieldScriptEntity->m72_elevation = actorArray[index].mC_matrix.t[1];
 }
 
-void initFieldScriptEntity2dSprite(sFieldEntity2dSprite* pSprite)
+void initCharacterShadowPoly(sFieldEntity2dSprite* pSprite)
 {
-	MissingCode();
+	POLY_FT4* p = &pSprite->m20_Poly[0];
+	SetPolyFT4(p);
+	pSprite->m0_screenVertices[3].vx = -0x18;
+	pSprite->m0_screenVertices[3].vz = -0x18;
+	pSprite->m0_screenVertices[2].vz = -0x18;
+	pSprite->m0_screenVertices[1].vx = -0x18;
+	pSprite->m0_screenVertices[3].vy = 0;
+	pSprite->m0_screenVertices[2].vx = 0x18;
+	pSprite->m0_screenVertices[2].vy = 0;
+	pSprite->m0_screenVertices[1].vy = 0;
+	pSprite->m0_screenVertices[1].vz = 0x18;
+	pSprite->m0_screenVertices[0].vx = 0x18;
+	pSprite->m0_screenVertices[0].vy = 0;
+	pSprite->m0_screenVertices[0].vz = 0x18;
+	pSprite->m20_Poly[0].r0 = 0x80;
+	pSprite->m20_Poly[0].g0 = 0x80;
+	pSprite->m20_Poly[0].b0 = 0x80;
+	pSprite->m20_Poly[0].tpage = GetTPage(0, 2, 0x280, 0x1e0);
+	pSprite->m20_Poly[0].clut = GetClut(0x100, 0xf3);
+	SetSemiTrans(p, 1);
+	pSprite->m20_Poly[0].x0y0.vx = 0xe0;
+	pSprite->m20_Poly[0].x0y0.vy = 0xe0;
+	pSprite->m20_Poly[0].u0 = '\0';
+	pSprite->m20_Poly[0].u1 = '\x0f';
+	pSprite->m20_Poly[0].u2 = '\0';
+	pSprite->m20_Poly[0].v2 = 0xef;
+	pSprite->m20_Poly[0].u3 = '\x0f';
+	pSprite->m20_Poly[0].v3 = 0xef;
+
+	pSprite->m20_Poly[1] = pSprite->m20_Poly[0];
 }
 
 int numInitializedFieldScriptEntities = 0;
@@ -584,7 +613,7 @@ void initFieldScriptEntity(int index)
 
 		initFieldScriptEntityValues(index);
 		actorArray[index].m8_2dSprite = new sFieldEntity2dSprite;
-		initFieldScriptEntity2dSprite(actorArray[index].m8_2dSprite);
+		initCharacterShadowPoly(actorArray[index].m8_2dSprite);
 	}
 }
 
@@ -1951,14 +1980,14 @@ struct sShapeTransfert
 };
 
 int shapeTransfertTableSize = 0;
-sShapeTransfert* shapeTransfertBuffer[2] = { nullptr, nullptr };
-void* shapeTransfertTemporaryBuffersLinkedLists[2] = { nullptr, nullptr };
+u8* shapeTransfertBuffer[2] = { nullptr, nullptr };
+u8* shapeTransfertTemporaryBuffersLinkedLists[2] = { nullptr, nullptr };
 
-sShapeTransfert* shapeTransfertTableCurrentEntry;
+u8* shapeTransfertTableCurrentEntry;
 int shapeTransfertDoubleBufferIndex = 0;
-sShapeTransfert* shapeTransfertTableStart;
-sShapeTransfert* shapeTransfertTableEnd;
-std::array<sShapeTransfert*, 2>shapeTransfertTable;
+u8* shapeTransfertTableStart;
+u8* shapeTransfertTableEnd;
+std::array<u8*, 2>shapeTransfertTable;
 
 void resetSpriteTransfertList()
 {
@@ -1968,8 +1997,8 @@ void resetSpriteTransfertList()
 void allocateShapeTransfert(int param_1)
 {
 	shapeTransfertTableSize = param_1;
-	shapeTransfertBuffer[0] = new sShapeTransfert[param_1];
-	shapeTransfertBuffer[1] = new sShapeTransfert[param_1];
+	shapeTransfertBuffer[0] = new u8[param_1 * 2];
+	shapeTransfertBuffer[1] = shapeTransfertBuffer[0] + param_1;
 	shapeTransfertTemporaryBuffersLinkedLists[1] = nullptr;
 	shapeTransfertTemporaryBuffersLinkedLists[0] = nullptr;
 	shapeTransfertTable[0] = nullptr;
@@ -1983,18 +2012,18 @@ void addToShapeTransfertTable(sPS1Pointer pData, short x, short y, short w, shor
 	int iVar2;
 	sShapeTransfert* psVar3;
 
-	psVar3 = shapeTransfertTableCurrentEntry;
+	psVar3 = (sShapeTransfert*)shapeTransfertTableCurrentEntry;
 	iVar2 = shapeTransfertDoubleBufferIndex;
-	if (shapeTransfertTableCurrentEntry + 1 < shapeTransfertTableEnd) {
-		shapeTransfertTableCurrentEntry->m0_rect.x = x;
-		shapeTransfertTableCurrentEntry->m0_rect.y = y;
-		shapeTransfertTableCurrentEntry->m0_rect.w = w;
-		shapeTransfertTableCurrentEntry->m0_rect.h = h;
-		shapeTransfertTableCurrentEntry->m8_pData = pData;
-		ppsVar1 = &shapeTransfertTableCurrentEntry->mC_pNext;
-		shapeTransfertTableCurrentEntry = shapeTransfertTableCurrentEntry + 1;
-		*ppsVar1 = shapeTransfertTable[iVar2];
-		shapeTransfertTable[iVar2] = psVar3;
+	if ((sShapeTransfert*)shapeTransfertTableCurrentEntry + 1 < (sShapeTransfert*)shapeTransfertTableEnd) {
+		psVar3->m0_rect.x = x;
+		psVar3->m0_rect.y = y;
+		psVar3->m0_rect.w = w;
+		psVar3->m0_rect.h = h;
+		psVar3->m8_pData = pData;
+		ppsVar1 = &psVar3->mC_pNext;
+		shapeTransfertTableCurrentEntry += sizeof(sShapeTransfert);
+		*ppsVar1 = (sShapeTransfert*)shapeTransfertTable[iVar2];
+		shapeTransfertTable[iVar2] = (u8*)psVar3;
 	}
 	return;
 }
@@ -5234,7 +5263,7 @@ void uploadCharacterSprite(sFieldEntitySub4* param_1, int param_2, sFieldEntityS
 			}
 		}
 		if ((READ_LE_U16(local_50) & 0x8000) == 0) {
-			assert(0);
+			MissingCode();
 		}
 		else
 		{
@@ -5280,13 +5309,576 @@ void clearShapeTransfertTableEntry(int param_1)
 	return;
 }
 
+MATRIX currentRenderingMatrix;
+
+void setCurrentRenderingMatrix(MATRIX* pMatrix)
+{
+	currentRenderingMatrix = *pMatrix;
+}
+
+std::array<sTag, 4096>* characterRenderingOT = nullptr;
+
+void setCharacterRenderingOT(std::array<sTag, 4096>& OT)
+{
+	characterRenderingOT = &OT;
+}
+
+int disableFogForCharacters = 0;
+bool disableCharacterShadowsRendering = 0;
+
+
+
+void renderFieldCharacterSpritesSub0Sub0(sFieldEntitySub4* pSpriteSheet)
+{
+	if ((isBattleOverlayLoaded != '\0') || (isOtherOverlayLoaded != '\0')) {
+		assert(0);
+	}
+
+	SVECTOR local_30;
+	VECTOR local_28;
+	uint uVar1;
+	sFieldEntitySub4_B4* psVar2;
+	int iVar3;
+	int iVar4;
+
+	uVar1 = pSpriteSheet->m40 >> 8 & 0x1f;
+	iVar3 = (int)(char)pSpriteSheet->m20->m3C << uVar1;
+	if ((pSpriteSheet->mAC >> 2 & 1) != 0) {
+		iVar3 = -iVar3;
+	}
+	iVar4 = ((int)(char)pSpriteSheet->m20->m3D << uVar1) * (int)pSpriteSheet->m2C_scale;
+	iVar3 = iVar3 * pSpriteSheet->m2C_scale;
+	if (iVar4 < 0) {
+		iVar4 = iVar4 + 0xfff;
+	}
+	if (iVar3 < 0) {
+		iVar3 = iVar3 + 0xfff;
+	}
+	local_30.vx = (pSpriteSheet->m0_position).vx >> 0x10;
+	local_30.vy = (pSpriteSheet->m0_position).vy >> 0x10;
+	local_30.vz = (pSpriteSheet->m0_position).vz >> 0x10;
+	rotateVectorByMatrix(&currentRenderingMatrix, &local_30, &local_28);
+	psVar2 = pSpriteSheet->m20;
+	(psVar2->mC_spriteMatrix).t[0] = currentRenderingMatrix.t[0] + local_28.vx + (iVar3 >> 0xc);
+	(psVar2->mC_spriteMatrix).t[1] = currentRenderingMatrix.t[1] + local_28.vy + (iVar4 >> 0xc);
+	(psVar2->mC_spriteMatrix).t[2] = currentRenderingMatrix.t[2] + local_28.vz;
+	SetRotMatrix(&psVar2->mC_spriteMatrix);
+	SetTransMatrix(&psVar2->mC_spriteMatrix);
+}
+
+SVECTOR currentSpriteCharacterSize[4];
+
+std::array<s16, 8> spriteMatrixTable = {
+	1,2,4,8,0x10,0x20,0x40,0x80,
+};
+
+void renderFieldCharacterSpritesSub0Sub1(sFieldEntitySub4* pSpriteSheet, sTag* pTag)
+{
+	sFieldEntitySub4_B4* psVar7 = pSpriteSheet->m20;
+	u32 uVar9 = pSpriteSheet->m40 >> 8 & 0x1f;
+	s8 bVar1 = psVar7->m3D;
+	sFieldEntitySub4_B4_sub* pSpriteDefinition = psVar7->m30;
+	s16 spriteWidth = (short)((int)(char)psVar7->m3C << uVar9);
+	if ((pSpriteSheet->mAC >> 2 & 1) != 0) {
+		spriteWidth = -spriteWidth;
+	}
+	u32 numPolyInSprite = pSpriteSheet->m40 >> 2 & 0x3f;
+	int currentBoundMatrixId = -1;
+
+	int local_30 = 0;
+
+	// enough space in the shape transfer buffer to write the poly?
+	if ((shapeTransfertTableCurrentEntry + numPolyInSprite * sizeof(POLY_FT4) < shapeTransfertTableEnd)) {
+		for (int i=0; i< numPolyInSprite; i++)
+		{
+			int matrixIdNeeded = pSpriteDefinition->m14 & 7;
+			if (currentBoundMatrixId != matrixIdNeeded) { // need to change the matrix?
+				local_30 = spriteMatrixTable[matrixIdNeeded] & ((pSpriteSheet->m3C >> 8) & 0xFF) == 0;
+				local_30 = 1; // hack
+				if (pSpriteSheet->m20->m34 == nullptr)
+				{
+					SetRotMatrix(&pSpriteSheet->m20->mC_spriteMatrix);
+					SetTransMatrix(&pSpriteSheet->m20->mC_spriteMatrix);
+				}
+				else
+				{
+					sFieldEntitySub4_124* psVar8 = &(*pSpriteSheet->m20->m34)[matrixIdNeeded];
+					if ((psVar8->m0 == 0) && (psVar8->m6 == 0))
+					{
+						SetRotMatrix(&pSpriteSheet->m20->mC_spriteMatrix);
+						SetTransMatrix(&pSpriteSheet->m20->mC_spriteMatrix);
+					}
+					else
+					{
+						int spriteScale = pSpriteSheet->m40 >> 8 & 0x1f;
+						int iVar12 = (int)(char)psVar8->m0 << spriteScale;
+						if ((pSpriteSheet->m3C >> 3 & 1) != 0) {
+							iVar12 = -iVar12;
+						}
+						int iVar13 = ((int)(char)psVar8->m1 << spriteScale) * (int)pSpriteSheet->m2C_scale;
+						iVar12 = iVar12 * pSpriteSheet->m2C_scale;
+						if (iVar13 < 0) {
+							iVar13 = iVar13 + 0xfff;
+						}
+						if (iVar12 < 0) {
+							iVar12 = iVar12 + 0xfff;
+						}
+						SVECTOR local_50;
+						local_50.vx = psVar8->m2;
+						local_50.vy = psVar8->m4;
+						local_50.vz = psVar8->m6;
+						if ((pSpriteSheet->m3C >> 3 & 1) != 0) {
+							local_50.vz = -local_50.vz;
+						}
+						MATRIX MStack112;
+						createRotationMatrix(&local_50, &MStack112);
+						MStack112.t[0] = (pSpriteSheet->m20->mC_spriteMatrix).t[0] + (iVar12 >> 0xc);
+						MStack112.t[1] = (pSpriteSheet->m20->mC_spriteMatrix).t[1] + (iVar13 >> 0xc);
+						MStack112.t[2] = (pSpriteSheet->m20->mC_spriteMatrix).t[2];
+						SetMulMatrix(&pSpriteSheet->m20->mC_spriteMatrix, &MStack112);
+						SetTransMatrix(&MStack112);
+					}
+				}
+				currentBoundMatrixId = matrixIdNeeded;
+			}
+			if (local_30)
+			{
+				POLY_FT4* temp = new POLY_FT4;
+
+				POLY_FT4* p = (POLY_FT4*)shapeTransfertTableCurrentEntry;
+				memcpy(p, temp, sizeof(POLY_FT4));
+
+				shapeTransfertTableCurrentEntry += sizeof(POLY_FT4);
+
+				p->m3_size = 9;
+				p->r0 = pSpriteDefinition->m10 & 0xFF;
+				p->g0 = (pSpriteDefinition->m10>>8) & 0xFF;
+				p->b0 = (pSpriteDefinition->m10 >> 16) & 0xFF;
+				p->code = (pSpriteDefinition->m10 >> 24) & 0xFF;
+				p->tpage = pSpriteDefinition->mA_tpage;
+				p->clut = pSpriteDefinition->mC_clut;
+
+				int spriteScale = pSpriteSheet->m40 >> 8 & 0x1f;
+				int spriteHeight = (short)(((int)(((uint)pSpriteDefinition->m6 + (int)(char)pSpriteDefinition->m8) * 0x10000) >> 0x10) << spriteScale);
+				int sVar13 = (short)(((int)(((uint)pSpriteDefinition->m7 + (int)(char)pSpriteDefinition->m9) * 0x10000) >> 0x10) << spriteScale);
+				int sVar11 = (short)((int)pSpriteDefinition->m0 << spriteScale);
+
+				currentSpriteCharacterSize[3].vy = (short)((int)pSpriteDefinition->m2 << spriteScale);
+				if ((pSpriteSheet->m3C >> 3 & 1) != 0) {
+					spriteHeight = -spriteHeight;
+					sVar11 = -sVar11;
+				}
+				if ((pSpriteSheet->m3C >> 4 & 1) != 0) {
+					sVar13 = -sVar13;
+					currentSpriteCharacterSize[3].vy = -currentSpriteCharacterSize[3].vy;
+				}
+				currentSpriteCharacterSize[3].vx = sVar11 + spriteHeight;
+				currentSpriteCharacterSize[2].vx = sVar11;
+				if (((uint)pSpriteDefinition->m14 >> 4 & 1) == 0) {
+					currentSpriteCharacterSize[2].vx = currentSpriteCharacterSize[3].vx;
+					currentSpriteCharacterSize[3].vx = sVar11;
+				}
+				currentSpriteCharacterSize[1].vy = currentSpriteCharacterSize[3].vy + sVar13;
+				if (((uint)pSpriteDefinition->m14 >> 5 & 1) == 0) {
+					currentSpriteCharacterSize[1].vy = currentSpriteCharacterSize[3].vy;
+					currentSpriteCharacterSize[3].vy = currentSpriteCharacterSize[3].vy + sVar13;
+				}
+				spriteHeight = (short)((int)(char)psVar7->m3D << uVar9);
+				currentSpriteCharacterSize[0].vy = currentSpriteCharacterSize[1].vy - spriteHeight;
+				currentSpriteCharacterSize[1].vy = currentSpriteCharacterSize[1].vy - spriteHeight;
+				currentSpriteCharacterSize[2].vy = currentSpriteCharacterSize[3].vy - spriteHeight;
+				currentSpriteCharacterSize[3].vy = currentSpriteCharacterSize[3].vy - spriteHeight;
+				currentSpriteCharacterSize[0].vx = currentSpriteCharacterSize[3].vx - spriteWidth;
+				currentSpriteCharacterSize[1].vx = currentSpriteCharacterSize[2].vx - spriteWidth;
+				currentSpriteCharacterSize[2].vx = currentSpriteCharacterSize[2].vx - spriteWidth;
+				currentSpriteCharacterSize[3].vx = currentSpriteCharacterSize[3].vx - spriteWidth;
+
+				long lStack60;
+				long lStack56;
+				RotTransPers4(&currentSpriteCharacterSize[0], &currentSpriteCharacterSize[1], &currentSpriteCharacterSize[2], &currentSpriteCharacterSize[3], &p->x0y0, &p->x1y1, &p->x3y3, &p->x2y2, &lStack60, &lStack56);
+
+				int spriteDef4 = (uint)(byte)pSpriteDefinition->m4;
+				int spriteDef5 = pSpriteDefinition->m5;
+				int spriteDef6 = pSpriteDefinition->m6 - 1;
+				if (((p->x3y3.vx) < (p->x0y0.vx)) && (spriteDef4 = spriteDef4 - 1, (int)spriteDef4 < 0)) {
+					spriteDef4 = 0;
+					spriteDef6 = pSpriteDefinition->m6 - 2;
+				}
+				int bVar3 = (byte)spriteDef4;
+				int bVar4 = spriteDef5 + (pSpriteDefinition->m7 - 1);
+				
+				p->u0 = bVar3;
+				p->v0 = spriteDef5;
+				p->u1 = bVar3 + spriteDef6;
+				p->v1 = spriteDef5;
+				p->u2 = bVar3;
+				p->v2 = bVar4;
+				p->u3 = bVar3 + spriteDef6;
+				p->v3 = bVar4;
+
+				if ((pSpriteSheet->m3C >> 0x1b & 1) == 0) {
+					p->m0_pNext = pTag->m0_pNext;
+					pTag->m0_pNext = p;
+				}
+				else {
+					sTag* puVar9 = pTag + -currentBoundMatrixId;
+					p->m0_pNext = puVar9->m0_pNext;
+					puVar9->m0_pNext = p;
+				}
+			}
+		}
+	}
+}
+
+void renderFieldCharacterSpritesSub0Sub2(sFieldEntitySub4* pSpriteSheet, sTag* pTag)
+{
+	MissingCode();
+}
+
+void renderFieldCharacterSpritesSub0(sFieldEntitySub4* pSpriteSheet, sTag* pTag)
+{
+	renderFieldCharacterSpritesSub0Sub0(pSpriteSheet);
+	renderFieldCharacterSpritesSub0Sub1(pSpriteSheet, pTag);
+	if ((pSpriteSheet->m3C >> 2 & 1) != 0) {
+		renderFieldCharacterSpritesSub0Sub2(pSpriteSheet, pTag);
+	}
+}
+
+void renderFieldCharacterSprites(std::array<sTag, 4096>& OT, int oddOrEven)
+{
+	int cameraDirection = getCameraDirection() & 0xFFFF;
+	MATRIX localRotationMatrix;
+	copyRotationMatrix(&localRotationMatrix, &computeProjectionMatrixTempMatrix);
+
+	SVECTOR tempVector;
+	tempVector.vx = 0;
+	tempVector.vy = (sceneDIP / 3) * -2;
+	tempVector.vz = 0;
+	if (totalActors)
+	{
+		for (int currentActorIndex=0; currentActorIndex<totalActors; currentActorIndex++)
+		{
+			sFieldEntity* pFieldEntity = &actorArray[currentActorIndex];
+			if ((pFieldEntity->m58_flags & 0x40) != 0) {
+				sFieldScriptEntity* pScriptEntity = pFieldEntity->m4C_scriptEntity;
+				sFieldEntitySub4* pSpriteSheet = pFieldEntity->m4_pVramSpriteSheet;
+				int flags = pScriptEntity->m4_flags;
+
+				pFieldEntity->m2C_matrixBackup = pFieldEntity->mC_matrix;
+
+				if ((flags & 0x2000) == 0) {
+					MATRIX tempMatrix;
+					SetRotMatrix(&currentProjectionMatrix);
+
+					setCopReg(2, 0, sVec2_s16::fromValue(pFieldEntity->mC_matrix.m[0][0], pFieldEntity->mC_matrix.m[1][0]));
+					setCopReg(2, 0x800, sVec2_s16::fromValue(pFieldEntity->mC_matrix.m[2][0], 0));
+					copFunction(2, 0x49e012);
+					tempMatrix.m[0][0] = getCopReg(2, 0x4800);
+					tempMatrix.m[1][0] = getCopReg(2, 0x5000);
+					tempMatrix.m[2][0] = getCopReg(2, 0x5800);
+
+					setCopReg(2, 0, sVec2_s16::fromValue(pFieldEntity->mC_matrix.m[0][1], pFieldEntity->mC_matrix.m[1][1]));
+					setCopReg(2, 0x800, sVec2_s16::fromValue(pFieldEntity->mC_matrix.m[2][1], 0));
+					copFunction(2, 0x49e012);
+					tempMatrix.m[0][1] = getCopReg(2, 0x4800);
+					tempMatrix.m[1][1] = getCopReg(2, 0x5000);
+					tempMatrix.m[2][1] = getCopReg(2, 0x5800);
+
+					setCopReg(2, 0, sVec2_s16::fromValue(pFieldEntity->mC_matrix.m[0][2], pFieldEntity->mC_matrix.m[1][2]));
+					setCopReg(2, 0x800, sVec2_s16::fromValue(pFieldEntity->mC_matrix.m[2][2], 0));
+					copFunction(2, 0x49e012);
+					tempMatrix.m[0][2] = getCopReg(2, 0x4800);
+					tempMatrix.m[1][2] = getCopReg(2, 0x5000);
+					tempMatrix.m[2][2] = getCopReg(2, 0x5800);
+
+					setCopControlWord(2, 0x2800, currentProjectionMatrix.t[0]);
+					setCopControlWord(2, 0x3000, currentProjectionMatrix.t[1]);
+					setCopControlWord(2, 0x3800, currentProjectionMatrix.t[2]);
+					setCopReg(2, 0, sVec2_s16::fromValue(pFieldEntity->mC_matrix.t[0], pFieldEntity->mC_matrix.t[1]));
+					setCopReg(2, 1, sVec2_s16::fromValue(pFieldEntity->mC_matrix.t[2], 0));
+					copFunction(2, 0x480012);
+					tempMatrix.t[0] = getCopReg(2, 0x19);
+					tempMatrix.t[1] = getCopReg(2, 0x1a);
+					tempMatrix.t[2] = getCopReg(2, 0x1b);
+
+					SetRotMatrix(&tempMatrix);
+					SetTransMatrix(&tempMatrix);
+
+					setCopReg(2, 0, sVec2_s16::fromValue(tempVector.vx, tempVector.vy));
+					setCopReg(2, 0x800, sVec2_s16::fromValue(tempVector.vz, 0));
+					copFunction(2, 0x180001);
+					sVec2_s16 local_50 = sVec2_s16::fromS32(getCopReg(2, 0xe));
+					s32 p = getCopReg(2, 8);
+					s32 mathFlag = getCopControlWord(2, 0xf800);
+					s32 local_44 = getCopReg(2, 0x9800) >> 2;
+					if (((local_50.vy) + 9U < 323) && (local_50.vx + 0x27U < 399)) {
+						flags = pScriptEntity->m4_flags & ~0x200;
+					}
+					else {
+						flags = pScriptEntity->m4_flags | 0x200;
+					}
+					pScriptEntity->m4_flags = flags;
+
+					if (((disableCharacterShadowsRendering == 0) && ((pFieldEntity->m58_flags & 0x20) == 0)) /* && (-1 < mathFlag)*/) {
+						VECTOR VStack200;
+						VStack200.vx = pScriptEntity->mF4_scale3d[0] * 3 >> 2;
+						VStack200.vy = pScriptEntity->mF4_scale3d[1] * 3 >> 2;
+						VStack200.vz = pScriptEntity->mF4_scale3d[2] * 3 >> 2;
+						if ((pScriptEntity->mE4_playableCharacterId == 7) && (pcInitVar1 != 0)) {
+							VStack200.vx = VStack200.vx * 5 >> 2;
+							VStack200.vy = VStack200.vy * 5 >> 2;
+							VStack200.vz = VStack200.vz * 5 >> 2;
+						}
+						pSpriteSheet->m20->mC_spriteMatrix = localRotationMatrix;
+						ScaleMatrix(&pSpriteSheet->m20->mC_spriteMatrix, &VStack200);
+
+						if (pFieldEntity->m4C_scriptEntity->m14_currentTriangleFlag & 0x200000)
+						{
+							assert(0);
+						}
+
+						if ((disableFogForCharacters == '\0') && (isFogSetup != 0)) {
+							assert(0);
+						}
+
+						local_44 = local_44 >> (primD_2Var0 & 0x1f);
+						if (1 < local_44) {
+							local_44 = local_44 + -2;
+						}
+
+						if ((ushort)(pScriptEntity->mE8 + 0x22U) < 2) {
+							assert(0);
+						}
+						else
+						{
+							pSpriteSheet->m3C &= 0xFFFF00FF;
+							if ((pScriptEntity->m4_flags & 0x2000000) == 0) {
+								if ((pScriptEntity->m134.m5) == 0) {
+									MissingCode();
+									renderFieldCharacterSpritesSub0(pSpriteSheet, &OT[local_44]);
+								}
+								else
+								{
+									assert(0);
+								}
+							}
+						}
+					}
+				}
+				else
+				{
+					assert(0);
+				}
+			}
+		}
+	}
+}
+
+void renderCharShadows(std::array<sTag, 4096>& OT, int oddOrEven)
+{
+	MATRIX localProjectionMatrix = currentProjectionMatrix;
+
+	if (!disableCharacterShadowsRendering)
+	{
+		for (int currentActorId = 0; currentActorId < totalActors; currentActorId++)
+		{
+			sFieldEntity* pCurrentFieldEntity = &actorArray[currentActorId];
+			if ((pCurrentFieldEntity->m58_flags & 0x60) == 0x40) {
+				sFieldScriptEntity* pScriptEntity = pCurrentFieldEntity->m4C_scriptEntity;
+				if (((((pScriptEntity->m4_flags & 0x102200) == 0) && ((pScriptEntity->m4_flags & 0x800) == 0)) && ((pScriptEntity->m0_flags & 0x10000) == 0)) &&
+					((pScriptEntity->m14_currentTriangleFlag & 0x200002U) == 0)) {
+
+					VECTOR local_c8;
+					VECTOR local_d8;
+					VECTOR local_e8;
+					local_e8.vx = 0;
+					local_e8.vy = 0;
+					local_e8.vz = 0x1000;
+
+					// inlined version of OuterProduct12 without register saving
+					setCopControlWord(2, 0, 0);
+					setCopControlWord(2, 0x1000, 0);
+					setCopControlWord(2, 0x2000, 0x1000);
+					pScriptEntity = pCurrentFieldEntity->m4C_scriptEntity;
+					setCopReg(2, 11, (pScriptEntity->m50).vz);
+					setCopReg(2, 9, (pScriptEntity->m50).vx);
+					setCopReg(2, 10, (pScriptEntity->m50).vy);
+					copFunction(2, 0x178000c);
+					local_c8.vx = getCopReg(2, 0x19);
+					local_c8.vy = getCopReg(2, 0x1a);
+					local_c8.vz = getCopReg(2, 0x1b);
+					VectorNormal(&local_c8, &local_d8);
+					setCopControlWord(2, 0, local_d8.vx);
+					setCopControlWord(2, 0x1000, local_d8.vy);
+					setCopControlWord(2, 0x2000, local_d8.vz);
+					pScriptEntity = pCurrentFieldEntity->m4C_scriptEntity;
+					setCopReg(2, 11, (pScriptEntity->m50).vz);
+					setCopReg(2, 9, (pScriptEntity->m50).vx);
+					setCopReg(2, 10, (pScriptEntity->m50).vy);
+					copFunction(2, 0x178000c);
+					local_c8.vx = getCopReg(2, 0x19);
+					local_c8.vy = getCopReg(2, 0x1a);
+					local_c8.vz = getCopReg(2, 0x1b);
+					VectorNormal(&local_c8, &local_e8);
+
+					short local_b8[9];
+					local_b8[0] = (short)local_d8.vx;
+					local_b8[1] = (short)local_d8.vy;
+					local_b8[2] = (short)local_d8.vz;
+					int uVar1 = (pCurrentFieldEntity->m4C_scriptEntity->m50).vx;
+					local_b8[3] = (short)uVar1;
+					int uVar2 = (pCurrentFieldEntity->m4C_scriptEntity->m50).vy;
+					local_b8[4] = (short)uVar2;
+					int uVar4 = (pCurrentFieldEntity->m4C_scriptEntity->m50).vz;
+					local_b8[6] = (short)local_e8.vx;
+					local_b8[8] = (short)local_e8.vz;
+					local_b8[7] = (short)local_e8.vy;
+					local_b8[5] = (short)uVar4;
+
+					SetRotMatrix(&currentProjectionMatrix);
+
+					setCopReg(2, 0x4800, local_d8.vx & 0xffff);
+					setCopReg(2, 0x5000, uVar1 & 0xffff);
+					setCopReg(2, 0x5800, local_e8.vx & 0xffff);
+					copFunction(2, 0x49e012);
+					uVar1 = getCopReg(2, 0x4800);
+					int iVar8 = getCopReg(2, 0x5000);
+					int uVar9 = getCopReg(2, 0x5800);
+					setCopReg(2, 0x4800, local_d8.vy & 0xffff);
+					setCopReg(2, 0x5000, uVar2 & 0xffff);
+					setCopReg(2, 0x5800, local_e8.vy & 0xffff);
+					copFunction(2, 0x49e012);
+					int iVar7 = getCopReg(2, 0x4800);
+					uVar2 = getCopReg(2, 0x5000);
+					int iVar10 = getCopReg(2, 0x5800);
+
+					MATRIX local_98;
+
+					local_98.m[0][0] = uVar1;
+					local_98.m[0][1] = iVar7;
+					local_98.m[2][0] = uVar9;
+					local_98.m[2][1] = iVar10;
+					setCopReg(2, 0x4800, local_d8.vz & 0xffff);
+					setCopReg(2, 0x5000, uVar4 & 0xffff);
+					setCopReg(2, 0x5800, local_e8.vz & 0xffff);
+					copFunction(2, 0x49e012);
+					uVar1 = getCopReg(2, 0x4800);
+					iVar7 = getCopReg(2, 0x5000);
+					uVar4 = getCopReg(2, 0x5800);
+
+					local_98.m[0][2] = uVar1;
+					local_98.m[1][0] = iVar8;
+					local_98.m[1][1] = uVar2;
+					local_98.m[1][2] = iVar7;
+					local_98.m[2][2] = uVar4;
+					setCopControlWord(2, 0x2800, currentProjectionMatrix.t[0]);
+					setCopControlWord(2, 0x3000, currentProjectionMatrix.t[1]);
+					setCopControlWord(2, 0x3800, currentProjectionMatrix.t[2]);
+					setCopReg(2, 0, (uint)(pCurrentFieldEntity->mC_matrix).t[0] & 0xffff | (uint)(ushort)pCurrentFieldEntity->m4_pVramSpriteSheet->m84 << 0x10);
+					setCopReg(2, 1, (pCurrentFieldEntity->mC_matrix).t[2]);
+					copFunction(2, 0x480012);
+					local_98.t[0] = getCopReg(2, 0x19);
+					local_98.t[1] = getCopReg(2, 0x1a);
+					local_98.t[2] = getCopReg(2, 0x1b);
+					iVar10 = pCurrentFieldEntity->m4C_scriptEntity->mF4_scale3d[0] * 0xc00;
+					VECTOR local_58;
+					local_58.vx = iVar10 >> 0xc;
+					iVar8 = pCurrentFieldEntity->m4C_scriptEntity->mF4_scale3d[1] * 0xc00;
+					local_58.vy = iVar8 >> 0xc;
+					iVar7 = pCurrentFieldEntity->m4C_scriptEntity->mF4_scale3d[2] * 0xc00;
+					local_58.vz = iVar7 >> 0xc;
+
+					if ((pcInitVar1 != 0) && ((pCurrentFieldEntity->m4C_scriptEntity->m0_flags & 0x400) != 0)) {
+						local_58.vy = iVar8 >> 0xe;
+						local_58.vz = iVar7 >> 0xe;
+						local_58.vx = iVar10 >> 0xe;
+					}
+
+					ScaleMatrix(&local_98, &local_58);
+					SetRotMatrix(&local_98);
+					SetTransMatrix(&local_98);
+
+					sFieldEntity2dSprite * psVar6 = pCurrentFieldEntity->m8_2dSprite;
+
+					long lStack72;
+					long lStack68;
+					int lVar3 = RotAverage4(&psVar6->m0_screenVertices[0], &psVar6->m0_screenVertices[1], &psVar6->m0_screenVertices[2], &psVar6->m0_screenVertices[3],
+						&psVar6->m20_Poly[oddOrEven].x0y0, &psVar6->m20_Poly[oddOrEven].x1y1, &psVar6->m20_Poly[oddOrEven].x2y2, &psVar6->m20_Poly[oddOrEven].x3y3, &lStack72, &lStack68);
+
+					sTag* pDestOT = &OT[lVar3 >> (primD_2Var0 & 0x1F)];
+
+					psVar6->m20_Poly[oddOrEven].m0_pNext = pDestOT->m0_pNext;
+					pDestOT->m0_pNext = &psVar6->m20_Poly[oddOrEven];
+				}
+			}
+
+		}
+	}
+}
+
+void* spriteCallback2Var1 = nullptr;
+void* spriteCallback2Var2 = nullptr;
+int spriteCallback2Var4 = 0;
+
+void execSpritesCallbacks2()
+{
+	if (spriteCallback2Var0 == 0) {
+		spriteCallback2Var1 = spriteCallback2Var2;
+		if (spriteCallback2Var2 != (void*)0x0) {
+			do {
+				/*
+				ppvVar1 = (void**)((int)spriteCallback2Var1 + 0x18);
+				ppcVar2 = (code**)((int)spriteCallback2Var1 + 8);
+				spriteCallback2Var3 = spriteCallback2Var1;
+				spriteCallback2Var1 = *ppvVar1;
+				if (*ppcVar2 != (code*)0x0) {
+					(**ppcVar2)();
+				}
+				*/
+				assert(0);
+			} while (spriteCallback2Var1 != (void*)0x0);
+		}
+	}
+	else {
+		spriteCallback2Var0 = spriteCallback2Var0 + -1;
+		if (spriteCallback2Var0 == 0) {
+			spriteCallback2Var4 = 0;
+		}
+	}
+}
+
 void renderChars()
 {
 	if (renderCharsDisabled != 1) {
 		clearShapeTransfertTableEntry(frameOddOrEven);
-		MissingCode();
+		setCharacterRenderingOT(pCurrentFieldRenderingContext->mCC_OT);
+		setCurrentRenderingMatrix(&currentProjectionMatrix);
 		uploadCharacterSprites();
 		MissingCode();
+		execSpritesCallbacks2();
+		renderFieldCharacterSprites(pCurrentFieldRenderingContext->mCC_OT, g_frameOddOrEven);
+
+		for (int i=0; i<totalActors; i++)
+		{
+			sFieldEntity* pFieldEntity = &actorArray[i];
+			if ((pFieldEntity->m58_flags & 0x60) == 0x40)
+			{
+				if ((((pFieldEntity->m4C_scriptEntity->m4_flags & 0x600) != 0x200) && ((pFieldEntity->m4C_scriptEntity->m4_flags & 0x1000) == 0)) && ((pFieldEntity->m4C_scriptEntity->m0_flags & 1) == 0)) {
+					OP_INIT_ENTITY_SCRIPT_sub0Sub9(pFieldEntity->m4_pVramSpriteSheet);
+				}
+			}
+			else {
+				if ((pFieldEntity->m4C_scriptEntity->m4_flags & 0x1000000) != 0)
+				{
+					OP_INIT_ENTITY_SCRIPT_sub0Sub9(pFieldEntity->m4_pVramSpriteSheet);
+				}
+			}
+		}
+
+		renderCharShadows(pCurrentFieldRenderingContext->mCC_OT, g_frameOddOrEven);
+		if (fieldDebugDisable == 0) {
+			assert(0);
+		}
 	}
 }
 
@@ -5304,7 +5896,7 @@ void shapeTransfert()
 {
 	sShapeTransfert* rect;
 
-	rect = shapeTransfertTable[shapeTransfertDoubleBufferIndex];
+	rect = (sShapeTransfert*)shapeTransfertTable[shapeTransfertDoubleBufferIndex];
 	while (rect != (sShapeTransfert*)0x0) {
 		if (rect->m8_pData.getPointer() == nullptr) {
 			ClearImage(&rect->m0_rect, '\0', '\0', '\0');
@@ -5314,7 +5906,7 @@ void shapeTransfert()
 		}
 		rect = rect->mC_pNext;
 	}
-	shapeTransfertTable[shapeTransfertDoubleBufferIndex] = (sShapeTransfert*)0x0;
+	shapeTransfertTable[shapeTransfertDoubleBufferIndex] = nullptr;
 }
 
 void AddPrims(sTag* ot, sTag* p0, sTag* p1)

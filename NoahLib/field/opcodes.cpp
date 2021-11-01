@@ -1613,10 +1613,10 @@ void OPX_3C()
 	if (fieldExecuteVar1 != 0) {
 		short uVar1 = getImmediateOrVariableUnsigned(1);
 		int uVar2 = getImmediateOrVariableUnsigned(3);
-		assert(0);
+		MissingCode();
 		int iVar3 = getImmediateOrVariableUnsigned(1);
 		uVar1 = getImmediateOrVariableUnsigned(3);
-		assert(0);
+		MissingCode();
 	}
 	pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 5;
 }
