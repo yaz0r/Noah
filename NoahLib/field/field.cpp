@@ -2227,7 +2227,7 @@ void initFieldData()
 
 	initCompassPoly(&fieldCompassVar2[0x14], 8, 8, 1); // arrow
 
-	MissingCode();
+	initCompassShadowPoly();
 
 	{
 		{

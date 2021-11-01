@@ -125,6 +125,18 @@ void SetSemiTrans(SPRT* p, int abe)
 	}
 }
 
+void SetSemiTrans(POLY_FT4* p, int abe)
+{
+	if (abe == 0)
+	{
+		p->code &= ~2;
+	}
+	else
+	{
+		p->code |= 2;
+	}
+}
+
 DISPENV* SetDefDispEnv(DISPENV* env, int x, int y, int w, int h)
 {
 	(env->disp).x = (short)x;

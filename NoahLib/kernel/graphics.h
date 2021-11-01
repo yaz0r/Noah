@@ -193,6 +193,7 @@ void SetSemiTrans(TILE* p, int abe);
 
 void SetSprt(SPRT* p);
 void SetSemiTrans(SPRT* p, int abe);
+void SetSemiTrans(POLY_FT4* p, int abe);
 
 sTag* ClearOTagR(sTag* ot, int n);
 void DrawOTag(sTag* ot);

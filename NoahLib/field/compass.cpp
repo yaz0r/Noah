@@ -84,23 +84,59 @@ s16 compassArrowCurrentDirection = 0;
 
 int fieldCompassVar = 0;
 
-
-void drawCompassArrowSegment(sTag* param_1, sFieldCompassVar2* param_2, MATRIX* param_3, int frameOddOrEven)
+void drawCompassLetters(sTag* param_1, sFieldCompassVar2* param_2, MATRIX* param_3, int frameOddOrEven)
 {
 	long lStack32;
 	long lStack28;
 
-	POLY_FT4* pPrim = &param_2->m20[frameOddOrEven];
+	POLY_FT4* pPrim = &param_2->m20_poly[frameOddOrEven];
 	PushMatrix();
 	SetRotMatrix(param_3);
 	SetTransMatrix(param_3);
-	RotAverage4(&param_2->m0, &param_2->m8, &param_2->m10, &param_2->m18, &pPrim->x0y0, &pPrim->x1y1, &pPrim->x2y2, &pPrim->x3y3, &lStack32, &lStack28);
+	RotAverage4(&param_2->m0[0], &param_2->m0[1], &param_2->m0[2], &param_2->m0[3], &pPrim->x0y0, &pPrim->x1y1, &pPrim->x2y2, &pPrim->x3y3, &lStack32, &lStack28);
+
+	int sVar2 = (short)(((int)pPrim->x3y3.vx + (int)pPrim->x2y2.vx) / 2);
+	int sVar3 = sVar2 + 8;
+	int sVar1 = pPrim->x3y3.vy;
+	sVar2 = sVar2 + -8;
+	pPrim->x0y0.vx = sVar2;
+	pPrim->x1y1.vx = sVar3;
+	pPrim->x2y2.vx = sVar2;
+	pPrim->x3y3.vx = sVar3;
+	pPrim->x2y2.vy = sVar1;
+	pPrim->x3y3.vy = sVar1;
+	pPrim->x0y0.vy = sVar1 + -10;
+	pPrim->x1y1.vy = sVar1 + -10;
 
 	pPrim->m0_pNext = param_1[1].m0_pNext;
 	param_1[1].m0_pNext = pPrim;
 
 	PopMatrix();
 }
+
+void drawCompassArrowSegment(sTag* param_1, sFieldCompassVar2* param_2, MATRIX* param_3, int frameOddOrEven)
+{
+	long lStack32;
+	long lStack28;
+
+	POLY_FT4* pPrim = &param_2->m20_poly[frameOddOrEven];
+	PushMatrix();
+	SetRotMatrix(param_3);
+	SetTransMatrix(param_3);
+	RotAverage4(&param_2->m0[0], &param_2->m0[1], &param_2->m0[2], &param_2->m0[3], &pPrim->x0y0, &pPrim->x1y1, &pPrim->x2y2, &pPrim->x3y3, &lStack32, &lStack28);
+
+	pPrim->m0_pNext = param_1[1].m0_pNext;
+	param_1[1].m0_pNext = pPrim;
+
+	PopMatrix();
+}
+
+short compassCardinalPointsLocation[4][2] = {
+	{0x0, 0x500},
+	{0x500, 0x0},
+	{0x0, -0x500},
+	{-0x500, 0x0},
+};
 
 void renderCompass()
 {
@@ -193,9 +229,15 @@ void renderCompass()
 	createRotationMatrix(&local_48, &MStack104);
 
 	if (((compassDisabled == '\0') && (updateAllEntitiesSub2Var0 == 0))) {
-		for (int i=0x10; i<0x14; i++)
+		//compass cardinal letters
+		for (int i=0; i<4; i++)
 		{
-			MissingCode(); //compass letters
+			setIdentityMatrix(&MStack168);
+			MStack168.t[0] = compassCardinalPointsLocation[i][0];
+			MStack168.t[2] = compassCardinalPointsLocation[i][1];
+			CompMatrix(&MStack232, &MStack168, &MStack136);
+			copyRotationMatrix(&MStack136, &MStack104);
+			drawCompassLetters(&pCurrentFieldRenderingContext->m80D4_uiOT[0], &fieldCompassVar2[i + 0x10], &MStack136, g_frameOddOrEven);
 		}
 
 		// main compass
@@ -303,26 +345,89 @@ void initCompassData()
 	compassGraphicDataStaging.clear();
 }
 
+static const short compassShadowPositions[4][4][2] = {
+	{
+		{-0x600, -0x600},
+		{0, -0x600},
+		{-0x600, 0},
+		{0, 0},
+	},
+	{
+		{0x600, -0x600},
+		{0, -0x600},
+		{0x600, 0},
+		{0, 0},
+	},
+	{
+		{-0x600, 0x600},
+		{0, 0x600},
+		{-0x600, 0},
+		{0, 0},
+	},
+	{
+		{0x600, 0x600},
+		{0, 0x600},
+		{0x600, 0},
+		{0, 0},
+	},
+};
+
+s8 compassShadowUVs[4][8] = {
+	{0,0,0x1F, 0, 0, 0x1F, 0x1F, 0x1F},
+	{0,0,0x1F, 0, 0, 0x1F, 0x1F, 0x1F},
+	{0,0,0x1F, 0, 0, 0x1F, 0x1F, 0x1F},
+	{0,0,0x1F, 0, 0, 0x1F, 0x1F, 0x1F},
+};
+
+void initCompassShadowPoly()
+{
+	for (int i=0; i<4; i++)
+	{
+		sFieldCompassVar2& polyEntry = fieldCompassVar2[i + 0x15];
+		SetPolyFT4(&polyEntry.m20_poly[0]);
+
+		for (int j=0; j<4; j++)
+		{
+			polyEntry.m0[j].vx = compassShadowPositions[i][j][0];
+			polyEntry.m0[j].vy = 0;
+			polyEntry.m0[j].vz = compassShadowPositions[i][j][1];
+		}
+
+		polyEntry.m20_poly[0].r0 = 0x80;
+		polyEntry.m20_poly[0].g0 = 0x80;
+		polyEntry.m20_poly[0].b0 = 0x80;
+
+		setPolyUV(&polyEntry.m20_poly[0], compassShadowUVs[i][0], compassShadowUVs[i][1] + 0xc0, compassShadowUVs[i][2], compassShadowUVs[i][3] + 0xc0, compassShadowUVs[i][4],
+			compassShadowUVs[i][5] + 0xc0, compassShadowUVs[i][6], compassShadowUVs[i][7] + 0xc0);
+		SetSemiTrans(&polyEntry.m20_poly[0], 1);
+
+		polyEntry.m20_poly[0].tpage = GetTPage(0, 2, 0x280, 0x1c0);
+		polyEntry.m20_poly[0].clut = GetClut(0x100, 0xf2);
+
+		polyEntry.m20_poly[1] = polyEntry.m20_poly[0];
+	}
+}
+
 void initCompassPoly(sFieldCompassVar2* prim, int XIndex, int ZIndex, int paletteIndex)
 {
-	POLY_FT4* p = &prim->m20[0];
+	POLY_FT4* p = &prim->m20_poly[0];
 	SetPolyFT4(p);
 
-	prim->m0.vx = compassInitDataX[XIndex][0];
-	prim->m0.vy = 0;
-	prim->m0.vz = compassInitDataZ[ZIndex][0];
+	prim->m0[0].vx = compassInitDataX[XIndex][0];
+	prim->m0[0].vy = 0;
+	prim->m0[0].vz = compassInitDataZ[ZIndex][0];
 
-	prim->m8.vx = compassInitDataX[XIndex][1];
-	prim->m8.vy = 0;
-	prim->m8.vz = compassInitDataZ[ZIndex][1];
+	prim->m0[1].vx = compassInitDataX[XIndex][1];
+	prim->m0[1].vy = 0;
+	prim->m0[1].vz = compassInitDataZ[ZIndex][1];
 
-	prim->m10.vx = compassInitDataX[XIndex][2];
-	prim->m10.vy = 0;
-	prim->m10.vz = compassInitDataZ[ZIndex][2];
+	prim->m0[2].vx = compassInitDataX[XIndex][2];
+	prim->m0[2].vy = 0;
+	prim->m0[2].vz = compassInitDataZ[ZIndex][2];
 
-	prim->m18.vx = compassInitDataX[XIndex][3];
-	prim->m18.vy = 0;
-	prim->m18.vz = compassInitDataZ[ZIndex][3];
+	prim->m0[3].vx = compassInitDataX[XIndex][3];
+	prim->m0[3].vy = 0;
+	prim->m0[3].vz = compassInitDataZ[ZIndex][3];
 
 	p->r0 = 0x80;
 	p->g0 = 0x80;
@@ -338,5 +443,5 @@ void initCompassPoly(sFieldCompassVar2* prim, int XIndex, int ZIndex, int palett
 		compassInitDataUV[XIndex][3], compassInitDataUV2[ZIndex][3]
 	);
 
-	prim->m20[1] = prim->m20[0];
+	prim->m20_poly[1] = prim->m20_poly[0];
 }
