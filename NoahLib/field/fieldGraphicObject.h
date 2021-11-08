@@ -19,12 +19,20 @@ struct sFieldEntitySub4_F4
 
 struct sFieldEntitySub4_124
 {
-	s8 m0;
-	s8 m1;
-	s16 m2;
-	s16 m4;
-	s16 m6;
+	s8 m0_translateX;
+	s8 m1_translateY;
+	s16 m2_rotateX;
+	s16 m4_rotateY;
+	s16 m6_rotateZ;
 	//size 8
+};
+
+struct sColorAndCode
+{
+	u8 m0_r;
+	u8 m1_g;
+	u8 m2_b;
+	u8 m3_code;
 };
 
 struct sFieldEntitySub4_B4_sub
@@ -39,7 +47,7 @@ struct sFieldEntitySub4_B4_sub
 	s8 m9;
 	s16 mA_tpage;
 	u16 mC_clut;
-	u32 m10;
+	sColorAndCode m10_colorAndCode;
 	u32 m14;
 	//size 0x18
 };
@@ -49,8 +57,8 @@ struct sFieldEntitySub4_B4
 	SVECTOR m0_rotation;
 	SVECTOR m6_scale;
 	MATRIX mC_spriteMatrix;
-	sFieldEntitySub4_B4_sub* m2C;
-	sFieldEntitySub4_B4_sub* m30;
+	std::vector<sFieldEntitySub4_B4_sub>* m2C;
+	std::vector<sFieldEntitySub4_B4_sub>* m30;
 	std::array<sFieldEntitySub4_124, 8>* m34;
 	struct sFieldEntitySub4* m38;
 	s8 m3C;
@@ -82,7 +90,7 @@ struct sFieldEntitySub4
 	s32 m1C;
 	sFieldEntitySub4_B4* m20;
 	sFieldEntitySub4_110* m24;
-	int m28;
+	sColorAndCode m28_colorAndCode;
 	s8 m2B;
 	s16 m2C_scale;
 	s16 m30;

@@ -7,6 +7,12 @@
 
 #include "noahLib.h"
 
+#if BX_PLATFORM_OSX
+extern "C" {
+	void* cbSetupMetalLayer(void*);
+}
+#endif
+
 SDL_Window* gWindowBGFX = nullptr;
 
 int gFrameLimit = 60;

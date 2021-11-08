@@ -28,11 +28,11 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1Sub1(sFieldEntitySub4* param_1)
 
 	iVar1 = 0;
 	do {
-		(*param_1->m20->m34)[iVar1].m0 = 0;
-		(*param_1->m20->m34)[iVar1].m1 = 0;
-		(*param_1->m20->m34)[iVar1].m2 = 0;
-		(*param_1->m20->m34)[iVar1].m4 = 0;
-		(*param_1->m20->m34)[iVar1].m6 = 0;
+		(*param_1->m20->m34)[iVar1].m0_translateX = 0;
+		(*param_1->m20->m34)[iVar1].m1_translateY = 0;
+		(*param_1->m20->m34)[iVar1].m2_rotateX = 0;
+		(*param_1->m20->m34)[iVar1].m4_rotateY = 0;
+		(*param_1->m20->m34)[iVar1].m6_rotateZ = 0;
 		iVar2 = iVar1 + 1;
 		iVar1 = iVar2;
 	} while (iVar2 != 8);
@@ -67,18 +67,18 @@ void executeSpriteBytecode2Sub0Sub0sub0(sFieldEntitySub4* param_1, int param_2, 
 						OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1Sub1(param_1);
 					}
 					if ((bVar2 & 0x20) != 0) {
-						(*param_1->m20->m34)[uVar6].m0 = READ_LE_U8(pbVar5);
-						(*param_1->m20->m34)[uVar6].m1 = READ_LE_U8(pbVar4 + 2);
+						(*param_1->m20->m34)[uVar6].m0_translateX = READ_LE_U8(pbVar5);
+						(*param_1->m20->m34)[uVar6].m1_translateY = READ_LE_U8(pbVar4 + 2);
 						pbVar5 = pbVar4 + 3;
 					}
 					pbVar4 = pbVar5;
 					if ((bVar2 & 0x10) == 0) {
-						(*param_1->m20->m34)[uVar6].m6 = 0;
+						(*param_1->m20->m34)[uVar6].m6_rotateZ = 0;
 					}
 					else {
 						bVar2 = READ_LE_U8(pbVar4);
 						pbVar4 = pbVar4 + 1;
-						(*param_1->m20->m34)[uVar6].m6 = (ushort)bVar2 << 4;
+						(*param_1->m20->m34)[uVar6].m6_rotateZ = (ushort)bVar2 << 4;
 					}
 				}
 			}
@@ -121,18 +121,18 @@ void executeSpriteBytecode2Sub0Sub0(sFieldEntitySub4* param_1, int param_2, sFie
 							}
 							u32 uVar4 = bVar2 & 7;
 							if ((bVar2 & 0x20) != 0) {
-								(*param_1->m20->m34)[uVar4].m0 = READ_LE_U8(pbVar6);
-								(*param_1->m20->m34)[uVar4].m1 = READ_LE_U8(pbVar5 + 2);
+								(*param_1->m20->m34)[uVar4].m0_translateX = READ_LE_U8(pbVar6);
+								(*param_1->m20->m34)[uVar4].m1_translateY = READ_LE_U8(pbVar5 + 2);
 								pbVar6 = pbVar5 + 3;
 							}
 							pbVar5 = pbVar6;
 							if ((bVar2 & 0x10) == 0) {
-								(*param_1->m20->m34)[uVar4].m6 = 0;
+								(*param_1->m20->m34)[uVar4].m6_rotateZ = 0;
 							}
 							else {
 								bVar2 = READ_LE_U8(pbVar5);
 								pbVar5 = pbVar5 + 1;
-								(*param_1->m20->m34)[uVar4].m6 = (ushort)bVar2 << 4;
+								(*param_1->m20->m34)[uVar4].m6_rotateZ = (ushort)bVar2 << 4;
 							}
 						}
 					}
@@ -219,13 +219,13 @@ void executeSpriteBytecode2Extended92(sFieldEntitySub4* param_1)
 		if (uVar3 != 0) {
 			uVar3 = uVar3 - 1;
 		}
-		int iVar2 = param_1->m28;
-		sFieldEntitySub4_B4_sub* psVar1 = param_1->m20->m30;
+		sColorAndCode colorAndcode = param_1->m28_colorAndCode;
+		std::vector<sFieldEntitySub4_B4_sub>::iterator psVar1 = param_1->m20->m30->begin();
 		int uVar4 = 0;
 		if ((param_1->m40 & 0xFF) >> 2 != 0) {
 			do {
 				uVar4 = uVar4 + 1;
-				psVar1->m10 = iVar2;
+				psVar1->m10_colorAndCode = colorAndcode;
 				psVar1->mA_tpage = psVar1->mA_tpage & 0xff9fU | (ushort)(uVar3 << 5);
 				psVar1 = psVar1 + 1;
 			} while (uVar4 != (param_1->m40 & 0xFF) >> 2);
@@ -994,7 +994,8 @@ sFieldEntitySub4* setupSpriteAreaInVram(sFieldEntitySub4* param_1, sFieldActorSe
 	param_1->m3C = param_1->m3C & 0xff00ffff | (initFieldVar2 & 0xf) << 0x14 | (initFieldVar2 & 0xf) << 0x10;;
 
 	int count = initFieldEntitySub4Sub4(pSetup->m8_pData);
-	param_1->m20->m2C = param_1->m20->m30 = new sFieldEntitySub4_B4_sub[count];
+	param_1->m20->m2C = param_1->m20->m30 = new std::vector<sFieldEntitySub4_B4_sub>;
+	param_1->m20->m30->resize(count);
 
 	param_1->m24->m4_vramLocation.vx = vramX;
 	param_1->m24->m4_vramLocation.vy = vramY;
@@ -1086,9 +1087,11 @@ void fieldActorCallback(sFieldEntitySub4* pThis)
 
 void OP_INIT_ENTITY_SCRIPT_sub0Sub3(sFieldEntitySub4* param_1, int param_2)
 {
-	delete[] param_1->m20->m2C;
+	delete param_1->m20->m2C;
 	sFieldEntitySub4_B4* psVar2 = param_1->m20;
-	psVar2->m2C = psVar2->m30 = new sFieldEntitySub4_B4_sub[param_2];
+	psVar2->m2C = psVar2->m30 = new std::vector<sFieldEntitySub4_B4_sub>;
+	psVar2->m30->resize(param_2);
+
 	return;
 }
 

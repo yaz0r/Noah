@@ -293,7 +293,7 @@ std::vector<u8>::iterator currentNpcSpriteUploadDataPtr;
 
 void transfertNpcSpriteSheetElement()
 {
-	MissingCode();
+	LoadImage(currentNpcSpriteUploadRect, &currentNpcSpriteUploadDataPtr[0]);
 }
 
 void uploadNpcSpriteSheet(std::vector<u8>::iterator& pImageData, int x, int y)
@@ -1127,9 +1127,35 @@ void initModel3(int, int)
 	MissingCode();
 }
 
-void execSpriteCallbacks2()
+void* spriteCallback2Var1 = nullptr;
+void* spriteCallback2Var2 = nullptr;
+int spriteCallback2Var4 = 0;
+
+void execSpritesCallbacks2()
 {
-	MissingCode();
+	if (spriteCallback2Var0 == 0) {
+		spriteCallback2Var1 = spriteCallback2Var2;
+		if (spriteCallback2Var2 != (void*)0x0) {
+			do {
+				/*
+				ppvVar1 = (void**)((int)spriteCallback2Var1 + 0x18);
+				ppcVar2 = (code**)((int)spriteCallback2Var1 + 8);
+				spriteCallback2Var3 = spriteCallback2Var1;
+				spriteCallback2Var1 = *ppvVar1;
+				if (*ppcVar2 != (code*)0x0) {
+					(**ppcVar2)();
+				}
+				*/
+				assert(0);
+			} while (spriteCallback2Var1 != (void*)0x0);
+		}
+	}
+	else {
+		spriteCallback2Var0 = spriteCallback2Var0 + -1;
+		if (spriteCallback2Var0 == 0) {
+			spriteCallback2Var4 = 0;
+		}
+	}
 }
 
 void OP_INIT_ENTITY_SCRIPT_sub0(int actorId, int clutYEntry, sFieldActorSetupParams* pSetup, int param_4, int clutXEntry, int param_6, int param_7)
@@ -1235,7 +1261,7 @@ void OP_INIT_ENTITY_SCRIPT_sub0(int actorId, int clutYEntry, sFieldActorSetupPar
 	if (!param_7)
 	{
 		OP_INIT_ENTITY_SCRIPT_sub0Sub9(pFieldEntitySub4);
-		execSpriteCallbacks2();
+		execSpritesCallbacks2();
 		if (pFieldEntitySub4->m7C->mC == 0xff) {
 			(actorArray[actorId].m4C_scriptEntity)->mEA_currentAnimationPlaying = 0xff;
 			(actorArray[actorId].m4C_scriptEntity)->m4_flags = (actorArray[actorId].m4C_scriptEntity)->m4_flags | 0x1000000;
@@ -5103,7 +5129,7 @@ void uploadCharacterSpriteSub1(sFieldEntitySub4* param_1, int param_2, sFieldEnt
 	int bVar2 = READ_LE_U8(pbVar13);
 	sPS1Pointer local_54 = pbVar13 + 4;
 	sPS1Pointer pbVar18 = pbVar13 + (bVar2 & 0x3f) * 2 + 4;
-	sFieldEntitySub4_B4_sub* psVar13 = param_1->m20->m30;
+	std::vector<sFieldEntitySub4_B4_sub>::iterator psVar13 = param_1->m20->m30->begin();
 	short sVar8 = (short)(iVar23 >> 0xc);
 	if (iVar23 < 0) {
 		sVar8 = (short)(iVar23 + 0xfff >> 0xc);
@@ -5116,7 +5142,7 @@ void uploadCharacterSpriteSub1(sFieldEntitySub4* param_1, int param_2, sFieldEnt
 	param_1->m38 = (short)(iVar23 >> 0xc);
 	u8 bVar3 = param_1->m3C & 0xFF;
 	u16 local_50 = param_3->m4_vramLocation.vy & 0xFF;
-	iVar23 = param_1->m28;
+	sColorAndCode colorAndCode = param_1->m28_colorAndCode;
 	u32 uVar21 = 4;
 	u32 uVar22 = 0;
 
@@ -5152,18 +5178,18 @@ void uploadCharacterSpriteSub1(sFieldEntitySub4* param_1, int param_2, sFieldEnt
 						OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1Sub1(param_1);
 					}
 					if ((bVar4 & 0x20) != 0) {
-						(*param_1->m20->m34)[uVar21].m0 = READ_LE_U8(pbVar19);
-						(*param_1->m20->m34)[uVar21].m1 = READ_LE_U8(pbVar18 + 2);
+						(*param_1->m20->m34)[uVar21].m0_translateX = READ_LE_U8(pbVar19);
+						(*param_1->m20->m34)[uVar21].m1_translateY = READ_LE_U8(pbVar18 + 2);
 						pbVar19 = pbVar18 + 3;
 					}
 					pbVar18 = pbVar19;
 					if ((bVar4 & 0x10) == 0) {
-						(*param_1->m20->m34)[uVar21].m6 = 0;
+						(*param_1->m20->m34)[uVar21].m6_rotateZ = 0;
 					}
 					else {
 						bVar4 = READ_LE_U8(pbVar18);
 						pbVar18 = pbVar18 + 1;
-						(*param_1->m20->m34)[uVar21].m6 = (ushort)bVar4 << 4;
+						(*param_1->m20->m34)[uVar21].m6_rotateZ = (ushort)bVar4 << 4;
 					}
 				}
 			}
@@ -5183,10 +5209,10 @@ void uploadCharacterSpriteSub1(sFieldEntitySub4* param_1, int param_2, sFieldEnt
 			u8 bVar5 = READ_LE_U8(pbVar18);
 			u8 bVar7 = bVar5 >> 4;
 			u8 uVar15 = bVar7 & 3;
-			psVar13->m10 = iVar23;
+			psVar13->m10_colorAndCode = colorAndCode;
 			if (((bVar7 & 3) != 0) || (uVar15 = (uint)(bVar3 >> 5), uVar15 != 0)) {
 				uVar15 = uVar15 - 1;
-				*(byte*)((int)&psVar13->m10 + 3) = *(byte*)((int)&psVar13->m10 + 3) | 2;
+				psVar13->m10_colorAndCode.m3_code |= 2;
 			}
 			if (((int)uVar17 >> 4 & 1U) == 0) {
 				sPS1Pointer iVar12;
@@ -5245,7 +5271,6 @@ void uploadCharacterSprite(sFieldEntitySub4* param_1, int param_2, sFieldEntityS
 {
 	param_1->m40 = param_1->m40 & 0xfff5ffff;
 	sPS1Pointer local_50 = param_3->m0;
-	sFieldEntitySub4_B4_sub* pFieldEntitySub4_B4_sub = param_1->m20->m30;
 	if (param_2 < (int)((READ_LE_U16(local_50) & 0x1ff) + 1)) {
 		if ((param_1->m3C >> 0x1e & 1) != 0) {
 			param_1->m3C = param_1->m3C & 0xbfffffff;
@@ -5377,7 +5402,6 @@ void renderFieldCharacterSpritesSub0Sub1(sFieldEntitySub4* pSpriteSheet, sTag* p
 	sFieldEntitySub4_B4* psVar7 = pSpriteSheet->m20;
 	u32 uVar9 = pSpriteSheet->m40 >> 8 & 0x1f;
 	s8 bVar1 = psVar7->m3D;
-	sFieldEntitySub4_B4_sub* pSpriteDefinition = psVar7->m30;
 	s16 spriteWidth = (short)((int)(char)psVar7->m3C << uVar9);
 	if ((pSpriteSheet->mAC >> 2 & 1) != 0) {
 		spriteWidth = -spriteWidth;
@@ -5391,6 +5415,7 @@ void renderFieldCharacterSpritesSub0Sub1(sFieldEntitySub4* pSpriteSheet, sTag* p
 	if ((shapeTransfertTableCurrentEntry + numPolyInSprite * sizeof(POLY_FT4) < shapeTransfertTableEnd)) {
 		for (int i=0; i< numPolyInSprite; i++)
 		{
+			sFieldEntitySub4_B4_sub* pSpriteDefinition = &(*psVar7->m30)[i];
 			int matrixIdNeeded = pSpriteDefinition->m14 & 7;
 			if (currentBoundMatrixId != matrixIdNeeded) { // need to change the matrix?
 				local_30 = spriteMatrixTable[matrixIdNeeded] & ((pSpriteSheet->m3C >> 8) & 0xFF) == 0;
@@ -5403,7 +5428,7 @@ void renderFieldCharacterSpritesSub0Sub1(sFieldEntitySub4* pSpriteSheet, sTag* p
 				else
 				{
 					sFieldEntitySub4_124* psVar8 = &(*pSpriteSheet->m20->m34)[matrixIdNeeded];
-					if ((psVar8->m0 == 0) && (psVar8->m6 == 0))
+					if ((psVar8->m0_translateX == 0) && (psVar8->m1_translateY == 0) && (psVar8->m6_rotateZ == 0))
 					{
 						SetRotMatrix(&pSpriteSheet->m20->mC_spriteMatrix);
 						SetTransMatrix(&pSpriteSheet->m20->mC_spriteMatrix);
@@ -5411,29 +5436,32 @@ void renderFieldCharacterSpritesSub0Sub1(sFieldEntitySub4* pSpriteSheet, sTag* p
 					else
 					{
 						int spriteScale = pSpriteSheet->m40 >> 8 & 0x1f;
-						int iVar12 = (int)(char)psVar8->m0 << spriteScale;
+
+						int spriteTranslateX = (int)(char)psVar8->m0_translateX << spriteScale;
 						if ((pSpriteSheet->m3C >> 3 & 1) != 0) {
-							iVar12 = -iVar12;
+							spriteTranslateX = -spriteTranslateX;
 						}
-						int iVar13 = ((int)(char)psVar8->m1 << spriteScale) * (int)pSpriteSheet->m2C_scale;
-						iVar12 = iVar12 * pSpriteSheet->m2C_scale;
-						if (iVar13 < 0) {
-							iVar13 = iVar13 + 0xfff;
+						spriteTranslateX *= pSpriteSheet->m2C_scale;
+						if (spriteTranslateX < 0) {
+							spriteTranslateX = spriteTranslateX + 0xfff;
 						}
-						if (iVar12 < 0) {
-							iVar12 = iVar12 + 0xfff;
+
+						int spriteTranslateY = ((int)(char)psVar8->m1_translateY << spriteScale) * (int)pSpriteSheet->m2C_scale;
+						if (spriteTranslateY < 0) {
+							spriteTranslateY = spriteTranslateY + 0xfff;
 						}
-						SVECTOR local_50;
-						local_50.vx = psVar8->m2;
-						local_50.vy = psVar8->m4;
-						local_50.vz = psVar8->m6;
+
+						SVECTOR localRotationVector;
+						localRotationVector.vx = psVar8->m2_rotateX;
+						localRotationVector.vy = psVar8->m4_rotateY;
+						localRotationVector.vz = psVar8->m6_rotateZ;
 						if ((pSpriteSheet->m3C >> 3 & 1) != 0) {
-							local_50.vz = -local_50.vz;
+							localRotationVector.vz = -localRotationVector.vz;
 						}
 						MATRIX MStack112;
-						createRotationMatrix(&local_50, &MStack112);
-						MStack112.t[0] = (pSpriteSheet->m20->mC_spriteMatrix).t[0] + (iVar12 >> 0xc);
-						MStack112.t[1] = (pSpriteSheet->m20->mC_spriteMatrix).t[1] + (iVar13 >> 0xc);
+						createRotationMatrix(&localRotationVector, &MStack112);
+						MStack112.t[0] = (pSpriteSheet->m20->mC_spriteMatrix).t[0] + (spriteTranslateX >> 0xc);
+						MStack112.t[1] = (pSpriteSheet->m20->mC_spriteMatrix).t[1] + (spriteTranslateY >> 0xc);
 						MStack112.t[2] = (pSpriteSheet->m20->mC_spriteMatrix).t[2];
 						SetMulMatrix(&pSpriteSheet->m20->mC_spriteMatrix, &MStack112);
 						SetTransMatrix(&MStack112);
@@ -5451,10 +5479,10 @@ void renderFieldCharacterSpritesSub0Sub1(sFieldEntitySub4* pSpriteSheet, sTag* p
 				shapeTransfertTableCurrentEntry += sizeof(POLY_FT4);
 
 				p->m3_size = 9;
-				p->r0 = pSpriteDefinition->m10 & 0xFF;
-				p->g0 = (pSpriteDefinition->m10>>8) & 0xFF;
-				p->b0 = (pSpriteDefinition->m10 >> 16) & 0xFF;
-				p->code = (pSpriteDefinition->m10 >> 24) & 0xFF;
+				p->r0 = pSpriteDefinition->m10_colorAndCode.m0_r;
+				p->g0 = pSpriteDefinition->m10_colorAndCode.m1_g;
+				p->b0 = pSpriteDefinition->m10_colorAndCode.m2_b;
+				p->code = pSpriteDefinition->m10_colorAndCode.m3_code;
 				p->tpage = pSpriteDefinition->mA_tpage;
 				p->clut = pSpriteDefinition->mC_clut;
 
@@ -5812,37 +5840,6 @@ void renderCharShadows(std::array<sTag, 4096>& OT, int oddOrEven)
 				}
 			}
 
-		}
-	}
-}
-
-void* spriteCallback2Var1 = nullptr;
-void* spriteCallback2Var2 = nullptr;
-int spriteCallback2Var4 = 0;
-
-void execSpritesCallbacks2()
-{
-	if (spriteCallback2Var0 == 0) {
-		spriteCallback2Var1 = spriteCallback2Var2;
-		if (spriteCallback2Var2 != (void*)0x0) {
-			do {
-				/*
-				ppvVar1 = (void**)((int)spriteCallback2Var1 + 0x18);
-				ppcVar2 = (code**)((int)spriteCallback2Var1 + 8);
-				spriteCallback2Var3 = spriteCallback2Var1;
-				spriteCallback2Var1 = *ppvVar1;
-				if (*ppcVar2 != (code*)0x0) {
-					(**ppcVar2)();
-				}
-				*/
-				assert(0);
-			} while (spriteCallback2Var1 != (void*)0x0);
-		}
-	}
-	else {
-		spriteCallback2Var0 = spriteCallback2Var0 + -1;
-		if (spriteCallback2Var0 == 0) {
-			spriteCallback2Var4 = 0;
 		}
 	}
 }
