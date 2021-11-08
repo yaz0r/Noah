@@ -39,10 +39,10 @@ struct sFieldEntitySub4_B4_sub
 {
 	s16 m0;
 	s16 m2;
-	s8 m4;
-	s8 m5;
-	s8 m6;
-	s8 m7;
+	u8 m4_texcoordX;
+	u8 m5_texcoordY;
+	u8 m6_width;
+	u8 m7_height;
 	s8 m8;
 	s8 m9;
 	s16 mA_tpage;
@@ -60,7 +60,7 @@ struct sFieldEntitySub4_B4
 	std::vector<sFieldEntitySub4_B4_sub>* m2C;
 	std::vector<sFieldEntitySub4_B4_sub>* m30;
 	std::array<sFieldEntitySub4_124, 8>* m34;
-	struct sFieldEntitySub4* m38;
+	struct sSpriteActor* m38;
 	s8 m3C;
 	s8 m3D;
 	//size ???
@@ -82,7 +82,7 @@ struct sStackElement
 	sPS1Pointer asPs1Pointer;
 };
 
-struct sFieldEntitySub4
+struct sSpriteActor
 {
 	sVec3 m0_position;
 	sVec3 mC;
@@ -110,8 +110,8 @@ struct sFieldEntitySub4
 	sPS1Pointer m5C;
 	sPS1Pointer m60;
 	sPS1Pointer m64_spriteByteCode;
-	void(*m68)(sFieldEntitySub4*);
-	sFieldEntitySub4* m6C;
+	void(*m68)(sSpriteActor*);
+	sSpriteActor* m6C;
 	s32 m70;
 	sFieldEntitySub4_F4* m7C;
 	s16 m80;
@@ -122,13 +122,14 @@ struct sFieldEntitySub4
 	std::array<sStackElement, 16> m8E_stack;
 	u16 m9E;
 	struct {
-		u32 m0 : 1;
-		u32 m1 : 10;
-		u32 m11 : 6;
-		u32 m17 : 3;
-		u32 m20 : 2;
-		u32 m22 : 6;
-		u32 m28 : 2;
+		u32 mx0 : 1;
+		u32 mx1 : 10;
+		u32 mxB : 6;
+		u32 mx11 : 3;
+		u32 mx14 : 2;
+		u32 mx16 : 6;
+		u32 mx1C : 2;
+		u32 mx1E : 2;
 
 		void clear()
 		{
@@ -144,24 +145,24 @@ struct sFieldEntitySub4
 	//size 0x164
 };
 
-extern sFieldEntitySub4* spriteTransfertListHead;
+extern sSpriteActor* spriteTransfertListHead;
 
-void OP_21_sub(sFieldEntitySub4* param_1, int param_2);
-void OP_INIT_ENTITY_SCRIPT_sub0Sub9(sFieldEntitySub4* param_1);
-sFieldEntitySub4* setupSpriteAreaInVram(sFieldEntitySub4* param_1, sFieldActorSetupParams* pSetup, int clutX, int clutY, int vramX, int vramY, int param_7);
-void OP_INIT_ENTITY_SCRIPT_sub0Sub6(sFieldEntitySub4* param_1, int param_2);
-void OP_INIT_ENTITY_SCRIPT_sub0Sub7(sFieldEntitySub4* param1, int param2);
+void OP_21_sub(sSpriteActor* param_1, int param_2);
+void OP_INIT_ENTITY_SCRIPT_sub0Sub9(sSpriteActor* param_1);
+sSpriteActor* initializeSpriteActor(sSpriteActor* param_1, sFieldActorSetupParams* pSetup, int clutX, int clutY, int vramX, int vramY, int param_7);
+void OP_INIT_ENTITY_SCRIPT_sub0Sub6(sSpriteActor* param_1, int param_2);
+void OP_INIT_ENTITY_SCRIPT_sub0Sub7(sSpriteActor* param1, int param2);
 
-void deleteFieldEntitySub4(sFieldEntitySub4* param_1);
-sFieldEntitySub4* createFieldEntitySub4(sFieldActorSetupParams* pSetup, int param_2, int param_3, int vramX, int vramY, int param_6);
-sFieldEntitySub4* createFieldEntitySub4Ext(sFieldActorSetupParams* pSetup, int param_2, int param_3, int vramX, int vramY, int param_6, int param_7);
+void deleteFieldEntitySub4(sSpriteActor* param_1);
+sSpriteActor* createSpriteActor(sFieldActorSetupParams* pSetup, int param_2, int param_3, int vramX, int vramY, int param_6);
+sSpriteActor* createSpriteActorEX(sFieldActorSetupParams* pSetup, int param_2, int param_3, int vramX, int vramY, int param_6, int param_7);
 
-void OP_INIT_ENTITY_SCRIPT_sub0Sub3(sFieldEntitySub4* param_1, int param_2);
-void OP_INIT_ENTITY_SCRIPT_sub0Sub4(sFieldEntitySub4* param_1, int param_2, int* param_3, int* param_4, int* param_5);
-void OP_INIT_ENTITY_SCRIPT_sub0Sub5(sFieldEntitySub4* param1, int param2);
+void OP_INIT_ENTITY_SCRIPT_sub0Sub3(sSpriteActor* param_1, int param_2);
+void OP_INIT_ENTITY_SCRIPT_sub0Sub4(sSpriteActor* param_1, int param_2, int* param_3, int* param_4, int* param_5);
+void OP_INIT_ENTITY_SCRIPT_sub0Sub5(sSpriteActor* param1, int param2);
 
-void OP_INIT_ENTITY_SCRIPT_sub0Sub8(sFieldEntitySub4* param1, void(*callback)(sFieldEntitySub4*));
-void fieldActorCallback(sFieldEntitySub4* pThis);
+void OP_INIT_ENTITY_SCRIPT_sub0Sub8(sSpriteActor* param1, void(*callback)(sSpriteActor*));
+void fieldActorCallback(sSpriteActor* pThis);
 
-void OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub2(sFieldEntitySub4* param_1, short param_2);
-void OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1Sub1(sFieldEntitySub4* param_1);
+void setSpriteActorAngle(sSpriteActor* param_1, short param_2);
+void OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1Sub1(sSpriteActor* param_1);

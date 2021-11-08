@@ -532,7 +532,7 @@ void OP_INIT_ENTITY_PC(void)
 	int iVar4;
 	int local_v0_684;
 	uint uVar5;
-	sFieldEntitySub4* psVar6;
+	sSpriteActor* psVar6;
 	sFieldScriptEntity* psVar7;
 	sFieldEntity* psVar8;
 
@@ -1629,7 +1629,7 @@ void OPX_1C(void)
 	sFieldScriptEntity* psVar4;
 	int iVar5;
 	int iVar6;
-	sFieldEntitySub4* psVar7;
+	sSpriteActor* psVar7;
 
 	psVar4 = pCurrentFieldScriptActor;
 	psVar7 = actorArray[currentFieldActorId].m4_pVramSpriteSheet;

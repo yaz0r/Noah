@@ -2323,7 +2323,7 @@ int getAngleCos(u32 param_1)
     return (int)rcossin_tbl[(param_1 & 0xfff) * 2];
 }
 
-int ratan2(int x, int y)
+int ratan2(int y, int x)
 {
     bool bVar1;
     bool bVar2;

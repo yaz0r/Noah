@@ -120,7 +120,7 @@ struct sFieldScriptEntity
 struct sFieldEntity
 {
     sFieldEntitySub0* m0;
-    struct sFieldEntitySub4* m4_pVramSpriteSheet;
+    struct sSpriteActor* m4_pVramSpriteSheet;
     sFieldEntity2dSprite* m8_2dSprite;
     sMatrix mC_matrix;
     sMatrix m2C_matrixBackup;
@@ -292,7 +292,7 @@ void setVar(int varIndex, s16 value);
 void startPartyCharacterASyncLoading(int partyCharacter, int partySlot);
 void fieldEntryPoint();
 
-void setupSpecialAnimation(sFieldEntitySub4* param_1, struct sFieldActorSetupParams* param_2);
+void setupSpecialAnimation(sSpriteActor* param_1, struct sFieldActorSetupParams* param_2);
 void OP_INIT_ENTITY_SCRIPT_sub0(int actorId, int param_2, struct sFieldActorSetupParams* pSetup, int param_4, int param_5, int param_6, int param_7);
 void OP_INIT_ENTITY_SCRIPT_sub1();
 void setCurrentActor2DPosition(int posX, int posZ);

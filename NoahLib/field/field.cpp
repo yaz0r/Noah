@@ -1178,14 +1178,14 @@ void OP_INIT_ENTITY_SCRIPT_sub0(int actorId, int clutYEntry, sFieldActorSetupPar
 				deleteFieldEntitySub4(actorArray[actorId].m4_pVramSpriteSheet);
 			}
 
-			actorArray[actorId].m4_pVramSpriteSheet = createFieldEntitySub4(pSetup, 0x100, ((clutYEntry + 480) * 0x10000) >> 0x10, vramX, vramY, 0x40);
+			actorArray[actorId].m4_pVramSpriteSheet = createSpriteActor(pSetup, 0x100, ((clutYEntry + 480) * 0x10000) >> 0x10, vramX, vramY, 0x40);
 		}
 		else
 		{
 			if ((actorArray[actorId].m5A & 1U) != 0) {
 				deleteFieldEntitySub4(actorArray[actorId].m4_pVramSpriteSheet);
 			}
-			actorArray[actorId].m4_pVramSpriteSheet = createFieldEntitySub4Ext(pSetup, (short)((clutXEntry * 0x10 + 0x100) * 0x10000 >> 0x10), (short)((uint)((clutYEntry + 0x1e0) * 0x10000) >> 0x10), vramX, vramY, 0x40, clutXEntry);
+			actorArray[actorId].m4_pVramSpriteSheet = createSpriteActorEX(pSetup, (short)((clutXEntry * 0x10 + 0x100) * 0x10000 >> 0x10), (short)((uint)((clutYEntry + 0x1e0) * 0x10000) >> 0x10), vramX, vramY, 0x40, clutXEntry);
 		}
 	}
 	else
@@ -1204,13 +1204,13 @@ void OP_INIT_ENTITY_SCRIPT_sub0(int actorId, int clutYEntry, sFieldActorSetupPar
 			iVar4 = clutYEntry + 0xe3;
 			sVar5 = 0x2a0;
 		}
-		actorArray[actorId].m4_pVramSpriteSheet = createFieldEntitySub4(pSetup, 0x100, (short)((uint)(iVar4 * 0x10000) >> 0x10), sVar5, (short)clutYEntry * 0x40 + 0x100, 8);
+		actorArray[actorId].m4_pVramSpriteSheet = createSpriteActor(pSetup, 0x100, (short)((uint)(iVar4 * 0x10000) >> 0x10), sVar5, (short)clutYEntry * 0x40 + 0x100, 8);
 		OP_INIT_ENTITY_SCRIPT_sub0Sub3(actorArray[actorId].m4_pVramSpriteSheet, 0x20);
 	}
 
 	actorArray[actorId].m5A |= 1;
 
-	sFieldEntitySub4* pFieldEntitySub4 = actorArray[actorId].m4_pVramSpriteSheet;
+	sSpriteActor* pFieldEntitySub4 = actorArray[actorId].m4_pVramSpriteSheet;
 
 	int temp0;
 	int temp1;
@@ -1795,7 +1795,7 @@ s32 load2dAnimVar = 0;
 s32 loadCompleted = 0;
 
 
-void setupSpecialAnimation(sFieldEntitySub4* param_1, sFieldActorSetupParams* param_2)
+void setupSpecialAnimation(sSpriteActor* param_1, sFieldActorSetupParams* param_2)
 {
 	param_1->m4C_specialAnimation = param_2;
 	return;
@@ -3254,7 +3254,7 @@ int updateEntityEventCode3Sub0(sFieldScriptEntity* param_1)
 	return iVar1;
 }
 
-void updateEntityEventCode3Sub1(sFieldEntitySub4* param_1, ushort rotation, sFieldEntity* param_3)
+void updateEntityEventCode3Sub1(sSpriteActor* param_1, ushort rotation, sFieldEntity* param_3)
 {
 	int iVar1;
 	sFieldScriptEntity* psVar2;
@@ -3716,7 +3716,7 @@ int updateEntityEventCode3Sub3(sVec3* param_1, sFieldScriptEntity* param_2, std:
 s16 updateEntityEventCode4Var0 = 0;
 s16 updateEntityEventCode4Var1 = 0;
 
-void updateEntityEventCode4(sFieldEntitySub4* param_1, int param_2, sFieldEntity* param_3)
+void updateEntityEventCode4(sSpriteActor* param_1, int param_2, sFieldEntity* param_3)
 {
 	sFieldScriptEntity* psVar1;
 
@@ -4096,7 +4096,7 @@ s32 EntityMoveCheck1Sub1(sFieldScriptEntity* pFieldScriptEntity, int walkmeshId,
 s8 EntityMoveCheck1Var1 = 0;
 int EntityMoveCheck1(int entityIndex, int mask, sFieldEntity* pFieldEntity, sFieldScriptEntity* pFieldScriptEntity, uint param_5)
 {
-	sFieldEntitySub4* psVar17 = actorArray[entityIndex].m4_pVramSpriteSheet;
+	sSpriteActor* psVar17 = actorArray[entityIndex].m4_pVramSpriteSheet;
 	if (entityIndex == playerControlledEntity) {
 		inputAllowedMask = 0xFFFF;
 	}
@@ -4796,7 +4796,7 @@ void updateAllEntities()
 				}
 				if (renderCharsDisabled == '\0') {
 					if ((psVar10->m4_flags & 0x1000000) == 0) {
-						OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub2(pActor->m4_pVramSpriteSheet, cameraTan + pActor->m4C_scriptEntity->m108_rotation3);
+						setSpriteActorAngle(pActor->m4_pVramSpriteSheet, cameraTan + pActor->m4C_scriptEntity->m108_rotation3);
 					}
 					else {
 						OP_INIT_ENTITY_SCRIPT_sub0Sub7(pActor->m4_pVramSpriteSheet, pActor->m4C_scriptEntity->m108_rotation3);
@@ -5121,7 +5121,7 @@ LAB_Field__80074d80:
 	}
 }
 
-void uploadCharacterSpriteSub1(sFieldEntitySub4* param_1, int param_2, sFieldEntitySub4_110* param_3)
+void uploadCharacterSpriteSub1(sSpriteActor* param_1, int param_2, sFieldEntitySub4_110* param_3)
 {
 	sPS1Pointer puVar16 = param_3->m0;
 	sPS1Pointer pbVar13 = puVar16 + READ_LE_U16(puVar16 + param_2 * 2);
@@ -5141,7 +5141,7 @@ void uploadCharacterSpriteSub1(sFieldEntitySub4* param_1, int param_2, sFieldEnt
 	}
 	param_1->m38 = (short)(iVar23 >> 0xc);
 	u8 bVar3 = param_1->m3C & 0xFF;
-	u16 local_50 = param_3->m4_vramLocation.vy & 0xFF;
+	u16 texcoordStartY = param_3->m4_vramLocation.vy & 0xFF;
 	sColorAndCode colorAndCode = param_1->m28_colorAndCode;
 	u32 uVar21 = 4;
 	u32 uVar22 = 0;
@@ -5197,15 +5197,17 @@ void uploadCharacterSpriteSub1(sFieldEntitySub4* param_1, int param_2, sFieldEnt
 			u8 bVar4 = READ_LE_U8(pbVar19);
 			u32 uVar17 = (uint)bVar4;
 			local_54 = local_54 + 2;
-			s8 cVar20;
+
+			s8 texcoordStartX;
 			if ((bVar4 & 1) == 0) {
-				psVar13->m14 = psVar13->m14 & 0xfffffff7;
-				cVar20 = (char)(((ushort)(param_3->m4_vramLocation).vx & 0x3f) >> 2);
+				psVar13->m14 &= ~8;
+				texcoordStartX = (char)(((ushort)(param_3->m4_vramLocation).vx & 0x3f) >> 2);
 			}
 			else {
-				psVar13->m14 = psVar13->m14 | 8;
-				cVar20 = (char)(((ushort)(param_3->m4_vramLocation).vx & 0x3f) >> 1);
+				psVar13->m14 |= 8;
+				texcoordStartX = (char)(((ushort)(param_3->m4_vramLocation).vx & 0x3f) >> 1);
 			}
+
 			u8 bVar5 = READ_LE_U8(pbVar18);
 			u8 bVar7 = bVar5 >> 4;
 			u8 uVar15 = bVar7 & 3;
@@ -5216,12 +5218,12 @@ void uploadCharacterSpriteSub1(sFieldEntitySub4* param_1, int param_2, sFieldEnt
 			}
 			if (((int)uVar17 >> 4 & 1U) == 0) {
 				sPS1Pointer iVar12;
-				if (((param_1->mA8.m0) == 1) && (iVar12 = param_1->m7C->m18, iVar12.getPointer() != 0)) {
+				if (((param_1->mA8.mx0) == 1) && (iVar12 = param_1->m7C->m18, iVar12.getPointer() != 0)) {
 					sPS1Pointer puVar11 = iVar12 + ((uVar17 & 0xe) * 2);
 					u16 uVar6 = READ_LE_U16(puVar11 + 2);
 					u16 uVar14 = READ_LE_U16(puVar11);
-					local_50 = uVar6 & 0xff;
-					cVar20 = (char)((uVar14 & 0x3f) >> 2);
+					texcoordStartY = uVar6 & 0xff;
+					texcoordStartX = (char)((uVar14 & 0x3f) >> 2);
 					psVar13->mA_tpage = (ushort)((uVar17 & 1) << 7) | (ushort)((uVar15 & 3) << 5) | (short)(uVar6 & 0x100) >> 4 | (ushort)((uVar14 & 0x3ff) >> 6) | (ushort)((uVar6 & 0x200) << 2);
 				}
 				else {
@@ -5243,10 +5245,10 @@ void uploadCharacterSpriteSub1(sFieldEntitySub4* param_1, int param_2, sFieldEnt
 								*/
 			}
 			psVar13->m14 = psVar13->m14 & 0xfffffff8U | uVar21;
-			psVar13->m4 = cVar20 + READ_LE_U8(pbVar19 + 1);
-			psVar13->m5 = (char)local_50 + READ_LE_U8(pbVar19 + 2);
-			psVar13->m6 = READ_LE_U8(pbVar19 + 3);
-			psVar13->m7 = READ_LE_U8(pbVar19 + 4);
+			psVar13->m4_texcoordX = texcoordStartX + READ_LE_U8(pbVar19 + 1);
+			psVar13->m5_texcoordY = texcoordStartY + READ_LE_U8(pbVar19 + 2);
+			psVar13->m6_width = READ_LE_U8(pbVar19 + 3);
+			psVar13->m7_height = READ_LE_U8(pbVar19 + 4);
 			psVar13->m14 = psVar13->m14 & 0xffffffefU | READ_LE_U8(pbVar18) >> 2 & 0x10;
 			if ((bVar2 & 0x80) == 0) {
 				psVar13->m0 = READ_LE_S8(pbVar18 + 1);
@@ -5267,7 +5269,7 @@ void uploadCharacterSpriteSub1(sFieldEntitySub4* param_1, int param_2, sFieldEnt
 	param_1->m40 = param_1->m40 & 0xffffff03 | (uVar22 & 0x3f) << 2;
 }
 
-void uploadCharacterSprite(sFieldEntitySub4* param_1, int param_2, sFieldEntitySub4_110* param_3)
+void uploadCharacterSprite(sSpriteActor* param_1, int param_2, sFieldEntitySub4_110* param_3)
 {
 	param_1->m40 = param_1->m40 & 0xfff5ffff;
 	sPS1Pointer local_50 = param_3->m0;
@@ -5299,10 +5301,10 @@ void uploadCharacterSprite(sFieldEntitySub4* param_1, int param_2, sFieldEntityS
 
 void uploadCharacterSprites()
 {
-	sFieldEntitySub4* psVar1;
+	sSpriteActor* psVar1;
 
 	psVar1 = spriteTransfertListHead;
-	if (spriteTransfertListHead != (sFieldEntitySub4*)0x0) {
+	if (spriteTransfertListHead != (sSpriteActor*)0x0) {
 		do {
 			if ((ushort)psVar1->m34 == 0) {
 				psVar1->m40 = psVar1->m40 & 0xffffff03;
@@ -5311,9 +5313,9 @@ void uploadCharacterSprites()
 				uploadCharacterSprite(psVar1, (uint)(ushort)psVar1->m34, psVar1->m24);
 			}
 			psVar1 = psVar1->m20->m38;
-		} while (psVar1 != (sFieldEntitySub4*)0x0);
+		} while (psVar1 != (sSpriteActor*)0x0);
 	}
-	spriteTransfertListHead = (sFieldEntitySub4*)0x0;
+	spriteTransfertListHead = (sSpriteActor*)0x0;
 }
 
 int frameOddOrEven = 0;
@@ -5353,7 +5355,7 @@ bool disableCharacterShadowsRendering = 0;
 
 
 
-void renderFieldCharacterSpritesSub0Sub0(sFieldEntitySub4* pSpriteSheet)
+void renderFieldCharacterSpritesSub0Sub0(sSpriteActor* pSpriteSheet)
 {
 	if ((isBattleOverlayLoaded != '\0') || (isOtherOverlayLoaded != '\0')) {
 		assert(0);
@@ -5397,7 +5399,7 @@ std::array<s16, 8> spriteMatrixTable = {
 	1,2,4,8,0x10,0x20,0x40,0x80,
 };
 
-void renderFieldCharacterSpritesSub0Sub1(sFieldEntitySub4* pSpriteSheet, sTag* pTag)
+void renderFieldCharacterSpritesSub0Sub1(sSpriteActor* pSpriteSheet, sTag* pTag)
 {
 	sFieldEntitySub4_B4* psVar7 = pSpriteSheet->m20;
 	u32 uVar9 = pSpriteSheet->m40 >> 8 & 0x1f;
@@ -5487,8 +5489,8 @@ void renderFieldCharacterSpritesSub0Sub1(sFieldEntitySub4* pSpriteSheet, sTag* p
 				p->clut = pSpriteDefinition->mC_clut;
 
 				int spriteScale = pSpriteSheet->m40 >> 8 & 0x1f;
-				int spriteHeight = (short)(((int)(((uint)pSpriteDefinition->m6 + (int)(char)pSpriteDefinition->m8) * 0x10000) >> 0x10) << spriteScale);
-				int sVar13 = (short)(((int)(((uint)pSpriteDefinition->m7 + (int)(char)pSpriteDefinition->m9) * 0x10000) >> 0x10) << spriteScale);
+				int spriteHeight = (short)(((int)(((uint)pSpriteDefinition->m6_width + (int)(char)pSpriteDefinition->m8) * 0x10000) >> 0x10) << spriteScale);
+				int sVar13 = (short)(((int)(((uint)pSpriteDefinition->m7_height + (int)(char)pSpriteDefinition->m9) * 0x10000) >> 0x10) << spriteScale);
 				int sVar11 = (short)((int)pSpriteDefinition->m0 << spriteScale);
 
 				currentSpriteCharacterSize[3].vy = (short)((int)pSpriteDefinition->m2 << spriteScale);
@@ -5525,24 +5527,27 @@ void renderFieldCharacterSpritesSub0Sub1(sFieldEntitySub4* pSpriteSheet, sTag* p
 				long lStack56;
 				RotTransPers4(&currentSpriteCharacterSize[0], &currentSpriteCharacterSize[1], &currentSpriteCharacterSize[2], &currentSpriteCharacterSize[3], &p->x0y0, &p->x1y1, &p->x3y3, &p->x2y2, &lStack60, &lStack56);
 
-				int spriteDef4 = (uint)(byte)pSpriteDefinition->m4;
-				int spriteDef5 = pSpriteDefinition->m5;
-				int spriteDef6 = pSpriteDefinition->m6 - 1;
-				if (((p->x3y3.vx) < (p->x0y0.vx)) && (spriteDef4 = spriteDef4 - 1, (int)spriteDef4 < 0)) {
-					spriteDef4 = 0;
-					spriteDef6 = pSpriteDefinition->m6 - 2;
+				int UV_xStart = pSpriteDefinition->m4_texcoordX;
+				int UV_yStart = pSpriteDefinition->m5_texcoordY;
+				int UV_Width = pSpriteDefinition->m6_width - 1;
+				int UV_Height = pSpriteDefinition->m7_height - 1;
+
+				if (((p->x3y3.vx) < (p->x0y0.vx)) && (UV_xStart = UV_xStart - 1, (int)UV_xStart < 0)) {
+					UV_xStart = 0;
+					UV_Width = pSpriteDefinition->m6_width - 2;
 				}
-				int bVar3 = (byte)spriteDef4;
-				int bVar4 = spriteDef5 + (pSpriteDefinition->m7 - 1);
 				
-				p->u0 = bVar3;
-				p->v0 = spriteDef5;
-				p->u1 = bVar3 + spriteDef6;
-				p->v1 = spriteDef5;
-				p->u2 = bVar3;
-				p->v2 = bVar4;
-				p->u3 = bVar3 + spriteDef6;
-				p->v3 = bVar4;
+				p->u0 = UV_xStart;
+				p->v0 = UV_yStart;
+
+				p->u1 = UV_xStart + UV_Width;
+				p->v1 = UV_yStart;
+
+				p->u2 = UV_xStart;
+				p->v2 = UV_yStart + UV_Height;
+
+				p->u3 = UV_xStart + UV_Width;
+				p->v3 = UV_yStart + UV_Height;
 
 				if ((pSpriteSheet->m3C >> 0x1b & 1) == 0) {
 					p->m0_pNext = pTag->m0_pNext;
@@ -5558,12 +5563,12 @@ void renderFieldCharacterSpritesSub0Sub1(sFieldEntitySub4* pSpriteSheet, sTag* p
 	}
 }
 
-void renderFieldCharacterSpritesSub0Sub2(sFieldEntitySub4* pSpriteSheet, sTag* pTag)
+void renderFieldCharacterSpritesSub0Sub2(sSpriteActor* pSpriteSheet, sTag* pTag)
 {
 	MissingCode();
 }
 
-void renderFieldCharacterSpritesSub0(sFieldEntitySub4* pSpriteSheet, sTag* pTag)
+void renderFieldCharacterSpritesSub0(sSpriteActor* pSpriteSheet, sTag* pTag)
 {
 	renderFieldCharacterSpritesSub0Sub0(pSpriteSheet);
 	renderFieldCharacterSpritesSub0Sub1(pSpriteSheet, pTag);
@@ -5589,7 +5594,7 @@ void renderFieldCharacterSprites(std::array<sTag, 4096>& OT, int oddOrEven)
 			sFieldEntity* pFieldEntity = &actorArray[currentActorIndex];
 			if ((pFieldEntity->m58_flags & 0x40) != 0) {
 				sFieldScriptEntity* pScriptEntity = pFieldEntity->m4C_scriptEntity;
-				sFieldEntitySub4* pSpriteSheet = pFieldEntity->m4_pVramSpriteSheet;
+				sSpriteActor* pSpriteSheet = pFieldEntity->m4_pVramSpriteSheet;
 				int flags = pScriptEntity->m4_flags;
 
 				pFieldEntity->m2C_matrixBackup = pFieldEntity->mC_matrix;
@@ -5695,7 +5700,8 @@ void renderFieldCharacterSprites(std::array<sTag, 4096>& OT, int oddOrEven)
 				}
 				else
 				{
-					assert(0);
+					//assert(0);
+					MissingCode();
 				}
 			}
 		}
@@ -6200,7 +6206,8 @@ void fieldEntryPoint()
 
 	if (fieldDebugDisable == 1) {
 		gameState.m1930_fieldVarsBackup[41] = 1;
-		setVar(0x50, 1);
+		//setVar(0x50, 1);
+		MissingCode();
 	}
 	initCompassData();
 	fieldRequestedGears = 0;
