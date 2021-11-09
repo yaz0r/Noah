@@ -59,7 +59,7 @@ struct sFieldEntitySub4_B4
 	MATRIX mC_spriteMatrix;
 	std::vector<sFieldEntitySub4_B4_sub>* m2C;
 	std::vector<sFieldEntitySub4_B4_sub>* m30;
-	std::array<sFieldEntitySub4_124, 8>* m34;
+	std::array<sFieldEntitySub4_124, 8>* m34_perSubgroupTransform;
 	struct sSpriteActor* m38;
 	s8 m3C;
 	s8 m3D;
@@ -120,7 +120,7 @@ struct sSpriteActor
 	u16 m86_thisSize;
 	s8 m8C_stackPosition;
 	std::array<sStackElement, 16> m8E_stack;
-	u16 m9E;
+	u16 m9E_wait;
 	struct {
 		u32 mx0 : 1;
 		u32 mx1 : 10;
@@ -136,7 +136,7 @@ struct sSpriteActor
 			memset(this, 0, sizeof(*this));
 		}
 	} mA8;
-	u32 mAC;
+	u32 mAC; // animation speed >> 7 & 0xFFF
 	u32 mB0;
 	sFieldEntitySub4_B4 mB4;
 	sFieldEntitySub4_F4 mF4;

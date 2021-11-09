@@ -25,11 +25,11 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1Sub1(sSpriteActor* param_1)
 {
 	for (int i=0; i<8; i++)
 	{
-		(*param_1->m20->m34)[i].m0_translateX = 0;
-		(*param_1->m20->m34)[i].m1_translateY = 0;
-		(*param_1->m20->m34)[i].m2_rotateX = 0;
-		(*param_1->m20->m34)[i].m4_rotateY = 0;
-		(*param_1->m20->m34)[i].m6_rotateZ = 0;
+		(*param_1->m20->m34_perSubgroupTransform)[i].m0_translateX = 0;
+		(*param_1->m20->m34_perSubgroupTransform)[i].m1_translateY = 0;
+		(*param_1->m20->m34_perSubgroupTransform)[i].m2_rotateX = 0;
+		(*param_1->m20->m34_perSubgroupTransform)[i].m4_rotateY = 0;
+		(*param_1->m20->m34_perSubgroupTransform)[i].m6_rotateZ = 0;
 	}
 }
 
@@ -56,21 +56,21 @@ void executeSpriteBytecode2Sub0Sub0sub0(sSpriteActor* param_1, int param_2, sFie
 				}
 				else {
 					u32 uVar6 = bVar2 & 7;
-					if (param_1->m20->m34 == nullptr) {
-						param_1->m20->m34 = new std::array<sFieldEntitySub4_124, 8>;
+					if (param_1->m20->m34_perSubgroupTransform == nullptr) {
+						param_1->m20->m34_perSubgroupTransform = new std::array<sFieldEntitySub4_124, 8>;
 						OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1Sub1(param_1);
 					}
 					if ((bVar2 & 0x20) != 0) {
-						(*param_1->m20->m34)[uVar6].m0_translateX = READ_LE_U8(pbVar5);
-						(*param_1->m20->m34)[uVar6].m1_translateY = READ_LE_U8(pbVar4 + 2);
+						(*param_1->m20->m34_perSubgroupTransform)[uVar6].m0_translateX = READ_LE_U8(pbVar5);
+						(*param_1->m20->m34_perSubgroupTransform)[uVar6].m1_translateY = READ_LE_U8(pbVar4 + 2);
 						pbVar5 = pbVar4 + 3;
 					}
 					pbVar4 = pbVar5;
 					if ((bVar2 & 0x10) == 0) {
-						(*param_1->m20->m34)[uVar6].m6_rotateZ = 0;
+						(*param_1->m20->m34_perSubgroupTransform)[uVar6].m6_rotateZ = 0;
 					}
 					else {
-						(*param_1->m20->m34)[uVar6].m6_rotateZ = (ushort)READ_LE_U8(pbVar4) << 4;
+						(*param_1->m20->m34_perSubgroupTransform)[uVar6].m6_rotateZ = (ushort)READ_LE_U8(pbVar4) << 4;
 						pbVar4 += 1;
 					}
 				}
@@ -108,24 +108,24 @@ void executeSpriteBytecode2Sub0Sub0(sSpriteActor* param_1, int param_2, sFieldEn
 							}
 						}
 						else {
-							if (param_1->m20->m34 == nullptr) {
-								param_1->m20->m34 = new std::array<sFieldEntitySub4_124, 8>;
+							if (param_1->m20->m34_perSubgroupTransform == nullptr) {
+								param_1->m20->m34_perSubgroupTransform = new std::array<sFieldEntitySub4_124, 8>;
 								OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1Sub1(param_1);
 							}
 							u32 uVar4 = bVar2 & 7;
 							if ((bVar2 & 0x20) != 0) {
-								(*param_1->m20->m34)[uVar4].m0_translateX = READ_LE_U8(pbVar6);
-								(*param_1->m20->m34)[uVar4].m1_translateY = READ_LE_U8(pbVar5 + 2);
+								(*param_1->m20->m34_perSubgroupTransform)[uVar4].m0_translateX = READ_LE_U8(pbVar6);
+								(*param_1->m20->m34_perSubgroupTransform)[uVar4].m1_translateY = READ_LE_U8(pbVar5 + 2);
 								pbVar6 = pbVar5 + 3;
 							}
 							pbVar5 = pbVar6;
 							if ((bVar2 & 0x10) == 0) {
-								(*param_1->m20->m34)[uVar4].m6_rotateZ = 0;
+								(*param_1->m20->m34_perSubgroupTransform)[uVar4].m6_rotateZ = 0;
 							}
 							else {
 								bVar2 = READ_LE_U8(pbVar5);
 								pbVar5 = pbVar5 + 1;
-								(*param_1->m20->m34)[uVar4].m6_rotateZ = (ushort)bVar2 << 4;
+								(*param_1->m20->m34_perSubgroupTransform)[uVar4].m6_rotateZ = (ushort)bVar2 << 4;
 							}
 						}
 					}
@@ -146,7 +146,7 @@ void executeSpriteBytecode2Sub0Sub0(sSpriteActor* param_1, int param_2, sFieldEn
 void executeSpriteBytecode2Sub0(sSpriteActor* param_1, short param_2)
 {
 	if ((param_1->m3C & 3) == 1) {
-		if (((param_1->m40 >> 0x14 & 1) != 0) && (param_1->m40 = param_1->m40 & 0xffefffff, param_1->m20->m34 != nullptr)) {
+		if (((param_1->m40 >> 0x14 & 1) != 0) && (param_1->m40 = param_1->m40 & 0xffefffff, param_1->m20->m34_perSubgroupTransform != nullptr)) {
 			OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1Sub1(param_1);
 		}
 		sSpriteActor* psVar2 = spriteTransfertListHead;
@@ -366,11 +366,9 @@ void executeSpriteBytecode2(sSpriteActor* param_1)
 		return;
 	}
 
-	int unaff_s3 = 0;
-
 	do
 	{
-		if (param_1->m9E != 0)
+		if (param_1->m9E_wait != 0)
 		{
 			return;
 		}
@@ -382,30 +380,32 @@ void executeSpriteBytecode2(sSpriteActor* param_1)
 		{
 			param_1->m64_spriteByteCode = pEndOfOpcode;
 
+			int waitDelay = 0;
+
 			if (bytecode < 0x10)
 			{
 				executeSpriteBytecode2Sub0(param_1, param_1->m34 + 1);
-				unaff_s3 = (bytecode & 0xf) + 1;
+				waitDelay = (bytecode & 0xf) + 1;
 			}
 			else if (bytecode < 0x20)
 			{
 				param_1->mA8.mxB++;
 				executeSpriteBytecode2Sub1(param_1);
-				unaff_s3 = (bytecode & 0xf) + 1;
+				waitDelay = (bytecode & 0xf) + 1;
 			}
 			else if (bytecode < 0x30)
 			{
 				param_1->m34--;
 				executeSpriteBytecode2Sub1(param_1);
-				unaff_s3 = (bytecode & 0xf) + 1;
+				waitDelay = (bytecode & 0xf) + 1;
 			}
 
 			if (bytecode < 0x40)
 			{
-				unaff_s3 = (bytecode & 0xf) + 1;
+				waitDelay = (bytecode & 0xf) + 1;
 			}
 
-			int iVar12 = unaff_s3 * (param_1->mAC >> 7 & 0xfff);
+			int iVar12 = waitDelay * (param_1->mAC >> 7 & 0xfff);
 			if (iVar12 < 0) {
 				iVar12 = iVar12 + 0xff;
 			}
@@ -414,7 +414,7 @@ void executeSpriteBytecode2(sSpriteActor* param_1)
 				iVar12 = 1;
 			}
 
-			param_1->m9E += iVar12;
+			param_1->m9E_wait += iVar12;
 			param_1->mA8.mx16++;
 
 			if (param_1->mA8.mx16 != 0)
@@ -445,7 +445,7 @@ void executeSpriteBytecode2(sSpriteActor* param_1)
 			{
 				assert(0);
 			}
-			param_1->m9E = 0;
+			param_1->m9E_wait = 0;
 			if (param_1->m68) {
 				param_1->m68(param_1);
 			}
@@ -460,14 +460,14 @@ void executeSpriteBytecode2(sSpriteActor* param_1)
 				OP_INIT_ENTITY_SCRIPT_sub0Sub6(param_1, (param_1->mAC >> 24) & 0xFF);
 				(param_1->mC).vy = iVar15;
 			}
-			param_1->m9E = 0;
+			param_1->m9E_wait = 0;
 			executeSpriteBytecode2(param_1);
 			return;
 		case 0xA7:
 			param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
 			if ((READ_LE_U8(pEndOfOpcode) & 0x80) != 0) {
 				spriteCallback2Var0 = (READ_LE_U8(pEndOfOpcode) & 0x7f) + 1;
-				param_1->m9E = param_1->m9E + 1;
+				param_1->m9E_wait = param_1->m9E_wait + 1;
 				return;
 			}
 			{
@@ -479,7 +479,7 @@ void executeSpriteBytecode2(sSpriteActor* param_1)
 				if (iVar13 >> 8 == 0) {
 					sVar11 = 1;
 				}
-				param_1->m9E = param_1->m9E + sVar11;
+				param_1->m9E_wait = param_1->m9E_wait + sVar11;
 			}
 			return;
 		case 0xE2: // Looks like a call
@@ -511,8 +511,8 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub9(sSpriteActor* param_1)
 	iVar2 = 0;
 	if (fieldDrawEnvsInitialized != -1) {
 		do {
-			sVar1 = param_1->m9E;
-			if ((param_1->m9E != 0) && (param_1->m9E = sVar1 + -1, sVar1 == 1)) {
+			sVar1 = param_1->m9E_wait;
+			if ((param_1->m9E_wait != 0) && (param_1->m9E_wait = sVar1 + -1, sVar1 == 1)) {
 				executeSpriteBytecode2(param_1);
 			}
 			iVar2 = iVar2 + 1;
@@ -659,7 +659,7 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1(sSpriteActor* param_1, const sPS1Pointer
 		if ((param_1->m3C & 3) == 1) {
 			param_1->m20->m3D = 0;
 			param_1->m20->m3C = 0;
-			if (((param_1->m40 >> 0x14 & 1) == 0) && (param_1->m20->m34 != nullptr)) {
+			if (((param_1->m40 >> 0x14 & 1) == 0) && (param_1->m20->m34_perSubgroupTransform != nullptr)) {
 				OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1Sub1(param_1);
 			}
 		}
@@ -667,7 +667,7 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1(sSpriteActor* param_1, const sPS1Pointer
 	param_1->m8C_stackPosition = 0x10;
 	param_1->m30 = 0;
 	param_1->mA8.mx1 = 0;
-	param_1->m9E = 1;
+	param_1->m9E_wait = 1;
 	param_1->mA8.mx16 = 0;
 	param_1->mA8.mx1C = 0;
 	param_1->mA8.mxB = 0x3F;
@@ -715,7 +715,7 @@ void executeSpriteBytecode(sSpriteActor* param_1, sPS1Pointer param_2, uint para
 				unaff_s3 = (bytecode & 0xf) + 1;
 			}
 
-			param_1->m9E += unaff_s3;
+			param_1->m9E_wait += unaff_s3;
 			param_1->mA8.mx16++;
 			if (param_1->mA8.mx16 == 0) {
 				param_1->mA8.mx16 = 0x3F;
@@ -803,14 +803,14 @@ void setSpriteActorAngle(sSpriteActor* param_1, short param_2)
 
 	// direction angle changed
 	if (originalM17 != param_1->mA8.mx11) {
-		sVar1 = param_1->m9E;
+		sVar1 = param_1->m9E_wait;
 		uVar2 = READ_LE_U16(param_1->m58 + 2);
 		sPS1Pointer puVar5 = param_1->m64_spriteByteCode;
 		param_1->mA8.mx16 = 0;
 		param_1->mA8.mxB = 0x3F;
 		param_1->m64_spriteByteCode = param_1->m58 + uVar2 + 2;
 		executeSpriteBytecode(param_1, puVar5, param_1->mA8.mx16);
-		param_1->m9E = sVar1;
+		param_1->m9E_wait = sVar1;
 	}
 
 	param_1->m3C = param_1->m3C & 0xfffffff7 | (param_1->mAC >> 3 & 1 ^ param_1->mAC >> 2 & 1) << 3;
@@ -962,7 +962,7 @@ void initFieldEntitySub4Sub2(sSpriteActor* pThis)
 	pThis->m20 = &pThis->mB4;
 	initsFieldEntitySub4_B4(&pThis->mB4);
 	pThis->m7C = &pThis->mF4;
-	pThis->m20->m34 = &pThis->m124;
+	pThis->m20->m34_perSubgroupTransform = &pThis->m124;
 	pThis->m24 = &pThis->m110;
 	pThis->m20->m38 = 0;
 }

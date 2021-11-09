@@ -4953,6 +4953,10 @@ bool submitModelForRendering(sModelBlock* param_1, std::vector<sTag*>& param_2, 
 		{
 			primRenderFunc(g_currentModelBlockSubBlocks, READ_LE_U16(currentModelBlockSubBlocks + 2));
 		}
+		else
+		{
+			currentModelInstanceArray8+= READ_LE_U16(currentModelBlockSubBlocks + 2);
+		}
 		currentModelBlockSubBlocks = g_currentModelBlockSubBlocks + READ_LE_U16(currentModelBlockSubBlocks + 2) * polyRenderDefs[primType].m1C_size;
 	}
 	g_currentModelBlockSubBlocks = currentModelBlockSubBlocks;
@@ -5143,53 +5147,53 @@ void uploadCharacterSpriteSub1(sSpriteActor* param_1, int param_2, sFieldEntityS
 	u8 bVar3 = param_1->m3C & 0xFF;
 	u16 texcoordStartY = param_3->m4_vramLocation.vy & 0xFF;
 	sColorAndCode colorAndCode = param_1->m28_colorAndCode;
-	u32 uVar21 = 4;
+	u32 transformId = 4;
 	u32 uVar22 = 0;
 
 	if ((bVar2 & 0x3f) != 0) {
 		do {
 			psVar13->m9 = 0;
 			psVar13->m8 = 0;
-			psVar13->m14 = psVar13->m14 & 0xffffffdf;
+			psVar13->m14 &= ~0x20;
 			while (true) {
-				u8 bVar4 = READ_LE_U8(pbVar18);
-				if ((bVar4 & 0x80) == 0) break;
+				u8 transformData = READ_LE_U8(pbVar18);
+				if ((transformData & 0x80) == 0)
+					break;
 				sPS1Pointer pbVar19 = pbVar18 + 1;
-				if ((bVar4 & 0x40) == 0) {
-					if ((bVar4 & 4) != 0) {
+				if ((transformData & 0x40) == 0) {
+					if ((transformData & 4) != 0) {
 						psVar13->m14 = psVar13->m14 | 0x20;
 					}
-					if ((bVar4 & 1) != 0) {
+					if ((transformData & 1) != 0) {
 						psVar13->m8 = READ_LE_U8(pbVar19);
 						pbVar19 = pbVar18 + 2;
 					}
 					pbVar18 = pbVar19;
-					if ((bVar4 & 2) != 0) {
-						bVar4 = READ_LE_U8(pbVar19);
+					if ((transformData & 2) != 0) {
+						transformData = READ_LE_U8(pbVar19);
 						pbVar18 = pbVar18 + 1;
-						psVar13->m9 = bVar4;
+						psVar13->m9 = transformData;
 					}
 				}
 				else {
-					uVar21 = bVar4 & 7;
-					if (param_1->m20->m34 == nullptr) {
-						std::array<sFieldEntitySub4_124, 8>* pasVar10 = new std::array<sFieldEntitySub4_124, 8>;
-						param_1->m20->m34 = pasVar10;
+					transformId = transformData & 7;
+					if (param_1->m20->m34_perSubgroupTransform == nullptr) {
+						param_1->m20->m34_perSubgroupTransform = new std::array<sFieldEntitySub4_124, 8>;
 						OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1Sub1(param_1);
 					}
-					if ((bVar4 & 0x20) != 0) {
-						(*param_1->m20->m34)[uVar21].m0_translateX = READ_LE_U8(pbVar19);
-						(*param_1->m20->m34)[uVar21].m1_translateY = READ_LE_U8(pbVar18 + 2);
+					if ((transformData & 0x20) != 0) {
+						(*param_1->m20->m34_perSubgroupTransform)[transformId].m0_translateX = READ_LE_U8(pbVar18 + 1);
+						(*param_1->m20->m34_perSubgroupTransform)[transformId].m1_translateY = READ_LE_U8(pbVar18 + 2);
 						pbVar19 = pbVar18 + 3;
 					}
 					pbVar18 = pbVar19;
-					if ((bVar4 & 0x10) == 0) {
-						(*param_1->m20->m34)[uVar21].m6_rotateZ = 0;
+					if ((transformData & 0x10) == 0) {
+						(*param_1->m20->m34_perSubgroupTransform)[transformId].m6_rotateZ = 0;
 					}
 					else {
-						bVar4 = READ_LE_U8(pbVar18);
+						transformData = READ_LE_U8(pbVar18);
 						pbVar18 = pbVar18 + 1;
-						(*param_1->m20->m34)[uVar21].m6_rotateZ = (ushort)bVar4 << 4;
+						(*param_1->m20->m34_perSubgroupTransform)[transformId].m6_rotateZ = (ushort)transformData << 4;
 					}
 				}
 			}
@@ -5244,7 +5248,7 @@ void uploadCharacterSpriteSub1(sSpriteActor* param_1, int param_2, sFieldEntityS
 								psVar13->mC_clut = uVar9;
 								*/
 			}
-			psVar13->m14 = psVar13->m14 & 0xfffffff8U | uVar21;
+			psVar13->m14 = (psVar13->m14 & ~7) | transformId;
 			psVar13->m4_texcoordX = texcoordStartX + READ_LE_U8(pbVar19 + 1);
 			psVar13->m5_texcoordY = texcoordStartY + READ_LE_U8(pbVar19 + 2);
 			psVar13->m6_width = READ_LE_U8(pbVar19 + 3);
@@ -5272,8 +5276,8 @@ void uploadCharacterSpriteSub1(sSpriteActor* param_1, int param_2, sFieldEntityS
 void uploadCharacterSprite(sSpriteActor* param_1, int param_2, sFieldEntitySub4_110* param_3)
 {
 	param_1->m40 = param_1->m40 & 0xfff5ffff;
-	sPS1Pointer local_50 = param_3->m0;
-	if (param_2 < (int)((READ_LE_U16(local_50) & 0x1ff) + 1)) {
+	sPS1Pointer dataPtr = param_3->m0;
+	if (param_2 < (int)((READ_LE_U16(dataPtr) & 0x1ff) + 1)) {
 		if ((param_1->m3C >> 0x1e & 1) != 0) {
 			param_1->m3C = param_1->m3C & 0xbfffffff;
 			sPS1Pointer puVar10 = param_3->mC;
@@ -5289,8 +5293,143 @@ void uploadCharacterSprite(sSpriteActor* param_1, int param_2, sFieldEntitySub4_
 				addToShapeTransfertTable(clutData, param_3->m8_clut.vx, param_3->m8_clut.vy, width, 1);
 			}
 		}
-		if ((READ_LE_U16(local_50) & 0x8000) == 0) {
-			MissingCode();
+		if ((READ_LE_U16(dataPtr) & 0x8000) == 0) {
+			// character sprite needs to be uploaded every frame (playable characters)
+			sVec2_s16 vramLocation = param_1->m24->m4_vramLocation;
+			sPS1Pointer subDataPtr = dataPtr + READ_LE_U16(dataPtr + param_2 * 2);
+			if ((param_1->m40 >> 0xd & 0xf) == 0xe) {
+				//uploadCharacterSpriteSub0(&vramLocation, subDataPtr[4]);
+				assert(0);
+			}
+
+			int height = READ_LE_U8(subDataPtr + 3) * param_1->m2C_scale;
+			u8 bVar2 = READ_LE_U8(subDataPtr);
+			sPS1Pointer puVar19 = subDataPtr + 6;
+			sPS1Pointer pbVar16 = subDataPtr + (bVar2 & 0x3f) * 4 + 6;
+			if (height < 0) {
+				height = height + 0xfff;
+			}
+			param_1->m36 = (short)(height >> 0xc);
+			height = READ_LE_U8(subDataPtr+1) * (int)param_1->m2C_scale;
+			if (height < 0) {
+				height = height + 0xfff;
+			}
+			param_1->m38 = (short)(height >> 0xc);
+			int bVar7 = *(byte*)&param_1->m3C >> 5;
+			int uVar12 = (uint)vramLocation.vx & 0x3f;
+			int uVar9 = (uint)vramLocation.vy;
+			sColorAndCode colorAndCode = param_1->m28_colorAndCode;
+			int uVar18 = 4;
+			int uVar20 = 0;
+
+			std::vector<sFieldEntitySub4_B4_sub>::iterator pFieldEntitySub4_B4_sub = param_1->m20->m30->begin();
+
+			if ((bVar2 & 0x3f) != 0) {
+				do {
+					pFieldEntitySub4_B4_sub->m9 = 0;
+					pFieldEntitySub4_B4_sub->m8 = 0;
+					pFieldEntitySub4_B4_sub->m14 = pFieldEntitySub4_B4_sub->m14 & 0xffffffdf;
+					while (true) {
+						int bVar3 = READ_LE_U8(pbVar16);
+						if ((bVar3 & 0x80) == 0) break;
+						sPS1Pointer pbVar17 = pbVar16 + 1;
+						if ((bVar3 & 0x40) == 0) {
+							if ((bVar3 & 4) != 0) {
+								pFieldEntitySub4_B4_sub->m14 = pFieldEntitySub4_B4_sub->m14 | 0x20;
+							}
+							if ((bVar3 & 1) != 0) {
+								pFieldEntitySub4_B4_sub->m8 = READ_LE_U8(pbVar17);
+								pbVar17 = pbVar16 + 2;
+							}
+							pbVar16 = pbVar17;
+							if ((bVar3 & 2) != 0) {
+								bVar3 = READ_LE_U8(pbVar16);
+								pbVar16 = pbVar16 + 1;
+								pFieldEntitySub4_B4_sub->m9 = bVar3;
+							}
+						}
+						else {
+							if (param_1->m20->m34_perSubgroupTransform == nullptr) {
+								param_1->m20->m34_perSubgroupTransform = new std::array<sFieldEntitySub4_124, 8>;
+								OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1Sub1(param_1);
+							}
+							uVar18 = bVar3 & 7;
+							if ((bVar3 & 0x20) != 0) {
+								(*param_1->m20->m34_perSubgroupTransform)[uVar18].m0_translateX = READ_LE_U8(pbVar17);
+								(*param_1->m20->m34_perSubgroupTransform)[uVar18].m1_translateY = READ_LE_U8(pbVar16+2);
+								pbVar17 = pbVar16 + 3;
+							}
+							pbVar16 = pbVar17;
+							if ((bVar3 & 0x10) == 0) {
+								(*param_1->m20->m34_perSubgroupTransform)[uVar18].m6_rotateZ = 0;
+							}
+							else {
+								bVar3 = READ_LE_U8(pbVar16);
+								pbVar16 = pbVar16 + 1;
+								(*param_1->m20->m34_perSubgroupTransform)[uVar18].m6_rotateZ = (ushort)bVar3 << 4;
+							}
+						}
+					}
+					int uVar5 = READ_LE_U16(puVar19 + 2);
+					sPS1Pointer pbVar17 = dataPtr + READ_LE_U16(puVar19) * 4;
+					int uVar10 = READ_LE_U16(puVar19 + 2) >> 5 & 0x3f;
+					int uVar6 = READ_LE_U16(pbVar17 + 2);
+					puVar19 = puVar19 + 4;
+					int cVar15 = (char)(uVar5 & 0x1f);
+					int bVar3;
+					u32 uVar14;
+					if ((uVar6 & 1) == 0) {
+						cVar15 = (char)(uVar12 << 2) + cVar15 * '\x04';
+						bVar3 = READ_LE_U8(pbVar17) >> 2;
+						uVar14 = pFieldEntitySub4_B4_sub->m14 & 0xfffffff7;
+					}
+					else {
+						cVar15 = (char)(uVar12 << 1) + cVar15 * '\x02';
+						bVar3 = READ_LE_U8(pbVar17) >> 1;
+						uVar14 = pFieldEntitySub4_B4_sub->m14 | 8;
+					}
+					pFieldEntitySub4_B4_sub->m14 = uVar14;
+					pFieldEntitySub4_B4_sub->m4_texcoordX = cVar15;
+					pFieldEntitySub4_B4_sub->m14 = pFieldEntitySub4_B4_sub->m14 & 0xfffffff8U | uVar18;
+					int local_56 = (char)uVar10;
+					pFieldEntitySub4_B4_sub->m5_texcoordY = local_56 + (char)uVar9;
+					pFieldEntitySub4_B4_sub->m6_width = READ_LE_U8(pbVar17);
+					pFieldEntitySub4_B4_sub->m7_height = READ_LE_U8(pbVar17 + 1);
+					pFieldEntitySub4_B4_sub->m14 = pFieldEntitySub4_B4_sub->m14 & 0xffffffefU | READ_LE_U8(pbVar16) >> 2 & 0x10;
+					int bVar4 = READ_LE_U8(pbVar16);
+					int bVar8 = bVar4 >> 4;
+					pFieldEntitySub4_B4_sub->m10_colorAndCode = colorAndCode;
+					uVar14 = bVar8 & 3;
+					if (((bVar8 & 3) != 0) || (uVar14 = (uint)bVar7, bVar7 != 0)) {
+						uVar14 = uVar14 - 1;
+						(pFieldEntitySub4_B4_sub->m10_colorAndCode).m3_code = (pFieldEntitySub4_B4_sub->m10_colorAndCode).m3_code | 2;
+					}
+					pFieldEntitySub4_B4_sub->mA_tpage =
+						(ushort)((uVar6 & 1) << 7) | (ushort)((uVar14 & 3) << 5) | (short)(vramLocation.vy & 0x100U) >> 4 | (ushort)(((uint)vramLocation.vx & 0x3ff) >> 6) |
+						(ushort)(((ushort)vramLocation.vy & 0x200) << 2);
+					u16 uVar11 = GetClut((int)(param_3->m8_clut).vx + (bVar4 & 0xf) * 0x10, (int)(param_3->m8_clut).vy);
+					pFieldEntitySub4_B4_sub->mC_clut = uVar11;
+					addToShapeTransfertTable(pbVar17 + 4, (short)((((uint)vramLocation.vx & 0xffff) + (uint)(uVar5 & 0x1f)) * 0x10000 >> 0x10), vramLocation.vy + uVar10, (ushort)bVar3, (ushort)READ_LE_U8(pbVar17+1));
+					if ((bVar2 & 0x80) == 0) {
+						pFieldEntitySub4_B4_sub->m0 = (short)(char)READ_LE_U8(pbVar16 + 1);
+						pFieldEntitySub4_B4_sub->m2 = (short)(char)READ_LE_U8(pbVar16 + 2);
+					}
+					else {
+						pFieldEntitySub4_B4_sub->m0 = (ushort)READ_LE_U8(pbVar16+1) | (ushort)(((uint)READ_LE_U8(pbVar16 + 2) << 0x18) >> 0x10);
+						pbVar17 = pbVar16 + 3;
+						sPS1Pointer pbVar1 = pbVar16 + 4;
+						pbVar16 = pbVar16 + 2;
+						pFieldEntitySub4_B4_sub->m2 = (ushort)READ_LE_U8(pbVar17) | (ushort)(((uint)READ_LE_U8(pbVar1) << 0x18) >> 0x10);
+					}
+					pFieldEntitySub4_B4_sub = pFieldEntitySub4_B4_sub + 1;
+					uVar20 = uVar20 + 1;
+					pbVar16 = pbVar16 + 3;
+				} while (uVar20 != (bVar2 & 0x3f));
+			}
+			param_1->m40 = param_1->m40 & 0xffffff03 | (uVar20 & 0x3f) << 2;
+			sPS1Pointer pointer;
+			pointer.makeNull();
+			addToShapeTransfertTable(pointer, vramLocation.vx, vramLocation.vy, READ_LE_U8(subDataPtr + 4), READ_LE_U8(subDataPtr + 5));
 		}
 		else
 		{
@@ -5422,14 +5561,14 @@ void renderFieldCharacterSpritesSub0Sub1(sSpriteActor* pSpriteSheet, sTag* pTag)
 			if (currentBoundMatrixId != matrixIdNeeded) { // need to change the matrix?
 				local_30 = spriteMatrixTable[matrixIdNeeded] & ((pSpriteSheet->m3C >> 8) & 0xFF) == 0;
 				local_30 = 1; // hack
-				if (pSpriteSheet->m20->m34 == nullptr)
+				if (pSpriteSheet->m20->m34_perSubgroupTransform == nullptr)
 				{
 					SetRotMatrix(&pSpriteSheet->m20->mC_spriteMatrix);
 					SetTransMatrix(&pSpriteSheet->m20->mC_spriteMatrix);
 				}
 				else
 				{
-					sFieldEntitySub4_124* psVar8 = &(*pSpriteSheet->m20->m34)[matrixIdNeeded];
+					sFieldEntitySub4_124* psVar8 = &(*pSpriteSheet->m20->m34_perSubgroupTransform)[matrixIdNeeded];
 					if ((psVar8->m0_translateX == 0) && (psVar8->m1_translateY == 0) && (psVar8->m6_rotateZ == 0))
 					{
 						SetRotMatrix(&pSpriteSheet->m20->mC_spriteMatrix);
