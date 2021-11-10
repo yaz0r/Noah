@@ -227,6 +227,18 @@ void executeSpriteBytecode2Extended92(sSpriteActor* param_1)
 	}
 }
 
+void OP_INIT_ENTITY_SCRIPT_sub0Sub7Sub0(sSpriteActor* param1)
+{
+	int iVar1;
+	int iVar2;
+
+	iVar2 = ((param1->m18 >> 4) << 8) / (int)(param1->mAC >> 7 & 0xfff);
+	iVar1 = getAngleSin((int)param1->m32);
+	param1->mC.vx = (iVar1 >> 2) * iVar2 >> 6;
+	iVar1 = getAngleCos((int)param1->m32);
+	param1->mC.vz = -((iVar1 >> 2) * iVar2) >> 6;
+}
+
 void executeSpriteBytecode2Extended(sSpriteActor* param_1, int bytecode, sPS1Pointer param_3)
 {
 	switch (bytecode & 0xff) {
@@ -242,6 +254,16 @@ void executeSpriteBytecode2Extended(sSpriteActor* param_1, int bytecode, sPS1Poi
 		break;
 	case 0xB4:
 		pushByteOnAnimationStack(param_1, READ_LE_U8(param_3));
+		break;
+	case 0xA0:
+		{
+			int iVar11 = READ_LE_U8(param_3 )* 0x10 * (fieldDrawEnvsInitialized + 1) * (int)param_1->m82;
+			if (iVar11 < 0) {
+				iVar11 = iVar11 + 0xfff;
+			}
+			param_1->m18 = (iVar11 >> 0xc) << 8;
+			OP_INIT_ENTITY_SCRIPT_sub0Sub7Sub0(param_1);
+		}
 		break;
 	case 0xc6:
 		if (param_1->mA8.mx0) {
@@ -1053,18 +1075,6 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub4(sSpriteActor* param_1, int param_2, int* par
 void OP_INIT_ENTITY_SCRIPT_sub0Sub5(sSpriteActor* param1, int param2)
 {
 	param1->m40 = param1->m40 & 0xffffe0ff | (param2 & 0x1f) << 8;
-}
-
-void OP_INIT_ENTITY_SCRIPT_sub0Sub7Sub0(sSpriteActor* param1)
-{
-	int iVar1;
-	int iVar2;
-
-	iVar2 = ((param1->m18 >> 4) << 8) / (int)(param1->mAC >> 7 & 0xfff);
-	iVar1 = getAngleSin((int)param1->m32);
-	param1->mC.vx = (iVar1 >> 2) * iVar2 >> 6;
-	iVar1 = getAngleCos((int)param1->m32);
-	param1->mC.vz = -((iVar1 >> 2) * iVar2) >> 6;
 }
 
 void OP_INIT_ENTITY_SCRIPT_sub0Sub7(sSpriteActor* param1, int param2)

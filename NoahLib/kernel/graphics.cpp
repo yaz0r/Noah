@@ -223,7 +223,7 @@ sTag gEndTag;
 sTag* ClearOTagR(sTag* ot, int n)
 {
 	sTag* pCurrent = ot;
-	for (int i=0; i<n; i++)
+	for (int i=0; i<n-1; i++)
 	{
 		pCurrent++;
 		pCurrent->m0_pNext = pCurrent - 1;

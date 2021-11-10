@@ -95,6 +95,7 @@ s32 objectClippingMask = 1;
 VECTOR fieldObjectRenderingVar1 = { 0,0,0 };
 SVECTOR fieldObjectRenderingVar2 = { 0,0,0 };
 s32 sceneSCRZ = 0;
+int fieldUseGroundOT = 0;
 
 const std::array<s8, 12> characterMappingTable = {
 	0,1,2,3,4,5,6,7,8,2,6,0
@@ -841,16 +842,16 @@ int primC_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator 
 	return 1;
 }
 
-s32 initFieldDrawEnvsSub0Var0 = 319;
-s32 initFieldDrawEnvsSub0Var1 = 0xEE0000;
+s32 screenClippingX = 319;
+s32 screenClippingY = 238 << 0x10;
 
-s32 primD_2Var0 = 2;
+s32 gDepthDivider = 2;
 std::array<sTag, 4096>* currentOTEntry = nullptr;
 
 void primD_2(std::vector<u8>::iterator meshSubBlock, int count)
 {
 	std::array<sTag, 4096>& pOT = *currentOTEntry;
-	int depthGranularity = primD_2Var0 + 2;
+	int depthGranularity = gDepthDivider + 2;
 
 	for (int i = 0; i < count; i++)
 	{
@@ -892,33 +893,44 @@ void primD_2(std::vector<u8>::iterator meshSubBlock, int count)
 				sVec2_s16 xy3;
 				gte_stsxy2(&xy3);
 
-				if (flagsTriangle1 > 0)
+				if (flagsTriangle1 < 0)
 				{
-					//if (!(((((initFieldDrawEnvsSub0Var1 <= xy0.asS32() && (initFieldDrawEnvsSub0Var1 <= xy1.asS32())) && (initFieldDrawEnvsSub0Var1 <= xy2.asS32())) && (initFieldDrawEnvsSub0Var1 <= xy3.asS32())))))
-					{
-						pOutputPrim->x0y0 = xy0;
-						pOutputPrim->x1y1 = xy1;
-						pOutputPrim->x2y2 = xy2;
-						pOutputPrim->x3y3 = xy3;
+					continue;
+				}
 
-						//if (((initFieldDrawEnvsSub0Var0 <= (xy0.vx)) && (initFieldDrawEnvsSub0Var0 <= (xy1.vx))) && (initFieldDrawEnvsSub0Var0 <= (xy2.vx) && (xy3.vx) < initFieldDrawEnvsSub0Var0))
-						{
-							int sz0, sz1, sz2, sz3;
-							gte_stsz4(&sz0, &sz1, &sz2, &sz3);
-							if (sz0 && sz1 && sz2 && sz3) {
-								int polyz = std::min<int>(sz0, sz1);
-								polyz = std::min<int>(sz2, polyz);
-								polyz = std::min<int>(sz3, polyz);
-								fieldPolyCount = fieldPolyCount + 1;
-								assert(polyz);
+				// TODO: this is not how the original code works, but this works for now
 
-								sTag* sDestTag = pOT[polyz >> (depthGranularity & 0x1f)].m0_pNext;
-								pOT[polyz >> (depthGranularity & 0x1f)].m0_pNext = pOutputPrim;
-								pOutputPrim->m0_pNext = sDestTag;
-								pOutputPrim->m3_size = 9;
-							}
-						}
-					}
+				// X clip
+				if (std::min<int>(std::min<int>(std::min<int>(xy0.vx, xy1.vx), xy2.vx), xy3.vx) > screenClippingX)
+					continue;
+				if (std::max<int>(std::max<int>(std::max<int>(xy0.vx, xy1.vx), xy2.vx), xy3.vx) < 0)
+					continue;
+
+				// Y clip
+				if (std::min<int>(std::min<int>(std::min<int>(xy0.vy, xy1.vy), xy2.vy), xy3.vy) > (screenClippingY >> 16))
+					continue;
+				if (std::max<int>(std::max<int>(std::max<int>(xy0.vy, xy1.vy), xy2.vy), xy3.vy) < 0)
+					continue;
+
+				pOutputPrim->x0y0 = xy0;
+				pOutputPrim->x1y1 = xy1;
+				pOutputPrim->x2y2 = xy2;
+				pOutputPrim->x3y3 = xy3;
+
+				int sz0, sz1, sz2, sz3;
+				gte_stsz4(&sz0, &sz1, &sz2, &sz3);
+
+				if (sz0 && sz1 && sz2 && sz3) {
+					int polyz = std::max<int>(sz0, sz1);
+					polyz = std::max<int>(sz2, polyz);
+					polyz = std::max<int>(sz3, polyz);
+					fieldPolyCount = fieldPolyCount + 1;
+					assert(polyz);
+
+					sTag* sDestTag = pOT[polyz >> (depthGranularity & 0x1f)].m0_pNext;
+					pOT[polyz >> (depthGranularity & 0x1f)].m0_pNext = pOutputPrim;
+					pOutputPrim->m0_pNext = sDestTag;
+					pOutputPrim->m3_size = 9;
 				}
 			}
 		}
@@ -2253,6 +2265,25 @@ void setPolyUV(POLY_FT4* poly, ushort u0, ushort v0, ushort u1, ushort v1, ushor
 	poly->v3 = v3;
 }
 
+int shoudlGroundOTBeEnabled()
+{
+	int iVar1;
+	std::vector<sFieldEntity>::iterator psVar2;
+
+	iVar1 = 0;
+	psVar2 = actorArray.begin();
+	if (0 < totalObjects) {
+		do {
+			if (((psVar2->m58_flags & 0x40) == 0) && ((psVar2->m58_flags & 0x8000) != 0)) {
+				return 1;
+			}
+			iVar1 = iVar1 + 1;
+			psVar2 = psVar2 + 1;
+		} while (iVar1 < totalObjects);
+	}
+	return 0;
+}
+
 void initFieldData()
 {
 	resetFieldDefault();
@@ -2567,6 +2598,13 @@ void initFieldData()
 	setupObjectRenderModes();
 	MissingCode();
 
+	int enableGroundOT = 1;
+	if (OPX_82Param4 == 0) {
+		enableGroundOT = shoudlGroundOTBeEnabled();
+	}
+	fieldUseGroundOT = enableGroundOT;
+
+	MissingCode();
 
 }
 
@@ -2708,8 +2746,8 @@ void setupFieldDisplayEnv(void)
 
 void initFieldDrawEnvsSub0(int param_1, int param_2)
 {
-	initFieldDrawEnvsSub0Var0 = param_1;
-	initFieldDrawEnvsSub0Var1 = (param_2 + -1) * 0x10000;
+	screenClippingX = param_1;
+	screenClippingY = (param_2 + -1) * 0x10000;
 	return;
 }
 
@@ -2752,8 +2790,6 @@ void setupFieldRenderingContext(void)
 	ClearOTagR(&fieldRenderContext[g_frameOddOrEven].m80D4_uiOT[0], 8);
 	return;
 }
-
-int fieldUseGroundOT = 0;
 
 void clearFieldOrderingTable()
 {
@@ -5782,7 +5818,7 @@ void renderFieldCharacterSprites(std::array<sTag, 4096>& OT, int oddOrEven)
 					sVec2_s16 local_50 = sVec2_s16::fromS32(getCopReg(2, 0xe));
 					s32 p = getCopReg(2, 8);
 					s32 mathFlag = getCopControlWord(2, 0xf800);
-					s32 local_44 = getCopReg(2, 0x9800) >> 2;
+					s32 spriteDepth = getCopReg(2, 0x9800) >> 2;
 					if (((local_50.vy) + 9U < 323) && (local_50.vx + 0x27U < 399)) {
 						flags = pScriptEntity->m4_flags & ~0x200;
 					}
@@ -5813,9 +5849,9 @@ void renderFieldCharacterSprites(std::array<sTag, 4096>& OT, int oddOrEven)
 							assert(0);
 						}
 
-						local_44 = local_44 >> (primD_2Var0 & 0x1f);
-						if (1 < local_44) {
-							local_44 = local_44 + -2;
+						spriteDepth = spriteDepth >> (gDepthDivider & 0x1f);
+						if (1 < spriteDepth) {
+							spriteDepth = spriteDepth + -2;
 						}
 
 						if ((ushort)(pScriptEntity->mE8 + 0x22U) < 2) {
@@ -5827,7 +5863,7 @@ void renderFieldCharacterSprites(std::array<sTag, 4096>& OT, int oddOrEven)
 							if ((pScriptEntity->m4_flags & 0x2000000) == 0) {
 								if ((pScriptEntity->m134.m5) == 0) {
 									MissingCode();
-									renderFieldCharacterSpritesSub0(pSpriteSheet, &OT[local_44]);
+									renderFieldCharacterSpritesSub0(pSpriteSheet, &OT[spriteDepth]);
 								}
 								else
 								{
@@ -5978,7 +6014,7 @@ void renderCharShadows(std::array<sTag, 4096>& OT, int oddOrEven)
 					int lVar3 = RotAverage4(&psVar6->m0_screenVertices[0], &psVar6->m0_screenVertices[1], &psVar6->m0_screenVertices[2], &psVar6->m0_screenVertices[3],
 						&psVar6->m20_Poly[oddOrEven].x0y0, &psVar6->m20_Poly[oddOrEven].x1y1, &psVar6->m20_Poly[oddOrEven].x2y2, &psVar6->m20_Poly[oddOrEven].x3y3, &lStack72, &lStack68);
 
-					sTag* pDestOT = &OT[lVar3 >> (primD_2Var0 & 0x1F)];
+					sTag* pDestOT = &OT[lVar3 >> (gDepthDivider & 0x1F)];
 
 					psVar6->m20_Poly[oddOrEven].m0_pNext = pDestOT->m0_pNext;
 					pDestOT->m0_pNext = &psVar6->m20_Poly[oddOrEven];
@@ -6051,12 +6087,14 @@ void shapeTransfert()
 	shapeTransfertTable[shapeTransfertDoubleBufferIndex] = nullptr;
 }
 
+// Add prims from p0 to p1 to ordering table element ot
 void AddPrims(sTag* ot, sTag* p0, sTag* p1)
 {
 	p1->m0_pNext = ot->m0_pNext;
 	ot->m0_pNext = p0;
 }
 
+// Add OT b (from 0 to index) to ordering table element a
 void linkOT(sTag* a, std::array<sTag, 4096>& b, int index)
 {
 	AddPrims(a, &b[index], &b[0]);
@@ -6090,8 +6128,10 @@ void updateAndRenderField()
 
 	if (updateAllEntitiesSub2Var0 == 0) {
 		if (fieldUseGroundOT != 0) {
+			// Add secondaryOT[0 - linkOTIndex] to mCC_OT[linkOTIndex]
 			linkOT(&pCurrentFieldRenderingContext->mCC_OT[linkOTIndex], pCurrentFieldRenderingContext->m40D0_secondaryOT, linkOTIndex);
 		}
+		// Add mCC_OT[0 - linkOTIndex] to mCC_OT[linkOTIndex]
 		linkOT(&pCurrentFieldRenderingContext->m80D4_uiOT[7], pCurrentFieldRenderingContext->mCC_OT, linkOTIndex);
 	}
 	DrawOTag(&pCurrentFieldRenderingContext->m80D4_uiOT[7]);
