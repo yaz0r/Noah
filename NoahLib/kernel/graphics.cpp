@@ -359,6 +359,41 @@ void DR_ENV::execute()
 {
 }
 
+u32 getBlending(u32 code, u32 tpage, u64& State)
+{
+/*
+* 0.5 x B + 0.5 x F
+* 1.0 x B + 1.0 x F
+* 1.0 x B - 1.0 x F
+* 1.0 x B +0.25 x F
+*/
+
+	if (code & 2)
+	{
+		int abr = (tpage >> 5) & 3;
+
+		switch (abr)
+		{
+		case 0: // 0.5 x B + 0.5 x F
+			State |= BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_FACTOR, BGFX_STATE_BLEND_FACTOR) | BGFX_STATE_BLEND_EQUATION(BGFX_STATE_BLEND_EQUATION_ADD);
+			return 0x7F7F7F7F;
+			break;
+		case 1: // 1.0 x B + 1.0 x F
+			State |= BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_ONE) | BGFX_STATE_BLEND_EQUATION(BGFX_STATE_BLEND_EQUATION_ADD);
+			return 0xFFFFFFFF;
+			break;
+		case 2: // 1.0 x B - 1.0 x F
+			State |= BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_ONE) | BGFX_STATE_BLEND_EQUATION(BGFX_STATE_BLEND_EQUATION_REVSUB);
+			return 0xFFFFFFFF;
+			break;
+		case 3: // 1.0 x B +0.25 x F
+			State |= BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_FACTOR, BGFX_STATE_BLEND_INV_FACTOR) | BGFX_STATE_BLEND_EQUATION(BGFX_STATE_BLEND_EQUATION_ADD);
+			return 0x3F3F3F3F;
+		}
+	}
+	return 0;
+}
+
 void SPRT::execute()
 {
 	float matrix[16];
@@ -450,12 +485,9 @@ void SPRT::execute()
 			| BGFX_STATE_MSAA
 			| BGFX_STATE_PT_TRISTRIP;
 
-		if (code & 2)
-		{
-			State |= BGFX_STATE_BLEND_NORMAL;
-		}
+		u32 blendRGBA = getBlending(code, pCurrentDrMode->code[0], State);
 
-		bgfx::setState(State);
+		bgfx::setState(State, blendRGBA);
 
 		bgfx::setVertexBuffer(0, &vertexBuffer);
 		bgfx::setIndexBuffer(&indexBuffer);
@@ -539,11 +571,6 @@ void TILE::execute()
 			| BGFX_STATE_DEPTH_TEST_ALWAYS
 			| BGFX_STATE_MSAA
 			| BGFX_STATE_PT_TRISTRIP;
-
-		if (code & 2)
-		{
-			State |= BGFX_STATE_BLEND_NORMAL;
-		}
 
 		bgfx::setState(State);
 
@@ -651,11 +678,14 @@ void POLY_FT4::execute()
 		pIndices[2] = 2;
 		pIndices[3] = 3;
 
-		bgfx::setState(0 | BGFX_STATE_WRITE_RGB
+		u64 State = BGFX_STATE_WRITE_RGB
 			| BGFX_STATE_DEPTH_TEST_ALWAYS
 			| BGFX_STATE_MSAA
-			| BGFX_STATE_PT_TRISTRIP
-		);
+			| BGFX_STATE_PT_TRISTRIP;
+
+		u32 blendRGBA = getBlending(code, tpage, State);
+
+		bgfx::setState(State, blendRGBA);
 
 		bgfx::setVertexBuffer(0, &vertexBuffer);
 		bgfx::setIndexBuffer(&indexBuffer);
@@ -747,11 +777,14 @@ void POLY_FT3::execute()
 		pIndices[1] = 1;
 		pIndices[2] = 2;
 
-		bgfx::setState(0 | BGFX_STATE_WRITE_RGB
+		u64 State = BGFX_STATE_WRITE_RGB
 			| BGFX_STATE_DEPTH_TEST_ALWAYS
 			| BGFX_STATE_MSAA
-			| BGFX_STATE_PT_TRISTRIP
-		);
+			| BGFX_STATE_PT_TRISTRIP;
+
+		u32 blendRGBA = getBlending(code, tpage, State);
+
+		bgfx::setState(State, blendRGBA);
 
 		bgfx::setVertexBuffer(0, &vertexBuffer);
 		bgfx::setIndexBuffer(&indexBuffer);
