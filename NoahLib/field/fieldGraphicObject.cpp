@@ -508,12 +508,17 @@ void executeSpriteBytecode2(sSpriteActor* param_1)
 			pushBytecodePointerOnAnimationStack(param_1, param_1->m64_spriteByteCode + 3);
 			param_1->m64_spriteByteCode += READ_LE_S16(pEndOfOpcode);
 			break;
-		case 0xe4:
+		case 0xe4: // loop number of time the last byte on the stack is
 			{
-				u8 cVar4 = popByteFromAnimationStack(param_1);
+				s8 cVar4 = popByteFromAnimationStack(param_1);
 				if (cVar4 != 0) {
-					pushByteOnAnimationStack(param_1, cVar4 + 0xff);
-					param_1->m64_spriteByteCode += (u32)READ_LE_U8(pEndOfOpcode) | (((u32)READ_LE_U8(startOfOpcode + 2) << 0x18) >> 0x10);
+					pushByteOnAnimationStack(param_1, cVar4 - 1);
+					param_1->m64_spriteByteCode += READ_LE_S16(pEndOfOpcode);
+				}
+				else
+				{
+					// end of loop
+					param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
 				}
 			}
 			break;
