@@ -787,6 +787,13 @@ void gte_stsxy2(sVec2_s16* xy)
 	*xy = sVec2_s16::fromS32(getCopReg(2, 0x7000));
 }
 
+void gte_stsz3(int* sz0, int* sz1, int* sz2)
+{
+	*sz0 = getCopReg(2, 0x8800);
+	*sz1 = getCopReg(2, 0x9000);
+	*sz2 = getCopReg(2, 0x9800);
+}
+
 void gte_stsz4(int* sz0, int* sz1, int* sz2, int* sz3)
 {
 	*sz0 = getCopReg(2, 0x8000);

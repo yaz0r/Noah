@@ -23,5 +23,6 @@ void gte_stlzc(int* pFlag);
 void gte_getMAC0(int* pOutput);
 void gte_stsxy3(sVec2_s16* xy0, sVec2_s16* xy1, sVec2_s16* xy2);
 void gte_stsxy2(sVec2_s16* xy);
+void gte_stsz3(int* sz0, int* sz1, int* sz2);
 void gte_stsz4(int* sz0, int* sz1, int* sz2, int* sz3);
 

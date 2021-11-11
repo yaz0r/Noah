@@ -848,7 +848,167 @@ s32 screenClippingY = 238 << 0x10;
 s32 gDepthDivider = 2;
 std::array<sTag, 4096>* currentOTEntry = nullptr;
 
-void primD_2(std::vector<u8>::iterator meshSubBlock, int count)
+void genericTrianglePrim(std::vector<u8>::iterator meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
+{
+	std::array<sTag, 4096>& pOT = *currentOTEntry;
+	int depthGranularity = gDepthDivider + 2;
+
+	for (int i = 0; i < count; i++)
+	{
+		POLY_FT3* pOutputPrim = (POLY_FT3*)*currentModelInstanceArray8;
+		currentModelInstanceArray8++;
+		assert(outputPrimSize == 0x20);
+
+		std::vector<u8>::iterator pVertices1 = currentModelBlockVertices + READ_LE_U16(meshSubBlock) * 8;
+		std::vector<u8>::iterator pVertices2 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 2) * 8;
+		std::vector<u8>::iterator pVertices3 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 4) * 8;
+		meshSubBlock += 8;
+
+		gte_ldv3(pVertices1, pVertices2, pVertices3);
+		gte_rtpt();
+
+		int flagsTriangle0;
+		gte_stlzc(&flagsTriangle0);
+
+		sVec2_s16 xy0;
+		sVec2_s16 xy1;
+		sVec2_s16 xy2;
+		gte_stsxy3(&xy0, &xy1, &xy2);
+
+		if (flagsTriangle0 > 0)
+		{
+			gte_nclip(); // write the normal to mac0
+
+			int normalMagnitude;
+			gte_getMAC0(&normalMagnitude);
+
+			if (normalMagnitude > 0) // is first triangle facing screen
+			{
+				// TODO: this is not how the original code works, but this works for now
+
+				// X clip
+				if (std::min<int>(std::min<int>(xy0.vx, xy1.vx), xy2.vx) > screenClippingX)
+					continue;
+				if (std::max<int>(std::max<int>(xy0.vx, xy1.vx), xy2.vx) < 0)
+					continue;
+
+				// Y clip
+				if (std::min<int>(std::min<int>(xy0.vy, xy1.vy), xy2.vy) > (screenClippingY >> 16))
+					continue;
+				if (std::max<int>(std::max<int>(xy0.vy, xy1.vy), xy2.vy) < 0)
+					continue;
+
+				assert(outputStride == 8);
+				pOutputPrim->x0y0 = xy0;
+				pOutputPrim->x1y1 = xy1;
+				pOutputPrim->x2y2 = xy2;
+
+				int sz0, sz1, sz2;
+				gte_stsz3(&sz0, &sz1, &sz2);
+
+				if (sz0 && sz1 && sz2) {
+					int polyz = std::max<int>(sz0, sz1);
+					polyz = std::max<int>(sz2, polyz);
+					fieldPolyCount = fieldPolyCount + 1;
+					assert(polyz);
+
+					sTag* sDestTag = pOT[polyz >> (depthGranularity & 0x1f)].m0_pNext;
+					pOT[polyz >> (depthGranularity & 0x1f)].m0_pNext = pOutputPrim;
+					pOutputPrim->m0_pNext = sDestTag;
+					assert(primSize == 7);
+					pOutputPrim->m3_size = primSize;
+				}
+			}
+		}
+	}
+}
+
+void prim5_0(std::vector<u8>::iterator meshSubBlock, int count)
+{
+	genericTrianglePrim(meshSubBlock, count, 0x20, 0x7, 0x8);
+}
+
+void prim5_2generic(std::vector<u8>::iterator meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
+{
+	std::array<sTag, 4096>& pOT = *currentOTEntry;
+	int depthGranularity = gDepthDivider + 2;
+
+	for (int i = 0; i < count; i++)
+	{
+		POLY_FT3* pOutputPrim = (POLY_FT3*)*currentModelInstanceArray8;
+		currentModelInstanceArray8++;
+		assert(outputPrimSize == 0x20);
+
+		std::vector<u8>::iterator pVertices1 = currentModelBlockVertices + READ_LE_U16(meshSubBlock) * 8;
+		std::vector<u8>::iterator pVertices2 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 2) * 8;
+		std::vector<u8>::iterator pVertices3 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 4) * 8;
+		meshSubBlock += 8;
+
+		gte_ldv3(pVertices1, pVertices2, pVertices3);
+		gte_rtpt();
+
+		int flagsTriangle0;
+		gte_stlzc(&flagsTriangle0);
+
+		sVec2_s16 xy0;
+		sVec2_s16 xy1;
+		sVec2_s16 xy2;
+		gte_stsxy3(&xy0, &xy1, &xy2);
+
+		if (flagsTriangle0 > 0)
+		{
+			gte_nclip(); // write the normal to mac0
+
+			int normalMagnitude;
+			gte_getMAC0(&normalMagnitude);
+
+			if (normalMagnitude > 0) // is first triangle facing screen
+			{
+				// TODO: this is not how the original code works, but this works for now
+
+				// X clip
+				if (std::min<int>(std::min<int>(xy0.vx, xy1.vx), xy2.vx) > screenClippingX)
+					continue;
+				if (std::max<int>(std::max<int>(xy0.vx, xy1.vx), xy2.vx) < 0)
+					continue;
+
+				// Y clip
+				if (std::min<int>(std::min<int>(xy0.vy, xy1.vy), xy2.vy) > (screenClippingY >> 16))
+					continue;
+				if (std::max<int>(std::max<int>(xy0.vy, xy1.vy), xy2.vy) < 0)
+					continue;
+
+				assert(outputStride == 0x8);
+				pOutputPrim->x0y0 = xy0;
+				pOutputPrim->x1y1 = xy1;
+				pOutputPrim->x2y2 = xy2;
+
+				int sz0, sz1, sz2;
+				gte_stsz3(&sz0, &sz1, &sz2);
+
+				if (sz0 && sz1 && sz2) {
+					int polyz = std::max<int>(sz0, sz1);
+					polyz = std::max<int>(sz2, polyz);
+					fieldPolyCount = fieldPolyCount + 1;
+					assert(polyz);
+
+					sTag* sDestTag = pOT[polyz >> (depthGranularity & 0x1f)].m0_pNext;
+					pOT[polyz >> (depthGranularity & 0x1f)].m0_pNext = pOutputPrim;
+					pOutputPrim->m0_pNext = sDestTag;
+					assert(primSize == 7);
+					pOutputPrim->m3_size = primSize;
+				}
+			}
+		}
+	}
+}
+
+void prim5_2(std::vector<u8>::iterator meshSubBlock, int count)
+{
+	prim5_2generic(meshSubBlock, count, 0x20, 0x7, 0x8);
+}
+
+void primD_2generic(std::vector<u8>::iterator meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
 {
 	std::array<sTag, 4096>& pOT = *currentOTEntry;
 	int depthGranularity = gDepthDivider + 2;
@@ -857,6 +1017,7 @@ void primD_2(std::vector<u8>::iterator meshSubBlock, int count)
 	{
 		POLY_FT4* pOutputPrim = (POLY_FT4*)*currentModelInstanceArray8;
 		currentModelInstanceArray8++;
+		assert(outputPrimSize == 0x28);
 
 		std::vector<u8>::iterator pVertices1 = currentModelBlockVertices + READ_LE_U16(meshSubBlock) * 8;
 		std::vector<u8>::iterator pVertices2 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 2) * 8;
@@ -912,6 +1073,7 @@ void primD_2(std::vector<u8>::iterator meshSubBlock, int count)
 				if (std::max<int>(std::max<int>(std::max<int>(xy0.vy, xy1.vy), xy2.vy), xy3.vy) < 0)
 					continue;
 
+				assert(outputStride == 8);
 				pOutputPrim->x0y0 = xy0;
 				pOutputPrim->x1y1 = xy1;
 				pOutputPrim->x2y2 = xy2;
@@ -930,12 +1092,116 @@ void primD_2(std::vector<u8>::iterator meshSubBlock, int count)
 					sTag* sDestTag = pOT[polyz >> (depthGranularity & 0x1f)].m0_pNext;
 					pOT[polyz >> (depthGranularity & 0x1f)].m0_pNext = pOutputPrim;
 					pOutputPrim->m0_pNext = sDestTag;
-					pOutputPrim->m3_size = 9;
+					assert(primSize == 9);
+					pOutputPrim->m3_size = primSize;
 				}
 			}
 		}
 	}
 }
+
+void primD_2(std::vector<u8>::iterator meshSubBlock, int count)
+{
+	primD_2generic(meshSubBlock, count, 0x28, 0x9, 0x8);
+}
+
+void primD_0generic(std::vector<u8>::iterator meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
+{
+	std::array<sTag, 4096>& pOT = *currentOTEntry;
+	int depthGranularity = gDepthDivider + 2;
+
+	for (int i = 0; i < count; i++)
+	{
+		POLY_FT4* pOutputPrim = (POLY_FT4*)*currentModelInstanceArray8;
+		currentModelInstanceArray8++;
+		assert(outputPrimSize == 0x28);
+
+		std::vector<u8>::iterator pVertices1 = currentModelBlockVertices + READ_LE_U16(meshSubBlock) * 8;
+		std::vector<u8>::iterator pVertices2 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 2) * 8;
+		std::vector<u8>::iterator pVertices3 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 4) * 8;
+		std::vector<u8>::iterator pVertices4 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 6) * 8;
+		meshSubBlock += 8;
+
+		gte_ldv3(pVertices1, pVertices2, pVertices3);
+		gte_rtpt();
+
+		int flagsTriangle0;
+		gte_stlzc(&flagsTriangle0);
+
+		sVec2_s16 xy0;
+		sVec2_s16 xy1;
+		sVec2_s16 xy2;
+		gte_stsxy3(&xy0, &xy1, &xy2);
+
+		if (flagsTriangle0 > 0)
+		{
+			gte_nclip(); // write the normal to mac0
+
+			int normalMagnitude;
+			gte_getMAC0(&normalMagnitude);
+
+			if (normalMagnitude > 0) // is first triangle facing screen
+			{
+				gte_ldv0(pVertices4); // load last vertex and compute 3rd point
+				gte_rtps();
+
+				int flagsTriangle1;
+				gte_stlzc(&flagsTriangle1);
+
+				sVec2_s16 xy3;
+				gte_stsxy2(&xy3);
+
+				if (flagsTriangle1 < 0)
+				{
+					continue;
+				}
+
+				// TODO: this is not how the original code works, but this works for now
+
+				// X clip
+				if (std::min<int>(std::min<int>(std::min<int>(xy0.vx, xy1.vx), xy2.vx), xy3.vx) > screenClippingX)
+					continue;
+				if (std::max<int>(std::max<int>(std::max<int>(xy0.vx, xy1.vx), xy2.vx), xy3.vx) < 0)
+					continue;
+
+				// Y clip
+				if (std::min<int>(std::min<int>(std::min<int>(xy0.vy, xy1.vy), xy2.vy), xy3.vy) > (screenClippingY >> 16))
+					continue;
+				if (std::max<int>(std::max<int>(std::max<int>(xy0.vy, xy1.vy), xy2.vy), xy3.vy) < 0)
+					continue;
+
+				assert(outputStride == 8);
+				pOutputPrim->x0y0 = xy0;
+				pOutputPrim->x1y1 = xy1;
+				pOutputPrim->x2y2 = xy2;
+				pOutputPrim->x3y3 = xy3;
+
+				int sz0, sz1, sz2, sz3;
+				gte_stsz4(&sz0, &sz1, &sz2, &sz3);
+
+				if (sz0 && sz1 && sz2 && sz3) {
+					int polyz = std::max<int>(sz0, sz1);
+					polyz = std::max<int>(sz2, polyz);
+					polyz = std::max<int>(sz3, polyz);
+					fieldPolyCount = fieldPolyCount + 1;
+					assert(polyz);
+
+					sTag* sDestTag = pOT[polyz >> (depthGranularity & 0x1f)].m0_pNext;
+					pOT[polyz >> (depthGranularity & 0x1f)].m0_pNext = pOutputPrim;
+					pOutputPrim->m0_pNext = sDestTag;
+					assert(primSize == 9);
+					pOutputPrim->m3_size = primSize;
+				}
+			}
+		}
+	}
+}
+
+void primD_0(std::vector<u8>::iterator meshSubBlock, int count)
+{
+	primD_0generic(meshSubBlock, count, 0x28, 0x9, 0x8);
+}
+
 int primD_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator meshBlock, int initParam)
 {
 	if (primD_isValid(displayList))
@@ -988,7 +1254,7 @@ const std::array<sPolyTypeRenderDefinition, 17> polyRenderDefs = {{
 	{	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x4,	0x1C}, // 0x2
 	{	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x8,	0x28}, // 0x3
 	{	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	prim4_init,	8,	0x4,	0x14}, // 0x4
-	{	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	prim5_init,	8,	0x8,	0x20}, // 0x5
+	{	prim5_0,	nullptr,	prim5_2,	nullptr,	nullptr,	nullptr,	prim5_init,	8,	0x8,	0x20}, // 0x5
 	{	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x4,	0x1C}, // 0x6
 	{	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x8,	0x28}, // 0x7
 	{	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	prim8_init,	8,	0x4,	0x18}, // 0x8
@@ -996,7 +1262,7 @@ const std::array<sPolyTypeRenderDefinition, 17> polyRenderDefs = {{
 	{	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x4,	0x24}, // 0xA
 	{	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0xC,	0x34}, // 0xB
 	{	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	primC_init,	8,	0x4,	0x18}, // 0xC
-	{	nullptr,	nullptr,	primD_2,	nullptr,	nullptr,	nullptr,	primD_init,	8,	0xC,	0x28}, // 0xD
+	{	primD_0,	nullptr,	primD_2,	nullptr,	nullptr,	nullptr,	primD_init,	8,	0xC,	0x28}, // 0xD
 	{	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x4,	0x24}, // 0xE
 	{	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0xC,	0x34}, // 0xF
 	{	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x4,	0x20}, // 0x10
