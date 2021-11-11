@@ -77,6 +77,9 @@ float4 getCLUTForColor(int2 clutConfig, int colorIndex)
 
     int CLUT = CLUT0 | (CLUT1 << 8);
 
+    if(CLUT == 0)
+        discard;
+
     int R = (CLUT >> 0) & 0x1F;
     int G = (CLUT >> 5) & 0x1F;
     int B = (CLUT >> 10) & 0x1F;
