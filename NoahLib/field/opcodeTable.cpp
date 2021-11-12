@@ -53,7 +53,7 @@ void initOpcodes()
     fieldScriptOpcodes[0x52] = OP_52;
     fieldScriptOpcodes[0x53] = OP_53;
     fieldScriptOpcodes[0x57] = OP_57;
-    fieldScriptOpcodes[0x59] = OP_59;
+    fieldScriptOpcodes[0x59] = OP_WALK_RANDOM_DIRECTION;
     fieldScriptOpcodes[0x5A] = OP_5A;
     fieldScriptOpcodes[0x5B] = resetFieldScriptActor;
     fieldScriptOpcodes[0x5F] = OP_SET_CURRENT_ACTOR_CARDINAL_DIRECTION;

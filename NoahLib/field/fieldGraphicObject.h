@@ -85,8 +85,8 @@ struct sStackElement
 struct sSpriteActor
 {
 	sVec3 m0_position;
-	sVec3 mC;
-	s32 m18;
+	sVec3 mC_step;
+	s32 m18_moveSpeed;
 	s32 m1C;
 	sFieldEntitySub4_B4* m20;
 	sFieldEntitySub4_110* m24;

@@ -354,7 +354,7 @@ void OP_PLAY_ANIMATION()
 	pCurrentFieldScriptActor->m4_flags = pCurrentFieldScriptActor->m4_flags & 0xfeffffff;
 	bVar2 = pCurrentFieldScriptFile[*puVar1 + 1];
 	pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 2;
-	pCurrentFieldScriptActor->mEA_currentAnimationPlaying = (ushort)bVar2;
+	pCurrentFieldScriptActor->mEA_forcedMoveSpeed = (ushort)bVar2;
 }
 
 void OP_GET_ACTOR_POSITION(void)
@@ -434,9 +434,129 @@ void OP_INIT_ENTITY_NPC(void)
 	return;
 }
 
-void OP_UPDATE_CHARACTER()
+u8 updateCharacterVar0 = 0;
+s16 updateCharacterVar1 = 0;
+s16 updateCharacterVar2 = 0;
+s16 updateCharacterVar3 = 0;
+s8 updateCharacterVar4 = 0;
+int playerCanRun = 0;
+int numFollowStruct = 0;
+int numFollowStruct2 = 0;
+extern s32 iRam800adb64;
+extern s16 updateEntityEventCode4Var0;
+
+std::array<short, 16> updateCharacterRotationOrder1 = {
+	0x8000,   0x400,   0x800,   0x600,
+	 0xC00,  0x8000,   0xA00,   0x800,
+	   0x0,   0x200,  0x8000,   0x400,
+	 0xE00,     0x0,   0xC00,  0x8000,
+};
+
+std::array<short, 16> updateCharacterRotationOrder2 = {
+	0x8000,   0xC00,     0x0,   0xE00,
+	 0x400,  0x8000,   0x200,     0x0,
+	 0x800,   0xA00,  0x8000,   0xC00,
+	 0x600,   0x800,   0x400,  0x8000,
+};
+
+int OP_UPDATE_CHARACTER_Sub0(sFieldScriptEntity* param_1)
+{
+	return -(uint)((param_1->m0_flags >> 9 & 3 & (uint)param_1->m14_currentTriangleFlag >> 3) != 0);
+}
+
+void checkForRandomEncounter()
 {
 	MissingCode();
+}
+
+void OP_UPDATE_CHARACTER()
+{
+	if ((pCurrentFieldScriptActor->m0_flags & 0x4000) == 0) {
+		if (updateCharacterVar0 == 0) {
+			pCurrentFieldScriptActor->m0_flags = pCurrentFieldScriptActor->m0_flags | 0x1000000;
+		}
+		pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 1;
+		return;
+	}
+
+	int windowIndex = 0;
+	for (windowIndex = 0; windowIndex <4; windowIndex++)
+	{
+		if (gDialogWindows[windowIndex].m0 == 0)
+			break;
+	}
+	if ((windowIndex != 4) || (fieldRandomBattleVar != 0))
+	{
+		pCurrentFieldScriptActor->m104_rotation = -0x8000;
+		pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 1;
+		return;
+	}
+
+	if ((padButtonForScripts[0].vx >> 12) != 0)
+	{
+		checkForRandomEncounter();
+	}
+
+	playerCanRun = 1;
+	if ((pCurrentFieldScriptActor->m14_currentTriangleFlag & 0x400000U) == 0) {
+		updateCharacterVar1 = 0;
+	}
+	else {
+		if (((pCurrentFieldScriptActor->m68_oldPosition[0] == (pCurrentFieldScriptActor->m20_position.vx >> 16)) &&
+			(pCurrentFieldScriptActor->m68_oldPosition[1] == (pCurrentFieldScriptActor->m20_position.vy >> 16))) &&
+			(pCurrentFieldScriptActor->m68_oldPosition[2] == (pCurrentFieldScriptActor->m20_position.vz >> 16))) {
+			updateCharacterVar1 = updateCharacterVar1 + 1;
+		}
+	}
+
+	if (((updateCharacterVar1 < 0x21) || (updateCharacterVar1 = 0x20, (padButtonForScripts[0].vx & 0x80U) == 0)) || (((pCurrentFieldScriptActor->m0_flags & 0x1800) != 0 || (iRam800adb64 != 0xff)))) {
+		if (updateEntityEventCode4Var0 == 0) {
+			if (((((padButtonForDialogs & 0x80) != 0) && ((pCurrentFieldScriptActor->m0_flags & 0x1800) == 0)) && ((pCurrentFieldScriptActor->m14_currentTriangleFlag & 0x400000U) == 0)) &&
+				(iRam800adb64 == 0xff)) goto LAB_Field__8009f7fc;
+		}
+		else {
+			if ((padButtonForDialogs & 0x80) == 0) {
+			LAB_Field__8009f8e4:
+				if (updateCharacterVar2 == 0) goto LAB_Field__8009f910;
+			}
+			else {
+				if (updateCharacterVar2 == 0) {
+					sFieldScriptEntity* psVar1;
+					int iVar2;
+					if ((iRam800adb64 == 0xff) && (iVar2 = OP_UPDATE_CHARACTER_Sub0(pCurrentFieldScriptActor), psVar1 = pCurrentFieldScriptActor, iVar2 == 0)) {
+						pCurrentFieldScriptActor->m0_flags = pCurrentFieldScriptActor->m0_flags | 0x800;
+						numFollowStruct2 = numFollowStruct;
+						psVar1->mE8_currentWalkSpeed = 0xff;
+						updateCharacterVar2 = updateCharacterVar3;
+					}
+					goto LAB_Field__8009f8e4;
+				}
+			}
+			updateCharacterVar2 = updateCharacterVar2 + -1;
+		}
+	}
+	else {
+	LAB_Field__8009f7fc:
+		int iVar2 = OP_UPDATE_CHARACTER_Sub0(pCurrentFieldScriptActor);
+		if (iVar2 == 0) {
+			pCurrentFieldScriptActor->m0_flags = pCurrentFieldScriptActor->m0_flags | 0x800;
+			numFollowStruct2 = numFollowStruct;
+		}
+	}
+LAB_Field__8009f910:
+	int uVar4;
+	if (updateCharacterVar4 == '\0') {
+		uVar4 = updateCharacterRotationOrder1[(ushort)padButtonForScripts[0].vx >> 0xc ^ 0xf];
+	}
+	else {
+		uVar4 = updateCharacterRotationOrder2[(ushort)padButtonForScripts[0].vx >> 0xc ^ 0xf];
+	}
+	if ((uVar4 & 0x8000) == 0) {
+		uVar4 = uVar4 - camera2Tan & 0xfff;
+	}
+	pCurrentFieldScriptActor->m104_rotation = uVar4;
+LAB_Field__8009f9d8:
+	pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 1;
 }
 
 void OP_UPDATE_CHARACTER_INFINITLY()
@@ -637,8 +757,8 @@ void OP_RAND_ROTATION()
 	ushort uVar5;
 
 	uVar5 = pCurrentFieldScriptActor->m106_currentRotation;
-	pCurrentFieldScriptActor->m102_rotationCount++;
-	if ((pCurrentFieldScriptActor->m102_rotationCount & 0xf) == 0) {
+	pCurrentFieldScriptActor->m102_randomSeed++;
+	if ((pCurrentFieldScriptActor->m102_randomSeed & 0xf) == 0) {
 		uVar4 = rand();
 		if ((uVar4 & 1) == 0) {
 			uVar5 = pCurrentFieldScriptActor->m106_currentRotation + 0x200;
@@ -838,12 +958,12 @@ void OP_57(void)
 			return;
 		}
 
-		if (pCurrentFieldScriptActor->m102_rotationCount < pCurrentFieldScriptActor->mE0_rotationLimit)
+		if (pCurrentFieldScriptActor->m102_randomSeed < pCurrentFieldScriptActor->mE0_rotationLimit)
 		{
-			(pCurrentFieldScriptActor->m20_position).vx = (pCurrentFieldScriptActor->m20_position).vx + pCurrentFieldScriptActor->mD0_targetPositionOffset[0];
-			(pCurrentFieldScriptActor->m20_position).vz = (pCurrentFieldScriptActor->m20_position).vz + pCurrentFieldScriptActor->mD0_targetPositionOffset[2];
-			(pCurrentFieldScriptActor->m20_position).vy = (pCurrentFieldScriptActor->m20_position).vy + (actorArray[currentFieldActorId].m4_pVramSpriteSheet->mC).vy;
-			(actorArray[currentFieldActorId].m4_pVramSpriteSheet->mC).vy = (actorArray[currentFieldActorId].m4_pVramSpriteSheet->mC).vy + actorArray[currentFieldActorId].m4_pVramSpriteSheet->m1C;
+			(pCurrentFieldScriptActor->m20_position).vx += pCurrentFieldScriptActor->mD0_targetPositionOffset[0];
+			(pCurrentFieldScriptActor->m20_position).vz += pCurrentFieldScriptActor->mD0_targetPositionOffset[2];
+			(pCurrentFieldScriptActor->m20_position).vy += (actorArray[currentFieldActorId].m4_pVramSpriteSheet->mC_step).vy;
+			(actorArray[currentFieldActorId].m4_pVramSpriteSheet->mC_step).vy += actorArray[currentFieldActorId].m4_pVramSpriteSheet->m1C;
 			if (((pCurrentFieldScriptActor->mD0_targetPositionOffset[0] != 0) || (pCurrentFieldScriptActor->mD0_targetPositionOffset[2] != 0)) && ((pCurrentFieldScriptActor->m0_flags & 0x8000) == 0)) {
 				s32 uVar5 = fp_atan2(pCurrentFieldScriptActor->mD0_targetPositionOffset);
 				pCurrentFieldScriptActor->m104_rotation = uVar5 | 0x8000;
@@ -865,7 +985,7 @@ void OP_57(void)
 				pCurrentFieldScriptActor->m8_currentWalkMeshTriangle[iVar8] = findTriangleInWalkMesh(iVar6, iVar7, iVar8, &auStack104[iVar8], &auStack168[iVar8]);
 				iVar8 = auStack104[iVar8].vy;
 			}
-			(actorArray[currentFieldActorId].m4_pVramSpriteSheet->mC).vy = 0;
+			(actorArray[currentFieldActorId].m4_pVramSpriteSheet->mC_step).vy = 0;
 			(pCurrentFieldScriptActor->m20_position).vx = iVar6 << 0x10;
 			(pCurrentFieldScriptActor->m20_position).vy = iVar8 << 0x10;
 			(pCurrentFieldScriptActor->m20_position).vz = iVar7 << 0x10;
@@ -880,7 +1000,7 @@ void OP_57(void)
 		actorArray[currentFieldActorId].m4_pVramSpriteSheet->m0_position.vx = (pCurrentFieldScriptActor->m20_position).vx;
 		actorArray[currentFieldActorId].m4_pVramSpriteSheet->m0_position.vy = (pCurrentFieldScriptActor->m20_position).vy;
 		actorArray[currentFieldActorId].m4_pVramSpriteSheet->m0_position.vz = (pCurrentFieldScriptActor->m20_position).vz;
-		pCurrentFieldScriptActor->m102_rotationCount = pCurrentFieldScriptActor->m102_rotationCount + 1;
+		pCurrentFieldScriptActor->m102_randomSeed = pCurrentFieldScriptActor->m102_randomSeed + 1;
 		breakCurrentScript = 1;
 		return;
 	default:
@@ -905,42 +1025,42 @@ void OP_57(void)
 		pCurrentFieldScriptActor->m10_walkmeshId = (short)iVar15;
 	}
 	int iVar15 = -((actorArray[currentFieldActorId].m4_pVramSpriteSheet->m1C * iVar6) / 2);
-	(actorArray[currentFieldActorId].m4_pVramSpriteSheet->mC).vy = iVar15;
-	(actorArray[currentFieldActorId].m4_pVramSpriteSheet->mC).vy = iVar15 + (iVar9 * 0x10000 - (pCurrentFieldScriptActor->m20_position).vy) / iVar6;
+	(actorArray[currentFieldActorId].m4_pVramSpriteSheet->mC_step).vy = iVar15;
+	(actorArray[currentFieldActorId].m4_pVramSpriteSheet->mC_step).vy = iVar15 + (iVar9 * 0x10000 - (pCurrentFieldScriptActor->m20_position).vy) / iVar6;
 	iVar9 = (pCurrentFieldScriptActor->m20_position).vx;
 	iVar15 = (pCurrentFieldScriptActor->m20_position).vz;
 	pCurrentFieldScriptActor->mD0_targetPositionOffset[1] = 0;
 	pCurrentFieldScriptActor->mE0_rotationLimit = (short)iVar6;
-	pCurrentFieldScriptActor->m102_rotationCount = 0;
+	pCurrentFieldScriptActor->m102_randomSeed = 0;
 	pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 0xb;
 	pCurrentFieldScriptActor->mD0_targetPositionOffset[0] = (iVar7 * 0x10000 - iVar9) / (iVar6 + 1);
 	pCurrentFieldScriptActor->mD0_targetPositionOffset[2] = (iVar8 * 0x10000 - iVar15) / (iVar6 + 1);
 	breakCurrentScript = 1;
 }
 
-void OP_59()
+void OP_WALK_RANDOM_DIRECTION()
 {
-	s16 uVar5 = pCurrentFieldScriptActor->m106_currentRotation;
-	s16 uVar3 = pCurrentFieldScriptActor->m102_rotationCount + 1;
-	pCurrentFieldScriptActor->m102_rotationCount = uVar3;
-	if ((uVar3 & 0xf) == 0) {
+	s16 newRotation = pCurrentFieldScriptActor->m106_currentRotation;
+	pCurrentFieldScriptActor->m102_randomSeed++;
+
+	if ((pCurrentFieldScriptActor->m102_randomSeed & 0xf) == 0) {
 		u32 uVar4 = rand();
 		if ((uVar4 & 0x30) == 0) {
 			if ((uVar4 & 1) == 0) {
-				uVar5 = pCurrentFieldScriptActor->m106_currentRotation + 0x200;
+				newRotation = pCurrentFieldScriptActor->m106_currentRotation + 0x200;
 			}
 			else {
-				uVar5 = pCurrentFieldScriptActor->m106_currentRotation - 0x200;
+				newRotation = pCurrentFieldScriptActor->m106_currentRotation - 0x200;
 			}
-			uVar5 = uVar5 & 0xfff;
+			newRotation = newRotation & 0xfff;
 		}
 		else {
-			uVar5 = pCurrentFieldScriptActor->m106_currentRotation | 0x8000;
-			pCurrentFieldScriptActor->m106_currentRotation = uVar5;
+			newRotation = pCurrentFieldScriptActor->m106_currentRotation | 0x8000;
+			pCurrentFieldScriptActor->m106_currentRotation = newRotation;
 		}
 	}
 	breakCurrentScript = 1;
-	pCurrentFieldScriptActor->m104_rotation = uVar5;
+	pCurrentFieldScriptActor->m104_rotation = newRotation;
 	pCurrentFieldScriptActor->mCC_scriptPC++;
 }
 
@@ -1215,7 +1335,7 @@ void OP_ROTATE_ACTOR_CLOCKWISE()
 	int iVar2;
 
 	iVar1 = getImmediateOrVariableUnsigned(1);
-	iVar2 = getCurrentActorRotation();
+	iVar2 = getCurrentActorRotationIn8Cardinal();
 	setCurrentActorTargetRotation(actorDirectionTable[iVar1 + iVar2 & 7]);
 }
 
@@ -1225,7 +1345,7 @@ void OP_ROTATE_ACTOR_ANTICLOCKWISE()
 	int iVar2;
 
 	iVar1 = getImmediateOrVariableUnsigned(1);
-	iVar2 = getCurrentActorRotation();
+	iVar2 = getCurrentActorRotationIn8Cardinal();
 	setCurrentActorTargetRotation(actorDirectionTable[iVar2 - iVar1 & 7]);
 }
 
@@ -1402,7 +1522,7 @@ void OPX_4D(void)
 	psVar2 = pCurrentFieldScriptActor;
 	bVar1 = pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1];
 	pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 2;
-	psVar2->mEA_currentAnimationPlaying = ~(ushort)bVar1;
+	psVar2->mEA_forcedMoveSpeed = ~(ushort)bVar1;
 	return;
 }
 

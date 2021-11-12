@@ -75,13 +75,13 @@ struct sFieldScriptEntity
     s8 mE3;
     s16 mE4_playableCharacterId;
     s16 mE6;
-    s16 mE8;
-    s16 mEA_currentAnimationPlaying;
+    s16 mE8_currentWalkSpeed;
+    s16 mEA_forcedMoveSpeed;
     s16 mEC_elevation;
     s32 mF0;
     std::array<s16, 3> mF4_scale3d;
     std::array<s8, 6> mFC;
-    s16 m102_rotationCount;
+    s16 m102_randomSeed;
     s16 m104_rotation;
     s16 m106_currentRotation;
     s16 m108_rotation3;
@@ -301,7 +301,7 @@ int getAngleSin(u32 param_1);
 int getAngleCos(u32 param_1);
 int spriteWalkToPositionOrActor(int param_1);
 void setCurrentActorRotation2(s16 param_1);
-int getCurrentActorRotation();
+int getCurrentActorRotationIn8Cardinal();
 void setCurrentActorTargetRotation(s16 param_1);
 void setCurrentActorElevation(short param_1);
 

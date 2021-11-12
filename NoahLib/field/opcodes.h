@@ -46,7 +46,7 @@ void OP_4B();
 void OP_52();
 void OP_53();
 void OP_57();
-void OP_59();
+void OP_WALK_RANDOM_DIRECTION();
 void OP_5A();
 void resetFieldScriptActor();
 void OP_SET_CURRENT_ACTOR_CARDINAL_DIRECTION();

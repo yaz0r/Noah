@@ -227,21 +227,23 @@ void executeSpriteBytecode2Extended92(sSpriteActor* param_1)
 	}
 }
 
-void OP_INIT_ENTITY_SCRIPT_sub0Sub7Sub0(sSpriteActor* param1)
+void computeStepFromMoveSpeed(sSpriteActor* param1)
 {
 	int iVar1;
 	int iVar2;
 
-	iVar2 = ((param1->m18 >> 4) << 8) / (int)(param1->mAC >> 7 & 0xfff);
+	iVar2 = ((param1->m18_moveSpeed >> 4) << 8) / (int)(param1->mAC >> 7 & 0xfff);
 	iVar1 = getAngleSin((int)param1->m32);
-	param1->mC.vx = (iVar1 >> 2) * iVar2 >> 6;
+	param1->mC_step.vx = (iVar1 >> 2) * iVar2 >> 6;
 	iVar1 = getAngleCos((int)param1->m32);
-	param1->mC.vz = -((iVar1 >> 2) * iVar2) >> 6;
+	param1->mC_step.vz = -((iVar1 >> 2) * iVar2) >> 6;
 }
 
 void executeSpriteBytecode2Extended(sSpriteActor* param_1, int bytecode, sPS1Pointer param_3)
 {
 	switch (bytecode & 0xff) {
+	case 0x84:
+		break;
 	case 0x92:
 		param_1->m2B |= 1;
 		executeSpriteBytecode2Extended92(param_1);
@@ -255,14 +257,14 @@ void executeSpriteBytecode2Extended(sSpriteActor* param_1, int bytecode, sPS1Poi
 	case 0xB4:
 		pushByteOnAnimationStack(param_1, READ_LE_U8(param_3));
 		break;
-	case 0xA0:
+	case 0xA0: // set the move speed for the character
 		{
 			int iVar11 = READ_LE_U8(param_3 )* 0x10 * (fieldDrawEnvsInitialized + 1) * (int)param_1->m82;
 			if (iVar11 < 0) {
 				iVar11 = iVar11 + 0xfff;
 			}
-			param_1->m18 = (iVar11 >> 0xc) << 8;
-			OP_INIT_ENTITY_SCRIPT_sub0Sub7Sub0(param_1);
+			param_1->m18_moveSpeed = (iVar11 >> 0xc) << 8;
+			computeStepFromMoveSpeed(param_1);
 		}
 		break;
 	case 0xc6:
@@ -478,9 +480,9 @@ void executeSpriteBytecode2(sSpriteActor* param_1)
 				param_1->m68(param_1);
 			}
 			{
-				int iVar15 = (param_1->mC).vy;
+				int iVar15 = (param_1->mC_step).vy;
 				OP_INIT_ENTITY_SCRIPT_sub0Sub6(param_1, (param_1->mAC >> 24) & 0xFF);
-				(param_1->mC).vy = iVar15;
+				(param_1->mC_step).vy = iVar15;
 			}
 			param_1->m9E_wait = 0;
 			executeSpriteBytecode2(param_1);
@@ -658,10 +660,10 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1(sSpriteActor* param_1, const sPS1Pointer
 
 
 	if ((flags >> 0xb & 1) == 0) {
-		param_1->mC.vz = 0;
-		param_1->mC.vy = 0;
-		param_1->mC.vx = 0;
-		param_1->m18 = 0;
+		param_1->mC_step.vz = 0;
+		param_1->mC_step.vy = 0;
+		param_1->mC_step.vx = 0;
+		param_1->m18_moveSpeed = 0;
 	}
 	if (param_1->m20)
 	{
@@ -758,6 +760,8 @@ void executeSpriteBytecode(sSpriteActor* param_1, sPS1Pointer param_2, uint para
 			case 0xB3:
 				param_1->mA8.mxB = READ_LE_U8(pBytecode + 1);
 				break;
+			case 0x84:
+			case 0xA0:
 			case 0xA7:
 			case 0xB4:
 			case 0xE4:
@@ -1085,7 +1089,7 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub5(sSpriteActor* param1, int param2)
 void OP_INIT_ENTITY_SCRIPT_sub0Sub7(sSpriteActor* param1, int param2)
 {
 	param1->m32 = param2;
-	OP_INIT_ENTITY_SCRIPT_sub0Sub7Sub0(param1);
+	computeStepFromMoveSpeed(param1);
 }
 
 void OP_INIT_ENTITY_SCRIPT_sub0Sub8(sSpriteActor* param1, void(*callback)(sSpriteActor*))

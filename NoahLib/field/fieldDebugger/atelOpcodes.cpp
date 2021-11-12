@@ -350,6 +350,7 @@ void initOpcodeTable()
 	// opcode 0x57 is dynamic
 
 	m_opcode[0x59]
+		.setName("WALK_RANDOM_DIRECTION")
 		.end();
 
 	m_opcode[0x5A]
