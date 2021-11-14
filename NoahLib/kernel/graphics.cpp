@@ -572,7 +572,9 @@ void TILE::execute()
 			| BGFX_STATE_MSAA
 			| BGFX_STATE_PT_TRISTRIP;
 
-		bgfx::setState(State);
+		u32 blendRGBA = getBlending(code, pCurrentDrMode->code[0], State);
+
+		bgfx::setState(State, blendRGBA);
 
 		bgfx::setVertexBuffer(0, &vertexBuffer);
 		bgfx::setIndexBuffer(&indexBuffer);

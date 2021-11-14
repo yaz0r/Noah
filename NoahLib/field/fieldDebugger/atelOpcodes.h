@@ -150,7 +150,7 @@ struct sOpcodeInfo
         return *this;
     }
 
-    sOpcodeInfo& addArgumentOffsetToQuadCoordinates(const char* argumentName = nullptr)
+    sOpcodeInfo& addArgumentTriggerIndex(const char* argumentName = nullptr)
     {
         addAgument(sOpcodeArg::triggerIndex, argumentName);
         m_opcodeSize += 0x1;

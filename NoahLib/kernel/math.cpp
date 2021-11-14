@@ -373,6 +373,83 @@ sSQRTables SQRTables = {
 	}
 };
 
+VECTOR* ApplyMatrixLV(MATRIX* m, VECTOR* v0, VECTOR* v1)
+{
+	uint uVar1;
+	int iVar2;
+	uint uVar3;
+	int iVar4;
+	uint uVar5;
+	int iVar6;
+	int iVar7;
+	int iVar8;
+	int iVar9;
+
+	SetRotMatrix(m);
+	uVar1 = v0->vx;
+	uVar3 = v0->vy;
+	uVar5 = v0->vz;
+	iVar7 = (int)uVar1 >> 0xf;
+	if ((int)uVar1 < 0) {
+		iVar7 = -((int)-uVar1 >> 0xf);
+		uVar1 = -(-uVar1 & 0x7fff);
+	}
+	else {
+		uVar1 = uVar1 & 0x7fff;
+	}
+	iVar8 = (int)uVar3 >> 0xf;
+	if ((int)uVar3 < 0) {
+		iVar8 = -((int)-uVar3 >> 0xf);
+		uVar3 = -(-uVar3 & 0x7fff);
+	}
+	else {
+		uVar3 = uVar3 & 0x7fff;
+	}
+	iVar9 = (int)uVar5 >> 0xf;
+	if ((int)uVar5 < 0) {
+		iVar9 = -((int)-uVar5 >> 0xf);
+		uVar5 = -(-uVar5 & 0x7fff);
+	}
+	else {
+		uVar5 = uVar5 & 0x7fff;
+	}
+	setCopReg(2, 0x4800, iVar7);
+	setCopReg(2, 0x5000, iVar8);
+	setCopReg(2, 0x5800, iVar9);
+	copFunction(2, 0x41e012);
+	iVar7 = getCopReg(2, 0xc800);
+	iVar8 = getCopReg(2, 0xd000);
+	iVar9 = getCopReg(2, 0xd800);
+	setCopReg(2, 0x4800, uVar1);
+	setCopReg(2, 0x5000, uVar3);
+	setCopReg(2, 0x5800, uVar5);
+	copFunction(2, 0x49e012);
+	if (iVar7 < 0) {
+		iVar7 = iVar7 * 8;
+	}
+	else {
+		iVar7 = iVar7 << 3;
+	}
+	if (iVar8 < 0) {
+		iVar8 = iVar8 * 8;
+	}
+	else {
+		iVar8 = iVar8 << 3;
+	}
+	if (iVar9 < 0) {
+		iVar9 = iVar9 * 8;
+	}
+	else {
+		iVar9 = iVar9 << 3;
+	}
+	iVar2 = getCopReg(2, 0xc800);
+	iVar4 = getCopReg(2, 0xd000);
+	iVar6 = getCopReg(2, 0xd800);
+	v1->vx = iVar2 + iVar7;
+	v1->vy = iVar4 + iVar8;
+	v1->vz = iVar6 + iVar9;
+	return v1;
+}
 
 s32 SquareRoot0(s32 value)
 {

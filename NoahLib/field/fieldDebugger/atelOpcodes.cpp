@@ -56,8 +56,8 @@ void initOpcodeTable()
 		.end();
 
 	m_opcode[0xA]
-		.setComment("Test against 3d quad (in 2d)")
-		.addArgumentOffsetToQuadCoordinates()
+		.setComment("CALL_IF_IN_TRIGGER")
+		.addArgumentTriggerIndex()
 		.addArgumentJumpLocation()
 		.end();
 
@@ -1001,7 +1001,7 @@ void initExtendedOpcodeTable()
 		.end();
 
 	m_extendedOpcode[0x4D]
-		.setComment("Clear some flags in current field actor")
+		.setName("PLAY_SPECIAL_2D_ANIMATION")
 		.addArgumentByte()
 		.end();
 
@@ -1024,6 +1024,7 @@ void initExtendedOpcodeTable()
 		.end();
 
 	m_extendedOpcode[0x53]
+		.setName("ENABLE_PLAYER_CONTROLS")
 		.end();
 
 	m_extendedOpcode[0x54]

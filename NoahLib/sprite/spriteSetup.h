@@ -1,6 +1,6 @@
 #pragma once
 
-struct sFieldActorSetupParams
+struct sSpriteActorAnimationBundle
 {
     void init(std::vector<u8>::iterator& inputData)
     {
@@ -8,6 +8,14 @@ struct sFieldActorSetupParams
 
         m4_offset = READ_LE_U32(inputData + 4);
         m4_pData.setPointer(&(*(inputData + m4_offset)));
+
+        {
+            m4_animations.resize(READ_LE_U16(m4_pData) & 0x3F);
+            for (int i=0; i< m4_animations.size(); i++)
+            {
+                m4_animations[i] = m4_pData + READ_LE_U16(m4_pData + 2 + i * 2);
+            }
+        }
 
         m8_offset = READ_LE_U32(inputData + 8);
         m8_pData.setPointer(&(*(inputData + m8_offset)));
@@ -22,6 +30,7 @@ struct sFieldActorSetupParams
 
     u32 m4_offset;
     sPS1Pointer m4_pData;
+    std::vector<sPS1Pointer> m4_animations;
     u32 m8_offset;
     sPS1Pointer m8_pData;
     u32 mC_offset;
@@ -29,5 +38,5 @@ struct sFieldActorSetupParams
 
 };
 
-extern std::vector<sFieldActorSetupParams> fieldActorSetupParams;
+extern std::vector<sSpriteActorAnimationBundle> fieldActorSetupParams;
 

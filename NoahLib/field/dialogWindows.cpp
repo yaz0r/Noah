@@ -102,8 +102,11 @@ void initIndividualDialogWindow(int windowIndex)
 	for (int i=0; i<8; i++)
 	{
 		RECT localRect = dialogWindowsRectConfigs3[i];
-		SetDrawMode(&gDialogWindows[windowIndex].mFC[0][i], 0, 0, GetTPage(0, 2, 0x280, 0x1f0), &localRect);
-		SetDrawMode(&gDialogWindows[windowIndex].mFC[1][i], 0, 0, GetTPage(0, 2, 0x280, 0x1f0), &localRect);
+		
+		int alphaMode = 2;
+		alphaMode = 0; // TODO: hack
+		SetDrawMode(&gDialogWindows[windowIndex].mFC[0][i], 0, 0, GetTPage(0, alphaMode, 0x280, 0x1f0), &localRect);
+		SetDrawMode(&gDialogWindows[windowIndex].mFC[1][i], 0, 0, GetTPage(0, alphaMode, 0x280, 0x1f0), &localRect);
 
 		SetSprt(&gDialogWindows[windowIndex].m1EC_windowBorders[0][i]);
 		gDialogWindows[windowIndex].m1EC_windowBorders[0][i].r0 = 0x80;
@@ -1259,8 +1262,14 @@ void updateDialogTextImage(sDialogWindow18* param_1)
 			param_1->m1C++;
 			return;
 		case 2:
-			assert(0);
-			break;
+			param_1->m6B = '\x02';
+			param_1->m10_flags = param_1->m10_flags | 0x48;
+			param_1->m1C++;
+			if (*param_1->m1C != '\x01') {
+				return;
+			}
+			param_1->m1C++;
+			return;
 		case 3:
 			assert(0);
 			break;
@@ -1293,6 +1302,19 @@ void updateDialogTextImage(sDialogWindow18* param_1)
 				param_1->m84_delay = param_1->m1C[2];
 				param_1->m1C += 3;
 				param_1->m6C_autoClose = 1;
+				return;
+			case 0xE:
+				{
+					int bVar1 = param_1->m68;
+					param_1->m68 = 1;
+					param_1->m69 = 1;
+					param_1->m6A = bVar1;
+					bVar1 = param_1->m1C[2];
+					param_1->m1C = param_1->m1C + 3;
+					int uVar6 = (ushort)bVar1;
+					param_1->m88_delayBetweenCharacters = uVar6;
+					param_1->m86_currentDelayForNextCharacter = uVar6;
+				}
 				return;
 			default:
 				assert(0);

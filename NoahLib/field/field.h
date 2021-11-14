@@ -76,7 +76,7 @@ struct sFieldScriptEntity
     s16 mE4_playableCharacterId;
     s16 mE6;
     s16 mE8_currentWalkSpeed;
-    s16 mEA_forcedMoveSpeed;
+    s16 mEA_forcedAnimation;
     s16 mEC_elevation;
     s32 mF0;
     std::array<s16, 3> mF4_scale3d;
@@ -92,7 +92,7 @@ struct sFieldScriptEntity
     std::vector<s32> m118;
     s16 m11C;
     s16 m11E;
-    struct sFieldActorSetupParams* m120_special2dAnimation;
+    struct sSpriteActorAnimationBundle* m120_special2dAnimation;
     std::vector<u8> m120_special2dAnimationRaw;
     s16 m124_special2dAnimationId;
     u8 m126;
@@ -155,7 +155,7 @@ extern int asyncLoadingVar2;
 extern int fieldExecuteVar1;
 
 extern const std::array<u16, 8> actorDirectionTable3;
-extern std::array<sFieldActorSetupParams, 3> partyCharacterBuffers;
+extern std::array<sSpriteActorAnimationBundle, 3> partyCharacterBuffers;
 extern s16 actorCameraTracked;
 extern s32 pcInitVar1;
 extern std::array<int, 11> PCToActorArray;
@@ -224,6 +224,15 @@ extern bool g_BreakOnMissingOpcode;
 
 extern std::vector<u8> rawFieldDialogBundle;
 
+struct sFieldTrigger
+{
+	std::array<s16, 3> m0;
+    std::array<s16, 3> m6;
+    std::array<s16, 3> mC;
+    std::array<s16, 3> m12;
+};
+extern std::vector<sFieldTrigger> fieldTriggerData;
+
 extern MATRIX currentProjectionMatrix;
 
 extern int playerControlledEntity;
@@ -240,6 +249,9 @@ extern MATRIX cameraMatrix;
 extern s32 sceneSCRZ;
 
 extern int updateAllEntitiesSub2Var0;
+
+extern short screenDistortionConfigured;
+extern short screenDistortionAvailable;
 
 struct sFieldRenderContext
 {
@@ -292,8 +304,8 @@ void setVar(int varIndex, s16 value);
 void startPartyCharacterASyncLoading(int partyCharacter, int partySlot);
 void fieldEntryPoint();
 
-void setupSpecialAnimation(sSpriteActor* param_1, struct sFieldActorSetupParams* param_2);
-void OP_INIT_ENTITY_SCRIPT_sub0(int actorId, int param_2, struct sFieldActorSetupParams* pSetup, int param_4, int param_5, int param_6, int param_7);
+void setupSpecialAnimation(sSpriteActor* param_1, struct sSpriteActorAnimationBundle* param_2);
+void OP_INIT_ENTITY_SCRIPT_sub0(int actorId, int param_2, struct sSpriteActorAnimationBundle* pSetup, int param_4, int param_5, int param_6, int param_7);
 void OP_INIT_ENTITY_SCRIPT_sub1();
 void setCurrentActor2DPosition(int posX, int posZ);
 void updateScriptActor3dRotation(int index);

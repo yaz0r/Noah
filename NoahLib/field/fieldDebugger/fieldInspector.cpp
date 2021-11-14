@@ -10,8 +10,10 @@
 
 #include "fieldModelInspector.h"
 #include "field/fieldModel.h"
+#include "sprite/spriteSetup.h"
 
 #include "field/field.h"
+#include "field/walkMesh.h"
 
 #include "../imgui_club/imgui_memory_editor/imgui_memory_editor.h"
 
@@ -33,10 +35,7 @@ extern std::vector<u8> rawFieldImageBundle;
 extern std::vector<u8> rawFieldImageBundle2;
 extern std::vector<u8> rawFieldModels;
 extern std::vector<u8> rawFieldScriptData;
-extern std::vector<u8> rawFieldTriggerData;
 extern std::vector<u8> rawFieldDialogBundle;
-extern std::vector<u8> rawFieldWalkMesh;
-extern std::vector<u8> rawFieldActorSetupParams;
 
 
 class c_fieldInspector
@@ -125,10 +124,10 @@ public:
         ImGui::Text("Num image bundle 2 entries: %d", READ_LE_U32(rawFieldImageBundle2.begin()));
         ImGui::Text("Num bundle3 entries: %d", READ_LE_U32(rawFieldModels.begin()));
         ImGui::Text("Num fieldScript num entities: %d", READ_LE_U32(rawFieldScriptData.begin() + 0x80));
-        ImGui::Text("Num triggers: %d", rawFieldTriggerData.size() / 24);
+        ImGui::Text("Num triggers: %d", fieldTriggerData.size());
         ImGui::Text("Dialog bundle size: %d", rawFieldDialogBundle.size());
-        ImGui::Text("Walkmesh entries: %d", READ_LE_U8(rawFieldWalkMesh.begin()));
-        ImGui::Text("Map entities size: %d", rawFieldActorSetupParams.size());
+        ImGui::Text("Walkmesh entries: %d", walkMesh.m0_count);
+        ImGui::Text("Map entities size: %d", fieldActorSetupParams.size());
 
         ImGui::Separator();
         ImGui::Text("Scene setup");
@@ -938,28 +937,28 @@ public:
                     .addArgumentByte()
                     .addArgumentU16OrVar()
                     .end();
-                handleGenericOpcode(dynamicOpcode);
+                handleGenericOpcode(dynamicOpcode, true);
                 break;
             case 1:
                 dynamicOpcode
                     .setComment("TODO: this might be very incorrect")
                     .addArgumentByte()
                     .end();
-                handleGenericOpcode(dynamicOpcode);
+                handleGenericOpcode(dynamicOpcode, true);
                 break;
             case 2:
                 dynamicOpcode
                     .setComment("TODO: this might be very incorrect")
                     .addArgumentByte()
                     .end();
-                handleGenericOpcode(dynamicOpcode);
+                handleGenericOpcode(dynamicOpcode, true);
                 break;
             case 3:
                 dynamicOpcode
                     .setComment("TODO: this might be very incorrect")
                     .addArgumentByte()
                     .end();
-                handleGenericOpcode(dynamicOpcode);
+                handleGenericOpcode(dynamicOpcode, true);
                 break;
             default:
                 ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));

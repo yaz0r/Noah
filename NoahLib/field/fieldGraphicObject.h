@@ -72,13 +72,14 @@ struct sFieldEntitySub4_110
 	sVec2_s16 m4_vramLocation;
 	sVec2_s16 m8_clut;
 	sPS1Pointer mC;
-	sPS1Pointer m10;
+	std::vector<sPS1Pointer>* m10_startOfAnimationContainer;
 	// size 0x14 (guessed, but seems to make sense)
 };
 
 struct sStackElement
 {
 	u8 asU8;
+	u16 asU16;
 	sPS1Pointer asPs1Pointer;
 };
 
@@ -101,12 +102,12 @@ struct sSpriteActor
 	s16 m3A;
 	u32 m3C;
 	u32 m40;
-	struct sFieldActorSetupParams* m44;
-	struct sFieldActorSetupParams* m48;
-	struct sFieldActorSetupParams* m4C_specialAnimation;
+	struct sSpriteActorAnimationBundle* m44_currentAnimationBundle;
+	struct sSpriteActorAnimationBundle* m48_defaultAnimationbundle;
+	struct sSpriteActorAnimationBundle* m4C_specialAnimation;
 	s32 m50;
 	sPS1Pointer m54;
-	sPS1Pointer m58;
+	sPS1Pointer m58_startOfCurrentAnimation;
 	sPS1Pointer m5C;
 	sPS1Pointer m60;
 	sPS1Pointer m64_spriteByteCode;
@@ -149,13 +150,13 @@ extern sSpriteActor* spriteTransfertListHead;
 
 void OP_21_sub(sSpriteActor* param_1, int param_2);
 void OP_INIT_ENTITY_SCRIPT_sub0Sub9(sSpriteActor* param_1);
-sSpriteActor* initializeSpriteActor(sSpriteActor* param_1, sFieldActorSetupParams* pSetup, int clutX, int clutY, int vramX, int vramY, int param_7);
-void OP_INIT_ENTITY_SCRIPT_sub0Sub6(sSpriteActor* param_1, int param_2);
+sSpriteActor* initializeSpriteActor(sSpriteActor* param_1, sSpriteActorAnimationBundle* pSetup, int clutX, int clutY, int vramX, int vramY, int param_7);
+void spriteActorSetPlayingAnimation(sSpriteActor* param_1, int param_2);
 void OP_INIT_ENTITY_SCRIPT_sub0Sub7(sSpriteActor* param1, int param2);
 
 void deleteFieldEntitySub4(sSpriteActor* param_1);
-sSpriteActor* createSpriteActor(sFieldActorSetupParams* pSetup, int param_2, int param_3, int vramX, int vramY, int param_6);
-sSpriteActor* createSpriteActorEX(sFieldActorSetupParams* pSetup, int param_2, int param_3, int vramX, int vramY, int param_6, int param_7);
+sSpriteActor* createSpriteActor(sSpriteActorAnimationBundle* pSetup, int param_2, int param_3, int vramX, int vramY, int param_6);
+sSpriteActor* createSpriteActorEX(sSpriteActorAnimationBundle* pSetup, int param_2, int param_3, int vramX, int vramY, int param_6, int param_7);
 
 void OP_INIT_ENTITY_SCRIPT_sub0Sub3(sSpriteActor* param_1, int param_2);
 void OP_INIT_ENTITY_SCRIPT_sub0Sub4(sSpriteActor* param_1, int param_2, int* param_3, int* param_4, int* param_5);

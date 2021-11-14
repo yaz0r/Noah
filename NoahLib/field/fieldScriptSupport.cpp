@@ -258,10 +258,35 @@ s32 iRam800afd04 = 0;
 s32 numDialogWindowsCreatedThisFrame = 0;
 s32 iRam800adb64 = 0xFF;
 s32 iRam800adb70 = 0;
+s32 dialogWindowFlag2 = 0;
 
 u32 getCameraDirection(void)
 {
 	return 7U - (camera2Tan + -0x100 >> 9) & 7;
+}
+
+uint getPlayerCharacterDir(void)
+{
+	return ((actorArray[playerControlledEntity].m4C_scriptEntity)->m106_currentRotation + 0x100 >> 9) + 2U & 7;
+}
+
+void SaveFieldAndDirections(void)
+{
+	short sVar1;
+
+	setVar(4, (ushort)fieldMapNumber & 0x3fff);
+	sVar1 = getPlayerCharacterDir();
+	setVar(6, sVar1);
+	sVar1 = getCameraDirection();
+	setVar(8, sVar1);
+	sVar1 = getVariable(0x12);
+	setVar(0x12, sVar1 + 1);
+	return;
+}
+
+void OP_CHANGE_FIELD_WHEN_READY_Sub()
+{
+	// Nothing!
 }
 
 void projectActorToScreen(int param_1, int* param_2, int* param_3, short param_4)
@@ -432,3 +457,14 @@ int showDialogWindowForActor(int actorId, int mode)
 	return 0;
 }
 
+s32 distance3d(long param_1, long param_2, long param_3)
+{
+	sVec3 local_28;
+    sVec3 local_18;
+
+	local_28.vx = param_1;
+	local_28.vy = param_2;
+	local_28.vz = param_3;
+	Square0(&local_28, &local_18);
+    return SquareRoot0(local_18.vx + local_18.vy + local_18.vz);
+}

@@ -34,10 +34,8 @@ std::vector<u8> rawFieldBundleForDebug;
 std::vector<u8> rawFieldBundle;
 std::vector<u8> rawFieldModels;
 std::vector<u8> rawFieldScriptData;
-std::vector<u8> rawFieldTriggerData;
 std::vector<u8> rawFieldDialogBundle;
-std::vector<u8> rawFieldWalkMesh;
-std::vector<u8> rawFieldActorSetupParams;
+std::vector<sFieldTrigger> fieldTriggerData;
 
 // this is malloc/free in original code, I keep it around for debugger
 std::vector<u8> rawFieldImageBundle;
@@ -58,14 +56,12 @@ std::array<s32, 3> currentParty;
 
 std::vector<sFieldEntity> actorArray;
 
-std::vector<sFieldActorSetupParams> fieldActorSetupParams;
+std::vector<sSpriteActorAnimationBundle> fieldActorSetupParams;
+std::vector<u8> rawFieldActorSetupParams;
 
 s16 numWalkMesh = 0;
 std::array<s32, 5> walkMeshNumTrianglePerBlock;
-u8* walkMeshVar1Raw;
 std::vector<u32>* walkMeshVar1;
-std::array<u8*, 5> walkMeshVerticesRaw;
-std::array<u8*, 5> walkMeshTriangleRaw;
 std::array<std::vector<SVECTOR>*, 5> walkMeshVertices;
 std::array<std::vector<sWalkMesh::sTriangleData>*, 5> walkMeshTriangle;
 s32 walkMeshVar4 = 0;
@@ -81,7 +77,7 @@ int g_frameOddOrEven = 0;
 
 std::array<std::vector<u8>, 3> partyCharacterBuffersRaw;
 std::array<std::vector<u8>, 3> partyCharacterBuffersCompressed;
-std::array<sFieldActorSetupParams, 3> partyCharacterBuffers;
+std::array<sSpriteActorAnimationBundle, 3> partyCharacterBuffers;
 s16 actorCameraTracked = 0;
 s32 pcInitVar1 = 0;
 std::array<int, 11> PCToActorArray;
@@ -97,6 +93,9 @@ VECTOR fieldObjectRenderingVar1 = { 0,0,0 };
 SVECTOR fieldObjectRenderingVar2 = { 0,0,0 };
 s32 sceneSCRZ = 0;
 int fieldUseGroundOT = 0;
+
+short screenDistortionConfigured = 0;
+short screenDistortionAvailable = 0;
 
 const std::array<s8, 12> characterMappingTable = {
 	0,1,2,3,4,5,6,7,8,2,6,0
@@ -242,6 +241,10 @@ void resetFieldDefault()
 	fieldChangePrevented = -1;
 	op9DVar1 = 2;
 	inputAllowedMask2 = 0xFFFF;
+
+	MissingCode();
+
+	fieldRandomBattleVar = 0;
 
 	MissingCode();
 
@@ -449,7 +452,7 @@ void initFieldScriptEntityValues(int index)
 	pFieldScriptEntity->mD0_targetPositionOffset[1] = 0;
 	pFieldScriptEntity->mD0_targetPositionOffset[2] = 0;
 	pFieldScriptEntity->mE6 = 0;
-	pFieldScriptEntity->mEA_forcedMoveSpeed = 0xff;
+	pFieldScriptEntity->mEA_forcedAnimation = 0xff;
 
 	pFieldScriptEntity->mE2 = 0;
 	pFieldScriptEntity->mCC_scriptPC = 0;
@@ -632,8 +635,8 @@ void initModel1(sModelBlock& pModelBlock, std::vector<sTag*>& outputBuffer1, std
 	outputBuffer2.resize(pModelBlock.m34_instanceBufferSize, nullptr);
 }
 
-int initModel2Sub0Var0;
-int initModel2Sub0Var1;
+int initModel2Sub0Var0 = 0;
+int initModel2Sub0Var1 = 1;
 
 void initModel2Sub0(void)
 {
@@ -1437,7 +1440,7 @@ void execSpritesCallbacks2()
 	}
 }
 
-void OP_INIT_ENTITY_SCRIPT_sub0(int actorId, int clutYEntry, sFieldActorSetupParams* pSetup, int param_4, int clutXEntry, int param_6, int param_7)
+void OP_INIT_ENTITY_SCRIPT_sub0(int actorId, int clutYEntry, sSpriteActorAnimationBundle* pSetup, int param_4, int clutXEntry, int param_6, int param_7)
 {
 	initModel3(8, 0);
 	actorArray[actorId].m4C_scriptEntity->m127 = clutYEntry;
@@ -1464,7 +1467,7 @@ void OP_INIT_ENTITY_SCRIPT_sub0(int actorId, int clutYEntry, sFieldActorSetupPar
 			if ((actorArray[actorId].m5A & 1U) != 0) {
 				deleteFieldEntitySub4(actorArray[actorId].m4_pVramSpriteSheet);
 			}
-			actorArray[actorId].m4_pVramSpriteSheet = createSpriteActorEX(pSetup, (short)((clutXEntry * 0x10 + 0x100) * 0x10000 >> 0x10), (short)((uint)((clutYEntry + 0x1e0) * 0x10000) >> 0x10), vramX, vramY, 0x40, clutXEntry);
+			actorArray[actorId].m4_pVramSpriteSheet = createSpriteActorEX(pSetup, (short)((clutXEntry * 0x10 + 0x100) * 0x10000 >> 0x10), (short)((uint)((clutYEntry + 480) * 0x10000) >> 0x10), vramX, vramY, 0x40, clutXEntry);
 		}
 	}
 	else
@@ -1530,7 +1533,7 @@ void OP_INIT_ENTITY_SCRIPT_sub0(int actorId, int clutYEntry, sFieldActorSetupPar
 		pFieldEntitySub4->m40 |= 0x40000;
 	}
 
-	OP_INIT_ENTITY_SCRIPT_sub0Sub6(pFieldEntitySub4, 0);
+	spriteActorSetPlayingAnimation(pFieldEntitySub4, 0);
 	OP_INIT_ENTITY_SCRIPT_sub0Sub7(pFieldEntitySub4, 0);
 	initModel3(8, 0);
 
@@ -1542,7 +1545,7 @@ void OP_INIT_ENTITY_SCRIPT_sub0(int actorId, int clutYEntry, sFieldActorSetupPar
 		OP_INIT_ENTITY_SCRIPT_sub0Sub9(pFieldEntitySub4);
 		execSpritesCallbacks2();
 		if (pFieldEntitySub4->m7C->mC == 0xff) {
-			(actorArray[actorId].m4C_scriptEntity)->mEA_forcedMoveSpeed = 0xff;
+			(actorArray[actorId].m4C_scriptEntity)->mEA_forcedAnimation = 0xff;
 			(actorArray[actorId].m4C_scriptEntity)->m4_flags = (actorArray[actorId].m4C_scriptEntity)->m4_flags | 0x1000000;
 			pFieldEntitySub4->m0_position.vx = ((actorArray[actorId].m4C_scriptEntity)->m20_position).vx;
 			pFieldEntitySub4->m0_position.vy = ((actorArray[actorId].m4C_scriptEntity)->m20_position).vy;
@@ -2060,8 +2063,16 @@ void setCurrentActorElevation(short param_1)
 	return;
 }
 
+void OPX_45()
+{
+	byte bVar1;
+	sFieldScriptEntity* psVar2;
 
-
+	psVar2 = pCurrentFieldScriptActor;
+	bVar1 = pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1];
+	pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 2;
+	psVar2->mE6 = (ushort)bVar1;
+}
 
 s16 OPX47Var = 0;
 void OPX_47()
@@ -2073,18 +2084,13 @@ void OPX_47()
 s32 load2dAnimVar = 0;
 s32 loadCompleted = 0;
 
-
-void setupSpecialAnimation(sSpriteActor* param_1, sFieldActorSetupParams* param_2)
+void setupSpecialAnimation(sSpriteActor* param_1, sSpriteActorAnimationBundle* param_2)
 {
 	param_1->m4C_specialAnimation = param_2;
 	return;
 }
 
-
-
-
 void updateGearState(int param_1)
-
 {
 	ushort uVar2;
 	int uVar1;
@@ -2656,9 +2662,27 @@ void initFieldData()
 	}
 
 	{
+		std::vector<u8> rawFieldTriggerData;
 		int rawFieldSize = READ_LE_U32(&rawFieldBundle[0x12C]);
 		rawFieldTriggerData.resize(rawFieldSize + 0x10);
 		fieldDecompress(rawFieldSize + 0x10, rawFieldBundle.begin() + READ_LE_U32(&rawFieldBundle[0x150]), rawFieldTriggerData);
+
+		fieldTriggerData.resize(rawFieldTriggerData.size() / 0x18);
+		for (int i=0; i<fieldTriggerData.size(); i++)
+		{
+			fieldTriggerData[i].m0[0] = READ_LE_S16(rawFieldTriggerData.begin() + i * 0x18 + 0x0);
+			fieldTriggerData[i].m0[1] = READ_LE_S16(rawFieldTriggerData.begin() + i * 0x18 + 0x2);
+			fieldTriggerData[i].m0[2] = READ_LE_S16(rawFieldTriggerData.begin() + i * 0x18 + 0x4);
+			fieldTriggerData[i].m6[0] = READ_LE_S16(rawFieldTriggerData.begin() + i * 0x18 + 0x6);
+			fieldTriggerData[i].m6[1] = READ_LE_S16(rawFieldTriggerData.begin() + i * 0x18 + 0x8);
+			fieldTriggerData[i].m6[2] = READ_LE_S16(rawFieldTriggerData.begin() + i * 0x18 + 0xA);
+			fieldTriggerData[i].mC[0] = READ_LE_S16(rawFieldTriggerData.begin() + i * 0x18 + 0xC);
+			fieldTriggerData[i].mC[1] = READ_LE_S16(rawFieldTriggerData.begin() + i * 0x18 + 0xE);
+			fieldTriggerData[i].mC[2] = READ_LE_S16(rawFieldTriggerData.begin() + i * 0x18 + 0x10);
+			fieldTriggerData[i].m12[0] = READ_LE_S16(rawFieldTriggerData.begin() + i * 0x18 + 0x12);
+			fieldTriggerData[i].m12[1] = READ_LE_S16(rawFieldTriggerData.begin() + i * 0x18 + 0x14);
+			fieldTriggerData[i].m12[2] = READ_LE_S16(rawFieldTriggerData.begin() + i * 0x18 + 0x16);
+		}
 	}
 
 	{
@@ -2668,30 +2692,36 @@ void initFieldData()
 	}
 
 	{
+		// TODO: clean that up!
+
+		std::vector<u8> rawFieldWalkMesh;
 		int rawFieldSize = READ_LE_U32(&rawFieldBundle[0x110]);
 		rawFieldWalkMesh.resize(rawFieldSize + 0x10);
 		fieldDecompress(rawFieldSize + 0x10, rawFieldBundle.begin() + READ_LE_U32(&rawFieldBundle[0x134]), rawFieldWalkMesh);
 		walkMesh.init(rawFieldWalkMesh);
-	}
 
-	{
 		std::vector<u8>::iterator walkMeshIterator = rawFieldWalkMesh.begin();
-		numWalkMesh = READ_LE_U32(walkMeshIterator);
+
+		numWalkMesh = walkMesh.m0_count;
 		assert(numWalkMesh < 5);
+
+		assert(numWalkMesh == READ_LE_U32(walkMeshIterator));
 		walkMeshIterator += 4;
 
-		for (int i = 0; i < 4; i++)
+		walkMeshNumTrianglePerBlock.fill(0);
+		for (int i = 0; i < walkMesh.m0_count; i++)
 		{
-			u32 block_size = READ_LE_U32(walkMeshIterator);
-			assert((block_size % 0xE) == 0);
-			walkMeshNumTrianglePerBlock[i] = block_size / 0xE;
-
-			walkMeshIterator += 4;
+			walkMeshNumTrianglePerBlock[i] = walkMesh.m_blocks[i].m_triangles.size();
 		}
 
+		walkMeshIterator += 4 * 4;
+
 		int iVar4 = 0;
-		walkMeshVar1Raw = &(rawFieldWalkMesh[0]) + READ_LE_U32(walkMeshIterator);
+		u8* walkMeshVar1Raw = &(rawFieldWalkMesh[0]) + READ_LE_U32(walkMeshIterator);
 		walkMeshIterator += 4;
+
+		std::array<u8*, 5> walkMeshVerticesRaw;
+		std::array<u8*, 5> walkMeshTriangleRaw;
 
 		if (numWalkMesh > 0) {
 			std::array<u8*, 5>::iterator piVar11 = walkMeshVerticesRaw.begin();
@@ -2719,6 +2749,8 @@ void initFieldData()
 	}
 
 	{
+		// TODO: rawFieldActorSetupParams should be local, but fieldActorSetupParams still points inside of it. Figure that out.
+
 		int rawFieldSize = READ_LE_U32(&rawFieldBundle[0x118]);
 		rawFieldActorSetupParams.resize(rawFieldSize + 0x10);
 		fieldDecompress(rawFieldSize + 0x10, rawFieldBundle.begin() + READ_LE_U32(&rawFieldBundle[0x13C]), rawFieldActorSetupParams);
@@ -3306,13 +3338,14 @@ void freeFieldData()
 	MissingCode();
 
 	actorArray.clear();
-	rawFieldTriggerData.clear();
+	fieldTriggerData.clear();
 	rawFieldDialogBundle.clear();
 	rawFieldScriptData.clear();
-	rawFieldWalkMesh.clear();
 	walkMesh.clear();
 	rawFieldModels.clear();
 	gCurrentFieldModels.clear();
+
+	fieldActorSetupParams.clear();
 	rawFieldActorSetupParams.clear();
 
 	MissingCode();
@@ -4039,11 +4072,11 @@ void updateEntityEventCode4(sSpriteActor* param_1, int param_2, sFieldEntity* pa
 		psVar1 = param_3->m4C_scriptEntity;
 		if ((psVar1->m4_flags & 0x2000) == 0) {
 			if ((psVar1->m4_flags & 0x1000000) == 0) {
-				OP_INIT_ENTITY_SCRIPT_sub0Sub6(param_1, param_2);
+				spriteActorSetPlayingAnimation(param_1, param_2);
 			}
 		}
 		else {
-			assert(0);
+			MissingCode();
 		}
 	}
 	return;
@@ -4184,12 +4217,28 @@ void updateEntityEventCode3(int index, sFieldEntity* pFieldEntity, sFieldScriptE
 	}
 	else
 	{
-		assert(0);
+		walkSpeed2 = updateEntityEventCode4Var1;
+		if (updateEntityEventCode4Var0 == 0) {
+			if (((pFieldEntity->m4_pVramSpriteSheet->m0_position).vy >> 16) == pFieldEntity->m4_pVramSpriteSheet->m84) {
+				pFieldEntity->m4_pVramSpriteSheet->m18_moveSpeed = 0;
+				walkSpeed2 = updateEntityEventCode4Var1;
+			}
+			else {
+				if (walkSpeed == 2) {
+					pFieldEntity->m4_pVramSpriteSheet->m18_moveSpeed = pFieldEntity->m4_pVramSpriteSheet->m82 * 0x60;
+					walkSpeed2 = updateEntityEventCode4Var1;
+				}
+				else {
+					pFieldEntity->m4_pVramSpriteSheet->m18_moveSpeed = pFieldEntity->m4_pVramSpriteSheet->m82 * 0x30;
+					walkSpeed2 = updateEntityEventCode4Var1;
+				}
+			}
+		}
 	}
 
 LAB_Field__800830ac:
-	if (pFieldScriptEntity->mEA_forcedMoveSpeed != 0xff) {
-		walkSpeed2 = pFieldScriptEntity->mEA_forcedMoveSpeed;
+	if (pFieldScriptEntity->mEA_forcedAnimation != 0xff) {
+		walkSpeed2 = pFieldScriptEntity->mEA_forcedAnimation;
 	}
 	if (((int)pFieldScriptEntity->mE8_currentWalkSpeed != (int)walkSpeed2) && ((pFieldScriptEntity->m0_flags & 0x2000000) == 0)) {
 		pFieldScriptEntity->mE8_currentWalkSpeed = walkSpeed2;
@@ -4755,85 +4804,6 @@ int checkCameraCollision(VECTOR*, std::array<s16, 6>&, std::array<s16, 4>&)
 
 int cameraCollisionState = 0;
 
-VECTOR* ApplyMatrixLV(MATRIX* m, VECTOR* v0, VECTOR* v1)
-
-{
-	uint uVar1;
-	int iVar2;
-	uint uVar3;
-	int iVar4;
-	uint uVar5;
-	int iVar6;
-	int iVar7;
-	int iVar8;
-	int iVar9;
-
-	SetRotMatrix(m);
-	uVar1 = v0->vx;
-	uVar3 = v0->vy;
-	uVar5 = v0->vz;
-	iVar7 = (int)uVar1 >> 0xf;
-	if ((int)uVar1 < 0) {
-		iVar7 = -((int)-uVar1 >> 0xf);
-		uVar1 = -(-uVar1 & 0x7fff);
-	}
-	else {
-		uVar1 = uVar1 & 0x7fff;
-	}
-	iVar8 = (int)uVar3 >> 0xf;
-	if ((int)uVar3 < 0) {
-		iVar8 = -((int)-uVar3 >> 0xf);
-		uVar3 = -(-uVar3 & 0x7fff);
-	}
-	else {
-		uVar3 = uVar3 & 0x7fff;
-	}
-	iVar9 = (int)uVar5 >> 0xf;
-	if ((int)uVar5 < 0) {
-		iVar9 = -((int)-uVar5 >> 0xf);
-		uVar5 = -(-uVar5 & 0x7fff);
-	}
-	else {
-		uVar5 = uVar5 & 0x7fff;
-	}
-	setCopReg(2, 0x4800, iVar7);
-	setCopReg(2, 0x5000, iVar8);
-	setCopReg(2, 0x5800, iVar9);
-	copFunction(2, 0x41e012);
-	iVar7 = getCopReg(2, 0xc800);
-	iVar8 = getCopReg(2, 0xd000);
-	iVar9 = getCopReg(2, 0xd800);
-	setCopReg(2, 0x4800, uVar1);
-	setCopReg(2, 0x5000, uVar3);
-	setCopReg(2, 0x5800, uVar5);
-	copFunction(2, 0x49e012);
-	if (iVar7 < 0) {
-		iVar7 = iVar7 * 8;
-	}
-	else {
-		iVar7 = iVar7 << 3;
-	}
-	if (iVar8 < 0) {
-		iVar8 = iVar8 * 8;
-	}
-	else {
-		iVar8 = iVar8 << 3;
-	}
-	if (iVar9 < 0) {
-		iVar9 = iVar9 * 8;
-	}
-	else {
-		iVar9 = iVar9 << 3;
-	}
-	iVar2 = getCopReg(2, 0xc800);
-	iVar4 = getCopReg(2, 0xd000);
-	iVar6 = getCopReg(2, 0xd800);
-	v1->vx = iVar2 + iVar7;
-	v1->vy = iVar4 + iVar8;
-	v1->vz = iVar6 + iVar9;
-	return v1;
-}
-
 void computeCameraEyeFromAt(VECTOR* param_1, VECTOR* param_2)
 {
 	MATRIX MStack80;
@@ -4947,6 +4917,13 @@ void updateCameraInterpolation(void)
 		updateCameraInterpolationSub2();
 		cameraRotationBetweenEyeAndAt.vy &= 0xfff;
 		return;
+	case 2:
+		updateCameraInterpolationVar0 = 0;
+		updateCameraInterpolationVar1 = updateCameraInterpolationVar1 + 1;
+		if (0x40 < updateCameraInterpolationVar1) {
+			cameraInterpolationMode = 0;
+		}
+		break;
 	default:
 		assert(0);
 	}
@@ -5860,7 +5837,7 @@ void renderFieldCharacterSpritesSub0Sub1(sSpriteActor* pSpriteSheet, sTag* pTag)
 	u32 numPolyInSprite = pSpriteSheet->m40 >> 2 & 0x3f;
 	int currentBoundMatrixId = -1;
 
-	int local_30 = 0;
+	int isVisible = 0;
 
 	// enough space in the shape transfer buffer to write the poly?
 	if ((shapeTransfertTableCurrentEntry + numPolyInSprite * sizeof(POLY_FT4) < shapeTransfertTableEnd)) {
@@ -5869,8 +5846,7 @@ void renderFieldCharacterSpritesSub0Sub1(sSpriteActor* pSpriteSheet, sTag* pTag)
 			sFieldEntitySub4_B4_sub* pSpriteDefinition = &(*psVar7->m30)[i];
 			int matrixIdNeeded = pSpriteDefinition->m14 & 7;
 			if (currentBoundMatrixId != matrixIdNeeded) { // need to change the matrix?
-				local_30 = spriteMatrixTable[matrixIdNeeded] & ((pSpriteSheet->m3C >> 8) & 0xFF) == 0;
-				local_30 = 1; // hack
+				isVisible = (spriteMatrixTable[matrixIdNeeded] & (pSpriteSheet->m3C >> 8) & 0xFF) == 0;
 				if (pSpriteSheet->m20->m34_perSubgroupTransform == nullptr)
 				{
 					SetRotMatrix(&pSpriteSheet->m20->mC_spriteMatrix);
@@ -5920,7 +5896,7 @@ void renderFieldCharacterSpritesSub0Sub1(sSpriteActor* pSpriteSheet, sTag* pTag)
 				}
 				currentBoundMatrixId = matrixIdNeeded;
 			}
-			if (local_30)
+			if (isVisible)
 			{
 				POLY_FT4* temp = new POLY_FT4;
 
@@ -6378,6 +6354,16 @@ void linkOT(sTag* a, std::array<sTag, 4096>& b, int index)
 	AddPrims(a, &b[index], &b[0]);
 }
 
+void updateAndRenderScreenDistortion()
+{
+	if (screenDistortionConfigured == 0) {
+		return;
+	}
+
+	MissingCode();
+	screenDistortionConfigured = 0;
+}
+
 void updateAndRenderField()
 {
 	MissingCode();
@@ -6395,6 +6381,8 @@ void updateAndRenderField()
 	renderObjects();
 	renderChars();
 	renderParticles();
+	MissingCode();
+	updateAndRenderScreenDistortion();
 	MissingCode();
 	DrawSync(0);
 	stepDialogWindows();
@@ -6520,6 +6508,7 @@ void getInputDuringVsync(void)
 		}
 		*/
 		newPadButtonForScripts[0].vx |= buttonMask;
+		newPadButtonForDialogs |= buttonMask;
 	}
 	//else
 	{
@@ -6561,6 +6550,7 @@ void getInputDuringVsync(void)
 				}
 
 				newPadButtonForScripts[0].vx |= buttonMask;
+				newPadButtonForDialogs |= buttonMask;
 			}
 		}
 	}
@@ -6710,7 +6700,7 @@ void fieldEntryPoint()
 
 	if (fieldDebugDisable == 1) {
 		gameState.m1930_fieldVarsBackup[41] = 1;
-		//setVar(0x50, 1);
+		setVar(0x50, 1);
 		MissingCode();
 	}
 	initCompassData();

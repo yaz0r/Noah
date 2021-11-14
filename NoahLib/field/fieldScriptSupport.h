@@ -22,6 +22,10 @@ extern s32 op9DVar1;
 extern s32 op9DVar2;
 extern s32 op9DVar3;
 
+extern s32 iRam800adb70;
+
+extern s32 dialogWindowFlag2;
+
 int getVar80(int param_1, uint param_2);
 int getVar40(int param_1, uint param_2);
 int getVar20(int param_1, uint param_2);
@@ -47,6 +51,10 @@ int isDialogAvatarLoaded(int faceId);
 int showDialogWindowForActor(int, int);
 
 void projectActorToScreen(int param_1, int* param_2, int* param_3, short param_4);
+
+void SaveFieldAndDirections(void);
+void OP_CHANGE_FIELD_WHEN_READY_Sub();
+s32 distance3d(long param_1, long param_2, long param_3);
 
 extern s32 numDialogWindowsCreatedThisFrame;
 

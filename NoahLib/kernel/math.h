@@ -106,6 +106,11 @@ void RotTrans(SVECTOR* rotation, VECTOR* output, long* flag);
 void copyRotationMatrix(MATRIX* param_1, MATRIX* param_2);
 VECTOR* rotateVectorByMatrix(MATRIX* m, SVECTOR* inputVector, VECTOR* outputVector);
 
+void Square0(sVec3* v0, sVec3* v1);
+s32 SquareRoot0(s32 value);
+
+VECTOR* ApplyMatrixLV(MATRIX* m, VECTOR* v0, VECTOR* v1);
+
 void PopMatrix();
 void PushMatrix();
 
