@@ -75,8 +75,6 @@ std::vector<u16> compassData2 = {
 	0,0,0,0,0,0,0,0
 };
 
-u8 DollyStop = 0;
-
 RECT compassDataRect = { 0,0,0,0 };
 
 s16 compassArrowTargetDirection = 0;

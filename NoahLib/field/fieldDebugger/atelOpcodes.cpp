@@ -548,6 +548,11 @@ void initOpcodeTable()
 		.addArgumentU16OrVar()
 		.end();
 
+	m_opcode[0x97]
+		.setName("DOLLY_SET")
+		.addArgumentU16OrVar()
+		.end();
+
 	m_opcode[0x98]
 		.setName("CHANGE_FIELD_WHEN_READY")
 		.addArgumentU16OrVar()

@@ -93,6 +93,10 @@ SVECTOR fieldObjectRenderingVar2 = { 0,0,0 };
 s32 sceneSCRZ = 0;
 int fieldUseGroundOT = 0;
 
+u8 DollyStop = 0;
+u8 DollySet = 0;
+
+
 short screenDistortionConfigured = 0;
 short screenDistortionAvailable = 0;
 
@@ -168,10 +172,24 @@ SVECTOR cameraProjectionAngles;
 SVECTOR cameraRotation;
 VECTOR cameraUp = { 0,0,0,0 };
 
+s16 cameraDollyVar0 = 0;
+s32 cameraDollyVar1 = 0;
+
 void resetCameraData()
 {
 	op99Var5 = 8;
 	op99Var6 = 8;
+	cameraDollyVar1 = 0x400000;
+	opA0_var1 = 0x8000000;
+
+	MissingCode();
+
+	op99Var7 = 0;
+	cameraTan = 0;
+	camera2Tan = 0;
+	DollySet = 0;
+	DollyStop = 0;
+	cameraDollyVar0 = 0;
 
 	MissingCode();
 
@@ -4824,9 +4842,113 @@ void updateCameraInterpolationSub2()
 	}
 }
 
-void updateCameraInterpolationSub0()
+
+std::array<u8, 8> cameraDirectionToDollyBitmask = {
+	0x10, 0x20, 0x40, 0x80, 0x01, 0x02, 0x04, 0x08l
+};
+
+int updateCameraDollySub0(byte param_1, uint param_2)
 {
-	MissingCode();
+	uint uVar1;
+	int iVar2;
+	int iVar3;
+
+	iVar2 = 0;
+	iVar3 = 0;
+	do {
+		uVar1 = param_2 & 7;
+		param_2 = param_2 + 1;
+		if ((param_1 & (cameraDirectionToDollyBitmask)[uVar1]) == 0) {
+			return iVar3;
+		}
+		iVar2 = iVar2 + 1;
+		iVar3 = iVar3 + 1;
+	} while (iVar2 < 8);
+	return 0;
+}
+
+int updateCameraDollySub1(byte param_1, uint param_2)
+{
+	uint uVar1;
+	int iVar2;
+	int iVar3;
+
+	iVar2 = 0;
+	iVar3 = 0;
+	do {
+		uVar1 = param_2 & 7;
+		param_2 = param_2 - 1;
+		if ((param_1 & (cameraDirectionToDollyBitmask)[uVar1]) == 0) {
+			return iVar3;
+		}
+		iVar2 = iVar2 + 1;
+		iVar3 = iVar3 + 1;
+	} while (iVar2 < 8);
+	return 0;
+}
+
+void updateCameraDolly()
+{
+	if ((DollySet != 0xff) && (DollyStop != 0xff)) {
+		if (cameraDollyVar0 == 0) {
+			if (((cameraDirectionToDollyBitmask)[((ushort)cameraRotationBetweenEyeAndAt.vy & 0xfff) >> 9] & DollySet) != 0) {
+				if ((cameraDollyVar1 != -0x400000) && (cameraDollyVar1 != 0x400000)) {
+					cameraDollyVar1 = 0x400000;
+					opA0_var0 = opA0_var0 + 0x200;
+				}
+				cameraDollyVar0 = 8;
+			}
+			int uVar5 = ((ushort)cameraRotationBetweenEyeAndAt.vy & 0xfff) >> 9;
+			if (((cameraDirectionToDollyBitmask)[uVar5] & DollyStop) != 0) {
+				int iVar2 = updateCameraDollySub0(DollyStop, uVar5);
+				int iVar3 = updateCameraDollySub1(DollyStop, ((ushort)cameraRotationBetweenEyeAndAt.vy & 0xfff) >> 9);
+				if (iVar3 < iVar2) {
+					cameraDollyVar1 = -0x400000;
+					opA0_var0 = opA0_var0 + -0x200;
+				}
+				else {
+					cameraDollyVar1 = 0x400000;
+					opA0_var0 = opA0_var0 + 0x200;
+				}
+				cameraDollyVar0 = 8;
+			}
+		}
+
+		if (((((padButtonForScripts[0].vx & 4U) != 0) && ((op99Var7 & 0x8000) == 0)) && (cameraDollyVar0 == 0)) &&
+			(((cameraDirectionToDollyBitmask)[(int)((int)cameraRotationBetweenEyeAndAt.vy - 0x200U & 0xfff) >> 9] & DollyStop) == 0)) {
+			cameraDollyVar1 = -0x400000;
+			cameraDollyVar0 = 8;
+			opA0_var0 = opA0_var0 + -0x200;
+		}
+
+		if (((((padButtonForScripts[0].vx & 8U) != 0) && ((op99Var7 & 0x8000) == 0)) && (cameraDollyVar0 == 0)) &&
+			(((cameraDirectionToDollyBitmask)[(int)((int)cameraRotationBetweenEyeAndAt.vy + 0x200U & 0xfff) >> 9] & DollyStop) == 0)) {
+			cameraDollyVar1 = 0x400000;
+			cameraDollyVar0 = 8;
+			opA0_var0 = opA0_var0 + 0x200;
+		}
+	}
+
+	if (cameraDollyVar0 != 0)
+	{
+		opA0_var1 = opA0_var1 + cameraDollyVar1;
+		cameraRotationBetweenEyeAndAt.vy = (short)((uint)opA0_var1 >> 0x10);
+		int sVar4 = cameraDollyVar0 + -1;
+		int bVar1 = cameraDollyVar0 != 1;
+		cameraDollyVar0 = sVar4;
+		if (!bVar1)
+		{
+			cameraRotationBetweenEyeAndAt.vy = (short)opA0_var0;
+		}
+	}
+	else
+	{
+		cameraRotationBetweenEyeAndAt.vy = (short)opA0_var0;
+	}
+
+	if (fieldDebugDisable == 0) {
+		assert(0);
+	}
 }
 
 int checkCameraCollision(VECTOR*, std::array<s16, 6>&, std::array<s16, 4>&)
@@ -4961,7 +5083,7 @@ void updateCameraInterpolation(void)
 		assert(0);
 	}
 
-	updateCameraInterpolationSub0();
+	updateCameraDolly();
 	sFieldEntity* psVar2 = &actorArray[actorCameraTracked];
 	VECTOR localPosition;
 	localPosition.vx = (psVar2->m4C_scriptEntity->m20_position).vx;
@@ -6527,6 +6649,9 @@ void getInputDuringVsync(void)
 		buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_DOWN) << 14;
 		buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_LEFT) << 15;
 		buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_RIGHT) << 13;
+
+		buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_LEFTSHOULDER) << 2;
+		buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER) << 3;
 /*
 		static bool pressRight = false;
 		if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_RIGHT))

@@ -225,6 +225,10 @@ extern bool g_BreakOnMissingOpcode;
 
 extern std::vector<u8> rawFieldDialogBundle;
 
+extern u8 DollyStop;
+extern u8 DollySet;
+
+
 struct sFieldTrigger
 {
 	std::array<s16, 3> m0;
