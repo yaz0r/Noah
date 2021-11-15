@@ -25,6 +25,8 @@ s32 op9DVar1 = 0;
 s32 op9DVar2 = 0;
 s32 op9DVar3 = 0;
 
+u8 updateCharacterVar0 = 0;
+
 int getVar80(int param_1, uint param_2)
 
 {
@@ -267,7 +269,7 @@ u32 getCameraDirection(void)
 
 uint getPlayerCharacterDir(void)
 {
-	return ((actorArray[playerControlledEntity].m4C_scriptEntity)->m106_currentRotation + 0x100 >> 9) + 2U & 7;
+	return ((actorArray[playerControlledActor].m4C_scriptEntity)->m106_currentRotation + 0x100 >> 9) + 2U & 7;
 }
 
 void SaveFieldAndDirections(void)

@@ -69,8 +69,6 @@ s32 walkMeshVar4 = 0;
 s16 isFogSetup = 0;
 s16 cameraTan = 0;
 
-int playerControlledEntity = 0;
-
 s16 entityMoveSpeedFactor = 0;
 
 int g_frameOddOrEven = 0;
@@ -80,7 +78,8 @@ std::array<std::vector<u8>, 3> partyCharacterBuffersCompressed;
 std::array<sSpriteActorAnimationBundle, 3> partyCharacterBuffers;
 s16 actorCameraTracked = 0;
 s32 pcInitVar1 = 0;
-std::array<int, 11> PCToActorArray;
+s32 playerControlledActor = 0;
+//std::array<int, 11> PCToActorArray;
 
 s32 fieldPolyCount;
 s32 fieldPolyCount2;
@@ -206,6 +205,14 @@ void resetCameraData()
 }
 
 int linkOTIndex;
+s8 EntityMoveCheck1Var1 = 0;
+char fieldObjectRenderingVar3 = 0;
+char noUpdatesToPartyMemebers = 0;
+int onlyUpdateDirector = 0;
+s16 playerCanRun = 1;
+s32 updateEntityEventCode3Var0 = 0;
+s32 updateEntityEventCode3Var1 = 0;
+s32 updateEntityEventCode3Var2 = 0;
 
 void resetFieldDefault()
 {
@@ -223,9 +230,30 @@ void resetFieldDefault()
 	MissingCode();
 
 	compassDisabled = 0;
-
+	OPX_50Param = 0;
 	MissingCode();
-
+	pcInitVar1 = 0;
+	updateCharacterVar0 = 0;
+	fieldObjectRenderingVar2.vy = 0;
+	fieldObjectRenderingVar2.vz = 0;
+	fieldObjectRenderingVar2.vx = 0;
+	screenDistortionConfigured = 0;
+	MissingCode();
+	OPE7_param[2] = 0;
+	OPE7_param[1] = 0;
+	OPE7_param[0] = 0;
+	noUpdatesToPartyMemebers = 0;
+	EntityMoveCheck1Var1 = 0;
+	fieldObjectRenderingVar3 = 0;
+	onlyUpdateDirector = 0;
+	fieldUseGroundOT = 0;
+	load2dAnimVar = 0;
+	//screenDistrotionAllocated = 0;
+	MissingCode();
+	updateEntityEventCode3Var1 = 0;
+	MissingCode();
+	actorCameraTracked = 0;
+	MissingCode();
 	linkOTIndex = 0x720;
 
 	MissingCode();
@@ -1886,7 +1914,7 @@ int spriteWalkToPositionOrActor(int param_1)
 		lVar14 = length1d(actorArray[readCharacter(1)].m4C_scriptEntity->m18[3] + pCurrentFieldScriptActor->m18[3]);
 		destinationX = actorArray[readCharacter(1)].m4C_scriptEntity->m20_position.vx >> 16;
 		destinationZ = actorArray[readCharacter(1)].m4C_scriptEntity->m20_position.vz >> 16;
-		if (pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1] == playerControlledEntity)
+		if (pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1] == playerControlledActor)
 		{
 			pCurrentFieldScriptActor->m0_flags |= 0x200000;
 		}
@@ -2016,14 +2044,14 @@ int getCurrentActorRotationIn8Cardinal()
 
 void setCurrentActorTargetRotation(s16 param_1)
 {
+	s16 angle = param_1 | 0x8000;
 	if (fieldExecuteVar1 == 0) {
-		pCurrentFieldScriptActor->m104_rotation = param_1 | 0x8000;
-		pCurrentFieldScriptActor->m106_currentRotation = param_1 | 0x8000;
-		pCurrentFieldScriptActor->m108_rotation3 = param_1 | 0x8000;
+		pCurrentFieldScriptActor->m104_rotation = angle;
+		pCurrentFieldScriptActor->m106_currentRotation = angle;
+		pCurrentFieldScriptActor->m108_rotation3 = angle;
 	}
-	pCurrentFieldScriptActor = pCurrentFieldScriptActor;
-	pCurrentFieldScriptActor->m104_rotation = param_1 | 0x8000U;
-	pCurrentFieldScriptActor->m106_currentRotation = param_1 | 0x8000U;
+	pCurrentFieldScriptActor->m104_rotation = angle;
+	pCurrentFieldScriptActor->m106_currentRotation = angle;
 	pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
 }
 
@@ -3397,9 +3425,6 @@ void ClearCacheAfterOverlayLoad()
 	MissingCode();
 }
 
-char noUpdatesToPartyMemebers = 0;
-
-int onlyUpdateDirector = 0;
 void exectueEntitiesUpdateFunction()
 {
 	int numEntitiesToUpdate = totalActors;
@@ -3571,10 +3596,6 @@ void updateEntityEventCode2(int index, sFieldEntity* pFieldEntity, sFieldScriptE
 	}
 }
 
-s16 playerCanRun = 1;
-s32 updateEntityEventCode3Var0 = 0;
-s32 updateEntityEventCode3Var1 = 0;
-s32 updateEntityEventCode3Var2 = 0;
 int updateEntityEventCode3Sub0(sFieldScriptEntity* param_1)
 {
 	int iVar1;
@@ -4159,7 +4180,7 @@ void updateEntityEventCode3(int index, sFieldEntity* pFieldEntity, sFieldScriptE
 			int iVar1 = -1;
 			if (pFieldScriptEntity->m8_currentWalkMeshTriangle[pFieldScriptEntity->m10_walkmeshId] != -1) {
 				int backupFlags = pFieldScriptEntity->m0_flags;
-				if (index == playerControlledEntity) {
+				if (index == playerControlledActor) {
 					if (partyToFieldEntityArrayMapping[1] != 0xff) {
 						pFieldScriptEntity->m0_flags = pFieldScriptEntity->m0_flags | (actorArray[partyToFieldEntityArrayMapping[1]].m4C_scriptEntity)->m0_flags & 0x600;
 					}
@@ -4263,8 +4284,14 @@ LAB_Field__800830ac:
 	pFieldScriptEntity->m40.vz = 0;
 }
 
+int EntityMoveCheck1(int entityIndex, int mask, sFieldEntity* pFieldEntity, sFieldScriptEntity* pFieldScriptEntity, uint param_5);
+
 void EntityMoveCheck0(uint entityIndex, sFieldEntity* pEntity, sFieldScriptEntity* pScriptEntity)
 {
+	MissingCode();
+	if (((pScriptEntity->m0_flags & 0x10000) == 0) && ((pScriptEntity->m4_flags & 0x200000) == 0)) {
+		EntityMoveCheck1(entityIndex, 0x7fffffff, pEntity, pScriptEntity, 0);
+	}
 	MissingCode();
 }
 
@@ -4455,11 +4482,10 @@ s32 EntityMoveCheck1Sub1(sFieldScriptEntity* pFieldScriptEntity, int walkmeshId,
 	return 0;
 }
 
-s8 EntityMoveCheck1Var1 = 0;
 int EntityMoveCheck1(int entityIndex, int mask, sFieldEntity* pFieldEntity, sFieldScriptEntity* pFieldScriptEntity, uint param_5)
 {
 	sSpriteActor* psVar17 = actorArray[entityIndex].m4_pVramSpriteSheet;
-	if (entityIndex == playerControlledEntity) {
+	if (entityIndex == playerControlledActor) {
 		inputAllowedMask = 0xFFFF;
 	}
 	if ((pFieldScriptEntity->m0_flags & 0x1000000) != 0) {
@@ -4469,7 +4495,7 @@ int EntityMoveCheck1(int entityIndex, int mask, sFieldEntity* pFieldEntity, sFie
 		return -1;
 	}
 	if (((pFieldScriptEntity->m0_flags & 0x10000) != 0) ||
-		((((entityIndex != playerControlledEntity || (EntityMoveCheck1Var1 != '\x01')) && ((psVar17->mC_step).vy == 0)) &&
+		((((entityIndex != playerControlledActor || (EntityMoveCheck1Var1 != '\x01')) && ((psVar17->mC_step).vy == 0)) &&
 			(!updateEntityEventCode3Sub0(pFieldScriptEntity) && (psVar17->m84 == (pFieldScriptEntity->m20_position.vy >> 16)))))) {
 		return -1;
 	}
@@ -4702,7 +4728,7 @@ void updateScriptAndMoveEntities()
 
 	MissingCode();
 
-	EntityMoveCheck0(playerControlledEntity, &actorArray[playerControlledEntity], actorArray[playerControlledEntity].m4C_scriptEntity);
+	EntityMoveCheck0(playerControlledActor, &actorArray[playerControlledActor], actorArray[playerControlledActor].m4C_scriptEntity);
 
 	MissingCode();
 
@@ -4712,7 +4738,7 @@ void updateScriptAndMoveEntities()
 		{
 			sFieldScriptEntity* pFieldScriptEntity = actorArray[i].m4C_scriptEntity;
 			if (((((pFieldScriptEntity->m4_flags & 0x600) != 0x200) && ((actorArray[i].m58_flags & 0xf80) == 0x200)) && ((pFieldScriptEntity->m0_flags & 0x10001) == 0)) &&
-				((i != playerControlledEntity &&
+				((i != playerControlledActor &&
 					EntityMoveCheck1(i, 0x7fffffff, &actorArray[i], pFieldScriptEntity, 0) && (actorArray[i].m4_pVramSpriteSheet->m7C->mC == 1)))) {
 				pFieldScriptEntity->m0_flags = pFieldScriptEntity->m0_flags & 0xfffff7ff;
 			}
@@ -5147,7 +5173,7 @@ void updateCamera()
 	switch (cameraTrackingMode)
 	{
 	case eCameraTrackingMode::e0_followPlayer: // follow player
-		updateCameraAt(&actorArray[playerControlledEntity].m4C_scriptEntity->m20_position);
+		updateCameraAt(&actorArray[playerControlledActor].m4C_scriptEntity->m20_position);
 		break;
 	default:
 		assert(0);
@@ -5256,8 +5282,6 @@ bool submitModelForRendering(sModelBlock* param_1, std::vector<sTag*>& param_2, 
 	g_currentModelBlockSubBlocks = currentModelBlockSubBlocks;
 	return 1;
 }
-
-char fieldObjectRenderingVar3 = 0;
 
 void renderObjects()
 {
@@ -5385,7 +5409,7 @@ LAB_Field__80074d80:
 
 			if (pFieldEntity->m0->m12_renderMode == 1)
 			{
-				assert(0);
+				MissingCode();
 			}
 			objectClippingMask = 0;
 
@@ -5393,7 +5417,7 @@ LAB_Field__80074d80:
 			{
 				if ((actorArray[i].m58_flags & 0x2000) && (pFieldEntity->m0->m14))
 				{
-					assert(0);
+					MissingCode();
 				}
 
 				SetRotMatrix(&projectedMatrix);

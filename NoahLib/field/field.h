@@ -158,7 +158,8 @@ extern const std::array<u16, 8> actorDirectionTable3;
 extern std::array<sSpriteActorAnimationBundle, 3> partyCharacterBuffers;
 extern s16 actorCameraTracked;
 extern s32 pcInitVar1;
-extern std::array<int, 11> PCToActorArray;
+//extern std::array<int, 11> PCToActorArray;
+extern s32 playerControlledActor;
 extern const std::array<s8, 12> characterMappingTable;
 extern s16 pcInitVar2;
 extern std::array<int, 3> unkPartyTable;
@@ -235,7 +236,6 @@ extern std::vector<sFieldTrigger> fieldTriggerData;
 
 extern MATRIX currentProjectionMatrix;
 
-extern int playerControlledEntity;
 extern std::array<std::vector<u8>, 3> partyCharacterBuffersRaw;
 extern std::array<int, 3> asyncPartyCharacterLoadingTable;
 

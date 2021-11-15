@@ -175,8 +175,8 @@
         <scriptEntity ID="13" Name=""/>
     </fieldInfo>
     <fieldInfo ID="5" Name="Lahan - Beginners hall">
-        <scriptEntity ID="0" Name=""/>
-        <scriptEntity ID="1" Name=""/>
+        <scriptEntity ID="0" Name="Director"/>
+        <scriptEntity ID="1" Name="Fei"/>
         <scriptEntity ID="2" Name=""/>
         <scriptEntity ID="3" Name=""/>
         <scriptEntity ID="4" Name=""/>
@@ -187,10 +187,10 @@
         <scriptEntity ID="9" Name=""/>
         <scriptEntity ID="10" Name=""/>
         <scriptEntity ID="11" Name=""/>
-        <scriptEntity ID="12" Name=""/>
+        <scriptEntity ID="12" Name="Lucca"/>
         <scriptEntity ID="13" Name=""/>
-        <scriptEntity ID="14" Name=""/>
-        <scriptEntity ID="15" Name=""/>
+        <scriptEntity ID="14" Name="Door"/>
+        <scriptEntity ID="15" Name="SavePoint?"/>
         <scriptEntity ID="16" Name=""/>
     </fieldInfo>
     <fieldInfo ID="6" Name="Lahan - Item shop"/>

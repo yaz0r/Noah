@@ -32,6 +32,8 @@ void initOpcodes()
     fieldScriptOpcodes[0x21] = OP_21;
     fieldScriptOpcodes[0x22] = OP_22;
     fieldScriptOpcodes[0x23] = OP_23;
+    fieldScriptOpcodes[0x24] = OP_24;
+    fieldScriptOpcodes[0x25] = OP_25;
     fieldScriptOpcodes[0x26] = OP_WAIT;
     fieldScriptOpcodes[0x27] = OP_RESET_CHARACTER;
     fieldScriptOpcodes[0x28] = OP_28;
@@ -74,6 +76,7 @@ void initOpcodes()
     fieldScriptOpcodes[0x6C] = OP_ROTATE_ACTOR_ANTICLOCKWISE;
     fieldScriptOpcodes[0x6D] = OP_GET_ANGLE_COS;
     fieldScriptOpcodes[0x6E] = OP_GET_ANGLE_SIN;
+    fieldScriptOpcodes[0x6F] = OP_ROTATE_TO_ACTOR;
     fieldScriptOpcodes[0x72] = OP_72;
     fieldScriptOpcodes[0x74] = OP_74;
     fieldScriptOpcodes[0x75] = OP_PLAY_MUSIC;
@@ -112,6 +115,7 @@ void initOpcodes()
     fieldScriptOpcodes[0xD2] = OP_SHOW_DIALOG_WINDOW_MODE0;
     fieldScriptOpcodes[0xD6] = OP_D6;
     fieldScriptOpcodes[0xDB] = OP_DB;
+    fieldScriptOpcodes[0xDF] = OP_DF;
     fieldScriptOpcodes[0xE1] = OP_VRAM_OPERATION;
     fieldScriptOpcodes[0xE5] = OP_SETUP_FOG;
     fieldScriptOpcodes[0xE6] = OP_E6;
@@ -126,6 +130,7 @@ void initOpcodes()
     fieldScriptOpcodes[0xF5] = OP_SHOW_DIALOG_WINDOW_FOR_CURRENT_ACTOR_MODE3;
     fieldScriptOpcodes[0xF6] = OP_F6;
     fieldScriptOpcodes[0xF8] = OP_SET_FLAGS_DYNAMIC;
+    fieldScriptOpcodes[0xFB] = OP_FB;
     fieldScriptOpcodes[0xFC] = OP_FC;
     fieldScriptOpcodes[0xFE] = OP_EXTENDED_OPCODE;
 
