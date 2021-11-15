@@ -52,7 +52,7 @@ void initOpcodes()
     fieldScriptOpcodes[0x43] = OP_SET_VAR_RANDOM;
     fieldScriptOpcodes[0x44] = OP_44;
     fieldScriptOpcodes[0x46] = OP_46;
-    fieldScriptOpcodes[0x4A] = OP_4A;
+    fieldScriptOpcodes[0x4A] =  OP_SPRITE_WALK_TO_POSITION_AND_WAIT;
     fieldScriptOpcodes[0x4B] = OP_4B;
     fieldScriptOpcodes[0x52] = OP_52;
     fieldScriptOpcodes[0x53] = OP_53;

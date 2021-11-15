@@ -473,7 +473,7 @@ s32 length1d(s32 param_1)
 {
 	sVec3 local_28;
 	sVec3 local_18;
-	local_18.vx = param_1;
+	local_28.vx = param_1;
 
 	Square0(&local_28, &local_18);
 	return SquareRoot0(local_18.vx);

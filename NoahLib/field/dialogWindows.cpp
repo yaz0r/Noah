@@ -907,7 +907,6 @@ void printDialogCharacter(ushort characterType, ushort characterId, ushort* outp
 		{
 			decodedString += (char)(characterId - 0x3D + 'a');
 		}
-		printf("%s", decodedString.c_str());
 	}
 
 	u16* pCharacterData = nullptr;
@@ -1257,7 +1256,6 @@ void updateDialogTextImage(sDialogWindow18* param_1)
 			iVar14 = printDialogTextVar;
 			break;
 		case 1: // end of line
-			printf("\n");
 			(param_1->m0).vx = 100;
 			param_1->m1C++;
 			return;

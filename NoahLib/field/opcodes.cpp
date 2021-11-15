@@ -1006,7 +1006,7 @@ void OP_46(void)
 }
 
 
-void OP_4A()
+void  OP_SPRITE_WALK_TO_POSITION_AND_WAIT()
 {
 	pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m23_walkMode = 0;
 	pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0 = 0xffff;

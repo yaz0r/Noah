@@ -1857,21 +1857,26 @@ int spriteWalkToPositionOrActor(int param_1)
 		actorArray[currentFieldActorId].m4_pVramSpriteSheet->m18_moveSpeed = 0x8000000 / pCurrentFieldScriptActor->m76;
 	}
 
-	int local_30;
-	int local_28;
+	int destinationX;
+	int destinationZ;
 
 	int lVar13 = 0;
 	int lVar14 = 0;
 
+	s32 stepLength = length1d(actorArray[currentFieldActorId].m4_pVramSpriteSheet->m18_moveSpeed >> 15);
+
+	s32 currentX = (pCurrentFieldScriptActor->m20_position.vx >> 16);
+	s32 currentZ = (pCurrentFieldScriptActor->m20_position.vz >> 16);
+
 	switch (pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m23_walkMode)
 	{
 	case 0:
-		local_30 = getVar80(1, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 5]);
-		local_28 = getVar40(3, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 5]);
+		destinationX = getVar80(1, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 5]);
+		destinationZ = getVar40(3, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 5]);
 		break;
 	case 1:
-		local_30 = getVar80(1, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 5]) + pCurrentFieldScriptActor->mD0_targetPositionOffset[0];
-		local_28 = getVar40(3, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 5]) + pCurrentFieldScriptActor->mD0_targetPositionOffset[2];
+		destinationX = getVar80(1, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 5]) + pCurrentFieldScriptActor->mD0_targetPositionOffset[0];
+		destinationZ = getVar40(3, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 5]) + pCurrentFieldScriptActor->mD0_targetPositionOffset[2];
 		break;
 	case 2:
 		if (readCharacter(1) == 0xFF)
@@ -1879,36 +1884,38 @@ int spriteWalkToPositionOrActor(int param_1)
 			return 0;
 		}
 		lVar14 = length1d(actorArray[readCharacter(1)].m4C_scriptEntity->m18[3] + pCurrentFieldScriptActor->m18[3]);
-		local_30 = actorArray[readCharacter(1)].m4C_scriptEntity->m20_position.vx >> 16;
-		local_28 = actorArray[readCharacter(1)].m4C_scriptEntity->m20_position.vz >> 16;
+		destinationX = actorArray[readCharacter(1)].m4C_scriptEntity->m20_position.vx >> 16;
+		destinationZ = actorArray[readCharacter(1)].m4C_scriptEntity->m20_position.vz >> 16;
 		if (pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1] == playerControlledEntity)
 		{
 			pCurrentFieldScriptActor->m0_flags |= 0x200000;
 		}
 		break;
 	case 3:
-		local_30 = pCurrentFieldScriptActor->mD0_targetPositionOffset[0] + ((getAngleSin(getImmediateOrVariableUnsigned(1) & 0xfff) << 0xc) >> 0xc);
-		local_28 = pCurrentFieldScriptActor->mD0_targetPositionOffset[2] + (getAngleCos(getImmediateOrVariableUnsigned(1) & 0xfff) * -0x1000 >> 0xc);
+		destinationX = pCurrentFieldScriptActor->mD0_targetPositionOffset[0] + ((getAngleSin(getImmediateOrVariableUnsigned(1) & 0xfff) << 0xc) >> 0xc);
+		destinationZ = pCurrentFieldScriptActor->mD0_targetPositionOffset[2] + (getAngleCos(getImmediateOrVariableUnsigned(1) & 0xfff) * -0x1000 >> 0xc);
 		break;
 	default:
 		assert(0);
 	}
 
-	sVec3 targetPosition;
-	targetPosition[0] = local_30 - (pCurrentFieldScriptActor->m20_position.vx >> 16);
-	targetPosition[2] = local_28 - (pCurrentFieldScriptActor->m20_position.vz >> 16);
-	targetPosition[1] = 0;
+	sVec3 travelDelta;
+	travelDelta[0] = destinationX - currentX;
+	travelDelta[1] = 0;
+	travelDelta[2] = destinationZ - currentZ;
 
 	pCurrentFieldScriptActor->m0_flags |= 0x400000;
 
 	// Reached destination yet?
+	s32 distanceToDestination = length2d(travelDelta[0], travelDelta[2]);
+
 	if ((pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0 == 0) ||
-		(length2d(targetPosition[0], targetPosition[2]) <= length1d(actorArray[currentFieldActorId].m4_pVramSpriteSheet->m18_moveSpeed >> 0xf) + 1 + lVar14))
+		(distanceToDestination <= (stepLength + 1 + lVar14)))
 	{
 		//reached location
 		if (param_1 == 0)
 		{
-			pCurrentFieldScriptActor->m106_currentRotation = pCurrentFieldScriptActor->m104_rotation = fp_atan2(targetPosition);
+			pCurrentFieldScriptActor->m106_currentRotation = pCurrentFieldScriptActor->m104_rotation = fp_atan2(travelDelta);
 		}
 		else
 		{
@@ -1930,7 +1937,7 @@ int spriteWalkToPositionOrActor(int param_1)
 	else
 	{
 		pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0--;
-		pCurrentFieldScriptActor->m106_currentRotation = pCurrentFieldScriptActor->m104_rotation = fp_atan2(targetPosition);
+		pCurrentFieldScriptActor->m106_currentRotation = pCurrentFieldScriptActor->m104_rotation = fp_atan2(travelDelta);
 		breakCurrentScript = 1;
 		return -1;
 	}

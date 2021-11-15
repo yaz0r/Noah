@@ -46,7 +46,7 @@ void OP_SET_VAR_DEC();
 void OP_SET_VAR_RANDOM();
 void OP_44();
 void OP_46();
-void OP_4A();
+void  OP_SPRITE_WALK_TO_POSITION_AND_WAIT();
 void OP_4B();
 void OP_52();
 void OP_53();
