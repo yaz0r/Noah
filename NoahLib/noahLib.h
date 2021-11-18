@@ -77,11 +77,21 @@ s32 READ_LE_S32(std::vector<u8>::const_iterator& inputStream);
 void noahFrame_start();
 bool noahFrame_end();
 
+struct sFixedPoint
+{
+    s32 m_value;
+    operator const s32&() const { return m_value; }
+    operator s32& () { return m_value; }
+    sFixedPoint& operator=(s32 value) { m_value = value; return *this; }
+
+    s32 getIntegerPart() { return m_value >> 16; }
+};
+
 struct VECTOR
 {
-    s32 vx;
-    s32 vy;
-    s32 vz;
+    sFixedPoint vx;
+    sFixedPoint vy;
+    sFixedPoint vz;
     s32 pad;
 
 	s32 operator[](size_t idx) const

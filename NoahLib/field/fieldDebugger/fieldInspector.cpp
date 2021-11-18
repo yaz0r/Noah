@@ -1405,7 +1405,7 @@ void fieldInspector_frame()
             {
                 popupToOpen = "ChooseField";
             }
-            
+
 
             if (ImGui::MenuItem("Save debug info"))
             {
@@ -1432,9 +1432,60 @@ void fieldInspector_frame()
     {
         ImGui::Text("Choose Field");
 
+        static char searchText[512] = "";
+        ImGui::InputText("Search", searchText, sizeof(searchText));
+
+        char searchTextLower[512];
+        strcpy(searchTextLower, searchText);
+        for (int i=0; i<strlen(searchTextLower); i++)
+        {
+            searchTextLower[i] = tolower(searchTextLower[i]);
+        }
+
+        std::vector<s32> visibleFields;
+        visibleFields.reserve(gFieldDebugInfo.mFieldList.size());
+        for (int i=0; i<gFieldDebugInfo.mFieldList.size(); i++)
+        {
+            if (strlen(searchText))
+            {
+                std::string fieldName = gFieldDebugInfo.mFieldList[i].mName;
+                for (int i=0; i<fieldName.size(); i++)
+                {
+                    fieldName[i] = tolower(fieldName[i]);
+                }
+
+                if (strstr(fieldName.c_str(), searchTextLower)  == nullptr)
+                {
+                    continue;
+                }
+            }
+            visibleFields.push_back(i);
+        }
+
         static int selectedField = 0;
         ImGui::SetNextItemWidth(500);
-        ImGui::ListBox("Field list", &selectedField, getFieldListName, &gFieldDebugInfo.mFieldList, gFieldDebugInfo.mFieldList.size());
+        if (ImGui::ListBoxHeader("Field list"))
+        {
+            for (int i=0; i<visibleFields.size(); i++)
+            {
+                bool isSelected = selectedField == visibleFields[i];
+
+                std::string fullNameWithNumber;
+                {
+                    char indexString[256];
+                    snprintf(indexString, sizeof(indexString), "%d - ", visibleFields[i]);
+                    fullNameWithNumber.append(indexString);
+                }
+                fullNameWithNumber.append(gFieldDebugInfo.mFieldList[visibleFields[i]].mName);
+
+                if (ImGui::Selectable(fullNameWithNumber.c_str(), &isSelected))
+                {
+                    selectedField = visibleFields[i];
+                }
+
+            }
+            ImGui::ListBoxFooter();
+        }
 
         if (ImGui::Button("Go!"))
         {

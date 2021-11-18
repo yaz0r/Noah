@@ -50,7 +50,7 @@ struct sFieldScriptEntity
     VECTOR m20_position;
     VECTOR m30_stepVector;
     VECTOR m40;
-    VECTOR m50;
+    VECTOR m50_surfaceNormal;
     std::array<s16, 3> m60;
     std::array<s16, 3> m68_oldPosition;
     s16 m6E;
