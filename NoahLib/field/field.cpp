@@ -3728,6 +3728,7 @@ int updateEntityEventCode3Sub3Sub1(sVec3* param_1, VECTOR* param_2, sFieldScript
     int triangleId = pFieldScriptEntity->m8_currentWalkMeshTriangle[pFieldScriptEntity->m10_walkmeshId];
     int collisionFlag;
 
+    int lastTriangle;
     std::vector<sWalkMesh::sTriangleData>::iterator pWalkMeshTriangles = walkMeshTriangle[pFieldScriptEntity->m10_walkmeshId]->begin();
     std::vector<SVECTOR>::iterator pVertices = walkMeshVertices[pFieldScriptEntity->m10_walkmeshId]->begin();
 
@@ -3764,6 +3765,8 @@ int updateEntityEventCode3Sub3Sub1(sVec3* param_1, VECTOR* param_2, sFieldScript
             vert0.set(pVertices[pTriangle.m0_verticeIndex[0]].vx, pVertices[pTriangle.m0_verticeIndex[0]].vz);
             vert1.set(pVertices[pTriangle.m0_verticeIndex[1]].vx, pVertices[pTriangle.m0_verticeIndex[1]].vz);
             vert2.set(pVertices[pTriangle.m0_verticeIndex[2]].vx, pVertices[pTriangle.m0_verticeIndex[2]].vz);
+
+            lastTriangle = triangleId;
 
             collisionFlag = 0;
             if (NCLIP(vert0, vert1, refPos) < 0) {
@@ -3828,7 +3831,7 @@ int updateEntityEventCode3Sub3Sub1(sVec3* param_1, VECTOR* param_2, sFieldScript
                 }
             }
 
-            u32 uVar3 = (*walkMeshVar1)[pWalkMeshTriangles[triangleId].mC_indexInWalkmeshData1] & mask;
+            u32 uVar3 = (*walkMeshVar1)[pWalkMeshTriangles[lastTriangle].mC_indexInWalkmeshData1] & mask;
 
             *param_7 = uVar3;
 
@@ -3861,7 +3864,7 @@ int updateEntityEventCode3Sub3Sub1(sVec3* param_1, VECTOR* param_2, sFieldScript
 
     LAB_Field__8007c3e4:
         if (collisionFlag == 2) {
-            sWalkMesh::sTriangleData& pTriangle = pWalkMeshTriangles[triangleId];
+            sWalkMesh::sTriangleData& pTriangle = pWalkMeshTriangles[lastTriangle];
             param_4[0].vx = pVertices[pTriangle.m0_verticeIndex[1]].vx;
             param_4[0].vy = pVertices[pTriangle.m0_verticeIndex[1]].vy;
             param_4[0].vz = pVertices[pTriangle.m0_verticeIndex[1]].vz;
@@ -3874,7 +3877,7 @@ int updateEntityEventCode3Sub3Sub1(sVec3* param_1, VECTOR* param_2, sFieldScript
                 if (collisionFlag != 1) {
                     return 0xffffffff;
                 }
-                sWalkMesh::sTriangleData& pTriangle = pWalkMeshTriangles[triangleId];
+                sWalkMesh::sTriangleData& pTriangle = pWalkMeshTriangles[lastTriangle];
                 param_4[0].vx = pVertices[pTriangle.m0_verticeIndex[0]].vx;
                 param_4[0].vy = pVertices[pTriangle.m0_verticeIndex[0]].vy;
                 param_4[0].vz = pVertices[pTriangle.m0_verticeIndex[0]].vz;
@@ -3886,7 +3889,7 @@ int updateEntityEventCode3Sub3Sub1(sVec3* param_1, VECTOR* param_2, sFieldScript
                 if (collisionFlag != 4) {
                     return -1;
                 }
-                sWalkMesh::sTriangleData& pTriangle = pWalkMeshTriangles[triangleId];
+                sWalkMesh::sTriangleData& pTriangle = pWalkMeshTriangles[lastTriangle];
                 param_4[0].vx = pVertices[pTriangle.m0_verticeIndex[2]].vx;
                 param_4[0].vy = pVertices[pTriangle.m0_verticeIndex[2]].vy;
                 param_4[0].vz = pVertices[pTriangle.m0_verticeIndex[2]].vz;
