@@ -480,7 +480,7 @@ void initFieldScriptEntityValues(int index)
 {
     sFieldScriptEntity* pFieldScriptEntity = actorArray[index].m4C_scriptEntity;
 
-    pFieldScriptEntity->m0_flags = 0xB0;
+    pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags = 0xB0;
     pFieldScriptEntity->m4_flags = 0x800;
     pFieldScriptEntity->m18[0] = 0x10;
     pFieldScriptEntity->m18[2] = 0x10;
@@ -1342,7 +1342,7 @@ void initModel2(sModelBlock* pModelBlock, std::vector<sTag*>& outputBuffer, int 
     if ((((pModelBlock->m0_flags & 1) == 0) && (pModelBlock->m30 != 0)) && (param_3 != 0)) {
         traceNextAlloc(0x26);
         pModelBlock->m18.resize(pModelBlock->m30);
-        pModelBlock->m0_flags = pModelBlock->m0_flags | 1;
+        pModelBlock->m0_flags |= 1;
     }
 
     currentModelBlockDisplayLists = pModelBlock->m_model->mRawData.begin() + pModelBlock->m14_offsetDisplayList;
@@ -1727,7 +1727,7 @@ void emptyPartySlot(int param_1)
         actorArray[iVar8].m58_flags = actorArray[iVar8].m58_flags & 0xf07f | 0x200;
         OP_INIT_ENTITY_SCRIPT_sub0(iVar8, 0, &partyCharacterBuffers[0], 1, 0, 0, 1);
         psVar6 = pCurrentFieldScriptActor;
-        pCurrentFieldScriptActor->m0_flags = pCurrentFieldScriptActor->m0_flags | 1;
+        pCurrentFieldScriptActor->m0_fieldScriptFlags.m0 = 1;
         puVar1 = &pCurrentFieldScriptActor->m4_flags;
         breakCurrentScript = 0;
         puVar2 = &pCurrentFieldScriptActor->mCC_scriptPC;
@@ -1736,7 +1736,7 @@ void emptyPartySlot(int param_1)
         pCurrentFieldEntity = psVar7;
         *puVar2 = uVar3;
         psVar6->m4_flags = *puVar1 | 0x100000;
-        psVar6->m0_flags = psVar6->m0_flags | 0x20000;
+        psVar6->m0_fieldScriptFlags.m_rawFlags |= 0x20000;
         psVar6->m4_flags = psVar6->m4_flags | 0x400;
         *piVar9 = 0xff;
     }
@@ -1845,7 +1845,7 @@ void setCurrentActor2DPosition(int posX, int posZ)
     pCurrentFieldScriptActor->mF0 = 0;
     pCurrentFieldScriptActor->mEC_elevation = 0;
     pCurrentFieldScriptActor->m72_elevation = pCurrentFieldScriptActor->m20_position.vy >> 0x10;
-    pCurrentFieldScriptActor->m0_flags = pCurrentFieldScriptActor->m0_flags & 0xfffbffff | 0x400000;
+    pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags = (pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags & ~0x40001) | 0x400000;
 }
 
 
@@ -1940,7 +1940,7 @@ int spriteWalkToPositionOrActor(int param_1)
         destinationZ = actorArray[readCharacter(1)].m4C_scriptEntity->m20_position.vz >> 16;
         if (pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1] == playerControlledActor)
         {
-            pCurrentFieldScriptActor->m0_flags |= 0x200000;
+            pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags |= 0x200000;
         }
         break;
     case 3:
@@ -1956,7 +1956,7 @@ int spriteWalkToPositionOrActor(int param_1)
     travelDelta[1] = 0;
     travelDelta[2] = destinationZ - currentZ;
 
-    pCurrentFieldScriptActor->m0_flags |= 0x400000;
+    pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags |= 0x400000;
 
     // Reached destination yet?
     s32 distanceToDestination = length2d(travelDelta[0], travelDelta[2]);
@@ -1971,7 +1971,7 @@ int spriteWalkToPositionOrActor(int param_1)
         }
         else
         {
-            if ((pCurrentFieldScriptActor->m0_flags & 0x8000) == 0)
+            if ((pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags & 0x8000) == 0)
             {
                 pCurrentFieldScriptActor->m106_currentRotation = pCurrentFieldScriptActor->m104_rotation = pCurrentFieldScriptActor->m106_currentRotation | 0x8000;
             }
@@ -1983,7 +1983,7 @@ int spriteWalkToPositionOrActor(int param_1)
 
         pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0 = 0xFFFF;
         pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m23_walkMode = 0;
-        pCurrentFieldScriptActor->m0_flags &= 0xfddff7ff;
+        pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags &= ~0x2200801;
         return 0;
     }
     else
@@ -3468,7 +3468,7 @@ void exectueEntitiesUpdateFunction()
             MissingCode();
 
             pCurrentFieldScriptActor = pFieldEntity->m4C_scriptEntity;
-            pCurrentFieldScriptActor->m0_flags &= 0xfeffffff;
+            pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags &= ~0x1000001;
             currentFieldActorId = i;
             pCurrentFieldEntity = pFieldEntity;
 
@@ -3493,7 +3493,7 @@ void exectueEntitiesUpdateFunction()
             }
             currentScriptFinished = 1;
             pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m0_scriptPC;
-            if (!(pCurrentFieldScriptActor->m0_flags & 1))
+            if (!(pCurrentFieldScriptActor->m0_fieldScriptFlags.m0))
             {
                 executeFieldScript(8);
             }
@@ -3543,7 +3543,7 @@ void updateEntityEventCode2(int index, sFieldEntity* pFieldEntity, sFieldScriptE
     int iVar9 = 0;
     int iVar12 = 0;
 
-    if ((pFieldScriptEntity->m0_flags & 0x41800) == 0)
+    if ((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x41800) == 0)
     {
         if ((triangleFlags & 0x420000) != 0) {
             VECTOR local_60;
@@ -3627,7 +3627,7 @@ int updateEntityEventCode3Sub0(sFieldScriptEntity* param_1)
     iVar1 = -1;
     if (((((((param_1->m14_currentTriangleFlag & 0x420000U) == 0) && (iVar1 = -1, updateEntityEventCode3Var1 == 0)) && (iVar1 = -1, param_1->m30_stepVector.vx == 0)) &&
         ((iVar1 = -1, param_1->m30_stepVector.vy == 0 && (iVar1 = -1, param_1->m30_stepVector.vz == 0)))) &&
-        ((iVar1 = -1, updateEntityEventCode3Var2 == 1 && ((iVar1 = -1, param_1->m74 == 0xff && (iVar1 = -1, (param_1->m0_flags & 0x401800) == 0)))))) &&
+        ((iVar1 = -1, updateEntityEventCode3Var2 == 1 && ((iVar1 = -1, param_1->m74 == 0xff && (iVar1 = -1, (param_1->m0_fieldScriptFlags.m_rawFlags & 0x401800) == 0)))))) &&
         (((param_1->m4_flags & 1) == 0 || (iVar1 = -1, param_1->m10_walkmeshId != 0)))) {
         if (((param_1->m4_flags & 2) == 0) || (param_1->m10_walkmeshId != 1)) {
             iVar1 = 0;
@@ -3723,13 +3723,181 @@ int updateEntityEventCode3Sub2(sVec3* param_1, sFieldScriptEntity* param_2)
     return 0;
 }
 
-int updateEntityEventCode3Sub3Sub1(sVec3* param_1, VECTOR* param_2, sFieldScriptEntity* param_3, std::array<SVECTOR, 2>& param_4, SVECTOR* param_5, int param_6, uint* param_7)
+int updateEntityEventCode3Sub3Sub1(sVec3* param_1, VECTOR* param_2, sFieldScriptEntity* pFieldScriptEntity, std::array<SVECTOR, 2>& param_4, SVECTOR* param_5, int param_6, uint* param_7)
 {
-    MissingCode();
-    param_5->vx = (param_2->vx + param_1->vx) >> 16;
-    param_5->vy = 0;
-    param_5->vz = (param_2->vz + param_1->vz) >> 16;
-    return 0;
+    int triangleId = pFieldScriptEntity->m8_currentWalkMeshTriangle[pFieldScriptEntity->m10_walkmeshId];
+    int collisionFlag;
+
+    std::vector<sWalkMesh::sTriangleData>::iterator pWalkMeshTriangles = walkMeshTriangle[pFieldScriptEntity->m10_walkmeshId]->begin();
+    std::vector<SVECTOR>::iterator pVertices = walkMeshVertices[pFieldScriptEntity->m10_walkmeshId]->begin();
+
+    if (triangleId != -1)
+    {
+        param_5->vx = (param_2->vx + param_1->vx) >> 16;
+        param_5->vy = 0;
+        param_5->vz = (param_2->vz + param_1->vz) >> 16;
+
+        sVec2_s16 refPos = sVec2_s16::fromValue(param_5->vx, param_5->vz);
+        sVec2_s16 refPos2 = sVec2_s16::fromValue(param_2->vx, param_2->vz);
+
+        u32 mask = 0;
+        if ((pFieldScriptEntity->m4_flags >> ((int)pFieldScriptEntity->m10_walkmeshId + 3U & 0x1f) & 1) == 0) {
+            mask = -(uint)(noUpdatesToPartyMemebers == '\0');
+        }
+
+        int local_38;
+        if (((((*walkMeshVar1)[pWalkMeshTriangles[triangleId].mC_indexInWalkmeshData1]) & mask & 0x400000) == 0) && (param_6 != 0x80)) {
+            local_38 = 0;
+        }
+        else {
+            local_38 = 1;
+        }
+
+        int iterationCount = 0;
+        for (iterationCount = 0; iterationCount < 0x20; iterationCount++)
+        {
+            sVec2_s16 vert0;
+            sVec2_s16 vert1;
+            sVec2_s16 vert2;
+
+            sWalkMesh::sTriangleData& pTriangle = pWalkMeshTriangles[triangleId];
+            vert0.set(pVertices[pTriangle.m0_verticeIndex[0]].vx, pVertices[pTriangle.m0_verticeIndex[0]].vz);
+            vert1.set(pVertices[pTriangle.m0_verticeIndex[1]].vx, pVertices[pTriangle.m0_verticeIndex[1]].vz);
+            vert2.set(pVertices[pTriangle.m0_verticeIndex[2]].vx, pVertices[pTriangle.m0_verticeIndex[2]].vz);
+
+            collisionFlag = 0;
+            if (NCLIP(vert0, vert1, refPos) < 0) {
+                collisionFlag |= 1;
+            }
+
+            if (NCLIP(vert1, vert2, refPos) < 0) {
+                collisionFlag |= 2;
+            }
+
+            if (NCLIP(vert2, vert0, refPos) < 0) {
+                collisionFlag |= 4;
+            }
+
+            if (collisionFlag < 8) {
+                switch (collisionFlag)
+                {
+                case 0:
+                    iterationCount = 0xFF;
+                    break;
+                case 1:
+                    triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[0];
+                    break;
+                case 2:
+                    triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[1];
+                    break;
+                case 3:
+                    if (NCLIP(vert1, refPos, refPos2) < 0)
+                    {
+                        triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[0];
+                    }
+                    else {
+                        triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[1];
+                    }
+                    break;
+                case 4:
+                    triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[2];
+                    break;
+                case 5:
+                    if (NCLIP(vert0, refPos, refPos2) < 0)
+                    {
+                        triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[2];
+                    }
+                    else {
+                        triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[0];
+                    }
+                    break;
+                case 6:
+                    if (NCLIP(vert2, refPos, refPos2) < 0)
+                    {
+                        triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[1];
+                    }
+                    else {
+                        triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[2];
+                    }
+                    break;
+                case 7:
+                    triangleId = -1;
+                    break;
+                default:
+                    assert(0);
+                }
+            }
+
+            u32 uVar3 = (*walkMeshVar1)[pWalkMeshTriangles[triangleId].mC_indexInWalkmeshData1] & mask;
+
+            *param_7 = uVar3;
+
+            VECTOR VStack120;
+
+            if ((((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags >> 8 & 7 & uVar3 >> 5) != 0) || (((uVar3 & 0x800000) != 0 && (pFieldScriptEntity->m10_walkmeshId == 0)))) ||
+                (((uVar3 & 0x400000) != 0 &&
+                    ((local_38 == 0 &&
+                        (getTriangleNormalAndAdjustY(pVertices[pTriangle.m0_verticeIndex[0]], pVertices[pTriangle.m0_verticeIndex[1]], pVertices[pTriangle.m0_verticeIndex[2]], param_5, &VStack120),
+                            param_5->vy < param_2->vy.getIntegerPart())))))) {
+                triangleId = -1;
+                break;
+            }
+
+            // reached the edge of the walkmesh
+            if (triangleId == -1)
+            {
+                goto LAB_Field__8007c3e4;
+            }
+        }
+        if ((triangleId != -1) && (iterationCount != 0x20)) {
+            if (param_6 == -1) {
+                return 0;
+            }
+            sWalkMesh::sTriangleData& pTriangle = pWalkMeshTriangles[triangleId];
+            VECTOR VStack120;
+            getTriangleNormalAndAdjustY(pVertices[pTriangle.m0_verticeIndex[0]], pVertices[pTriangle.m0_verticeIndex[1]], pVertices[pTriangle.m0_verticeIndex[2]], param_5, &VStack120);
+            return 0;
+        }
+
+    LAB_Field__8007c3e4:
+        if (collisionFlag == 2) {
+            sWalkMesh::sTriangleData& pTriangle = pWalkMeshTriangles[triangleId];
+            param_4[0].vx = pVertices[pTriangle.m0_verticeIndex[1]].vx;
+            param_4[0].vy = pVertices[pTriangle.m0_verticeIndex[1]].vy;
+            param_4[0].vz = pVertices[pTriangle.m0_verticeIndex[1]].vz;
+            param_4[1].vx = pVertices[pTriangle.m0_verticeIndex[2]].vx;
+            param_4[1].vy = pVertices[pTriangle.m0_verticeIndex[2]].vy;
+            param_4[1].vz = pVertices[pTriangle.m0_verticeIndex[2]].vz;
+        }
+        else {
+            if (collisionFlag < 3) {
+                if (collisionFlag != 1) {
+                    return 0xffffffff;
+                }
+                sWalkMesh::sTriangleData& pTriangle = pWalkMeshTriangles[triangleId];
+                param_4[0].vx = pVertices[pTriangle.m0_verticeIndex[0]].vx;
+                param_4[0].vy = pVertices[pTriangle.m0_verticeIndex[0]].vy;
+                param_4[0].vz = pVertices[pTriangle.m0_verticeIndex[0]].vz;
+                param_4[1].vx = pVertices[pTriangle.m0_verticeIndex[1]].vx;
+                param_4[1].vy = pVertices[pTriangle.m0_verticeIndex[1]].vy;
+                param_4[1].vz = pVertices[pTriangle.m0_verticeIndex[1]].vz;
+            }
+            else {
+                if (collisionFlag != 4) {
+                    return -1;
+                }
+                sWalkMesh::sTriangleData& pTriangle = pWalkMeshTriangles[triangleId];
+                param_4[0].vx = pVertices[pTriangle.m0_verticeIndex[2]].vx;
+                param_4[0].vy = pVertices[pTriangle.m0_verticeIndex[2]].vy;
+                param_4[0].vz = pVertices[pTriangle.m0_verticeIndex[2]].vz;
+                param_4[1].vx = pVertices[pTriangle.m0_verticeIndex[0]].vx;
+                param_4[1].vy = pVertices[pTriangle.m0_verticeIndex[0]].vy;
+                param_4[1].vz = pVertices[pTriangle.m0_verticeIndex[0]].vz;
+            }
+        }
+    }
+
+    return -1;
 }
 
 uint updateEntityEventCode3Sub3Sub2(short param_1, std::array<SVECTOR, 2>& param_2, sVec3* param_3)
@@ -3896,7 +4064,7 @@ int updateEntityEventCode3Sub4Sub1(sVec3* deltaStep, VECTOR* position, sFieldScr
                 return -1;
             }
             u32 uVar4 = ((*walkMeshVar1)[pWalkMeshTriangles[triangleId].mC_indexInWalkmeshData1]) & mask;
-            if ((((local_58->m0_flags >> 9 & 3 & uVar4 >> 3) != 0) || ((local_58->m0_flags >> 8 & 7 & uVar4 >> 5) != 0)) || (((uVar4 & 0x800000) != 0 && (local_58->m10_walkmeshId == 0)))) {
+            if ((((local_58->m0_fieldScriptFlags.m_rawFlags >> 9 & 3 & uVar4 >> 3) != 0) || ((local_58->m0_fieldScriptFlags.m_rawFlags >> 8 & 7 & uVar4 >> 5) != 0)) || (((uVar4 & 0x800000) != 0 && (local_58->m10_walkmeshId == 0)))) {
                 triangleId = -1;
                 break;
             }
@@ -3995,7 +4163,7 @@ int updateEntityEventCode3Sub4(sVec3* position, sFieldScriptEntity* param_2, std
         return -1;
     }
     else {
-        if ((param_2->m0_flags & 0x40000) == 0) {
+        if ((param_2->m0_fieldScriptFlags.m_rawFlags & 0x40000) == 0) {
             if (((int)auStack80.vy << 0x10 < (param_2->m20_position).vy) && (updateEntityEventCode3Var1 == 0))
                 return -1;
         }
@@ -4095,7 +4263,7 @@ int updateEntityEventCode3Sub3(sVec3* param_1, sFieldScriptEntity* param_2, std:
     if (updateEntityEventCode3Sub3Sub1(&local_88, &param_2->m20_position, param_2, param_3, &local_68, 0, &local_38) == -1) {
         return -1;
     }
-    param_2->m0_flags = param_2->m0_flags | 0x4000000;
+    param_2->m0_fieldScriptFlags.m_rawFlags |= 0x4000000;
 
     param_1->vx = local_88.vx;
     param_1->vy = local_68.vy * 0x10000 - param_2->m20_position.vy;
@@ -4113,13 +4281,13 @@ void updateEntityEventCode4(sSpriteActor* param_1, int param_2, sFieldEntity* pa
 
     if ((param_3->m58_flags & 0x40) != 0) {
         if ((param_2 != 3) && (updateEntityEventCode4Var0 == 0)) {
-            param_3->m4C_scriptEntity->m0_flags = param_3->m4C_scriptEntity->m0_flags & 0xfffff7ff;
+            param_3->m4C_scriptEntity->m0_fieldScriptFlags.m11 = 0;
         }
         if (param_2 == 0xff) {
             param_2 = 0;
         }
         if (param_2 != updateEntityEventCode4Var1) {
-            param_3->m4C_scriptEntity->m0_flags = param_3->m4C_scriptEntity->m0_flags & 0xfffff7ff;
+            param_3->m4C_scriptEntity->m0_fieldScriptFlags.m11 = 0;
         }
         psVar1 = param_3->m4C_scriptEntity;
         if ((psVar1->m4_flags & 0x2000) == 0) {
@@ -4139,16 +4307,16 @@ void updateEntityEventCode3(int index, sFieldEntity* pFieldEntity, sFieldScriptE
     int rotation = pFieldScriptEntity->m104_rotation;
     std::array<SVECTOR, 2> auStack56;
 
-    if ((pFieldScriptEntity->m0_flags & 0x1000000) != 0) {
+    if ((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x1000000) != 0) {
         updateEntityEventCode3Var0 = index;
         return;
     }
 
     int walkSpeed = 1;
-    if ((((pFieldScriptEntity->m0_flags & 0x4000) != 0) && ((padButtonForScripts[0].vx & 0x40) != 0)) && (playerCanRun == 1)) {
+    if ((((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x4000) != 0) && ((padButtonForScripts[0].vx & 0x40) != 0)) && (playerCanRun == 1)) {
         walkSpeed = 2;
     }
-    if (((pFieldScriptEntity->m0_flags & 0x1800) != 0) && (pFieldScriptEntity->mE8_currentWalkSpeed != walkSpeed)) {
+    if (((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x1800) != 0) && (pFieldScriptEntity->mE8_currentWalkSpeed != walkSpeed)) {
         if (pFieldScriptEntity->mE8_currentWalkSpeed == 1) {
             walkSpeed = 1;
         }
@@ -4175,7 +4343,7 @@ void updateEntityEventCode3(int index, sFieldEntity* pFieldEntity, sFieldScriptE
 
     bool bMoved = true;
 
-    if (((((int)(short)rotation & 0x8000U) == 0) || (moveMask != 0)) || ((pFieldScriptEntity->m0_flags & 0x40800) != 0)) {
+    if (((((int)(short)rotation & 0x8000U) == 0) || (moveMask != 0)) || ((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x40800) != 0)) {
         if (((int)(short)rotation & 0x8000U) == 0) {
             updateEntityEventCode3Sub1(pFieldEntity->m4_pVramSpriteSheet, (int)(short)rotation, pFieldEntity);
             stepVector.vx = pFieldEntity->m4_pVramSpriteSheet->mC_step.vx + pFieldScriptEntity->m40.vx;
@@ -4203,22 +4371,22 @@ void updateEntityEventCode3(int index, sFieldEntity* pFieldEntity, sFieldScriptE
 
             int iVar1 = -1;
             if (pFieldScriptEntity->m8_currentWalkMeshTriangle[pFieldScriptEntity->m10_walkmeshId] != -1) {
-                int backupFlags = pFieldScriptEntity->m0_flags;
+                int backupFlags = pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags;
                 if (index == playerControlledActor) {
                     if (partyToFieldEntityArrayMapping[1] != 0xff) {
-                        pFieldScriptEntity->m0_flags = pFieldScriptEntity->m0_flags | (actorArray[partyToFieldEntityArrayMapping[1]].m4C_scriptEntity)->m0_flags & 0x600;
+                        pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags |= (actorArray[partyToFieldEntityArrayMapping[1]].m4C_scriptEntity)->m0_fieldScriptFlags.m_rawFlags & 0x600;
                     }
                     if (partyToFieldEntityArrayMapping[2] != 0xff) {
-                        pFieldScriptEntity->m0_flags = pFieldScriptEntity->m0_flags | (actorArray[partyToFieldEntityArrayMapping[2]].m4C_scriptEntity)->m0_flags & 0x600;
+                        pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags |= (actorArray[partyToFieldEntityArrayMapping[2]].m4C_scriptEntity)->m0_fieldScriptFlags.m_rawFlags & 0x600;
                     }
                 }
-                if ((((pFieldScriptEntity->m0_flags & 0x41800) == 0) && (pFieldScriptEntity->m74 == -1)) && (updateEntityEventCode3Var1 == 0)) {
+                if ((((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x41800) == 0) && (pFieldScriptEntity->m74 == -1)) && (updateEntityEventCode3Var1 == 0)) {
                     iVar1 = updateEntityEventCode3Sub3(&stepVector, pFieldScriptEntity, auStack56, rotation);
                 }
                 else {
                     iVar1 = updateEntityEventCode3Sub4(&stepVector, pFieldScriptEntity, auStack56, rotation);
                 }
-                pFieldScriptEntity->m0_flags = pFieldScriptEntity->m0_flags & 0xfffff9ff | backupFlags & 0x600;
+                pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags = (pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & ~0x601) | (backupFlags & 0x600);
             }
             if (iVar1 == -1)
             {
@@ -4252,7 +4420,7 @@ void updateEntityEventCode3(int index, sFieldEntity* pFieldEntity, sFieldScriptE
 
     int walkSpeed2;
 
-    if ((pFieldScriptEntity->m0_flags & 0x800) == 0) {
+    if ((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x800) == 0) {
         if (((int)pFieldScriptEntity->m104_rotation & 0x8000U) != 0) {
             walkSpeed = pFieldScriptEntity->mE6;
         }
@@ -4292,7 +4460,7 @@ LAB_Field__800830ac:
     if (pFieldScriptEntity->mEA_forcedAnimation != 0xff) {
         walkSpeed2 = pFieldScriptEntity->mEA_forcedAnimation;
     }
-    if (((int)pFieldScriptEntity->mE8_currentWalkSpeed != (int)walkSpeed2) && ((pFieldScriptEntity->m0_flags & 0x2000000) == 0)) {
+    if (((int)pFieldScriptEntity->mE8_currentWalkSpeed != (int)walkSpeed2) && ((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x2000000) == 0)) {
         pFieldScriptEntity->mE8_currentWalkSpeed = walkSpeed2;
         updateEntityEventCode4(pFieldEntity->m4_pVramSpriteSheet, walkSpeed2, pFieldEntity);
     }
@@ -4317,12 +4485,12 @@ void EntityMoveCheck0(uint entityIndex, sFieldEntity* pEntity, sFieldScriptEntit
 
 
     MissingCode();
-    if (((pScriptEntity->m0_flags & 0x10000) == 0) && ((pScriptEntity->m4_flags & 0x200000) == 0)) {
+    if (((pScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x10000) == 0) && ((pScriptEntity->m4_flags & 0x200000) == 0)) {
         EntityMoveCheck1(entityIndex, mask, pEntity, pScriptEntity, 0);
     }
     if ((actorArray[entityIndex].m4_pVramSpriteSheet)->m7C->mC == 1) {
         resetInputs();
-        pScriptEntity->m0_flags = pScriptEntity->m0_flags & 0xfffff7ff;
+        pScriptEntity->m0_fieldScriptFlags.m_rawFlags &= ~0x801;
     }
 
     MissingCode();
@@ -4521,13 +4689,13 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
     if (entityIndex == playerControlledActor) {
         inputAllowedMask = 0xFFFF;
     }
-    if ((pFieldScriptEntity->m0_flags & 0x1000000) != 0) {
+    if ((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x1000000) != 0) {
         return -1;
     }
     if ((pFieldScriptEntity->m4_flags & 0x200000) != 0) {
         return -1;
     }
-    if (((pFieldScriptEntity->m0_flags & 0x10000) != 0) ||
+    if (((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x10000) != 0) ||
         ((((entityIndex != playerControlledActor || (EntityMoveCheck1Var1 != '\x01')) && ((pSpriteActor->mC_step).vy == 0)) &&
             (!updateEntityEventCode3Sub0(pFieldScriptEntity) && (pSpriteActor->m84 == (pFieldScriptEntity->m20_position.vy >> 16)))))) {
         return -1;
@@ -4553,10 +4721,10 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
         stackVar.m10_altitude2[i] = 0x7fffffff;
     }
 
-    int selectedWalkMesh = 0;
-    for (selectedWalkMesh = 0; selectedWalkMesh < numWalkMesh - 1; selectedWalkMesh++)
+    int evaluatedWalkMeshes = 0;
+    for (evaluatedWalkMeshes = 0; evaluatedWalkMeshes < numWalkMesh - 1; evaluatedWalkMeshes++)
     {
-        if (EntityMoveCheck1Sub1(pFieldScriptEntity, selectedWalkMesh, &stackVar.m0_altitude[selectedWalkMesh], &stackVar.m38_triangleNormal[selectedWalkMesh], &stackVar.m30_triangleId[selectedWalkMesh], &stackVar.m10_altitude2[selectedWalkMesh]))
+        if (EntityMoveCheck1Sub1(pFieldScriptEntity, evaluatedWalkMeshes, &stackVar.m0_altitude[evaluatedWalkMeshes], &stackVar.m38_triangleNormal[evaluatedWalkMeshes], &stackVar.m30_triangleId[evaluatedWalkMeshes], &stackVar.m10_altitude2[evaluatedWalkMeshes]))
         {
             break;
         }
@@ -4575,7 +4743,7 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
         stackVar.m10_altitude2[2] = 0x7fffffff;
     }
 
-    int altitude = stackVar.m0_altitude[pFieldScriptEntity->m10_walkmeshId];
+    int altitudeOfCurrentWalkMesh = stackVar.m0_altitude[pFieldScriptEntity->m10_walkmeshId];
     {
         // sort by altitude
         for (int i = 0; i < 2; i++)
@@ -4591,25 +4759,26 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
         }
     }
 
-    if (selectedWalkMesh == numWalkMesh - 1)
+    if (evaluatedWalkMeshes == numWalkMesh - 1)
     {
-        if (selectedWalkMesh > 0)
+        if (evaluatedWalkMeshes > 0)
         {
             for (int i = 0; i < numWalkMesh - 1; i++)
             {
                 pFieldScriptEntity->m8_currentWalkMeshTriangle[i] = stackVar.m30_triangleId[i];
-
             }
         }
 
         int foundEntry;
-        if (((pFieldScriptEntity->m20_position.vy.getIntegerPart()) < altitude) || ((pFieldScriptEntity->m0_flags & 0x1800) != 0))
+        if (((pFieldScriptEntity->m20_position.vy.getIntegerPart()) < altitudeOfCurrentWalkMesh) || ((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x1800) != 0)) //0x402443
         {
             for (foundEntry = 0; foundEntry < numWalkMesh - 1; foundEntry++)
             {
                 if ((pFieldScriptEntity->m20_position.vy.getIntegerPart()) <= stackVar.m0_altitude[foundEntry]) {
-                    assert(0);
-                    pFieldScriptEntity->m10_walkmeshId = stackVar.m20_walkmeshId[foundEntry];
+                    if (foundEntry != 0)
+                    {
+                        pFieldScriptEntity->m10_walkmeshId = stackVar.m20_walkmeshId[foundEntry];
+                    }
                     break;
                 }
             }
@@ -4627,7 +4796,7 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
             pFieldScriptEntity->m10_walkmeshId = stackVar.m20_walkmeshId[0];
         }
 
-        if ((pFieldScriptEntity->m0_flags >> 8 & 7 & getWalkmeshTriangleFlag(pFieldScriptEntity) >> 5) == 0) {
+        if ((pFieldScriptEntity->m0_fieldScriptFlags.m8 & getWalkmeshTriangleFlag(pFieldScriptEntity) >> 5) == 0) {
             if ((getWalkmeshTriangleFlag(pFieldScriptEntity) & 0x800000) == 0) {
                 (pFieldScriptEntity->m20_position).vx = (pFieldScriptEntity->m20_position).vx + (pFieldScriptEntity->m30_stepVector).vx;
                 (pFieldScriptEntity->m20_position).vz = (pFieldScriptEntity->m20_position).vz + (pFieldScriptEntity->m30_stepVector).vz;
@@ -4678,7 +4847,7 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
             if (0 < (pSpriteActor->mC_step).vy) {
                 (pSpriteActor->mC_step).vy = 0;
             }
-            pFieldScriptEntity->m0_flags = pFieldScriptEntity->m0_flags & 0xffbfefff;
+            pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags &= ~0x401001;
             (pFieldScriptEntity->m20_position).vy = (int)pSpriteActor->m84 << 0x10;
         }
         (pSpriteActor->m0_position).vx = (pFieldScriptEntity->m20_position).vx;
@@ -4707,22 +4876,22 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
         }
 
         auto psVar18 = actorArray[entityIndex].m4_pVramSpriteSheet;
-        if ((pFieldScriptEntity->m0_flags & 0x40000) != 0) {
+        if ((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x40000) != 0) {
             (pFieldScriptEntity->m20_position).vy = (int)pFieldScriptEntity->mEC_elevation << 0x10;
             (psVar18->mC_step).vy = 0;
         }
         (pFieldScriptEntity->m20_position).vy = (pFieldScriptEntity->m20_position).vy + (psVar18->mC_step).vy;
         int uVar6 = getWalkmeshTriangleFlag(pFieldScriptEntity);
         if (pFieldScriptEntity->m10_walkmeshId != sVar2) {
-            pFieldScriptEntity->m0_flags = pFieldScriptEntity->m0_flags & 0xfbffffff;
+            pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags &= ~0x4000001;
         }
-        if ((pFieldScriptEntity->m0_flags & 0x4000000) == 0) {
+        if ((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x4000000) == 0) {
             int sVar1 = (pFieldScriptEntity->m20_position).vy >> 16;
             if (psVar18->m84 <= sVar1) goto LAB_Field__80085104;
             if (psVar18->m84 != sVar1) {
-                (psVar18->mC_step).vy = (psVar18->mC_step).vy + psVar18->m1C;
+                (psVar18->mC_step).vy += psVar18->m1C;
             }
-            pFieldScriptEntity->m0_flags = pFieldScriptEntity->m0_flags | 0x1000;
+            pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags |= 0x1000;
             pFieldScriptEntity->mF0 = (psVar18->mC_step).vy;
         }
         else {
@@ -4733,16 +4902,16 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
             if (0 < (psVar18->mC_step).vy) {
                 (psVar18->mC_step).vy = 0;
             }
-            pFieldScriptEntity->m0_flags = pFieldScriptEntity->m0_flags & 0xffbfefff;
+            pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags &= ~0x401001;
             (pFieldScriptEntity->m20_position).vy = (int)psVar18->m84 << 0x10;
         }
-        pFieldScriptEntity->m0_flags = pFieldScriptEntity->m0_flags & 0xfbffffff;
+        pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags &= ~0x4000001;
         int foundEntry = 0;
         if (0 < numWalkMesh + -1) {
-            altitude = pFieldScriptEntity->m20_position.vy >> 16;
+            altitudeOfCurrentWalkMesh = pFieldScriptEntity->m20_position.vy >> 16;
             int psVar8 = 0;
             do {
-                if (((stackVar.m0_altitude[psVar8] < altitude) && ((int)(altitude - (uint)(ushort)pFieldScriptEntity->m18[1]) < stackVar.m10_altitude2[psVar8])) && (stackVar.m0_altitude[psVar8] != stackVar.m10_altitude2[0])) break;
+                if (((stackVar.m0_altitude[psVar8] < altitudeOfCurrentWalkMesh) && ((int)(altitudeOfCurrentWalkMesh - (uint)(ushort)pFieldScriptEntity->m18[1]) < stackVar.m10_altitude2[psVar8])) && (stackVar.m0_altitude[psVar8] != stackVar.m10_altitude2[0])) break;
                 foundEntry = foundEntry + 1;
                 psVar8++;
             } while (foundEntry < numWalkMesh + -1);
@@ -4818,7 +4987,7 @@ void updateScriptAndMoveEntities()
 
         if ((actorArray[i].m58_flags & 0xF80) == 0x200)
         {
-            if ((pFieldScriptEntity->m0_flags & 0x10001) == 0)
+            if ((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x10001) == 0)
             {
                 if ((pFieldScriptEntity->m4_flags & 0x600) != 0x200)
                 {
@@ -4845,10 +5014,10 @@ void updateScriptAndMoveEntities()
         if (actorArray[i].m58_flags & 0xF00)
         {
             sFieldScriptEntity* pFieldScriptEntity = actorArray[i].m4C_scriptEntity;
-            if (((((pFieldScriptEntity->m4_flags & 0x600) != 0x200) && ((actorArray[i].m58_flags & 0xf80) == 0x200)) && ((pFieldScriptEntity->m0_flags & 0x10001) == 0)) &&
+            if (((((pFieldScriptEntity->m4_flags & 0x600) != 0x200) && ((actorArray[i].m58_flags & 0xf80) == 0x200)) && ((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x10001) == 0)) &&
                 ((i != playerControlledActor &&
                     EntityMoveCheck1(i, 0x7fffffff, &actorArray[i], pFieldScriptEntity, 0) && (actorArray[i].m4_pVramSpriteSheet->m7C->mC == 1)))) {
-                pFieldScriptEntity->m0_flags = pFieldScriptEntity->m0_flags & 0xfffff7ff;
+                pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags &= ~0x801;
             }
         }
     }
@@ -5306,11 +5475,11 @@ void updateAllEntities()
             sFieldScriptEntity* psVar10 = pActor->m4C_scriptEntity;
             u32 uVar7 = psVar10->m4_flags;
             if (((uVar7 & 0x100000) == 0) && ((uVar7 & 0x600) != 0x200)) {
-                if ((psVar10->m0_flags & 0x8000) == 0) {
+                if ((psVar10->m0_fieldScriptFlags.m_rawFlags & 0x8000) == 0) {
                     s32 iVar9;
                     s32 iVar8;
                     s32 sVar5;
-                    if (((psVar10->m14_currentTriangleFlag & 0x200000U) == 0) || (iVar9 = 0x200, (psVar10->m0_flags & 0x1800) != 0)) {
+                    if (((psVar10->m14_currentTriangleFlag & 0x200000U) == 0) || (iVar9 = 0x200, (psVar10->m0_fieldScriptFlags.m_rawFlags & 0x1800) != 0)) {
                         sVar5 = OPX47Var;
                         if ((uVar7 & 0x2000) == 0) {
                             sVar5 = psVar10->m11E;
@@ -6387,7 +6556,7 @@ void renderCharShadows(std::array<sTag, 4096>& OT, int oddOrEven)
             sFieldEntity* pCurrentFieldEntity = &actorArray[currentActorId];
             if ((pCurrentFieldEntity->m58_flags & 0x60) == 0x40) {
                 sFieldScriptEntity* pScriptEntity = pCurrentFieldEntity->m4C_scriptEntity;
-                if (((((pScriptEntity->m4_flags & 0x102200) == 0) && ((pScriptEntity->m4_flags & 0x800) == 0)) && ((pScriptEntity->m0_flags & 0x10000) == 0)) &&
+                if (((((pScriptEntity->m4_flags & 0x102200) == 0) && ((pScriptEntity->m4_flags & 0x800) == 0)) && ((pScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x10000) == 0)) &&
                     ((pScriptEntity->m14_currentTriangleFlag & 0x200002U) == 0)) {
 
                     VECTOR local_c8;
@@ -6490,7 +6659,7 @@ void renderCharShadows(std::array<sTag, 4096>& OT, int oddOrEven)
                     iVar7 = pCurrentFieldEntity->m4C_scriptEntity->mF4_scale3d[2] * 0xc00;
                     local_58.vz = iVar7 >> 0xc;
 
-                    if ((pcInitVar1 != 0) && ((pCurrentFieldEntity->m4C_scriptEntity->m0_flags & 0x400) != 0)) {
+                    if ((pcInitVar1 != 0) && ((pCurrentFieldEntity->m4C_scriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x400) != 0)) {
                         local_58.vy = iVar8 >> 0xe;
                         local_58.vz = iVar7 >> 0xe;
                         local_58.vx = iVar10 >> 0xe;
@@ -6538,7 +6707,7 @@ void renderChars()
             sFieldEntity* pFieldEntity = &actorArray[i];
             if ((pFieldEntity->m58_flags & 0x60) == 0x40)
             {
-                if ((((pFieldEntity->m4C_scriptEntity->m4_flags & 0x600) != 0x200) && ((pFieldEntity->m4C_scriptEntity->m4_flags & 0x1000) == 0)) && ((pFieldEntity->m4C_scriptEntity->m0_flags & 1) == 0)) {
+                if ((((pFieldEntity->m4C_scriptEntity->m4_flags & 0x600) != 0x200) && ((pFieldEntity->m4C_scriptEntity->m4_flags & 0x1000) == 0)) && ((pFieldEntity->m4C_scriptEntity->m0_fieldScriptFlags.m_rawFlags & 1) == 0)) {
                     OP_INIT_ENTITY_SCRIPT_sub0Sub9(pFieldEntity->m4_pVramSpriteSheet);
                 }
             }

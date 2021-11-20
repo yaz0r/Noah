@@ -39,9 +39,23 @@ struct sFieldScriptEntityScriptSlot
     // size 8
 };
 
+struct sFieldScriptEntity_flags0
+{
+    union {
+        struct {
+            u32 m0 : 1;
+            u32 m1_unk : 6;
+            u32 m7 : 1;
+            u32 m8 : 3;
+            u32 m11 : 1;
+        };
+        u32 m_rawFlags = 0;
+    };
+};
+
 struct sFieldScriptEntity
 {
-    u32 m0_flags;
+    sFieldScriptEntity_flags0 m0_fieldScriptFlags;
     u32 m4_flags;
     std::array<s16, 4> m8_currentWalkMeshTriangle;
     u16 m10_walkmeshId;
