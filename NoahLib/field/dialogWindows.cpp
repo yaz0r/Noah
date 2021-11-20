@@ -475,7 +475,7 @@ void createDialogWindow(short x, short y, int dialogIndex, int windowIndex, int 
 	gDialogWindows[windowIndex].m37C = -1;
 	setupWindowSize1(windowIndex, (int)x, (int)y2, width * 4 + 0x10, height * 0xe + 0x10);
 	int xOffset = 0;
-	if ((actorArray[fieldActorId].m4C_scriptEntity)->m80_DialogAvatarFace != 0xff) {
+	if ((actorArray[fieldActorId].m4C_scriptEntity)->m80_DialogAvatarFace != -1) {
 		xOffset = -(ushort)((flagUpper & 0x402) == 0) & 0x44;
 	}
 	setupWindowSize2(&gDialogWindows[windowIndex].m18, windowsDefaultPositions[windowIndex].vx, windowsDefaultPositions[windowIndex].vy, x + xOffset + 8, y, width, height);

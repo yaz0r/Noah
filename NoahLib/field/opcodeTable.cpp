@@ -49,6 +49,7 @@ void initOpcodes()
     fieldScriptOpcodes[0x38] = OP_SET_VAR_ADD;
     fieldScriptOpcodes[0x39] = OP_SET_VAR_SUBSTRACT;
     fieldScriptOpcodes[0x3A] = OP_SET_VARBIT_TRUE;
+    fieldScriptOpcodes[0x3B] = OP_SET_VARBIT_FALSE;
     fieldScriptOpcodes[0x3C] = OP_SET_VAR_INC;
     fieldScriptOpcodes[0x3D] = OP_SET_VAR_DEC;
     fieldScriptOpcodes[0x43] = OP_SET_VAR_RANDOM;
@@ -149,6 +150,7 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0x21] = OPX_21;
     fieldScriptOpcodes_EX[0x26] = OP_SETUP_SCREEN_DISTORTION;
     fieldScriptOpcodes_EX[0x27] = OPX_27;
+    fieldScriptOpcodes_EX[0x3A] = OP_SET_PARTY_FRAME_MASK;
     fieldScriptOpcodes_EX[0x3C] = OPX_3C;
     fieldScriptOpcodes_EX[0x3D] = OPX_3D;
     fieldScriptOpcodes_EX[0x3E] = OPX_3E;

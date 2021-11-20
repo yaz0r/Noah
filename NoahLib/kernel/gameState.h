@@ -25,6 +25,7 @@ struct sGameState
     std::array<sGameStateA42, 20> m9A0_gears;
     std::array<u16, 512> m1930_fieldVarsBackup;
     u16 m1D30_partyMemberBitField;
+    u16 m1D32_partyFrameMask;
     std::array<s8, 3> m1D34_currentParty;
     std::array<s8, 5> m22B1_isOnGear;
     u16 m231A_fieldID;

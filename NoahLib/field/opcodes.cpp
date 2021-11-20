@@ -1140,7 +1140,7 @@ void OP_57(void)
     else {
         int iVar15 = getVar20(6, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 10]);
 
-        pCurrentFieldScriptActor->m8_currentWalkMeshTriangle[iVar8] = findTriangleInWalkMesh(iVar7, iVar8, iVar15, &auStack104[iVar8], &auStack168[iVar8]);
+        findTriangleInWalkMesh(iVar7, iVar8, iVar15, &auStack104[iVar15], &auStack168[iVar15]);
 
         iVar9 = (int)auStack104[iVar15].vy;
         pCurrentFieldScriptActor->m10_walkmeshId = (short)iVar15;
@@ -2156,6 +2156,19 @@ void OPX_27()
     breakCurrentScript = 1;
 }
 
+void OP_SET_PARTY_FRAME_MASK()
+{
+    int uVar1;
+    uint uVar2;
+
+    uVar1 = getImmediateOrVariableUnsigned(1);
+    uVar2 = getCharacter(uVar1);
+    if (uVar2 != 0xff) {
+        pKernelGameState->m1D32_partyFrameMask = pKernelGameState->m1D32_partyFrameMask | (ushort)(1 << (uVar2 & 0x1f));
+    }
+    pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
+}
+
 void OPX_3C()
 {
     if (fieldExecuteVar1 != 0) {
@@ -2670,6 +2683,20 @@ void OP_SET_VARBIT_TRUE()
     uVar3 = getVar40(3, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 5]);
     uVar2 = readU16FromScript(1);
     setVar((uint)uVar2, uVar1 | (ushort)(1 << (uVar3 & 0x1f)));
+    pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 6;
+}
+
+void OP_SET_VARBIT_FALSE()
+{
+    ushort uVar1;
+    ushort uVar2;
+    uint uVar3;
+
+    uVar1 = readU16FromScript(1);
+    uVar1 = getVariable(uVar1);
+    uVar3 = getVar40(3, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 5]);
+    uVar2 = readU16FromScript(1);
+    setVar((uint)uVar2, uVar1 & ~(ushort)(1 << (uVar3 & 0x1f)));
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 6;
 }
 

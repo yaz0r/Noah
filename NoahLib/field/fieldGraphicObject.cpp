@@ -515,7 +515,6 @@ void executeSpriteBytecode2(sSpriteActor* param_1)
 			param_1->mA8.mx1C = 0;
 			return;
 		case 0x85:
-		case 0x87:
 		case 0x8E:
 		case 0x98:
 		case 0xBE:
@@ -548,6 +547,22 @@ void executeSpriteBytecode2(sSpriteActor* param_1)
 			param_1->m9E_wait = 0;
 			executeSpriteBytecode2(param_1);
 			return;
+        case 0x86: // Happen when Fei jumps in cutscene after lahan battle.
+            if (param_1->mC_step.vy < 0)
+            {
+                param_1->m9E_wait = 1;
+                return;
+            }
+            param_1->m64_spriteByteCode = param_1->m64_spriteByteCode + sizePerBytecodeTable[bytecode];
+            break;
+        case 0x87: // Happen when Fei jumps in cutscene after lahan battle.
+            if ((param_1->m0_position.vy >> 16) < param_1->m84)
+            {
+                param_1->m9E_wait = 1;
+                return;
+            }
+            param_1->m64_spriteByteCode = param_1->m64_spriteByteCode + sizePerBytecodeTable[bytecode];
+            break;
 		case 0xA7:
 			param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
 			if ((READ_LE_U8(pEndOfOpcode) & 0x80) != 0) {
