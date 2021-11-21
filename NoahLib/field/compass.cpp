@@ -161,8 +161,8 @@ void renderCompass()
 	SetGeomScreen(0x80);
 	SetGeomOffset(0x10a, 0xa6);
 
-	VECTOR local_30 = { 0,0,0 };
-	VECTOR local_40 = {
+	FP_VEC4 local_30 = { 0,0,0 };
+	FP_VEC4 local_40 = {
 		0,
 		cameraEye[1] - cameraAt[1],
 		length2d(cameraEye[0] - cameraAt[0] >> 0x10,cameraEye[2] - cameraAt[2] >> 0x10) * -0x10000,
@@ -181,7 +181,7 @@ void renderCompass()
 	compassArrowTargetDirection = actorArray[actorCameraTracked].m4C_scriptEntity->m106_currentRotation + cameraTan + 0x400;
 	compassArrowCurrentDirection = stepInterpolateDirection(compassArrowCurrentDirection, compassArrowTargetDirection, 0x40);;
 
-	SVECTOR local_48;
+	SFP_VEC4 local_48;
 	local_48.vx = 0;
 	local_48.vy = compassArrowCurrentDirection;
 	local_48.vz = 0;

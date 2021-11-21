@@ -87,60 +87,100 @@ struct sFixedPoint
     s32 getIntegerPart() { return m_value >> 16; }
 };
 
-struct VECTOR
+struct FP_VEC3
 {
     sFixedPoint vx;
     sFixedPoint vy;
     sFixedPoint vz;
-    s32 pad;
 
-	s32 operator[](size_t idx) const
-	{
-		switch (idx)
-		{
-		case 0:
-			return vx;
-		case 1:
-			return vy;
-		case 2:
-			return vz;
-		default:
-			assert(0);
-			return 0;
-		}
-	}
+    s32 operator[](size_t idx) const
+    {
+        switch (idx)
+        {
+        case 0:
+            return vx;
+        case 1:
+            return vy;
+        case 2:
+            return vz;
+        default:
+            assert(0);
+            return 0;
+        }
+    }
 
-	s32& operator[](size_t idx)
-	{
-		switch (idx)
-		{
-		case 0:
-			return vx;
-		case 1:
-			return vy;
-		case 2:
-			return vz;
-		default:
-			assert(0);
-			return vx;
-		}
-	}
+    s32& operator[](size_t idx)
+    {
+        switch (idx)
+        {
+        case 0:
+            return vx;
+        case 1:
+            return vy;
+        case 2:
+            return vz;
+        default:
+            assert(0);
+            return vx;
+        }
+    }
 };
 
-struct SVECTOR
+struct FP_VEC4 : public FP_VEC3
+{
+    s32 pad;
+};
+
+struct SFP_VEC3
 {
     s16 vx;
     s16 vy;
     s16 vz;
+};
+
+struct SFP_VEC4 : public SFP_VEC3
+{
     s16 pad;
 
-    static SVECTOR FromIt(std::vector<u8>::iterator it)
+    static SFP_VEC4 FromIt(std::vector<u8>::iterator it)
     {
-        SVECTOR temp;
+        SFP_VEC4 temp;
         temp.vx = READ_LE_S16(it);
-        temp.vy = READ_LE_S16(it+2);
-        temp.vz = READ_LE_S16(it+4);
+        temp.vy = READ_LE_S16(it + 2);
+        temp.vz = READ_LE_S16(it + 4);
         return temp;
+    }
+
+    s16 operator[](size_t idx) const
+    {
+        switch (idx)
+        {
+        case 0:
+            return vx;
+        case 1:
+            return vy;
+        case 2:
+            return vz;
+        default:
+            assert(0);
+            return pad;
+        }
+    }
+
+    s16& operator[](size_t idx)
+    {
+        switch (idx)
+        {
+        case 0:
+            return vx;
+        case 1:
+            return vy;
+        case 2:
+            return vz;
+        default:
+            assert(0);
+            return pad;
+        }
     }
 };
 

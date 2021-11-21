@@ -2,7 +2,7 @@
 
 struct sFieldCompassVar2
 {
-	std::array<SVECTOR, 4> m0;
+	std::array<SFP_VEC4, 4> m0;
 	std::array<POLY_FT4, 2> m20_poly;
 	// size 0x70
 };

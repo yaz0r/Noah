@@ -10,14 +10,14 @@ struct sFieldEntitySub0
     std::array<std::vector<sTag*>,2> m8;
     s16 m12_renderMode;
     void* m14;
-    SVECTOR m18;
+    SFP_VEC4 m18;
     s16 m20;
     //size 0x24
 };
 
 struct sFieldEntity2dSprite
 {
-    SVECTOR m0_screenVertices[4];
+    SFP_VEC4 m0_screenVertices[4];
     POLY_FT4 m20_Poly[2];
     //size 0x70
 };
@@ -60,11 +60,14 @@ struct sFieldScriptEntity
     std::array<s16, 4> m8_currentWalkMeshTriangle;
     u16 m10_walkmeshId;
     s32 m14_currentTriangleFlag;
-    std::array<s16, 4> m18;
-    VECTOR m20_position;
-    VECTOR m30_stepVector;
-    VECTOR m40;
-    VECTOR m50_surfaceNormal;
+    s16 m18;
+    s16 m1A;
+    s16 m1C;
+    s16 m1E_collisionRadius;
+    FP_VEC4 m20_position;
+    FP_VEC4 m30_stepVector;
+    FP_VEC4 m40;
+    FP_VEC4 m50_surfaceNormal;
     std::array<s16, 3> m60;
     std::array<s16, 3> m68_oldPosition;
     s16 m6E;
@@ -83,7 +86,7 @@ struct sFieldScriptEntity
     u16 mCC_scriptPC;
     s8 mCE_currentScriptSlot;
     s8 mCF;
-    sVec3 mD0_targetPositionOffset;
+    FP_VEC3 mD0_targetPositionOffset;
     s16 mE0_rotationLimit;
     s8 mE2;
     s8 mE3;
@@ -102,6 +105,7 @@ struct sFieldScriptEntity
     s16 m10A;
     s8 m10C;
     s8 m10D;
+    std::vector<s16> m110_modelRotation2;
     std::vector<sVec2_s16> m114_movementBoundingZone;
     std::vector<s32> m118;
     s16 m11C;
@@ -125,7 +129,7 @@ struct sFieldScriptEntity
         u32 m0 : 4;
         u32 m4 : 1;
         u32 m5 : 2;
-        u32 m7 : 1;
+        u32 m7_isModelRotation2Allocated : 1;
     }m134;
 
     // size 0x138
@@ -139,7 +143,7 @@ struct sFieldEntity
     sMatrix mC_matrix;
     sMatrix m2C_matrixBackup;
     sFieldScriptEntity* m4C_scriptEntity;
-    SVECTOR m50_modelRotation;
+    SFP_VEC4 m50_modelRotation;
     u16 m58_flags;
     u16 m5A;
     //size 0x5C
@@ -189,9 +193,9 @@ extern s32 cameraInterpolationTargetStartPosition[3];
 extern s32 cameraInterpolationPositionStep[3];
 extern s32 cameraInterpolationStartPosition[3];
 extern s32 cameraEye[3];
-extern VECTOR cameraEye2;
+extern FP_VEC4 cameraEye2;
 extern s32 cameraAt[3];
-extern VECTOR cameraAt2;
+extern FP_VEC4 cameraAt2;
 extern u16 cameraInterpolationFlags;
 extern s16 cameraInterpolationTargetNumSteps;
 extern s32 cameraInterpolationPositionNumSteps;
@@ -257,9 +261,9 @@ extern MATRIX currentProjectionMatrix;
 extern std::array<std::vector<u8>, 3> partyCharacterBuffersRaw;
 extern std::array<int, 3> asyncPartyCharacterLoadingTable;
 
-extern SVECTOR cameraProjectionAngles;
-extern SVECTOR cameraRotation;
-extern VECTOR cameraUp;
+extern SFP_VEC4 cameraProjectionAngles;
+extern SFP_VEC4 cameraRotation;
+extern FP_VEC4 cameraUp;
 extern s16 cameraTan;
 
 extern MATRIX worldScaleMatrix;

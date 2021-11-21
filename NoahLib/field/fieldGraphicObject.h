@@ -54,8 +54,8 @@ struct sFieldEntitySub4_B4_sub
 
 struct sFieldEntitySub4_B4
 {
-	SVECTOR m0_rotation;
-	SVECTOR m6_scale;
+	SFP_VEC4 m0_rotation;
+	SFP_VEC4 m6_scale;
 	MATRIX mC_spriteMatrix;
 	std::vector<sFieldEntitySub4_B4_sub>* m2C;
 	std::vector<sFieldEntitySub4_B4_sub>* m30;
@@ -85,8 +85,8 @@ struct sStackElement
 
 struct sSpriteActor
 {
-	sVec3 m0_position;
-	sVec3 mC_step;
+	FP_VEC3 m0_position;
+	FP_VEC3 mC_step;
 	s32 m18_moveSpeed;
 	s32 m1C;
 	sFieldEntitySub4_B4* m20;

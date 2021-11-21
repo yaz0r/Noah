@@ -630,7 +630,7 @@ void setupSpriteObjectMatrix(sSpriteActor* param_1)
 
 {
 	if ((param_1->m40 & 1) == 0) {
-		VECTOR scale;
+		FP_VEC4 scale;
 		scale.vx = param_1->m20->m6_scale.vx;
 		scale.vy = param_1->m20->m6_scale.vy;
 		scale.vz = param_1->m20->m6_scale.vz;
@@ -639,7 +639,7 @@ void setupSpriteObjectMatrix(sSpriteActor* param_1)
 	}
 	else {
 		MATRIX scaleMatrix;
-		VECTOR scale;
+		FP_VEC4 scale;
 
 		// make identity
 		scaleMatrix.m[0][0] = 0x1000;
@@ -666,7 +666,7 @@ void setupSpriteObjectMatrix(sSpriteActor* param_1)
 	}
 
 	if (param_1->m3A != 0) {
-		VECTOR scale;
+		FP_VEC4 scale;
 		scale.vx = param_1->m3A / 2;
 		scale.vy = param_1->m3A / 2;
 		scale.vz = param_1->m3A / 2;
@@ -1079,7 +1079,7 @@ sSpriteActor* initializeSpriteActor(sSpriteActor* param_1, sSpriteActorAnimation
 {
 	initFieldEntitySub4Sub1(param_1);
 	initFieldEntitySub4Sub2(param_1);
-	initFieldEntitySub4Sub3(param_1, 0x10000);
+	initFieldEntitySub4Sub3(param_1, 0x1000);
 
 	param_1->m3C = (param_1->m3C & ~0x3) | 1;
 	param_1->m40 &= ~0x0001E000;

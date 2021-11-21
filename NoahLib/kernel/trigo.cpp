@@ -2404,7 +2404,7 @@ int ratan2(int y, int x)
     return iVar3;
 }
 
-int fp_atan2(sVec3& param_1)
+int fp_atan2(FP_VEC3& param_1)
 {
     return -ratan2(param_1[2], param_1[0]) & 0xFFF;
 }

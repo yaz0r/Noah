@@ -10,7 +10,7 @@
 #include "dialogWindows.h"
 
 // TODO: Cleanup
-s16 findTriangleInWalkMesh(int posX, int posZ, int walkmeshId, SVECTOR* param_4, VECTOR* param_5);
+s16 findTriangleInWalkMesh(int posX, int posZ, int walkmeshId, SFP_VEC4* param_4, FP_VEC4* param_5);
 extern s16 numWalkMesh;
 /////////////////////////
 
@@ -754,16 +754,16 @@ void OP_INIT_ENTITY_PC(void)
 void OP_18()
 {
     if (pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1] != 0) {
-        pCurrentFieldScriptActor->m18[0] = (ushort)pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1] << 1;
+        pCurrentFieldScriptActor->m18 = (ushort)pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1] << 1;
     }
     if (pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 2] != 0) {
-        pCurrentFieldScriptActor->m18[2] = (ushort)pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 2] << 1;
+        pCurrentFieldScriptActor->m1C = (ushort)pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 2] << 1;
     }
     if (pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 3] != 0) {
-        pCurrentFieldScriptActor->m18[1] = (ushort)pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 3] << 1;
+        pCurrentFieldScriptActor->m1A = (ushort)pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 3] << 1;
     }
     if (pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 4] != 0) {
-        pCurrentFieldScriptActor->m18[3] = (ushort)pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 4] << 1;
+        pCurrentFieldScriptActor->m1E_collisionRadius = (ushort)pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 4] << 1;
     }
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 5;
 }
@@ -1055,8 +1055,8 @@ void OP_53(void)
 
 void OP_57(void)
 {
-    std::array<VECTOR, 4> auStack168;
-    std::array<SVECTOR, 4> auStack104;
+    std::array<FP_VEC4, 4> auStack168;
+    std::array<SFP_VEC4, 4> auStack104;
 
     pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags |= 0x10000;
     int iVar6;
@@ -2443,9 +2443,9 @@ void OP_E7()
 void OP_EC_sub(int* param_1, int* param_2, short param_3)
 {
     MATRIX MStack88;
-    VECTOR local_38;
-    VECTOR local_28;
-    SVECTOR local_18;
+    FP_VEC4 local_38;
+    FP_VEC4 local_28;
+    SFP_VEC4 local_18;
 
     local_18.vx = 0;
     local_18.vz = 0;

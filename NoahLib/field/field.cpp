@@ -62,7 +62,7 @@ std::vector<u8> rawFieldActorSetupParams;
 s16 numWalkMesh = 0;
 std::array<s32, 5> walkMeshNumTrianglePerBlock;
 std::vector<u32>* walkMeshVar1;
-std::array<std::vector<SVECTOR>*, 5> walkMeshVertices;
+std::array<std::vector<SFP_VEC4>*, 5> walkMeshVertices;
 std::array<std::vector<sWalkMesh::sTriangleData>*, 5> walkMeshTriangle;
 s32 walkMeshVar4 = 0;
 
@@ -88,8 +88,8 @@ MATRIX worldScaleMatrix;
 MATRIX cameraMatrix;
 MATRIX cameraMatrix2;
 s32 objectClippingMask = 1;
-VECTOR fieldObjectRenderingVar1 = { 0,0,0 };
-SVECTOR fieldObjectRenderingVar2 = { 0,0,0 };
+FP_VEC4 fieldObjectRenderingVar1 = { 0,0,0 };
+SFP_VEC4 fieldObjectRenderingVar2 = { 0,0,0 };
 s32 sceneSCRZ = 0;
 int fieldUseGroundOT = 0;
 
@@ -168,9 +168,9 @@ void resetInputs()
 std::array<sFieldRenderContext, 2> fieldRenderContext;
 sFieldRenderContext* pCurrentFieldRenderingContext = nullptr;
 
-SVECTOR cameraProjectionAngles;
-SVECTOR cameraRotation;
-VECTOR cameraUp = { 0,0,0,0 };
+SFP_VEC4 cameraProjectionAngles;
+SFP_VEC4 cameraRotation;
+FP_VEC4 cameraUp = { 0,0,0,0 };
 
 s16 cameraDollyVar0 = 0;
 s32 cameraDollyVar1 = 0;
@@ -377,7 +377,7 @@ void uploadNpcSpriteSheet(std::vector<u8>::iterator& pImageData, int x, int y)
 
 void setupField3d(std::vector<u8>::iterator input)
 {
-    computeMatrix(&cameraMatrix, (VECTOR*)cameraEye, (VECTOR*)cameraAt, &cameraUp);
+    computeMatrix(&cameraMatrix, (FP_VEC4*)cameraEye, (FP_VEC4*)cameraAt, &cameraUp);
     createRotationMatrix(&cameraProjectionAngles, &currentProjectionMatrix);
     MulRotationMatrix(&cameraMatrix, &currentProjectionMatrix);
 
@@ -385,13 +385,13 @@ void setupField3d(std::vector<u8>::iterator input)
 }
 
 
-void getTriangleNormalAndAdjustY(const SVECTOR& vec0, const SVECTOR& vec1, const SVECTOR& vec2, SVECTOR* outputPosition, VECTOR* pOutputTriangleNormal)
+void getTriangleNormalAndAdjustY(const SFP_VEC4& vec0, const SFP_VEC4& vec1, const SFP_VEC4& vec2, SFP_VEC4* outputPosition, FP_VEC4* pOutputTriangleNormal)
 {
-    VECTOR normalizedVec0To1;
-    VECTOR normalizedVec0To2;
+    FP_VEC4 normalizedVec0To1;
+    FP_VEC4 normalizedVec0To2;
 
     {
-        VECTOR vec0To1;
+        FP_VEC4 vec0To1;
         vec0To1.vx = vec1.vx - vec0.vx;
         vec0To1.vy = vec1.vy - vec0.vy;
         vec0To1.vz = vec1.vz - vec0.vz;
@@ -399,7 +399,7 @@ void getTriangleNormalAndAdjustY(const SVECTOR& vec0, const SVECTOR& vec1, const
     }
 
     {
-        VECTOR vec0To2;
+        FP_VEC4 vec0To2;
         vec0To2.vx = vec2.vx - vec0.vx;
         vec0To2.vy = vec2.vy - vec0.vy;
         vec0To2.vz = vec2.vz - vec0.vz;
@@ -415,16 +415,16 @@ void getTriangleNormalAndAdjustY(const SVECTOR& vec0, const SVECTOR& vec1, const
     }
 }
 
-s16 findTriangleInWalkMesh(int posX, int posZ, int walkmeshId, SVECTOR* param_4, VECTOR* triangleNormal)
+s16 findTriangleInWalkMesh(int posX, int posZ, int walkmeshId, SFP_VEC4* param_4, FP_VEC4* triangleNormal)
 {
-    SVECTOR resultPosition;
+    SFP_VEC4 resultPosition;
 
     resultPosition.vx = (short)posX;
     resultPosition.vy = 0;
     resultPosition.vz = (short)posZ;
 
     std::vector<sWalkMesh::sTriangleData>::iterator pTriangle = walkMeshTriangle[walkmeshId]->begin();
-    std::vector<SVECTOR>::iterator pVertices = walkMeshVertices[walkmeshId]->begin();
+    std::vector<SFP_VEC4>::iterator pVertices = walkMeshVertices[walkmeshId]->begin();
 
     sVec2_s16 refPos;
     refPos.set(posX, posZ);
@@ -441,9 +441,9 @@ s16 findTriangleInWalkMesh(int posX, int posZ, int walkmeshId, SVECTOR* param_4,
 
         if ((NCLIP(pos0, pos1, refPos) > -1) && (NCLIP(pos1, pos2, refPos) > -1) && (NCLIP(pos2, pos0, refPos) > -1))
         {
-            SVECTOR vec0 = pVertices[pTriangle->m0_verticeIndex[0]];
-            SVECTOR vec1 = pVertices[pTriangle->m0_verticeIndex[1]];
-            SVECTOR vec2 = pVertices[pTriangle->m0_verticeIndex[2]];
+            SFP_VEC4 vec0 = pVertices[pTriangle->m0_verticeIndex[0]];
+            SFP_VEC4 vec1 = pVertices[pTriangle->m0_verticeIndex[1]];
+            SFP_VEC4 vec2 = pVertices[pTriangle->m0_verticeIndex[2]];
 
             getTriangleNormalAndAdjustY(vec0, vec1, vec2, &resultPosition, triangleNormal);
             param_4->vx = resultPosition.vx;
@@ -482,9 +482,9 @@ void initFieldScriptEntityValues(int index)
 
     pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags = 0xB0;
     pFieldScriptEntity->m4_flags = 0x800;
-    pFieldScriptEntity->m18[0] = 0x10;
-    pFieldScriptEntity->m18[2] = 0x10;
-    pFieldScriptEntity->m18[1] = 0x60;
+    pFieldScriptEntity->m18 = 0x10;
+    pFieldScriptEntity->m1C = 0x10;
+    pFieldScriptEntity->m1A = 0x60;
     pFieldScriptEntity->m74 = -1;
     pFieldScriptEntity->m75 = -1;
 
@@ -511,7 +511,7 @@ void initFieldScriptEntityValues(int index)
     pFieldScriptEntity->m6E = 0;
     pFieldScriptEntity->m12C_flags &= 0xffffffdf;
     pFieldScriptEntity->m11E = 0x200;
-    pFieldScriptEntity->m18[3] = pFieldScriptEntity->m18[0];
+    pFieldScriptEntity->m1E_collisionRadius= pFieldScriptEntity->m18;
     pFieldScriptEntity->m12C_flags &= 0xfffffffc;
     pFieldScriptEntity->mFC[5] = 0x80;
     pFieldScriptEntity->mFC[4] = 0x80;
@@ -552,7 +552,7 @@ void initFieldScriptEntityValues(int index)
     pFieldScriptEntity->m10_walkmeshId = 0;
     pFieldScriptEntity->mEC_elevation = 0;
 
-    pFieldScriptEntity->m134.m7 = 0;
+    pFieldScriptEntity->m134.m7_isModelRotation2Allocated = 0;
 
     pFieldScriptEntity->m12C_flags &= 0xffffe03f;
 
@@ -576,8 +576,8 @@ void initFieldScriptEntityValues(int index)
     pFieldScriptEntity->m8_currentWalkMeshTriangle[0] = 0;
     pFieldScriptEntity->m12C_flags &= 0xffffffe3;
 
-    SVECTOR local_48[4];
-    VECTOR local_88[4];
+    SFP_VEC4 local_48[4];
+    FP_VEC4 local_88[4];
 
     for (int i = 0; i < numWalkMesh; i++)
     {
@@ -759,12 +759,12 @@ std::vector<u8>::iterator currentModelBlockNormals;
 std::vector<u8>::iterator currentModelBlockVertices;
 std::vector<u8>::iterator currentModeBlock18;
 
-void computeFaceNormal(const SVECTOR& v0, const SVECTOR& v1, const SVECTOR& v2, SVECTOR* pNormal)
+void computeFaceNormal(const SFP_VEC4& v0, const SFP_VEC4& v1, const SFP_VEC4& v2, SFP_VEC4* pNormal)
 {
     MissingCode();
 }
 
-void NormalColorCol(SVECTOR* faceNormal, std::vector<u8>::iterator displayList, POLY_FT3* pNewPoly)
+void NormalColorCol(SFP_VEC4* faceNormal, std::vector<u8>::iterator displayList, POLY_FT3* pNewPoly)
 {
     MissingCode();
 }
@@ -789,11 +789,11 @@ int prim0_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator 
     }
     else {
         if ((initParam & 2) == 0) {
-            SVECTOR faceNormal;
+            SFP_VEC4 faceNormal;
             computeFaceNormal(
-                SVECTOR::FromIt(currentModelBlockVertices + READ_LE_U16(meshBlock) * 8),
-                SVECTOR::FromIt(currentModelBlockVertices + READ_LE_U16(meshBlock + 2) * 8),
-                SVECTOR::FromIt(currentModelBlockVertices + READ_LE_U16(meshBlock + 4) * 8),
+                SFP_VEC4::FromIt(currentModelBlockVertices + READ_LE_U16(meshBlock) * 8),
+                SFP_VEC4::FromIt(currentModelBlockVertices + READ_LE_U16(meshBlock + 2) * 8),
+                SFP_VEC4::FromIt(currentModelBlockVertices + READ_LE_U16(meshBlock + 4) * 8),
                 &faceNormal
             );
             NormalColorCol(&faceNormal, displayList, pNewPoly);
@@ -805,13 +805,13 @@ int prim0_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator 
         currentModeBlock18 = currentModeBlock18 + 4;
 
         computeFaceNormal(
-            SVECTOR::FromIt(currentModelBlockVertices + READ_LE_U16(meshBlock) * 8),
-            SVECTOR::FromIt(currentModelBlockVertices + READ_LE_U16(meshBlock + 2) * 8),
-            SVECTOR::FromIt(currentModelBlockVertices + READ_LE_U16(meshBlock + 4) * 8),
-            (SVECTOR*)&(*currentModeBlock18)
+            SFP_VEC4::FromIt(currentModelBlockVertices + READ_LE_U16(meshBlock) * 8),
+            SFP_VEC4::FromIt(currentModelBlockVertices + READ_LE_U16(meshBlock + 2) * 8),
+            SFP_VEC4::FromIt(currentModelBlockVertices + READ_LE_U16(meshBlock + 4) * 8),
+            (SFP_VEC4*)&(*currentModeBlock18)
         );
     }
-    NormalColorCol((SVECTOR*)&(*currentModeBlock18), displayList, pNewPoly);
+    NormalColorCol((SFP_VEC4*)&(*currentModeBlock18), displayList, pNewPoly);
     currentModeBlock18 = currentModeBlock18 + 4;
     pNewPoly->code = READ_LE_U8(displayList + 3);
     return 1;
@@ -1568,11 +1568,11 @@ void OP_INIT_ENTITY_SCRIPT_sub0(int actorId, int clutYEntry, sSpriteActorAnimati
         pFieldEntitySub4->m84 = actorArray[actorId].mC_matrix.t[1] & 0xFFFF;
         if (!param_4)
         {
-            actorArray[actorId].m4C_scriptEntity->m18[1] = temp1 * 2;
+            actorArray[actorId].m4C_scriptEntity->m1A = temp1 * 2;
         }
         else
         {
-            actorArray[actorId].m4C_scriptEntity->m18[1] = 0x40;
+            actorArray[actorId].m4C_scriptEntity->m1A = 0x40;
         }
     }
     else
@@ -1791,8 +1791,8 @@ void startPartyCharacterASyncLoading(int partyCharacter, int partySlot)
 
 void setCurrentActor2DPosition(int posX, int posZ)
 {
-    std::array<VECTOR, 4> alStack136;
-    std::array<SVECTOR, 4> auStack72;
+    std::array<FP_VEC4, 4> alStack136;
+    std::array<SFP_VEC4, 4> auStack72;
     for (int i = 0; i < numWalkMesh; i++)
     {
         pCurrentFieldScriptActor->m8_currentWalkMeshTriangle[i] = findTriangleInWalkMesh(posX, posZ, i, &auStack72[i], &alStack136[i]);
@@ -1935,7 +1935,7 @@ int spriteWalkToPositionOrActor(int param_1)
         {
             return 0;
         }
-        lVar14 = length1d(actorArray[readCharacter(1)].m4C_scriptEntity->m18[3] + pCurrentFieldScriptActor->m18[3]);
+        lVar14 = length1d(actorArray[readCharacter(1)].m4C_scriptEntity->m1E_collisionRadius + pCurrentFieldScriptActor->m1E_collisionRadius);
         destinationX = actorArray[readCharacter(1)].m4C_scriptEntity->m20_position.vx >> 16;
         destinationZ = actorArray[readCharacter(1)].m4C_scriptEntity->m20_position.vz >> 16;
         if (pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1] == playerControlledActor)
@@ -1951,7 +1951,7 @@ int spriteWalkToPositionOrActor(int param_1)
         assert(0);
     }
 
-    sVec3 travelDelta;
+    FP_VEC3 travelDelta;
     travelDelta[0] = destinationX - currentX;
     travelDelta[1] = 0;
     travelDelta[2] = destinationZ - currentZ;
@@ -2036,8 +2036,8 @@ s32 cameraInterpolationPositionStep[3] = { 0,0,0 };
 s32 cameraInterpolationStartPosition[3] = { 0,0,0 };
 s32 cameraEye[3] = { 0,0,0 };
 s32 cameraAt[3] = { 0,0,0 };
-VECTOR cameraEye2;
-VECTOR cameraAt2;
+FP_VEC4 cameraEye2;
+FP_VEC4 cameraAt2;
 u16 cameraInterpolationFlags = 0;
 s16 cameraInterpolationTargetNumSteps = 0;
 s32 cameraInterpolationPositionNumSteps = 0;
@@ -2528,7 +2528,7 @@ void setupObjectRenderModes()
     }
 }
 
-SVECTOR renderModelRotationAngles;
+SFP_VEC4 renderModelRotationAngles;
 MATRIX renderModelRotationMatrix;
 s32 cameraDeltaTan;
 
@@ -3516,7 +3516,7 @@ std::array<s16, 8> deltaMoveTable1 = {
 
 s16 deltaMoveVar0 = 0;
 
-void computeDeltaMove(sVec3* param_1, int param_2, uint param_3)
+void computeDeltaMove(FP_VEC3* param_1, int param_2, uint param_3)
 {
     int iVar1;
     int iVar2;
@@ -3537,16 +3537,17 @@ void updateEntityEventCode2(int index, sFieldEntity* pFieldEntity, sFieldScriptE
         triangleFlags = pFieldScriptEntity->m14_currentTriangleFlag;
     }
 
-    sVec3 deltaMove;
+    FP_VEC3 deltaMove;
     computeDeltaMove(&deltaMove, deltaMoveTable0[(triangleFlags >> 9) & 3], deltaMoveTable1[(triangleFlags >> 11) & 0x7] + deltaMoveVar0 & 0xfff);
 
     int iVar9 = 0;
     int iVar12 = 0;
-
+    s32 touchedActor;
+    bool bApplyDelta = triangleFlags & 0x4000;
     if ((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x41800) == 0)
     {
         if ((triangleFlags & 0x420000) != 0) {
-            VECTOR local_60;
+            FP_VEC4 local_60;
             local_60.vx = -((pFieldScriptEntity->m50_surfaceNormal).vx * (pFieldScriptEntity->m50_surfaceNormal).vy) >> 0xf;
             local_60.vz = -((pFieldScriptEntity->m50_surfaceNormal).vz * (pFieldScriptEntity->m50_surfaceNormal).vy) >> 0xf;
             if (local_60.vx == 0) {
@@ -3556,7 +3557,7 @@ void updateEntityEventCode2(int index, sFieldEntity* pFieldEntity, sFieldScriptE
             if (local_60.vz == 0) {
                 local_60.vz = 1;
             }
-            VECTOR local_50;
+            FP_VEC4 local_50;
             VectorNormal(&local_60, &local_50);
             if (local_50.vx == 0) {
                 local_50.vx = 1;
@@ -3586,35 +3587,38 @@ void updateEntityEventCode2(int index, sFieldEntity* pFieldEntity, sFieldScriptE
             pFieldScriptEntity->m40.vz += iVar12;
             pFieldScriptEntity->m104_rotation = pFieldScriptEntity->m104_rotation | 0x8000;
         }
-        if (pFieldScriptEntity->m74 == -1)
+        touchedActor = pFieldScriptEntity->m74;
+        if (touchedActor == -1)
         {
             if ((triangleFlags & 0x20000) != 0) {
                 (pFieldScriptEntity->m40).vx = (pFieldScriptEntity->m40).vx + iVar9;
                 (pFieldScriptEntity->m40).vz = (pFieldScriptEntity->m40).vz + iVar12;
             }
-            if (triangleFlags & 0x8000)
-            {
-                pFieldScriptEntity->m40.vx += deltaMove.vx;
-                pFieldScriptEntity->m40.vy += deltaMove.vy;
-                pFieldScriptEntity->m40.vz += deltaMove.vz;
-            }
+            bApplyDelta = triangleFlags & 0x8000;
+            goto LAB_Field__8008288c;
         }
     }
     else
     {
-        if (triangleFlags & 0x4000)
+LAB_Field__8008288c:
+        if (bApplyDelta)
         {
             pFieldScriptEntity->m40.vx += deltaMove.vx;
             pFieldScriptEntity->m40.vy += deltaMove.vy;
             pFieldScriptEntity->m40.vz += deltaMove.vz;
         }
+        touchedActor = pFieldScriptEntity->m74;
+        if (touchedActor == -1)
+        {
+            goto LAB_Field__80082af4;
+        }
     }
 
-    if (pFieldScriptEntity->m74 != -1)
-    {
+    if (((actorArray[touchedActor].m4C_scriptEntity)->m4_flags & 0xc0) == 0xc0) {
         assert(0);
     }
 
+LAB_Field__80082af4:
     if ((pFieldScriptEntity->m4_flags & 0x22000) == 0x22000) {
         assert(0);
     }
@@ -3696,7 +3700,7 @@ LAB_Field__800821bc:
     (param_1->mC_step).vz = (param_1->mC_step).vz & 0xfffff000;
 }
 
-int updateEntityEventCode3Sub2(sVec3* param_1, sFieldScriptEntity* param_2)
+int updateEntityEventCode3Sub2(FP_VEC3* param_1, sFieldScriptEntity* param_2)
 {
     long lVar2;
     std::vector<u16>* pasVar3;
@@ -3723,14 +3727,14 @@ int updateEntityEventCode3Sub2(sVec3* param_1, sFieldScriptEntity* param_2)
     return 0;
 }
 
-int updateEntityEventCode3Sub3Sub1(sVec3* param_1, VECTOR* param_2, sFieldScriptEntity* pFieldScriptEntity, std::array<SVECTOR, 2>& param_4, SVECTOR* param_5, int param_6, uint* param_7)
+int updateEntityEventCode3Sub3Sub1(FP_VEC3* param_1, FP_VEC4* param_2, sFieldScriptEntity* pFieldScriptEntity, std::array<SFP_VEC4, 2>& param_4, SFP_VEC4* param_5, int param_6, uint* param_7)
 {
     int triangleId = pFieldScriptEntity->m8_currentWalkMeshTriangle[pFieldScriptEntity->m10_walkmeshId];
     int collisionFlag;
 
     int lastTriangle;
     std::vector<sWalkMesh::sTriangleData>::iterator pWalkMeshTriangles = walkMeshTriangle[pFieldScriptEntity->m10_walkmeshId]->begin();
-    std::vector<SVECTOR>::iterator pVertices = walkMeshVertices[pFieldScriptEntity->m10_walkmeshId]->begin();
+    std::vector<SFP_VEC4>::iterator pVertices = walkMeshVertices[pFieldScriptEntity->m10_walkmeshId]->begin();
 
     if (triangleId != -1)
     {
@@ -3835,7 +3839,7 @@ int updateEntityEventCode3Sub3Sub1(sVec3* param_1, VECTOR* param_2, sFieldScript
 
             *param_7 = uVar3;
 
-            VECTOR VStack120;
+            FP_VEC4 VStack120;
 
             if ((((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags >> 8 & 7 & uVar3 >> 5) != 0) || (((uVar3 & 0x800000) != 0 && (pFieldScriptEntity->m10_walkmeshId == 0)))) ||
                 (((uVar3 & 0x400000) != 0 &&
@@ -3857,7 +3861,7 @@ int updateEntityEventCode3Sub3Sub1(sVec3* param_1, VECTOR* param_2, sFieldScript
                 return 0;
             }
             sWalkMesh::sTriangleData& pTriangle = pWalkMeshTriangles[triangleId];
-            VECTOR VStack120;
+            FP_VEC4 VStack120;
             getTriangleNormalAndAdjustY(pVertices[pTriangle.m0_verticeIndex[0]], pVertices[pTriangle.m0_verticeIndex[1]], pVertices[pTriangle.m0_verticeIndex[2]], param_5, &VStack120);
             return 0;
         }
@@ -3903,7 +3907,7 @@ int updateEntityEventCode3Sub3Sub1(sVec3* param_1, VECTOR* param_2, sFieldScript
     return -1;
 }
 
-uint updateEntityEventCode3Sub3Sub2(short param_1, std::array<SVECTOR, 2>& param_2, sVec3* param_3)
+uint updateEntityEventCode3Sub3Sub2(short param_1, std::array<SFP_VEC4, 2>& param_2, FP_VEC3* param_3)
 
 {
     short sVar1;
@@ -3911,8 +3915,8 @@ uint updateEntityEventCode3Sub3Sub2(short param_1, std::array<SVECTOR, 2>& param
     long lVar3;
     uint uVar4;
     uint uVar5;
-    VECTOR local_38;
-    VECTOR local_28;
+    FP_VEC4 local_38;
+    FP_VEC4 local_28;
 
     lVar3 = ratan2(param_2[1].vz - param_2[0].vz, param_2[1].vx - param_2[0].vx);
     uVar4 = -lVar3 & 0xfff;
@@ -3946,14 +3950,14 @@ uint updateEntityEventCode3Sub3Sub2(short param_1, std::array<SVECTOR, 2>& param
     return uVar4;
 }
 
-int updateEntityEventCode3Sub4Sub1(sVec3* deltaStep, VECTOR* position, sFieldScriptEntity* pFieldScriptEntity, std::array<SVECTOR, 2>& param_4, SVECTOR* param_5, int param_6)
+int updateEntityEventCode3Sub4Sub1(FP_VEC3* deltaStep, FP_VEC4* position, sFieldScriptEntity* pFieldScriptEntity, std::array<SFP_VEC4, 2>& param_4, SFP_VEC4* param_5, int param_6)
 {
     int collisionFlag;
     int uVar2;
 
     int triangleId = (int)pFieldScriptEntity->m8_currentWalkMeshTriangle[pFieldScriptEntity->m10_walkmeshId];
     std::vector<sWalkMesh::sTriangleData>& pWalkMeshTriangles = *walkMeshTriangle[pFieldScriptEntity->m10_walkmeshId];
-    std::vector<SVECTOR>& pWalkMeshVertices = *walkMeshVertices[pFieldScriptEntity->m10_walkmeshId];
+    std::vector<SFP_VEC4>& pWalkMeshVertices = *walkMeshVertices[pFieldScriptEntity->m10_walkmeshId];
 
     if (triangleId == -1) {
         uVar2 = -1;
@@ -4112,11 +4116,11 @@ int updateEntityEventCode3Sub4Sub1(sVec3* deltaStep, VECTOR* position, sFieldScr
     return uVar2;
 }
 
-int updateEntityEventCode3Sub4(sVec3* position, sFieldScriptEntity* param_2, std::array<SVECTOR, 2>& param_3, s16 angle)
+int updateEntityEventCode3Sub4(FP_VEC3* position, sFieldScriptEntity* param_2, std::array<SFP_VEC4, 2>& param_3, s16 angle)
 {
-    VECTOR* psVar4;
-    sVec3 local_60;
-    SVECTOR auStack80;
+    FP_VEC4* psVar4;
+    FP_VEC3 local_60;
+    SFP_VEC4 auStack80;
 
     local_60.vx = position->vx + getAngleSin(angle & 0xfff) * 0x40;
     local_60.vz = position->vz + getAngleCos(angle & 0xfff) * -0x40;
@@ -4183,13 +4187,13 @@ int updateEntityEventCode3Sub4(sVec3* position, sFieldScriptEntity* param_2, std
     }
 }
 
-int updateEntityEventCode3Sub3(sVec3* param_1, sFieldScriptEntity* param_2, std::array<SVECTOR, 2>& param_3, short angle)
+int updateEntityEventCode3Sub3(FP_VEC3* param_1, sFieldScriptEntity* param_2, std::array<SFP_VEC4, 2>& param_3, short angle)
 {
     long lVar2;
-    sVec3 local_88;
-    SVECTOR local_68;
-    VECTOR local_58;
-    VECTOR local_48;
+    FP_VEC3 local_88;
+    SFP_VEC4 local_68;
+    FP_VEC4 local_58;
+    FP_VEC4 local_48;
     uint local_38;
 
     local_88.vx = param_1->vx + getAngleSin(angle - 0x100U & 0xfff) * 0x40;
@@ -4308,7 +4312,7 @@ void updateEntityEventCode4(sSpriteActor* param_1, int param_2, sFieldEntity* pa
 void updateEntityEventCode3(int index, sFieldEntity* pFieldEntity, sFieldScriptEntity* pFieldScriptEntity)
 {
     int rotation = pFieldScriptEntity->m104_rotation;
-    std::array<SVECTOR, 2> auStack56;
+    std::array<SFP_VEC4, 2> auStack56;
 
     if ((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x1000000) != 0) {
         updateEntityEventCode3Var0 = index;
@@ -4342,7 +4346,7 @@ void updateEntityEventCode3(int index, sFieldEntity* pFieldEntity, sFieldScriptE
         moveMask = 1;
     }
 
-    sVec3 stepVector;
+    FP_VEC3 stepVector;
 
     bool bMoved = true;
 
@@ -4481,19 +4485,175 @@ LAB_Field__800830ac:
 
 int EntityMoveCheck1(int entityIndex, int mask, sFieldEntity* pFieldEntity, sFieldScriptEntity* pFieldScriptEntity, uint param_5);
 
-void EntityMoveCheck0(uint entityIndex, sFieldEntity* pEntity, sFieldScriptEntity* pScriptEntity)
+void Vec3ToSVec3(SFP_VEC3* param_1, FP_VEC3* param_2)
 {
-    u32 mask = 0x7fffffff;
+    param_1->vx = param_2->vx.getIntegerPart();
+    param_1->vy = param_2->vy.getIntegerPart();
+    param_1->vz = param_2->vz.getIntegerPart();
+    return;
+}
 
+s32 EntityMoveCheck0Var0 = 0;
 
+s32 computeDistanceBetweenActors(int param_1, int param_2)
+{
+    return length2d(
+        actorArray[param_2].m4C_scriptEntity->m20_position.vx.getIntegerPart() - actorArray[param_1].m4C_scriptEntity->m20_position.vx.getIntegerPart(),
+        actorArray[param_2].m4C_scriptEntity->m20_position.vz.getIntegerPart() - actorArray[param_1].m4C_scriptEntity->m20_position.vz.getIntegerPart());
+}
+
+void EntityMoveCheck0(uint playerEntityIndex, sFieldEntity* pPlayerEntity, sFieldScriptEntity* pPlayerScriptEntity)
+{
+    std::array<FP_VEC4, 8> scratchBuffer; // this would normally be allocated in the cpu scratch buffer
+    std::array<FP_VEC4, 8>::iterator pScratchBuffer = scratchBuffer.begin();
+
+    bool finalState = false;
+
+    FP_VEC3 postStepPosition;
+    postStepPosition.vx = (pPlayerScriptEntity->m20_position).vx + (pPlayerScriptEntity->m30_stepVector).vx;
+    postStepPosition.vy = (pPlayerScriptEntity->m20_position).vy + (pPlayerScriptEntity->m30_stepVector).vy;
+    postStepPosition.vz = (pPlayerScriptEntity->m20_position).vz + (pPlayerScriptEntity->m30_stepVector).vz;
+
+    SFP_VEC3 SFP_postStepPosition;
+    Vec3ToSVec3(&SFP_postStepPosition, &postStepPosition);
+
+    s32 SFPStepAsInts[3];
+    SFPStepAsInts[0] = (int)SFP_postStepPosition.vx;
+    SFPStepAsInts[2] = (int)SFP_postStepPosition.vz;
+
+    sFieldScriptEntity_flags0 playerFlags = pPlayerScriptEntity->m0_fieldScriptFlags;
+
+    u32 bestDistance = 0x7fffffff;
+    s32 testedEntityYWithOffset;
+
+    u32 playerFlags40800 = playerFlags.m_rawFlags & 0x40800;
+
+    s32 playerY = pPlayerScriptEntity->m20_position.vy.getIntegerPart();
+    s32 testedEntityY;
+    s16 initialActor18Y = pPlayerScriptEntity->m1A;
+    s32 finalCount;
+    s8 playerVar74 = pPlayerScriptEntity->m74;
+
+    for (int actorId=0; actorId < totalActors; actorId++)
+    {
+        if (actorId == playerEntityIndex)
+            continue;
+
+        sFieldScriptEntity* pCurrentFieldScriptEntity = actorArray[actorId].m4C_scriptEntity;
+        sFieldScriptEntity_flags0 entityFlags = pCurrentFieldScriptEntity->m0_fieldScriptFlags;
+
+        if (entityFlags.m0 != 0)
+            continue;
+
+        pCurrentFieldScriptEntity->m4_flags &= ~0xC101;
+        if ((pCurrentFieldScriptEntity->m4_flags & 0x80) == 0)
+        {
+            if ((entityFlags.m_rawFlags & 0x2000) == 0)
+            {
+                pScratchBuffer->vx = (((pCurrentFieldScriptEntity->m20_position).vx + (pCurrentFieldScriptEntity->m30_stepVector).vx) >> 0x10) - SFPStepAsInts[0];
+                pScratchBuffer->vz = (((pCurrentFieldScriptEntity->m20_position).vz + (pCurrentFieldScriptEntity->m30_stepVector).vz) >> 0x10) - SFPStepAsInts[2];
+                pScratchBuffer->vy = pPlayerScriptEntity->m1E_collisionRadius + pCurrentFieldScriptEntity->m1E_collisionRadius;
+                Square0(&pScratchBuffer[0], &pScratchBuffer[1]);
+                if (pScratchBuffer[1].vx + pScratchBuffer[1].vz < pScratchBuffer[1].vy) // player is in collision radius
+                    goto LAB_Field__80084438;
+                pCurrentFieldScriptEntity->m4_flags &= ~0xC00001;
+            }
+            else
+            {
+                assert(0);
+LAB_Field__80084438:
+                if ((pPlayerScriptEntity->m14_currentTriangleFlag & 0x400000U) == 0) {
+                    if ((((pCurrentFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags | playerFlags.m_rawFlags) & 0x80) == 0) && (noUpdatesToPartyMemebers == 0)) {
+                        testedEntityY = pCurrentFieldScriptEntity->m20_position.vy.getIntegerPart();
+                        testedEntityYWithOffset = testedEntityY - pCurrentFieldScriptEntity->m1A;
+                        goto LAB_Field__800844b8;
+                    }
+                }
+                else {
+                    if (fieldDebugDisable == 0) {
+                        assert(0);
+                    }
+                }
+                continue;
+            }
+        }
+        else
+        {
+            assert(0);
+
+LAB_Field__800844b8:
+            if ((pPlayerScriptEntity->m74 == actorId) && (playerFlags40800 == 0)) {
+LAB_Field__80084520:
+                pCurrentFieldScriptEntity->m4_flags = pCurrentFieldScriptEntity->m4_flags | 0x800000;
+                (pPlayerScriptEntity->m40).vx = (pCurrentFieldScriptEntity->m30_stepVector).vx;
+                (pPlayerScriptEntity->m40).vy = (pCurrentFieldScriptEntity->m30_stepVector).vy;
+                finalCount = 2;
+                (pPlayerScriptEntity->m40).vz = (pCurrentFieldScriptEntity->m30_stepVector).vz;
+                bestDistance = testedEntityYWithOffset;
+                if (playerFlags40800 == 0) {
+                    pPlayerScriptEntity->m74 = (byte)actorId;
+                    finalState = true;
+                }
+            }
+            else
+            {
+                if ((testedEntityY < (int)(playerY - (uint)(ushort)initialActor18Y)) || (playerY < testedEntityYWithOffset)) {
+                    assert(0);
+                }
+                else
+                {
+                    if ((playerY < testedEntityYWithOffset + 0x10) || ((pCurrentFieldScriptEntity->m4_flags & 0x800000) != 0))
+                        goto LAB_Field__80084520;
+                    if ((entityFlags.m_rawFlags & 0x10) == 0) {
+                        assert(0);
+                    }
+                    (pCurrentFieldScriptEntity->m40).vx = 0;
+                    (pCurrentFieldScriptEntity->m40).vy = 0;
+                    (pCurrentFieldScriptEntity->m40).vz = 0;
+                    (pCurrentFieldScriptEntity->m30_stepVector).vx = 0;
+                    (pCurrentFieldScriptEntity->m30_stepVector).vy = 0;
+                    (pCurrentFieldScriptEntity->m30_stepVector).vz = 0;
+                    (pPlayerScriptEntity->m30_stepVector).vx = 0;
+                    (pPlayerScriptEntity->m30_stepVector).vy = 0;
+                    (pPlayerScriptEntity->m30_stepVector).vz = 0;
+                    (pPlayerScriptEntity->m40).vx = 0;
+                    (pPlayerScriptEntity->m40).vy = 0;
+                    (pPlayerScriptEntity->m40).vz = 0;
+                }
+            }
+            pCurrentFieldScriptEntity->m4_flags |= 0x400000;
+        }
+    }
+
+    if (updateEntityEventCode3Var1 != 0) {
+        finalState = false;
+        finalCount = finalCount + 1;
+        bestDistance = EntityMoveCheck0Var0;
+    }
+    if (finalState) {
+        (actorArray[pPlayerScriptEntity->m74].m4C_scriptEntity)->m4_flags = (actorArray[pPlayerScriptEntity->m74].m4C_scriptEntity)->m4_flags | 0x8000;
+        if (playerVar74 == -1) {
+            if ((pPlayerScriptEntity->m134.m7_isModelRotation2Allocated) == 0) {
+                pPlayerScriptEntity->m110_modelRotation2.resize(6);
+                pPlayerScriptEntity->m134.m7_isModelRotation2Allocated = 1;
+            }
+            pPlayerScriptEntity->m110_modelRotation2[0] = actorArray[pPlayerScriptEntity->m74].m50_modelRotation[0];
+            pPlayerScriptEntity->m110_modelRotation2[1] = actorArray[pPlayerScriptEntity->m74].m50_modelRotation[1];
+            pPlayerScriptEntity->m110_modelRotation2[2] = actorArray[pPlayerScriptEntity->m74].m50_modelRotation[2];
+            pPlayerScriptEntity->m110_modelRotation2[4] = computeDistanceBetweenActors(playerEntityIndex, pPlayerScriptEntity->m74);
+        }
+    }
+    else {
+        pPlayerScriptEntity->m74 = -1;
+    }
 
     MissingCode();
-    if (((pScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x10000) == 0) && ((pScriptEntity->m4_flags & 0x200000) == 0)) {
-        EntityMoveCheck1(entityIndex, mask, pEntity, pScriptEntity, 0);
+    if (((pPlayerScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x10000) == 0) && ((pPlayerScriptEntity->m4_flags & 0x200000) == 0)) {
+        EntityMoveCheck1(playerEntityIndex, bestDistance, pPlayerEntity, pPlayerScriptEntity, 0);
     }
-    if ((actorArray[entityIndex].m4_pVramSpriteSheet)->m7C->mC == 1) {
+    if ((actorArray[playerEntityIndex].m4_pVramSpriteSheet)->m7C->mC == 1) {
         resetInputs();
-        pScriptEntity->m0_fieldScriptFlags.m_rawFlags &= ~0x801;
+        pPlayerScriptEntity->m0_fieldScriptFlags.m_rawFlags &= ~0x801;
     }
 
     MissingCode();
@@ -4505,7 +4665,7 @@ struct sEntityMoveCheck1StackStruct
     std::array<s32, 4> m10_altitude2;
     std::array<s32, 4> m20_walkmeshId;
     std::array<s16, 4> m30_triangleId;
-    std::array<VECTOR, 4> m38_triangleNormal;
+    std::array<FP_VEC4, 4> m38_triangleNormal;
     std::array<s32, 4> m78_position;
     std::array<s16, 4> m88;
 };
@@ -4527,7 +4687,7 @@ void EntityMoveCheck1Sub1Sub1(int* param_1, int* param_2, int param_3)
     return;
 }
 
-s32 EntityMoveCheck1Sub1(sFieldScriptEntity* pFieldScriptEntity, int walkmeshId, s32* pOutputAltitude, VECTOR* triangleNormal, s16* pOutputTriangleId, s32* pOutputAltitude2)
+s32 EntityMoveCheck1Sub1(sFieldScriptEntity* pFieldScriptEntity, int walkmeshId, s32* pOutputAltitude, FP_VEC4* triangleNormal, s16* pOutputTriangleId, s32* pOutputAltitude2)
 {
     if (pFieldScriptEntity->m8_currentWalkMeshTriangle[walkmeshId] == -1) {
         return -1;
@@ -4538,7 +4698,7 @@ s32 EntityMoveCheck1Sub1(sFieldScriptEntity* pFieldScriptEntity, int walkmeshId,
     sVec2_s16 refPos;
     sVec2_s16 refPos2;
 
-    SVECTOR testedPosition;
+    SFP_VEC4 testedPosition;
     testedPosition.vx = (pFieldScriptEntity->m20_position.vx + pFieldScriptEntity->m30_stepVector.vx) >> 16;
     testedPosition.vy = 0;
     testedPosition.vz = (pFieldScriptEntity->m20_position.vz + pFieldScriptEntity->m30_stepVector.vz) >> 16;
@@ -4558,7 +4718,7 @@ s32 EntityMoveCheck1Sub1(sFieldScriptEntity* pFieldScriptEntity, int walkmeshId,
     {
         sWalkMesh::sTriangleData& pTriangle = (*walkMeshTriangle[walkmeshId])[triangleId];
         std::vector<sWalkMesh::sTriangleData>::iterator pWalkMeshTriangles = walkMeshTriangle[walkmeshId]->begin();
-        std::vector<SVECTOR>::iterator pVertices = walkMeshVertices[walkmeshId]->begin();
+        std::vector<SFP_VEC4>::iterator pVertices = walkMeshVertices[walkmeshId]->begin();
 
         sVec2_s16 vert0;
         sVec2_s16 vert1;
@@ -4641,7 +4801,7 @@ s32 EntityMoveCheck1Sub1(sFieldScriptEntity* pFieldScriptEntity, int walkmeshId,
         return -1;
     }
 
-    std::vector<SVECTOR>::iterator pVertices = walkMeshVertices[walkmeshId]->begin();
+    std::vector<SFP_VEC4>::iterator pVertices = walkMeshVertices[walkmeshId]->begin();
     sWalkMesh::sTriangleData& pTriangle = (*walkMeshTriangle[walkmeshId])[triangleId];
 
     getTriangleNormalAndAdjustY(pVertices[pTriangle.m0_verticeIndex[0]], pVertices[pTriangle.m0_verticeIndex[1]], pVertices[pTriangle.m0_verticeIndex[2]], &testedPosition, triangleNormal);
@@ -4914,7 +5074,7 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
             altitudeOfCurrentWalkMesh = pFieldScriptEntity->m20_position.vy >> 16;
             int psVar8 = 0;
             do {
-                if (((stackVar.m0_altitude[psVar8] < altitudeOfCurrentWalkMesh) && ((int)(altitudeOfCurrentWalkMesh - (uint)(ushort)pFieldScriptEntity->m18[1]) < stackVar.m10_altitude2[psVar8])) && (stackVar.m0_altitude[psVar8] != stackVar.m10_altitude2[0])) break;
+                if (((stackVar.m0_altitude[psVar8] < altitudeOfCurrentWalkMesh) && ((int)(altitudeOfCurrentWalkMesh - (uint)(ushort)pFieldScriptEntity->m1A) < stackVar.m10_altitude2[psVar8])) && (stackVar.m0_altitude[psVar8] != stackVar.m10_altitude2[0])) break;
                 foundEntry = foundEntry + 1;
                 psVar8++;
             } while (foundEntry < numWalkMesh + -1);
@@ -4922,7 +5082,7 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
         int foundEntryTriangle;
         if ((foundEntry == numWalkMesh + -1) &&
             ((foundEntryTriangle = (*walkMeshTriangle[pFieldScriptEntity->m10_walkmeshId])[pFieldScriptEntity->m8_currentWalkMeshTriangle[pFieldScriptEntity->m10_walkmeshId]].mD * 4, -1 < foundEntryTriangle ||
-                (foundEntryTriangle + psVar18->m84 <= ((pFieldScriptEntity->m20_position.vy >> 16) - (uint)(ushort)pFieldScriptEntity->m18[1]))))) {
+                (foundEntryTriangle + psVar18->m84 <= ((pFieldScriptEntity->m20_position.vy >> 16) - (uint)(ushort)pFieldScriptEntity->m1A))))) {
             psVar18->m0_position.vx = (pFieldScriptEntity->m20_position).vx;
             psVar18->m0_position.vy = (pFieldScriptEntity->m20_position).vy;
             psVar18->m0_position.vz = (pFieldScriptEntity->m20_position).vz;
@@ -5060,7 +5220,7 @@ uint stepInterpolateDirection(int currentDirection, int targetDirection, int ste
 }
 
 short cameraShakeEnabled = 0;
-VECTOR fieldCameraOffset = { 0,0,0,0 };
+FP_VEC4 fieldCameraOffset = { 0,0,0,0 };
 
 void updateCameraInterpolationSub2()
 {
@@ -5213,7 +5373,7 @@ void updateCameraDolly()
     }
 }
 
-int checkCameraCollision(VECTOR*, std::array<s16, 6>&, std::array<s16, 4>&)
+int checkCameraCollision(FP_VEC4*, std::array<s16, 6>&, std::array<s16, 4>&)
 {
     MissingCode();
     return 0;
@@ -5221,11 +5381,11 @@ int checkCameraCollision(VECTOR*, std::array<s16, 6>&, std::array<s16, 4>&)
 
 int cameraCollisionState = 0;
 
-void computeCameraEyeFromAt(VECTOR* param_1, VECTOR* param_2)
+void computeCameraEyeFromAt(FP_VEC4* param_1, FP_VEC4* param_2)
 {
     MATRIX MStack80;
-    VECTOR local_30;
-    VECTOR local_20;
+    FP_VEC4 local_30;
+    FP_VEC4 local_20;
 
     PushMatrix();
     createRotationMatrix(&cameraRotationBetweenEyeAndAt, &MStack80);
@@ -5239,9 +5399,9 @@ void computeCameraEyeFromAt(VECTOR* param_1, VECTOR* param_2)
     return;
 }
 
-void updateCameraInterpolationSub1(VECTOR* param_1, int elevation)
+void updateCameraInterpolationSub1(FP_VEC4* param_1, int elevation)
 {
-    VECTOR local_48;
+    FP_VEC4 local_48;
     local_48.vx = param_1->vx;
     local_48.vy = 0;
     local_48.vz = param_1->vz;
@@ -5347,14 +5507,14 @@ void updateCameraInterpolation(void)
 
     updateCameraDolly();
     sFieldEntity* psVar2 = &actorArray[actorCameraTracked];
-    VECTOR localPosition;
+    FP_VEC4 localPosition;
     localPosition.vx = (psVar2->m4C_scriptEntity->m20_position).vx;
     localPosition.vy = (psVar2->m4C_scriptEntity->m20_position).vy;
     localPosition.vz = (psVar2->m4C_scriptEntity->m20_position).vz;
     updateCameraInterpolationSub1(&localPosition, (int)psVar2->m4C_scriptEntity->m72_elevation);
     if ((op99Var7 & 0x4000) == 0) {
-        SVECTOR walkmeshOutput1;
-        VECTOR walkmeshOutput2;
+        SFP_VEC4 walkmeshOutput1;
+        FP_VEC4 walkmeshOutput2;
         findTriangleInWalkMesh((cameraEye2.vx >> 16), (cameraEye2.vz >> 16), numWalkMesh + -1, &walkmeshOutput1, &walkmeshOutput2);
         if ((int)walkmeshOutput1.vy < (int)(cameraEye2.vy >> 16)) {
             cameraEye2.vy = (int)walkmeshOutput1.vy << 0x10;
@@ -5374,19 +5534,19 @@ void updateCameraInterpolation(void)
 
 struct sCurrentCameraVectors
 {
-    VECTOR m10_eye;
-    VECTOR m20_at;
+    FP_VEC4 m10_eye;
+    FP_VEC4 m20_at;
 };
 
 sCurrentCameraVectors* pCurrentCameraVectors = nullptr;
 
-SVECTOR computeProjectionMatrixAngles = { 0,0,0 };
+SFP_VEC4 computeProjectionMatrixAngles = { 0,0,0 };
 MATRIX computeProjectionMatrixTempMatrix;
 MATRIX computeProjectionMatrixTempMatrix2;
 
 void computeProjectionMatrix(void)
 {
-    VECTOR local_70;
+    FP_VEC4 local_70;
     MATRIX MStack64;
     long alStack32[2];
 
@@ -5531,7 +5691,7 @@ struct sUpdateCameraAtStruct
     s32 m50[4];
 };
 
-void updateCameraAt(VECTOR* pCameraAt)
+void updateCameraAt(FP_VEC4* pCameraAt)
 {
     sUpdateCameraAtStruct local_98;
     for (int i = 0; i < 3; i++)
@@ -5573,8 +5733,8 @@ bool isObjectOcluded(sFieldEntitySub0* param_1)
     short sVar2;
     int iVar3;
     int iVar4;
-    VECTOR local_48;
-    SVECTOR local_38;
+    FP_VEC4 local_48;
+    SFP_VEC4 local_38;
     long lStack48;
     sVec2_s16 local_2c;
     long alStack40[2];
@@ -5676,8 +5836,8 @@ void renderObjects()
         MissingCode();
     }
 
-    VECTOR scale1 = { 0x800, 0x800, 0x800 };
-    VECTOR scale2 = { worldScaleFactor , worldScaleFactor , worldScaleFactor };
+    FP_VEC4 scale1 = { 0x800, 0x800, 0x800 };
+    FP_VEC4 scale2 = { worldScaleFactor , worldScaleFactor , worldScaleFactor };
 
     ScaleMatrix(&worldScaleMatrix, &scale2);
 
@@ -5703,7 +5863,7 @@ void renderObjects()
         {
             if (i < totalActors)
             {
-                SVECTOR rotationAxis;
+                SFP_VEC4 rotationAxis;
                 switch (pFieldEntity->m4C_scriptEntity->m12C_flags & 3)
                 {
                 case 0:
@@ -6202,8 +6362,8 @@ void renderFieldCharacterSpritesSub0Sub0(sSpriteActor* pSpriteSheet)
         assert(0);
     }
 
-    SVECTOR local_30;
-    VECTOR local_28;
+    SFP_VEC4 local_30;
+    FP_VEC4 local_28;
     uint uVar1;
     sFieldEntitySub4_B4* psVar2;
     int iVar3;
@@ -6234,7 +6394,7 @@ void renderFieldCharacterSpritesSub0Sub0(sSpriteActor* pSpriteSheet)
     SetTransMatrix(&psVar2->mC_spriteMatrix);
 }
 
-SVECTOR currentSpriteCharacterSize[4];
+SFP_VEC4 currentSpriteCharacterSize[4];
 
 std::array<s16, 8> spriteMatrixTable = {
     1,2,4,8,0x10,0x20,0x40,0x80,
@@ -6293,7 +6453,7 @@ void renderFieldCharacterSpritesSub0Sub1(sSpriteActor* pSpriteSheet, sTag* pTag)
                             spriteTranslateY = spriteTranslateY + 0xfff;
                         }
 
-                        SVECTOR localRotationVector;
+                        SFP_VEC4 localRotationVector;
                         localRotationVector.vx = psVar8->m2_rotateX;
                         localRotationVector.vy = psVar8->m4_rotateY;
                         localRotationVector.vz = psVar8->m6_rotateZ;
@@ -6423,7 +6583,7 @@ void renderFieldCharacterSprites(std::array<sTag, 4096>& OT, int oddOrEven)
     MATRIX localRotationMatrix;
     copyRotationMatrix(&localRotationMatrix, &computeProjectionMatrixTempMatrix);
 
-    SVECTOR tempVector;
+    SFP_VEC4 tempVector;
     tempVector.vx = 0;
     tempVector.vy = (sceneDIP / 3) * -2;
     tempVector.vz = 0;
@@ -6493,7 +6653,7 @@ void renderFieldCharacterSprites(std::array<sTag, 4096>& OT, int oddOrEven)
                     pScriptEntity->m4_flags = flags;
 
                     if (((disableCharacterShadowsRendering == 0) && ((pFieldEntity->m58_flags & 0x20) == 0)) /* && (-1 < mathFlag)*/) {
-                        VECTOR VStack200;
+                        FP_VEC4 VStack200;
                         VStack200.vx = pScriptEntity->mF4_scale3d[0] * 3 >> 2;
                         VStack200.vy = pScriptEntity->mF4_scale3d[1] * 3 >> 2;
                         VStack200.vz = pScriptEntity->mF4_scale3d[2] * 3 >> 2;
@@ -6562,9 +6722,9 @@ void renderCharShadows(std::array<sTag, 4096>& OT, int oddOrEven)
                 if (((((pScriptEntity->m4_flags & 0x102200) == 0) && ((pScriptEntity->m4_flags & 0x800) == 0)) && ((pScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x10000) == 0)) &&
                     ((pScriptEntity->m14_currentTriangleFlag & 0x200002U) == 0)) {
 
-                    VECTOR local_c8;
-                    VECTOR local_d8;
-                    VECTOR local_e8;
+                    FP_VEC4 local_c8;
+                    FP_VEC4 local_d8;
+                    FP_VEC4 local_e8;
                     local_e8.vx = 0;
                     local_e8.vy = 0;
                     local_e8.vz = 0x1000;
@@ -6655,7 +6815,7 @@ void renderCharShadows(std::array<sTag, 4096>& OT, int oddOrEven)
                     local_98.t[1] = getCopReg(2, 0x1a);
                     local_98.t[2] = getCopReg(2, 0x1b);
                     iVar10 = pCurrentFieldEntity->m4C_scriptEntity->mF4_scale3d[0] * 0xc00;
-                    VECTOR local_58;
+                    FP_VEC4 local_58;
                     local_58.vx = iVar10 >> 0xc;
                     iVar8 = pCurrentFieldEntity->m4C_scriptEntity->mF4_scale3d[1] * 0xc00;
                     local_58.vy = iVar8 >> 0xc;
