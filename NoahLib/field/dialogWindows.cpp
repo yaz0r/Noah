@@ -32,8 +32,14 @@ const std::array<RECT, 8> dialogWindowsRectConfigs3 = {
 	}
 };
 
-std::array<RECT, 1> dialogWindowsRectConfigs2 = {
-	{	0x20,	0x1C0,	0x8,	0xC	},
+std::array<RECT, 5> dialogWindowsRectConfigs2 = {
+    {
+        {	0x20,	0x1C0,	0x8,	0xC	},
+        {	0x28,	0x1C0,	0x8,	0xC	},
+        {	0x30,	0x1C0,	0x8,	0xC	},
+        {	0x38,	0x1C0,	0x8,	0xC	},
+        {	0x40,	0x1C0,	0x8,	0xC	},
+    }
 };
 
 std::array<RECT, 6> dialogWindowsRectConfigs = {
@@ -87,11 +93,11 @@ void initIndividualDialogWindow(int windowIndex)
 		gDialogWindows[windowIndex].m39C_Sprt[0].r0 = 0x80;
 		gDialogWindows[windowIndex].m39C_Sprt[0].g0 = 0x80;
 		gDialogWindows[windowIndex].m39C_Sprt[0].b0 = 0x80;
-		gDialogWindows[windowIndex].m39C_Sprt[0].w = 0xc;
+		gDialogWindows[windowIndex].m39C_Sprt[0].h = 0xc;
 		gDialogWindows[windowIndex].m39C_Sprt[0].clut = GetClut(0x100, 0xf6);
 		gDialogWindows[windowIndex].m39C_Sprt[0].u0 = 0x80;
 		gDialogWindows[windowIndex].m39C_Sprt[0].v0 = 0xc0;
-		gDialogWindows[windowIndex].m39C_Sprt[0].h = 8;
+		gDialogWindows[windowIndex].m39C_Sprt[0].w = 8;
 		gDialogWindows[windowIndex].m39C_Sprt[0].x0 = 0;
 		gDialogWindows[windowIndex].m39C_Sprt[0].y0 = 0;
 		gDialogWindows[windowIndex].m39C_Sprt[1] = gDialogWindows[windowIndex].m39C_Sprt[0];
@@ -549,10 +555,10 @@ void dealocateDialogWindow18MemorySubSub(sDialogWindow18* param_1)
 		psVar1 = param_1->m8C;
 		while (psVar1 != nullptr) {
 			psVar2 = psVar1->m0_pNext;
-			free(psVar1);
+			delete psVar1;
 			psVar1 = psVar2;
 		}
-		param_1->m8C = (sDialogWindow18_8C*)0x0;
+		param_1->m8C = nullptr;
 		param_1->m82 = 0;
 	}
 	return;
@@ -784,10 +790,30 @@ void dialogWindowSetupForRendering(sTag* OT, int oddOrEven, int windowIndex)
 			}
 		}
 
-		// Sprite to highlight text (selected text in multi-selection)
+		// Selector sprite for multi-choice (selected text in multi-selection)
 		if (((gDialogWindows[windowIndex].m37C == 0) && (gDialogWindows[windowIndex].m410 == 0)) && (gDialogWindows[windowIndex].m408_openAnimationCounter == 0)) {
-			assert(0);
-			MissingCode();
+            if ((gDialogWindows[windowIndex].m494_hasDialogFace == 1) && ((gDialogWindows[windowIndex].m40C_flags & 0x20U) == 0)) {
+                gDialogWindows[windowIndex].m39C_Sprt[oddOrEven].x0 = windowX + 0x5A;
+            }
+            else {
+                gDialogWindows[windowIndex].m39C_Sprt[oddOrEven].x0 = windowX + 0x16;
+            }
+
+            gDialogWindows[windowIndex].m39C_Sprt[oddOrEven].y0 = (gDialogWindows[windowIndex].m382_CurrentMultiChoiceSelection + gDialogWindows[windowIndex].m37E_startOfMultiChoice) * 0xe + (short)windowY + 8;
+
+            RECT local_90;
+            local_90.x = dialogWindowsRectConfigs2[dialogWindowsFrameCount2].x;
+            local_90.y = dialogWindowsRectConfigs2[dialogWindowsFrameCount2].y;
+            local_90.w = dialogWindowsRectConfigs2[dialogWindowsFrameCount2].w;
+            local_90.h = dialogWindowsRectConfigs2[dialogWindowsFrameCount2].h;
+
+            SetDrawMode(&gDialogWindows[windowIndex].m384[oddOrEven], 0, 0, GetTPage(0, 0, 0x288, 0x1c0), &local_90);
+
+            gDialogWindows[windowIndex].m39C_Sprt[oddOrEven].m0_pNext = OT->m0_pNext;
+            OT->m0_pNext = &gDialogWindows[windowIndex].m39C_Sprt[oddOrEven];
+
+            gDialogWindows[windowIndex].m384[oddOrEven].m0_pNext = &gDialogWindows[windowIndex].m39C_Sprt[oddOrEven];
+            OT->m0_pNext = &gDialogWindows[windowIndex].m384[oddOrEven];
 		}
 
 		gDialogWindows[windowIndex].mDC_backgroundTile[oddOrEven].x0 = (short)windowX;
@@ -811,12 +837,29 @@ void clearSelectedLineForMultiChoice(sDialogWindow18* param_1)
 	return;
 }
 
+void setSelectedLineForMultiChoice(sDialogWindow18* param_1, char param_2)
+{
+    param_1->m6E_selectedLineForMultiChoice = param_2;
+    return;
+}
+
 void updateMultiChoice(int param_1)
 {
 	if ((gDialogWindows[param_1].m37C == 0) && (gDialogWindows[param_1].m408_openAnimationCounter == 0)) {
 		if (gDialogWindows[param_1].m410 == 0) {
-			assert(0);
-		}
+            if ((padButtonForField & 0x4000) != 0) {
+                gDialogWindows[param_1].m382_CurrentMultiChoiceSelection++;
+                if(gDialogWindows[param_1].m380_numMaxMultiChoiceSelection + -1 < (int)gDialogWindows[param_1].m382_CurrentMultiChoiceSelection)
+                    gDialogWindows[param_1].m382_CurrentMultiChoiceSelection = 0;
+            }
+            if ((padButtonForField & 0x1000) != 0) {
+                gDialogWindows[param_1].m382_CurrentMultiChoiceSelection = gDialogWindows[param_1].m382_CurrentMultiChoiceSelection + -1;
+                if (gDialogWindows[param_1].m382_CurrentMultiChoiceSelection < 0) {
+                    gDialogWindows[param_1].m382_CurrentMultiChoiceSelection = gDialogWindows[param_1].m380_numMaxMultiChoiceSelection + -1;
+                }
+            }
+            setSelectedLineForMultiChoice(&gDialogWindows[param_1].m18, (char)gDialogWindows[param_1].m382_CurrentMultiChoiceSelection + (char)gDialogWindows[param_1].m37E_startOfMultiChoice);
+        }
 		else
 		{
 			clearSelectedLineForMultiChoice(&gDialogWindows[param_1].m18);
@@ -1612,4 +1655,25 @@ void addDialogWindowsToOT(sTag* OT, int oddOrEven)
 
 	gDialogDrModes[g_frameOddOrEven][0].m0_pNext = OT->m0_pNext;
 	OT->m0_pNext = &gDialogDrModes[g_frameOddOrEven][0];
+}
+
+void setupMultiChoice(sDialogWindow18* param_1, u8 R, u8 G, u8 B)
+{
+    for (int i=0; i<param_1->mC_height; i++)
+    {
+        param_1->m28_perLineBuffer[i].m0[1][1].r0 = R;
+        param_1->m28_perLineBuffer[i].m0[1][0].r0 = R;
+        param_1->m28_perLineBuffer[i].m0[0][1].r0 = R;
+        param_1->m28_perLineBuffer[i].m0[0][0].r0 = R;
+
+        param_1->m28_perLineBuffer[i].m0[1][1].g0 = G;
+        param_1->m28_perLineBuffer[i].m0[1][0].g0 = G;
+        param_1->m28_perLineBuffer[i].m0[0][1].g0 = G;
+        param_1->m28_perLineBuffer[i].m0[0][0].g0 = G;
+
+        param_1->m28_perLineBuffer[i].m0[1][1].b0 = B;
+        param_1->m28_perLineBuffer[i].m0[1][0].b0 = B;
+        param_1->m28_perLineBuffer[i].m0[0][1].b0 = B;
+        param_1->m28_perLineBuffer[i].m0[0][0].b0 = B;
+    }
 }

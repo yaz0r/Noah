@@ -28,13 +28,16 @@ struct sFieldScriptEntityScriptSlot
     u16 m0_scriptPC;
     u8 m2_delay;
     u8 m3_scriptIndex;
-    struct {
-        u32 m0 : 16;
-        u32 m16 : 2;
-        u32 m18 : 4;
-        u32 m22 : 1;
-        u32 m23_walkMode : 2;
-        u32 m25X : 5;
+    union {
+        struct {
+            u32 m0 : 16;
+            u32 m16 : 2;
+            u32 m18 : 4;
+            u32 m22 : 1;
+            u32 m23_walkMode : 2;
+            u32 m25X : 5;
+        };
+        u32 raw;
     } m4_flags; // bit 18, size 4
     // size 8
 };
@@ -270,6 +273,8 @@ extern MATRIX worldScaleMatrix;
 extern MATRIX cameraMatrix;
 extern s32 sceneSCRZ;
 
+extern u16 padButtonForField;
+
 extern int updateAllEntitiesSub2Var0;
 
 extern short screenDistortionConfigured;
@@ -287,6 +292,13 @@ struct sFieldRenderContext
 
 extern std::array<sFieldRenderContext, 2> fieldRenderContext;
 extern sFieldRenderContext* pCurrentFieldRenderingContext;
+
+extern s16 OP_A4Var0;
+extern int OP_A4Var1;
+extern int OP_A4Var2;
+extern s16 OP_B6SubVar0;
+extern s16 OP_B6Var1;
+extern s16 OP_B6Var2;
 
 void flagAllocation(std::vector<u8>&);
 void unflagAllocation(std::vector<u8>&);

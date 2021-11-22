@@ -684,7 +684,7 @@ void initOpcodeTable()
 		.end();
 
 	m_opcode[0xBF]
-		.setName("ROTATION_3D_PITC_ADD")
+		.setName("ROTATION_3D_PITCH_ADD")
 		.addArgumentU16OrVar()
 		.end();
 
@@ -704,7 +704,6 @@ void initOpcodeTable()
 		.end();
 
 	m_opcode[0xC4]
-		.setName("REMOVE_FROM_AVAILABLE_PARTY")
 		.addArgumentByte()
 		.end();
 
@@ -756,6 +755,10 @@ void initOpcodeTable()
 		.addArgumentByte()
 		.end();
 
+    m_opcode[0xD6]
+        .addArgumentU16OrVar()
+        .end();
+
 	m_opcode[0xD7]
 		.addArgumentU16OrVar()
 		.end();
@@ -775,6 +778,18 @@ void initOpcodeTable()
 		.addArgumentS16OrVar(0x04)
 		.addSignControlByte()
 		.end();
+
+    m_opcode[0xE5]
+        .setName("SETUP_FOG")
+        .addArgumentU16OrVar("NearColor_R")
+        .addArgumentU16OrVar("NearColor_G")
+        .addArgumentU16OrVar("NearColor_B")
+        .addArgumentU16OrVar("FarColor_R")
+        .addArgumentU16OrVar("FarColor_G")
+        .addArgumentU16OrVar("FarColor_B")
+        .addArgumentU16OrVar("FogNear")
+        .addArgumentU16OrVar("FogFar")
+        .end();
 
 	m_opcode[0xE6]
 		.addArgumentS16()
@@ -879,9 +894,22 @@ void initExtendedOpcodeTable()
 		.addArgumentU16OrVar()
 		.end();
 
+    m_extendedOpcode[0x4]
+        .addArgumentU16OrVar()
+        .end();
+
 	m_extendedOpcode[0x7]
 		.addArgumentByte()
 		.end();
+
+    m_extendedOpcode[0xC]
+        .addArgumentU16()
+        .addArgumentU16()
+        .addArgumentU16()
+        .addArgumentU16()
+        .addArgumentU16()
+        .addArgumentU16()
+        .end();
 
 	m_extendedOpcode[0xD]
 		.setName("SET_DIALOG_AVATAR")

@@ -69,7 +69,8 @@ struct sDialogWindow
 	SPRT m1EC_windowBorders[2][10];
 	s16 m37C;
 	s8 m37E_startOfMultiChoice;
-	s8 m382_CurrentMultiChoiceSelection;
+    s16 m380_numMaxMultiChoiceSelection;
+    s16 m382_CurrentMultiChoiceSelection;
 	DR_MODE m384[2];
 	SPRT m39C_Sprt[2];
 	s16 m3C4;
@@ -106,6 +107,8 @@ extern std::array<std::array<DR_MODE, 16>, 2> gDialogDrModes;
 
 extern std::array<u8, 3> dialogWindowColor;
 
+extern u16 windowOpenBF;
+
 void flagWindowOpenBF(uint param_1);
 void createDialogWindow(short x, short y, int dialogIndex, int windowIndex, int width, int height, int fieldActorId, int actorId, int mode, uint param_10, uint param_11);
 void initDialogWindows();
@@ -115,3 +118,5 @@ int allocateDialogWindow();
 int getWindowWithLowestPriority();
 void stepDialogWindows();
 void addDialogWindowsToOT(sTag* OT, int oddOrEven);
+s8 addDialogWindowsToOTSub0(sDialogWindow18* param_1);
+void setupMultiChoice(sDialogWindow18* param_1, u8 R, u8 G, u8 B);

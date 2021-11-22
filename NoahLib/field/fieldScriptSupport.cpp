@@ -371,47 +371,90 @@ int showDialogWindowForActor(int actorId, int mode)
 	}
 
     pCurrentFieldScriptActor->m84 &= 0xFFFF; // clear upper part
+    int flagFromScript = pCurrentFieldScriptActor->m84;
 	if (pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 3] != 0) {
-        u32 newUpperPart = (pCurrentFieldScriptActor->m84 & 0xFF00) | pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 3];
-        pCurrentFieldScriptActor->m84 |= (newUpperPart << 16);
+        flagFromScript = (pCurrentFieldScriptActor->m84 & 0xFF00) | pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 3];
+        pCurrentFieldScriptActor->m84 |= (flagFromScript << 16);
 	}
 
-    int windowDisplayMode = (pCurrentFieldScriptActor->m84 >> (16 + 4)) & 3;
+    int windowDisplayMode = (flagFromScript >> 4) & 3;
 
-    MissingCode(); // some weird handling of camera direction (select top or bottom of the screen depending where the character is?)
-
-    gDialogWindows[windowIndex].m40C_flags = 1;
-
-    int boxY;
+    int boxY = 0x10;
     int projectedPosition[2];
 
-	if ((mode == 0) || (mode == 3)) {
-        projectActorToScreen(actorId, &projectedPosition[0], &projectedPosition[1], -0x40);
-        boxY = 0x14;
-		if (mode == 0) {
-            boxY = projectedPosition[1] + dialogBoxHeight * -0xe + -0x24;
-		}
-		else {
-            projectedPosition[0] = 0xa0;
-		}
-		if ((pCurrentFieldScriptActor->m80_DialogAvatarFace != -1) && (((pCurrentFieldScriptActor->m84>>16) & 2) == 0)) {
-			dialogBoxHeight = 4;
-			if ((int)dialogBoxWidth < 0x18) {
-				dialogBoxWidth = 0x18;
-			}
-			dialogBoxWidth = dialogBoxWidth + 0x11;
-            boxY = 0x10;
-		}
-	}
+    if (windowDisplayMode == 1) {
+    LAB_Field__8009c8e0:
+        boxY = windowIndex << 3;
+    LAB_Field__8009c8e4:
+        gDialogWindows[windowIndex].m40C_flags = 1;
+        if ((mode == 0) || (mode == 3)) {
+            projectActorToScreen(actorId, projectedPosition, projectedPosition + 1, -0x40);
+            boxY = 0x14;
+            if (mode == 0) {
+                boxY = projectedPosition[1] + dialogBoxHeight * -0xe + -0x24;
+            }
+            else {
+                projectedPosition[0] = 0xa0;
+            }
+            if ((pCurrentFieldScriptActor->m80_DialogAvatarFace != 0xff) && ((flagFromScript & 2) == 0)) {
+                dialogBoxHeight = 4;
+                if ((int)dialogBoxWidth < 0x18) {
+                    dialogBoxWidth = 0x18;
+                }
+                dialogBoxWidth = dialogBoxWidth + 0x11;
+                boxY = 0x10;
+            }
+            goto LAB_Field__8009ca64;
+        }
+        boxY = 0x10;
+    }
+    else {
+        if (windowDisplayMode == 0) {
+            if (((pCurrentFieldScriptActor->m12C_flags >> 9 & 7) - (getCameraDirection() & 0xffff) & 7) < 5) {
+                if ((activeWindowsFlags & 0x80) != 0) goto LAB_Field__8009c8e0;
+            }
+            else {
+                if (((activeWindowsFlags & 0x80) == 0) && (boxY = windowIndex * 8, numActiveWindows == 0)) goto LAB_Field__8009c8e4;
+            }
+        }
+        else {
+            if (windowDisplayMode != 2) goto LAB_Field__8009ca64;
+        }
+        gDialogWindows[windowIndex].m40C_flags = 0x81;
+        if ((mode == 0) || (boxY = 0x94, mode == 3)) {
+            projectActorToScreen(actorId, projectedPosition, projectedPosition + 1, -0x40);
+            boxY = 0x94;
+            if (mode == 0) {
+                boxY = projectedPosition[1] + 0x30;
+            }
+            else {
+                projectedPosition[0] = 0xa0;
+            }
+            int bVar2;
+            if ((pCurrentFieldScriptActor->m80_DialogAvatarFace != 0xff) && (bVar2 = (int)dialogBoxWidth < 0x18, (flagFromScript & 2) == 0)) {
+                dialogBoxWidth = dialogBoxWidth + 0x11;
+                if (bVar2) {
+                    dialogBoxWidth = 0x29;
+                }
+                dialogBoxHeight = 4;
+                boxY = 0x94;
+            }
+            goto LAB_Field__8009ca64;
+        }
+    }
+    dialogBoxHeight = 4;
+    dialogBoxWidth = 0x48;
+    projectedPosition[0] = 0xa0;
 
-    int boxX = projectedPosition[0] + -8 + dialogBoxWidth * -2;
-    int boxX2 = boxX + 0x10;
-	if (boxX < 0xc) {
-        boxX = 0xc;
+LAB_Field__8009ca64:
+    int boxX3 = projectedPosition[0] + -8 + dialogBoxWidth * -2;
+    int boxX2 = boxX3 + 0x10;
+	if (boxX3 < 0xc) {
+        boxX3 = 0xc;
         boxX2 = 0x1c;
 	}
 	if (0x134 < (int)(boxX2 + dialogBoxWidth * 4)) {
-		boxX = (short)dialogBoxWidth * -4 + 0x124;
+		boxX3 = (short)dialogBoxWidth * -4 + 0x124;
 	}
     int boxY2 = boxY + 8;
 	if (boxY < 0x10) {
@@ -423,7 +466,7 @@ int showDialogWindowForActor(int actorId, int mode)
 	}
 	if ((mode == 0) || (mode == 3)) {
 		if (pCurrentFieldScriptActor->m88[0] != 0) {
-			boxX = pCurrentFieldScriptActor->m88[0];
+			boxX3 = pCurrentFieldScriptActor->m88[0];
 		}
 		if (pCurrentFieldScriptActor->m88[1] != 0) {
             boxY2 = pCurrentFieldScriptActor->m88[1];
@@ -452,7 +495,7 @@ int showDialogWindowForActor(int actorId, int mode)
 			flags = 0x400;
 		}
 	}
-	createDialogWindow((int)boxX, (int)boxY, dialogIndex, windowIndex, dialogBoxWidth, dialogBoxHeight, currentFieldActorId, actorId, mode, flags, (pCurrentFieldScriptActor->m84 >> 16));
+	createDialogWindow((int)boxX3, (int)boxY, dialogIndex, windowIndex, dialogBoxWidth, dialogBoxHeight, currentFieldActorId, actorId, mode, flags, (pCurrentFieldScriptActor->m84 >> 16));
 	flagWindowOpenBF(windowIndex);
 	pCurrentFieldScriptActor->m104_rotation |= 0x8000;
     pCurrentFieldScriptActor->mCC_scriptPC += 4;

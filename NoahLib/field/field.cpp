@@ -96,6 +96,12 @@ int fieldUseGroundOT = 0;
 u8 DollyStop = 0;
 u8 DollySet = 0;
 
+s16 OP_A4Var0 = 0;
+int OP_A4Var1 = 0;
+int OP_A4Var2 = 0;
+s16 OP_B6SubVar0 = 0;
+s16 OP_B6Var1 = 0;
+s16 OP_B6Var2 = 0;
 
 short screenDistortionConfigured = 0;
 short screenDistortionAvailable = 0;
@@ -4538,7 +4544,124 @@ int EntityMoveCheck0Sub2(int param_1, int param_2, sFieldScriptEntity* param_3, 
 
 void  startScriptsForCollisions(uint playerEntityIndex, sFieldEntity* pPlayerEntity, sFieldScriptEntity* pPlayerScriptEntity)
 {
+    bool bTrigger = false;
+    u32 newValueInFlags = 7;
+    for (int actorId =0; actorId <totalActors; actorId++)
+    {
+        sFieldScriptEntity* pTestedScriptEntity = actorArray[actorId].m4C_scriptEntity;
+        s8 scriptIndexToStart = -1;
 
+        if (((pTestedScriptEntity->m0_fieldScriptFlags.m0) == 0) && (pPlayerScriptEntity->m74 != actorId)) {
+            s32 yDiff = pTestedScriptEntity->m20_position.vy.getIntegerPart() + pTestedScriptEntity->m60[1];
+            if ((pTestedScriptEntity->m4_flags & 0x180) != 0) {
+                assert(0);
+            }
+            if ((pTestedScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x2000) == 0) {
+                FP_VEC4 tempVec1;
+                tempVec1.vx = pTestedScriptEntity->m20_position.vx.getIntegerPart() - pPlayerScriptEntity->m20_position.vx.getIntegerPart() + pTestedScriptEntity->m60[0];
+                tempVec1.vz = pTestedScriptEntity->m20_position.vz.getIntegerPart() - pPlayerScriptEntity->m20_position.vz.getIntegerPart() + pTestedScriptEntity->m60[2];
+                tempVec1.vy = pPlayerScriptEntity->m1E_collisionRadius + 0x20 + pTestedScriptEntity->m1E_collisionRadius;
+
+                FP_VEC4 tempVec2;
+                Square0(&tempVec1, &tempVec2);
+
+                if ((((tempVec2.vx + tempVec2.vz < tempVec2.vy) && (pPlayerScriptEntity->m20_position.vy.getIntegerPart() - pPlayerScriptEntity->m1A <= yDiff)) && ((int)(yDiff - (uint)(ushort)pTestedScriptEntity->m1A) <= pPlayerScriptEntity->m20_position.vy.getIntegerPart())) && (actorId != playerEntityIndex)) {
+                    tempVec1.vx = pTestedScriptEntity->m20_position.vx.getIntegerPart() - pPlayerScriptEntity->m20_position.vx.getIntegerPart() + pTestedScriptEntity->m60[0];
+                    tempVec1.vz = pTestedScriptEntity->m20_position.vz.getIntegerPart() - pPlayerScriptEntity->m20_position.vz.getIntegerPart() + pTestedScriptEntity->m60[2];
+
+                    Square0(&tempVec1, &tempVec2);
+
+                    FP_VEC4 tempVec3;
+                    FP_VEC4 tempVec4;
+                    tempVec3.vx = pPlayerScriptEntity->m1E_collisionRadius + 8 + (uint)(ushort)pTestedScriptEntity->m1E_collisionRadius;
+                    tempVec3.vz = pPlayerScriptEntity->m1E_collisionRadius + 0x20 + (uint)(ushort)pTestedScriptEntity->m1E_collisionRadius;
+                    Square0(&tempVec3, &tempVec4);
+
+                    s32 distance = tempVec2.vx + tempVec2.vz;
+                    if (((tempVec4.vz <= distance) || ((padButtonForDialogs & 0x20) == 0)) || ((bTrigger || ((pTestedScriptEntity->m4_flags & 0x4000000) != 0)))) {
+                        if (((pTestedScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0xa20000) == 0) && (distance < tempVec4.vx)) {
+                            scriptIndexToStart =  3;
+                            newValueInFlags = 4;
+                            int lVar5 = ratan2(tempVec1.vz, tempVec1.vx);
+                            int uVar7 = -(lVar5 >> 9);
+                            pTestedScriptEntity->m12C_flags = pTestedScriptEntity->m12C_flags & 0xfffff1ff | (uVar7 & 7) << 9;
+                        }
+                    }
+                    else
+                    {
+                        int lVar5 = ratan2(tempVec1.vz, tempVec1.vx);
+                        int uVar7 = -lVar5 >> 9;
+                        if ((0xa88 < ((pPlayerScriptEntity->m106_currentRotation & 0xfff) - (-lVar5 & 0xfffU) & 0xfff) - 700) && (windowOpenBF == 0)) {
+                            bTrigger = true;
+                            scriptIndexToStart = 2;
+                            newValueInFlags = 3;
+                            pTestedScriptEntity->m12C_flags = pTestedScriptEntity->m12C_flags & 0xfffff1ff | (uVar7 & 7) << 9;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                if ((((pPlayerScriptEntity->m20_position.vy.getIntegerPart() - pPlayerScriptEntity->m1A <= yDiff) && ((int)(yDiff - (uint)(ushort)pTestedScriptEntity->m1A) <= pPlayerScriptEntity->m20_position.vy.getIntegerPart())) && (actorId != playerEntityIndex)) &&
+                    (EntityMoveCheck0Sub2(pPlayerScriptEntity->m20_position.vx.getIntegerPart(), pPlayerScriptEntity->m20_position.vz.getIntegerPart(), pTestedScriptEntity, 0x10) == 0)) {
+                    if ((((padButtonForDialogs & 0x20) == 0) || (bTrigger)) || ((pTestedScriptEntity->m4_flags & 0x4000000) != 0)) {
+                        if ((pTestedScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0xa20000) == 0) {
+                            scriptIndexToStart = 3;
+                            newValueInFlags = 4;
+                            FP_VEC4 tempVec1;
+                            tempVec1.vx = (pTestedScriptEntity->m20_position.vx.getIntegerPart() - pPlayerScriptEntity->m20_position.vx.getIntegerPart()) + (int)pTestedScriptEntity->m60[0];
+                            tempVec1.vz = (pTestedScriptEntity->m20_position.vz.getIntegerPart() - pPlayerScriptEntity->m20_position.vz.getIntegerPart()) + (int)pTestedScriptEntity->m60[2];
+                            int lVar5 = ratan2(tempVec1.vz, tempVec1.vx);
+                            pTestedScriptEntity->m12C_flags = pTestedScriptEntity->m12C_flags & 0xfffff1ff | (-(lVar5 >> 9) & 7U) << 9;
+                            if (fieldDebugDisable == 0) {
+                                assert(0);
+                            }
+                        }
+                    }
+                    else {
+                        if (((pTestedScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x220000) == 0) && (windowOpenBF == 0)) {
+                            FP_VEC4 tempVec1;
+                            tempVec1.vx = (pTestedScriptEntity->m20_position.vx.getIntegerPart() - pPlayerScriptEntity->m20_position.vx.getIntegerPart()) + (int)pTestedScriptEntity->m60[0];
+                            tempVec1.vz = (pTestedScriptEntity->m20_position.vz.getIntegerPart() - pPlayerScriptEntity->m20_position.vz.getIntegerPart()) + (int)pTestedScriptEntity->m60[2];
+                            int lVar5 = ratan2(tempVec1.vz, tempVec1.vx);
+                            if (((pTestedScriptEntity->m4_flags & 0x40000) == 0) || (0xa88 < ((pPlayerScriptEntity->m106_currentRotation & 0xfff) - (-lVar5 & 0xfffU) & 0xfff) - 700)) {
+                                bTrigger = true;
+                                scriptIndexToStart = 2;
+                                newValueInFlags = 3;
+                                pTestedScriptEntity->m12C_flags = pTestedScriptEntity->m12C_flags & 0xfffff1ff | (-lVar5 >> 9 & 7U) << 9;
+                                if (fieldDebugDisable == 0) {
+                                    assert(0);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (scriptIndexToStart != -1) {
+            int foundSlot = 0;
+            for (foundSlot = 0; foundSlot < 8; foundSlot++)
+            {
+                if (pTestedScriptEntity->m8C_scriptSlots[foundSlot].m3_scriptIndex == scriptIndexToStart)
+                    break;
+            }
+
+            if (foundSlot == 8) // script wasn't running already, start it
+            {
+                for (int slotId = 0; slotId < 8; slotId++)
+                {
+                    if (((pTestedScriptEntity->m8C_scriptSlots[slotId].m4_flags.m18) == 0xf) && ((pTestedScriptEntity->m8C_scriptSlots[slotId].m4_flags.m22) == 0)) {
+                        pTestedScriptEntity->m8C_scriptSlots[slotId].m0_scriptPC = getScriptEntryPoint(actorId, scriptIndexToStart);
+                        pTestedScriptEntity->m8C_scriptSlots[slotId].m3_scriptIndex = scriptIndexToStart;
+                        pTestedScriptEntity->m8C_scriptSlots[slotId].m4_flags.m18 = newValueInFlags;
+                        pTestedScriptEntity->m106_currentRotation |= 0x8000;
+                        pTestedScriptEntity->m104_rotation = pTestedScriptEntity->m106_currentRotation;
+                        break;
+                    }
+                }
+            }
+        }
+    }
 }
 
 void EntityMoveCheck0(uint playerEntityIndex, sFieldEntity* pPlayerEntity, sFieldScriptEntity* pPlayerScriptEntity)
@@ -5274,7 +5397,16 @@ FP_VEC4 fieldCameraOffset = { 0,0,0,0 };
 void updateCameraInterpolationSub2()
 {
     if ((op99Var7 & 0x10) != 0) {
-        assert(0);
+        if (OP_B6SubVar0 != 0) {
+            OP_B6Var2 = OP_B6Var2 + OP_B6Var1;
+            sceneSCRZ = OP_B6Var2 >> 0x10;
+        }
+        int iVar1 = OP_B6SubVar0 + -1;
+        OP_B6SubVar0 = (short)iVar1;
+        if (iVar1 * 0x10000 < 0) {
+            OP_B6SubVar0 = 0;
+            op99Var7 = op99Var7 & 0xffef;
+        }
     }
     if (op9DVar1 != 0) {
         op99Var5 = 1;
@@ -5484,7 +5616,14 @@ void updateCameraInterpolationSub1(FP_VEC4* param_1, int elevation)
         }
     }
     if ((op99Var7 & 8) != 0) {
-        assert(0);
+        OP_A4Var1 = OP_A4Var1 + OP_A4Var2;
+        sceneDIP = (short)((uint)OP_A4Var1 >> 0x10);
+        int sVar4 = OP_A4Var0 + -1;
+        int bVar1 = OP_A4Var0 == 1;
+        OP_A4Var0 = sVar4;
+        if (bVar1) {
+            op99Var7 = op99Var7 & 0xfff7;
+        }
     }
 }
 
@@ -7136,6 +7275,7 @@ void getInputDuringVsync(void)
                 */
         newPadButtonForScripts[0].vx |= buttonMask;
         newPadButtonForDialogs |= buttonMask;
+        newPadButtonForField |= buttonMask;
     }
     //else
     {
@@ -7178,6 +7318,7 @@ void getInputDuringVsync(void)
 
                 newPadButtonForScripts[0].vx |= buttonMask;
                 newPadButtonForDialogs |= buttonMask;
+                newPadButtonForField |= buttonMask;
             }
         }
     }

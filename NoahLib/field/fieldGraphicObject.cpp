@@ -206,7 +206,7 @@ sSpriteActor* spriteBytecode2ExtendedE0(sSpriteActor* param_1, sPS1Pointer param
 	return nullptr;
 }
 
-void executeSpriteBytecode2Extended92(sSpriteActor* param_1)
+void updateAllSubsprites(sSpriteActor* param_1)
 {
 	if ((param_1->m3C & 3) == 1) {
 		int blendMode = param_1->m3C >> 5 & 7;
@@ -259,8 +259,8 @@ void executeSpriteBytecode2Extended(sSpriteActor* param_1, int bytecode, sPS1Poi
 	case 0x84:
 		break;
 	case 0x92:
-		param_1->m28_colorAndCode.m3_code |= 1;
-		executeSpriteBytecode2Extended92(param_1);
+		param_1->m28_colorAndCode.m3_code |= 1; // make transparent
+		updateAllSubsprites(param_1);
 		break;
 	case 0x96:
 		MissingCode();
@@ -330,7 +330,7 @@ void executeSpriteBytecode2Extended(sSpriteActor* param_1, int bytecode, sPS1Poi
 			MissingCode();
 		}
 		if ((param_1->m3C & 3) == 1) {
-			executeSpriteBytecode2Extended92(param_1);
+			updateAllSubsprites(param_1);
 		}
 		break;
 	case 0xF6:
