@@ -259,7 +259,7 @@ void executeSpriteBytecode2Extended(sSpriteActor* param_1, int bytecode, sPS1Poi
 	case 0x84:
 		break;
 	case 0x92:
-		param_1->m2B |= 1;
+		param_1->m28_colorAndCode.m3_code |= 1;
 		executeSpriteBytecode2Extended92(param_1);
 		break;
 	case 0x96:
@@ -1036,7 +1036,7 @@ void spriteActorSetPlayingAnimation(sSpriteActor* param_1, int animationId)
 void initFieldEntitySub4Sub1(sSpriteActor* param_1)
 {
 	param_1->m3C = 0;
-	param_1->m2B = 0x2d;
+	param_1->m28_colorAndCode.m3_code = 0x2d;
 	param_1->m40 = 0;
 	param_1->m3A = 0;
 	param_1->m30 = 0;

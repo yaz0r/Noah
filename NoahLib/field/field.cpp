@@ -4502,6 +4502,45 @@ s32 computeDistanceBetweenActors(int param_1, int param_2)
         actorArray[param_2].m4C_scriptEntity->m20_position.vz.getIntegerPart() - actorArray[param_1].m4C_scriptEntity->m20_position.vz.getIntegerPart());
 }
 
+int EntityMoveCheck0Sub2(int param_1, int param_2, sFieldScriptEntity* param_3, int param_4)
+{
+    int iVar1;
+    long lVar2;
+    sVec2_s16 iVar3;
+    sVec2_s16 iVar4;
+    sVec2_s16 iVar5;
+    sVec2_s16 sxy2;
+    sVec2_s16 sxy0;
+
+    sxy2 = sVec2_s16::fromS32(param_1 * 0x10000 + param_2);
+    iVar1 = (param_3->m20_position).vz.getIntegerPart();
+    iVar5 = sVec2_s16::fromS32(((param_3->m20_position.vx.getIntegerPart() - (uint)(ushort)param_3->m18) - param_4) * 0x10000);
+    iVar4 = sVec2_s16::fromS32(iVar1 + (uint)(ushort)param_3->m1C + param_4);
+    sxy0 = sVec2_s16::fromS32(iVar5.asS32() + iVar4.asS32());
+    iVar3 = sVec2_s16::fromS32((param_3->m20_position.vx.getIntegerPart() + (uint)(ushort)param_3->m18 + param_4) * 0x10000);
+    iVar4 = sVec2_s16::fromS32(iVar3.asS32() + iVar4.asS32());
+    iVar1 = (iVar1 - (uint)(ushort)param_3->m1C) - param_4;
+    iVar3 = sVec2_s16::fromS32(iVar3.asS32() + iVar1);
+    iVar5 = sVec2_s16::fromS32(iVar5.asS32() + iVar1);
+    lVar2 = NCLIP(sxy0, iVar4, sxy2);
+    if ((((lVar2 < 0) || (lVar2 = NCLIP(iVar4, iVar3, sxy2), lVar2 < 0)) || (lVar2 = NCLIP(iVar3, iVar5, sxy2), lVar2 < 0)) || (lVar2 = NCLIP(iVar5, sxy0, sxy2), lVar2 < 0)) {
+        iVar1 = -1;
+    }
+    else {
+        iVar1 = 0;
+        if (fieldDebugDisable == 0) {
+            assert(0);
+            iVar1 = 0;
+        }
+    }
+    return iVar1;
+}
+
+void  startScriptsForCollisions(uint playerEntityIndex, sFieldEntity* pPlayerEntity, sFieldScriptEntity* pPlayerScriptEntity)
+{
+
+}
+
 void EntityMoveCheck0(uint playerEntityIndex, sFieldEntity* pPlayerEntity, sFieldScriptEntity* pPlayerScriptEntity)
 {
     std::array<FP_VEC4, 8> scratchBuffer; // this would normally be allocated in the cpu scratch buffer
@@ -4560,21 +4599,24 @@ void EntityMoveCheck0(uint playerEntityIndex, sFieldEntity* pPlayerEntity, sFiel
             }
             else
             {
-                assert(0);
-LAB_Field__80084438:
-                if ((pPlayerScriptEntity->m14_currentTriangleFlag & 0x400000U) == 0) {
-                    if ((((pCurrentFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags | playerFlags.m_rawFlags) & 0x80) == 0) && (noUpdatesToPartyMemebers == 0)) {
-                        testedEntityY = pCurrentFieldScriptEntity->m20_position.vy.getIntegerPart();
-                        testedEntityYWithOffset = testedEntityY - pCurrentFieldScriptEntity->m1A;
-                        goto LAB_Field__800844b8;
+                testedEntityY = EntityMoveCheck0Sub2(SFPStepAsInts[0], SFPStepAsInts[2], pCurrentFieldScriptEntity, 0);
+                if (testedEntityY == 0) {
+                LAB_Field__80084438:
+                    if ((pPlayerScriptEntity->m14_currentTriangleFlag & 0x400000U) == 0) {
+                        if ((((pCurrentFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags | playerFlags.m_rawFlags) & 0x80) == 0) && (noUpdatesToPartyMemebers == 0)) {
+                            testedEntityY = pCurrentFieldScriptEntity->m20_position.vy.getIntegerPart();
+                            testedEntityYWithOffset = testedEntityY - pCurrentFieldScriptEntity->m1A;
+                            goto LAB_Field__800844b8;
+                        }
                     }
-                }
-                else {
-                    if (fieldDebugDisable == 0) {
-                        assert(0);
+                    else {
+                        if (fieldDebugDisable == 0) {
+                            assert(0);
+                        }
                     }
+                    continue;
                 }
-                continue;
+                pCurrentFieldScriptEntity->m4_flags &= ~0xC00001;
             }
         }
         else
@@ -5183,6 +5225,13 @@ void updateScriptAndMoveEntities()
                 pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags &= ~0x801;
             }
         }
+    }
+
+    if (fieldDebugDisable == 0) {
+        assert(0);
+    }
+    if ((fieldRandomBattleVar == 0) && (noUpdatesToPartyMemebers == '\0')) {
+        startScriptsForCollisions(playerControlledActor, &actorArray[playerControlledActor], actorArray[playerControlledActor].m4C_scriptEntity);
     }
 
     MissingCode();

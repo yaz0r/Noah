@@ -92,7 +92,6 @@ struct sSpriteActor
 	sFieldEntitySub4_B4* m20;
 	sFieldEntitySub4_110* m24;
 	sColorAndCode m28_colorAndCode;
-	s8 m2B;
 	s16 m2C_scale;
 	s16 m30;
 	s16 m32;
