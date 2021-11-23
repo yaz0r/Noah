@@ -370,14 +370,16 @@ int showDialogWindowForActor(int actorId, int mode)
 		}
 	}
 
-    pCurrentFieldScriptActor->m84 &= 0xFFFF; // clear upper part
-    int flagFromScript = pCurrentFieldScriptActor->m84;
+    int old84 = pCurrentFieldScriptActor->m84;
+    int windowDisplayMode = old84 & 0xffff;
+    pCurrentFieldScriptActor->m84 = windowDisplayMode;
+    int flagFromScript = windowDisplayMode;
 	if (pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 3] != 0) {
-        flagFromScript = (pCurrentFieldScriptActor->m84 & 0xFF00) | pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 3];
-        pCurrentFieldScriptActor->m84 |= (flagFromScript << 16);
+        flagFromScript = old84 & 0xff00 | pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 3];
+        pCurrentFieldScriptActor->m84 = windowDisplayMode | flagFromScript << 0x10;
 	}
 
-    int windowDisplayMode = (flagFromScript >> 4) & 3;
+    windowDisplayMode = (flagFromScript >> 4) & 3;
 
     int boxY = 0x10;
     int projectedPosition[2];
@@ -431,7 +433,7 @@ int showDialogWindowForActor(int actorId, int mode)
                 projectedPosition[0] = 0xa0;
             }
             int bVar2;
-            if ((pCurrentFieldScriptActor->m80_DialogAvatarFace != 0xff) && (bVar2 = (int)dialogBoxWidth < 0x18, (flagFromScript & 2) == 0)) {
+            if ((pCurrentFieldScriptActor->m80_DialogAvatarFace != -1) && (bVar2 = (int)dialogBoxWidth < 0x18, (flagFromScript & 2) == 0)) {
                 dialogBoxWidth = dialogBoxWidth + 0x11;
                 if (bVar2) {
                     dialogBoxWidth = 0x29;
@@ -456,12 +458,13 @@ LAB_Field__8009ca64:
 	if (0x134 < (int)(boxX2 + dialogBoxWidth * 4)) {
 		boxX3 = (short)dialogBoxWidth * -4 + 0x124;
 	}
-    int boxY2 = boxY + 8;
+    int boxY22 = boxY + 8;
 	if (boxY < 0x10) {
         boxY = 0x10;
-        boxY2 = 0x18;
+        boxY22 = 0x18;
 	}
-	if (0xd4 < (int)(boxY2 + dialogBoxHeight * 0xe)) {
+    int boxY2 = (short)boxY;
+	if (0xd4 < (int)(boxY22 + dialogBoxHeight * 0xe)) {
         boxY2 = (short)dialogBoxHeight * -0xe + 0xcc;
 	}
 	if ((mode == 0) || (mode == 3)) {
@@ -495,7 +498,7 @@ LAB_Field__8009ca64:
 			flags = 0x400;
 		}
 	}
-	createDialogWindow((int)boxX3, (int)boxY, dialogIndex, windowIndex, dialogBoxWidth, dialogBoxHeight, currentFieldActorId, actorId, mode, flags, (pCurrentFieldScriptActor->m84 >> 16));
+	createDialogWindow((int)boxX3, (int)boxY2, dialogIndex, windowIndex, dialogBoxWidth, dialogBoxHeight, currentFieldActorId, actorId, mode, flags, (pCurrentFieldScriptActor->m84 >> 16));
 	flagWindowOpenBF(windowIndex);
 	pCurrentFieldScriptActor->m104_rotation |= 0x8000;
     pCurrentFieldScriptActor->mCC_scriptPC += 4;
