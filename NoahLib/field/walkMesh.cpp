@@ -60,10 +60,10 @@ void sWalkMesh::init(const std::vector<u8>& input)
         }
     }
 
-    m_materials.reserve(numMaxMaterials);
+    m_materials.reserve(numMaxMaterials+1);
     u32 material_offset = READ_LE_U32(input.begin() + 4 + 0x10);
     std::vector<u8>::const_iterator material_data = input.begin() + material_offset;
-    for (int i=0; i<numMaxMaterials; i++)
+    for (int i=0; i<numMaxMaterials+1; i++)
     {
         m_materials.push_back(READ_LE_U32(material_data + 4 * i));
     }

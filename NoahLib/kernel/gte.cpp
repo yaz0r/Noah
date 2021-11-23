@@ -69,8 +69,8 @@ s16& IR1 = (CP2D.p[9].sw.l);
 s16& IR2 = (CP2D.p[10].sw.l);
 s16& IR3 = (CP2D.p[11].sw.l);
 u32& SXY0 = (CP2D.p[12].d);
-#define SX0 (CP2D.p[12].sw.l)
-#define SY0 (CP2D.p[12].sw.h)
+s16& SX0 = (CP2D.p[12].sw.l);
+s16& SY0 = (CP2D.p[12].sw.h);
 u32& SXY1 = (CP2D.p[13].d);
 #define SX1 (CP2D.p[13].sw.l)
 #define SY1 (CP2D.p[13].sw.h)

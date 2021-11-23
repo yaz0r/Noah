@@ -31,11 +31,14 @@ struct sFieldScriptEntityScriptSlot
     union {
         struct {
             u32 m0 : 16;
-            u32 m16 : 2;
+            u32 m16_status : 2;
             u32 m18 : 4;
             u32 m22 : 1;
             u32 m23_walkMode : 2;
-            u32 m25X : 5;
+            u32 m25 : 1;
+            u32 m26 : 1;
+            u32 m27 : 2;
+            u32 m28X : 1;
         };
         u32 raw;
     } m4_flags; // bit 18, size 4
@@ -101,7 +104,7 @@ struct sFieldScriptEntity
     s32 mF0;
     std::array<s16, 3> mF4_scale3d;
     std::array<s8, 6> mFC;
-    s16 m102_randomSeed;
+    s16 m102_numSteps;
     s16 m104_rotation;
     s16 m106_currentRotation;
     s16 m108_rotation3;
@@ -175,7 +178,6 @@ extern int asyncLoadingVar1;
 extern int asyncLoadingVar2;
 extern int fieldExecuteVar1;
 
-extern const std::array<u16, 8> actorDirectionTable3;
 extern std::array<sSpriteActorAnimationBundle, 3> partyCharacterBuffers;
 extern s16 actorCameraTracked;
 extern s32 pcInitVar1;
@@ -233,6 +235,7 @@ extern s32 fieldExecuteVar3;
 extern s16 fieldRandomBattleVar;
 
 extern const std::array<u16, 8> actorDirectionTable;
+extern const std::array<u16, 8> actorDirectionTable2;
 extern const std::array<u16, 8> actorDirectionTable3;
 
 extern s32 load2dAnimVar;
@@ -353,3 +356,6 @@ void setupRGBFaderSlot0_fadeIn(int);
 void setupRGBCalcSlot0_fadeToBlack(int);
 
 void setPolyUV(POLY_FT4* poly, ushort u0, ushort v0, ushort u1, ushort v1, ushort u2, ushort v2, ushort u3, ushort v3);
+
+void updateEntityEventCode3Sub1(sSpriteActor* param_1, ushort rotation, sFieldEntity* param_3);
+void updateEntityEventCode4(sSpriteActor* param_1, int param_2, sFieldEntity* param_3);

@@ -21,6 +21,66 @@ ImVec2 oldWindowSize = { -1,-1 };
 
 bgfx::ProgramHandle getLineShader();
 
+void drawLine(int viewIndex, const std::array<s16, 3>& v0, const std::array<s16, 3>& v1)
+{
+    {
+        bgfx::VertexLayout layout;
+        layout
+            .begin()
+            .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
+            .add(bgfx::Attrib::Color0, 4, bgfx::AttribType::Float)
+            .end();
+
+        bgfx::TransientVertexBuffer vertexBuffer;
+        bgfx::TransientIndexBuffer indexBuffer;
+        bgfx::allocTransientBuffers(&vertexBuffer, layout, 2, &indexBuffer, 2);
+
+        struct sVertice
+        {
+            float v[3];
+            float color[4];
+        };
+
+        sVertice* pVertices = (sVertice*)vertexBuffer.data;
+        u16* pIndices = (u16*)indexBuffer.data;
+
+        for (int i = 0; i < 2; i++)
+        {
+            pVertices[i].color[0] = 0.f;
+            pVertices[i].color[1] = 1.f;
+            pVertices[i].color[2] = 1.f;
+            pVertices[i].color[3] = 1.f;
+        }
+
+        float halfScale = 10;
+
+        pVertices[0].v[0] = v0[0];
+        pVertices[0].v[1] = v0[1];
+        pVertices[0].v[2] = v0[2];
+
+        pVertices[1].v[0] = v1[0];
+        pVertices[1].v[1] = v1[1];
+        pVertices[1].v[2] = v1[2];
+
+        pIndices[0] = 0;
+        pIndices[1] = 1;
+
+        bgfx::setState(0 | BGFX_STATE_WRITE_RGB
+            | BGFX_STATE_WRITE_A
+            | BGFX_STATE_WRITE_Z
+            | BGFX_STATE_DEPTH_TEST_LEQUAL
+            | BGFX_STATE_CULL_CW
+            | BGFX_STATE_MSAA
+            | BGFX_STATE_PT_LINES
+        );
+
+        bgfx::setVertexBuffer(0, &vertexBuffer);
+        bgfx::setIndexBuffer(&indexBuffer);
+
+        bgfx::submit(viewIndex, getLineShader());
+    }
+}
+
 void drawCube(int viewIndex, float* modelMatrix)
 {
     bgfx::setTransform(modelMatrix);
@@ -330,6 +390,14 @@ void fieldViewDebug_step()
         bgfx::touch(fieldDebugger_bgfxView);
 
         walkMesh.bgfxRender(fieldDebugger_bgfxView);
+
+        for (int i=0; i<fieldTriggerData.size(); i++)
+        {
+            drawLine(fieldDebugger_bgfxView, fieldTriggerData[i].m0, fieldTriggerData[i].m6);
+            drawLine(fieldDebugger_bgfxView, fieldTriggerData[i].m6, fieldTriggerData[i].mC);
+            drawLine(fieldDebugger_bgfxView, fieldTriggerData[i].mC, fieldTriggerData[i].m12);
+            drawLine(fieldDebugger_bgfxView, fieldTriggerData[i].m12, fieldTriggerData[i].m0);
+        }
 
         for (int i=0; i<actorArray.size(); i++)
         {

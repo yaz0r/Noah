@@ -591,18 +591,18 @@ long RotAverage4(SFP_VEC4* v0, SFP_VEC4* v1, SFP_VEC4* v2, SFP_VEC4* v3, sVec2_s
 
 long NCLIP(sVec2_s16 sxy0, sVec2_s16 sxy1, sVec2_s16 sxy2)
 {
-	s16 SX0;
-	s16 SY0;
-	s16 SX1;
-	s16 SY1;
-	s16 SX2;
-	s16 SY2;
+    s16 SX0;
+    s16 SY0;
+    s16 SX1;
+    s16 SY1;
+    s16 SX2;
+    s16 SY2;
 
-	sxy0.get(SY0, SX0);
-	sxy1.get(SY1, SX1);
-	sxy2.get(SY2, SX2);
+    sxy0.get(SX0, SY0);
+    sxy1.get(SX1, SY1);
+    sxy2.get(SX2, SY2);
 
-	return ((int64_t)(SX0 * SY1) + (SX1 * SY2) + (SX2 * SY0) - (SX0 * SY2) - (SX1 * SY0) - (SX2 * SY1));
+    return -((int64_t)(SX0 * SY1) + (SX1 * SY2) + (SX2 * SY0) - (SX0 * SY2) - (SX1 * SY0) - (SX2 * SY1));
 }
 
 void OuterProduct12(FP_VEC4* a, FP_VEC4* b, FP_VEC4* r)

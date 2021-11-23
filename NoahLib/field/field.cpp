@@ -532,7 +532,7 @@ void initFieldScriptEntityValues(int index)
     {
         pFieldScriptEntity->m8C_scriptSlots[i].m2_delay = 0;
         pFieldScriptEntity->m8C_scriptSlots[i].m0_scriptPC = -1;
-        pFieldScriptEntity->m8C_scriptSlots[i].m4_flags.m16 = 0;
+        pFieldScriptEntity->m8C_scriptSlots[i].m4_flags.m16_status = 0;
         pFieldScriptEntity->m8C_scriptSlots[i].m4_flags.m18 = 0xF;
         pFieldScriptEntity->m8C_scriptSlots[i].m4_flags.m22 = 0;
         pFieldScriptEntity->m8C_scriptSlots[i].m4_flags.m23_walkMode = 0;
@@ -562,7 +562,7 @@ void initFieldScriptEntityValues(int index)
 
     pFieldScriptEntity->m134.m5 = 0;
 
-    pFieldScriptEntity->m102_randomSeed = rand();
+    pFieldScriptEntity->m102_numSteps = rand();
 
     pFieldScriptEntity->mF4_scale3d[0] = 0x1000;
     pFieldScriptEntity->mF4_scale3d[1] = 0x1000;
@@ -1858,6 +1858,11 @@ const std::array<u16, 8> actorDirectionTable = {
     0x8400,  0x8600,  0x8800,  0x8A00
 };
 
+const std::array<u16, 8> actorDirectionTable2 = {
+    0x8C00,  0x8E00,  0x8000,  0x8200,
+    0x8400,  0x8600,  0x8800,  0x8A00
+};
+
 const std::array<u16, 8> actorDirectionTable3 = {
     0x8C00,  0x8400,  0x8800,  0x8000,
     0x8A00,  0x8E00,  0x8600,  0x8200
@@ -1896,7 +1901,15 @@ int findCharacterInParty(int param_1)
 
 void updateScriptActor3dRotation(int index)
 {
-    MissingCode();
+    sFieldEntity* psVar1;
+    FP_VEC4 local_20;
+
+    psVar1 = &actorArray[index];
+    local_20.vx = (long)psVar1->m4C_scriptEntity->mF4_scale3d[0];
+    local_20.vy = (long)psVar1->m4C_scriptEntity->mF4_scale3d[1];
+    local_20.vz = (long)psVar1->m4C_scriptEntity->mF4_scale3d[2];
+    createRotationMatrix(&actorArray[index].m50_modelRotation, &actorArray[index].mC_matrix);
+    ScaleMatrix(&actorArray[index].mC_matrix, &local_20);
 }
 
 int spriteWalkToPositionOrActor(int param_1)
@@ -3714,10 +3727,10 @@ int updateEntityEventCode3Sub2(FP_VEC3* param_1, sFieldScriptEntity* param_2)
 
         std::vector<sVec2_s16>& pasVar3 = param_2->m114_movementBoundingZone;
         std::array<sVec2_s16, 4> boundingZone;
-        boundingZone[0].set(pasVar3[0].vx, pasVar3[0].vx);
-        boundingZone[1].set(pasVar3[1].vx, pasVar3[1].vx);
-        boundingZone[2].set(pasVar3[2].vx, pasVar3[2].vx);
-        boundingZone[3].set(pasVar3[3].vx, pasVar3[3].vx);
+        boundingZone[0].set(pasVar3[0].vx, pasVar3[0].vy);
+        boundingZone[1].set(pasVar3[1].vx, pasVar3[1].vy);
+        boundingZone[2].set(pasVar3[2].vx, pasVar3[2].vy);
+        boundingZone[3].set(pasVar3[3].vx, pasVar3[3].vy);
 
         if ((NCLIP(boundingZone[0], boundingZone[1], position) < 0) || (NCLIP(boundingZone[1], boundingZone[2], position) < 0) || (NCLIP(boundingZone[2], boundingZone[3], position) < 0)) {
             return -1;
@@ -4539,6 +4552,8 @@ int EntityMoveCheck0Sub2(int param_1, int param_2, sFieldScriptEntity* param_3, 
     return iVar1;
 }
 
+int startScriptsForCollisionsVar0 = 0;
+
 void  startScriptsForCollisions(uint playerEntityIndex, sFieldEntity* pPlayerEntity, sFieldScriptEntity* pPlayerScriptEntity)
 {
     bool bTrigger = false;
@@ -4551,7 +4566,39 @@ void  startScriptsForCollisions(uint playerEntityIndex, sFieldEntity* pPlayerEnt
         if (((pTestedScriptEntity->m0_fieldScriptFlags.m0) == 0) && (pPlayerScriptEntity->m74 != actorId)) {
             s32 yDiff = pTestedScriptEntity->m20_position.vy.getIntegerPart() + pTestedScriptEntity->m60[1];
             if ((pTestedScriptEntity->m4_flags & 0x180) != 0) {
-                assert(0);
+                if ((pTestedScriptEntity->m4_flags & 0x100) == 0) {
+                    startScriptsForCollisionsVar0 = 0;
+                }
+                else {
+                    if ((((padButtonForDialogs & 0x20) == 0) || (bTrigger)) || ((pTestedScriptEntity->m4_flags & 0x4000000) != 0)) {
+                        if ((pTestedScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0xa20000) == 0) {
+                            scriptIndexToStart = '\x03';
+                            newValueInFlags = 4;
+                            FP_VEC4 tempVec1;
+                            tempVec1.vx = (((int)(pTestedScriptEntity->m20_position).vx.getIntegerPart()) - pPlayerScriptEntity->m20_position.vx.getIntegerPart()) + (int)pTestedScriptEntity->m60[0];
+                            tempVec1.vz = (((int)(pTestedScriptEntity->m20_position).vz.getIntegerPart()) - pPlayerScriptEntity->m20_position.vz.getIntegerPart()) + (int)pTestedScriptEntity->m60[2];
+                            int lVar5 = ratan2(tempVec1.vz, tempVec1.vx);
+                            int bVar1 = startScriptsForCollisionsVar0 == 0;
+                            pTestedScriptEntity->m12C_flags = pTestedScriptEntity->m12C_flags & 0xfffff1ff | (-(lVar5 >> 9) & 7U) << 9;
+                            if ((bVar1) && ((pTestedScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x8000000) != 0)) {
+                                startScriptsForCollisionsVar0 = 1;
+                                (pPlayerEntity->m4_pVramSpriteSheet->mC_step).vy = 0;
+                            }
+                        }
+                    }
+                    else {
+                        if (((pTestedScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x220000) == 0) && (windowOpenBF == 0)) {
+                            bTrigger = true;
+                            scriptIndexToStart = '\x02';
+                            newValueInFlags = 3;
+                            FP_VEC4 tempVec1;
+                            tempVec1.vx = (((int)(pTestedScriptEntity->m20_position).vx.getIntegerPart()) - pPlayerScriptEntity->m20_position.vx.getIntegerPart()) + (int)pTestedScriptEntity->m60[0];
+                            tempVec1.vz = (((int)(pTestedScriptEntity->m20_position).vz.getIntegerPart()) - pPlayerScriptEntity->m20_position.vz.getIntegerPart()) + (int)pTestedScriptEntity->m60[2];
+                            int lVar5 = ratan2(tempVec1.vz, tempVec1.vx);
+                            pTestedScriptEntity->m12C_flags = pTestedScriptEntity->m12C_flags & 0xfffff1ff | -lVar5 & 0xe00U;
+                        }
+                    }
+                }
             }
             if ((pTestedScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x2000) == 0) {
                 FP_VEC4 tempVec1;
@@ -4661,6 +4708,12 @@ void  startScriptsForCollisions(uint playerEntityIndex, sFieldEntity* pPlayerEnt
     }
 }
 
+int EntityMoveCheck0Sub1(int actorId, sSpriteActor* param_2, int stepX, int stepZ, int* param_5, FP_VEC4* outputNormal)
+{
+    MissingCode();
+    return -1;
+}
+
 void EntityMoveCheck0(uint playerEntityIndex, sFieldEntity* pPlayerEntity, sFieldScriptEntity* pPlayerScriptEntity)
 {
     std::array<FP_VEC4, 8> scratchBuffer; // this would normally be allocated in the cpu scratch buffer
@@ -4741,7 +4794,24 @@ void EntityMoveCheck0(uint playerEntityIndex, sFieldEntity* pPlayerEntity, sFiel
         }
         else
         {
-            assert(0);
+            FP_VEC4 local_98;
+            testedEntityY = EntityMoveCheck0Sub1(actorId, actorArray[actorId].m4_pVramSpriteSheet, SFPStepAsInts[0], SFPStepAsInts[2], &testedEntityYWithOffset, &local_98);
+            if (testedEntityY != 0) {
+                pCurrentFieldScriptEntity->m4_flags = pCurrentFieldScriptEntity->m4_flags & 0xff3fffff;
+                continue;
+            }
+            if (fieldDebugDisable == 0) {
+                assert(0);
+            }
+            pCurrentFieldScriptEntity->m4_flags = pCurrentFieldScriptEntity->m4_flags | 0x100;
+            testedEntityY = testedEntityYWithOffset + (uint)(ushort)pCurrentFieldScriptEntity->m1A;
+            if ((byte)pPlayerScriptEntity->m74 != actorId) {
+                testedEntityY = testedEntityYWithOffset + testedEntityY;
+            }
+            (pPlayerScriptEntity->m50_surfaceNormal).vx = local_98[0];
+            (pPlayerScriptEntity->m50_surfaceNormal).vy = local_98[1];
+            (pPlayerScriptEntity->m50_surfaceNormal).vz = local_98[2];
+            pCurrentFieldScriptEntity->m4_flags |= 0x4000;
 
 LAB_Field__800844b8:
             if ((pPlayerScriptEntity->m74 == actorId) && (playerFlags40800 == 0)) {

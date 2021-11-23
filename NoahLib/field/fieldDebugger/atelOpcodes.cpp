@@ -459,7 +459,8 @@ void initOpcodeTable()
 		.addArgumentU16OrVar()
 		.end();
 
-	m_opcode[0x74]
+    m_opcode[0x74]
+        .setName("PLAY_SOUND_EFFECT")
 		.addArgumentU16OrVar()
 		.end();
 

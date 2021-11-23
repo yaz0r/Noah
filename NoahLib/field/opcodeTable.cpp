@@ -19,6 +19,7 @@ void initOpcodes()
     fieldScriptOpcodes[0x0B] = OP_INIT_ENTITY_NPC;
     fieldScriptOpcodes[0x0C] = OP_UPDATE_CHARACTER_INFINITLY;
     fieldScriptOpcodes[0x0D] = OP_RETURN;
+    fieldScriptOpcodes[0x10] = OP_10;
     fieldScriptOpcodes[0x16] = OP_INIT_ENTITY_PC;
     fieldScriptOpcodes[0x15] = OP_15;
     fieldScriptOpcodes[0x17] = OP_17;
@@ -27,6 +28,7 @@ void initOpcodes()
     fieldScriptOpcodes[0x1A] = OP_1A;
     fieldScriptOpcodes[0x1C] = OP_SET_CURRENT_ACTOR_ELEVATION;
     fieldScriptOpcodes[0x1D] = OP_SET_CURRENT_ACTOR_POSITION_3D;
+    fieldScriptOpcodes[0x1E] = OP_UPDATE_ELEVATION;
     fieldScriptOpcodes[0x1F] = OP_1F;
     fieldScriptOpcodes[0x20] = OP_SET_CURRENT_ACTOR_FLAGS;
     fieldScriptOpcodes[0x21] = OP_21;
@@ -80,8 +82,9 @@ void initOpcodes()
     fieldScriptOpcodes[0x6D] = OP_GET_ANGLE_COS;
     fieldScriptOpcodes[0x6E] = OP_GET_ANGLE_SIN;
     fieldScriptOpcodes[0x6F] = OP_ROTATE_TO_ACTOR;
+    fieldScriptOpcodes[0x70] = OP_ROTATE_AWAY_FROM_ACTOR;
     fieldScriptOpcodes[0x72] = OP_72;
-    fieldScriptOpcodes[0x74] = OP_74;
+    fieldScriptOpcodes[0x74] = OP_PLAY_SOUND_EFFECT;
     fieldScriptOpcodes[0x75] = OP_PLAY_MUSIC;
     fieldScriptOpcodes[0x76] = OP_76;
     fieldScriptOpcodes[0x79] = OP_RESTORE_HP;
@@ -90,6 +93,7 @@ void initOpcodes()
     fieldScriptOpcodes[0x85] = OP_IF_GAMEPROGRESS_GREATER;
     fieldScriptOpcodes[0x86] = OP_IF_GAMEPROGRESS_EQUAL;
     fieldScriptOpcodes[0x87] = OP_SET_GAMEPROGRESS;
+    fieldScriptOpcodes[0x92] = OP_92;
     fieldScriptOpcodes[0x93] = OP_ADD_ENDITY_TO_FIELD1721_LIST;
     fieldScriptOpcodes[0x98] = OP_CHANGE_FIELD_WHEN_READY2;
     fieldScriptOpcodes[0x99] = OP_99;
@@ -98,16 +102,19 @@ void initOpcodes()
     fieldScriptOpcodes[0x9C] = OP_WAIT_DIALOG;
     fieldScriptOpcodes[0x9D] = OP_9D;
     fieldScriptOpcodes[0xA0] = OP_SET_SCREEN_GEOMETRY;
+    fieldScriptOpcodes[0xA2] = OP_A2;
     fieldScriptOpcodes[0xA3] = OP_SET_DESIRED_CAMERA_POSITION;
     fieldScriptOpcodes[0xA4] = OP_A4;
     fieldScriptOpcodes[0xA7] = OP_UPDATE_CHARACTER;
     fieldScriptOpcodes[0xA9] = OP_SETUP_MULTICHOICE;
     fieldScriptOpcodes[0xA8] = OP_A8;
+    fieldScriptOpcodes[0xAA] = OP_AA;
     fieldScriptOpcodes[0xAC] = OP_AC;
     fieldScriptOpcodes[0xB3] = OP_START_FADE_IN;
     fieldScriptOpcodes[0xB4] = OP_START_FADE_TO_BLACK;
     fieldScriptOpcodes[0xB6] = OP_B6;
     fieldScriptOpcodes[0xB7] = OP_B7;
+    fieldScriptOpcodes[0xB8] = OP_B8;
     fieldScriptOpcodes[0xBB] = OP_REMOVE_FROM_AVAILABLE_PARTY;
     fieldScriptOpcodes[0xBC] = OP_INIT_ENTITY_SCRIPT;
     fieldScriptOpcodes[0xBE] = OP_ROTATION_3D_YAW_SUBSTRACT;
