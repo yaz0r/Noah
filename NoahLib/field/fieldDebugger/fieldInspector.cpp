@@ -933,7 +933,7 @@ public:
             {
             case 0:
                 dynamicOpcode
-                    .setComment("TODO: this might be very incorrect")
+                    .setName("SCREEN_DISTORTION_FADE_OUT_START")
                     .addArgumentByte()
                     .addArgumentU16OrVar()
                     .end();
@@ -941,21 +941,21 @@ public:
                 break;
             case 1:
                 dynamicOpcode
-                    .setComment("TODO: this might be very incorrect")
+                    .setName("SCREEN_DISTORTION_FADE_OUT_WAIT")
                     .addArgumentByte()
                     .end();
                 handleGenericOpcode(dynamicOpcode, true);
                 break;
             case 2:
                 dynamicOpcode
-                    .setComment("TODO: this might be very incorrect")
+                    .setName("SCREEN_DISTORTION_FADE_OUT_FINISH")
                     .addArgumentByte()
                     .end();
                 handleGenericOpcode(dynamicOpcode, true);
                 break;
             case 3:
                 dynamicOpcode
-                    .setComment("TODO: this might be very incorrect")
+                    .setName("SCREEN_DISTORTION_FADE_OUT_CLEANUP")
                     .addArgumentByte()
                     .end();
                 handleGenericOpcode(dynamicOpcode, true);

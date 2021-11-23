@@ -805,14 +805,15 @@ void initOpcodeTable()
 		.end();
 
 	m_opcode[0xEC]
+        .setName("ORBIT")
 		.addArgumentByte("mode")
-		.addArgumentS16OrVar(0x80, "InputVector")
-		.addArgumentS16OrVar(0x40)
-		.addArgumentS16OrVar(0x20)
+		.addArgumentS16OrVar(0x80, "yOrbit")
+		.addArgumentS16OrVar(0x40, "angle")
+		.addArgumentS16OrVar(0x20, "magnitude")
 		.addSignControlByte()
-		.addArgumentVarIndex("OutputVector")
-		.addArgumentVarIndex()
-		.addArgumentVarIndex()
+		.addArgumentVarIndex("OutputX")
+		.addArgumentVarIndex("OutputY")
+		.addArgumentVarIndex("OutputZ")
 		.setComment("Mode0: cameraTargetOverride, Mode1: cameraTarget, Mode2: cameraPositionOverride, Mode3: desiredCameraPosition")
 		.end();
 

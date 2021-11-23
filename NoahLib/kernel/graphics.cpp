@@ -801,3 +801,13 @@ void POLY_FT3::execute()
 	}
 }
 
+void DR_MOVE::execute()
+{
+    MissingCode();
+}
+
+void SetDrawMove(DR_MOVE* p, RECT* rect, int x, int y)
+{
+    MissingCode();
+}
+

@@ -130,7 +130,7 @@ void initOpcodes()
     fieldScriptOpcodes[0xE5] = OP_SETUP_FOG;
     fieldScriptOpcodes[0xE6] = OP_E6;
     fieldScriptOpcodes[0xE7] = OP_E7;
-    fieldScriptOpcodes[0xEC] = OP_EC;
+    fieldScriptOpcodes[0xEC] = ORBIT;
     fieldScriptOpcodes[0xEE] = OP_EE;
     fieldScriptOpcodes[0xEF] = OP_WAIT_CAMERA;
     fieldScriptOpcodes[0xF1] = OP_SETUP_SCREEN_EFFECT1;
@@ -159,7 +159,7 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0x1C] = OPX_1C;
     fieldScriptOpcodes_EX[0x21] = OPX_21;
     fieldScriptOpcodes_EX[0x26] = OP_SETUP_SCREEN_DISTORTION;
-    fieldScriptOpcodes_EX[0x27] = OPX_27;
+    fieldScriptOpcodes_EX[0x27] = OP_SCREEN_DISTORTION_FADE_OUT;
     fieldScriptOpcodes_EX[0x3A] = OP_SET_PARTY_FRAME_MASK;
     fieldScriptOpcodes_EX[0x3C] = OPX_3C;
     fieldScriptOpcodes_EX[0x3D] = OPX_3D;

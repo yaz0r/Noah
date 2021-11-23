@@ -8,6 +8,7 @@
 #include "fieldGraphicObject.h"
 #include "sprite/spriteSetup.h"
 #include "dialogWindows.h"
+#include "screenDistortion.h"
 
 // TODO: Cleanup
 s16 findTriangleInWalkMesh(int posX, int posZ, int walkmeshId, SFP_VEC4* param_4, FP_VEC4* param_5);
@@ -2324,59 +2325,40 @@ void OPX_13()
 
 void OP_SETUP_SCREEN_DISTORTION()
 {
-    screenDistortionConfigured = 1;
-    MissingCode();
+    setupScreenDistortion(0);
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 0xf;
-
-    MissingCode();
-    screenDistortionAvailable = 0;
 }
 
-void OPX_27()
+void OP_SCREEN_DISTORTION_FADE_OUT()
 {
-    byte bVar1;
-    ushort uVar2;
-    int uVar3;
+    switch (pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1])
+    {
+    case 0:
+        setScreenDistortionParams(0, 0, 0, 0, 0, 0, getImmediateOrVariableUnsigned(2));
+        screenDistortionFadeOut = 1;
+        pCurrentFieldScriptActor->mCC_scriptPC += 4;
+        break;
+    case 1:
+        if (screenDistortionRunning == 0) {
+            pCurrentFieldScriptActor->mCC_scriptPC += 2;
+        }
+        else
+        {
+            pCurrentFieldScriptActor->mCC_scriptPC -= 1;
+        }
+        break;
+    case 2:
+        screenDistortionRunning = 0;
+        pCurrentFieldScriptActor->mCC_scriptPC += 2;
+        break;
+    case 3:
+        freeScreenDistortion();
+        pCurrentFieldScriptActor->mCC_scriptPC += 2;
+        break;
+    default:
+        assert(0);
+    }
 
-    uVar2 = pCurrentFieldScriptActor->mCC_scriptPC;
-    bVar1 = pCurrentFieldScriptFile[uVar2 + 1];
-    if (bVar1 == 1) {
-        if (screenDistortionConfigured == 0) {
-            pCurrentFieldScriptActor->mCC_scriptPC = uVar2 + 2;
-            breakCurrentScript = 1;
-            return;
-        }
-        pCurrentFieldScriptActor->mCC_scriptPC = uVar2 - 1;
-        breakCurrentScript = 1;
-        return;
-    }
-    if (bVar1 < 2) {
-        if (bVar1 != 0) {
-            breakCurrentScript = 1;
-            return;
-        }
-        uVar3 = getImmediateOrVariableUnsigned(2);
-        MissingCode();
-        //setScreenDistortionParams(0, 0, 0, 0, 0, 0, uVar3);
-        screenDistortionAvailable = 1;
-        uVar2 = pCurrentFieldScriptActor->mCC_scriptPC + 4;
-    }
-    else {
-        if (bVar1 == 2) {
-            screenDistortionConfigured = 0;
-            pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 2;
-            breakCurrentScript = 1;
-            return;
-        }
-        if (bVar1 != 3) {
-            breakCurrentScript = 1;
-            return;
-        }
-        MissingCode();
-        //freeScreenDistortion();
-        uVar2 = pCurrentFieldScriptActor->mCC_scriptPC + 2;
-    }
-    pCurrentFieldScriptActor->mCC_scriptPC = uVar2;
     breakCurrentScript = 1;
 }
 
@@ -2693,7 +2675,7 @@ void OP_E7()
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 7;
 }
 
-void OP_EC_sub(int* param_1, int* param_2, short param_3)
+void computeOrbit(FP_VEC3* param_1, FP_VEC3* param_2, s16 orbitRotation)
 {
     MATRIX MStack88;
     FP_VEC4 local_38;
@@ -2702,79 +2684,48 @@ void OP_EC_sub(int* param_1, int* param_2, short param_3)
 
     local_18.vx = 0;
     local_18.vz = 0;
-    local_18.vy = param_3;
+    local_18.vy = orbitRotation;
     PushMatrix();
     createRotationMatrix(&local_18, &MStack88);
-    local_38.vx = *param_2 - *param_1;
-    local_38.vy = param_2[1] - param_1[1];
-    local_38.vz = param_2[2] - param_1[2];
+    local_38.vx = param_2->vx - param_1->vx;
+    local_38.vy = param_2->vy - param_1->vy;
+    local_38.vz = param_2->vz - param_1->vz;
     ApplyMatrixLV(&MStack88, &local_38, &local_28);
-    *param_1 = local_28.vx + *param_2;
-    param_1[2] = local_28.vz + param_2[2];
+    param_1->vx = local_28.vx + param_2->vx;
+    param_1->vz = local_28.vz + param_2->vz;
     PopMatrix();
     return;
 }
 
-void OP_EC(void)
-{
-    byte bVar1;
-    ushort uVar2;
-    int uVar3;
-    int iVar4;
-    int iVar5;
-    int iVar6;
-    int local_38;
-    int local_34;
-    int local_30;
-    int local_28;
-    int local_24;
-    int local_20;
+const std::array<FP_VEC3*, 4> cameraMapping = {
+    {
+        &cameraTargetOverride,
+        &desiredCameraTarget,
+        &cameraPositionOverride,
+        &desiredCameraPosition
+    }
+};
 
-    bVar1 = pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1];
-    if (bVar1 == 1) {
-        local_38 = desiredCameraTarget[0];
-        local_34 = desiredCameraTarget[1];
-        local_30 = desiredCameraTarget[2];
-    }
-    else {
-        if (bVar1 < 2) {
-            if (bVar1 == 0) {
-                local_38 = cameraTargetOverride[0];
-                local_34 = cameraTargetOverride[1];
-                local_30 = cameraTargetOverride[2];
-            }
-        }
-        else {
-            if (bVar1 == 2) {
-                local_38 = cameraPositionOverride[0];
-                local_34 = cameraPositionOverride[1];
-                local_30 = cameraPositionOverride[2];
-            }
-            else {
-                if (bVar1 == 3) {
-                    local_38 = desiredCameraPosition[0];
-                    local_34 = desiredCameraPosition[1];
-                    local_30 = desiredCameraPosition[2];
-                }
-            }
-        }
-    }
-    uVar3 = getVar80(2, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 8]);
-    iVar4 = getVar40(4, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 8]);
-    iVar5 = getVar20(6, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 8]);
-    iVar6 = (iVar4 * 0xb60 >> 8) + 0xc00;
-    iVar4 = getAngleSin(iVar6);
-    local_24 = (iVar4 * iVar5 * -0x20 >> 0x10) * (int)op99Var4 * 0x10 + local_34;
-    iVar4 = getAngleCos(iVar6);
-    local_28 = local_38;
-    local_20 = (iVar4 * iVar5 * 0x20 >> 0x10) * (int)op99Var4 * 0x10 + local_30;
-    OP_EC_sub(&local_28, &local_38, uVar3);
-    uVar2 = readU16FromScript(9);
-    setVar((uint)uVar2, local_28 >> 16);
-    uVar2 = readU16FromScript(0xb);
-    setVar((uint)uVar2, local_20 >> 16);
-    uVar2 = readU16FromScript(0xd);
-    setVar((uint)uVar2, local_24 >> 16);
+void ORBIT(void)
+{
+    FP_VEC3 vec = *cameraMapping[pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1]];
+
+    int orbitRotation = getVar80(2, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 8]);
+    int param2 = getVar40(4, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 8]);
+    int param3 = getVar20(6, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 8]);
+
+    int angle = (param2 * 0xb60 >> 8) + 0xc00;
+
+    FP_VEC3 vec2;
+    vec2.vy = (getAngleSin(angle) * param3 * -0x20 >> 0x10) * (int)op99Var4 * 0x10 + vec.vy;
+    vec2.vx = vec.vx;
+    vec2.vz = (getAngleCos(angle) * param3 * 0x20 >> 0x10) * (int)op99Var4 * 0x10 + vec.vz;
+
+    computeOrbit(&vec2, &vec, orbitRotation);
+    setVar(readU16FromScript(9), vec2.vx.getIntegerPart());
+    setVar(readU16FromScript(0xb), vec2.vz.getIntegerPart());
+    setVar(readU16FromScript(0xd), vec2.vy.getIntegerPart());
+
     fieldExectuteMaxCycles = fieldExectuteMaxCycles + 1;
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 0xf;
     return;
@@ -2782,69 +2733,11 @@ void OP_EC(void)
 
 void OP_EE()
 {
-    byte bVar1;
-    int local_10;
-    int local_c;
-    int local_8;
+    int sourceIndex = pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1];
+    int destIndex = pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 2];
 
-    bVar1 = pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1];
-    if (bVar1 == 1) {
-        local_10 = desiredCameraTarget[0];
-        local_c = desiredCameraTarget[1];
-        local_8 = desiredCameraTarget[2];
-    }
-    else {
-        if (bVar1 < 2) {
-            if (bVar1 == 0) {
-                local_10 = cameraTargetOverride[0];
-                local_c = cameraTargetOverride[1];
-                local_8 = cameraTargetOverride[2];
-            }
-        }
-        else {
-            if (bVar1 == 2) {
-                local_10 = cameraPositionOverride[0];
-                local_c = cameraPositionOverride[1];
-                local_8 = cameraPositionOverride[2];
-            }
-            else {
-                if (bVar1 == 3) {
-                    local_10 = desiredCameraPosition[0];
-                    local_c = desiredCameraPosition[1];
-                    local_8 = desiredCameraPosition[2];
-                }
-            }
-        }
-    }
-    bVar1 = pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 2];
-    if (bVar1 == 1) {
-        desiredCameraTarget[0] = local_10;
-        desiredCameraTarget[1] = local_c;
-        desiredCameraTarget[2] = local_8;
-    }
-    else {
-        if (bVar1 < 2) {
-            if (bVar1 == 0) {
-                cameraTargetOverride[0] = local_10;
-                cameraTargetOverride[1] = local_c;
-                cameraTargetOverride[2] = local_8;
-            }
-        }
-        else {
-            if (bVar1 == 2) {
-                cameraPositionOverride[0] = local_10;
-                cameraPositionOverride[1] = local_c;
-                cameraPositionOverride[2] = local_8;
-            }
-            else {
-                if (bVar1 == 3) {
-                    desiredCameraPosition[0] = local_10;
-                    desiredCameraPosition[1] = local_c;
-                    desiredCameraPosition[2] = local_8;
-                }
-            }
-        }
-    }
+    *cameraMapping[destIndex] = *cameraMapping[sourceIndex];
+
     fieldExectuteMaxCycles = fieldExectuteMaxCycles + 1;
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
 }

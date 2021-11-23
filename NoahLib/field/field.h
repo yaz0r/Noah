@@ -187,17 +187,17 @@ extern std::array<int, 3> unkPartyTable;
 
 extern s32 opA0_var0;
 extern s32 opA0_var1;
-extern s32 desiredCameraPosition[3];
-extern s32 cameraTargetOverride[3];
-extern s32 desiredCameraTarget[3];
-extern s32 cameraPositionOverride[3];
-extern s32 cameraInterpolationTargetStep[3];
-extern s32 cameraInterpolationTargetStartPosition[3];
-extern s32 cameraInterpolationPositionStep[3];
-extern s32 cameraInterpolationStartPosition[3];
-extern s32 cameraEye[3];
+extern FP_VEC3 desiredCameraPosition;
+extern FP_VEC3 cameraTargetOverride;
+extern FP_VEC3 desiredCameraTarget;
+extern FP_VEC3 cameraPositionOverride;
+extern FP_VEC3 cameraInterpolationTargetStep;
+extern FP_VEC3 cameraInterpolationTargetStartPosition;
+extern FP_VEC3 cameraInterpolationPositionStep;
+extern FP_VEC3 cameraInterpolationStartPosition;
+extern FP_VEC4 cameraEye;
 extern FP_VEC4 cameraEye2;
-extern s32 cameraAt[3];
+extern FP_VEC4 cameraAt;
 extern FP_VEC4 cameraAt2;
 extern u16 cameraInterpolationFlags;
 extern s16 cameraInterpolationTargetNumSteps;
@@ -276,9 +276,6 @@ extern s32 sceneSCRZ;
 extern u16 padButtonForField;
 
 extern int updateAllEntitiesSub2Var0;
-
-extern short screenDistortionConfigured;
-extern short screenDistortionAvailable;
 
 struct sFieldRenderContext
 {

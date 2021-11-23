@@ -73,6 +73,13 @@ struct DR_MODE : public sTag
 	virtual void execute() override;
 };
 
+struct DR_MOVE : public sTag
+{
+    u32 code[5];
+
+    virtual void execute() override;
+};
+
 struct DRAWENV
 {
 	RECT clip;
@@ -187,6 +194,8 @@ u16 GetTPage(int tp, int abr, int x, int y);
 DISPENV* SetDefDispEnv(DISPENV* env, int x, int y, int w, int h);
 DRAWENV* SetDefDrawEnv(DRAWENV* env, int x, int y, int w, int h);
 void SetDrawMode(DR_MODE* p, int dfe, int dtd, int tpage, RECT* tw);
+
+void SetDrawMove(DR_MOVE* p, RECT* rect, int x, int y);
 
 void SetTile(TILE* p);
 void SetSemiTrans(TILE* p, int abe);

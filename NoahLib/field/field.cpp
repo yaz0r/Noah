@@ -17,6 +17,7 @@
 #include "kernel/gte.h"
 #include "compass.h"
 #include "kernel/TIM.h"
+#include "screenDistortion.h"
 
 #include "SDL_gamecontroller.h"
 #include "SDL_keyboard.h"
@@ -102,9 +103,6 @@ int OP_A4Var2 = 0;
 s16 OP_B6SubVar0 = 0;
 s16 OP_B6Var1 = 0;
 s16 OP_B6Var2 = 0;
-
-short screenDistortionConfigured = 0;
-short screenDistortionAvailable = 0;
 
 const std::array<s8, 12> characterMappingTable = {
     0,1,2,3,4,5,6,7,8,2,6,0
@@ -261,7 +259,7 @@ void resetFieldDefault()
     fieldObjectRenderingVar2.vy = 0;
     fieldObjectRenderingVar2.vz = 0;
     fieldObjectRenderingVar2.vx = 0;
-    screenDistortionConfigured = 0;
+    screenDistortionRunning = 0;
     MissingCode();
     OPE7_param[2] = 0;
     OPE7_param[1] = 0;
@@ -383,7 +381,7 @@ void uploadNpcSpriteSheet(std::vector<u8>::iterator& pImageData, int x, int y)
 
 void setupField3d(std::vector<u8>::iterator input)
 {
-    computeMatrix(&cameraMatrix, (FP_VEC4*)cameraEye, (FP_VEC4*)cameraAt, &cameraUp);
+    computeMatrix(&cameraMatrix, &cameraEye, &cameraAt, &cameraUp);
     createRotationMatrix(&cameraProjectionAngles, &currentProjectionMatrix);
     MulRotationMatrix(&cameraMatrix, &currentProjectionMatrix);
 
@@ -2031,17 +2029,16 @@ void SetGeomOffset(int ofx, int ofy)
 s32 opA0_var0 = 0;
 s32 opA0_var1 = 0;
 
-s32 desiredCameraPosition[3] = { 0,0,0 };
-
-s32 cameraTargetOverride[3] = { 0,0,0 };
-s32 desiredCameraTarget[3] = { 0,0,0 };
-s32 cameraPositionOverride[3] = { 0,0,0 };
-s32 cameraInterpolationTargetStep[3] = { 0,0,0 };
-s32 cameraInterpolationTargetStartPosition[3] = { 0,0,0 };
-s32 cameraInterpolationPositionStep[3] = { 0,0,0 };
-s32 cameraInterpolationStartPosition[3] = { 0,0,0 };
-s32 cameraEye[3] = { 0,0,0 };
-s32 cameraAt[3] = { 0,0,0 };
+FP_VEC3 desiredCameraPosition = { 0,0,0 };
+FP_VEC3 cameraTargetOverride = { 0,0,0 };
+FP_VEC3 desiredCameraTarget = { 0,0,0 };
+FP_VEC3 cameraPositionOverride = { 0,0,0 };
+FP_VEC3 cameraInterpolationTargetStep = { 0,0,0 };
+FP_VEC3 cameraInterpolationTargetStartPosition = { 0,0,0 };
+FP_VEC3 cameraInterpolationPositionStep = { 0,0,0 };
+FP_VEC3 cameraInterpolationStartPosition = { 0,0,0 };
+FP_VEC4 cameraEye;
+FP_VEC4 cameraAt;
 FP_VEC4 cameraEye2;
 FP_VEC4 cameraAt2;
 u16 cameraInterpolationFlags = 0;
@@ -7115,16 +7112,6 @@ void AddPrims(sTag* ot, sTag* p0, sTag* p1)
 void linkOT(sTag* a, std::array<sTag, 4096>& b, int index)
 {
     AddPrims(a, &b[index], &b[0]);
-}
-
-void updateAndRenderScreenDistortion()
-{
-    if (screenDistortionConfigured == 0) {
-        return;
-    }
-
-    MissingCode();
-    screenDistortionConfigured = 0;
 }
 
 void updateAndRenderField()
