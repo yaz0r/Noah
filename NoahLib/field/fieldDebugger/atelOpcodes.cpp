@@ -555,7 +555,7 @@ void initOpcodeTable()
 		.end();
 
 	m_opcode[0x98]
-		.setName("CHANGE_FIELD_WHEN_READY")
+		.setName("CHANGE_FIELD_WHEN_READY2")
 		.addArgumentU16OrVar()
 		.addArgumentU16OrVar()
 		.end();
@@ -705,10 +705,12 @@ void initOpcodeTable()
 		.end();
 
 	m_opcode[0xC4]
+        .setName("OPEN_DOOR")
 		.addArgumentByte()
 		.end();
 
 	m_opcode[0xC5]
+        .setName("CLOSE_DOOR")
 		.addArgumentByte()
 		.end();
 
@@ -800,9 +802,10 @@ void initOpcodeTable()
 		.end();
 
 	m_opcode[0xE7]
-		.addArgumentU16OrVar()
-		.addArgumentU16OrVar()
-		.addArgumentU16OrVar()
+        .setName("SET_BACKGROUND_CLEAR_COLOR")
+		.addArgumentU16OrVar("r")
+		.addArgumentU16OrVar("g")
+		.addArgumentU16OrVar("b")
 		.end();
 
 	m_opcode[0xEC]

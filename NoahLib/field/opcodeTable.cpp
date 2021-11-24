@@ -112,6 +112,7 @@ void initOpcodes()
     fieldScriptOpcodes[0xAC] = OP_AC;
     fieldScriptOpcodes[0xB3] = OP_START_FADE_IN;
     fieldScriptOpcodes[0xB4] = OP_START_FADE_TO_BLACK;
+    fieldScriptOpcodes[0xB5] = OP_B5;
     fieldScriptOpcodes[0xB6] = OP_B6;
     fieldScriptOpcodes[0xB7] = OP_B7;
     fieldScriptOpcodes[0xB8] = OP_B8;
@@ -122,7 +123,8 @@ void initOpcodes()
     fieldScriptOpcodes[0xC0] = OP_ROTATION_3D_PITCH_SUBSTRACT;
     fieldScriptOpcodes[0xC1] = OP_ROTATION_3D_ROLL_ADD;
     fieldScriptOpcodes[0xC2] = OP_ROTATION_3D_ROLL_SUBSTRACT;
-    fieldScriptOpcodes[0xC4] = OP_C4;
+    fieldScriptOpcodes[0xC4] = OP_OPEN_DOOR;
+    fieldScriptOpcodes[0xC5] = OP_CLOSE_DOOR;
     fieldScriptOpcodes[0xC6] = OP_INCREASE_FIELD_EXECUTION_MAX_CYCLES;
     fieldScriptOpcodes[0xC9] = OP_IF_PLAYER_IN_TRIGGER2;
     fieldScriptOpcodes[0xCB] = OP_IF_PLAYER_IN_TRIGGER;
@@ -136,7 +138,7 @@ void initOpcodes()
     fieldScriptOpcodes[0xE1] = OP_VRAM_OPERATION;
     fieldScriptOpcodes[0xE5] = OP_SETUP_FOG;
     fieldScriptOpcodes[0xE6] = OP_E6;
-    fieldScriptOpcodes[0xE7] = OP_E7;
+    fieldScriptOpcodes[0xE7] = OP_SET_BACKGROUND_CLEAR_COLOR;
     fieldScriptOpcodes[0xEC] = ORBIT;
     fieldScriptOpcodes[0xEE] = OP_EE;
     fieldScriptOpcodes[0xEF] = OP_WAIT_CAMERA;

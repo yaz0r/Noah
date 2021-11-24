@@ -1418,6 +1418,9 @@ void fieldInspector_frame()
             ImGui::EndMenu();
         }
 
+        ImGui::Checkbox("Execute scripts", &g_executeScripts);
+        ImGui::Checkbox("Execute update scripts", &g_executeUpdateScripts);
+
         ImGui::EndMainMenuBar();
     }
 

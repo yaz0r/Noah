@@ -49,7 +49,7 @@ struct sFieldScriptEntity_flags0
 {
     union {
         struct {
-            u32 m0 : 1;
+            u32 m0_updateScriptDisabled : 1;
             u32 m1_unk : 6;
             u32 m7 : 1;
             u32 m8 : 3;
@@ -157,6 +157,9 @@ struct sFieldEntity
 extern std::vector<sFieldEntity> actorArray;
 extern std::array<s32, 3> currentParty;
 
+extern bool g_executeScripts;
+extern bool g_executeUpdateScripts;
+
 extern s32 fieldMapNumber;
 extern s32 fieldChangePrevented;
 extern s32 fieldMusicLoadPending;
@@ -220,7 +223,7 @@ extern s32 OPX_86Param;
 extern s32 OPX8E_param0;
 extern s32 OPX8E_param1;
 extern s8 OPX_E0Param;
-extern u8 OPE7_param[3];
+extern u8 fieldBackgroundClearColor[3];
 
 extern int playMusicAuthorized;
 extern int musicVar1;
@@ -279,6 +282,9 @@ extern s32 sceneSCRZ;
 extern u16 padButtonForField;
 
 extern int updateAllEntitiesSub2Var0;
+
+extern s16 cameraDollyVar0;
+extern s32 cameraDollyVar1;
 
 struct sFieldRenderContext
 {
