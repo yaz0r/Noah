@@ -83,11 +83,11 @@
         <scriptEntity ID="51" Name="To Alice House"/>
         <scriptEntity ID="52" Name=""/>
         <scriptEntity ID="53" Name="To beginner&apos;s hall"/>
-        <scriptEntity ID="54" Name=""/>
+        <scriptEntity ID="54" Name="To Fei&apos;s house"/>
         <scriptEntity ID="55" Name="To item shop"/>
-        <scriptEntity ID="56" Name=""/>
-        <scriptEntity ID="57" Name=""/>
-        <scriptEntity ID="58" Name="To pub"/>
+        <scriptEntity ID="56" Name="To pub"/>
+        <scriptEntity ID="57" Name="To pub upstairs"/>
+        <scriptEntity ID="58" Name="To pub 2"/>
         <scriptEntity ID="59" Name=""/>
         <scriptEntity ID="60" Name=""/>
         <scriptEntity ID="61" Name=""/>
@@ -185,10 +185,10 @@
         <scriptEntity ID="7" Name=""/>
         <scriptEntity ID="8" Name=""/>
         <scriptEntity ID="9" Name=""/>
-        <scriptEntity ID="10" Name=""/>
-        <scriptEntity ID="11" Name=""/>
-        <scriptEntity ID="12" Name="Lucca"/>
-        <scriptEntity ID="13" Name=""/>
+        <scriptEntity ID="10" Name="Battle tuto NPC"/>
+        <scriptEntity ID="11" Name="Battle abilities tuto NPC"/>
+        <scriptEntity ID="12" Name="Lucca (savepoint tuto)"/>
+        <scriptEntity ID="13" Name="Camera tuto NPC"/>
         <scriptEntity ID="14" Name="Door"/>
         <scriptEntity ID="15" Name="SavePoint?"/>
         <scriptEntity ID="16" Name=""/>
@@ -266,8 +266,8 @@
         <scriptEntity ID="8" Name=""/>
         <scriptEntity ID="9" Name="Bed"/>
         <scriptEntity ID="10" Name="Maid"/>
-        <scriptEntity ID="11" Name=""/>
-        <scriptEntity ID="12" Name=""/>
+        <scriptEntity ID="11" Name="Painting 1 (on the easel)"/>
+        <scriptEntity ID="12" Name="Painting 2 (left of easel)"/>
         <scriptEntity ID="13" Name=""/>
         <scriptEntity ID="14" Name=""/>
         <scriptEntity ID="15" Name=""/>

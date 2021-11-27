@@ -25,7 +25,7 @@ void initOpcodes()
     fieldScriptOpcodes[0x17] = OP_17;
     fieldScriptOpcodes[0x18] = OP_18;
     fieldScriptOpcodes[0x19] = OP_SET_ACTOR_POSITION_2D;
-    fieldScriptOpcodes[0x1A] = OP_1A;
+    fieldScriptOpcodes[0x1A] = OP_SET_ENTITY_WALKMESH_LAYER;
     fieldScriptOpcodes[0x1C] = OP_SET_CURRENT_ACTOR_ELEVATION;
     fieldScriptOpcodes[0x1D] = OP_SET_CURRENT_ACTOR_POSITION_3D;
     fieldScriptOpcodes[0x1E] = OP_UPDATE_ELEVATION;
@@ -66,6 +66,7 @@ void initOpcodes()
     fieldScriptOpcodes[0x59] = OP_WALK_RANDOM_DIRECTION;
     fieldScriptOpcodes[0x5A] = OP_5A;
     fieldScriptOpcodes[0x5B] = resetFieldScriptActor;
+    fieldScriptOpcodes[0x5C] = OP_5C;
     fieldScriptOpcodes[0x5D] = OP_PLAY_ANIMATION_EX;
     fieldScriptOpcodes[0x5E] = OP_WAIT_ANIMATION_END;
     fieldScriptOpcodes[0x5F] = OP_SET_CURRENT_ACTOR_CARDINAL_DIRECTION;
@@ -75,6 +76,7 @@ void initOpcodes()
     fieldScriptOpcodes[0x63] = OP_SET_DESIRED_CAMERA_TARGET;
     fieldScriptOpcodes[0x64] = OP_64;
     fieldScriptOpcodes[0x65] = OP_SET_CAMERA_POSITION_OVERRIDE;
+    fieldScriptOpcodes[0x67] = OP_67;
     fieldScriptOpcodes[0x69] = OP_SET_CURRENT_ACTOR_ROTATION;
     fieldScriptOpcodes[0x6A] = OP_SET_ACTOR_ROTATION2;
     fieldScriptOpcodes[0x6B] = OP_ROTATE_ACTOR_CLOCKWISE;
@@ -108,7 +110,7 @@ void initOpcodes()
     fieldScriptOpcodes[0xA7] = OP_UPDATE_CHARACTER;
     fieldScriptOpcodes[0xA9] = OP_SETUP_MULTICHOICE;
     fieldScriptOpcodes[0xA8] = OP_A8;
-    fieldScriptOpcodes[0xAA] = OP_AA;
+    fieldScriptOpcodes[0xAA] = OP_ROTATE_CAMERA_RELATIVE;
     fieldScriptOpcodes[0xAC] = OP_AC;
     fieldScriptOpcodes[0xB3] = OP_START_FADE_IN;
     fieldScriptOpcodes[0xB4] = OP_START_FADE_TO_BLACK;
@@ -133,6 +135,7 @@ void initOpcodes()
     fieldScriptOpcodes[0xD6] = OP_D6;
     fieldScriptOpcodes[0xD9] = OP_D9;
     fieldScriptOpcodes[0xDB] = OP_DB;
+    fieldScriptOpcodes[0xDC] = OP_DC;
     fieldScriptOpcodes[0xDE] = OP_DE;
     fieldScriptOpcodes[0xDF] = OP_DF;
     fieldScriptOpcodes[0xE1] = OP_VRAM_OPERATION;
@@ -152,6 +155,7 @@ void initOpcodes()
     fieldScriptOpcodes[0xFB] = OP_FB;
     fieldScriptOpcodes[0xFC] = OP_FC;
     fieldScriptOpcodes[0xFE] = OP_EXTENDED_OPCODE;
+    fieldScriptOpcodes[0xFF] = OP_FF;
 
     fieldScriptOpcodes_EX[0x01] = OP_RAND_ROTATION;
     fieldScriptOpcodes_EX[0x03] = OP_SET_CURRENT_ACTOR_SCALE;
@@ -163,9 +167,11 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0x0E] = OP_SET_MUSIC_PARAMS;
     fieldScriptOpcodes_EX[0x13] = OPX_13;
     fieldScriptOpcodes_EX[0x15] = OPX_15;
+    fieldScriptOpcodes_EX[0x17] = OPX_17;
     fieldScriptOpcodes_EX[0x18] = OP_ADD_TO_CURRENT_PARTY;
     fieldScriptOpcodes_EX[0x19] = OP_REMOVE_FROM_CURRENT_PARTY;
     fieldScriptOpcodes_EX[0x1C] = OPX_1C;
+    fieldScriptOpcodes_EX[0x1E] = OPX_1E;
     fieldScriptOpcodes_EX[0x21] = OPX_21;
     fieldScriptOpcodes_EX[0x26] = OP_SETUP_SCREEN_DISTORTION;
     fieldScriptOpcodes_EX[0x27] = OP_SCREEN_DISTORTION_FADE_OUT;
@@ -174,6 +180,7 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0x3D] = OPX_3D;
     fieldScriptOpcodes_EX[0x3E] = OPX_3E;
     fieldScriptOpcodes_EX[0x3F] = OPX_3F;
+    fieldScriptOpcodes_EX[0x40] = OPX_40;
     fieldScriptOpcodes_EX[0x41] = OP_SET_ON_GEAR;
     fieldScriptOpcodes_EX[0x42] = OP_SET_OFF_GEAR;
     fieldScriptOpcodes_EX[0x45] = OPX_45;
@@ -191,9 +198,12 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0x62] = OPX_62;
     fieldScriptOpcodes_EX[0x65] = OPX_65;
     fieldScriptOpcodes_EX[0x66] = OPX_66;
+    fieldScriptOpcodes_EX[0x7F] = OPX_7F;
     fieldScriptOpcodes_EX[0x80] = OPX_80;
     fieldScriptOpcodes_EX[0x81] = OPX_81;
     fieldScriptOpcodes_EX[0x82] = OPX_82;
+    fieldScriptOpcodes_EX[0x84] = OPX_84;
+    fieldScriptOpcodes_EX[0x85] = OPX_85;
     fieldScriptOpcodes_EX[0x86] = OPX_86;
     fieldScriptOpcodes_EX[0x8C] = OPX_8C;
     fieldScriptOpcodes_EX[0x8E] = OPX_8E;
@@ -209,9 +219,14 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0x98] = OPX_98;
     fieldScriptOpcodes_EX[0x9A] = OPX_9A;
     fieldScriptOpcodes_EX[0xA1] = OP_ASSIGN_GEAR;
-    fieldScriptOpcodes_EX[0xA4] = OP_RESTORE_GEAR;
-    fieldScriptOpcodes_EX[0xCD] = OP_GET_CURRENT_DISC_NUMBER;
     fieldScriptOpcodes_EX[0xA2] = OPX_A2;
+    fieldScriptOpcodes_EX[0xA4] = OP_RESTORE_GEAR;
+    fieldScriptOpcodes_EX[0xA5] = OPX_A5;
+    fieldScriptOpcodes_EX[0xAF] = OPX_AF;
+    fieldScriptOpcodes_EX[0xBD] = OPX_BD;
+    fieldScriptOpcodes_EX[0xCB] = OPX_CB;
+    fieldScriptOpcodes_EX[0xCC] = OPX_CC;
+    fieldScriptOpcodes_EX[0xCD] = OP_GET_CURRENT_DISC_NUMBER;
     fieldScriptOpcodes_EX[0xE0] = OPX_E0;
 }
 

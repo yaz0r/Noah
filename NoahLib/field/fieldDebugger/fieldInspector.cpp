@@ -859,7 +859,7 @@ public:
         return !opcode.m_breakFlow;
     }
 
-    bool decompileOpcode(u16& inputPC)
+    bool decompileOpcode(u16& inputPC, u16 currentTracePC)
     {
         static bool bOpcodesInitialized = false;
         if (!bOpcodesInitialized)
@@ -871,7 +871,15 @@ public:
 
         startOfInstruction = inputPC;
         currentPC = inputPC;
-        ImGui::Text("    0x%04X\t", currentPC); ImGui::SameLine();
+        if (currentPC == currentTracePC)
+        {
+            ImGui::Text("->", currentPC); ImGui::SameLine();
+        }
+        else
+        {
+            ImGui::Text("  ", currentPC); ImGui::SameLine();
+        }
+        ImGui::Text("  0x%04X\t", currentPC); ImGui::SameLine();
 
         u16 opcode = readU8FromScript(0);
 
@@ -898,6 +906,34 @@ public:
             decodeJumpIf();
             currentPC += 8;
             return true;
+        case 0x10: // dynamic opcode
+            switch (readU8FromScript(1))
+            {
+            case 0:
+                dynamicOpcode
+                    .addArgumentByte()
+                    .addArgumentS16OrVar(0x80)
+                    .addArgumentS16OrVar(0x40)
+                    .addArgumentS16OrVar(0x20)
+                    .addSignControlByte()
+                    .end();
+                handleGenericOpcode(dynamicOpcode);
+                break;
+            case 1:
+                dynamicOpcode
+                    .addArgumentByte()
+                    .end();
+                handleGenericOpcode(dynamicOpcode);
+                break;
+
+            default:
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));
+                ImGui::Text("Failed to decode opcode 0x%02X (%d)", opcode, opcode & 0xFF);
+                ImGui::PopStyleColor();
+                return false;
+            }
+            break;
+
         case 0x57: // dynamic opcode
             switch (readU8FromScript(1) & 3)
             {
@@ -925,7 +961,7 @@ public:
                 ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));
                 ImGui::Text("Failed to decode opcode 0x%02X (%d)", opcode, opcode & 0xFF);
                 ImGui::PopStyleColor();
-                break;
+                return false;
             }
             break;
         case 0xFE27:
@@ -964,7 +1000,36 @@ public:
                 ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));
                 ImGui::Text("Failed to decode opcode 0x%02X (%d)", opcode, opcode & 0xFF);
                 ImGui::PopStyleColor();
+                return false;
+            }
+            break;
+        case 0xFE5C:
+            switch (readU8FromScript(1))
+            {
+            case 0:
+                dynamicOpcode
+                    .addArgumentByte()
+                    .end();
+                handleGenericOpcode(dynamicOpcode, true);
                 break;
+            case 1:
+                dynamicOpcode
+                    .addArgumentByte()
+                    .end();
+                handleGenericOpcode(dynamicOpcode, true);
+                break;
+            case 2:
+                dynamicOpcode
+                    .addArgumentByte()
+                    .addArgumentU16OrVar()
+                    .end();
+                handleGenericOpcode(dynamicOpcode, true);
+                break;
+            default:
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));
+                ImGui::Text("Failed to decode opcode 0x%02X (%d)", opcode, opcode & 0xFF);
+                ImGui::PopStyleColor();
+                return false;
             }
             break;
         default:
@@ -1230,6 +1295,8 @@ public:
             }
         }
 
+        u16 currentTracePC = actorArray[entityId].m4C_scriptEntity->mCC_scriptPC;
+
         for (int i = 0; i < m_byteTypeTable.size();)
         {
             if (m_byteTypeTable[i].mType == 1)
@@ -1247,7 +1314,7 @@ public:
                 }
 
                 u16 startPC = i;
-                while (decompileOpcode(startPC)) {
+                while (decompileOpcode(startPC, currentTracePC)) {
                     if (m_byteTypeTable[startPC].mComment.length())
                     {
                         ImGui::SameLine();
@@ -1274,7 +1341,7 @@ public:
 
             m_byteTypeTable[startPC].mType = 1;
 
-            while (decompileOpcode(startPC)) {
+            while (decompileOpcode(startPC, currentPC)) {
                 startPC = currentPC;
                 m_byteTypeTable[startPC].mType = 1;
             }

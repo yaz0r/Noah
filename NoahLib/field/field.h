@@ -286,6 +286,8 @@ extern int updateAllEntitiesSub2Var0;
 extern s16 cameraDollyVar0;
 extern s32 cameraDollyVar1;
 
+extern int onlyUpdateDirector;
+
 struct sFieldRenderContext
 {
 	DRAWENV m0_drawEnv;
@@ -365,3 +367,8 @@ void setPolyUV(POLY_FT4* poly, ushort u0, ushort v0, ushort u1, ushort v1, ushor
 
 void updateEntityEventCode3Sub1(sSpriteActor* param_1, ushort rotation, sFieldEntity* param_3);
 void updateEntityEventCode4(sSpriteActor* param_1, int param_2, sFieldEntity* param_3);
+
+void waitForReadFinished(void);
+void startLoadingPlayableCharacters();
+void finalizeLoadPlayableCharacters();
+int getGearForCharacter(int param_1);

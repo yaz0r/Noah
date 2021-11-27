@@ -28,7 +28,7 @@ void loadInitialGameState()
 
         for (int i=0; i<3; i++)
         {
-            gameState.m1D34_currentParty[i] = READ_LE_S8(rawGameState.begin() + 0x1D34 + i);
+            gameState.m1D34_currentParty[i] = READ_LE_U8(rawGameState.begin() + 0x1D34 + i);
         }
 
         gameState.m231A_fieldID = READ_LE_U16(rawGameState.begin() + 0x231A);

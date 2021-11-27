@@ -133,6 +133,7 @@ void initOpcodeTable()
 		.end();
 
 	m_opcode[0x1A]
+        .setName("SET_ENTITY_WALKMESH_LAYER")
 		.addArgumentByte()
 		.end();
 
@@ -624,6 +625,7 @@ void initOpcodeTable()
 		.end();
 
 	m_opcode[0xAA]
+        .setName("ROTATE_CAMERA_RELATIVE")
 		.addArgumentByte()
 		.end();
 
@@ -773,12 +775,12 @@ void initOpcodeTable()
 
 	m_opcode[0xE1]
 		.setName("VRAM_OPERATION")
-		.addArgumentS16OrVar(0x80)
-		.addArgumentS16OrVar(0x40)
-		.addArgumentS16OrVar(0x20)
-		.addArgumentS16OrVar(0x10)
-		.addArgumentS16OrVar(0x08)
-		.addArgumentS16OrVar(0x04)
+		.addArgumentS16OrVar(0x80, "destX")
+		.addArgumentS16OrVar(0x40, "destY")
+		.addArgumentS16OrVar(0x20, "sourceX")
+		.addArgumentS16OrVar(0x10, "sourceY")
+		.addArgumentS16OrVar(0x08, "width")
+		.addArgumentS16OrVar(0x04, "height")
 		.addSignControlByte()
 		.end();
 
@@ -1074,6 +1076,8 @@ void initExtendedOpcodeTable()
 	m_extendedOpcode[0x5A]
 		.addArgumentU16OrVar()
 		.end();
+
+    // opcode 0xFE57 is dynamic
 
 	m_extendedOpcode[0x5E]
 		.setName("SET_TRANSPARENCY_MODE")

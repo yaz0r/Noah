@@ -202,32 +202,35 @@ void OP_10Sub(int param_1)
     sSpriteActor* pSpriteActor = actorArray[currentFieldActorId].m4_pVramSpriteSheet;
     s16 pField76;
     s32 valueFromFlags;
+
+    int walkSpeed;
     if (((actorArray[currentFieldActorId].m4C_scriptEntity)->m4_flags & 0x2000) == 0) {
-        pField76 = pCurrentFieldScriptActor->m76;
-        valueFromFlags = 0x4000000;
+        walkSpeed = (0x4000000 / pCurrentFieldScriptActor->m76) >> 0x10;
     }
     else {
-        pField76 = pCurrentFieldScriptActor->m76;
-        valueFromFlags = 0x8000000;
+        walkSpeed = (0x8000000 / pCurrentFieldScriptActor->m76) >> 0x10;
     }
-    int divider = (int)(valueFromFlags / pField76) >> 0x10;
-    if (divider == 0) {
-        divider = 1;
+
+    if (walkSpeed == 0) {
+        walkSpeed = 1;
     }
+
     pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags = pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags | 0x10000;
 
     int animation = 1;
 
-    if (pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1] == 0)
+    switch (pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1])
+    {
+    case 0:
     {
         int X = getVar80(2, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 8]) * 0x10000;
         int Z = getVar40(4, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 8]) * 0x10000;
         int Y = getVar20(6, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 8]) * 0x10000;
         int distance = distance3d(X - (pCurrentFieldScriptActor->m20_position).vx >> 0x10, Y - (pCurrentFieldScriptActor->m20_position).vy >> 0x10, Z - (pCurrentFieldScriptActor->m20_position).vz >> 0x10);
-        int step = (short)(distance / divider);
-        pCurrentFieldScriptActor->m102_numSteps = step;
-        if ((distance / divider & 0xffffU) == 0) {
-            pCurrentFieldScriptActor->m102_numSteps = step + 1;
+
+        pCurrentFieldScriptActor->m102_numSteps = distance / walkSpeed;
+        if (pCurrentFieldScriptActor->m102_numSteps == 0) {
+            pCurrentFieldScriptActor->m102_numSteps = 1;
         }
 
         pCurrentFieldScriptActor->mD0_targetPositionOffset[0] = (X - (pCurrentFieldScriptActor->m20_position).vx) / pCurrentFieldScriptActor->m102_numSteps;
@@ -238,24 +241,25 @@ void OP_10Sub(int param_1)
             pCurrentFieldScriptActor->m106_currentRotation = pCurrentFieldScriptActor->m104_rotation = -ratan2(pCurrentFieldScriptActor->mD0_targetPositionOffset[2] >> 0x10, pCurrentFieldScriptActor->mD0_targetPositionOffset.vx.getIntegerPart());
         }
         pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 9;
+        break;
     }
-    else {
+    case 1:
+        // reached target?
         if ((pCurrentFieldScriptActor->m102_numSteps < 1) || (pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0 == 0)) {
-
-            // go back to previous opcode
+            // go back to previous opcode to retrieve target location
             pCurrentFieldScriptActor->mCC_scriptPC -= 9;
             assert(pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 0] == 0x10);
             assert(pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1] == 0);
             if (pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0 != 0) {
-                FP_VEC4 copyVector = pCurrentFieldScriptActor->m20_position;
+                FP_VEC4 currentPosition = pCurrentFieldScriptActor->m20_position;
 
                 (pCurrentFieldScriptActor->m20_position).vx = getVar80(2, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 8]) << 0x10;
-                (pCurrentFieldScriptActor->m20_position).vy = getVar40(4, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 8]) << 0x10;
-                (pCurrentFieldScriptActor->m20_position).vz = getVar20(6, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 8]) << 0x10;
+                (pCurrentFieldScriptActor->m20_position).vz = getVar40(4, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 8]) << 0x10;
+                (pCurrentFieldScriptActor->m20_position).vy = getVar20(6, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 8]) << 0x10;
 
-                (pCurrentFieldScriptActor->m30_stepVector).vx = (pCurrentFieldScriptActor->m20_position).vx - copyVector.vx;
-                (pCurrentFieldScriptActor->m30_stepVector).vy = (pCurrentFieldScriptActor->m20_position).vy - copyVector.vy;
-                (pCurrentFieldScriptActor->m30_stepVector).vz = (pCurrentFieldScriptActor->m20_position).vz - copyVector.vz;
+                (pCurrentFieldScriptActor->m30_stepVector).vx = (pCurrentFieldScriptActor->m20_position).vx - currentPosition.vx;
+                (pCurrentFieldScriptActor->m30_stepVector).vy = (pCurrentFieldScriptActor->m20_position).vy - currentPosition.vy;
+                (pCurrentFieldScriptActor->m30_stepVector).vz = (pCurrentFieldScriptActor->m20_position).vz - currentPosition.vz;
             }
             animation = (int)pCurrentFieldScriptActor->mE6;
             if (param_1 == 0) {
@@ -282,13 +286,17 @@ void OP_10Sub(int param_1)
         }
 
         pCurrentFieldScriptActor->m102_numSteps = pCurrentFieldScriptActor->m102_numSteps + -1;
-        actorArray[divider].mC_matrix.t[0] = pCurrentFieldScriptActor->m20_position.vx.getIntegerPart();
-        actorArray[divider].mC_matrix.t[1] = pCurrentFieldScriptActor->m20_position.vy.getIntegerPart();
-        actorArray[divider].mC_matrix.t[2] = pCurrentFieldScriptActor->m20_position.vz.getIntegerPart();
+        actorArray[walkSpeed].mC_matrix.t[0] = pCurrentFieldScriptActor->m20_position.vx.getIntegerPart();
+        actorArray[walkSpeed].mC_matrix.t[1] = pCurrentFieldScriptActor->m20_position.vy.getIntegerPart();
+        actorArray[walkSpeed].mC_matrix.t[2] = pCurrentFieldScriptActor->m20_position.vz.getIntegerPart();
         (pSpriteActor->m0_position).vx = (pCurrentFieldScriptActor->m20_position).vx;
         (pSpriteActor->m0_position).vy = (pCurrentFieldScriptActor->m20_position).vy;
         (pSpriteActor->m0_position).vz = (pCurrentFieldScriptActor->m20_position).vz;
+        break;
+    default:
+        assert(0);
     }
+
 
     if (pCurrentFieldScriptActor->mEA_forcedAnimation != 0xff) {
         animation = (int)pCurrentFieldScriptActor->mEA_forcedAnimation;
@@ -451,7 +459,7 @@ void OP_28(void)
     iVar1 = readCharacter(1);
     if (iVar1 != 0xff) {
         iVar1 = readCharacter(1);
-        (actorArray[iVar1].m4C_scriptEntity)->m0_fieldScriptFlags.m_rawFlags &= ~2;
+        actorArray[iVar1].m4C_scriptEntity->m0_fieldScriptFlags.m0_updateScriptDisabled = 0;
     }
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 2;
 }
@@ -556,6 +564,34 @@ void OPX_15()
     iVar2 = currentFieldActorId;
     psVar3->m4_flags = psVar3->m4_flags & 0xfffff7ff;
     actorArray[iVar2].m58_flags = actorArray[iVar2].m58_flags & 0xffdf;
+}
+
+void OPX_17(void)
+{
+    ushort uVar1;
+    uint uVar2;
+    long lVar3;
+    sFieldScriptEntity* psVar4;
+    sFieldScriptEntity* psVar5;
+
+    uVar2 = readCharacter(1);
+    if ((uVar2 != 0xff) && (uVar2 = readCharacter(2), uVar2 != 0xff)) {
+        uVar2 = readCharacter(2);
+        psVar4 = actorArray[uVar2].m4C_scriptEntity;
+        uVar2 = readCharacter(1);
+        psVar5 = actorArray[uVar2].m4C_scriptEntity;
+        lVar3 = ratan2((psVar4->m20_position).vz - (psVar5->m20_position).vz, (psVar4->m20_position).vx - (psVar5->m20_position).vx);
+        uVar1 = -(short)lVar3 | 0x8000;
+        if (fieldExecuteVar1 == 0) {
+            psVar5->m104_rotation = uVar1;
+            psVar5->m106_currentRotation = uVar1;
+            psVar5->m108_rotation3 = uVar1;
+        }
+        psVar5->m104_rotation = uVar1;
+        psVar5->m106_currentRotation = uVar1;
+    }
+    pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
+    return;
 }
 
 void OP_INIT_ENTITY_NPC(void)
@@ -730,7 +766,7 @@ void OP_SET_ACTOR_POSITION_2D(void)
     return;
 }
 
-void OP_1A()
+void OP_SET_ENTITY_WALKMESH_LAYER()
 {
     pCurrentFieldScriptActor->m10_walkmeshId = (ushort)pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1];
     setCurrentActor2DPosition((int)(actorArray[currentFieldActorId].m4C_scriptEntity)->m20_position.vx, (int)(actorArray[currentFieldActorId].m4C_scriptEntity)->m20_position.vz);
@@ -1394,6 +1430,103 @@ void OP_5A()
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 1;
 }
 
+void OP_5CSub0(int param_1, int* param_2, int* param_3, int* param_4)
+{
+    int uVar1;
+    int uVar2;
+    int iVar1;
+    int uVar4;
+    int uVar3;
+
+    if (param_1 == 1) {
+        iVar1 = getVariable(0x30);
+        *param_2 = iVar1;
+        uVar4 = getVariable(0x32);
+        uVar3 = 0x34;
+    }
+    else {
+        if (param_1 < 2) {
+            if (param_1 != 0) {
+                return;
+            }
+            uVar1 = getVariable(0x2a);
+            *param_2 = uVar1;
+            uVar2 = getVariable(0x2c);
+            uVar3 = 0x2e;
+            uVar4 = uVar2;
+        }
+        else {
+            if (param_1 != 2) {
+                return;
+            }
+            iVar1 = getVariable(0x36);
+            *param_2 = iVar1;
+            uVar4 = getVariable(0x38);
+            uVar3 = 0x3a;
+        }
+    }
+    *param_3 = uVar4;
+    uVar4 = getVariable(uVar3);
+    *param_4 = uVar4;
+    return;
+}
+
+void OP_5C()
+{
+    sFieldEntity* pFieldEntity = &actorArray[currentFieldActorId];
+    int param0 = getImmediateOrVariableUnsigned(1);
+    if (2 < param0) {
+        param0 = 2;
+    }
+    unkPartyTable[param0] = currentFieldActorId;
+    int iVar5 = currentParty[param0];
+    int bVar4;
+    if ((iVar5 == 0xff) || (bVar4 = getGearForCharacter(iVar5), iVar5 = param0, bVar4 == 0xff)) {
+        OP_INIT_ENTITY_SCRIPT();
+        pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 2;
+        pCurrentFieldScriptActor->m4_flags |= 0x800;
+    }
+    else {
+        int entityParam;
+        int position[2];
+        OP_5CSub0(param0, &entityParam, &position[0], &position[1]);
+
+        bool bFieldDifferent = (fieldMapNumber & 0xfff) == (entityParam & 0x3fffU);
+        pCurrentFieldScriptActor->m10_walkmeshId = (ushort)(entityParam >> 0xe) & 3;
+
+        if (!bFieldDifferent) {
+            position[0] = 0;
+            position[1] = 0;
+            pCurrentFieldScriptActor->m10_walkmeshId = 0;
+        }
+
+        if ((pKernelGameState->m22B1_isOnGear[param0] != 0) || (currentParty[param0] == 7)) {
+            bFieldDifferent = false;
+        }
+
+        pFieldEntity->m58_flags = pFieldEntity->m58_flags & 0xf07f | 0x200;
+
+        OP_INIT_ENTITY_SCRIPT_sub0(currentFieldActorId, param0, &partyCharacterBuffers[param0], 1, 0, param0, 1);
+        actorArray[currentFieldActorId].m58_flags = actorArray[currentFieldActorId].m58_flags & 0xffdf;
+        if ((fieldMapNumber & 0xfff) != (entityParam & 0x3fffU)) {
+            pCurrentFieldScriptActor->m10_walkmeshId = 0;
+        }
+
+        setCurrentActor2DPosition(position[0], position[1]);
+        OP_INIT_ENTITY_SCRIPT_sub1();
+        pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags = pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags & 0xfffffcff | 0x400;
+        if (!bFieldDifferent) {
+            actorArray[currentFieldActorId].m58_flags = actorArray[currentFieldActorId].m58_flags | 0x20;
+        }
+        if (numWalkMesh + -1 < (int)pCurrentFieldScriptActor->m10_walkmeshId) {
+            pCurrentFieldScriptActor->m10_walkmeshId = 0;
+        }
+        pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags = pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags | 0x20000;
+        pCurrentFieldScriptActor->m4_flags = pCurrentFieldScriptActor->m4_flags | 0xc00;
+        pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
+    }
+}
+
 void OP_PLAY_ANIMATION_EX()
 {
     OP_PLAY_ANIMATION();
@@ -1734,7 +1867,7 @@ void OP_A8()
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 5;
 }
 
-void OP_AA(void)
+void OP_ROTATE_CAMERA_RELATIVE(void)
 {
     int iVar1;
     sFieldScriptEntity* psVar2;
@@ -1879,6 +2012,37 @@ void OP_SET_CAMERA_POSITION_OVERRIDE()
     cameraPositionOverride[1] = iVar1 << 0x10;
     fieldExectuteMaxCycles = fieldExectuteMaxCycles + 1;
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 8;
+}
+
+void OP_67Sub(ushort param_1)
+{
+    ushort uVar1;
+    uint uVar2;
+    sFieldScriptEntity* psVar3;
+
+    uVar2 = readCharacter(1);
+    if (uVar2 != 0xff) {
+        uVar2 = readCharacter(1);
+        psVar3 = actorArray[uVar2].m4C_scriptEntity;
+        uVar1 = param_1 | 0x8000;
+        if (fieldExecuteVar1 == 0) {
+            psVar3->m104_rotation = uVar1;
+            psVar3->m106_currentRotation = uVar1;
+            psVar3->m108_rotation3 = uVar1;
+        }
+        psVar3->m104_rotation = param_1 | 0x8000;
+        psVar3->m106_currentRotation = param_1 | 0x8000;
+    }
+    pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 4;
+    return;
+}
+
+void OP_67()
+{
+    int iVar1;
+
+    iVar1 = getImmediateOrVariableUnsigned(2);
+    OP_67Sub(actorDirectionTable[iVar1]);
 }
 
 void OP_SET_ACTOR_ROTATION2()
@@ -2278,7 +2442,25 @@ void OPX_5C(void)
     }
 
     MissingCode();
-    pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 2;
+
+    switch (pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1])
+    {
+    case 0:
+        MissingCode();
+        pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 2;
+        break;
+    case 1:
+        MissingCode();
+        pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 2;
+        break;
+    case 2:
+        pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 4;
+        break;
+    default:
+        assert(0);
+    }
+
+    breakCurrentScript = 1;
 }
 
 void OPX_5D()
@@ -2310,6 +2492,19 @@ void OPX_66(void)
 {
     MissingCode();
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 9;
+}
+
+void OPX_7F()
+{
+    MissingCode();
+/*    if (DAT_Field__800adb88 == 0) {
+        uVar1 = pCurrentFieldScriptActor->mCC_scriptPC + 1;
+    }
+    else {
+        uVar1 = pCurrentFieldScriptActor->mCC_scriptPC - 1;
+    }*/
+    pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 1;
+    breakCurrentScript = 1;
 }
 
 void OPX_80(void)
@@ -2355,6 +2550,35 @@ void OPX_82(void)
     OPX_82Param3[2] = getImmediateOrVariableUnsigned(0x17);
     pCurrentFieldScriptActor->mCC_scriptPC += 0x19;
     OPX_82Param4 = 1;
+}
+
+void OPX_84()
+{
+    if ((((playMusicAuthorized == 0) || (fieldExecuteVar3 == 0)) || (fieldChangePrevented == 0)) || (((loadCompleted != 0 || (fieldMusicLoadPending == -1)) || (load2dAnimVar != 0)))) {
+        breakCurrentScript = 1;
+        pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC - 1;
+    }
+    else {
+        MissingCode();
+        //playMusicAuthorized = 0;
+        //fieldExecuteVar2 = 0;
+        if (getImmediateOrVariableUnsigned(5) != 0x7FFF)
+        {
+            SaveFieldAndDirections();
+            setVar(2, getImmediateOrVariableUnsigned(7));
+            fieldMapNumber = getImmediateOrVariableUnsigned(5);
+
+            fieldChangePrevented = 0; // HACK! since we don't have battles
+        }
+        breakCurrentScript = 1;
+        pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 9;
+    }
+}
+
+void OPX_85()
+{
+    MissingCode();
+    pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 7;
 }
 
 void OPX_86(void)
@@ -2497,6 +2721,46 @@ void OPX_E0(void)
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 2;
 }
 
+void OPX_A5()
+{
+    MissingCode();
+    pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 0x7;
+}
+
+void OPX_AF()
+{
+    MissingCode();
+    pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 0x12;
+}
+
+void OPX_BD()
+{
+    MissingCode();
+    pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 0x7;
+}
+
+void OPX_CB()
+{
+    breakCurrentScript = 1;
+    MissingCode();
+    pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 1;
+}
+
+void OPX_CC(void)
+{
+    ushort uVar1;
+
+    if (onlyUpdateDirector == 0) {
+        uVar1 = pCurrentFieldScriptActor->mCC_scriptPC + 1;
+    }
+    else {
+        uVar1 = pCurrentFieldScriptActor->mCC_scriptPC - 1;
+    }
+    pCurrentFieldScriptActor->mCC_scriptPC = uVar1;
+    breakCurrentScript = 1;
+    return;
+}
+
 void OPX_A2(void)
 {
     ushort uVar1;
@@ -2615,6 +2879,12 @@ void OPX_3F()
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 7;
 }
 
+void OPX_40()
+{
+    MissingCode();
+    pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 7;
+}
+
 void OPX_1C(void)
 {
     uint* puVar1;
@@ -2650,6 +2920,17 @@ void OPX_1C(void)
     psVar7->m0_position.vy = (psVar4->m20_position).vy;
     psVar7->m0_position.vz = (psVar4->m20_position).vz;
     psVar4->mCC_scriptPC = psVar4->mCC_scriptPC + 8;
+    return;
+}
+
+void OPX_1E(void)
+{
+    fieldMapNumber = fieldMapNumber | 0xc000;
+    waitForReadFinished();
+    startLoadingPlayableCharacters();
+    finalizeLoadPlayableCharacters();
+    pcInitVar1 = (uint)pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1];
+    pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 2;
     return;
 }
 
@@ -3300,6 +3581,24 @@ void OP_DB()
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 5;
 }
 
+void OP_DC(void)
+{
+    ushort uVar1;
+    short sVar2;
+    short sVar3;
+
+    uVar1 = readU16FromScript(1);
+    sVar2 = getVariable(uVar1);
+    uVar1 = readU16FromScript(3);
+    sVar3 = getVariable(uVar1);
+    uVar1 = readU16FromScript(3);
+    setVar((uint)uVar1, sVar2);
+    uVar1 = readU16FromScript(1);
+    setVar((uint)uVar1, sVar3);
+    pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 5;
+    return;
+}
+
 void OP_DE()
 {
     ushort uVar1;
@@ -3861,4 +4160,9 @@ void OP_EXTENDED_OPCODE()
     }
 
     fieldScriptOpcodes_EX[opcodeEX]();
+}
+
+void OP_FF()
+{
+    pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 1;
 }

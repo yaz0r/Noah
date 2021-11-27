@@ -2,6 +2,7 @@
 #include "walkMesh.h"
 
 #include "bgfx/bgfx.h"
+#include "imgui.h"
 
 sWalkMesh walkMesh;
 
@@ -139,13 +140,34 @@ bgfx::ProgramHandle getModelShader() // TODO: move!
 
 void sWalkMesh::bgfxRender(int viewIndex)
 {
-    if (m_blocks.size() == 0)
+    static std::array<bool, 4> enabledWalkmeshRender = { true, false, false, false };
+
+    if (ImGui::BeginMainMenuBar())
     {
-        return;
+        if (ImGui::BeginMenu("Debug display"))
+        {
+            if (ImGui::BeginMenu("Walkmesh"))
+            {
+                for (int i=0; i<4; i++)
+                {
+                    char name[256] = "";
+                    sprintf(name, "Walkmesh %d", i);
+                    ImGui::Checkbox(name, &enabledWalkmeshRender[i]);
+                }
+                ImGui::EndMenu();
+            }
+            ImGui::EndMenu();
+        }
+
+        ImGui::EndMainMenuBar();
     }
 
-    const sBlock& newBlock = m_blocks[0];
+    for (int layerId = 0; layerId < m_blocks.size(); layerId++)
     {
+        if (!enabledWalkmeshRender[layerId])
+            continue;
+
+        const sBlock& newBlock = m_blocks[layerId];
         bgfx::VertexLayout layout;
         layout
             .begin()

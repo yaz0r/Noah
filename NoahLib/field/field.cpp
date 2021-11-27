@@ -3284,7 +3284,6 @@ void allocatePartyCharacterBuffers()
 }
 
 void waitForReadFinished(void)
-
 {
     int iVar1;
 
@@ -3307,7 +3306,7 @@ void finalizeLoadPlayableCharacters()
         for (int i = 0; i < 3; i++)
         {
             unflagAllocation(partyCharacterBuffersRaw[i]);
-            if (currentParty[i] != -1)
+            if (currentParty[i] != 0xFF)
             {
                 unflagAllocation(partyCharacterBuffersCompressed[i]);
                 decompress(partyCharacterBuffersCompressed[i].begin(), partyCharacterBuffersRaw[i]);
@@ -3326,11 +3325,6 @@ void refinalizePlayableCharacters(int)
     MissingCode();
 }
 
-void setupFieldCurrentPartyFromKernelAsGears()
-{
-    MissingCode();
-}
-
 struct sLoadingBatchCommands
 {
     u16 m0_fileIndex;
@@ -3338,6 +3332,7 @@ struct sLoadingBatchCommands
 };
 
 sLoadingBatchCommands playableCharacterLoadingBatchCommands[11];
+
 
 void batchStartLoadingFiles(sLoadingBatchCommands* pCommands, int param_2)
 {
@@ -3350,14 +3345,50 @@ void batchStartLoadingFiles(sLoadingBatchCommands* pCommands, int param_2)
     }
 }
 
+void setupFieldCurrentPartyFromKernelAsGears()
+{
+    int pCurrentPartyId = 0;
+    for (int i = 0; i < 3; i++)
+    {
+        if (gameState.m1D34_currentParty[i] != 0xff) {
+            currentParty[pCurrentPartyId++] = (uint)gameState.m1D34_currentParty[i];
+        }
+    }
+
+    int indexInLoadingBatch = 0;
+    for (int i = 0; i < 3; i++)
+    {
+        if (currentParty[i] != 0xFF)
+        {
+            int gearId = getGearForCharacter(currentParty[i]);
+            int gearFileId = gearId + 0x10;
+            if (gearId == 0xff) {
+                gearFileId = 0x10;
+            }
+            playableCharacterLoadingBatchCommands[indexInLoadingBatch].m0_fileIndex = gearFileId;
+            asyncPartyCharacterLoadingTable[indexInLoadingBatch] = gearFileId;
+            partyCharacterBuffersCompressed[indexInLoadingBatch].resize(getFileSizeAligned(gearFileId + 5));
+            playableCharacterLoadingBatchCommands[indexInLoadingBatch].m4_loadPtr = &partyCharacterBuffersCompressed[indexInLoadingBatch];
+            flagAllocation(partyCharacterBuffersCompressed[indexInLoadingBatch]);
+            indexInLoadingBatch++;
+        }
+    }
+    playableCharacterLoadingBatchCommands[indexInLoadingBatch].m0_fileIndex = 0;
+    playableCharacterLoadingBatchCommands[indexInLoadingBatch].m4_loadPtr = nullptr;
+
+    batchStartLoadingFiles(playableCharacterLoadingBatchCommands, 0);
+    typeOfPlayableCharacterLoaded = 2;
+
+}
+
 void setupFieldCurrentPartyFromKernelAsCharacters()
 {
     pKernelGameState = &gameState;
 
     for (int i = 0; i < 3; i++)
     {
-        currentParty[i] = -1;
-        if (gameState.m1D34_currentParty[i] != -1)
+        currentParty[i] = 0xFF;
+        if (gameState.m1D34_currentParty[i] != 0xFF)
         {
             currentParty[i] = gameState.m1D34_currentParty[i];
         }
@@ -3743,12 +3774,8 @@ int updateEntityEventCode3Sub2(FP_VEC3* param_1, sFieldScriptEntity* param_2)
         boundingZone[2].set(pasVar3[2].vx, pasVar3[2].vy);
         boundingZone[3].set(pasVar3[3].vx, pasVar3[3].vy);
 
-        if ((NCLIP(boundingZone[0], boundingZone[1], position) < 0) || (NCLIP(boundingZone[1], boundingZone[2], position) < 0) || (NCLIP(boundingZone[2], boundingZone[3], position) < 0)) {
+        if ((NCLIP(boundingZone[0], boundingZone[1], position) < 0) || (NCLIP(boundingZone[1], boundingZone[2], position) < 0) || (NCLIP(boundingZone[2], boundingZone[3], position) < 0) || (NCLIP(boundingZone[3], boundingZone[0], position) < 0)) {
             return -1;
-        }
-        else {
-            lVar2 = NCLIP(boundingZone[2], boundingZone[0], position);
-            return lVar2 >> 0x1f;
         }
     }
     return 0;
@@ -5228,6 +5255,7 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
             }
         }
 
+        // disable the player's directional arrow for movement
         if (entityIndex == playerControlledActor) {
             inputAllowedMask = 0xfff;
         }
@@ -6918,7 +6946,7 @@ void renderFieldCharacterSprites(std::array<sTag, 4096>& OT, int oddOrEven)
                     }
                     pScriptEntity->m4_flags = flags;
 
-                    if (((disableCharacterShadowsRendering == 0) && ((pFieldEntity->m58_flags & 0x20) == 0)) /* && (-1 < mathFlag)*/) {
+                    if (((disableCharacterShadowsRendering == 0) && ((pFieldEntity->m58_flags & 0x20) == 0)) && (-1 < mathFlag)) {
                         FP_VEC4 VStack200;
                         VStack200.vx = pScriptEntity->mF4_scale3d[0] * 3 >> 2;
                         VStack200.vy = pScriptEntity->mF4_scale3d[1] * 3 >> 2;
