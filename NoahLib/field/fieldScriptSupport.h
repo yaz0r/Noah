@@ -47,6 +47,7 @@ uint getImmediateOrVariableUnsigned(int param_1);
 void playMusicFromScript();
 void jumpIfMask(u16 mask);
 
+void resetPortraitLoadingStatus();
 int isDialogAvatarLoaded(int faceId);
 int showDialogWindowForActor(int, int);
 

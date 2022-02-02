@@ -157,7 +157,7 @@ void OPX_04();
 void OPX_07();
 void OPX_09();
 void OPX_0C();
-void OP_SET_DIALOG_AVATAR();
+void OP_SET_DIALOG_PORTRAIT();
 void OP_SET_MUSIC_PARAMS();
 void OPX_13();
 void OPX_15();

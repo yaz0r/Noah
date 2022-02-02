@@ -87,10 +87,10 @@ struct sDialogWindow
 	s16 m418_actorId;
 	s32 m41C[2];
 	s32 m424[2];
-	DR_MODE m42C_FaceDrawMode[2];
-	POLY_FT4 m444_FacePoly[2];
-	u8 m494_hasDialogFace;
-	u8 m495_dialogFaceId;
+	DR_MODE m42C_portraitDrawMode[2];
+	POLY_FT4 m444_portraitPoly[2];
+	u8 m494_hasPortrait;
+	u8 m495_portrait;
 	// size 0x498
 };
 

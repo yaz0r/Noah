@@ -23,6 +23,14 @@ struct s_directoryEntry
 extern std::vector<s_fileTableEntry> fatFileTableBuffer;
 extern std::vector<s_directoryEntry> fatDirectoryTableBuffer;
 
+struct sLoadingBatchCommands
+{
+    u16 m0_fileIndex;
+    std::vector<u8>* m4_loadPtr;
+};
+void batchStartLoadingFiles(sLoadingBatchCommands* pCommands, int param_2);
+
+
 void initCDAndFileSystem(std::vector<s_fileTableEntry>* fileTable, std::vector<s_directoryEntry>* directoryTable, int);
 
 int getFileSize(int fileIndex);
@@ -30,4 +38,5 @@ int getFileSizeAligned(int fileIndex);
 int getFileStartSector(int fileIndex);
 void readFile(int fileIndex, std::vector<u8>& output, int, int);
 int setCurrentDirectory(int directory, int offset);
-void waitReadCompletion(int);
+int isCDBusy();
+int waitReadCompletion(int);

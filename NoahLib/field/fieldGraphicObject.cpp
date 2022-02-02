@@ -1001,7 +1001,7 @@ void spriteActorSetPlayingAnimation(sSpriteActor* param_1, int animationId)
 	}
 	else {
 		if (param_1->m44_currentAnimationBundle == param_1->m48_defaultAnimationbundle) {
-			uVar2 = param_1->mB0 & 0xfffffbff;
+			uVar2 = param_1->mB0 & ~0x400;
 		}
 		else {
 			uVar2 = param_1->mB0 | 0x400;

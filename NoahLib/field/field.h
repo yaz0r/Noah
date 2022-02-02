@@ -83,7 +83,7 @@ struct sFieldScriptEntity
     s8 m75;
     s16 m76;
     std::array<u16, 4> m78_stack;
-    s8 m80_DialogAvatarFace;
+    s8 m80_dialogPortrait;
     s8 m81_selectedMultichoiceLine;
     std::array<s8, 2> m82;
     s32 m84;

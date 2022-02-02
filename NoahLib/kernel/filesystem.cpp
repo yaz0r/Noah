@@ -13,9 +13,23 @@ void readRawSectorsFromDisk(int startSector, std::vector<u8>& output, int size, 
     c_isoManager::getCurrentDisc()->readData(startSector, size, output);
 }
 
-void waitReadCompletion(int)
+int isCDBusy()
 {
     MissingCode();
+    return 0;
+}
+
+int waitReadCompletion(int param_1)
+{
+    int iVar1;
+
+    if (param_1 == 0) {
+        do {
+            iVar1 = isCDBusy();
+        } while (0 < iVar1);
+    }
+    iVar1 = isCDBusy();
+    return iVar1;
 }
 
 int getNumFilesInDirectory(int directory)
@@ -249,5 +263,16 @@ void c_filesystemExplorer::frame()
                 gFileHexView[i] = nullptr;
             }
         }
+    }
+}
+
+void batchStartLoadingFiles(sLoadingBatchCommands* pCommands, int param_2)
+{
+    // TODO: this is a quick and dirty implementation, not how the original code worked
+    while (pCommands->m4_loadPtr)
+    {
+        readFile(pCommands->m0_fileIndex, *pCommands->m4_loadPtr, 0, 0);
+
+        pCommands++;
     }
 }

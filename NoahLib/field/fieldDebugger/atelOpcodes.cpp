@@ -919,7 +919,7 @@ void initExtendedOpcodeTable()
         .end();
 
 	m_extendedOpcode[0xD]
-		.setName("SET_DIALOG_AVATAR")
+		.setName("SET_DIALOG_PORTRAIT")
 		.addArgumentU16OrVar()
 		.end();
 

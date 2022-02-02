@@ -318,6 +318,7 @@ void resetFieldDefault()
     createRotationMatrix(&cameraProjectionAngles, &currentProjectionMatrix);
     pCurrentFieldRenderingContext = &fieldRenderContext[0];
     resetCameraData();
+    resetPortraitLoadingStatus();
 
     MissingCode();
 }
@@ -571,7 +572,7 @@ void initFieldScriptEntityValues(int index)
     pFieldScriptEntity->mF4_scale3d[1] = 0x1000;
     pFieldScriptEntity->mF4_scale3d[2] = 0x1000;
     pFieldScriptEntity->m10D = 0xff;
-    pFieldScriptEntity->m80_DialogAvatarFace = -1;
+    pFieldScriptEntity->m80_dialogPortrait = -1;
     pFieldScriptEntity->m106_currentRotation = -0x8000;
     pFieldScriptEntity->m104_rotation = -0x8000;
     pFieldScriptEntity->m108_rotation3 = -0x8000;
@@ -2990,13 +2991,6 @@ void initFieldData()
 
 }
 
-int isCDBusy()
-{
-    MissingCode();
-    return 0;
-}
-
-
 
 void loadRawFieldBundle(int fieldId)
 {
@@ -3326,25 +3320,7 @@ void refinalizePlayableCharacters(int)
     MissingCode();
 }
 
-struct sLoadingBatchCommands
-{
-    u16 m0_fileIndex;
-    std::vector<u8>* m4_loadPtr;
-};
-
 sLoadingBatchCommands playableCharacterLoadingBatchCommands[11];
-
-
-void batchStartLoadingFiles(sLoadingBatchCommands* pCommands, int param_2)
-{
-    // TODO: this is a quick and dirty implementation, not how the original code worked
-    while (pCommands->m4_loadPtr)
-    {
-        readFile(pCommands->m0_fileIndex, *pCommands->m4_loadPtr, 0, 0);
-
-        pCommands++;
-    }
-}
 
 void setupFieldCurrentPartyFromKernelAsGears()
 {

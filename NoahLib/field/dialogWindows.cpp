@@ -132,16 +132,16 @@ void initIndividualDialogWindow(int windowIndex)
 
 	{
 		RECT localRect = { 0,0,0xFF,0xFF };
-		SetDrawMode(&gDialogWindows[windowIndex].m42C_FaceDrawMode[0], 0, 0, GetTPage(1, 0, 0x2c0, 0x100), &localRect);
-		SetDrawMode(&gDialogWindows[windowIndex].m42C_FaceDrawMode[1], 0, 0, GetTPage(1, 0, 0x2c0, 0x100), &localRect);
+		SetDrawMode(&gDialogWindows[windowIndex].m42C_portraitDrawMode[0], 0, 0, GetTPage(1, 0, 0x2c0, 0x100), &localRect);
+		SetDrawMode(&gDialogWindows[windowIndex].m42C_portraitDrawMode[1], 0, 0, GetTPage(1, 0, 0x2c0, 0x100), &localRect);
 
-		SetPolyFT4(&gDialogWindows[windowIndex].m444_FacePoly[0]);
-		gDialogWindows[windowIndex].m444_FacePoly[0].r0 = 0x80;
-		gDialogWindows[windowIndex].m444_FacePoly[0].g0 = 0x80;
-		gDialogWindows[windowIndex].m444_FacePoly[0].b0 = 0x80;
-		gDialogWindows[windowIndex].m444_FacePoly[0].clut = GetClut(0, 0xe0);
-		gDialogWindows[windowIndex].m444_FacePoly[0].tpage = GetTPage(1, 0, 0x2c0, 0x100);
-		gDialogWindows[windowIndex].m444_FacePoly[1] = gDialogWindows[windowIndex].m444_FacePoly[0];
+		SetPolyFT4(&gDialogWindows[windowIndex].m444_portraitPoly[0]);
+		gDialogWindows[windowIndex].m444_portraitPoly[0].r0 = 0x80;
+		gDialogWindows[windowIndex].m444_portraitPoly[0].g0 = 0x80;
+		gDialogWindows[windowIndex].m444_portraitPoly[0].b0 = 0x80;
+		gDialogWindows[windowIndex].m444_portraitPoly[0].clut = GetClut(0, 0xe0);
+		gDialogWindows[windowIndex].m444_portraitPoly[0].tpage = GetTPage(1, 0, 0x2c0, 0x100);
+		gDialogWindows[windowIndex].m444_portraitPoly[1] = gDialogWindows[windowIndex].m444_portraitPoly[0];
 	}
 }
 
@@ -251,41 +251,45 @@ int getWindowWithLowestPriority()
 
 s32 createDialogWindowCounter = 0;
 
-void setupDialogWindowFacePoly(int windowIndex, int setupIndex)
+void setupDialogWindowPortraitPoly(int windowIndex, int setupIndex)
 {
-	static const std::array<sVec2_s16, 4> dialogWindowFacePolySetups = { {
+	static const std::array<sVec2_s16, 8> dialogWindowPortraitPolySetups = { {
 		{ 0x3F, 0 },
 		{ 0, 0 },
 		{ 0x3F, 0x40 },
 		{ 0, 0x40 },
+        { 0x3F, 0x80 },
+        { 0, 0x80 },
+        { 0x3F, 0xBF },
+        { 0, 0xBF },
 	} };
 
-	gDialogWindows[windowIndex].m444_FacePoly[0].u0 = dialogWindowFacePolySetups[setupIndex].vx;
-	gDialogWindows[windowIndex].m444_FacePoly[1].u0 = dialogWindowFacePolySetups[setupIndex].vx;
+	gDialogWindows[windowIndex].m444_portraitPoly[0].u0 = dialogWindowPortraitPolySetups[setupIndex].vx;
+	gDialogWindows[windowIndex].m444_portraitPoly[1].u0 = dialogWindowPortraitPolySetups[setupIndex].vx;
 
-	gDialogWindows[windowIndex].m444_FacePoly[0].v0 = dialogWindowFacePolySetups[setupIndex].vy;
-	gDialogWindows[windowIndex].m444_FacePoly[1].v0 = dialogWindowFacePolySetups[setupIndex].vy;
+	gDialogWindows[windowIndex].m444_portraitPoly[0].v0 = dialogWindowPortraitPolySetups[setupIndex].vy;
+	gDialogWindows[windowIndex].m444_portraitPoly[1].v0 = dialogWindowPortraitPolySetups[setupIndex].vy;
 
-	gDialogWindows[windowIndex].m444_FacePoly[0].u1 = dialogWindowFacePolySetups[setupIndex].vx + 0x40;
-	gDialogWindows[windowIndex].m444_FacePoly[1].u1 = dialogWindowFacePolySetups[setupIndex].vx + 0x40;
+	gDialogWindows[windowIndex].m444_portraitPoly[0].u1 = dialogWindowPortraitPolySetups[setupIndex].vx + 0x40;
+	gDialogWindows[windowIndex].m444_portraitPoly[1].u1 = dialogWindowPortraitPolySetups[setupIndex].vx + 0x40;
 
-	gDialogWindows[windowIndex].m444_FacePoly[0].v1 = dialogWindowFacePolySetups[setupIndex].vy;
-	gDialogWindows[windowIndex].m444_FacePoly[1].v1 = dialogWindowFacePolySetups[setupIndex].vy;
+	gDialogWindows[windowIndex].m444_portraitPoly[0].v1 = dialogWindowPortraitPolySetups[setupIndex].vy;
+	gDialogWindows[windowIndex].m444_portraitPoly[1].v1 = dialogWindowPortraitPolySetups[setupIndex].vy;
 
-	gDialogWindows[windowIndex].m444_FacePoly[0].u2 = dialogWindowFacePolySetups[setupIndex].vx;
-	gDialogWindows[windowIndex].m444_FacePoly[1].u2 = dialogWindowFacePolySetups[setupIndex].vx;
+	gDialogWindows[windowIndex].m444_portraitPoly[0].u2 = dialogWindowPortraitPolySetups[setupIndex].vx;
+	gDialogWindows[windowIndex].m444_portraitPoly[1].u2 = dialogWindowPortraitPolySetups[setupIndex].vx;
 
-	gDialogWindows[windowIndex].m444_FacePoly[0].v2 = dialogWindowFacePolySetups[setupIndex].vy + 0x40;
-	gDialogWindows[windowIndex].m444_FacePoly[1].v2 = dialogWindowFacePolySetups[setupIndex].vy + 0x40;
+	gDialogWindows[windowIndex].m444_portraitPoly[0].v2 = dialogWindowPortraitPolySetups[setupIndex].vy + 0x40;
+	gDialogWindows[windowIndex].m444_portraitPoly[1].v2 = dialogWindowPortraitPolySetups[setupIndex].vy + 0x40;
 
-	gDialogWindows[windowIndex].m444_FacePoly[0].u3 = dialogWindowFacePolySetups[setupIndex].vx + 0x40;
-	gDialogWindows[windowIndex].m444_FacePoly[1].u3 = dialogWindowFacePolySetups[setupIndex].vx + 0x40;
+	gDialogWindows[windowIndex].m444_portraitPoly[0].u3 = dialogWindowPortraitPolySetups[setupIndex].vx + 0x40;
+	gDialogWindows[windowIndex].m444_portraitPoly[1].u3 = dialogWindowPortraitPolySetups[setupIndex].vx + 0x40;
 
-	gDialogWindows[windowIndex].m444_FacePoly[0].v3 = dialogWindowFacePolySetups[setupIndex].vy + 0x40;
-	gDialogWindows[windowIndex].m444_FacePoly[1].v3 = dialogWindowFacePolySetups[setupIndex].vy + 0x40;
+	gDialogWindows[windowIndex].m444_portraitPoly[0].v3 = dialogWindowPortraitPolySetups[setupIndex].vy + 0x40;
+	gDialogWindows[windowIndex].m444_portraitPoly[1].v3 = dialogWindowPortraitPolySetups[setupIndex].vy + 0x40;
 
-	gDialogWindows[windowIndex].m444_FacePoly[0].clut = GetClut(0, setupIndex + 0xe0);
-	gDialogWindows[windowIndex].m444_FacePoly[1].clut = GetClut(0, setupIndex + 0xe0);
+	gDialogWindows[windowIndex].m444_portraitPoly[0].clut = GetClut(0, setupIndex + 0xe0);
+	gDialogWindows[windowIndex].m444_portraitPoly[1].clut = GetClut(0, setupIndex + 0xe0);
 }
 
 void setupWindowSize1(int windowIndex, short x, short y, short width, short height)
@@ -461,9 +465,9 @@ void createDialogWindow(short x, short y, int dialogIndex, int windowIndex, int 
 	}
 
 	sFieldScriptEntity* pScriptEntity = actorArray[fieldActorId].m4C_scriptEntity;
-	if ((pScriptEntity->m80_DialogAvatarFace == -1) || ((flagUpper & 2) != 0)) {
-		gDialogWindows[windowIndex].m495_dialogFaceId = 0x80;
-		gDialogWindows[windowIndex].m494_hasDialogFace = 0;
+	if ((pScriptEntity->m80_dialogPortrait == -1) || ((flagUpper & 2) != 0)) {
+		gDialogWindows[windowIndex].m495_portrait = 0x80;
+		gDialogWindows[windowIndex].m494_hasPortrait = 0;
 	}
 	else {
 		u32 windowSetupIndex;
@@ -473,15 +477,15 @@ void createDialogWindow(short x, short y, int dialogIndex, int windowIndex, int 
 		else {
 			windowSetupIndex = pScriptEntity->m12C_flags >> 1 & 0xe;
 		}
-		setupDialogWindowFacePoly(windowIndex, windowSetupIndex);
-		gDialogWindows[windowIndex].m494_hasDialogFace = 1;
-		gDialogWindows[windowIndex].m495_dialogFaceId = (actorArray[fieldActorId].m4C_scriptEntity)->m80_DialogAvatarFace;
+		setupDialogWindowPortraitPoly(windowIndex, windowSetupIndex);
+		gDialogWindows[windowIndex].m494_hasPortrait = 1;
+		gDialogWindows[windowIndex].m495_portrait = (actorArray[fieldActorId].m4C_scriptEntity)->m80_dialogPortrait;
 	}
 
 	gDialogWindows[windowIndex].m37C = -1;
 	setupWindowSize1(windowIndex, (int)x, (int)y2, width * 4 + 0x10, height * 0xe + 0x10);
 	int xOffset = 0;
-	if ((actorArray[fieldActorId].m4C_scriptEntity)->m80_DialogAvatarFace != -1) {
+	if ((actorArray[fieldActorId].m4C_scriptEntity)->m80_dialogPortrait != -1) {
 		xOffset = -(ushort)((flagUpper & 0x402) == 0) & 0x44;
 	}
 	setupWindowSize2(&gDialogWindows[windowIndex].m18, windowsDefaultPositions[windowIndex].vx, windowsDefaultPositions[windowIndex].vy, x + xOffset + 8, y, width, height);
@@ -778,21 +782,21 @@ void dialogWindowSetupForRendering(sTag* OT, int oddOrEven, int windowIndex)
 				polyX = ((windowX + windowWidth) - faceWidth) + -4;
 			}
 
-			setupFacePolyPosition(&gDialogWindows[windowIndex].m444_FacePoly[oddOrEven], polyX, windowY + 4, faceWidth, faceHeight, (ushort)gDialogWindows[windowIndex].m40C_flags & 0x20);
+			setupFacePolyPosition(&gDialogWindows[windowIndex].m444_portraitPoly[oddOrEven], polyX, windowY + 4, faceWidth, faceHeight, (ushort)gDialogWindows[windowIndex].m40C_flags & 0x20);
 
 			// chain the face poly
-			if (gDialogWindows[windowIndex].m494_hasDialogFace == 1) {
-				gDialogWindows[windowIndex].m444_FacePoly[oddOrEven].m0_pNext = OT->m0_pNext;
-				OT->m0_pNext = &gDialogWindows[windowIndex].m444_FacePoly[oddOrEven];
+			if (gDialogWindows[windowIndex].m494_hasPortrait == 1) {
+				gDialogWindows[windowIndex].m444_portraitPoly[oddOrEven].m0_pNext = OT->m0_pNext;
+				OT->m0_pNext = &gDialogWindows[windowIndex].m444_portraitPoly[oddOrEven];
 
-				gDialogWindows[windowIndex].m42C_FaceDrawMode[oddOrEven].m0_pNext = &gDialogWindows[windowIndex].m444_FacePoly[oddOrEven];
-				OT->m0_pNext = &gDialogWindows[windowIndex].m42C_FaceDrawMode[oddOrEven];
+				gDialogWindows[windowIndex].m42C_portraitDrawMode[oddOrEven].m0_pNext = &gDialogWindows[windowIndex].m444_portraitPoly[oddOrEven];
+				OT->m0_pNext = &gDialogWindows[windowIndex].m42C_portraitDrawMode[oddOrEven];
 			}
 		}
 
 		// Selector sprite for multi-choice (selected text in multi-selection)
 		if (((gDialogWindows[windowIndex].m37C == 0) && (gDialogWindows[windowIndex].m410 == 0)) && (gDialogWindows[windowIndex].m408_openAnimationCounter == 0)) {
-            if ((gDialogWindows[windowIndex].m494_hasDialogFace == 1) && ((gDialogWindows[windowIndex].m40C_flags & 0x20U) == 0)) {
+            if ((gDialogWindows[windowIndex].m494_hasPortrait == 1) && ((gDialogWindows[windowIndex].m40C_flags & 0x20U) == 0)) {
                 gDialogWindows[windowIndex].m39C_Sprt[oddOrEven].x0 = windowX + 0x5A;
             }
             else {

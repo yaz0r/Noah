@@ -163,7 +163,7 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0x07] = OPX_07;
     fieldScriptOpcodes_EX[0x09] = OPX_09;
     fieldScriptOpcodes_EX[0x0C] = OPX_0C;
-    fieldScriptOpcodes_EX[0x0D] = OP_SET_DIALOG_AVATAR;
+    fieldScriptOpcodes_EX[0x0D] = OP_SET_DIALOG_PORTRAIT;
     fieldScriptOpcodes_EX[0x0E] = OP_SET_MUSIC_PARAMS;
     fieldScriptOpcodes_EX[0x13] = OPX_13;
     fieldScriptOpcodes_EX[0x15] = OPX_15;

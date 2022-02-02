@@ -1,6 +1,8 @@
 #include "noahLib.h"
 #include "fieldScriptSupport.h"
 #include "dialogWindows.h"
+#include "kernel/filesystem.h"
+#include "kernel/TIM.h"
 
 int currentFieldActorId;
 std::vector<u8>::iterator pCurrentFieldScriptFile;
@@ -240,10 +242,215 @@ void jumpIfMask(u16 mask)
     pCurrentFieldScriptActor->mCC_scriptPC = uVar1;
 }
 
-int isDialogAvatarLoaded(int faceId)
+struct sPortraitLoadingStatus {
+    s16 m0_id;
+    s16 m2_status;
+    s16 m4_isAsymmetric;
+};
+
+std::array<sPortraitLoadingStatus, 3> portraitLoadingStatus;
+std::array<std::vector<u8>, 3> partyPortraitPointers;
+int currentPortraitLoadingSlot = 0;
+
+void resetPortraitLoadingStatus() {
+    for (int i = 0; i < 3; i++) {
+        portraitLoadingStatus[i].m0_id = -1;
+        portraitLoadingStatus[i].m2_status = -1;
+    }
+    currentPortraitLoadingSlot = 0;
+}
+
+std::array<std::array<RECT, 2>, 3> partyPortraitsRects = { {
+    {{{0x2C0, 0x100, 0x0, 0xE1}, {0x2E0, 0x100, 0x0, 0xE0}}},
+    {{{0x2C0, 0x140, 0x0, 0xE3}, {0x2E0, 0x140, 0x0, 0xE2}}},
+    {{{0x2C0, 0x180, 0x0, 0xE5}, {0x2E0, 0x180, 0x0, 0xE4}}},
+}};
+
+std::array<sLoadingBatchCommands, 3> portraitsLoadingCommands;
+
+std::array<std::array<u8, 2>, 90> portraitMapping = { {
+    {0x0, 0x0},
+    {0x6, 0x6},
+    {0x11, 0x11},
+    {0x13, 0x14},
+    {0x15, 0x15},
+    {0x17, 0x17},
+    {0x18, 0x18},
+    {0x1C, 0x1C},
+    {0x1B, 0x1B},
+    {0x11, 0x11},
+    {0x19, 0x19},
+    {0x22, 0x22},
+    {0x23, 0x23},
+    {0x24, 0x24},
+    {0x25, 0x25},
+    {0x4F, 0x4F},
+    {0x52, 0x52},
+    {0x53, 0x53},
+    {0x1A, 0x1A},
+    {0x34, 0x34},
+    {0x51, 0x51},
+    {0x4D, 0x4D},
+    {0x4E, 0x4E},
+    {0x21, 0x21},
+    {0x29, 0x29},
+    {0x1D, 0x1D},
+    {0x2B, 0x2B},
+    {0x32, 0x33},
+    {0x2A, 0x2A},
+    {0x35, 0x35},
+    {0x38, 0x38},
+    {0x26, 0x26},
+    {0x1, 0x1},
+    {0x2, 0x2},
+    {0x3, 0x3},
+    {0x4, 0x4},
+    {0x5, 0x5},
+    {0x7, 0x7},
+    {0x8, 0x8},
+    {0x9, 0x9},
+    {0xA, 0xA},
+    {0xB, 0xB},
+    {0xC, 0xC},
+    {0xD, 0xD},
+    {0xE, 0xE},
+    {0xF, 0xF},
+    {0x10, 0x10},
+    {0x12, 0x12},
+    {0x1E, 0x1E},
+    {0x1F, 0x1F},
+    {0x20, 0x20},
+    {0x27, 0x27},
+    {0x28, 0x28},
+    {0x2C, 0x2C},
+    {0x2D, 0x2D},
+    {0x2E, 0x2E},
+    {0x2F, 0x2F},
+    {0x30, 0x30},
+    {0x31, 0x31},
+    {0x36, 0x36},
+    {0x16, 0x16},
+    {0x39, 0x39},
+    {0x3A, 0x3A},
+    {0x3B, 0x3B},
+    {0x3C, 0x3C},
+    {0x3D, 0x3D},
+    {0x3E, 0x3E},
+    {0x3F, 0x3F},
+    {0x40, 0x40},
+    {0x41, 0x41},
+    {0x42, 0x42},
+    {0x43, 0x43},
+    {0x44, 0x44},
+    {0x45, 0x45},
+    {0x46, 0x46},
+    {0x47, 0x47},
+    {0x48, 0x48},
+    {0x49, 0x49},
+    {0x4A, 0x4A},
+    {0x4B, 0x4B},
+    {0x4C, 0x4C},
+    {0x50, 0x50},
+    {0x37, 0x37},
+    {0x54, 0x54},
+    {0x55, 0x55},
+    {0x56, 0x56},
+    {0x57, 0x57},
+    {0x58, 0x58},
+    {0x59, 0x59},
+    {0x5A, 0x5A},
+} };
+
+int isPortraitUsed(uint param_1)
 {
-	MissingCode();
-	return 0;
+    int i = 0;
+    while ((((gDialogWindows[i].m40E) != 0 || (((int)(gDialogWindows[i].m494_hasPortrait)) != 1)) ||
+        (((int)(gDialogWindows[i].m495_portrait)) != param_1))) {
+        i = i + 1;
+        if (3 < i) {
+            return 0;
+        }
+    }
+    return -1;
+}
+
+int isDialogAvatarLoaded(int portraitId)
+{
+    for (int i = 0; i < 3; i++) {
+        switch (portraitLoadingStatus[i].m2_status) {
+        case 0: // idle
+            break;
+        case 1: // wait loading
+            if(waitReadCompletion(1) == 0) {
+                portraitLoadingStatus[i].m2_status = 2;
+                loadTimToVram(partyPortraitPointers[0].begin(), partyPortraitsRects[i][0].x, partyPortraitsRects[i][0].y, partyPortraitsRects[i][0].w, partyPortraitsRects[i][0].h, 0x100, 1);
+
+                // handle portrait asymmetry
+                if (portraitLoadingStatus[i].m4_isAsymmetric == 0) {
+                    loadTimToVram(partyPortraitPointers[0].begin(), partyPortraitsRects[i][1].x, partyPortraitsRects[i][1].y, partyPortraitsRects[i][1].w, partyPortraitsRects[i][1].h, 0x100, 1);
+                }
+                else {
+                    loadTimToVram(partyPortraitPointers[1].begin(), partyPortraitsRects[i][1].x, partyPortraitsRects[i][1].y, partyPortraitsRects[i][1].w, partyPortraitsRects[i][1].h, 0x100, 1);
+                }
+            }
+            return -1;
+        case 2: // cleanup
+            portraitLoadingStatus[i].m2_status = 0;
+            break;
+        }
+
+    }
+
+    for (int i = 0; i < 3; i++) {
+        if (portraitLoadingStatus[i].m0_id == portraitId) {
+            pCurrentFieldScriptActor->m12C_flags &= ~(7 << 2);
+            pCurrentFieldScriptActor->m12C_flags |= (i & 7) << 2;
+            return 0;
+        }
+    }
+
+    {
+        bool bVar1 = false;
+        int i = 0;
+        while (true) {
+            currentPortraitLoadingSlot = currentPortraitLoadingSlot + 1;
+            if (2 < (int)currentPortraitLoadingSlot) {
+                currentPortraitLoadingSlot = 0;
+            }
+
+            int iVar2 = isPortraitUsed((int)portraitLoadingStatus[currentPortraitLoadingSlot].m0_id);
+            i = i + 1;
+            if (iVar2 == 0) {
+                bVar1 = true;
+                goto LAB_Field__8009c364;
+            }
+            if (2 < i) {
+            LAB_Field__8009c364:
+                if (bVar1) {
+                    pCurrentFieldScriptActor->m12C_flags = pCurrentFieldScriptActor->m12C_flags & 0xffffffe3 | (currentPortraitLoadingSlot & 7) << 2;
+                    setCurrentDirectory(4, 0);
+                    portraitLoadingStatus[currentPortraitLoadingSlot].m0_id = (short)portraitId;
+                    portraitLoadingStatus[currentPortraitLoadingSlot].m2_status = 1;
+                    portraitLoadingStatus[currentPortraitLoadingSlot].m4_isAsymmetric = 0;
+                    portraitsLoadingCommands[0].m0_fileIndex = portraitMapping[portraitId][0] + 0x46;
+                    partyPortraitPointers[0].resize(getFileSizeAligned(portraitsLoadingCommands[0].m0_fileIndex));
+                    i = 1;
+                    portraitsLoadingCommands[0].m4_loadPtr = &partyPortraitPointers[0];
+                    if (portraitMapping[portraitId][1] != portraitMapping[portraitId][0]) {
+                        portraitLoadingStatus[currentPortraitLoadingSlot].m4_isAsymmetric = 1;
+                        portraitsLoadingCommands[1].m0_fileIndex = portraitMapping[portraitId][1] + 0x46;
+                        i = 2;
+                        partyPortraitPointers[1].resize(getFileSizeAligned(portraitsLoadingCommands[1].m0_fileIndex));
+                        portraitsLoadingCommands[1].m4_loadPtr = &partyPortraitPointers[1];
+                    }
+                    portraitsLoadingCommands[i].m0_fileIndex = 0;
+                    portraitsLoadingCommands[i].m4_loadPtr = nullptr;
+                    batchStartLoadingFiles(&portraitsLoadingCommands[0], 0);
+                }
+                return -1;
+            }
+        }
+    }
 }
 
 int getDialogParam0(const std::vector<u8>& bundle, int index)
@@ -317,7 +524,7 @@ int showDialogWindowForActor(int actorId, int mode)
 	int iVar6;
 	if (((((loadCompleted != 0) || (iRam800afd04 != 0)) || (numDialogWindowsCreatedThisFrame != 0)) || (iRam800adb64 != 0xff)) ||
 		(((iRam800adb70 == 0 && (iVar6 = isLoadCompleted(), iVar6 != 0)) ||
-			((pCurrentFieldScriptActor->m80_DialogAvatarFace != -1 && (iVar6 = isDialogAvatarLoaded((uint)pCurrentFieldScriptActor->m80_DialogAvatarFace), iVar6 == -1)))))) {
+			((pCurrentFieldScriptActor->m80_dialogPortrait != -1 && (iVar6 = isDialogAvatarLoaded((uint)pCurrentFieldScriptActor->m80_dialogPortrait), iVar6 == -1)))))) {
 		breakCurrentScript = 1;
 		return -1;
 	}
@@ -398,7 +605,7 @@ int showDialogWindowForActor(int actorId, int mode)
             else {
                 projectedPosition[0] = 0xa0;
             }
-            if ((pCurrentFieldScriptActor->m80_DialogAvatarFace != 0xff) && ((flagFromScript & 2) == 0)) {
+            if ((pCurrentFieldScriptActor->m80_dialogPortrait != -1) && ((flagFromScript & 2) == 0)) {
                 dialogBoxHeight = 4;
                 if ((int)dialogBoxWidth < 0x18) {
                     dialogBoxWidth = 0x18;
@@ -433,7 +640,7 @@ int showDialogWindowForActor(int actorId, int mode)
                 projectedPosition[0] = 0xa0;
             }
             int bVar2;
-            if ((pCurrentFieldScriptActor->m80_DialogAvatarFace != -1) && (bVar2 = (int)dialogBoxWidth < 0x18, (flagFromScript & 2) == 0)) {
+            if ((pCurrentFieldScriptActor->m80_dialogPortrait != -1) && (bVar2 = (int)dialogBoxWidth < 0x18, (flagFromScript & 2) == 0)) {
                 dialogBoxWidth = dialogBoxWidth + 0x11;
                 if (bVar2) {
                     dialogBoxWidth = 0x29;
@@ -480,7 +687,7 @@ LAB_Field__8009ca64:
 		if (pCurrentFieldScriptActor->m82[1] != 0) {
 			dialogBoxHeight = (uint)pCurrentFieldScriptActor->m82[1];
 		}
-		if ((pCurrentFieldScriptActor->m80_DialogAvatarFace != -1) && (((pCurrentFieldScriptActor->m84 >> 16) & 2) == 0)) {
+		if ((pCurrentFieldScriptActor->m80_dialogPortrait != -1) && (((pCurrentFieldScriptActor->m84 >> 16) & 2) == 0)) {
 			dialogBoxHeight = 4;
 		}
 	}

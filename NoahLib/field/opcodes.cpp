@@ -915,9 +915,9 @@ void OP_18()
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 5;
 }
 
-void OP_SET_DIALOG_AVATAR(void)
+void OP_SET_DIALOG_PORTRAIT(void)
 {
-    pCurrentFieldScriptActor->m80_DialogAvatarFace = getCharacter(getImmediateOrVariableUnsigned(1));
+    pCurrentFieldScriptActor->m80_dialogPortrait = getCharacter(getImmediateOrVariableUnsigned(1));
     pCurrentFieldScriptActor->mCC_scriptPC += 3;
 }
 
@@ -4139,7 +4139,7 @@ void OP_FC()
     else
     {
         int characterId = readCharacter(1);
-        pCurrentFieldScriptActor->m80_DialogAvatarFace = (actorArray[characterId].m4C_scriptEntity)->m80_DialogAvatarFace;
+        pCurrentFieldScriptActor->m80_dialogPortrait = (actorArray[characterId].m4C_scriptEntity)->m80_dialogPortrait;
         OP_SHOW_DIALOG_WINDOW_FOR_OTHER_ACTOR_MODE0();
     }
 }
