@@ -909,11 +909,12 @@ s32 screenClippingX = 319;
 s32 screenClippingY = 238 << 0x10;
 
 s32 gDepthDivider = 2;
-std::array<sTag, 4096>* currentOTEntry = nullptr;
+
+OTTable* currentOTEntry = nullptr;
 
 void genericTrianglePrim(std::vector<u8>::iterator meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
 {
-    std::array<sTag, 4096>& pOT = *currentOTEntry;
+    OTTable& pOT = *currentOTEntry;
     int depthGranularity = gDepthDivider + 2;
 
     for (int i = 0; i < count; i++)
@@ -993,7 +994,7 @@ void prim5_0(std::vector<u8>::iterator meshSubBlock, int count)
 
 void prim5_2generic(std::vector<u8>::iterator meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
 {
-    std::array<sTag, 4096>& pOT = *currentOTEntry;
+    OTTable& pOT = *currentOTEntry;
     int depthGranularity = gDepthDivider + 2;
 
     for (int i = 0; i < count; i++)
@@ -1073,7 +1074,7 @@ void prim5_2(std::vector<u8>::iterator meshSubBlock, int count)
 
 void primD_2generic(std::vector<u8>::iterator meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
 {
-    std::array<sTag, 4096>& pOT = *currentOTEntry;
+    OTTable& pOT = *currentOTEntry;
     int depthGranularity = gDepthDivider + 2;
 
     for (int i = 0; i < count; i++)
@@ -1170,7 +1171,7 @@ void primD_2(std::vector<u8>::iterator meshSubBlock, int count)
 
 void primD_0generic(std::vector<u8>::iterator meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
 {
-    std::array<sTag, 4096>& pOT = *currentOTEntry;
+    OTTable& pOT = *currentOTEntry;
     int depthGranularity = gDepthDivider + 2;
 
     for (int i = 0; i < count; i++)
@@ -6066,7 +6067,7 @@ int isObjectClipped(sModelBlock* param_1, uint param_2)
     return 0;
 }
 
-bool submitModelForRendering(sModelBlock* param_1, std::vector<sTag*>& param_2, std::array<sTag, 4096>& OT, int renderMode)
+bool submitModelForRendering(sModelBlock* param_1, std::vector<sTag*>& param_2, OTTable& OT, int renderMode)
 {
     if ((objectClippingMask != 0) && (isObjectClipped(param_1, objectClippingMask))) {
         return 0;
@@ -6638,9 +6639,9 @@ void setCurrentRenderingMatrix(MATRIX* pMatrix)
     currentRenderingMatrix = *pMatrix;
 }
 
-std::array<sTag, 4096>* characterRenderingOT = nullptr;
+OTTable* characterRenderingOT = nullptr;
 
-void setCharacterRenderingOT(std::array<sTag, 4096>& OT)
+void setCharacterRenderingOT(OTTable& OT)
 {
     characterRenderingOT = &OT;
 }
@@ -6871,7 +6872,7 @@ void renderFieldCharacterSpritesSub0(sSpriteActor* pSpriteSheet, sTag* pTag)
     }
 }
 
-void renderFieldCharacterSprites(std::array<sTag, 4096>& OT, int oddOrEven)
+void renderFieldCharacterSprites(OTTable& OT, int oddOrEven)
 {
     int cameraDirection = getCameraDirection() & 0xFFFF;
     MATRIX localRotationMatrix;
@@ -7002,7 +7003,7 @@ void renderFieldCharacterSprites(std::array<sTag, 4096>& OT, int oddOrEven)
     }
 }
 
-void renderCharShadows(std::array<sTag, 4096>& OT, int oddOrEven)
+void renderCharShadows(OTTable& OT, int oddOrEven)
 {
     MATRIX localProjectionMatrix = currentProjectionMatrix;
 
@@ -7218,7 +7219,7 @@ void AddPrims(sTag* ot, sTag* p0, sTag* p1)
 }
 
 // Add OT b (from 0 to index) to ordering table element a
-void linkOT(sTag* a, std::array<sTag, 4096>& b, int index)
+void linkOT(sTag* a, OTTable& b, int index)
 {
     AddPrims(a, &b[index], &b[0]);
 }

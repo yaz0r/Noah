@@ -293,8 +293,8 @@ struct sFieldRenderContext
 	DRAWENV m0_drawEnv;
 	DRAWENV m5C_backgroundRect;
 	DISPENV mB8_displayEnv;
-	std::array<sTag, 4096> mCC_OT;
-	std::array<sTag, 4096> m40D0_secondaryOT;
+	OTTable mCC_OT;
+	OTTable m40D0_secondaryOT;
 	std::array<sTag, 8> m80D4_uiOT;
 };
 

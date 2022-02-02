@@ -10,6 +10,8 @@ struct sTag
 	virtual void execute() {}
 };
 
+typedef std::array<sTag, 4096> OTTable;
+
 struct TILE : public sTag
 {
 	u8 r0;
