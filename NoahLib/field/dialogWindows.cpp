@@ -415,7 +415,7 @@ const std::vector<sVec2_s16> windowsDefaultPositions = {
 	{0x300, 0x1B4},
 };
 
-s16 dialogWindowFlag1 = 0;
+s16 dialogWindowOpenAnimationNumFrames = 0;
 
 
 std::vector<u8>::iterator getDialogParamPointer(std::vector<u8>& buffer, int param_2)
@@ -498,7 +498,7 @@ void createDialogWindow(short x, short y, int dialogIndex, int windowIndex, int 
 	}
 
 	int bVar3 = 2;
-	if (dialogWindowFlag1 == 8) {
+	if (dialogWindowOpenAnimationNumFrames == 8) {
 		bVar3 = 1;
 	}
 	gDialogWindows[windowIndex].m18.m68 = bVar3;
@@ -507,7 +507,7 @@ void createDialogWindow(short x, short y, int dialogIndex, int windowIndex, int 
 	gDialogWindows[windowIndex].m18.m10_flags |= 2;
 	gDialogWindows[windowIndex].m416_fieldActorId = fieldActorId;
 	gDialogWindows[windowIndex].m418_actorId = actorId;
-	gDialogWindows[windowIndex].m408_openAnimationCounter = dialogWindowFlag1;
+	gDialogWindows[windowIndex].m408_openAnimationCounter = dialogWindowOpenAnimationNumFrames;
 
 	if ((param_11 & 0x800) == 0) {
 		gDialogWindows[windowIndex].m412 = 0;
@@ -520,8 +520,8 @@ void createDialogWindow(short x, short y, int dialogIndex, int windowIndex, int 
 	gDialogWindows[windowIndex].m41C[1] = ((projectedPosition[1] - (height * 7 + 8)) - (int)y2) * 0x10000;
 
 	if ((flagUpper & 0x100) == 0) {
-		gDialogWindows[windowIndex].m424[0] = -(gDialogWindows[windowIndex].m41C[0] / (int)dialogWindowFlag1);
-		gDialogWindows[windowIndex].m424[1] = -(gDialogWindows[windowIndex].m41C[1] / (int)dialogWindowFlag1);
+		gDialogWindows[windowIndex].m424[0] = -(gDialogWindows[windowIndex].m41C[0] / (int)dialogWindowOpenAnimationNumFrames);
+		gDialogWindows[windowIndex].m424[1] = -(gDialogWindows[windowIndex].m41C[1] / (int)dialogWindowOpenAnimationNumFrames);
 	}
 	else {
 		gDialogWindows[windowIndex].m408_openAnimationCounter = 1;
@@ -694,7 +694,27 @@ void dialogWindowSetupForRendering(sTag* OT, int oddOrEven, int windowIndex)
 
 		// scale window down during opening animation
 		if (gDialogWindows[windowIndex].m408_openAnimationCounter != 0) {
-			MissingCode();
+            int numFramesTimesTwo = dialogWindowOpenAnimationNumFrames << 1;
+            int numFramesPassedInAnimation = dialogWindowOpenAnimationNumFrames - gDialogWindows[windowIndex].m408_openAnimationCounter;
+            int XOffset = ((windowWidth << 0x10) / numFramesTimesTwo) * numFramesPassedInAnimation;
+            int YOffset = ((windowHeight << 0x10) / numFramesTimesTwo) * numFramesPassedInAnimation;
+            windowX = (windowX + (windowWidth - (windowWidth2 >> 0x1f) >> 1)) - (XOffset >> 0x10);
+            windowWidth = XOffset * 2 >> 0x10;
+            windowY = (windowY + (windowHeight - (windowHeight2 >> 0x1f) >> 1)) - (YOffset >> 0x10);
+            windowHeight = YOffset * 2 >> 0x10;
+            if (windowWidth < 0x10) {
+                windowX = windowX - (0x10 - windowWidth) / 2;
+                windowWidth = 0x10;
+            }
+            if (windowHeight < 0x10) {
+                windowY = windowY - (0x10 - windowHeight) / 2;
+                windowHeight = 0x10;
+            }
+            windowWidth2 = gDialogWindows[windowIndex].m41C[1] + gDialogWindows[windowIndex].m424[1];
+            gDialogWindows[windowIndex].m41C[0] = gDialogWindows[windowIndex].m41C[0] + gDialogWindows[windowIndex].m424[0];
+            windowY = windowY + (windowWidth2 >> 0x10);
+            gDialogWindows[windowIndex].m41C[1] = windowWidth2;
+            windowX = windowX + (gDialogWindows[windowIndex].m41C[0] >> 0x10);
 		}
 
 		if ((((gDialogWindows[windowIndex].m3C4 == 0) && (gDialogWindows[windowIndex].m410 == 0)) && (gDialogWindows[windowIndex].m408_openAnimationCounter == 0)) &&

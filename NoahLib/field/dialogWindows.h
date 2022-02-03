@@ -95,7 +95,7 @@ struct sDialogWindow
 };
 
 extern std::array<sDialogWindow, 4> gDialogWindows;
-extern s16 dialogWindowFlag1;
+extern s16 dialogWindowOpenAnimationNumFrames;
 
 extern u16 textSpriteMode0;
 extern u16 textSpriteMode1;

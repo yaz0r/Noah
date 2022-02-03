@@ -301,7 +301,7 @@ void resetFieldDefault()
 
     MissingCode();
 
-    dialogWindowFlag1 = 8;
+    dialogWindowOpenAnimationNumFrames = 8;
 
     MissingCode();
 

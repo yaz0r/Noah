@@ -3545,7 +3545,7 @@ void OP_D6()
             if (dialogWindowFlag2 != 2) goto LAB_Field__80092600;
         }
     }
-    dialogWindowFlag1 = uVar1;
+    dialogWindowOpenAnimationNumFrames = uVar1;
 LAB_Field__80092600:
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
 }
