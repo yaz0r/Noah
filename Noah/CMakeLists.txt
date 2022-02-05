@@ -16,35 +16,17 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-file(GLOB PDS_DATA
-    "${CMAKE_SOURCE_DIR}/data/*"
-)
-
 file(GLOB SRC_ROOT
     "*.cpp"
     "*.h"
 )
 
-file(GLOB_RECURSE SRC_KERNEL
-    "kernel/*.cpp"
-    "kernel/*.h"
-)
-
-file(GLOB_RECURSE SRC_FIELD_A3
-    "field/field_a3/*.cpp"
-    "field/field_a3/*.h"
-)
-
 set(SOURCES
  ${SOURCES}
- ${SRC_KERNEL}
  ${SRC_ROOT}
- ${SRC_FIELD_A3}
 )
 
 source_group("src" FILES ${SRC_ROOT})
-source_group("src\\kernel" FILES ${SRC_KERNEL})
-source_group("src\\field\\field_a3" FILES ${SRC_FIELD_A3})
 
 set( CMAKE_EXE_LINKER_FLAGS_SHIPPING "${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO} /LTCG /OPT:ICF /OPT:REF /SUBSYSTEM:WINDOWS /DEBUG" )
 

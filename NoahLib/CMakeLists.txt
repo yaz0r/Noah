@@ -126,3 +126,10 @@ addShaderProgram(TILE_vs TILE_ps TILE.varying.def)
 assign_source_group(${SOURCES})
 
 add_library (NoahLib ${SOURCES})
+
+#if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+#		target_compile_definitions( NoahLib PUBLIC "BX_CONFIG_DEBUG=1" )
+#	else()
+#		target_compile_definitions( NoahLib PUBLIC "BX_CONFIG_DEBUG=0" )
+#endif()
+target_compile_definitions( NoahLib PUBLIC "BX_CONFIG_DEBUG=0" )

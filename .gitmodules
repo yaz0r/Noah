@@ -1,6 +1,6 @@
 [submodule "ThirdParty/bgfx.cmake"]
 	path = ThirdParty/bgfx.cmake
-	url = git@github.com:yaz0r/bgfx.cmake.git
+	url = git@github.com:bkaradzic/bgfx.cmake.git
 [submodule "ThirdParty/SDL"]
 	path = ThirdParty/SDL
 	url = git@github.com:yaz0r/SDL.git
