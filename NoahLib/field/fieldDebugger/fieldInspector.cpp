@@ -118,7 +118,7 @@ public:
         }
     }
 
-    void c_fieldInspector::fieldInspector_info()
+    void fieldInspector_info()
     {
         ImGui::Text("Num image bundle 1 entries: %d", READ_LE_U32(rawFieldImageBundle.begin()));
         ImGui::Text("Num image bundle 2 entries: %d", READ_LE_U32(rawFieldImageBundle2.begin()));
@@ -1378,14 +1378,16 @@ public:
         for (int entityId = 0; entityId < numScriptEntity; entityId++)
         {
             ImGui::PushID(entityId);
-            char buffer[1024];
+            std::string EntityName;
             if (currentFielDebugInfo.mScriptEntities[entityId].mName.size())
             {
-                strcpy_s(buffer, sizeof(buffer), currentFielDebugInfo.mScriptEntities[entityId].mName.c_str());
+                EntityName = currentFielDebugInfo.mScriptEntities[entityId].mName.c_str();
             }
             else
             {
+                char buffer[1024];
                 sprintf(buffer, "Entity %d", entityId);
+                EntityName = buffer;
             }
             
             bool isSelected = (entityId == selectedEntityId);
@@ -1402,13 +1404,13 @@ public:
                 ImGui::SameLine();
             }
 
-            ImGui::Text(buffer);
+            ImGui::Text(EntityName.c_str());
             ImGui::SameLine();
 
             if (ImGui::Button("Rename"))
             {
                 popupToOpen = "RenameScriptEntity";
-                strcpy(entityRenameBuffer, buffer);
+                strcpy(entityRenameBuffer, EntityName.c_str());
                 scriptEntityToRename = entityId;
             }
             ImGui::PopID();

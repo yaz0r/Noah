@@ -1,15 +1,7 @@
 cmake_minimum_required(VERSION 2.8.11)
 project(soloud C)
 
-IF(${CMAKE_SYSTEM_NAME} MATCHES iOS)
-set(SOLOUD_LIB_NAME soloud-ios)
-ELSEIF(${CMAKE_SYSTEM_NAME} MATCHES tvOS)
-Set(SOLOUD_LIB_NAME soloud-tvos)
-ELSEIF(${CMAKE_SYSTEM_NAME} MATCHES Darwin)
-Set(SOLOUD_LIB_NAME soloud-darwin)
-ELSE()
 set(SOLOUD_LIB_NAME soloud)
-ENDIF()
 
 file(GLOB_RECURSE SOLOUD_HEADERS ${soloud_SOURCE_DIR}/soloud/include/*.h)
 file(GLOB_RECURSE SOLOUD_SOURCES

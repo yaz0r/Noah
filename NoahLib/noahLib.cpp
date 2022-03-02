@@ -2,7 +2,7 @@
 #include "bgfxGlue.h"
 #include "imgui.h"
 #include "kernel/isoManager.h"
-#include "kernel/fileSystem.h"
+#include "kernel/filesystem.h"
 #include "kernel/gameState.h"
 #include "kernel/decompress.h"
 #include "kernel/graphics.h"
@@ -37,7 +37,8 @@ bool noahInit(int argc, char* argv[])
 		readFile(6, compressedFontData, 0, 0);
 		waitReadCompletion(0);
 		traceNextAlloc(0x30);
-		initFont(mallocAndDecompress(compressedFontData));
+        std::vector<u8> fontData = mallocAndDecompress(compressedFontData);
+		initFont(fontData);
 	}
 
     MissingCode();
@@ -121,32 +122,32 @@ s32 READ_LE_S32(const void* ptr)
     return *(s32*)ptr;
 }
 
-u8 READ_LE_U8(std::vector<u8>::const_iterator& inputStream)
+u8 READ_LE_U8(const std::vector<u8>::const_iterator& inputStream)
 {
     return *inputStream;
 }
 
-s8 READ_LE_S8(std::vector<u8>::const_iterator& inputStream)
+s8 READ_LE_S8(const std::vector<u8>::const_iterator& inputStream)
 {
     return *(s8*)&inputStream[0];
 }
 
-u16 READ_LE_U16(std::vector<u8>::const_iterator& inputStream)
+u16 READ_LE_U16(const std::vector<u8>::const_iterator& inputStream)
 {
     return READ_LE_U16(&inputStream[0]);
 }
 
-s16 READ_LE_S16(std::vector<u8>::const_iterator& inputStream)
+s16 READ_LE_S16(const std::vector<u8>::const_iterator& inputStream)
 {
     return READ_LE_S16(&inputStream[0]);
 }
 
-u32 READ_LE_U32(std::vector<u8>::const_iterator& inputStream)
+u32 READ_LE_U32(const std::vector<u8>::const_iterator& inputStream)
 {
     return READ_LE_U32(&inputStream[0]);
 }
 
-s32 READ_LE_S32(std::vector<u8>::const_iterator& inputStream)
+s32 READ_LE_S32(const std::vector<u8>::const_iterator& inputStream)
 {
     return READ_LE_S32(&inputStream[0]);
 }

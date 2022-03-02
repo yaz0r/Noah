@@ -2,7 +2,7 @@
 
 struct sSpriteActorAnimationBundle
 {
-    void init(std::vector<u8>::iterator& inputData)
+    void init(std::vector<u8>::iterator inputData)
     {
         rawData = &inputData[0];
 

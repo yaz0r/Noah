@@ -21,7 +21,7 @@ public:
     static c_isoFile* getCurrentDisc();
 
 private:
-    static c_isoFile* c_isoManager::openIsoFile(std::string& fileName);
+    static c_isoFile* openIsoFile(const std::string& fileName);
 
     static std::vector<c_isoFile*> g_isoFiles;
     static int m_currentDisc;

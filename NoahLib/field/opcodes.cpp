@@ -620,20 +620,19 @@ s16 updateCharacterVar1 = 0;
 s16 updateCharacterVar2 = 0;
 s16 updateCharacterVar3 = 0;
 s8 updateCharacterVar4 = 0;
-int playerCanRun = 0;
 int numFollowStruct = 0;
 int numFollowStruct2 = 0;
 extern s32 iRam800adb64;
 extern s16 updateEntityEventCode4Var0;
 
-std::array<short, 16> updateCharacterRotationOrder1 = {
+std::array<u16, 16> updateCharacterRotationOrder1 = {
     0x8000,   0x400,   0x800,   0x600,
      0xC00,  0x8000,   0xA00,   0x800,
        0x0,   0x200,  0x8000,   0x400,
      0xE00,     0x0,   0xC00,  0x8000,
 };
 
-std::array<short, 16> updateCharacterRotationOrder2 = {
+std::array<u16, 16> updateCharacterRotationOrder2 = {
     0x8000,   0xC00,     0x0,   0xE00,
      0x400,  0x8000,   0x200,     0x0,
      0x800,   0xA00,  0x8000,   0xC00,
@@ -2308,7 +2307,8 @@ void OP_LOAD_SPECIAL_2D_ANIMATION()
         pCurrentFieldScriptActor->m120_special2dAnimationRaw.resize(iVar2 + 8);
         readFile(iVar1, pCurrentFieldScriptActor->m120_special2dAnimationRaw, 0, 0x80);
 
-        pCurrentFieldScriptActor->m120_special2dAnimation->init(pCurrentFieldScriptActor->m120_special2dAnimationRaw.begin());
+        std::vector<u8>::iterator it = pCurrentFieldScriptActor->m120_special2dAnimationRaw.begin();
+        pCurrentFieldScriptActor->m120_special2dAnimation->init(it);
 
         if (fieldExecuteVar1 == 0) {
             waitReadCompletion(0);
@@ -3040,7 +3040,7 @@ void OP_B6Sub(int param_1, int param_2)
     return;
 }
 
-std::array<s16, 64> OP_B5SubTable = { {
+std::array<u16, 64> OP_B5SubTable = { {
    0x0, 0x1, 0x2, 0x3,
    0x4, 0xFFFD, 0xFFFE, 0xFFFF,
 0xFFFF, 0x0, 0x1, 0x2,

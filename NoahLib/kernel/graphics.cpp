@@ -400,6 +400,7 @@ void SPRT::execute()
 	bx::mtxIdentity(matrix);
 
 	bgfx::setTransform(matrix);
+    if(1)
 	{
 		bgfx::VertexLayout layout;
 		layout
@@ -509,6 +510,7 @@ void TILE::execute()
 	bx::mtxIdentity(matrix);
 
 	bgfx::setTransform(matrix);
+    if(1)
 	{
 		bgfx::VertexLayout layout;
 		layout
@@ -603,6 +605,7 @@ void POLY_FT4::execute()
 	bx::mtxIdentity(matrix);
 
 	bgfx::setTransform(matrix);
+    if(1)
 	{
 		bgfx::VertexLayout layout;
 		layout

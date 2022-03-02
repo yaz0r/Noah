@@ -10,7 +10,7 @@ include_directories(
 #    "${THIRD_PARTY}/tracy"
     "${THIRD_PARTY}/bgfx.cmake/bgfx/include"
     "${THIRD_PARTY}/bgfx.cmake/bx/include"
-    "${THIRD_PARTY}/bgfx.cmake/bx/include/compat/msvc"
+#    "${THIRD_PARTY}/bgfx.cmake/bx/include/compat/msvc"
     "${THIRD_PARTY}/bgfx.cmake/bgfx/3rdparty"
     "${THIRD_PARTY}/bgfx.cmake/bimg/include"
 #    "${THIRD_PARTY}/aosdk"

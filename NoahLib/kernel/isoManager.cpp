@@ -4,7 +4,7 @@
 std::vector<c_isoFile*> c_isoManager::g_isoFiles;
 int c_isoManager::m_currentDisc = -1;
 
-c_isoFile* c_isoManager::openIsoFile(std::string& fileName)
+c_isoFile* c_isoManager::openIsoFile(const std::string& fileName)
 {
     FILE* fHandle = fopen(fileName.c_str(), "rb");
     if (fHandle)

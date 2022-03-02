@@ -546,9 +546,9 @@ void computeMatrix(MATRIX* pOutputMatrix, FP_VEC4* param_2, FP_VEC4* param_3, FP
 	pOutputMatrix->m[2][2] = local_50.vz;
 
 	SFP_VEC4 local_20 = {
-		(param_2->vx >> 16) * 3,
-		(param_2->vy >> 16) * 3,
-		(param_2->vz >> 16) * 3,
+		(s16)((param_2->vx >> 16) * 3),
+        (s16)((param_2->vy >> 16) * 3),
+        (s16)((param_2->vz >> 16) * 3),
 	};
 
 	rotateVectorByMatrix(pOutputMatrix, &local_20, &local_60);

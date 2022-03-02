@@ -19,6 +19,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 file(GLOB SRC_ROOT
     "*.cpp"
     "*.h"
+    "*.mm"
 )
 
 set(SOURCES

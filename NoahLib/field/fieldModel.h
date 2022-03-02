@@ -49,7 +49,7 @@ struct sModelBlock
 
 struct sModel
 {
-    void init(std::vector<u8>::iterator& inputData, int dataSize);
+    void init(std::vector<u8>::iterator inputData, int dataSize);
 
     u32 m0_numBlocks;
     std::vector<sModelBlock> m10_blocks;

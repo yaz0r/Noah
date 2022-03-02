@@ -255,6 +255,7 @@ extern std::vector<u8> rawFieldDialogBundle;
 extern u8 DollyStop;
 extern u8 DollySet;
 
+extern s16 playerCanRun;
 
 struct sFieldTrigger
 {

@@ -6,7 +6,7 @@
 
 std::vector<sModel> gCurrentFieldModels;
 
-void sModel::init(std::vector<u8>::iterator& input, int dataSize)
+void sModel::init(std::vector<u8>::iterator input, int dataSize)
 {
     mRawData.resize(dataSize);
     for (int i=0; i<dataSize; i++)

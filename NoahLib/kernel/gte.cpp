@@ -1,5 +1,6 @@
 #include "noahLib.h"
 #include "gte.h"
+#include <math.h>
 
 typedef union {
 #if defined(__BIGENDIAN__)

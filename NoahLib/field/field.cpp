@@ -117,7 +117,7 @@ std::array<int, 3> unkPartyTable;
 
 u8 fieldBackgroundClearColor[3];
 
-void fieldModelRelocation(std::vector<u8>::iterator& pModelData)
+void fieldModelRelocation(std::vector<u8>::iterator pModelData)
 {
     MissingCode();
 }
@@ -338,11 +338,13 @@ void LogMissingOpcode(int actorId, u16 scriptOffset, u16 opcode)
 {
     if (g_BreakOnMissingOpcode)
     {
+#ifdef WIN32
         __debugbreak();
+#endif
     }
 }
 
-void uploadFieldImages(std::vector<u8>::iterator& pImageData)
+void uploadFieldImages(std::vector<u8>::iterator pImageData)
 {
     MissingCode();
 }
@@ -355,7 +357,7 @@ void transfertNpcSpriteSheetElement()
     LoadImage(currentNpcSpriteUploadRect, &currentNpcSpriteUploadDataPtr[0]);
 }
 
-void uploadNpcSpriteSheet(std::vector<u8>::iterator& pImageData, int x, int y)
+void uploadNpcSpriteSheet(std::vector<u8>::iterator pImageData, int x, int y)
 {
     int count = READ_LE_U32(pImageData);
 

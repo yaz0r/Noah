@@ -67,12 +67,12 @@ s16 READ_LE_S16(const void* ptr);
 u32 READ_LE_U32(const void* ptr);
 s32 READ_LE_S32(const void* ptr);
 
-u8 READ_LE_U8(std::vector<u8>::const_iterator& inputStream);
-s8 READ_LE_S8(std::vector<u8>::const_iterator& inputStream);
-u16 READ_LE_U16(std::vector<u8>::const_iterator& inputStream);
-s16 READ_LE_S16(std::vector<u8>::const_iterator& inputStream);
-u32 READ_LE_U32(std::vector<u8>::const_iterator& inputStream);
-s32 READ_LE_S32(std::vector<u8>::const_iterator& inputStream);
+u8 READ_LE_U8(const std::vector<u8>::const_iterator& inputStream);
+s8 READ_LE_S8(const std::vector<u8>::const_iterator& inputStream);
+u16 READ_LE_U16(const std::vector<u8>::const_iterator& inputStream);
+s16 READ_LE_S16(const std::vector<u8>::const_iterator& inputStream);
+u32 READ_LE_U32(const std::vector<u8>::const_iterator& inputStream);
+s32 READ_LE_S32(const std::vector<u8>::const_iterator& inputStream);
 
 void noahFrame_start();
 bool noahFrame_end();
@@ -145,9 +145,9 @@ struct SFP_VEC4 : public SFP_VEC3
     static SFP_VEC4 FromIt(std::vector<u8>::iterator it)
     {
         SFP_VEC4 temp;
-        temp.vx = READ_LE_S16(it);
-        temp.vy = READ_LE_S16(it + 2);
-        temp.vz = READ_LE_S16(it + 4);
+        temp.vx = READ_LE_S16(it); it += 2;
+        temp.vy = READ_LE_S16(it); it += 2;
+        temp.vz = READ_LE_S16(it); it += 2;
         return temp;
     }
 

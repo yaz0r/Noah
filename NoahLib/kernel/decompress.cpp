@@ -1,7 +1,7 @@
 #include "noahLib.h"
 #include "decompress.h"
 
-void decompress(std::vector<u8>::iterator& inputStream, std::vector<u8>& output)
+void decompress(std::vector<u8>::iterator inputStream, std::vector<u8>& output)
 {
     int totalSize = READ_LE_U32(inputStream);
     if (totalSize == 0)
@@ -56,7 +56,7 @@ void decompress(std::vector<u8>::iterator& inputStream, std::vector<u8>& output)
     output.resize(totalSize);
 }
 
-void fieldDecompress(int size, std::vector<u8>::iterator& inputStream, std::vector<u8>& output)
+void fieldDecompress(int size, std::vector<u8>::iterator inputStream, std::vector<u8>& output)
 {
     decompress(inputStream, output);
 }
@@ -67,6 +67,7 @@ std::vector<u8> mallocAndDecompress(std::vector<u8>& input)
 
     std::vector<u8> output;
     output.resize(totalSize);
-    decompress(input.begin(), output);
+    std::vector<u8>::iterator buffer = input.begin();
+    decompress(buffer, output);
     return output;
 }
