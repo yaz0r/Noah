@@ -493,7 +493,7 @@ void SPRT::execute()
 		bgfx::setVertexBuffer(0, &vertexBuffer);
 		bgfx::setIndexBuffer(&indexBuffer);
 
-		bgfx::UniformHandle s_PSXVramUniformHandle = BGFX_INVALID_HANDLE;
+		static bgfx::UniformHandle s_PSXVramUniformHandle = BGFX_INVALID_HANDLE;
 		if (!bgfx::isValid(s_PSXVramUniformHandle))
 		{
 			s_PSXVramUniformHandle = bgfx::createUniform("s_PSXVram", bgfx::UniformType::Sampler);
@@ -581,7 +581,7 @@ void TILE::execute()
 		bgfx::setVertexBuffer(0, &vertexBuffer);
 		bgfx::setIndexBuffer(&indexBuffer);
 
-		bgfx::UniformHandle s_PSXVramUniformHandle = BGFX_INVALID_HANDLE;
+		static bgfx::UniformHandle s_PSXVramUniformHandle = BGFX_INVALID_HANDLE;
 		if (!bgfx::isValid(s_PSXVramUniformHandle))
 		{
 			s_PSXVramUniformHandle = bgfx::createUniform("s_PSXVram", bgfx::UniformType::Sampler);
@@ -695,7 +695,7 @@ void POLY_FT4::execute()
 		bgfx::setVertexBuffer(0, &vertexBuffer);
 		bgfx::setIndexBuffer(&indexBuffer);
 
-		bgfx::UniformHandle s_PSXVramUniformHandle = BGFX_INVALID_HANDLE;
+		static bgfx::UniformHandle s_PSXVramUniformHandle = BGFX_INVALID_HANDLE;
 		if (!bgfx::isValid(s_PSXVramUniformHandle))
 		{
 			s_PSXVramUniformHandle = bgfx::createUniform("s_PSXVram", bgfx::UniformType::Sampler);
@@ -794,7 +794,7 @@ void POLY_FT3::execute()
 		bgfx::setVertexBuffer(0, &vertexBuffer);
 		bgfx::setIndexBuffer(&indexBuffer);
 
-		bgfx::UniformHandle s_PSXVramUniformHandle = BGFX_INVALID_HANDLE;
+		static bgfx::UniformHandle s_PSXVramUniformHandle = BGFX_INVALID_HANDLE;
 		if (!bgfx::isValid(s_PSXVramUniformHandle))
 		{
 			s_PSXVramUniformHandle = bgfx::createUniform("s_PSXVram", bgfx::UniformType::Sampler);
