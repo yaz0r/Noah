@@ -769,6 +769,7 @@ void initOpcodeTable()
         .end();
 
 	m_opcode[0xD7]
+        .setName("SET_ROTATION_FOR_RENDERING")
 		.addArgumentU16OrVar()
 		.end();
 

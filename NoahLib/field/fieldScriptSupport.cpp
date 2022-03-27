@@ -162,6 +162,7 @@ GameProgress:
 0x7: Talked to Dan (before leaving Fei's house)
 0x8: Talked to Alice
 0xA: Looking for Citan around his house
+0xC: Citan told Fei to look in storage room (music box)
 0xD: At citan, night time, Fei leaves
 0xF: At citan, night time, heading back to Lahan, Citan waiting outside after Fei's departure
 

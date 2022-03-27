@@ -1269,6 +1269,13 @@ void OP_4B()
     }
 }
 
+void OP_4C()
+{
+    pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0 = 0xFFFF;
+    MissingCode();
+    pCurrentFieldScriptActor->mCC_scriptPC += 8;
+}
+
 void OP_52(void)
 {
     pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m23_walkMode = 2;
@@ -3526,6 +3533,18 @@ void OP_RESET_CHARACTER()
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 2;
 }
 
+void OP_CD()
+{
+    pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags |= 0x800000;
+    pCurrentFieldScriptActor->mCC_scriptPC++;
+}
+
+void OP_CE()
+{
+    pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags &= ~0x800000;
+    pCurrentFieldScriptActor->mCC_scriptPC++;
+}
+
 void OP_SET_DIALOG_WINDOW_PARAM()
 {
     pCurrentFieldScriptActor->m88[0] = getImmediateOrVariableUnsigned(1);
@@ -3539,6 +3558,21 @@ void OP_SET_DIALOG_WINDOW_PARAM()
 void OP_SHOW_DIALOG_WINDOW_MODE0()
 {
     showDialogWindowForActor(currentFieldActorId, 0);
+}
+
+void OP_SHOW_DIALOG_WINDOW_FOR_OTHER_ACTOR_MODE0()
+{
+    if (readCharacter(1) == 0xff) {
+        pCurrentFieldScriptActor->mCC_scriptPC += 6;
+    }
+    else {
+        int characterId = readCharacter(1);
+        pCurrentFieldScriptActor->mCC_scriptPC++;
+        if (showDialogWindowForActor(characterId, 0) != -1) {
+            return;
+        }
+        pCurrentFieldScriptActor->mCC_scriptPC--;
+    }
 }
 
 void OP_D6()
@@ -3562,6 +3596,13 @@ void OP_D6()
     dialogWindowOpenAnimationNumFrames = uVar1;
 LAB_Field__80092600:
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
+}
+
+void OP_SET_ROTATION_FOR_RENDERING(void)
+{
+    pCurrentFieldScriptActor->m12C_flags = pCurrentFieldScriptActor->m12C_flags & 0xfffffffc | 1;
+    pCurrentFieldScriptActor->m70_rotationForRendering = getImmediateOrVariableUnsigned(1);
+    pCurrentFieldScriptActor->mCC_scriptPC += 3;
 }
 
 void OP_D9(void)
@@ -4095,6 +4136,19 @@ void OPX_09()
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
 }
 
+void OPX_0A()
+{
+    ushort uVar1;
+    ushort uVar2;
+    ushort uVar3;
+
+    uVar1 = readU16FromScript(1);
+    uVar2 = readU16FromScript(1);
+    uVar3 = getVariable((uint)(uVar1 >> 4));
+    setVar((uint)(uVar1 >> 4), uVar3 | (ushort)(1 << (uVar2 & 0xf)));
+    pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
+}
+
 void OPX_0C()
 {
     MissingCode();
@@ -4108,22 +4162,11 @@ void OP_SET_MUSIC_PARAMS()
     breakCurrentScript = 1;
 }
 
-void OP_SHOW_DIALOG_WINDOW_FOR_OTHER_ACTOR_MODE0()
+void OPX_10()
 {
-    if (readCharacter(1) == 0xFF)
-    {
-        pCurrentFieldScriptActor->mCC_scriptPC += 6;
-    }
-    else
-    {
-        int characterId = readCharacter(1);
-        pCurrentFieldScriptActor->mCC_scriptPC += 1;
-        if (showDialogWindowForActor(characterId, 0) != -1)
-        {
-            return;
-        }
-        pCurrentFieldScriptActor->mCC_scriptPC -= 1;
-    }
+    MissingCode();
+    pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 5;
+    breakCurrentScript = 1;
 }
 
 void OP_FB()

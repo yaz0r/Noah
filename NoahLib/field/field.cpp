@@ -4566,17 +4566,11 @@ int isPositionInEntityScriptBoundingVolume(int testedX, int testedZ, sFieldScrip
     s32 minZ = testedScriptEntity->m20_position.vz.getIntegerPart() - testedScriptEntity->m18_boundingVolume.vz - extraRadius;
     s32 maxZ = testedScriptEntity->m20_position.vz.getIntegerPart() + testedScriptEntity->m18_boundingVolume.vz + extraRadius;
 
-    sVec2_s16 minXmaxZ = sVec2_s16::fromS32(minX * 0x10000 + maxZ);
-    sVec2_s16 maxXmaxZ = sVec2_s16::fromS32(maxX * 0x10000 + maxZ);
-    sVec2_s16 maxXminZ = sVec2_s16::fromS32(maxX * 0x10000 + minZ);
-    sVec2_s16 minXminZ = sVec2_s16::fromS32(minX * 0x10000 + minZ);
-    sVec2_s16 testedPosition = sVec2_s16::fromS32(testedX * 0x10000 + testedZ);
-
-    minXmaxZ.set(minX, maxZ);
-    maxXmaxZ.set(maxX, maxZ);
-    maxXminZ.set(maxX, minZ);
-    minXminZ.set(minX, minZ);
-    testedPosition.set(testedX, testedZ);
+    sVec2_s16 minXmaxZ = sVec2_s16::fromValue(minX, maxZ);
+    sVec2_s16 maxXmaxZ = sVec2_s16::fromValue(maxX, maxZ);
+    sVec2_s16 maxXminZ = sVec2_s16::fromValue(maxX, minZ);
+    sVec2_s16 minXminZ = sVec2_s16::fromValue(minX, minZ);
+    sVec2_s16 testedPosition = sVec2_s16::fromValue(testedX, testedZ);
 
     if (NCLIP(minXmaxZ, maxXmaxZ, testedPosition) < 0)
         return -1;

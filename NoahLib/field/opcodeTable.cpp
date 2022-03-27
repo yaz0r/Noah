@@ -60,6 +60,7 @@ void initOpcodes()
     fieldScriptOpcodes[0x47] = OP_WALK_AND_CHANGE_FIELD;
     fieldScriptOpcodes[0x4A] = OP_SPRITE_WALK_TO_POSITION_AND_WAIT;
     fieldScriptOpcodes[0x4B] = OP_4B;
+    fieldScriptOpcodes[0x4C] = OP_4C;
     fieldScriptOpcodes[0x52] = OP_52;
     fieldScriptOpcodes[0x53] = OP_53;
     fieldScriptOpcodes[0x57] = OP_57;
@@ -130,9 +131,13 @@ void initOpcodes()
     fieldScriptOpcodes[0xC6] = OP_INCREASE_FIELD_EXECUTION_MAX_CYCLES;
     fieldScriptOpcodes[0xC9] = OP_IF_PLAYER_IN_TRIGGER2;
     fieldScriptOpcodes[0xCB] = OP_IF_PLAYER_IN_TRIGGER;
+    fieldScriptOpcodes[0xCD] = OP_CD;
+    fieldScriptOpcodes[0xCE] = OP_CE;
     fieldScriptOpcodes[0xD0] = OP_SET_DIALOG_WINDOW_PARAM;
     fieldScriptOpcodes[0xD2] = OP_SHOW_DIALOG_WINDOW_MODE0;
+    fieldScriptOpcodes[0xD4] = OP_SHOW_DIALOG_WINDOW_FOR_OTHER_ACTOR_MODE0;
     fieldScriptOpcodes[0xD6] = OP_D6;
+    fieldScriptOpcodes[0xD7] = OP_SET_ROTATION_FOR_RENDERING;
     fieldScriptOpcodes[0xD9] = OP_D9;
     fieldScriptOpcodes[0xDB] = OP_DB;
     fieldScriptOpcodes[0xDC] = OP_DC;
@@ -162,9 +167,11 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0x04] = OPX_04;
     fieldScriptOpcodes_EX[0x07] = OPX_07;
     fieldScriptOpcodes_EX[0x09] = OPX_09;
+    fieldScriptOpcodes_EX[0x0A] = OPX_0A;
     fieldScriptOpcodes_EX[0x0C] = OPX_0C;
     fieldScriptOpcodes_EX[0x0D] = OP_SET_DIALOG_PORTRAIT;
     fieldScriptOpcodes_EX[0x0E] = OP_SET_MUSIC_PARAMS;
+    fieldScriptOpcodes_EX[0x10] = OPX_10;
     fieldScriptOpcodes_EX[0x13] = OPX_13;
     fieldScriptOpcodes_EX[0x15] = OPX_15;
     fieldScriptOpcodes_EX[0x17] = OPX_17;
