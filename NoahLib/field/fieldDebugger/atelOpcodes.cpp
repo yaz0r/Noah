@@ -546,7 +546,7 @@ void initOpcodeTable()
 		.end();
 
 	m_opcode[0x93]
-		.setName("ADD_ENDITY_TO_FIELD1721_LIST")
+		.setName("ADD_ENDITY_TO_MECHA_LIST")
 		.addArgumentU16OrVar()
 		.end();
 

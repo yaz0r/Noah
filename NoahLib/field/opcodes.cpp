@@ -10,6 +10,7 @@
 #include "dialogWindows.h"
 #include "screenDistortion.h"
 #include "field.h"
+#include "mecha/mechaOverlay.h"
 
 // TODO: Cleanup
 s16 findTriangleInWalkMesh(int posX, int posZ, int walkmeshId, SFP_VEC4* param_4, FP_VEC4* param_5);
@@ -1687,7 +1688,7 @@ void OP_92()
     breakCurrentScript = 1;
 }
 
-void OP_ADD_ENDITY_TO_FIELD1721_LIST()
+void OP_ADD_ENDITY_TO_MECHA_LIST()
 {
     actorArray[currentFieldActorId].m58_flags = actorArray[currentFieldActorId].m58_flags & 0xf07f | 0x200;
     int iVar3 = getImmediateOrVariableUnsigned(1);
@@ -1699,10 +1700,10 @@ void OP_ADD_ENDITY_TO_FIELD1721_LIST()
     psVar2->m0_fieldScriptFlags.m_rawFlags = psVar2->m0_fieldScriptFlags.m_rawFlags | 0x100;
     actorArray[iVar1].m58_flags = actorArray[iVar1].m58_flags & 0xffdf;
     psVar2->m4_flags = psVar2->m4_flags & 0xfffff7ff | 0x2000;
-    //(&field1721EntityList)[NumEntityInField1721List] = (short)(iVar3 << 1);
-    //(&DAT_Field__800b225f)[NumEntityInField1721List] = 0;
-    //pCurrentFieldScriptActor->m12C_flags = pCurrentFieldScriptActor->m12C_flags & 0xffff1fff | (NumEntityInField1721List & 7) << 0xd;
-    //NumEntityInField1721List = NumEntityInField1721List + 1;
+    mechaList[NumMechas] = (short)(iVar3 << 1);
+    mechaList2[NumMechas] = 0;
+    pCurrentFieldScriptActor->m12C_flags = pCurrentFieldScriptActor->m12C_flags & 0xffff1fff | (NumMechas & 7) << 0xd;
+    NumMechas = NumMechas + 1;
     MissingCode();
 }
 

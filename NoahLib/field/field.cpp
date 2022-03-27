@@ -18,6 +18,7 @@
 #include "compass.h"
 #include "kernel/TIM.h"
 #include "screenDistortion.h"
+#include "mecha/mechaOverlay.h"
 
 #include "SDL_gamecontroller.h"
 #include "SDL_keyboard.h"
@@ -238,6 +239,8 @@ s16 playerCanRun = 1;
 s32 updateEntityEventCode3Var0 = 0;
 s32 updateEntityEventCode3Var1 = 0;
 s32 updateEntityEventCode3Var2 = 0;
+s16 updateEntityEventCode4Var0 = 0;
+s16 updateEntityEventCode4Var1 = 0;
 
 void resetFieldDefault()
 {
@@ -251,6 +254,14 @@ void resetFieldDefault()
     padButtonForDialogs2 = 0;
     padButtonForField = 0;
     padButtonForField2 = 0;
+
+    MissingCode();
+    updateEntityEventCode4Var1 = 3;
+    numMaxMechaOverlayEntries = 0x40;
+
+    MissingCode();
+
+    NumMechas = 0;
 
     MissingCode();
 
@@ -2978,6 +2989,12 @@ void initFieldData()
 
     fieldIdForDebugger = currentFieldId0 / 2; // hack!
 
+    MissingCode();
+    loadMechaOVerlayAndRegisterMechas();
+
+
+    MissingCode();
+
     currentFieldId1 = -1;
     currentFieldId0 = -1;
     setupObjectRenderModes();
@@ -3425,6 +3442,11 @@ void startLoadingPlayableCharacters()
     }
 }
 
+void ClearCacheAfterOverlayLoad()
+{
+    MissingCode();
+}
+
 void freeFieldData()
 {
     MissingCode();
@@ -3439,6 +3461,15 @@ void freeFieldData()
 
     fieldActorSetupParams.clear();
     rawFieldActorSetupParams.clear();
+
+    MissingCode();
+
+    if (NumMechas != 0) {
+        freeMechaModule();
+        mechaOverlayBuffer.clear();
+        ClearCacheAfterOverlayLoad();
+    }
+    NumMechas = 0;
 
     MissingCode();
 }
@@ -3475,11 +3506,6 @@ void transitionFields()
     fieldTransitionMode = 2;
     MissingCode();
 
-}
-
-void ClearCacheAfterOverlayLoad()
-{
-    MissingCode();
 }
 
 void exectueEntitiesUpdateFunction()
@@ -4311,9 +4337,6 @@ int updateEntityEventCode3Sub3(FP_VEC3* param_1, sFieldScriptEntity* param_2, st
     param_2->m72_elevation = (param_2->m20_position.vy + param_1->vy) >> 0x10;
     return 0;
 }
-
-s16 updateEntityEventCode4Var0 = 0;
-s16 updateEntityEventCode4Var1 = 0;
 
 void updateEntityEventCode4(sSpriteActor* param_1, int param_2, sFieldEntity* param_3)
 {

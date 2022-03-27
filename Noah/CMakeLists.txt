@@ -19,7 +19,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 file(GLOB SRC_ROOT
     "*.cpp"
     "*.h"
-    "*.mm"
 )
 
 set(SOURCES
@@ -27,7 +26,18 @@ set(SOURCES
  ${SRC_ROOT}
 )
 
-source_group("src" FILES ${SRC_ROOT})
+IF(${CMAKE_SYSTEM_NAME} MATCHES iOS|tvOS|Darwin)
+    file(GLOB OBJECTIVE_C_SRC
+        "*.mm"
+    )
+
+    set(OBJECTIVE_C_SRC
+     ${SOURCES}
+     ${SRC_ROOT}
+    )
+endif()
+
+source_group("src" FILES ${SOURCES})
 
 set( CMAKE_EXE_LINKER_FLAGS_SHIPPING "${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO} /LTCG /OPT:ICF /OPT:REF /SUBSYSTEM:WINDOWS /DEBUG" )
 

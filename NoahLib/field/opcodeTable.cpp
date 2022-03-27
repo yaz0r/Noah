@@ -96,7 +96,7 @@ void initOpcodes()
     fieldScriptOpcodes[0x86] = OP_IF_GAMEPROGRESS_EQUAL;
     fieldScriptOpcodes[0x87] = OP_SET_GAMEPROGRESS;
     fieldScriptOpcodes[0x92] = OP_92;
-    fieldScriptOpcodes[0x93] = OP_ADD_ENDITY_TO_FIELD1721_LIST;
+    fieldScriptOpcodes[0x93] = OP_ADD_ENDITY_TO_MECHA_LIST;
     fieldScriptOpcodes[0x98] = OP_CHANGE_FIELD_WHEN_READY2;
     fieldScriptOpcodes[0x99] = OP_99;
     fieldScriptOpcodes[0x9A] = OP_9A;

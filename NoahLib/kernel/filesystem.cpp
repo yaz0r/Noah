@@ -276,3 +276,23 @@ void batchStartLoadingFiles(sLoadingBatchCommands* pCommands, int param_2)
         pCommands++;
     }
 }
+
+std::vector<std::vector<u8>::iterator> doPointerRelocation(std::vector<u8>& inputData)
+{
+    std::vector<std::vector<u8>::iterator> relocatedPointers;
+
+    std::vector<u8>::iterator it = inputData.begin();
+    u32 uVar1 = READ_LE_U32(it);
+    if (uVar1)
+    {
+        it += 4;
+        int uVar3 = 1;
+        do
+        {
+            uVar3++;
+            relocatedPointers.push_back(inputData.begin() + READ_LE_U32(it));
+            it += 4;
+        } while (uVar3 <= uVar1);
+    }
+    return relocatedPointers;
+}

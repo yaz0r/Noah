@@ -10,12 +10,16 @@ include_directories(
 #    "${THIRD_PARTY}/tracy"
     "${THIRD_PARTY}/bgfx.cmake/bgfx/include"
     "${THIRD_PARTY}/bgfx.cmake/bx/include"
-#    "${THIRD_PARTY}/bgfx.cmake/bx/include/compat/msvc"
+#    
     "${THIRD_PARTY}/bgfx.cmake/bgfx/3rdparty"
     "${THIRD_PARTY}/bgfx.cmake/bimg/include"
 #    "${THIRD_PARTY}/aosdk"
     "${THIRD_PARTY}/tinyxml2"
 )
+
+if(${MSVC})
+    include_directories("${THIRD_PARTY}/bgfx.cmake/bx/include/compat/msvc")
+endif()
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -32,8 +36,9 @@ set(SOURCES
  "${THIRD_PARTY}/imgui/imgui.cpp"
  "${THIRD_PARTY}/imgui/imgui.h"
  "${THIRD_PARTY}/imgui/imgui_draw.cpp"
+ "${THIRD_PARTY}/imgui/imgui_tables.cpp"
  "${THIRD_PARTY}/imgui/imgui_widgets.cpp"
- "${THIRD_PARTY}/imgui/examples/imgui_impl_sdl.cpp"
+ "${THIRD_PARTY}/imgui/backends/imgui_impl_sdl.cpp"
 
  "${THIRD_PARTY}/ImGuizmo/ImGuizmo.cpp"
  "${THIRD_PARTY}/ImGuizmo/ImGuizmo.h"

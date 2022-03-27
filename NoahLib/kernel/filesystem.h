@@ -40,3 +40,4 @@ void readFile(int fileIndex, std::vector<u8>& output, int, int);
 int setCurrentDirectory(int directory, int offset);
 int isCDBusy();
 int waitReadCompletion(int);
+std::vector<std::vector<u8>::iterator> doPointerRelocation(std::vector<u8>& inputData);
