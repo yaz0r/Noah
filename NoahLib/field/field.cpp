@@ -503,9 +503,9 @@ void initFieldScriptEntityValues(int index)
 
     pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags = 0xB0;
     pFieldScriptEntity->m4_flags = 0x800;
-    pFieldScriptEntity->m18 = 0x10;
-    pFieldScriptEntity->m1C = 0x10;
-    pFieldScriptEntity->m1A = 0x60;
+    pFieldScriptEntity->m18_boundingVolume.vx = 0x10;
+    pFieldScriptEntity->m18_boundingVolume.vz = 0x10;
+    pFieldScriptEntity->m18_boundingVolume.vy = 0x60;
     pFieldScriptEntity->m74 = -1;
     pFieldScriptEntity->m75 = -1;
 
@@ -532,7 +532,7 @@ void initFieldScriptEntityValues(int index)
     pFieldScriptEntity->m6E = 0;
     pFieldScriptEntity->m12C_flags &= 0xffffffdf;
     pFieldScriptEntity->m11E = 0x200;
-    pFieldScriptEntity->m1E_collisionRadius= pFieldScriptEntity->m18;
+    pFieldScriptEntity->m1E_collisionRadius= pFieldScriptEntity->m18_boundingVolume.vx;
     pFieldScriptEntity->m12C_flags &= 0xfffffffc;
     pFieldScriptEntity->mFC[5] = 0x80;
     pFieldScriptEntity->mFC[4] = 0x80;
@@ -1590,11 +1590,11 @@ void OP_INIT_ENTITY_SCRIPT_sub0(int actorId, int clutYEntry, sSpriteActorAnimati
         pFieldEntitySub4->m84 = actorArray[actorId].mC_matrix.t[1] & 0xFFFF;
         if (!param_4)
         {
-            actorArray[actorId].m4C_scriptEntity->m1A = temp1 * 2;
+            actorArray[actorId].m4C_scriptEntity->m18_boundingVolume.vx = temp1 * 2;
         }
         else
         {
-            actorArray[actorId].m4C_scriptEntity->m1A = 0x40;
+            actorArray[actorId].m4C_scriptEntity->m18_boundingVolume.vx = 0x40;
         }
     }
     else
@@ -4558,38 +4558,39 @@ s32 computeDistanceBetweenActors(int param_1, int param_2)
         actorArray[param_2].m4C_scriptEntity->m20_position.vz.getIntegerPart() - actorArray[param_1].m4C_scriptEntity->m20_position.vz.getIntegerPart());
 }
 
-int EntityMoveCheck0Sub2(int param_1, int param_2, sFieldScriptEntity* param_3, int param_4)
+int isPositionInEntityScriptBoundingVolume(int testedX, int testedZ, sFieldScriptEntity* testedScriptEntity, int extraRadius)
 {
-    int iVar1;
-    long lVar2;
-    sVec2_s16 iVar3;
-    sVec2_s16 iVar4;
-    sVec2_s16 iVar5;
-    sVec2_s16 sxy2;
-    sVec2_s16 sxy0;
+    s32 minX = testedScriptEntity->m20_position.vx.getIntegerPart() - testedScriptEntity->m18_boundingVolume.vx - extraRadius;
+    s32 maxX = testedScriptEntity->m20_position.vx.getIntegerPart() + testedScriptEntity->m18_boundingVolume.vx + extraRadius;
 
-    sxy2 = sVec2_s16::fromS32(param_1 * 0x10000 + param_2);
-    iVar1 = (param_3->m20_position).vz.getIntegerPart();
-    iVar5 = sVec2_s16::fromS32(((param_3->m20_position.vx.getIntegerPart() - (uint)(ushort)param_3->m18) - param_4) * 0x10000);
-    iVar4 = sVec2_s16::fromS32(iVar1 + (uint)(ushort)param_3->m1C + param_4);
-    sxy0 = sVec2_s16::fromS32(iVar5.asS32() + iVar4.asS32());
-    iVar3 = sVec2_s16::fromS32((param_3->m20_position.vx.getIntegerPart() + (uint)(ushort)param_3->m18 + param_4) * 0x10000);
-    iVar4 = sVec2_s16::fromS32(iVar3.asS32() + iVar4.asS32());
-    iVar1 = (iVar1 - (uint)(ushort)param_3->m1C) - param_4;
-    iVar3 = sVec2_s16::fromS32(iVar3.asS32() + iVar1);
-    iVar5 = sVec2_s16::fromS32(iVar5.asS32() + iVar1);
-    lVar2 = NCLIP(sxy0, iVar4, sxy2);
-    if ((((lVar2 < 0) || (lVar2 = NCLIP(iVar4, iVar3, sxy2), lVar2 < 0)) || (lVar2 = NCLIP(iVar3, iVar5, sxy2), lVar2 < 0)) || (lVar2 = NCLIP(iVar5, sxy0, sxy2), lVar2 < 0)) {
-        iVar1 = -1;
+    s32 minZ = testedScriptEntity->m20_position.vz.getIntegerPart() - testedScriptEntity->m18_boundingVolume.vz - extraRadius;
+    s32 maxZ = testedScriptEntity->m20_position.vz.getIntegerPart() + testedScriptEntity->m18_boundingVolume.vz + extraRadius;
+
+    sVec2_s16 minXmaxZ = sVec2_s16::fromS32(minX * 0x10000 + maxZ);
+    sVec2_s16 maxXmaxZ = sVec2_s16::fromS32(maxX * 0x10000 + maxZ);
+    sVec2_s16 maxXminZ = sVec2_s16::fromS32(maxX * 0x10000 + minZ);
+    sVec2_s16 minXminZ = sVec2_s16::fromS32(minX * 0x10000 + minZ);
+    sVec2_s16 testedPosition = sVec2_s16::fromS32(testedX * 0x10000 + testedZ);
+
+    minXmaxZ.set(minX, maxZ);
+    maxXmaxZ.set(maxX, maxZ);
+    maxXminZ.set(maxX, minZ);
+    minXminZ.set(minX, minZ);
+    testedPosition.set(testedX, testedZ);
+
+    if (NCLIP(minXmaxZ, maxXmaxZ, testedPosition) < 0)
+        return -1;
+    if (NCLIP(maxXmaxZ, maxXminZ, testedPosition) < 0)
+        return -1;
+    if (NCLIP(maxXminZ, minXminZ, testedPosition) < 0)
+        return -1;
+    if (NCLIP(minXminZ, minXmaxZ, testedPosition) < 0)
+        return -1;
+
+    if (fieldDebugDisable == 0) {
+        assert(0);
     }
-    else {
-        iVar1 = 0;
-        if (fieldDebugDisable == 0) {
-            assert(0);
-            iVar1 = 0;
-        }
-    }
-    return iVar1;
+    return 0;
 }
 
 int startScriptsForCollisionsVar0 = 0;
@@ -4649,7 +4650,7 @@ void  startScriptsForCollisions(uint playerEntityIndex, sFieldEntity* pPlayerEnt
                 FP_VEC4 tempVec2;
                 Square0(&tempVec1, &tempVec2);
 
-                if ((((tempVec2.vx + tempVec2.vz < tempVec2.vy) && (pPlayerScriptEntity->m20_position.vy.getIntegerPart() - pPlayerScriptEntity->m1A <= yDiff)) && ((int)(yDiff - (uint)(ushort)pTestedScriptEntity->m1A) <= pPlayerScriptEntity->m20_position.vy.getIntegerPart())) && (actorId != playerEntityIndex)) {
+                if ((((tempVec2.vx + tempVec2.vz < tempVec2.vy) && (pPlayerScriptEntity->m20_position.vy.getIntegerPart() - pPlayerScriptEntity->m18_boundingVolume.vy <= yDiff)) && ((int)(yDiff - (uint)(ushort)pTestedScriptEntity->m18_boundingVolume.vy) <= pPlayerScriptEntity->m20_position.vy.getIntegerPart())) && (actorId != playerEntityIndex)) {
                     tempVec1.vx = pTestedScriptEntity->m20_position.vx.getIntegerPart() - pPlayerScriptEntity->m20_position.vx.getIntegerPart() + pTestedScriptEntity->m60[0];
                     tempVec1.vz = pTestedScriptEntity->m20_position.vz.getIntegerPart() - pPlayerScriptEntity->m20_position.vz.getIntegerPart() + pTestedScriptEntity->m60[2];
 
@@ -4686,8 +4687,8 @@ void  startScriptsForCollisions(uint playerEntityIndex, sFieldEntity* pPlayerEnt
             }
             else
             {
-                if ((((pPlayerScriptEntity->m20_position.vy.getIntegerPart() - pPlayerScriptEntity->m1A <= yDiff) && ((int)(yDiff - (uint)(ushort)pTestedScriptEntity->m1A) <= pPlayerScriptEntity->m20_position.vy.getIntegerPart())) && (actorId != playerEntityIndex)) &&
-                    (EntityMoveCheck0Sub2(pPlayerScriptEntity->m20_position.vx.getIntegerPart(), pPlayerScriptEntity->m20_position.vz.getIntegerPart(), pTestedScriptEntity, 0x10) == 0)) {
+                if ((((pPlayerScriptEntity->m20_position.vy.getIntegerPart() - pPlayerScriptEntity->m18_boundingVolume.vy <= yDiff) && ((int)(yDiff - (uint)(ushort)pTestedScriptEntity->m18_boundingVolume.vy) <= pPlayerScriptEntity->m20_position.vy.getIntegerPart())) && (actorId != playerEntityIndex)) &&
+                    (isPositionInEntityScriptBoundingVolume(pPlayerScriptEntity->m20_position.vx.getIntegerPart(), pPlayerScriptEntity->m20_position.vz.getIntegerPart(), pTestedScriptEntity, 0x10) == 0)) {
                     if ((((padButtonForDialogs & 0x20) == 0) || (bTrigger)) || ((pTestedScriptEntity->m4_flags & 0x4000000) != 0)) {
                         if ((pTestedScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0xa20000) == 0) {
                             scriptIndexToStart = 3;
@@ -4782,7 +4783,7 @@ void EntityMoveCheck0(uint playerEntityIndex, sFieldEntity* pPlayerEntity, sFiel
 
     s32 playerY = pPlayerScriptEntity->m20_position.vy.getIntegerPart();
     s32 testedEntityY;
-    s16 initialActor18Y = pPlayerScriptEntity->m1A;
+    s16 initialActor18Y = pPlayerScriptEntity->m18_boundingVolume.vy;
     s32 finalCount;
     s8 playerVar74 = pPlayerScriptEntity->m74;
 
@@ -4812,13 +4813,13 @@ void EntityMoveCheck0(uint playerEntityIndex, sFieldEntity* pPlayerEntity, sFiel
             }
             else
             {
-                testedEntityY = EntityMoveCheck0Sub2(SFPStepAsInts[0], SFPStepAsInts[2], pCurrentFieldScriptEntity, 0);
+                testedEntityY = isPositionInEntityScriptBoundingVolume(SFPStepAsInts[0], SFPStepAsInts[2], pCurrentFieldScriptEntity, 0);
                 if (testedEntityY == 0) {
                 LAB_Field__80084438:
                     if ((pPlayerScriptEntity->m14_currentTriangleFlag & 0x400000U) == 0) {
                         if ((((pCurrentFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags | playerFlags.m_rawFlags) & 0x80) == 0) && (noUpdatesToPartyMemebers == 0)) {
                             testedEntityY = pCurrentFieldScriptEntity->m20_position.vy.getIntegerPart();
-                            testedEntityYWithOffset = testedEntityY - pCurrentFieldScriptEntity->m1A;
+                            testedEntityYWithOffset = testedEntityY - pCurrentFieldScriptEntity->m18_boundingVolume.vy;
                             goto LAB_Field__800844b8;
                         }
                     }
@@ -4844,7 +4845,7 @@ void EntityMoveCheck0(uint playerEntityIndex, sFieldEntity* pPlayerEntity, sFiel
                 assert(0);
             }
             pCurrentFieldScriptEntity->m4_flags = pCurrentFieldScriptEntity->m4_flags | 0x100;
-            testedEntityY = testedEntityYWithOffset + (uint)(ushort)pCurrentFieldScriptEntity->m1A;
+            testedEntityY = testedEntityYWithOffset + (uint)(ushort)pCurrentFieldScriptEntity->m18_boundingVolume.vy;
             if ((byte)pPlayerScriptEntity->m74 != actorId) {
                 testedEntityY = testedEntityYWithOffset + testedEntityY;
             }
@@ -4870,7 +4871,17 @@ LAB_Field__80084520:
             else
             {
                 if ((testedEntityY < (int)(playerY - (uint)(ushort)initialActor18Y)) || (playerY < testedEntityYWithOffset)) {
-                    assert(0);
+                    u32 tempFlags = pCurrentFieldScriptEntity->m4_flags;
+                    pCurrentFieldScriptEntity->m4_flags = tempFlags & 0xfffffeff;
+                    if (playerY < testedEntityYWithOffset) {
+                        pCurrentFieldScriptEntity->m4_flags = tempFlags & 0xfffffeff | 0x800000;
+                        if (testedEntityYWithOffset < bestDistance) {
+                            bestDistance = testedEntityYWithOffset;
+                        }
+                    }
+                    else {
+                        pCurrentFieldScriptEntity->m4_flags = tempFlags & 0xff7ffeff;
+                    }
                 }
                 else
                 {
@@ -5347,7 +5358,7 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
             altitudeOfCurrentWalkMesh = pFieldScriptEntity->m20_position.vy >> 16;
             int psVar8 = 0;
             do {
-                if (((stackVar.m0_altitude[psVar8] < altitudeOfCurrentWalkMesh) && ((int)(altitudeOfCurrentWalkMesh - (uint)(ushort)pFieldScriptEntity->m1A) < stackVar.m10_altitude2[psVar8])) && (stackVar.m0_altitude[psVar8] != stackVar.m10_altitude2[0])) break;
+                if (((stackVar.m0_altitude[psVar8] < altitudeOfCurrentWalkMesh) && ((int)(altitudeOfCurrentWalkMesh - (uint)(ushort)pFieldScriptEntity->m18_boundingVolume.vy) < stackVar.m10_altitude2[psVar8])) && (stackVar.m0_altitude[psVar8] != stackVar.m10_altitude2[0])) break;
                 foundEntry = foundEntry + 1;
                 psVar8++;
             } while (foundEntry < numWalkMesh + -1);
@@ -5355,7 +5366,7 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
         int foundEntryTriangle;
         if ((foundEntry == numWalkMesh + -1) &&
             ((foundEntryTriangle = (*walkMeshTriangle[pFieldScriptEntity->m10_walkmeshId])[pFieldScriptEntity->m8_currentWalkMeshTriangle[pFieldScriptEntity->m10_walkmeshId]].mD * 4, -1 < foundEntryTriangle ||
-                (foundEntryTriangle + psVar18->m84 <= ((pFieldScriptEntity->m20_position.vy >> 16) - (uint)(ushort)pFieldScriptEntity->m1A))))) {
+                (foundEntryTriangle + psVar18->m84 <= ((pFieldScriptEntity->m20_position.vy >> 16) - (uint)(ushort)pFieldScriptEntity->m18_boundingVolume.vy))))) {
             psVar18->m0_position.vx = (pFieldScriptEntity->m20_position).vx;
             psVar18->m0_position.vy = (pFieldScriptEntity->m20_position).vy;
             psVar18->m0_position.vz = (pFieldScriptEntity->m20_position).vz;

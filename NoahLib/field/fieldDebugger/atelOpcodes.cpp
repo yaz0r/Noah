@@ -119,10 +119,11 @@ void initOpcodeTable()
 		.end();
 
 	m_opcode[0x18]
-		.addArgumentByte()
-		.addArgumentByte()
-		.addArgumentByte()
-		.addArgumentByte()
+        .setName("SET_BOUNDING_VOLUME")
+		.addArgumentByte("VolumeX")
+		.addArgumentByte("VolumeZ")
+		.addArgumentByte("VolumeZ")
+		.addArgumentByte("CollisionRadius")
 		.end();
 
 	m_opcode[0x19]
@@ -146,8 +147,8 @@ void initOpcodeTable()
 	m_opcode[0x1D]
 		.setName("SET_CURRENT_ACTOR_POSITION_3D")
 		.addArgumentS16("X")
-		.addArgumentS16("Y")
 		.addArgumentS16("Z")
+		.addArgumentS16("Y")
 		.end();
 
 	m_opcode[0x1F]
@@ -355,9 +356,12 @@ void initOpcodeTable()
 		.end();
 
 	m_opcode[0x5A]
+        .setName("RESET_FIELD_SCRIPT_ACTOR")
 		.end();
 
 	m_opcode[0x5B]
+        .setName("RESET_FIELD_SCRIPT_ACTOR_FOREVER")
+        .setOpcodeBreakExecutionFlow()
 		.end();
 
 	m_opcode[0x5D]

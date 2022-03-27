@@ -23,7 +23,7 @@ void initOpcodes()
     fieldScriptOpcodes[0x16] = OP_INIT_ENTITY_PC;
     fieldScriptOpcodes[0x15] = OP_15;
     fieldScriptOpcodes[0x17] = OP_17;
-    fieldScriptOpcodes[0x18] = OP_18;
+    fieldScriptOpcodes[0x18] = OP_SET_BOUNDING_VOLUME;
     fieldScriptOpcodes[0x19] = OP_SET_ACTOR_POSITION_2D;
     fieldScriptOpcodes[0x1A] = OP_SET_ENTITY_WALKMESH_LAYER;
     fieldScriptOpcodes[0x1C] = OP_SET_CURRENT_ACTOR_ELEVATION;
@@ -58,7 +58,7 @@ void initOpcodes()
     fieldScriptOpcodes[0x44] = OP_44;
     fieldScriptOpcodes[0x46] = OP_46;
     fieldScriptOpcodes[0x47] = OP_WALK_AND_CHANGE_FIELD;
-    fieldScriptOpcodes[0x4A] =  OP_SPRITE_WALK_TO_POSITION_AND_WAIT;
+    fieldScriptOpcodes[0x4A] = OP_SPRITE_WALK_TO_POSITION_AND_WAIT;
     fieldScriptOpcodes[0x4B] = OP_4B;
     fieldScriptOpcodes[0x52] = OP_52;
     fieldScriptOpcodes[0x53] = OP_53;
@@ -176,6 +176,7 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0x26] = OP_SETUP_SCREEN_DISTORTION;
     fieldScriptOpcodes_EX[0x27] = OP_SCREEN_DISTORTION_FADE_OUT;
     fieldScriptOpcodes_EX[0x3A] = OP_SET_PARTY_FRAME_MASK;
+    fieldScriptOpcodes_EX[0x3B] = OP_CLEAR_PARTY_FRAME_MASK;
     fieldScriptOpcodes_EX[0x3C] = OPX_3C;
     fieldScriptOpcodes_EX[0x3D] = OPX_3D;
     fieldScriptOpcodes_EX[0x3E] = OPX_3E;

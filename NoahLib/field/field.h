@@ -66,9 +66,7 @@ struct sFieldScriptEntity
     std::array<s16, 4> m8_currentWalkMeshTriangle;
     u16 m10_walkmeshId;
     s32 m14_currentTriangleFlag;
-    s16 m18;
-    s16 m1A;
-    s16 m1C;
+    SFP_VEC3 m18_boundingVolume;
     s16 m1E_collisionRadius;
     FP_VEC4 m20_position;
     FP_VEC4 m30_stepVector;

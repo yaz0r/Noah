@@ -281,6 +281,23 @@ void executeSpriteBytecode2Extended(sSpriteActor* param_1, int bytecode, sPS1Poi
 			computeStepFromMoveSpeed(param_1);
 		}
 		break;
+    case 0xA1: // fei jumping
+        {
+            s32 tempNewAltitude = param_1->m7C->m0;
+
+            if ((((uint)param_1->mA8.mx0) != 1) || (tempNewAltitude == 0)) {
+                s32 newValue = READ_LE_U8(param_3) * 0x10 * (fieldDrawEnvsInitialized + 1) * (int)param_1->m82;
+                if (newValue < 0) {
+                    newValue += 0xfff;
+                }
+                tempNewAltitude = (newValue >> 0xc) << 8;
+            }
+            (param_1->mC_step).vy = tempNewAltitude;
+            int iVar12 = (param_1->mC_step).vy << 8;
+            (param_1->mC_step).vy = iVar12;
+            (param_1->mC_step).vy = iVar12 / (int)(param_1->mAC >> 7 & 0xfff);
+        }
+        break;
 	case 0xC1:
 		MissingCode();
 		break;
@@ -835,13 +852,20 @@ void executeSpriteBytecode(sSpriteActor* param_1, sPS1Pointer param_2, uint para
 			case 0x81:
 			case 0x82:
 				return;
+            case 0x86:
+            case 0x87:
+                if (pBytecode == param_2)
+                    return;
+                break;
 			case 0xB3:
 				param_1->mA8.mxB = READ_LE_U8(pBytecode + 1);
 				break;
 			case 0x84:
 			case 0xA0:
+            case 0xA1:
 			case 0xA7:
 			case 0xB4:
+            case 0xC6:
 			case 0xE4:
 				break;
 			default:

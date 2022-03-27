@@ -14,6 +14,7 @@
 
 #include "field/field.h"
 #include "field/walkMesh.h"
+#include "field/fieldScriptSupport.h"
 
 #include "../imgui_club/imgui_memory_editor/imgui_memory_editor.h"
 
@@ -1489,6 +1490,14 @@ void fieldInspector_frame()
 
         ImGui::Checkbox("Execute scripts", &g_executeScripts);
         ImGui::Checkbox("Execute update scripts", &g_executeUpdateScripts);
+
+        if (ImGui::BeginMenu("Field debug")) {
+            int gameProgress = getVariable(0);
+            if (ImGui::InputInt("GameProgress", &gameProgress)) {
+                setVar(0, gameProgress);
+            }
+            ImGui::EndMenu();
+        }
 
         ImGui::EndMainMenuBar();
     }

@@ -287,9 +287,9 @@ void OP_10Sub(int param_1)
         }
 
         pCurrentFieldScriptActor->m102_numSteps = pCurrentFieldScriptActor->m102_numSteps + -1;
-        actorArray[walkSpeed].mC_matrix.t[0] = pCurrentFieldScriptActor->m20_position.vx.getIntegerPart();
-        actorArray[walkSpeed].mC_matrix.t[1] = pCurrentFieldScriptActor->m20_position.vy.getIntegerPart();
-        actorArray[walkSpeed].mC_matrix.t[2] = pCurrentFieldScriptActor->m20_position.vz.getIntegerPart();
+        actorArray[currentFieldActorId].mC_matrix.t[0] = pCurrentFieldScriptActor->m20_position.vx.getIntegerPart();
+        actorArray[currentFieldActorId].mC_matrix.t[1] = pCurrentFieldScriptActor->m20_position.vy.getIntegerPart();
+        actorArray[currentFieldActorId].mC_matrix.t[2] = pCurrentFieldScriptActor->m20_position.vz.getIntegerPart();
         (pSpriteActor->m0_position).vx = (pCurrentFieldScriptActor->m20_position).vx;
         (pSpriteActor->m0_position).vy = (pCurrentFieldScriptActor->m20_position).vy;
         (pSpriteActor->m0_position).vz = (pCurrentFieldScriptActor->m20_position).vz;
@@ -898,16 +898,16 @@ void OP_INIT_ENTITY_PC(void)
     return;
 }
 
-void OP_18()
+void OP_SET_BOUNDING_VOLUME()
 {
     if (pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1] != 0) {
-        pCurrentFieldScriptActor->m18 = (ushort)pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1] << 1;
+        pCurrentFieldScriptActor->m18_boundingVolume.vx = (ushort)pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1] << 1;
     }
     if (pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 2] != 0) {
-        pCurrentFieldScriptActor->m1C = (ushort)pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 2] << 1;
+        pCurrentFieldScriptActor->m18_boundingVolume.vz = (ushort)pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 2] << 1;
     }
     if (pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 3] != 0) {
-        pCurrentFieldScriptActor->m1A = (ushort)pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 3] << 1;
+        pCurrentFieldScriptActor->m18_boundingVolume.vy = (ushort)pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 3] << 1;
     }
     if (pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 4] != 0) {
         pCurrentFieldScriptActor->m1E_collisionRadius = (ushort)pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 4] << 1;
@@ -2849,6 +2849,19 @@ void OP_SET_PARTY_FRAME_MASK()
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
 }
 
+void OP_CLEAR_PARTY_FRAME_MASK()
+{
+    int uVar1;
+    uint uVar2;
+
+    uVar1 = getImmediateOrVariableUnsigned(1);
+    uVar2 = getCharacter(uVar1);
+    if (uVar2 != 0xff) {
+        pKernelGameState->m1D32_partyFrameMask = pKernelGameState->m1D32_partyFrameMask & ~(1 << (uVar2 & 0x1f));
+    }
+    pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
+}
+
 void OPX_3C()
 {
     if (fieldExecuteVar1 != 0) {
@@ -3196,7 +3209,7 @@ void OP_IF_PLAYER_IN_TRIGGER()
 
     int playerY = actorArray[playerControlledActor].m4C_scriptEntity->m20_position.vy.getIntegerPart();
 
-    if ((psVar5->m0[1] < playerY) && ((int)(playerY - (uint)(ushort)actorArray[playerControlledActor].m4C_scriptEntity->m1A) < (int)psVar5->m0[1]))
+    if ((psVar5->m0[1] < playerY) && ((int)(playerY - (uint)(ushort)actorArray[playerControlledActor].m4C_scriptEntity->m18_boundingVolume.vy) < (int)psVar5->m0[1]))
     {
         std::array<sVec2_s16, 4> triggerCorners;
         triggerCorners[0].set(psVar5->m0[2], psVar5->m0[0]);

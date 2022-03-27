@@ -155,6 +155,21 @@ uint getImmediateOrVariableUnsigned(int param_1)
 }
 
 /*
+GameProgress:
+
+0x3: Prolog text done
+0x6: Fei painting intro done
+0x7: Talked to Dan (before leaving Fei's house)
+0x8: Talked to Alice
+0xA: Looking for Citan around his house
+0xD: At citan, night time, Fei leaves
+0xF: At citan, night time, heading back to Lahan, Citan waiting outside after Fei's departure
+
+
+*/
+
+/*
+0x0: GameProgress
 0xA: event time
 0xC/0xE: system time
 */
