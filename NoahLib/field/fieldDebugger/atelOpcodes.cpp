@@ -122,7 +122,7 @@ void initOpcodeTable()
         .setName("SET_BOUNDING_VOLUME")
 		.addArgumentByte("VolumeX")
 		.addArgumentByte("VolumeZ")
-		.addArgumentByte("VolumeZ")
+		.addArgumentByte("VolumeY")
 		.addArgumentByte("CollisionRadius")
 		.end();
 
@@ -338,6 +338,7 @@ void initOpcodeTable()
 		.end();
 
 	m_opcode[0x53]
+        .setName("FOLLOW_ENTITY")
 		.addArgumentCharacter()
 		.end();
 
@@ -617,7 +618,7 @@ void initOpcodeTable()
 		.end();
 
 	m_opcode[0xA8]
-		.setComment("Rand related")
+		.setName("RAND_MODULO")
 		.addArgumentVarIndex()
 		.addArgumentU16OrVar()
 		.end();
@@ -1075,8 +1076,16 @@ void initExtendedOpcodeTable()
 	m_extendedOpcode[0x54]
 		.end();
 
+    m_extendedOpcode[0x55]
+        .end();
+
 	m_extendedOpcode[0x57]
 		.end();
+
+    m_extendedOpcode[0x59]
+        .setName("OPEN_STORE_MENU")
+        .addArgumentU16OrVar()
+        .end();
 
 	m_extendedOpcode[0x5A]
 		.addArgumentU16OrVar()
@@ -1179,7 +1188,6 @@ void initExtendedOpcodeTable()
 		.setComment("Wait for something")
 		.end();
 
-
 	m_extendedOpcode[0x8C]
 		.addArgumentU16OrVar()
 		.addArgumentU16OrVar()
@@ -1258,6 +1266,10 @@ void initExtendedOpcodeTable()
 	m_extendedOpcode[0x97]
 		.addArgumentByte()
 		.end();
+
+    m_extendedOpcode[0x99]
+        .addArgumentByte()
+        .end();
 
 	m_extendedOpcode[0xA1]
 		.setName("ASSIGN_GEAR")

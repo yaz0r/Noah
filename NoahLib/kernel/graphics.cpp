@@ -339,6 +339,14 @@ void initPSXFB()
 	bgfx::touch(PSXOutput_bgfxView);
 }
 
+bool isGameInFocus() {
+    ImGui::Begin("PSX Output");
+    bool gameHasFocus = ImGui::IsWindowFocused();
+    ImGui::End();
+
+    return gameHasFocus;
+}
+
 void drawPSXFB()
 {
 	if (ImGui::Begin("PSX Output"))

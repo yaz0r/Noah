@@ -9,6 +9,7 @@
 
 #include "ImGuizmo.h"
 #include "SDL_scancode.h"
+#include "SDL_keyboard.h"
 #include "field/fieldModel.h"
 
 int fieldModelInspector_bgfxView = 2;
@@ -88,34 +89,36 @@ void fieldModelInspector_step(int modelId)
 
                 bx::Vec3 translationVector(0, 0, 0);
 
-                if (io.KeysDown[SDL_SCANCODE_A])
-                {
-                    translationVector.x -= 10;
-                }
+                const Uint8* keyState = SDL_GetKeyboardState(NULL);
 
-                if (io.KeysDown[SDL_SCANCODE_D])
+                for (int i = 0; i < SDL_NUM_SCANCODES; i++)
                 {
-                    translationVector.x += 10;
-                }
-
-                if (io.KeysDown[SDL_SCANCODE_Q])
-                {
-                    translationVector.y -= 10;
-                }
-
-                if (io.KeysDown[SDL_SCANCODE_E])
-                {
-                    translationVector.y += 10;
-                }
-
-                if (io.KeysDown[SDL_SCANCODE_W])
-                {
-                    translationVector.z += 10;
-                }
-
-                if (io.KeysDown[SDL_SCANCODE_S])
-                {
-                    translationVector.z -= 10;
+                    if (keyState[i])
+                    {
+                        switch (i)
+                        {
+                        case SDL_SCANCODE_A:
+                            translationVector.x -= 10;
+                            break;
+                        case SDL_SCANCODE_D:
+                            translationVector.x += 10;
+                            break;
+                        case SDL_SCANCODE_Q:
+                            translationVector.y += 10;
+                            break;
+                        case SDL_SCANCODE_E:
+                            translationVector.y -= 10;
+                            break;
+                        case SDL_SCANCODE_W:
+                            translationVector.z += 10;
+                            break;
+                        case SDL_SCANCODE_S:
+                            translationVector.z -= 10;
+                            break;
+                        default:
+                            break;
+                        }
+                    }
                 }
 
                 matrixTranslation = bx::add(matrixTranslation, bx::mul(translationVector, rotationMatrix));

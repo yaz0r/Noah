@@ -7328,9 +7328,14 @@ int loadInputFromVSyncBuffer()
 
 */
 
+bool isGameInFocus();
+
 void getInputDuringVsync(void)
 {
     MissingCode();
+
+    if (!isGameInFocus())
+        return;
 
     static SDL_GameController* controller = nullptr;
     if (controller == nullptr)

@@ -912,17 +912,17 @@ public:
             {
             case 0:
                 dynamicOpcode
-                    .addArgumentByte()
-                    .addArgumentS16OrVar(0x80)
-                    .addArgumentS16OrVar(0x40)
-                    .addArgumentS16OrVar(0x20)
+                    .addArgumentByte("Mode")
+                    .addArgumentS16OrVar(0x80, "X")
+                    .addArgumentS16OrVar(0x40, "Z")
+                    .addArgumentS16OrVar(0x20, "Y")
                     .addSignControlByte()
                     .end();
                 handleGenericOpcode(dynamicOpcode);
                 break;
             case 1:
                 dynamicOpcode
-                    .addArgumentByte()
+                    .addArgumentByte("Mode")
                     .end();
                 handleGenericOpcode(dynamicOpcode);
                 break;
