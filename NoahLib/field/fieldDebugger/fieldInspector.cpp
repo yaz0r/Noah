@@ -1033,6 +1033,40 @@ public:
                 return false;
             }
             break;
+        case 0xFE77:
+            dynamicOpcode.setName("LOAD_TIM_TO_VRAM");
+            switch (readU8FromScript(1))
+            {
+            case 0:
+                dynamicOpcode
+                    .addArgumentByte()
+                    .end();
+                handleGenericOpcode(dynamicOpcode, true);
+                break;
+            case 1:
+                dynamicOpcode
+                    .addArgumentByte()
+                    .addArgumentS16OrVar(0x80)
+                    .addArgumentS16OrVar(0x40)
+                    .addArgumentS16OrVar(0x20)
+                    .addArgumentS16OrVar(0x10)
+                    .addSignControlByte()
+                    .end();
+                handleGenericOpcode(dynamicOpcode, true);
+                break;
+            case 2:
+                dynamicOpcode
+                    .addArgumentByte()
+                    .end();
+                handleGenericOpcode(dynamicOpcode, true);
+                break;
+            default:
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));
+                ImGui::Text("Failed to decode opcode 0x%02X (%d)", opcode, opcode & 0xFF);
+                ImGui::PopStyleColor();
+                return false;
+            }
+            break;
         default:
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));
             ImGui::Text("Failed to decode opcode 0x%02X (%d)", opcode, opcode & 0xFF);

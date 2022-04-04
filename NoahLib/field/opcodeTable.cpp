@@ -64,6 +64,7 @@ void initOpcodes()
     fieldScriptOpcodes[0x52] = OP_52;
     fieldScriptOpcodes[0x53] = OP_53;
     fieldScriptOpcodes[0x57] = OP_57;
+    fieldScriptOpcodes[0x58] = OP_58;
     fieldScriptOpcodes[0x59] = OP_WALK_RANDOM_DIRECTION;
     fieldScriptOpcodes[0x5A] = OP_5A;
     fieldScriptOpcodes[0x5B] = resetFieldScriptActor;
@@ -119,6 +120,7 @@ void initOpcodes()
     fieldScriptOpcodes[0xB6] = OP_B6;
     fieldScriptOpcodes[0xB7] = OP_B7;
     fieldScriptOpcodes[0xB8] = OP_B8;
+    fieldScriptOpcodes[0xBA] = OP_ADD_FROM_AVAILABLE_PARTY;
     fieldScriptOpcodes[0xBB] = OP_REMOVE_FROM_AVAILABLE_PARTY;
     fieldScriptOpcodes[0xBC] = OP_INIT_ENTITY_SCRIPT;
     fieldScriptOpcodes[0xBE] = OP_ROTATION_3D_YAW_SUBSTRACT;
@@ -129,6 +131,7 @@ void initOpcodes()
     fieldScriptOpcodes[0xC4] = OP_OPEN_DOOR;
     fieldScriptOpcodes[0xC5] = OP_CLOSE_DOOR;
     fieldScriptOpcodes[0xC6] = OP_INCREASE_FIELD_EXECUTION_MAX_CYCLES;
+    fieldScriptOpcodes[0xC8] = OP_C8;
     fieldScriptOpcodes[0xC9] = OP_IF_PLAYER_IN_TRIGGER2;
     fieldScriptOpcodes[0xCB] = OP_IF_PLAYER_IN_TRIGGER;
     fieldScriptOpcodes[0xCD] = OP_CD;
@@ -137,8 +140,8 @@ void initOpcodes()
     fieldScriptOpcodes[0xD2] = OP_SHOW_DIALOG_WINDOW_MODE0;
     fieldScriptOpcodes[0xD4] = OP_SHOW_DIALOG_WINDOW_FOR_OTHER_ACTOR_MODE0;
     fieldScriptOpcodes[0xD6] = OP_D6;
-    fieldScriptOpcodes[0xD7] = OP_SET_ROTATION_FOR_RENDERING;
-    fieldScriptOpcodes[0xD9] = OP_D9;
+    fieldScriptOpcodes[0xD7] = OP_SET_OBJECT_SWIVEL_ON_X_AXIS;
+    fieldScriptOpcodes[0xD9] = OP_SET_OBJECT_SWIVEL_ON_Z_AXIS;
     fieldScriptOpcodes[0xDB] = OP_DB;
     fieldScriptOpcodes[0xDC] = OP_DC;
     fieldScriptOpcodes[0xDE] = OP_DE;
@@ -157,6 +160,7 @@ void initOpcodes()
     fieldScriptOpcodes[0xF5] = OP_SHOW_DIALOG_WINDOW_FOR_CURRENT_ACTOR_MODE3;
     fieldScriptOpcodes[0xF6] = OP_F6;
     fieldScriptOpcodes[0xF8] = OP_SET_FLAGS_DYNAMIC;
+    fieldScriptOpcodes[0xF9] = OP_F9;
     fieldScriptOpcodes[0xFB] = OP_FB;
     fieldScriptOpcodes[0xFC] = OP_FC;
     fieldScriptOpcodes[0xFE] = OP_EXTENDED_OPCODE;
@@ -177,6 +181,7 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0x17] = OPX_17;
     fieldScriptOpcodes_EX[0x18] = OP_ADD_TO_CURRENT_PARTY;
     fieldScriptOpcodes_EX[0x19] = OP_REMOVE_FROM_CURRENT_PARTY;
+    fieldScriptOpcodes_EX[0x1A] = OP_FINALIZE_PARTY_CHARACTER_LOADING;
     fieldScriptOpcodes_EX[0x1C] = OPX_1C;
     fieldScriptOpcodes_EX[0x1E] = OPX_1E;
     fieldScriptOpcodes_EX[0x21] = OPX_21;
@@ -203,9 +208,11 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0x54] = OPX_54;
     fieldScriptOpcodes_EX[0x5C] = OPX_5C;
     fieldScriptOpcodes_EX[0x5D] = OPX_5D;
+    fieldScriptOpcodes_EX[0x5E] = OP_SET_TRANSPARENCY_MODE;
     fieldScriptOpcodes_EX[0x62] = OPX_62;
     fieldScriptOpcodes_EX[0x65] = OPX_65;
     fieldScriptOpcodes_EX[0x66] = OPX_66;
+    fieldScriptOpcodes_EX[0x6B] = OPX_6B;
     fieldScriptOpcodes_EX[0x7F] = OPX_7F;
     fieldScriptOpcodes_EX[0x80] = OPX_80;
     fieldScriptOpcodes_EX[0x81] = OPX_81;
@@ -226,12 +233,15 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0x97] = OPX_97;
     fieldScriptOpcodes_EX[0x98] = OPX_98;
     fieldScriptOpcodes_EX[0x9A] = OPX_9A;
+    fieldScriptOpcodes_EX[0x9F] = OP_TOGGLE_FRAME_LOCK;
     fieldScriptOpcodes_EX[0xA1] = OP_ASSIGN_GEAR;
     fieldScriptOpcodes_EX[0xA2] = OPX_A2;
     fieldScriptOpcodes_EX[0xA4] = OP_RESTORE_GEAR;
     fieldScriptOpcodes_EX[0xA5] = OPX_A5;
     fieldScriptOpcodes_EX[0xAF] = OPX_AF;
+    fieldScriptOpcodes_EX[0xB8] = OPX_B8;
     fieldScriptOpcodes_EX[0xBD] = OPX_BD;
+    fieldScriptOpcodes_EX[0xC8] = OPX_C8;
     fieldScriptOpcodes_EX[0xCB] = OPX_CB;
     fieldScriptOpcodes_EX[0xCC] = OPX_CC;
     fieldScriptOpcodes_EX[0xCD] = OP_GET_CURRENT_DISC_NUMBER;

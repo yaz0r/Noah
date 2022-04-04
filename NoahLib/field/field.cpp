@@ -23,6 +23,8 @@
 #include "SDL_gamecontroller.h"
 #include "SDL_keyboard.h"
 
+u32 numVsync = 0;
+
 bool g_executeScripts = true;
 bool g_executeUpdateScripts = true;
 
@@ -118,9 +120,11 @@ std::array<int, 3> unkPartyTable;
 
 u8 fieldBackgroundClearColor[3];
 
-void fieldModelRelocation(std::vector<u8>::iterator pModelData)
+int fieldModelRelocation(std::vector<u8>::iterator pModelData)
 {
+    int count = READ_LE_U32(pModelData);
     MissingCode();
+    return count;
 }
 
 s32 fieldChangePrevented = -1;
@@ -790,6 +794,15 @@ void NormalColorCol(SFP_VEC4* faceNormal, std::vector<u8>::iterator displayList,
     MissingCode();
 }
 
+void NormalColor(SFP_VEC4* $2, std::array<u8,4> $3)
+{
+/*    gte_ldv0((SVECTOR*)$2);
+    gte_ncs_b();
+    gte_strgb($3);
+    return;*/
+    MissingCode();
+}
+
 int prim0_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator meshBlock, int initParam)
 {
     POLY_FT3* pNewPoly = new POLY_FT3;
@@ -836,6 +849,42 @@ int prim0_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator 
     currentModeBlock18 = currentModeBlock18 + 4;
     pNewPoly->code = READ_LE_U8(displayList + 3);
     return 1;
+}
+
+int prim1_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator meshBlock, int initParam)
+{
+    if (primD_isValid(displayList))
+    {
+        POLY_FT3* pNewPoly = new POLY_FT3;
+
+        pNewPoly->m3_size = 7;
+        pNewPoly->code = READ_LE_U8(displayList + 3);
+        pNewPoly->u0 = READ_LE_U8(displayList + 4);
+        pNewPoly->v0 = READ_LE_U8(displayList + 5);
+        pNewPoly->clut = primD_initSub0Sub1Var0;
+        pNewPoly->u1 = READ_LE_U8(displayList + 6);
+        pNewPoly->v1 = READ_LE_U8(displayList + 7);
+        pNewPoly->tpage = primD_initSub0Sub0Var0;
+        pNewPoly->u2 = READ_LE_U8(displayList + 0);
+        pNewPoly->v2 = READ_LE_U8(displayList + 1);
+
+        if ((initParam & 1) == 0) {
+            if (initParam & 4) {
+                //NormalColor(currentModeBlock18, pNewPoly);
+                MissingCode();
+            }
+        }
+        else
+        {
+            MissingCode();
+        }
+        currentModeBlock18 += 8;
+
+        *currentModelInstanceArray8 = pNewPoly;
+        currentModelInstanceArray8++;
+        return 1;
+    }
+    return 0;
 }
 
 int prim4_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator meshBlock, int initParam)
@@ -901,6 +950,38 @@ int prim8_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator 
     }
     pNewPoly->code = READ_LE_U8(displayList + 3);
     return 1;
+}
+
+int prim9_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator meshBlock, int initParam)
+{
+    if (primD_isValid(displayList))
+    {
+        POLY_FT4* pNewPoly = new POLY_FT4;
+
+        pNewPoly->m3_size = 9;
+        pNewPoly->r0 = READ_LE_U8(displayList + 0);
+        pNewPoly->g0 = READ_LE_U8(displayList + 1);
+        pNewPoly->b0 = READ_LE_U8(displayList + 2);
+        pNewPoly->code = READ_LE_U8(displayList + 3);
+        pNewPoly->u0 = READ_LE_U8(displayList + 4);
+        pNewPoly->v0 = READ_LE_U8(displayList + 5);
+        pNewPoly->clut = primD_initSub0Sub1Var0;
+        pNewPoly->u1 = READ_LE_U8(displayList + 6);
+        pNewPoly->v1 = READ_LE_U8(displayList + 7);
+        pNewPoly->tpage = primD_initSub0Sub0Var0;
+        pNewPoly->u2 = READ_LE_U8(displayList + 8);
+        pNewPoly->v2 = READ_LE_U8(displayList + 9);
+        pNewPoly->u3 = READ_LE_U8(displayList + 10);
+        pNewPoly->v3 = READ_LE_U8(displayList + 11);
+
+        MissingCode();
+
+        currentModeBlock18 += 8;
+        *currentModelInstanceArray8 = pNewPoly;
+        currentModelInstanceArray8++;
+        return 1;
+    }
+    return 0;
 }
 
 
@@ -1328,7 +1409,7 @@ struct sPolyTypeRenderDefinition
 
 const std::array<sPolyTypeRenderDefinition, 17> polyRenderDefs = { {
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	prim0_init,	8,	0x4,	0x04}, // 0x0
-    {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x8,	0x20}, // 0x1
+    {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	prim1_init,	8,	0x8,	0x20}, // 0x1
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x4,	0x1C}, // 0x2
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x8,	0x28}, // 0x3
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	prim4_init,	8,	0x4,	0x14}, // 0x4
@@ -1336,7 +1417,7 @@ const std::array<sPolyTypeRenderDefinition, 17> polyRenderDefs = { {
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x4,	0x1C}, // 0x6
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x8,	0x28}, // 0x7
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	prim8_init,	8,	0x4,	0x18}, // 0x8
-    {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0xC,	0x28}, // 0x9
+    {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	prim9_init,	8,	0xC,	0x28}, // 0x9
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x4,	0x24}, // 0xA
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0xC,	0x34}, // 0xB
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	primC_init,	8,	0x4,	0x18}, // 0xC
@@ -3825,9 +3906,9 @@ int updateEntityEventCode3Sub3Sub1(FP_VEC3* param_1, FP_VEC4* param_2, sFieldScr
             sVec2_s16 vert2;
 
             sWalkMesh::sTriangleData& pTriangle = pWalkMeshTriangles[triangleId];
-            vert0.set(pVertices[pTriangle.m0_verticeIndex[0]].vx, pVertices[pTriangle.m0_verticeIndex[0]].vz);
-            vert1.set(pVertices[pTriangle.m0_verticeIndex[1]].vx, pVertices[pTriangle.m0_verticeIndex[1]].vz);
-            vert2.set(pVertices[pTriangle.m0_verticeIndex[2]].vx, pVertices[pTriangle.m0_verticeIndex[2]].vz);
+            vert0.set(pVertices[pTriangle.m0_verticeIndex[0]].vx, pVertices[pTriangle.m0_verticeIndex[0]].vz); // s4
+            vert1.set(pVertices[pTriangle.m0_verticeIndex[1]].vx, pVertices[pTriangle.m0_verticeIndex[1]].vz); // s3
+            vert2.set(pVertices[pTriangle.m0_verticeIndex[2]].vx, pVertices[pTriangle.m0_verticeIndex[2]].vz); // s1
 
             lastTriangle = triangleId;
 
@@ -3851,39 +3932,39 @@ int updateEntityEventCode3Sub3Sub1(FP_VEC3* param_1, FP_VEC4* param_2, sFieldScr
                     iterationCount = 0xFF;
                     break;
                 case 1:
-                    triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[0];
+                    triangleId = pTriangle.m6_connectivity[0];
                     break;
                 case 2:
-                    triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[1];
+                    triangleId = pTriangle.m6_connectivity[1];
                     break;
                 case 3:
                     if (NCLIP(vert1, refPos, refPos2) < 0)
                     {
-                        triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[0];
+                        triangleId = pTriangle.m6_connectivity[0];
                     }
                     else {
-                        triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[1];
+                        triangleId = pTriangle.m6_connectivity[1];
                     }
                     break;
                 case 4:
-                    triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[2];
+                    triangleId = pTriangle.m6_connectivity[2];
                     break;
                 case 5:
                     if (NCLIP(vert0, refPos, refPos2) < 0)
                     {
-                        triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[2];
+                        triangleId = pTriangle.m6_connectivity[2];
                     }
                     else {
-                        triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[0];
+                        triangleId = pTriangle.m6_connectivity[0];
                     }
                     break;
                 case 6:
                     if (NCLIP(vert2, refPos, refPos2) < 0)
                     {
-                        triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[1];
+                        triangleId = pTriangle.m6_connectivity[1];
                     }
                     else {
-                        triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[2];
+                        triangleId = pTriangle.m6_connectivity[2];
                     }
                     break;
                 case 7:
@@ -3894,7 +3975,7 @@ int updateEntityEventCode3Sub3Sub1(FP_VEC3* param_1, FP_VEC4* param_2, sFieldScr
                 }
             }
 
-            u32 uVar3 = (*walkMeshVar1)[pWalkMeshTriangles[lastTriangle].mC_indexInWalkmeshData1] & mask;
+            u32 uVar3 = (*walkMeshVar1)[pTriangle.mC_indexInWalkmeshData1] & mask;
 
             *param_7 = uVar3;
 
@@ -7353,10 +7434,9 @@ void getInputDuringVsync(void)
         }
     }
 
-
+    u16 buttonMask = 0;
     if (controller)
     {
-        u16 buttonMask = 0;
         buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_A) << 6; // Cross
         buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_B) << 5; // Circle
         buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_Y) << 4; // Triangle
@@ -7381,9 +7461,6 @@ void getInputDuringVsync(void)
                     buttonMask |= 0x2000;
                 }
                 */
-        newPadButtonForScripts[0].vx |= buttonMask;
-        newPadButtonForDialogs |= buttonMask;
-        newPadButtonForField |= buttonMask;
     }
     //else
     {
@@ -7393,7 +7470,6 @@ void getInputDuringVsync(void)
         {
             if (keyState[i])
             {
-                u16 buttonMask = 0;
                 switch (i)
                 {
                 case SDL_SCANCODE_Z:
@@ -7423,13 +7499,34 @@ void getInputDuringVsync(void)
                 default:
                     break;
                 }
-
-                newPadButtonForScripts[0].vx |= buttonMask;
-                newPadButtonForDialogs |= buttonMask;
-                newPadButtonForField |= buttonMask;
             }
         }
     }
+
+    static u32 previousDownButtons = 0;
+    static u32 numVsyncButtonHeld = 0;
+
+    newPadButtonForScripts[0].vx |= buttonMask;
+    newPadButtonForDialogs = (newPadButtonForScripts[0].vx ^ previousDownButtons) & newPadButtonForScripts[0].vx;
+
+    if (newPadButtonForDialogs != 0) {
+        numVsyncButtonHeld = 0;
+    }
+    newPadButtonForField = newPadButtonForScripts[0].vx;
+
+    if (numVsyncButtonHeld < 0x20)
+    {
+        previousDownButtons++;
+        newPadButtonForField = newPadButtonForDialogs;
+    }
+    else if(numVsync & 3)
+    {
+        newPadButtonForField = newPadButtonForDialogs;
+    }
+
+    MissingCode();
+
+    previousDownButtons = newPadButtonForScripts[0].vx;
 
 }
 
@@ -7468,7 +7565,6 @@ void incrementTime()
     MissingCode();
 }
 
-u32 numVsync = 0;
 void vsyncCallback(void)
 {
     numVsync++;

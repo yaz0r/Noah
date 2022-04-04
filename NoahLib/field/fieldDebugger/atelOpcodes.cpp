@@ -352,6 +352,10 @@ void initOpcodeTable()
 
 	// opcode 0x57 is dynamic
 
+    m_opcode[0x58]
+        .setName("SET_DESIRED_CAMERA_TARGET_TO_ENTITY")
+        .end();
+
 	m_opcode[0x59]
 		.setName("WALK_RANDOM_DIRECTION")
 		.end();
@@ -770,9 +774,19 @@ void initOpcodeTable()
         .end();
 
 	m_opcode[0xD7]
-        .setName("SET_ROTATION_FOR_RENDERING")
+        .setName("SET_OBJECT_SWIVEL_ON_X_AXIS")
 		.addArgumentU16OrVar()
 		.end();
+
+    m_opcode[0xD8]
+        .setName("SET_OBJECT_SWIVEL_ON_Y_AXIS")
+        .addArgumentU16OrVar()
+        .end();
+
+    m_opcode[0xD9]
+        .setName("SET_OBJECT_SWIVEL_ON_Z_AXIS")
+        .addArgumentU16OrVar()
+        .end();
 
 	m_opcode[0xDB]
 		.addArgumentU16OrVar()
@@ -884,6 +898,10 @@ void initOpcodeTable()
 		.addArgumentU16("FlagValue")
 		.end();
 
+    m_opcode[0xF9]
+        .addArgumentCharacter()
+        .end();
+
 	m_opcode[0xFC]
 		.addArgumentCharacter()
 		.addArgumentDialogId()
@@ -914,6 +932,10 @@ void initExtendedOpcodeTable()
 	m_extendedOpcode[0x7]
 		.addArgumentByte()
 		.end();
+
+    m_extendedOpcode[0x9]
+        .addArgumentU16OrVar()
+        .end();
 
     m_extendedOpcode[0xC]
         .addArgumentU16()
@@ -1009,6 +1031,11 @@ void initExtendedOpcodeTable()
 
 	// 0x27 is dynamic
 
+    m_extendedOpcode[0x3A]
+        .setName("SET_PARTY_FRAME_MASK")
+        .addArgumentU16OrVar()
+        .end();
+
 	m_extendedOpcode[0x3B]
 		.setName("CLEAR_PARTY_FRAME_MASK")
 		.addArgumentU16OrVar()
@@ -1077,10 +1104,22 @@ void initExtendedOpcodeTable()
 		.end();
 
     m_extendedOpcode[0x55]
+        .setName("OPEN_NORMAL_MENU")
+        .end();
+
+    m_extendedOpcode[0x56]
+        .setName("OPEN_PARTY_MENU")
+        .addArgumentU16OrVar()
         .end();
 
 	m_extendedOpcode[0x57]
+        .setName("OPEN_LOAD_GAME_MENU")
 		.end();
+
+    m_extendedOpcode[0x56]
+        .setName("OPEN_RENAME_MENU")
+        .addArgumentU16OrVar()
+        .end();
 
     m_extendedOpcode[0x59]
         .setName("OPEN_STORE_MENU")
@@ -1097,6 +1136,14 @@ void initExtendedOpcodeTable()
 		.setName("SET_TRANSPARENCY_MODE")
 		.addArgumentU16OrVar()
 		.end();
+
+
+    m_extendedOpcode[0x5F]
+        .addArgumentByte()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .end();
 
 	m_extendedOpcode[0x60]
 		.setName("SET_2D_BACKGROUND")
@@ -1135,6 +1182,8 @@ void initExtendedOpcodeTable()
 		.addArgumentU16OrVar()
 		.addArgumentCharacter()
 		.end();
+
+    // 0x77 is dynamic
 
 	m_extendedOpcode[0x80]
 		.addArgumentU16()
@@ -1271,6 +1320,12 @@ void initExtendedOpcodeTable()
         .addArgumentByte()
         .end();
 
+    m_extendedOpcode[0x9F]
+        .setName("TOGGLE_FRAME_LOCK")
+        .addArgumentByte()
+        .addArgumentU16OrVar()
+        .end();
+
 	m_extendedOpcode[0xA1]
 		.setName("ASSIGN_GEAR")
 		.addArgumentU16OrVar("Character")
@@ -1290,6 +1345,11 @@ void initExtendedOpcodeTable()
 		.addArgumentU16OrVar()
 		.addArgumentU16OrVar()
 		.end();
+
+    m_extendedOpcode[0xB8]
+        .addArgumentByte()
+        .addArgumentU16OrVar()
+        .end();
 
 	m_extendedOpcode[0xBD]
 		.addArgumentU16OrVar()

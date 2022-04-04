@@ -34,7 +34,12 @@ void sModel::init(std::vector<u8>::iterator input, int dataSize)
         m10_blocks[i].mC_offsetNormals = READ_LE_U32(blockData + 0xC);
         m10_blocks[i].m10_offsetMeshBlocks = READ_LE_U32(blockData + 0x10);
         m10_blocks[i].m14_offsetDisplayList = READ_LE_U32(blockData + 0x14);
-        assert(READ_LE_U32(blockData + 0x18) == 0);
+
+        //assert(READ_LE_U32(blockData + 0x18) == 0);
+        if (READ_LE_U32(blockData + 0x18)) {
+            m10_blocks[i].m18.resize(1);
+            MissingCode();
+        }
 
 		m10_blocks[i].m20 = READ_LE_S16(blockData + 0x20);
 		m10_blocks[i].m22 = READ_LE_S16(blockData + 0x22);

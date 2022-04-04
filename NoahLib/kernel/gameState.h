@@ -28,6 +28,7 @@ struct sGameState
     u16 m1D32_partyFrameMask;
     std::array<u8, 3> m1D34_currentParty;
     std::array<s8, 5> m22B1_isOnGear;
+    u16 m2318_partyFrameLock;
     u16 m231A_fieldID;
 };
 

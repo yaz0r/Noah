@@ -398,16 +398,16 @@
         <scriptEntity ID="12" Name="Citan (NPC)"/>
         <scriptEntity ID="13" Name="Event camera control"/>
         <scriptEntity ID="14" Name="Music Box Statue"/>
-        <scriptEntity ID="15" Name="Event Control"/>
-        <scriptEntity ID="16" Name=""/>
-        <scriptEntity ID="17" Name=""/>
-        <scriptEntity ID="18" Name=""/>
-        <scriptEntity ID="19" Name=""/>
+        <scriptEntity ID="15" Name="Music box event trigger"/>
+        <scriptEntity ID="16" Name="Cog1"/>
+        <scriptEntity ID="17" Name="Cog2"/>
+        <scriptEntity ID="18" Name="Top panel"/>
+        <scriptEntity ID="19" Name="Right Panel"/>
         <scriptEntity ID="20" Name="Panel with carving"/>
-        <scriptEntity ID="21" Name=""/>
+        <scriptEntity ID="21" Name="Front panel"/>
         <scriptEntity ID="22" Name=""/>
         <scriptEntity ID="23" Name=""/>
-        <scriptEntity ID="24" Name=""/>
+        <scriptEntity ID="24" Name="Particle system"/>
         <scriptEntity ID="25" Name=""/>
     </fieldInfo>
     <fieldInfo ID="22" Name="Blackmoon Forest Entrance"/>

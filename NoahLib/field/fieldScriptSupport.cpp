@@ -166,7 +166,7 @@ GameProgress:
 0xD: At citan, night time, Fei leaves
 0xF: At citan, night time, heading back to Lahan, Citan waiting outside after Fei's departure
 
-
+0x15: if > 0x15, Yui is not in Citan's kitchen
 */
 
 /*

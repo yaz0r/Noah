@@ -166,3 +166,5 @@ void fieldActorCallback(sSpriteActor* pThis);
 
 void setSpriteActorAngle(sSpriteActor* param_1, short param_2);
 void OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1Sub1(sSpriteActor* param_1);
+
+void setTransparencyMode(sSpriteActor* param_1, u32 mode);

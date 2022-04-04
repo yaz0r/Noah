@@ -1228,3 +1228,27 @@ sSpriteActor* createSpriteActorEX(sSpriteActorAnimationBundle* pSetup, int clutX
 	loadVramSpriteParam = 0;
 	return pVar1;
 }
+
+void setTransparencyMode(sSpriteActor* sprite, u32 mode)
+{
+    byte bVar1;
+    uint uVar2;
+
+    sprite->m3C = sprite->m3C & 0xffffff1f | (mode & 7) << 5;
+    if ((mode & 7) == 0) {
+        bVar1 = (sprite->m28_colorAndCode).m3_code & 0xfd;
+    }
+    else {
+        bVar1 = (sprite->m28_colorAndCode).m3_code | 2;
+    }
+    (sprite->m28_colorAndCode).m3_code = bVar1;
+    if ((sprite->m40 >> 0xd & 0xf) - 8 < 2) {
+        uVar2 = sprite->m3C >> 5 & 7;
+        if (uVar2 != 0) {
+            sprite->m3C = sprite->m3C & 0xffffff1f | (uVar2 - 1 & 7) << 5;
+        }
+    }
+    else {
+        updateAllSubsprites(sprite);
+    }
+}
