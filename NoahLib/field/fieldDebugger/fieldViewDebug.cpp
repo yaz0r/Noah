@@ -11,6 +11,7 @@
 #include "SDL_scancode.h"
 #include "SDL_keyboard.h"
 #include "field/field.h"
+#include "field/mecha/mechaOverlay.h"
 
 int fieldDebugger_bgfxView = 1;
 
@@ -438,6 +439,8 @@ void fieldViewDebug_step()
                 drawCube(fieldDebugger_bgfxView, finalMatrix);
             }
         }
+
+        renderMechasForDebugFieldRenderer(fieldDebugger_bgfxView);
     }
     ImGui::End();
 }

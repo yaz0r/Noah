@@ -295,6 +295,10 @@ std::vector<std::vector<u8>> doPointerRelocationAndSplit(std::vector<u8>& inputD
             u32 endPos = READ_LE_U32(it + 4);
             u32 size = endPos - startPos;
 
+            if (endPos < startPos) {
+                size = 0;
+            }
+
             std::vector<u8> outputBuffer;
             outputBuffer.reserve(size);
 

@@ -776,7 +776,7 @@ int primD_isValid(std::vector<u8>::iterator displayList)
     return iVar2;
 }
 
-std::vector<sTag*>::iterator currentModelInstanceArray8;
+std::vector<sTag*>::iterator currentModelInstanceDrawPrims;
 
 std::vector<u8>::iterator currentModelBlockDisplayLists;
 std::vector<u8>::iterator g_currentModelBlockSubBlocks;
@@ -806,8 +806,8 @@ void NormalColor(SFP_VEC4* $2, std::array<u8,4> $3)
 int prim0_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator meshBlock, int initParam)
 {
     POLY_FT3* pNewPoly = new POLY_FT3;
-    *currentModelInstanceArray8 = pNewPoly;
-    currentModelInstanceArray8++;
+    *currentModelInstanceDrawPrims = pNewPoly;
+    currentModelInstanceDrawPrims++;
 
     pNewPoly->m3_size = 4;
 
@@ -855,6 +855,8 @@ int prim1_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator 
 {
     if (primD_isValid(displayList))
     {
+        assert(READ_LE_U8(displayList + 3) == 0x24); // triangle with texture
+
         POLY_FT3* pNewPoly = new POLY_FT3;
 
         pNewPoly->m3_size = 7;
@@ -880,8 +882,53 @@ int prim1_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator 
         }
         currentModeBlock18 += 8;
 
-        *currentModelInstanceArray8 = pNewPoly;
-        currentModelInstanceArray8++;
+        *currentModelInstanceDrawPrims = pNewPoly;
+        currentModelInstanceDrawPrims++;
+        return 1;
+    }
+    return 0;
+}
+
+struct CVECTOR {
+    u8 r;
+    u8 g;
+    u8 b;
+    u8 pad;
+};
+
+void NormalColor3(SFP_VEC4* $2, SFP_VEC4* $3, SFP_VEC4* v2, CVECTOR* v3, CVECTOR* v4, CVECTOR* v5)
+{
+    MissingCode();
+}
+
+int prim3_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator meshBlock, int initParam)
+{
+    if (primD_isValid(displayList))
+    {
+        //assert((READ_LE_U8(displayList + 3) & ~(16 | 2 | 1)) == 0x34);
+
+        POLY_GT3* pNewPoly = new POLY_GT3;
+
+        pNewPoly->m3_size = 9;
+
+        SFP_VEC4 n0 = SFP_VEC4::FromIt(currentModelBlockNormals + READ_LE_U16(meshBlock) * 8);
+        SFP_VEC4 n1 = SFP_VEC4::FromIt(currentModelBlockNormals + READ_LE_U16(meshBlock + 2) * 8);
+        SFP_VEC4 n2 = SFP_VEC4::FromIt(currentModelBlockNormals + READ_LE_U16(meshBlock + 4) * 8);
+
+        NormalColor3(&n0, &n1, &n2, (CVECTOR*)&pNewPoly->r0, (CVECTOR*)&pNewPoly->r1, (CVECTOR*)&pNewPoly->r2);
+
+        pNewPoly->code = READ_LE_U8(displayList + 3);
+        pNewPoly->u0 = READ_LE_U8(displayList + 4);
+        pNewPoly->v0 = READ_LE_U8(displayList + 5);
+        pNewPoly->clut = primD_initSub0Sub1Var0;
+        pNewPoly->u1 = READ_LE_U8(displayList + 6);
+        pNewPoly->v1 = READ_LE_U8(displayList + 7);
+        pNewPoly->tpage = primD_initSub0Sub0Var0;
+        pNewPoly->u2 = READ_LE_U8(displayList + 0);
+        pNewPoly->v2 = READ_LE_U8(displayList + 1);
+
+        *currentModelInstanceDrawPrims = pNewPoly;
+        currentModelInstanceDrawPrims++;
         return 1;
     }
     return 0;
@@ -889,7 +936,9 @@ int prim1_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator 
 
 int prim4_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator meshBlock, int initParam)
 {
-    POLY_FT3* pNewPoly = new POLY_FT3;
+    assert(READ_LE_U8(displayList + 3) == 0x20); // colored triangle
+
+    POLY_F3* pNewPoly = new POLY_F3;
 
     pNewPoly->m3_size = 4;
     pNewPoly->r0 = READ_LE_U8(displayList + 0);
@@ -897,8 +946,8 @@ int prim4_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator 
     pNewPoly->b0 = READ_LE_U8(displayList + 2);
     pNewPoly->code = READ_LE_U8(displayList + 3);
 
-    *currentModelInstanceArray8 = pNewPoly;
-    currentModelInstanceArray8++;
+    *currentModelInstanceDrawPrims = pNewPoly;
+    currentModelInstanceDrawPrims++;
     return 1;
 }
 
@@ -906,6 +955,8 @@ int prim5_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator 
 {
     if (primD_isValid(displayList))
     {
+        assert((READ_LE_U8(displayList + 3) & ~(16 | 2 | 1)) == 0x24);
+
         POLY_FT3* pNewPoly = new POLY_FT3;
 
         pNewPoly->m3_size = 7;
@@ -919,8 +970,8 @@ int prim5_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator 
         pNewPoly->u2 = READ_LE_U8(displayList + 0);
         pNewPoly->v2 = READ_LE_U8(displayList + 1);
 
-        *currentModelInstanceArray8 = pNewPoly;
-        currentModelInstanceArray8++;
+        *currentModelInstanceDrawPrims = pNewPoly;
+        currentModelInstanceDrawPrims++;
         return 1;
     }
     return 0;
@@ -928,11 +979,13 @@ int prim5_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator 
 
 int prim8_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator meshBlock, int initParam)
 {
-    POLY_FT3* pNewPoly = new POLY_FT3;
+    assert(READ_LE_U8(displayList + 3) == 0x28); // quad with color
+
+    POLY_F4* pNewPoly = new POLY_F4;
 
     pNewPoly->m3_size = 4;
-    *currentModelInstanceArray8 = pNewPoly;
-    currentModelInstanceArray8++;
+    *currentModelInstanceDrawPrims = pNewPoly;
+    currentModelInstanceDrawPrims++;
 
     if ((initParam & 1) == 0) {
         if ((initParam & 4) == 0) {
@@ -956,6 +1009,8 @@ int prim9_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator 
 {
     if (primD_isValid(displayList))
     {
+        assert(READ_LE_U8(displayList + 3) == 0x2C); // quad with texture
+
         POLY_FT4* pNewPoly = new POLY_FT4;
 
         pNewPoly->m3_size = 9;
@@ -977,8 +1032,8 @@ int prim9_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator 
         MissingCode();
 
         currentModeBlock18 += 8;
-        *currentModelInstanceArray8 = pNewPoly;
-        currentModelInstanceArray8++;
+        *currentModelInstanceDrawPrims = pNewPoly;
+        currentModelInstanceDrawPrims++;
         return 1;
     }
     return 0;
@@ -987,6 +1042,8 @@ int prim9_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator 
 
 int primC_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator meshBlock, int initParam)
 {
+    assert(READ_LE_U8(displayList + 3) == 0x28); // quad with color
+
     POLY_F4* pNewPoly = new POLY_F4;
 
     pNewPoly->m3_size = 5;
@@ -995,8 +1052,8 @@ int primC_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator 
     pNewPoly->b0 = READ_LE_U8(displayList + 2);
     pNewPoly->code = READ_LE_U8(displayList + 3);
 
-    *currentModelInstanceArray8 = pNewPoly;
-    currentModelInstanceArray8++;
+    *currentModelInstanceDrawPrims = pNewPoly;
+    currentModelInstanceDrawPrims++;
     return 1;
 }
 
@@ -1007,15 +1064,166 @@ s32 gDepthDivider = 2;
 
 OTTable* currentOTEntry = nullptr;
 
-void genericTrianglePrim(std::vector<u8>::iterator meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
+void genericTrianglePrim_14(std::vector<u8>::iterator meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
 {
     OTTable& pOT = *currentOTEntry;
     int depthGranularity = gDepthDivider + 2;
 
     for (int i = 0; i < count; i++)
     {
-        POLY_FT3* pOutputPrim = (POLY_FT3*)*currentModelInstanceArray8;
-        currentModelInstanceArray8++;
+        POLY_F3* pOutputPrim = (POLY_F3*)*currentModelInstanceDrawPrims;
+        currentModelInstanceDrawPrims++;
+        assert(outputPrimSize == 0x14);
+
+        std::vector<u8>::iterator pVertices1 = currentModelBlockVertices + READ_LE_U16(meshSubBlock) * 8;
+        std::vector<u8>::iterator pVertices2 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 2) * 8;
+        std::vector<u8>::iterator pVertices3 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 4) * 8;
+        meshSubBlock += 8;
+
+        gte_ldv3(pVertices1, pVertices2, pVertices3);
+        gte_rtpt();
+
+        int flagsTriangle0;
+        gte_stlzc(&flagsTriangle0);
+
+        sVec2_s16 xy0;
+        sVec2_s16 xy1;
+        sVec2_s16 xy2;
+        gte_stsxy3(&xy0, &xy1, &xy2);
+
+        if (flagsTriangle0 > 0)
+        {
+            gte_nclip(); // write the normal to mac0
+
+            int normalMagnitude;
+            gte_getMAC0(&normalMagnitude);
+
+            if (normalMagnitude > 0) // is first triangle facing screen
+            {
+                // TODO: this is not how the original code works, but this works for now
+
+                // X clip
+                if (std::min<int>(std::min<int>(xy0.vx, xy1.vx), xy2.vx) > screenClippingX)
+                    continue;
+                if (std::max<int>(std::max<int>(xy0.vx, xy1.vx), xy2.vx) < 0)
+                    continue;
+
+                // Y clip
+                if (std::min<int>(std::min<int>(xy0.vy, xy1.vy), xy2.vy) > (screenClippingY >> 16))
+                    continue;
+                if (std::max<int>(std::max<int>(xy0.vy, xy1.vy), xy2.vy) < 0)
+                    continue;
+
+                assert(outputStride == 4);
+                pOutputPrim->x0y0 = xy0;
+                pOutputPrim->x1y1 = xy1;
+                pOutputPrim->x2y2 = xy2;
+
+                int sz0, sz1, sz2, sz3;
+                gte_stsz4(&sz0, &sz1, &sz2, &sz3);
+
+                if (sz0 && sz1 && sz2 && sz3) {
+                    int polyz = std::max<int>(sz0, sz1);
+                    polyz = std::max<int>(sz2, polyz);
+                    polyz = std::max<int>(sz3, polyz);
+                    fieldPolyCount = fieldPolyCount + 1;
+                    assert(polyz);
+
+                    sTag* sDestTag = pOT[polyz >> (depthGranularity & 0x1f)].m0_pNext;
+                    pOT[polyz >> (depthGranularity & 0x1f)].m0_pNext = pOutputPrim;
+                    pOutputPrim->m0_pNext = sDestTag;
+                    assert(primSize == 4);
+                    pOutputPrim->m3_size = primSize;
+                }
+            }
+        }
+    }
+}
+
+void genericTrianglePrim_28(std::vector<u8>::iterator meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
+{
+    OTTable& pOT = *currentOTEntry;
+    int depthGranularity = gDepthDivider + 2;
+
+    for (int i = 0; i < count; i++)
+    {
+        POLY_FT4* pOutputPrim = (POLY_FT4*)*currentModelInstanceDrawPrims;
+        currentModelInstanceDrawPrims++;
+        assert(outputPrimSize == 0x14);
+
+        std::vector<u8>::iterator pVertices1 = currentModelBlockVertices + READ_LE_U16(meshSubBlock) * 8;
+        std::vector<u8>::iterator pVertices2 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 2) * 8;
+        std::vector<u8>::iterator pVertices3 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 4) * 8;
+        meshSubBlock += 8;
+
+        gte_ldv3(pVertices1, pVertices2, pVertices3);
+        gte_rtpt();
+
+        int flagsTriangle0;
+        gte_stlzc(&flagsTriangle0);
+
+        sVec2_s16 xy0;
+        sVec2_s16 xy1;
+        sVec2_s16 xy2;
+        gte_stsxy3(&xy0, &xy1, &xy2);
+
+        if (flagsTriangle0 > 0)
+        {
+            gte_nclip(); // write the normal to mac0
+
+            int normalMagnitude;
+            gte_getMAC0(&normalMagnitude);
+
+            if (normalMagnitude > 0) // is first triangle facing screen
+            {
+                // TODO: this is not how the original code works, but this works for now
+
+                // X clip
+                if (std::min<int>(std::min<int>(xy0.vx, xy1.vx), xy2.vx) > screenClippingX)
+                    continue;
+                if (std::max<int>(std::max<int>(xy0.vx, xy1.vx), xy2.vx) < 0)
+                    continue;
+
+                // Y clip
+                if (std::min<int>(std::min<int>(xy0.vy, xy1.vy), xy2.vy) > (screenClippingY >> 16))
+                    continue;
+                if (std::max<int>(std::max<int>(xy0.vy, xy1.vy), xy2.vy) < 0)
+                    continue;
+
+                assert(outputStride == 8);
+                pOutputPrim->x0y0 = xy0;
+                pOutputPrim->x1y1 = xy1;
+                pOutputPrim->x2y2 = xy2;
+
+                int sz0, sz1, sz2;
+                gte_stsz3(&sz0, &sz1, &sz2);
+
+                if (sz0 && sz1 && sz2) {
+                    int polyz = std::max<int>(sz0, sz1);
+                    polyz = std::max<int>(sz2, polyz);
+                    fieldPolyCount = fieldPolyCount + 1;
+                    assert(polyz);
+
+                    sTag* sDestTag = pOT[polyz >> (depthGranularity & 0x1f)].m0_pNext;
+                    pOT[polyz >> (depthGranularity & 0x1f)].m0_pNext = pOutputPrim;
+                    pOutputPrim->m0_pNext = sDestTag;
+                    assert(primSize == 7);
+                    pOutputPrim->m3_size = primSize;
+                }
+            }
+        }
+    }
+}
+
+void genericTrianglePrim_20(std::vector<u8>::iterator meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
+{
+    OTTable& pOT = *currentOTEntry;
+    int depthGranularity = gDepthDivider + 2;
+
+    for (int i = 0; i < count; i++)
+    {
+        POLY_FT3* pOutputPrim = (POLY_FT3*)*currentModelInstanceDrawPrims;
+        currentModelInstanceDrawPrims++;
         assert(outputPrimSize == 0x20);
 
         std::vector<u8>::iterator pVertices1 = currentModelBlockVertices + READ_LE_U16(meshSubBlock) * 8;
@@ -1084,7 +1292,7 @@ void genericTrianglePrim(std::vector<u8>::iterator meshSubBlock, int count, int 
 
 void prim5_0(std::vector<u8>::iterator meshSubBlock, int count)
 {
-    genericTrianglePrim(meshSubBlock, count, 0x20, 0x7, 0x8);
+    genericTrianglePrim_20(meshSubBlock, count, 0x20, 0x7, 0x8);
 }
 
 void prim5_2generic(std::vector<u8>::iterator meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
@@ -1094,8 +1302,8 @@ void prim5_2generic(std::vector<u8>::iterator meshSubBlock, int count, int outpu
 
     for (int i = 0; i < count; i++)
     {
-        POLY_FT3* pOutputPrim = (POLY_FT3*)*currentModelInstanceArray8;
-        currentModelInstanceArray8++;
+        POLY_FT3* pOutputPrim = (POLY_FT3*)*currentModelInstanceDrawPrims;
+        currentModelInstanceDrawPrims++;
         assert(outputPrimSize == 0x20);
 
         std::vector<u8>::iterator pVertices1 = currentModelBlockVertices + READ_LE_U16(meshSubBlock) * 8;
@@ -1162,6 +1370,16 @@ void prim5_2generic(std::vector<u8>::iterator meshSubBlock, int count, int outpu
     }
 }
 
+void prim3_0(std::vector<u8>::iterator meshSubBlock, int count)
+{
+    genericTrianglePrim_28(meshSubBlock, count, 0x28, 0x9, 0xc);
+}
+
+void prim4_0(std::vector<u8>::iterator meshSubBlock, int count)
+{
+    genericTrianglePrim_14(meshSubBlock, count, 0x14, 0x4, 4);
+}
+
 void prim5_2(std::vector<u8>::iterator meshSubBlock, int count)
 {
     prim5_2generic(meshSubBlock, count, 0x20, 0x7, 0x8);
@@ -1174,8 +1392,8 @@ void primD_2generic(std::vector<u8>::iterator meshSubBlock, int count, int outpu
 
     for (int i = 0; i < count; i++)
     {
-        POLY_FT4* pOutputPrim = (POLY_FT4*)*currentModelInstanceArray8;
-        currentModelInstanceArray8++;
+        POLY_FT4* pOutputPrim = (POLY_FT4*)*currentModelInstanceDrawPrims;
+        currentModelInstanceDrawPrims++;
         assert(outputPrimSize == 0x28);
 
         std::vector<u8>::iterator pVertices1 = currentModelBlockVertices + READ_LE_U16(meshSubBlock) * 8;
@@ -1271,8 +1489,8 @@ void primD_0generic(std::vector<u8>::iterator meshSubBlock, int count, int outpu
 
     for (int i = 0; i < count; i++)
     {
-        POLY_FT4* pOutputPrim = (POLY_FT4*)*currentModelInstanceArray8;
-        currentModelInstanceArray8++;
+        POLY_FT4* pOutputPrim = (POLY_FT4*)*currentModelInstanceDrawPrims;
+        currentModelInstanceDrawPrims++;
         assert(outputPrimSize == 0x28);
 
         std::vector<u8>::iterator pVertices1 = currentModelBlockVertices + READ_LE_U16(meshSubBlock) * 8;
@@ -1383,8 +1601,8 @@ int primD_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator 
         pNewPoly->u3 = READ_LE_U8(displayList + 10);
         pNewPoly->v3 = READ_LE_U8(displayList + 11);
 
-        *currentModelInstanceArray8 = pNewPoly;
-        currentModelInstanceArray8++;
+        *currentModelInstanceDrawPrims = pNewPoly;
+        currentModelInstanceDrawPrims++;
         return 1;
     }
     return 0;
@@ -1408,20 +1626,20 @@ struct sPolyTypeRenderDefinition
 };
 
 const std::array<sPolyTypeRenderDefinition, 17> polyRenderDefs = { {
-    {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	prim0_init,	8,	0x4,	0x04}, // 0x0
-    {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	prim1_init,	8,	0x8,	0x20}, // 0x1
+    {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	prim0_init,	8,	0x4,	0x04}, // 0x0 POLY_FT3 with light
+    {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	prim1_init,	8,	0x8,	0x20}, // 0x1 POLY_FT3
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x4,	0x1C}, // 0x2
-    {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x8,	0x28}, // 0x3
-    {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	prim4_init,	8,	0x4,	0x14}, // 0x4
-    {	prim5_0,	nullptr,	prim5_2,	nullptr,	nullptr,	nullptr,	prim5_init,	8,	0x8,	0x20}, // 0x5
+    {	prim3_0,	nullptr,	nullptr,	nullptr,	prim3_0,	prim3_0,	prim3_init,	8,	0x8,	0x28}, // 0x3 POLY_GT3
+    {	prim4_0,	prim4_0,	nullptr,	nullptr,	prim4_0,	prim4_0,	prim4_init,	8,	0x4,	0x14}, // 0x4 POLY_F3
+    {	prim5_0,	nullptr,	prim5_2,	nullptr,	nullptr,	nullptr,	prim5_init,	8,	0x8,	0x20}, // 0x5 POLY_FT3
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x4,	0x1C}, // 0x6
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x8,	0x28}, // 0x7
-    {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	prim8_init,	8,	0x4,	0x18}, // 0x8
-    {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	prim9_init,	8,	0xC,	0x28}, // 0x9
+    {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	prim8_init,	8,	0x4,	0x18}, // 0x8 POLY_F4
+    {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	prim9_init,	8,	0xC,	0x28}, // 0x9 POLY_FT4
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x4,	0x24}, // 0xA
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0xC,	0x34}, // 0xB
-    {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	primC_init,	8,	0x4,	0x18}, // 0xC
-    {	primD_0,	nullptr,	primD_2,	nullptr,	nullptr,	nullptr,	primD_init,	8,	0xC,	0x28}, // 0xD
+    {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	primC_init,	8,	0x4,	0x18}, // 0xC POLY_F4
+    {	primD_0,	nullptr,	primD_2,	nullptr,	nullptr,	nullptr,	primD_init,	8,	0xC,	0x28}, // 0xD POLY_FT4
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x4,	0x24}, // 0xE
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0xC,	0x34}, // 0xF
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x4,	0x20}, // 0x10
@@ -1440,7 +1658,7 @@ void* initModelDynamicVertices(sModelBlock* pModelBlock)
 
 void initModel2(sModelBlock* pModelBlock, std::vector<sTag*>& outputBuffer, int param_3)
 {
-    currentModelInstanceArray8 = outputBuffer.begin();
+    currentModelInstanceDrawPrims = outputBuffer.begin();
 
     if ((((pModelBlock->m0_flags & 1) == 0) && (pModelBlock->m30 != 0)) && (param_3 != 0)) {
         traceNextAlloc(0x26);
@@ -3018,6 +3236,12 @@ void initFieldData()
     allocateShapeTransfert(0x3c00);
 
     MissingCode();
+
+    initMechaFieldArgs2(mechaFieldArgs2[1], 0x800, 0, 0, 0x800, 0, 0, 0x800, 0, 0);
+    initMechaFieldArgs2(mechaFieldArgs2[0], 0x1f8, -0xfc1, -0x1f8, 0, 0, 0, 0, 0, 0);
+    mechaBackColor[2] = 0x1e;
+    mechaBackColor[1] = 0x1e;
+    mechaBackColor[0] = 0x1e;
 
     OPX_80Params[2] = 0x140;
     OPX_80Params[7] = 0;
@@ -6160,11 +6384,12 @@ bool submitModelForRendering(sModelBlock* param_1, std::vector<sTag*>& param_2, 
         return 0;
     }
 
-    currentModeBlock18 = param_1->m18.begin();
+    if(param_1->m18.size())
+        currentModeBlock18 = param_1->m18.begin();
     currentModelBlockNormals = param_1->m_model->mRawData.begin() + param_1->mC_offsetNormals;
     currentModelBlockVertices = param_1->m_model->mRawData.begin() + param_1->m8_offsetVertices;
     fieldPolyCount2 += param_1->m4_numPrims;
-    currentModelInstanceArray8 = param_2.begin();
+    currentModelInstanceDrawPrims = param_2.begin();
     currentOTEntry = &OT;
 
     int numMeshBlockLeft = param_1->m6_numMeshBlock;
@@ -6201,7 +6426,7 @@ bool submitModelForRendering(sModelBlock* param_1, std::vector<sTag*>& param_2, 
         }
         else
         {
-            currentModelInstanceArray8 += READ_LE_U16(currentModelBlockSubBlocks + 2);
+            currentModelInstanceDrawPrims += READ_LE_U16(currentModelBlockSubBlocks + 2);
         }
         currentModelBlockSubBlocks = g_currentModelBlockSubBlocks + READ_LE_U16(currentModelBlockSubBlocks + 2) * polyRenderDefs[primType].m1C_size;
     }
@@ -7330,6 +7555,8 @@ void updateAndRenderField()
     renderParticles();
     MissingCode();
     updateAndRenderScreenDistortion();
+    MissingCode();
+    renderMechasInField();
     MissingCode();
     DrawSync(0);
     stepDialogWindows();

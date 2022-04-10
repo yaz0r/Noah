@@ -378,3 +378,5 @@ void initModel3(int, int);
 int fieldModelRelocation(std::vector<u8>::iterator pModelData);
 void initModel1(sModelBlock& pModelBlock, std::vector<sTag*>& outputBuffer1, std::vector<sTag*>& outputBuffer2);
 void initModel2(sModelBlock* pModelBlock, std::vector<sTag*>& outputBuffer, int param_3);
+
+bool submitModelForRendering(sModelBlock* param_1, std::vector<sTag*>& param_2, OTTable& OT, int renderMode);

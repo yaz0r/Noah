@@ -509,7 +509,7 @@ void sModelBlock::buildDrawcall(int viewIndex)
             break;
         }
 
-        case 0x28: { // quad with texture
+        case 0x28: { // quad with color
             renderQuadWithColor(viewIndex, mesh_blocks, displaylist, vertices, cmd);
 
             mesh_blocks += 8;
