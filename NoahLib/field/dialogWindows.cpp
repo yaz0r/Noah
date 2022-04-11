@@ -528,7 +528,7 @@ void createDialogWindow(short x, short y, int dialogIndex, int windowIndex, int 
 		gDialogWindows[windowIndex].m424[0] = -gDialogWindows[windowIndex].m41C[0];
 		gDialogWindows[windowIndex].m424[1] = -gDialogWindows[windowIndex].m41C[1];
 	}
-	if ((((actorArray[actorId].m4C_scriptEntity)->m4_flags & 0x200) != 0) && ((flagUpper & 1) == 0)) {
+	if ((((actorArray[actorId].m4C_scriptEntity)->m4_flags.m_rawFlags & 0x200) != 0) && ((flagUpper & 1) == 0)) {
 		gDialogWindows[windowIndex].m414 = 0;
 	}
 }

@@ -226,6 +226,7 @@ void OPX_95();
 void OP_CREATE_PARTICLE_EFFECT_FOR_CURRENT_ACTOR();
 void OPX_97();
 void OPX_98();
+void OPX_99();
 void OPX_9A();
 void OP_TOGGLE_FRAME_LOCK();
 void OP_ASSIGN_GEAR();

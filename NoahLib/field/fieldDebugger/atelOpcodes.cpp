@@ -1046,6 +1046,31 @@ void initExtendedOpcodeTable()
 		.addArgumentU16OrVar()
 		.end();
 
+    m_extendedOpcode[0x3D]
+        .setName("SET_MECHA_MATRIX_ELEMENTS_0")
+        .addArgumentS16OrVar(0x80)
+        .addArgumentS16OrVar(0x40)
+        .addArgumentS16OrVar(0x20)
+        .addArgumentS16OrVar(0x10)
+        .addSignControlByte()
+        .end();
+
+    m_extendedOpcode[0x3E]
+        .setName("SET_MECHA_MATRIX_ELEMENTS_1")
+        .addArgumentS16OrVar(0x80)
+        .addArgumentS16OrVar(0x40)
+        .addArgumentS16OrVar(0x20)
+        .addArgumentS16OrVar(0x10)
+        .addSignControlByte()
+        .end();
+
+    m_extendedOpcode[0x3F]
+        .setName("SETUP_MECHA_BACK_COLOR")
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .end();
+
 	m_extendedOpcode[0x41]
 		.setName("SET_ON_GEAR")
 		.addArgumentU16OrVar()
@@ -1061,6 +1086,10 @@ void initExtendedOpcodeTable()
 		.setComment("Set field mE6 of current entity")
 		.addArgumentByte()
 		.end();
+
+    m_extendedOpcode[0x47]
+        .addArgumentU16OrVar()
+        .end();
 
 	m_extendedOpcode[0x4A]
 		.setName("LOAD_SPECIAL_2D_ANIMATION")
@@ -1129,6 +1158,12 @@ void initExtendedOpcodeTable()
 	m_extendedOpcode[0x5A]
 		.addArgumentU16OrVar()
 		.end();
+
+    m_extendedOpcode[0x5D]
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .end();
 
     // opcode 0xFE57 is dynamic
 

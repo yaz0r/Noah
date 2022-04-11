@@ -12,7 +12,7 @@ int initFieldVar4 = 0;
 int initFieldVar5 = 0;
 int loadVramSpriteParam = 0;
 
-sSpriteActor* spriteTransfertListHead = nullptr;
+sSpriteActorCore* spriteTransfertListHead = nullptr;
 sFieldEntitySub4_110 sFieldEntitySub4_110_8005a474;
 sFieldEntitySub4_110 sFieldEntitySub4_110_8006be10;
 
@@ -21,7 +21,7 @@ void OP_21_sub(sSpriteActor* param_1, int param_2)
 	param_1->mAC = param_1->mAC & 0xfff8007f | (param_2 & 0xfff) << 7;
 }
 
-void OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1Sub1(sSpriteActor* param_1)
+void resetPerSubgroupTransforms(sSpriteActorCore* param_1)
 {
 	for (int i=0; i<8; i++)
 	{
@@ -33,7 +33,7 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1Sub1(sSpriteActor* param_1)
 	}
 }
 
-void executeSpriteBytecode2Sub0Sub0sub0(sSpriteActor* param_1, int param_2, sFieldEntitySub4_110* param_3)
+void executeSpriteBytecode2Sub0Sub0sub0(sSpriteActorCore* param_1, int param_2, sFieldEntitySub4_110* param_3)
 {
 	sPS1Pointer psVar4 = param_3->m0 + READ_LE_U16(param_3->m0 + param_2 * 2);
 	u32 bVar1 = READ_LE_U8(psVar4);
@@ -58,7 +58,7 @@ void executeSpriteBytecode2Sub0Sub0sub0(sSpriteActor* param_1, int param_2, sFie
 					u32 uVar6 = bVar2 & 7;
 					if (param_1->m20->m34_perSubgroupTransform == nullptr) {
 						param_1->m20->m34_perSubgroupTransform = new std::array<sFieldEntitySub4_124, 8>;
-						OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1Sub1(param_1);
+						resetPerSubgroupTransforms(param_1);
 					}
 					if ((bVar2 & 0x20) != 0) {
 						(*param_1->m20->m34_perSubgroupTransform)[uVar6].m0_translateX = READ_LE_U8(pbVar5);
@@ -84,7 +84,7 @@ void executeSpriteBytecode2Sub0Sub0sub0(sSpriteActor* param_1, int param_2, sFie
 	}
 }
 
-void executeSpriteBytecode2Sub0Sub0(sSpriteActor* param_1, int param_2, sFieldEntitySub4_110* param_3)
+void executeSpriteBytecode2Sub0Sub0(sSpriteActorCore* param_1, int param_2, sFieldEntitySub4_110* param_3)
 {
 	sPS1Pointer puVar4 = param_3->m0;
 	if (param_2 < (int)((READ_LE_U16(puVar4) & 0x1ff) + 1)) {
@@ -110,7 +110,7 @@ void executeSpriteBytecode2Sub0Sub0(sSpriteActor* param_1, int param_2, sFieldEn
 						else {
 							if (param_1->m20->m34_perSubgroupTransform == nullptr) {
 								param_1->m20->m34_perSubgroupTransform = new std::array<sFieldEntitySub4_124, 8>;
-								OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1Sub1(param_1);
+								resetPerSubgroupTransforms(param_1);
 							}
 							u32 uVar4 = bVar2 & 7;
 							if ((bVar2 & 0x20) != 0) {
@@ -143,17 +143,23 @@ void executeSpriteBytecode2Sub0Sub0(sSpriteActor* param_1, int param_2, sFieldEn
 	}
 }
 
-void executeSpriteBytecode2Sub0(sSpriteActor* param_1, short param_2)
+void addToSpriteTransferList(sSpriteActorCore* param_1, short param_2)
 {
 	if ((param_1->m3C & 3) == 1) {
-		if (((param_1->m40 >> 0x14 & 1) != 0) && (param_1->m40 = param_1->m40 & 0xffefffff, param_1->m20->m34_perSubgroupTransform != nullptr)) {
-			OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1Sub1(param_1);
-		}
-		sSpriteActor* psVar2 = spriteTransfertListHead;
-		sSpriteActor* psVar1 = spriteTransfertListHead;
-		if ((param_1->m40 >> 0x11 & 1) != 0) {
-			while (psVar1 != nullptr) {
-				if (psVar1 == param_1) {
+        if (param_1->m40 & 0x00100000) {
+            param_1->m40 &= ~0x00100000;
+            if (param_1->m20->m34_perSubgroupTransform != nullptr) {
+                resetPerSubgroupTransforms(param_1);
+            }
+        }
+
+        // if already in shape transfer list
+		if (param_1->m40 & 0x20000) {
+            sSpriteActorCore* pCurrentHead = spriteTransfertListHead;
+
+            // find it in the list
+			while (pCurrentHead != nullptr) {
+				if (pCurrentHead == param_1) {
 					sFieldEntitySub4_110* psVar3 = param_1->m24;
 					if (((psVar3 != &sFieldEntitySub4_110_8005a474) && (psVar3 != &sFieldEntitySub4_110_8006be10)) && ((param_1->m40 >> 0x13 & 1) == 0)) {
 						executeSpriteBytecode2Sub0Sub0(param_1, param_1->m34, psVar3);
@@ -161,20 +167,20 @@ void executeSpriteBytecode2Sub0(sSpriteActor* param_1, short param_2)
 					param_1->m34 = param_2;
 					return;
 				}
-				psVar1 = psVar1->m20->m38;
+				pCurrentHead = pCurrentHead->m20->m38_pNext;
 			}
 		}
 		param_1->m34 = param_2;
-		spriteTransfertListHead = param_1;
-		param_1->m40 = param_1->m40 | 0x20000;
-		param_1->m20->m38 = psVar2;
+		param_1->m40 |= 0x20000;
+		param_1->m20->m38_pNext = spriteTransfertListHead;
+        spriteTransfertListHead = param_1;
 	}
 	else {
 		param_1->m34 = 0;
 	}
 }
 
-void executeSpriteBytecode2Sub1(sSpriteActor* param_1)
+void executeSpriteBytecode2Sub1(sSpriteActorCore* param_1)
 {
 	ushort uVar1;
 
@@ -190,23 +196,338 @@ void executeSpriteBytecode2Sub1(sSpriteActor* param_1)
 		param_1->mAC |= 8;
 	}
 	param_1->m3C = param_1->m3C & ~8 | (param_1->mAC >> 3 & 1 ^ param_1->mAC >> 2 & 1) << 3;
-	executeSpriteBytecode2Sub0(param_1, uVar1 & 0x1ff);
+	addToSpriteTransferList(param_1, uVar1 & 0x1ff);
 	return;
 }
 
-void pushByteOnAnimationStack(sSpriteActor* param_1, u8 param)
+void pushByteOnAnimationStack(sSpriteActorCore* param_1, u8 param)
 {
 	param_1->m8E_stack[--param_1->m8C_stackPosition].asU8 = param;
 }
 
-sSpriteActor* spriteBytecode2ExtendedE0(sSpriteActor* param_1, sPS1Pointer param_2, sFieldEntitySub4_110* param_3)
+u8 spriteBytecode2ExtendedE0_Var0 = 0;
+
+u16 getSavePointCreationMode1(sPS1Pointer param_1)
 {
-	//assert(0);
-	MissingCode();
-	return nullptr;
+    u16 uVar1;
+
+    uVar1 = READ_LE_U16(param_1) >> 8 & 7;
+    if ((READ_LE_U16(param_1) >> 0xe & 1) != 0) {
+        uVar1 = uVar1 + 8;
+    }
+    return uVar1;
 }
 
-void updateAllSubsprites(sSpriteActor* param_1)
+u32 getModeForSavePointMesh(u32 param_1)
+{
+    switch (param_1) {
+    default:
+        return 1;
+        break;
+    case 1:
+    case 4:
+    case 8:
+    case 9:
+        return 0;
+        break;
+    case 2:
+    case 7:
+    case 0xf:
+        return 2;
+    }
+}
+
+void allocateSavePointMeshDataSub0_callback(sSavePointMesh_1C* param_1)
+{
+    assert(0);
+}
+
+u32 registerSpriteCallback2Counter2 = 0;
+u32 allocateSavePointMeshDataSub0_var0 = 0;
+u32 allocateSavePointMeshDataSub0_var1 = 0;
+void allocateSavePointMeshDataSub0(sSavePointMesh* param_1, sSavePointMesh_1C* param_2)
+{
+    param_2->m0_owner = param_1;
+    param_2->mC = allocateSavePointMeshDataSub0_callback;
+    param_2->m8 = 0;
+    param_2->m18_pNext = spriteCallback2Var2;
+    spriteCallback2Var2 = param_2;
+    param_2->m14 = param_1->m0.m10 & 0x1fffffff;
+    param_2->m10 = param_2->m10 & 0xe0000000 | (registerSpriteCallback2Counter2 & 0x1fffffff);
+    registerSpriteCallback2Counter2++;
+
+    if (spriteBytecode2ExtendedE0_Var0 == 0) {
+        param_2->m14 &= ~0x80000000;
+    }
+    else {
+        allocateSavePointMeshDataSub0_var0++;
+        param_2->m14 |= 0x80000000;
+    }
+    allocateSavePointMeshDataSub0_var1++;
+}
+
+sSavePointMesh_1C* spriteCallback2Head = nullptr;
+u32 registerSpriteCallback2Counter = 0;
+
+void registerSpriteCallback2Sub0(sSavePointMesh_1C* param_1) {
+    assert(0);
+}
+
+
+void registerSpriteCallback2(sSavePointMesh* param_1, sSavePointMesh_1C* param_2) {
+    param_2->m0_owner = param_1;
+    param_2->m10 = param_2->m10 & 0xe0000000 | (registerSpriteCallback2Counter2 & 0x1fffffff);
+    registerSpriteCallback2Counter2 = registerSpriteCallback2Counter2 + 1;
+    param_2->m18_pNext = spriteCallback2Head;
+    spriteCallback2Head = param_2;
+    param_2->m8 = nullptr;
+    param_2->mC = registerSpriteCallback2Sub0;
+    registerSpriteCallback2Counter = registerSpriteCallback2Counter + 1;
+    param_2->m14 = param_1->m0.m10 & 0x1fffffff;
+}
+
+void regCallback8(sSavePointMesh_1C* param_1, void (*param_2)(sSavePointMesh_1C*))
+{
+    param_1->m8 = param_2;
+}
+
+void regCallbackC(sSavePointMesh_1C* param_1, void (*param_2)(sSavePointMesh_1C*))
+{
+    param_1->mC = param_2;
+}
+
+void savePointCallback8(sSavePointMesh_1C* param_1) {
+    //OP_INIT_ENTITY_SCRIPT_sub0Sub9(param_1->m4);
+    MissingCode();
+
+    param_1->mC(param_1);
+}
+
+void savePointCallbackC(sSavePointMesh_1C* param_1) {
+    MissingCode();
+    registerSpriteCallback2Sub0(param_1 + 1);
+}
+
+void initFieldEntitySub4Sub1(sSpriteActorCore* param_1)
+{
+    param_1->m3C = 0;
+    param_1->m28_colorAndCode.m3_code = 0x2d;
+    param_1->m40 = 0;
+    param_1->m3A = 0;
+    param_1->m30 = 0;
+    param_1->m32 = 0;
+    param_1->m34 = 0;
+    param_1->mA8.clear();
+    param_1->m3C = param_1->m3C & 0xfe00ffe3;
+    param_1->m40 = param_1->m40 & 0xfffe0003;
+    param_1->mAC = 0;
+    param_1->mB0 = 0;
+    int iVar1 = (fieldDrawEnvsInitialized + 1) * (fieldDrawEnvsInitialized + 1) * 0x4000 * param_1->m82;
+    param_1->mAC = param_1->mAC & 0xfff8007f | 0x8000;
+    param_1->mA8.mx11 = 0;
+    if (iVar1 < 0) {
+        iVar1 = iVar1 + 0xfff;
+    }
+    param_1->m1C = iVar1 >> 0xc;
+    param_1->m64_spriteByteCode.makeNull();
+    param_1->m70 = 0;
+    param_1->m44_currentAnimationBundle = 0;
+    param_1->m68 = 0;
+    param_1->m80 = 0;
+    param_1->m8C_stackPosition = 0x10;
+    param_1->m84 = 0;
+    param_1->m6C_pointerToOwnerStructure = nullptr;
+    param_1->m50 = 0;
+}
+
+sSavePointMesh* allocateSavePointMeshData(sSavePointMesh* param_1, int param_2)
+{
+    sSavePointMesh* pvVar1 = new sSavePointMesh;
+    allocateSavePointMeshDataSub0(param_1, &pvVar1->m0);
+    registerSpriteCallback2(pvVar1, &pvVar1->m1C);
+
+    initFieldEntitySub4Sub1(&pvVar1->m38_spriteActorData.m0_spriteActorCore);
+
+    pvVar1->m0.m4 = &pvVar1->m38_spriteActorData.m0_spriteActorCore;
+    pvVar1->m1C.m4 = &pvVar1->m38_spriteActorData.m0_spriteActorCore;
+
+    regCallback8(&pvVar1->m0, savePointCallback8);
+    regCallbackC(&pvVar1->m0, savePointCallbackC);
+
+    return pvVar1;
+}
+
+void initsFieldEntitySub4_B4(sFieldEntitySub4_B4* pThis)
+{
+    pThis->m0_rotation.vx = 0;
+    pThis->m0_rotation.vy = 0;
+    pThis->m0_rotation.vz = 0;
+    pThis->m2C = nullptr;
+}
+
+void createSavePointMeshDataMode1(sSavePointMesh_data* param_1)
+{
+    (param_1->m0_spriteActorCore).m20 = &param_1->mB4;
+    initsFieldEntitySub4_B4(&param_1->mB4);
+    ((param_1->m0_spriteActorCore).m20)->m30 = &param_1->mF4;
+    ((param_1->m0_spriteActorCore).m20)->m34_perSubgroupTransform = nullptr;
+    ((param_1->m0_spriteActorCore).m20)->m38_pNext = nullptr;
+}
+
+int initFieldEntitySub4Sub4(const sPS1Pointer& param_1)
+{
+    return (READ_LE_U16(param_1) >> 9) & 0x3F;
+}
+
+sSavePointMesh* createSavePointMeshData(int mode1, int mode2, sFieldEntitySub4_110* param_3, int param_4, sSavePointMesh* param_5)
+{
+    sSavePointMesh* pNewSavePoint = nullptr;
+    switch (mode2) {
+    case 1:
+        if (mode1 == 5) {
+            assert(0);
+        }
+        if (mode1 == 6) {
+            assert(0);
+        }
+        {
+            int numF4 = initFieldEntitySub4Sub4(param_3->m0) - 1;
+            pNewSavePoint = allocateSavePointMeshData(param_5, ((numF4) * 0x18) + 0x58 + param_4);
+            pNewSavePoint->m38_spriteActorData.mF4.resize(numF4);
+            createSavePointMeshDataMode1(&pNewSavePoint->m38_spriteActorData);
+            break;
+        }
+    default:
+        assert(0);
+    }
+
+    pNewSavePoint->m38_spriteActorData.m0_spriteActorCore.m6C_pointerToOwnerStructure = pNewSavePoint;
+    pNewSavePoint->m38_spriteActorData.m0_spriteActorCore.m86_thisSize = 0xCAFECAFE;
+    pNewSavePoint->m38_spriteActorData.m0_spriteActorCore.m24 = param_3;
+
+    return pNewSavePoint;
+}
+
+void spriteBytecode2ExtendedE0_Sub0Sub0Sub0(sSavePointMesh_1C* param_1, void (*param_2)(sSavePointMesh_1C*))
+{
+    param_1->m8 = param_2;
+    return;
+}
+
+void spriteCallback_render0(sSavePointMesh_1C* param_1) {
+    assert(0);
+}
+
+const std::vector<void (*)(sSavePointMesh_1C*)> spriteBytecode2ExtendedE0_Sub0Sub0_callback = { {
+        spriteCallback_render0,
+} };
+
+void spriteBytecode2ExtendedE0_Sub0Sub0(sSavePointMesh_1C* param_1, int param_2)
+{
+    spriteBytecode2ExtendedE0_Sub0Sub0Sub0(param_1, spriteBytecode2ExtendedE0_Sub0Sub0_callback[param_2]);
+    return;
+}
+
+void spriteBytecode2ExtendedE0_Sub0(sSavePointMesh* param_1)
+{
+    u32 mode = (param_1->m38_spriteActorData).m0_spriteActorCore.m40 >> 0xd & 0xf;
+    switch (mode)
+    {
+    case 0:
+        break;
+    default:
+        assert(0);
+        break;
+    }
+    spriteBytecode2ExtendedE0_Sub0Sub0(&param_1->m1C, mode);
+}
+
+void spriteBytecode2ExtendedE0(sSpriteActorCore* param_1, sPS1Pointer param_2, sFieldEntitySub4_110* param_3)
+{
+    u8 oldSpriteBytecode2ExtendedE0_Var0 = spriteBytecode2ExtendedE0_Var0;
+    u32 b0_flag = param_1->mB0;
+    param_1->mB0 = b0_flag | 0x800;
+    if ((b0_flag & 0x100) != 0) {
+        spriteBytecode2ExtendedE0_Var0 = 0;
+    }
+    u32 savePointCreationMode1 = getSavePointCreationMode1(param_2);
+    if (savePointCreationMode1 == 3) {
+        savePointCreationMode1 = param_1->m40 >> 0xd & 0xf;
+    }
+    u32 savePointCreationMode2 = getModeForSavePointMesh(savePointCreationMode1);
+
+    sSavePointMesh* pSavePointMesh = createSavePointMeshData(savePointCreationMode1, savePointCreationMode2, param_3, 0, (sSavePointMesh*)param_1->m6C_pointerToOwnerStructure);
+    pSavePointMesh->m0.m14 |= 0x20000000;
+
+    (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m40 = (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m40 & 0xfffe1fff | (savePointCreationMode1 & 0xf) << 0xd;
+    (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m3C = (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m3C & 0xfffffffc | savePointCreationMode2 & 3;
+
+    (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m40 = (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m40 & 0xfffe00ff | (savePointCreationMode1 & 0xf) << 0xd | param_1->m40 & 0x1f00;
+    (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m3C = (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m3C & 0xfffffff7 | param_1->m3C & 8;
+
+
+    (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m3C = (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m3C & 0xffffffe7 | param_1->m3C & 8 | param_1->m3C & 0x10;
+    (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m3C = (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m3C & 0xffff00ff | param_1->m3C & 0xFF00;
+
+    (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m40 = (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m40 & 0xfffbffff | param_1->m40 & 0x40000;
+
+    (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m3C = (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m3C & 0xfffffffb | 0x4000000;
+    (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m18_moveSpeed = param_1->m18_moveSpeed;
+    (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m32 = param_1->m32;
+    (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m2C_scale = param_1->m2C_scale;
+    (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m34 = param_1->m34;
+    savePointCreationMode1 = (uint)param_1->mB0 >> 9 & 1;
+    (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.mB0 = (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.mB0 & 0xfffffdff | savePointCreationMode1 << 9;
+
+    if (savePointCreationMode1 != 0) {
+        (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m3A = param_1->m3A;
+        (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m40 = (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m40 & 0xffffe0ff | 0x300;
+    }
+
+    (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.mA8.mx1E = param_1->mA8.mx1E;
+    (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.mAC = (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.mAC & 0xfffffffc | param_1->mAC & 3;
+    (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.mB0 = (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.mB0 & 0xfffffeffU | param_1->mB0 & 0x100U;
+    (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.mAC = (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.mAC & 0xffffffbf | param_1->mAC & 0x40;
+    (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.mAC = (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.mAC & 0xfff8003f | param_1->mAC & 0x40 | param_1->mAC & 0x7ff80;
+    (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.mA8.mx0 = 0;
+    (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.mAC = (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.mAC & 0xfff8003b | param_1->mAC & 0x40 | param_1->mAC & 0x7ff80 | param_1->mAC & 4;
+
+    if (((uint)param_1->mA8.mx0) == 0) {
+        (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m7C = param_1->m7C;
+    }
+    else {
+        (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m7C = (sFieldEntitySub4_F4*)0x0;
+    }
+
+    (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m70 = (int)param_1;
+    (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m44_currentAnimationBundle = param_1->m44_currentAnimationBundle;
+    (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m48_defaultAnimationbundle = param_1->m48_defaultAnimationbundle;
+    (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m74 = param_1->m74;
+    (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m82 = param_1->m82;
+    (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m50 = param_1->m50;
+    (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m8D = (param_1->mAC >> 24) & 0xFF;
+    (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m78 = param_1->m78;
+    (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m0_position.vx = param_1->m0_position.vx;
+    (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m0_position.vy = param_1->m0_position.vy;
+    (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m0_position.vz = param_1->m0_position.vz;
+    (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.mC_step.vx = param_1->mC_step.vx;
+    (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.mC_step.vy = param_1->mC_step.vy;
+    (pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.mC_step.vz = param_1->mC_step.vz;
+    if (savePointCreationMode2 != 0) {
+        ((pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m20)->m0_rotation[0] = (param_1->m20)->m0_rotation[0];
+        ((pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m20)->m0_rotation[1] = (param_1->m20)->m0_rotation[1];
+        ((pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m20)->m0_rotation[2] = (param_1->m20)->m0_rotation[2];
+        ((pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m20)->m6_scale[0] = (param_1->m20)->m6_scale[0];
+        ((pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m20)->m6_scale[1] = (param_1->m20)->m6_scale[1];
+        ((pSavePointMesh->m38_spriteActorData).m0_spriteActorCore.m20)->m6_scale[2] = (param_1->m20)->m6_scale[2];
+    }
+
+    setCurrentAnimationPtr(&pSavePointMesh->m38_spriteActorData.m0_spriteActorCore, param_2);
+    spriteBytecode2ExtendedE0_Sub0(pSavePointMesh);
+    spriteBytecode2ExtendedE0_Var0 = oldSpriteBytecode2ExtendedE0_Var0;	
+}
+
+void updateAllSubsprites(sSpriteActorCore* param_1)
 {
 	if ((param_1->m3C & 3) == 1) {
 		int blendMode = param_1->m3C >> 5 & 7;
@@ -227,7 +548,7 @@ void updateAllSubsprites(sSpriteActor* param_1)
 	}
 }
 
-void computeStepFromMoveSpeed(sSpriteActor* param1)
+void computeStepFromMoveSpeed(sSpriteActorCore* param1)
 {
 	int iVar1;
 	int iVar2;
@@ -253,7 +574,7 @@ sStackElement* executeSpriteBytecode2Sub3(sSpriteActor* param_1, sPS1Pointer par
 	return nullptr;
 }
 
-void executeSpriteBytecode2Extended(sSpriteActor* param_1, int bytecode, sPS1Pointer param_3)
+void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS1Pointer param_3)
 {
 	switch (bytecode & 0xff) {
 	case 0x84:
@@ -439,19 +760,19 @@ const std::array<u8, 256> sizePerBytecodeTable = {
 	0x4, 0x4, 0x4, 0x4,
 };
 
-u8 popByteFromAnimationStack(sSpriteActor* param_1)
+u8 popByteFromAnimationStack(sSpriteActorCore* param_1)
 {
 	return param_1->m8E_stack[param_1->m8C_stackPosition++].asU8;
 }
 
-void pushBytecodePointerOnAnimationStack(sSpriteActor* param_1, sPS1Pointer param_2)
+void pushBytecodePointerOnAnimationStack(sSpriteActorCore* param_1, sPS1Pointer param_2)
 {
 	param_1->m8E_stack[--param_1->m8C_stackPosition].asPs1Pointer = param_2;
 }
 
 int spriteCallback2Var0 = 0;
 
-void executeSpriteBytecode2(sSpriteActor* param_1)
+void executeSpriteBytecode2(sSpriteActorCore* param_1)
 {
 	if (isBattleOverlayLoaded != '\0') {
 		assert(0);
@@ -476,7 +797,7 @@ void executeSpriteBytecode2(sSpriteActor* param_1)
 
 			if (bytecode < 0x10)
 			{
-				executeSpriteBytecode2Sub0(param_1, param_1->m34 + 1);
+				addToSpriteTransferList(param_1, param_1->m34 + 1);
 				waitDelay = (bytecode & 0xf) + 1;
 			}
 			else if (bytecode < 0x20)
@@ -625,7 +946,7 @@ void executeSpriteBytecode2(sSpriteActor* param_1)
 	} while (1);
 }
 
-void OP_INIT_ENTITY_SCRIPT_sub0Sub9(sSpriteActor* param_1)
+void OP_INIT_ENTITY_SCRIPT_sub0Sub9(sSpriteActorCore* param_1)
 {
 	short sVar1;
 	int iVar2;
@@ -643,7 +964,7 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub9(sSpriteActor* param_1)
 	return;
 }
 
-void setupSpriteObjectMatrix(sSpriteActor* param_1)
+void setupSpriteObjectMatrix(sSpriteActorCore* param_1)
 
 {
 	if ((param_1->m40 & 1) == 0) {
@@ -691,7 +1012,7 @@ void setupSpriteObjectMatrix(sSpriteActor* param_1)
 	}
 }
 
-void initFieldEntitySub4Sub3(sSpriteActor* param_1, int param_2)
+void initFieldEntitySub4Sub3(sSpriteActorCore* param_1, int param_2)
 {
 	sFieldEntitySub4_B4* psVar1;
 
@@ -710,7 +1031,7 @@ void initFieldEntitySub4Sub3(sSpriteActor* param_1, int param_2)
 //u16 m2: offset to byte code
 //u16 m4: offset to?
 
-void setCurrentAnimationPtr(sSpriteActor* param_1, const sPS1Pointer startOfAnimation)
+void setCurrentAnimationPtr(sSpriteActorCore* param_1, const sPS1Pointer startOfAnimation)
 {
 	uint uVar1;
 	sFieldEntitySub4_B4* psVar2;
@@ -782,7 +1103,7 @@ void setCurrentAnimationPtr(sSpriteActor* param_1, const sPS1Pointer startOfAnim
 			param_1->m20->m3D = 0;
 			param_1->m20->m3C = 0;
 			if (((param_1->m40 >> 0x14 & 1) == 0) && (param_1->m20->m34_perSubgroupTransform != nullptr)) {
-				OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1Sub1(param_1);
+				resetPerSubgroupTransforms(param_1);
 			}
 		}
 	}
@@ -802,7 +1123,7 @@ void setCurrentAnimationPtr(sSpriteActor* param_1, const sPS1Pointer startOfAnim
 	return;
 }
 
-void executeSpriteBytecode(sSpriteActor* param_1, sPS1Pointer param_2, uint param_3)
+void executeSpriteBytecode(sSpriteActorCore* param_1, sPS1Pointer param_2, uint param_3)
 {
 	int unaff_s3;
 
@@ -819,7 +1140,7 @@ void executeSpriteBytecode(sSpriteActor* param_1, sPS1Pointer param_2, uint para
 			param_1->m64_spriteByteCode = pBytecode + 1;
 			if (bytecode < 0x10)
 			{
-				executeSpriteBytecode2Sub0(param_1, param_1->m34 + 1);
+				addToSpriteTransferList(param_1, param_1->m34 + 1);
 				unaff_s3 = (bytecode & 0xf) + 1;
 			}
 			else if (bytecode < 0x20)
@@ -830,7 +1151,7 @@ void executeSpriteBytecode(sSpriteActor* param_1, sPS1Pointer param_2, uint para
 			}
 			else if (bytecode < 0x30)
 			{
-				executeSpriteBytecode2Sub0(param_1, param_1->m34 - 1);
+				addToSpriteTransferList(param_1, param_1->m34 - 1);
 				unaff_s3 = (bytecode & 0xf) + 1;
 			}
 
@@ -877,7 +1198,7 @@ void executeSpriteBytecode(sSpriteActor* param_1, sPS1Pointer param_2, uint para
 	}
 }
 
-void setSpriteActorAngle(sSpriteActor* param_1, short angle)
+void setSpriteActorAngle(sSpriteActorCore* param_1, short angle)
 {
 	short sVar1;
 	ushort uVar2;
@@ -974,25 +1295,13 @@ void deleteFieldEntitySub4(sSpriteActor* param_1)
 	MissingCode();
 }
 
-void initsFieldEntitySub4_B4(sFieldEntitySub4_B4* pThis)
-{
-	pThis->m0_rotation.vx = 0;
-	pThis->m0_rotation.vy = 0;
-	pThis->m0_rotation.vz = 0;
-	pThis->m2C = nullptr;
-}
-
-int initFieldEntitySub4Sub4(const sPS1Pointer& param_1)
-{
-	return (READ_LE_U16(param_1) >> 9) & 0x3F;
-}
 
 int initFieldEntitySub4Sub5Sub1(const sPS1Pointer& param_1)
 {
 	return READ_LE_U8(param_1 + 1) >> 7;
 }
 
-void setAnimationBundle(sSpriteActor* param_1, sSpriteActorAnimationBundle* pAnimationBundle)
+void setAnimationBundle(sSpriteActorCore* param_1, sSpriteActorAnimationBundle* pAnimationBundle)
 {
 	sFieldEntitySub4_110* psVar2 = param_1->m24;
 	if (pAnimationBundle != 0) {
@@ -1014,7 +1323,7 @@ void setAnimationBundle(sSpriteActor* param_1, sSpriteActorAnimationBundle* pAni
 	}
 }
 
-void spriteActorSetPlayingAnimation(sSpriteActor* param_1, int animationId)
+void spriteActorSetPlayingAnimation(sSpriteActorCore* param_1, int animationId)
 {
 	ushort uVar1;
 	uint uVar2;
@@ -1057,38 +1366,6 @@ void spriteActorSetPlayingAnimation(sSpriteActor* param_1, int animationId)
 	}
 }
 
-void initFieldEntitySub4Sub1(sSpriteActor* param_1)
-{
-	param_1->m3C = 0;
-	param_1->m28_colorAndCode.m3_code = 0x2d;
-	param_1->m40 = 0;
-	param_1->m3A = 0;
-	param_1->m30 = 0;
-	param_1->m32 = 0;
-	param_1->m34 = 0;
-	param_1->mA8.clear();
-	param_1->m3C = param_1->m3C & 0xfe00ffe3;
-	param_1->m40 = param_1->m40 & 0xfffe0003;
-	param_1->mAC = 0;
-	param_1->mB0 = 0;
-	int iVar1 = (fieldDrawEnvsInitialized + 1) * (fieldDrawEnvsInitialized + 1) * 0x4000 * param_1->m82;
-	param_1->mAC = param_1->mAC & 0xfff8007f | 0x8000;
-	param_1->mA8.mx11 = 0;
-	if (iVar1 < 0) {
-		iVar1 = iVar1 + 0xfff;
-	}
-	param_1->m1C = iVar1 >> 0xc;
-	param_1->m64_spriteByteCode.makeNull();
-	param_1->m70 = 0;
-	param_1->m44_currentAnimationBundle = 0;
-	param_1->m68 = 0;
-	param_1->m80 = 0;
-	param_1->m8C_stackPosition = 0x10;
-	param_1->m84 = 0;
-	param_1->m6C = (sSpriteActor*)0x0;
-	param_1->m50 = 0;
-}
-
 void initFieldEntitySub4Sub2(sSpriteActor* pThis)
 {
 	pThis->m20 = &pThis->mB4;
@@ -1096,7 +1373,7 @@ void initFieldEntitySub4Sub2(sSpriteActor* pThis)
 	pThis->m7C = &pThis->mF4;
 	pThis->m20->m34_perSubgroupTransform = &pThis->m124;
 	pThis->m24 = &pThis->m110;
-	pThis->m20->m38 = 0;
+	pThis->m20->m38_pNext = 0;
 }
 
 sSpriteActor* initializeSpriteActor(sSpriteActor* param_1, sSpriteActorAnimationBundle* pSetup, int clutX, int clutY, int vramX, int vramY, int param_7)
@@ -1120,7 +1397,7 @@ sSpriteActor* initializeSpriteActor(sSpriteActor* param_1, sSpriteActorAnimation
 		param_1->m7C->mC = 0;
 	}
 
-	param_1->m6C = param_1;
+	param_1->m6C_pointerToOwnerStructure = param_1;
 	param_1->m3C = param_1->m3C & 0xff00ffff | (initFieldVar2 & 0xf) << 0x14 | (initFieldVar2 & 0xf) << 0x10;;
 
 	int count = initFieldEntitySub4Sub4(pSetup->m8_pData);
@@ -1193,14 +1470,14 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub7(sSpriteActor* param1, int param2)
 	computeStepFromMoveSpeed(param1);
 }
 
-void OP_INIT_ENTITY_SCRIPT_sub0Sub8(sSpriteActor* param1, void(*callback)(sSpriteActor*))
+void OP_INIT_ENTITY_SCRIPT_sub0Sub8(sSpriteActorCore* param1, void(*callback)(sSpriteActorCore*))
 {
 	param1->m68 = callback;
 }
 
-void fieldActorCallback(sSpriteActor* pThis)
+void fieldActorCallback(sSpriteActorCore* pThis)
 {
-	actorArray[pThis->m7C->m14_actorId].m4C_scriptEntity->m4_flags |= 0x10000;
+	actorArray[pThis->m7C->m14_actorId].m4C_scriptEntity->m4_flags.m_rawFlags |= 0x10000;
 }
 
 void OP_INIT_ENTITY_SCRIPT_sub0Sub3(sSpriteActor* param_1, int param_2)

@@ -59,10 +59,22 @@ struct sFieldScriptEntity_flags0
     };
 };
 
+
+struct sFieldScriptEntity_flags4
+{
+    union {
+        struct {
+            u32 m0_unk : 11;
+            u32 m_x800 : 1;
+        };
+        u32 m_rawFlags = 0;
+    };
+};
+
 struct sFieldScriptEntity
 {
     sFieldScriptEntity_flags0 m0_fieldScriptFlags;
-    u32 m4_flags;
+    sFieldScriptEntity_flags4 m4_flags;
     std::array<s16, 4> m8_currentWalkMeshTriangle;
     u16 m10_walkmeshId;
     s32 m14_currentTriangleFlag;
@@ -306,6 +318,8 @@ extern int OP_A4Var2;
 extern s16 OP_B6SubVar0;
 extern s16 OP_B6Var1;
 extern s16 OP_B6Var2;
+
+extern struct sSavePointMesh_1C* spriteCallback2Var2;
 
 void flagAllocation(std::vector<u8>&);
 void unflagAllocation(std::vector<u8>&);

@@ -232,6 +232,7 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0x96] = OP_CREATE_PARTICLE_EFFECT_FOR_CURRENT_ACTOR;
     fieldScriptOpcodes_EX[0x97] = OPX_97;
     fieldScriptOpcodes_EX[0x98] = OPX_98;
+    fieldScriptOpcodes_EX[0x99] = OPX_99;
     fieldScriptOpcodes_EX[0x9A] = OPX_9A;
     fieldScriptOpcodes_EX[0x9F] = OP_TOGGLE_FRAME_LOCK;
     fieldScriptOpcodes_EX[0xA1] = OP_ASSIGN_GEAR;

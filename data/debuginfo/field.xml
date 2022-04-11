@@ -99,7 +99,7 @@
         <scriptEntity ID="1" Name="Fei"/>
         <scriptEntity ID="2" Name="Citan"/>
         <scriptEntity ID="3" Name=""/>
-        <scriptEntity ID="4" Name="Weital?"/>
+        <scriptEntity ID="4" Name="Weital"/>
         <scriptEntity ID="5" Name=""/>
         <scriptEntity ID="6" Name=""/>
         <scriptEntity ID="7" Name=""/>
@@ -910,7 +910,23 @@
     <fieldInfo ID="517" Name="Solaris - bridge after 516 (hangs)"/>
     <fieldInfo ID="518" Name="Solaris - like 514 but hangs"/>
     <fieldInfo ID="519" Name="Solaris, 3rd - Class main causeway"/>
-    <fieldInfo ID="520" Name="Solaris, 3rd - Class - quarters with the savepoint"/>
+    <fieldInfo ID="520" Name="Solaris, 3rd - Class - quarters with the savepoint">
+        <scriptEntity ID="0" Name=""/>
+        <scriptEntity ID="1" Name=""/>
+        <scriptEntity ID="2" Name=""/>
+        <scriptEntity ID="3" Name=""/>
+        <scriptEntity ID="4" Name=""/>
+        <scriptEntity ID="5" Name=""/>
+        <scriptEntity ID="6" Name=""/>
+        <scriptEntity ID="7" Name=""/>
+        <scriptEntity ID="8" Name=""/>
+        <scriptEntity ID="9" Name=""/>
+        <scriptEntity ID="10" Name=""/>
+        <scriptEntity ID="11" Name=""/>
+        <scriptEntity ID="12" Name=""/>
+        <scriptEntity ID="13" Name=""/>
+        <scriptEntity ID="14" Name="Save point"/>
+    </fieldInfo>
     <fieldInfo ID="521" Name="Solaris, 3rd - Class - mutant&apos;s quarters (one time)"/>
     <fieldInfo ID="522" Name="Solaris, 3rd - Class - empty quarters"/>
     <fieldInfo ID="523" Name="Solaris, 3rd - Class - coward&apos;s quarters"/>
