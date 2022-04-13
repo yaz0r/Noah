@@ -2,6 +2,7 @@
 #include "fieldGraphicObject.h"
 #include "field.h"
 #include "sprite/spriteSetup.h"
+#include "kernel/TIM.h"
 
 int OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1_var = 0x2000;
 int fieldDrawEnvsInitialized = 0;
@@ -160,7 +161,7 @@ void addToSpriteTransferList(sSpriteActorCore* param_1, short param_2)
             // find it in the list
 			while (pCurrentHead != nullptr) {
 				if (pCurrentHead == param_1) {
-					sFieldEntitySub4_110* psVar3 = param_1->m24;
+					sFieldEntitySub4_110* psVar3 = param_1->m24_vramData;
 					if (((psVar3 != &sFieldEntitySub4_110_8005a474) && (psVar3 != &sFieldEntitySub4_110_8006be10)) && ((param_1->m40 >> 0x13 & 1) == 0)) {
 						executeSpriteBytecode2Sub0Sub0(param_1, param_1->m34, psVar3);
 					}
@@ -482,11 +483,6 @@ void spriteCallback_render2(sSavePointMesh_1C* param_1) {
 }
 
 void savePointCallback8(sSavePointMesh_1C* param_1) {
-
-    // HACK!
-    spriteCallback_render2(param_1);
-
-
     OP_INIT_ENTITY_SCRIPT_sub0Sub9(param_1->m4);
     savePointCallback8Sub0(param_1->m4);
 
@@ -633,7 +629,7 @@ sSavePointMeshAbstract* createSavePointMeshData(int mode1, int mode2, sFieldEnti
 
     pNewSavePoint->m38_spriteActorCore.m6C_pointerToOwnerStructure = pNewSavePoint;
     pNewSavePoint->m38_spriteActorCore.m86_thisSize = mode2;
-    pNewSavePoint->m38_spriteActorCore.m24 = param_3;
+    pNewSavePoint->m38_spriteActorCore.m24_vramData = param_3;
 
     return pNewSavePoint;
 }
@@ -813,13 +809,66 @@ void setupOverrideTPage(uint x, uint y)
     overrideTPageValue = GetTPage(0, 0, x & 0xffff, y & 0xffff) & 0x1f;
 }
 
+u16 customVramUploadX;
+u16 customVramUploadY;
+sPS1Pointer customVramUploadPtr;
+
+void loadMechaTextures(sPS1Pointer param_1, short param_2, short tpageX, short tpageY, short param_5, short clutX, short clutY)
+{
+    int textureCount = READ_LE_U8(param_1);
+    sPS1Pointer psVar2 = param_1 + textureCount * 4 + 4;
+    for (int i = 0; i < textureCount; i++) {
+        RECT uploadRect[2];
+        switch (READ_LE_U32(psVar2)) {
+        case 0x1100:
+            switch (param_2) {
+            case 1:
+                uploadRect[0].x = tpageX + READ_LE_U16(psVar2 + 8);
+                uploadRect[0].y = tpageY + READ_LE_U16(psVar2 + 10);
+                break;
+            default:
+                assert(0);
+                break;
+            }
+            break;
+        case 0x1101:
+            switch (param_5)
+            {
+            case 0:
+                uploadRect[0].x = READ_LE_U16(psVar2 + 4) + READ_LE_U16(psVar2 + 8);
+                uploadRect[0].y = READ_LE_U16(psVar2 + 6) + READ_LE_U16(psVar2 + 10);
+                break;
+            default:
+                assert(0);
+                break;
+            }
+            break;
+        default:
+            assert(0);
+            break;
+        }
+
+        uploadRect[0].w = READ_LE_U16(psVar2 + 0xc);
+        uploadRect[0].h = READ_LE_U16(psVar2 + 0xe);
+        LoadImage(uploadRect, psVar2 + 0x10);
+        psVar2 = psVar2 + 0x10 + (int)uploadRect[0].w * (int)uploadRect[0].h * 2;
+    }
+
+    MissingCode();
+}
+
+void customVramUpload()
+{
+    loadMechaTextures(customVramUploadPtr, 1, customVramUploadX, customVramUploadY, 0,0,0);
+}
+
 void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS1Pointer param_3)
 {
 	switch (bytecode & 0xff) {
 	case 0x84:
 		break;
     case 0x8D:
-        setupOverrideTPage(param_1->m24->m4_vramLocation.vx, param_1->m24->m4_vramLocation.vy);
+        setupOverrideTPage(param_1->m24_vramData->m4_vramLocation.vx, param_1->m24_vramData->m4_vramLocation.vy);
         break;
 	case 0x92:
 		param_1->m28_colorAndCode.m3_code |= 1; // make transparent
@@ -920,7 +969,7 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
 		//executeSpriteBytecode2Sub3(param_1, param_3)->asU8 += executeSpriteBytecode2Sub3(param_1, param_3 + 1)->asU8;
 		break;
 	case 0xe0:
-		spriteBytecode2ExtendedE0(param_1, param_3 + READ_LE_S16(param_3), param_1->m24);
+		spriteBytecode2ExtendedE0(param_1, param_3 + READ_LE_S16(param_3), param_1->m24_vramData);
 		break;
 	case 0xF0:
 		return;
@@ -959,7 +1008,10 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
 		MissingCode();
 		break;
 	case 0xfc:
-		MissingCode();
+        customVramUploadX = (param_1->m24_vramData->m4_vramLocation).vx;
+        customVramUploadY = (param_1->m24_vramData->m4_vramLocation).vy;
+        customVramUploadPtr = param_3 + (READ_LE_U8(param_3) + READ_LE_U8(param_3 + 1) * 0x100 + READ_LE_U8(param_3 + 2) * 0x10000);
+        customVramUpload();
 		break;
 	default:
 		assert(0);
@@ -1538,7 +1590,7 @@ int initFieldEntitySub4Sub5Sub1(const sPS1Pointer& param_1)
 
 void setAnimationBundle(sSpriteActorCore* param_1, sSpriteActorAnimationBundle* pAnimationBundle)
 {
-	sFieldEntitySub4_110* psVar2 = param_1->m24;
+	sFieldEntitySub4_110* psVar2 = param_1->m24_vramData;
 	if (pAnimationBundle != 0) {
 		if (pAnimationBundle != param_1->m44_currentAnimationBundle) {
 			initFieldEntitySub4Sub5Sub0(psVar2, pAnimationBundle, psVar2->m4_vramLocation, psVar2->m8_clut);
@@ -1578,15 +1630,15 @@ void spriteActorSetPlayingAnimation(sSpriteActorCore* param_1, int animationId)
 		if (animationId < 0) {
 			setAnimationBundle(param_1, param_1->m4C_specialAnimation);
 			if ((isBattleOverlayLoaded != 0) &&
-				(iVar3 = initFieldEntitySub4Sub5Sub1(param_1->m24->m0), iVar3 == 0)) {
-				param_1->m24->m4_vramLocation.vx = 0x100;
-				param_1->m24->m4_vramLocation.vy = 0x300;
+				(iVar3 = initFieldEntitySub4Sub5Sub1(param_1->m24_vramData->m0), iVar3 == 0)) {
+				param_1->m24_vramData->m4_vramLocation.vx = 0x100;
+				param_1->m24_vramData->m4_vramLocation.vy = 0x300;
 			}
 		}
 		else {
 			setAnimationBundle(param_1, param_1->m48_defaultAnimationbundle);
 			if (isBattleOverlayLoaded != 0) {
-				param_1->m24->m4_vramLocation = param_1->m7C->mE_vramLocation;
+				param_1->m24_vramData->m4_vramLocation = param_1->m7C->mE_vramLocation;
 			}
 		}
 		param_1->mAC = (param_1->mAC & 0x00FFFFFF) | (((char)animationId) << 24);
@@ -1595,7 +1647,7 @@ void spriteActorSetPlayingAnimation(sSpriteActorCore* param_1, int animationId)
 		}
 
 		param_1->m40 = param_1->m40 | 0x100000;
-		param_1->m58_startOfCurrentAnimation = (*param_1->m24->m10_startOfAnimationContainer)[animationId];
+		param_1->m58_startOfCurrentAnimation = (*param_1->m24_vramData->m10_startOfAnimationContainer)[animationId];
 		setCurrentAnimationPtr(param_1, param_1->m58_startOfCurrentAnimation);
 		setSpriteActorAngle(param_1, param_1->m80);
 	}
@@ -1607,7 +1659,7 @@ void initFieldEntitySub4Sub2(sSpriteActor* pThis)
 	initsFieldEntitySub4_B4(&pThis->mB4);
 	pThis->m7C = &pThis->mF4;
 	pThis->m20->getAsSprite()->m34_perSubgroupTransform = &pThis->m124;
-	pThis->m24 = &pThis->m110;
+	pThis->m24_vramData = &pThis->m110;
 	pThis->m20->getAsSprite()->m38_pNext = 0;
 }
 
@@ -1639,10 +1691,10 @@ sSpriteActor* initializeSpriteActor(sSpriteActor* param_1, sSpriteActorAnimation
 	param_1->m20->getAsSprite()->m2C = param_1->m20->getAsSprite()->m30 = new std::vector<sFieldEntitySub4_B4_sub>;
 	param_1->m20->getAsSprite()->m30->resize(count);
 
-	param_1->m24->m4_vramLocation.vx = vramX;
-	param_1->m24->m4_vramLocation.vy = vramY;
-	param_1->m24->m8_clut.vx = clutX;
-	param_1->m24->m8_clut.vy = clutY;
+	param_1->m24_vramData->m4_vramLocation.vx = vramX;
+	param_1->m24_vramData->m4_vramLocation.vy = vramY;
+	param_1->m24_vramData->m8_clut.vx = clutX;
+	param_1->m24_vramData->m8_clut.vy = clutY;
 
 	param_1->m48_defaultAnimationbundle = pSetup;
 
@@ -1663,10 +1715,10 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub4(sSpriteActor* param_1, int param_2, int* par
 	int iVar4;
 	uint uVar5;
 
-	pbVar2 = (*param_1->m24->m10_startOfAnimationContainer)[0];
+	pbVar2 = (*param_1->m24_vramData->m10_startOfAnimationContainer)[0];
 	bVar1 = READ_LE_U8(pbVar2 + READ_LE_U16(pbVar2 + 4) + 4);
 	uVar5 = (uint)bVar1;
-	pbVar2 = param_1->m24->m0;
+	pbVar2 = param_1->m24_vramData->m0;
 	iVar3 = uVar5 << 1;
 	if (bVar1 != 0) {
 		uVar5 = uVar5 - 1;

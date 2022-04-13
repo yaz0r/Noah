@@ -1791,6 +1791,26 @@ sSavePointMesh_1C* spriteCallback2Var2 = nullptr;
 sSavePointMesh_1C* spriteCallback2Var3 = nullptr;
 int spriteCallback2Var4 = 0;
 
+void execSpritesCallback(void)
+{
+    sSavePointMesh_1C** ppsVar1;
+
+    spriteCallback2Var1 = spriteCallback2Head;
+    if (spriteCallback2Head != (sSavePointMesh_1C*)0x0) {
+        do {
+            ppsVar1 = &spriteCallback2Var1->m18_pNext;
+            auto previous = spriteCallback2Var1;
+            void (*puVar2)(sSavePointMesh_1C*) = spriteCallback2Var1->m8;
+            spriteCallback2Var3 = spriteCallback2Var1;
+            spriteCallback2Var1 = *ppsVar1;
+            if (puVar2 != nullptr) {
+                puVar2(previous);
+            }
+        } while (spriteCallback2Var1 != (sSavePointMesh_1C*)0x0);
+    }
+    return;
+}
+
 void execSpritesCallbacks2()
 {
     if (spriteCallback2Var0 == 0) {
@@ -6764,7 +6784,7 @@ void uploadCharacterSprite(sSpriteActorCore* param_1, int param_2, sFieldEntityS
         }
         if ((READ_LE_U16(dataPtr) & 0x8000) == 0) {
             // character sprite needs to be uploaded every frame (playable characters)
-            sVec2_s16 vramLocation = param_1->m24->m4_vramLocation;
+            sVec2_s16 vramLocation = param_1->m24_vramData->m4_vramLocation;
             sPS1Pointer subDataPtr = dataPtr + READ_LE_U16(dataPtr + param_2 * 2);
             if ((param_1->m40 >> 0xd & 0xf) == 0xe) {
                 //uploadCharacterSpriteSub0(&vramLocation, subDataPtr[4]);
@@ -6916,7 +6936,7 @@ void uploadCharacterSprites()
                 psVar1->m40 = psVar1->m40 & 0xffffff03;
             }
             else {
-                uploadCharacterSprite(psVar1, (uint)(ushort)psVar1->m34, psVar1->m24);
+                uploadCharacterSprite(psVar1, (uint)(ushort)psVar1->m34, psVar1->m24_vramData);
             }
             psVar1 = psVar1->m20->getAsSprite()->m38_pNext;
         } while (psVar1 != (sSpriteActor*)0x0);
@@ -7493,7 +7513,7 @@ void renderChars()
         setCharacterRenderingOT(pCurrentFieldRenderingContext->mCC_OT);
         setCurrentRenderingMatrix(&currentProjectionMatrix);
         uploadCharacterSprites();
-        MissingCode();
+        execSpritesCallback();
         execSpritesCallbacks2();
         renderFieldCharacterSprites(pCurrentFieldRenderingContext->mCC_OT, g_frameOddOrEven);
 

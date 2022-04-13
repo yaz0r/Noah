@@ -290,6 +290,7 @@ void loadMechaTextures(sMechaDataTable1_sub4* param_1, short param_2, short tpag
     MissingCode();
 }
 
+
 void sMechaModel_init(sModel& modelBlock, sMechaInitVar4* param_2)
 {
     param_2->m4 = modelBlock.m0_numBlocks;

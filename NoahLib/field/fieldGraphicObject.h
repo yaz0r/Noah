@@ -111,7 +111,7 @@ struct sSpriteActorCore {
     s32 m18_moveSpeed;
     s32 m1C;
     sFieldEntitySub4_B4_base* m20 = nullptr;
-    sFieldEntitySub4_110* m24;
+    sFieldEntitySub4_110* m24_vramData;
     sColorAndCode m28_colorAndCode;
     s16 m2C_scale;
     s16 m30;
@@ -230,6 +230,7 @@ struct sSavePointMesh2 : public sSavePointMeshAbstract
 };
 
 extern sSpriteActorCore* spriteTransfertListHead;
+extern sSavePointMesh_1C* spriteCallback2Head;
 
 void OP_21_sub(sSpriteActor* param_1, int param_2);
 void OP_INIT_ENTITY_SCRIPT_sub0Sub9(sSpriteActorCore* param_1);
