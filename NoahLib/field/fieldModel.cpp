@@ -6,6 +6,32 @@
 
 std::vector<sModel> gCurrentFieldModels;
 
+void sModelBlock::init(u8* blockData) {
+    m0_flags = READ_LE_U16(blockData + 0);
+    m2_numVertices = READ_LE_U16(blockData + 2);
+    m4_numPrims = READ_LE_U16(blockData + 4);
+    m6_numMeshBlock = READ_LE_U16(blockData + 6);
+    m8_offsetVertices = READ_LE_U32(blockData + 8);
+    mC_offsetNormals = READ_LE_U32(blockData + 0xC);
+    m10_offsetMeshBlocks = READ_LE_U32(blockData + 0x10);
+    m14_offsetDisplayList = READ_LE_U32(blockData + 0x14);
+
+    //assert(READ_LE_U32(blockData + 0x18) == 0);
+    if (READ_LE_U32(blockData + 0x18)) {
+        m18.resize(1);
+        MissingCode();
+    }
+
+    m20 = READ_LE_S16(blockData + 0x20);
+    m22 = READ_LE_S16(blockData + 0x22);
+    m24 = READ_LE_S16(blockData + 0x24);
+    m28 = READ_LE_S16(blockData + 0x28);
+    m2A = READ_LE_S16(blockData + 0x2A);
+    m2C = READ_LE_S16(blockData + 0x2C);
+    m30 = READ_LE_U32(blockData + 0x30);
+    m34_instanceBufferSize = READ_LE_U32(blockData + 0x34);
+}
+
 void sModel::init(std::vector<u8>::iterator input, int dataSize)
 {
     mRawData.resize(dataSize);
@@ -22,35 +48,11 @@ void sModel::init(std::vector<u8>::iterator input, int dataSize)
     m10_blocks.resize(m0_numBlocks);
     for (int i = 0; i < m0_numBlocks; i++)
     {
-        m10_blocks[i].m_model = this;
+        m10_blocks[i].m_baseItForRelocation = &mRawData[0];
 
         std::vector<u8>::iterator blockData = inputData + i * 0x38;
 
-        m10_blocks[i].m0_flags = READ_LE_U16(blockData + 0);
-        m10_blocks[i].m2_numVertices = READ_LE_U16(blockData + 2);
-        m10_blocks[i].m4_numPrims = READ_LE_U16(blockData + 4);
-        m10_blocks[i].m6_numMeshBlock = READ_LE_U16(blockData + 6);
-        m10_blocks[i].m8_offsetVertices = READ_LE_U32(blockData + 8);
-        m10_blocks[i].mC_offsetNormals = READ_LE_U32(blockData + 0xC);
-        m10_blocks[i].m10_offsetMeshBlocks = READ_LE_U32(blockData + 0x10);
-        m10_blocks[i].m14_offsetDisplayList = READ_LE_U32(blockData + 0x14);
-
-        //assert(READ_LE_U32(blockData + 0x18) == 0);
-        if (READ_LE_U32(blockData + 0x18)) {
-            m10_blocks[i].m18.resize(1);
-            MissingCode();
-        }
-
-		m10_blocks[i].m20 = READ_LE_S16(blockData + 0x20);
-		m10_blocks[i].m22 = READ_LE_S16(blockData + 0x22);
-		m10_blocks[i].m24 = READ_LE_S16(blockData + 0x24);
-		m10_blocks[i].m28 = READ_LE_S16(blockData + 0x28);
-		m10_blocks[i].m2A = READ_LE_S16(blockData + 0x2A);
-		m10_blocks[i].m2C = READ_LE_S16(blockData + 0x2C);
-        m10_blocks[i].m30 = READ_LE_U32(blockData + 0x30);
-        m10_blocks[i].m34_instanceBufferSize = READ_LE_U32(blockData + 0x34);
-
-        std::vector<u8>::iterator vertexData = inputData + m10_blocks[i].m8_offsetVertices;
+        m10_blocks[i].init(&blockData[0]);
     }
 }
 
@@ -225,7 +227,7 @@ void flushTriangles(sModelBlock* pThis, int viewIndex, bgfx::TextureHandle textu
     currentIndices.clear();
 }
 
-void renderTriangleWithTexture(int viewIndex, std::vector<u8>::iterator& mesh_blocks, std::vector<u8>::iterator& displaylist, std::vector<u8>::iterator& vertices, u32 cmd)
+void renderTriangleWithTexture(int viewIndex, u8*& mesh_blocks, u8*& displaylist, u8*& vertices, u32 cmd)
 {
     std::array<float, 2> uv[4];
     uv[0][0] = displaylist[0];
@@ -268,7 +270,7 @@ void renderTriangleWithTexture(int viewIndex, std::vector<u8>::iterator& mesh_bl
     currentIndices.push_back(startIndex + 2);
 }
 
-void renderTriangleWithColor(int viewIndex, std::vector<u8>::iterator& mesh_blocks, std::vector<u8>::iterator& displaylist, std::vector<u8>::iterator& vertices, u32 cmd)
+void renderTriangleWithColor(int viewIndex, u8*& mesh_blocks, u8*& displaylist, u8*& vertices, u32 cmd)
 {
     int startIndex = currentVertices.size();
 
@@ -302,7 +304,7 @@ void renderTriangleWithColor(int viewIndex, std::vector<u8>::iterator& mesh_bloc
     currentIndices.push_back(startIndex + 2);
 }
 
-void renderQuadWithColor(int viewIndex, std::vector<u8>::iterator& mesh_blocks, std::vector<u8>::iterator& displaylist, std::vector<u8>::iterator& vertices, u32 cmd)
+void renderQuadWithColor(int viewIndex, u8*& mesh_blocks, u8*& displaylist, u8*& vertices, u32 cmd)
 {
     int startIndex = currentVertices.size();
 
@@ -340,7 +342,7 @@ void renderQuadWithColor(int viewIndex, std::vector<u8>::iterator& mesh_blocks, 
     currentIndices.push_back(startIndex + 1);
 }
 
-void renderQuadWithTexture(int viewIndex, std::vector<u8>::iterator& mesh_blocks, std::vector<u8>::iterator& displaylist, std::vector<u8>::iterator& vertices)
+void renderQuadWithTexture(int viewIndex, u8*& mesh_blocks, u8*& displaylist, u8*& vertices)
 {
     std::array<float, 2> uv[4];
     uv[0][0] = displaylist[0];
@@ -435,9 +437,9 @@ void sModelBlock::bgfxRender(int viewIndex, float* modelMatrix)
 
 void sModelBlock::buildDrawcall(int viewIndex)
 {
-    std::vector<u8>::iterator mesh_blocks = m_model->mRawData.begin() + m10_offsetMeshBlocks;
-    std::vector<u8>::iterator displaylist = m_model->mRawData.begin() + m14_offsetDisplayList;
-    std::vector<u8>::iterator vertices = m_model->mRawData.begin() + m8_offsetVertices;
+    u8* mesh_blocks = m_baseItForRelocation + m10_offsetMeshBlocks;
+    u8* displaylist = m_baseItForRelocation + m14_offsetDisplayList;
+    u8* vertices = m_baseItForRelocation + m8_offsetVertices;
 
     bool quad_block = false;
     int poly_available = 0;
@@ -536,4 +538,3 @@ void sModelBlock::buildDrawcall(int viewIndex)
 
     
 }
-

@@ -853,7 +853,7 @@ void mechaInitNewMecha(int entryId, ushort flags, sMechaDataTable2* pData2, sMec
         *pLoadedMecha->mA8 = mechaModelBlocksBufferForLoading;
         // Fixup
         for (int i = 0; i < pLoadedMecha->mA8->m0_numBlocks; i++) {
-            pLoadedMecha->mA8->m10_blocks[i].m_model = pLoadedMecha->mA8;
+            pLoadedMecha->mA8->m10_blocks[i].m_baseItForRelocation = &pLoadedMecha->mA8->mRawData[0];
         }
 
         sMechaModel_init(*pLoadedMecha->mA8, pLoadedMecha->m0);

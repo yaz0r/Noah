@@ -11,6 +11,8 @@ struct sDrawCall
 
 struct sModelBlock
 {
+    void init(u8* input);
+
     u16 m0_flags;
     s16 m2_numVertices;
     s16 m4_numPrims;
@@ -42,7 +44,7 @@ struct sModelBlock
     std::vector<sMeshBlock> m_meshBlocks;
     std::vector<sDrawCall> m_drawCalls;
 
-    struct sModel* m_model;
+    u8* m_baseItForRelocation;
     void bgfxRender(int viewIndex, float* modelMatrix);
     void buildDrawcall(int viewIndex);
 };

@@ -712,28 +712,28 @@ void initModel1(sModelBlock& pModelBlock, std::vector<sTag*>& outputBuffer1, std
     outputBuffer2.resize(pModelBlock.m34_instanceBufferSize, nullptr);
 }
 
-int initModel2Sub0Var0 = 0;
+int overrideTPageMode = 0;
 int initModel2Sub0Var1 = 1;
 
 void initModel2Sub0(void)
 {
-    initModel2Sub0Var0 = 0;
+    overrideTPageMode = 0;
     initModel2Sub0Var1 = 1;
     return;
 }
 
-s32 primD_initSub0Sub0Var1 = 0;
+s32 overrideTPageValue = 0;
 s16 primD_initSub0Sub0Var0 = 0;
 
 void setupPrimTexturePage(ushort param_1)
 
 {
-    primD_initSub0Sub0Var0 = (ushort)primD_initSub0Sub0Var1;
-    if (initModel2Sub0Var0 == 1) {
+    primD_initSub0Sub0Var0 = (ushort)overrideTPageValue;
+    if (overrideTPageMode == 1) {
         primD_initSub0Sub0Var0 = param_1 & 0xffe0 | primD_initSub0Sub0Var0;
     }
     else {
-        if (initModel2Sub0Var0 != 2) {
+        if (overrideTPageMode != 2) {
             primD_initSub0Sub0Var0 = param_1;
             return;
         }
@@ -753,7 +753,7 @@ void setupPrimClut(ushort param_1)
     return;
 }
 
-int primD_isValid(std::vector<u8>::iterator displayList)
+int primD_isValid(u8* displayList)
 {
     byte bVar1;
     int iVar2;
@@ -778,18 +778,18 @@ int primD_isValid(std::vector<u8>::iterator displayList)
 
 std::vector<sTag*>::iterator currentModelInstanceDrawPrims;
 
-std::vector<u8>::iterator currentModelBlockDisplayLists;
-std::vector<u8>::iterator g_currentModelBlockSubBlocks;
-std::vector<u8>::iterator currentModelBlockNormals;
-std::vector<u8>::iterator currentModelBlockVertices;
-std::vector<u8>::iterator currentModeBlock18;
+u8* currentModelBlockDisplayLists;
+u8* g_currentModelBlockSubBlocks;
+u8* currentModelBlockNormals;
+u8* currentModelBlockVertices;
+u8* currentModeBlock18;
 
 void computeFaceNormal(const SFP_VEC4& v0, const SFP_VEC4& v1, const SFP_VEC4& v2, SFP_VEC4* pNormal)
 {
     MissingCode();
 }
 
-void NormalColorCol(SFP_VEC4* faceNormal, std::vector<u8>::iterator displayList, POLY_FT3* pNewPoly)
+void NormalColorCol(SFP_VEC4* faceNormal, u8* displayList, POLY_FT3* pNewPoly)
 {
     MissingCode();
 }
@@ -803,7 +803,7 @@ void NormalColor(SFP_VEC4* $2, std::array<u8,4> $3)
     MissingCode();
 }
 
-int prim0_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator meshBlock, int initParam)
+int prim0_init(u8* displayList, u8* meshBlock, int initParam)
 {
     POLY_FT3* pNewPoly = new POLY_FT3;
     *currentModelInstanceDrawPrims = pNewPoly;
@@ -851,7 +851,7 @@ int prim0_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator 
     return 1;
 }
 
-int prim1_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator meshBlock, int initParam)
+int prim1_init(u8* displayList, u8* meshBlock, int initParam)
 {
     if (primD_isValid(displayList))
     {
@@ -901,7 +901,7 @@ void NormalColor3(SFP_VEC4* $2, SFP_VEC4* $3, SFP_VEC4* v2, CVECTOR* v3, CVECTOR
     MissingCode();
 }
 
-int prim3_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator meshBlock, int initParam)
+int prim3_init(u8* displayList, u8* meshBlock, int initParam)
 {
     if (primD_isValid(displayList))
     {
@@ -934,7 +934,7 @@ int prim3_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator 
     return 0;
 }
 
-int prim4_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator meshBlock, int initParam)
+int prim4_init(u8* displayList, u8* meshBlock, int initParam)
 {
     assert(READ_LE_U8(displayList + 3) == 0x20); // colored triangle
 
@@ -951,7 +951,7 @@ int prim4_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator 
     return 1;
 }
 
-int prim5_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator meshBlock, int initParam)
+int prim5_init(u8* displayList, u8* meshBlock, int initParam)
 {
     if (primD_isValid(displayList))
     {
@@ -977,7 +977,7 @@ int prim5_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator 
     return 0;
 }
 
-int prim8_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator meshBlock, int initParam)
+int prim8_init(u8* displayList, u8* meshBlock, int initParam)
 {
     assert(READ_LE_U8(displayList + 3) == 0x28); // quad with color
 
@@ -1005,7 +1005,7 @@ int prim8_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator 
     return 1;
 }
 
-int prim9_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator meshBlock, int initParam)
+int prim9_init(u8* displayList, u8* meshBlock, int initParam)
 {
     if (primD_isValid(displayList))
     {
@@ -1040,7 +1040,7 @@ int prim9_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator 
 }
 
 
-int primC_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator meshBlock, int initParam)
+int primC_init(u8* displayList, u8* meshBlock, int initParam)
 {
     assert(READ_LE_U8(displayList + 3) == 0x28); // quad with color
 
@@ -1064,7 +1064,7 @@ s32 gDepthDivider = 2;
 
 OTTable* currentOTEntry = nullptr;
 
-void genericTrianglePrim_14(std::vector<u8>::iterator meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
+void genericTrianglePrim_14(u8* meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
 {
     OTTable& pOT = *currentOTEntry;
     int depthGranularity = gDepthDivider + 2;
@@ -1075,9 +1075,9 @@ void genericTrianglePrim_14(std::vector<u8>::iterator meshSubBlock, int count, i
         currentModelInstanceDrawPrims++;
         assert(outputPrimSize == 0x14);
 
-        std::vector<u8>::iterator pVertices1 = currentModelBlockVertices + READ_LE_U16(meshSubBlock) * 8;
-        std::vector<u8>::iterator pVertices2 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 2) * 8;
-        std::vector<u8>::iterator pVertices3 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 4) * 8;
+        u8* pVertices1 = currentModelBlockVertices + READ_LE_U16(meshSubBlock) * 8;
+        u8* pVertices2 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 2) * 8;
+        u8* pVertices3 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 4) * 8;
         meshSubBlock += 8;
 
         gte_ldv3(pVertices1, pVertices2, pVertices3);
@@ -1140,7 +1140,7 @@ void genericTrianglePrim_14(std::vector<u8>::iterator meshSubBlock, int count, i
     }
 }
 
-void genericTrianglePrim_28(std::vector<u8>::iterator meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
+void genericTrianglePrim_28(u8* meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
 {
     OTTable& pOT = *currentOTEntry;
     int depthGranularity = gDepthDivider + 2;
@@ -1151,9 +1151,9 @@ void genericTrianglePrim_28(std::vector<u8>::iterator meshSubBlock, int count, i
         currentModelInstanceDrawPrims++;
         assert(outputPrimSize == 0x14);
 
-        std::vector<u8>::iterator pVertices1 = currentModelBlockVertices + READ_LE_U16(meshSubBlock) * 8;
-        std::vector<u8>::iterator pVertices2 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 2) * 8;
-        std::vector<u8>::iterator pVertices3 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 4) * 8;
+        u8* pVertices1 = currentModelBlockVertices + READ_LE_U16(meshSubBlock) * 8;
+        u8* pVertices2 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 2) * 8;
+        u8* pVertices3 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 4) * 8;
         meshSubBlock += 8;
 
         gte_ldv3(pVertices1, pVertices2, pVertices3);
@@ -1215,7 +1215,7 @@ void genericTrianglePrim_28(std::vector<u8>::iterator meshSubBlock, int count, i
     }
 }
 
-void genericTrianglePrim_20(std::vector<u8>::iterator meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
+void genericTrianglePrim_20(u8* meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
 {
     OTTable& pOT = *currentOTEntry;
     int depthGranularity = gDepthDivider + 2;
@@ -1226,9 +1226,9 @@ void genericTrianglePrim_20(std::vector<u8>::iterator meshSubBlock, int count, i
         currentModelInstanceDrawPrims++;
         assert(outputPrimSize == 0x20);
 
-        std::vector<u8>::iterator pVertices1 = currentModelBlockVertices + READ_LE_U16(meshSubBlock) * 8;
-        std::vector<u8>::iterator pVertices2 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 2) * 8;
-        std::vector<u8>::iterator pVertices3 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 4) * 8;
+        u8* pVertices1 = currentModelBlockVertices + READ_LE_U16(meshSubBlock) * 8;
+        u8* pVertices2 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 2) * 8;
+        u8* pVertices3 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 4) * 8;
         meshSubBlock += 8;
 
         gte_ldv3(pVertices1, pVertices2, pVertices3);
@@ -1290,12 +1290,12 @@ void genericTrianglePrim_20(std::vector<u8>::iterator meshSubBlock, int count, i
     }
 }
 
-void prim5_0(std::vector<u8>::iterator meshSubBlock, int count)
+void prim5_0(u8* meshSubBlock, int count)
 {
     genericTrianglePrim_20(meshSubBlock, count, 0x20, 0x7, 0x8);
 }
 
-void prim5_2generic(std::vector<u8>::iterator meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
+void prim5_2generic(u8* meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
 {
     OTTable& pOT = *currentOTEntry;
     int depthGranularity = gDepthDivider + 2;
@@ -1306,9 +1306,9 @@ void prim5_2generic(std::vector<u8>::iterator meshSubBlock, int count, int outpu
         currentModelInstanceDrawPrims++;
         assert(outputPrimSize == 0x20);
 
-        std::vector<u8>::iterator pVertices1 = currentModelBlockVertices + READ_LE_U16(meshSubBlock) * 8;
-        std::vector<u8>::iterator pVertices2 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 2) * 8;
-        std::vector<u8>::iterator pVertices3 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 4) * 8;
+        u8* pVertices1 = currentModelBlockVertices + READ_LE_U16(meshSubBlock) * 8;
+        u8* pVertices2 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 2) * 8;
+        u8* pVertices3 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 4) * 8;
         meshSubBlock += 8;
 
         gte_ldv3(pVertices1, pVertices2, pVertices3);
@@ -1370,22 +1370,22 @@ void prim5_2generic(std::vector<u8>::iterator meshSubBlock, int count, int outpu
     }
 }
 
-void prim3_0(std::vector<u8>::iterator meshSubBlock, int count)
+void prim3_0(u8* meshSubBlock, int count)
 {
     genericTrianglePrim_28(meshSubBlock, count, 0x28, 0x9, 0xc);
 }
 
-void prim4_0(std::vector<u8>::iterator meshSubBlock, int count)
+void prim4_0(u8* meshSubBlock, int count)
 {
     genericTrianglePrim_14(meshSubBlock, count, 0x14, 0x4, 4);
 }
 
-void prim5_2(std::vector<u8>::iterator meshSubBlock, int count)
+void prim5_2(u8* meshSubBlock, int count)
 {
     prim5_2generic(meshSubBlock, count, 0x20, 0x7, 0x8);
 }
 
-void primD_2generic(std::vector<u8>::iterator meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
+void primD_2generic(u8* meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
 {
     OTTable& pOT = *currentOTEntry;
     int depthGranularity = gDepthDivider + 2;
@@ -1396,10 +1396,10 @@ void primD_2generic(std::vector<u8>::iterator meshSubBlock, int count, int outpu
         currentModelInstanceDrawPrims++;
         assert(outputPrimSize == 0x28);
 
-        std::vector<u8>::iterator pVertices1 = currentModelBlockVertices + READ_LE_U16(meshSubBlock) * 8;
-        std::vector<u8>::iterator pVertices2 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 2) * 8;
-        std::vector<u8>::iterator pVertices3 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 4) * 8;
-        std::vector<u8>::iterator pVertices4 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 6) * 8;
+        u8* pVertices1 = currentModelBlockVertices + READ_LE_U16(meshSubBlock) * 8;
+        u8* pVertices2 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 2) * 8;
+        u8* pVertices3 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 4) * 8;
+        u8* pVertices4 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 6) * 8;
         meshSubBlock += 8;
 
         gte_ldv3(pVertices1, pVertices2, pVertices3);
@@ -1477,12 +1477,12 @@ void primD_2generic(std::vector<u8>::iterator meshSubBlock, int count, int outpu
     }
 }
 
-void primD_2(std::vector<u8>::iterator meshSubBlock, int count)
+void primD_2(u8* meshSubBlock, int count)
 {
     primD_2generic(meshSubBlock, count, 0x28, 0x9, 0x8);
 }
 
-void primD_0generic(std::vector<u8>::iterator meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
+void primD_0generic(u8* meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
 {
     OTTable& pOT = *currentOTEntry;
     int depthGranularity = gDepthDivider + 2;
@@ -1493,10 +1493,10 @@ void primD_0generic(std::vector<u8>::iterator meshSubBlock, int count, int outpu
         currentModelInstanceDrawPrims++;
         assert(outputPrimSize == 0x28);
 
-        std::vector<u8>::iterator pVertices1 = currentModelBlockVertices + READ_LE_U16(meshSubBlock) * 8;
-        std::vector<u8>::iterator pVertices2 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 2) * 8;
-        std::vector<u8>::iterator pVertices3 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 4) * 8;
-        std::vector<u8>::iterator pVertices4 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 6) * 8;
+        u8* pVertices1 = currentModelBlockVertices + READ_LE_U16(meshSubBlock) * 8;
+        u8* pVertices2 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 2) * 8;
+        u8* pVertices3 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 4) * 8;
+        u8* pVertices4 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 6) * 8;
         meshSubBlock += 8;
 
         gte_ldv3(pVertices1, pVertices2, pVertices3);
@@ -1574,12 +1574,12 @@ void primD_0generic(std::vector<u8>::iterator meshSubBlock, int count, int outpu
     }
 }
 
-void primD_0(std::vector<u8>::iterator meshSubBlock, int count)
+void primD_0(u8* meshSubBlock, int count)
 {
     primD_0generic(meshSubBlock, count, 0x28, 0x9, 0x8);
 }
 
-int primD_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator meshBlock, int initParam)
+int primD_init(u8* displayList, u8* meshBlock, int initParam)
 {
     if (primD_isValid(displayList))
     {
@@ -1608,8 +1608,8 @@ int primD_init(std::vector<u8>::iterator displayList, std::vector<u8>::iterator 
     return 0;
 }
 
-typedef void(*t_primRenderFunc)(std::vector<u8>::iterator meshSubBlock, int count);
-typedef int(*t_primInitFunc)(std::vector<u8>::iterator displayList, std::vector<u8>::iterator meshBlock, int initParam);
+typedef void(*t_primRenderFunc)(u8* meshSubBlock, int count);
+typedef int(*t_primInitFunc)(u8* displayList, u8* meshBlock, int initParam);
 
 struct sPolyTypeRenderDefinition
 {
@@ -1666,11 +1666,15 @@ void initModel2(sModelBlock* pModelBlock, std::vector<sTag*>& outputBuffer, int 
         pModelBlock->m0_flags |= 1;
     }
 
-    currentModelBlockDisplayLists = pModelBlock->m_model->mRawData.begin() + pModelBlock->m14_offsetDisplayList;
-    g_currentModelBlockSubBlocks = pModelBlock->m_model->mRawData.begin() + pModelBlock->m10_offsetMeshBlocks;
-    currentModelBlockNormals = pModelBlock->m_model->mRawData.begin() + pModelBlock->mC_offsetNormals;
-    currentModelBlockVertices = pModelBlock->m_model->mRawData.begin() + pModelBlock->m8_offsetVertices;
-    currentModeBlock18 = pModelBlock->m18.begin();
+    currentModelBlockDisplayLists = pModelBlock->m_baseItForRelocation + pModelBlock->m14_offsetDisplayList;
+    g_currentModelBlockSubBlocks = pModelBlock->m_baseItForRelocation + pModelBlock->m10_offsetMeshBlocks;
+    currentModelBlockNormals = pModelBlock->m_baseItForRelocation + pModelBlock->mC_offsetNormals;
+    currentModelBlockVertices = pModelBlock->m_baseItForRelocation + pModelBlock->m8_offsetVertices;
+    currentModeBlock18 = nullptr;
+    if(pModelBlock->m18.size())
+    {
+        currentModeBlock18 = &pModelBlock->m18[0];
+    }
 
     int initParam;
     switch (param_3)
@@ -6381,15 +6385,15 @@ bool submitModelForRendering(sModelBlock* param_1, std::vector<sTag*>& param_2, 
     }
 
     if(param_1->m18.size())
-        currentModeBlock18 = param_1->m18.begin();
-    currentModelBlockNormals = param_1->m_model->mRawData.begin() + param_1->mC_offsetNormals;
-    currentModelBlockVertices = param_1->m_model->mRawData.begin() + param_1->m8_offsetVertices;
+        currentModeBlock18 = &param_1->m18[0];
+    currentModelBlockNormals = param_1->m_baseItForRelocation + param_1->mC_offsetNormals;
+    currentModelBlockVertices = param_1->m_baseItForRelocation + param_1->m8_offsetVertices;
     fieldPolyCount2 += param_1->m4_numPrims;
     currentModelInstanceDrawPrims = param_2.begin();
     currentOTEntry = &OT;
 
     int numMeshBlockLeft = param_1->m6_numMeshBlock;
-    std::vector<u8>::iterator currentModelBlockSubBlocks = param_1->m_model->mRawData.begin() + param_1->m10_offsetMeshBlocks;
+    u8* currentModelBlockSubBlocks = param_1->m_baseItForRelocation + param_1->m10_offsetMeshBlocks;
     while (numMeshBlockLeft = numMeshBlockLeft - 1, numMeshBlockLeft != 0xffffffff) {
         int primType = READ_LE_U8(currentModelBlockSubBlocks);
         t_primRenderFunc primRenderFunc = nullptr;

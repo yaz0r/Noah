@@ -57,13 +57,26 @@ struct sFieldEntitySub4_B4
 	SFP_VEC4 m0_rotation;
 	SFP_VEC4 m6_scale;
 	MATRIX mC_spriteMatrix;
-	std::vector<sFieldEntitySub4_B4_sub>* m2C;
-	std::vector<sFieldEntitySub4_B4_sub>* m30;
+    std::vector<sFieldEntitySub4_B4_sub>* m2C;
+    std::vector<sFieldEntitySub4_B4_sub>* m30;
 	std::array<sFieldEntitySub4_124, 8>* m34_perSubgroupTransform;
 	struct sSpriteActorCore* m38_pNext;
 	s8 m3C;
 	s8 m3D;
 	//size ???
+};
+
+// size would be 0x54 or 0x58? Or ther is 2 versions of it
+struct sFieldEntitySub4_B4_alt
+{
+    SFP_VEC4 m0_rotation;
+    SFP_VEC4 m6_scale;
+
+    std::array<std::vector<struct sTag*>, 2> m2C;
+    std::vector<sFieldEntitySub4_B4_sub>* m30;
+    struct sModelBlock* m34_pModelBlock;
+    void* m38;
+    u32 m40;
 };
 
 struct sFieldEntitySub4_110
@@ -88,7 +101,8 @@ struct sSpriteActorCore {
     FP_VEC3 mC_step;
     s32 m18_moveSpeed;
     s32 m1C;
-    sFieldEntitySub4_B4* m20;
+    sFieldEntitySub4_B4* m20 = nullptr;
+    sFieldEntitySub4_B4_alt* m20_alt = nullptr;
     sFieldEntitySub4_110* m24;
     sColorAndCode m28_colorAndCode;
     s16 m2C_scale;
@@ -161,12 +175,19 @@ struct sSpriteActor : public sSpriteActorCore
 	//size 0x164
 };
 
-struct sSavePointMesh_data
+struct sSavePointMesh_data1
 {
     sSpriteActorCore m0_spriteActorCore;
-    sFieldEntitySub4_B4 mB4;
+    sFieldEntitySub4_B4_alt mB4;
     std::vector<sFieldEntitySub4_B4_sub> mF4;
 };
+
+struct sSavePointMesh_data2
+{
+    sSpriteActorCore m0_spriteActorCore;
+    sFieldEntitySub4_B4_alt mB4;
+};
+
 
 struct sSavePointMesh_1C
 {
@@ -179,11 +200,25 @@ struct sSavePointMesh_1C
     sSavePointMesh_1C* m18_pNext;
 };
 
-struct sSavePointMesh
-{
+// base size of one of those is expected to be 0xEC
+struct sSavePointMeshAbstract {
     sSavePointMesh_1C m0;
     sSavePointMesh_1C m1C;
-    sSavePointMesh_data m38_spriteActorData;
+    sSpriteActorCore m38_spriteActorCore;
+};
+
+
+// size of this one is 0xEC(base size) + 0x58(size of sFieldEntitySub4_B4_alt? but that is 4 off) and 0x18*count (size of sFieldEntitySub4_B4_sub)
+struct sSavePointMesh1 : public sSavePointMeshAbstract
+{
+    sFieldEntitySub4_B4_alt mB4;
+    std::vector<sFieldEntitySub4_B4_sub> mF4;
+};
+
+// size of this one is 0xEC(base size) + 0x54(size of sFieldEntitySub4_B4_alt?)
+struct sSavePointMesh2 : public sSavePointMeshAbstract
+{
+    sFieldEntitySub4_B4_alt mB4;
 };
 
 extern sSpriteActorCore* spriteTransfertListHead;

@@ -321,6 +321,9 @@ extern s16 OP_B6Var2;
 
 extern struct sSavePointMesh_1C* spriteCallback2Var2;
 
+extern int overrideTPageMode;
+extern s32 overrideTPageValue;
+
 void flagAllocation(std::vector<u8>&);
 void unflagAllocation(std::vector<u8>&);
 

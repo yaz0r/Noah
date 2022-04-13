@@ -62,6 +62,8 @@ s16 READ_LE_S16(const sPS1Pointer&);
 u32 READ_LE_U32(const sPS1Pointer&);
 s32 READ_LE_S32(const sPS1Pointer&);
 
+u8 READ_LE_U8(const void* ptr);
+s8 READ_LE_S8(const void* ptr);
 u16 READ_LE_U16(const void* ptr);
 s16 READ_LE_S16(const void* ptr);
 u32 READ_LE_U32(const void* ptr);
@@ -141,6 +143,15 @@ struct SFP_VEC3
 struct SFP_VEC4 : public SFP_VEC3
 {
     s16 pad;
+
+    static SFP_VEC4 FromIt(u8* it)
+    {
+        SFP_VEC4 temp;
+        temp.vx = READ_LE_S16(it); it += 2;
+        temp.vy = READ_LE_S16(it); it += 2;
+        temp.vz = READ_LE_S16(it); it += 2;
+        return temp;
+    }
 
     static SFP_VEC4 FromIt(std::vector<u8>::iterator it)
     {

@@ -735,6 +735,12 @@ void gte_ldv0(const SFP_VEC4* pVertices0)
 	setCopReg(2, COP2D_Z0, sVec2_s16::fromValue(pVertices0->vz, 0));
 }
 
+void gte_ldv0(u8* pVertices)
+{
+    setCopReg(2, COP2D_XY0, sVec2_s16::fromValue(READ_LE_S16(pVertices), READ_LE_S16(pVertices + 2)));
+    setCopReg(2, COP2D_Z0, sVec2_s16::fromValue(READ_LE_S16(pVertices + 4), 0));
+}
+
 void gte_ldv0(std::vector<u8>::iterator& pVertices)
 {
 	setCopReg(2, COP2D_XY0, sVec2_s16::fromValue(READ_LE_S16(pVertices), READ_LE_S16(pVertices + 2)));
@@ -751,6 +757,18 @@ void gte_ldv3(std::vector<u8>::iterator& pVertices0, std::vector<u8>::iterator& 
 
 	setCopReg(2, COP2D_XY2, sVec2_s16::fromValue(READ_LE_S16(pVertices2), READ_LE_S16(pVertices2 + 2)));
 	setCopReg(2, COP2D_Z2, sVec2_s16::fromValue(READ_LE_S16(pVertices2 + 4), 0));
+}
+
+void gte_ldv3(u8* pVertices0, u8* pVertices1, u8* pVertices2)
+{
+    setCopReg(2, COP2D_XY0, sVec2_s16::fromValue(READ_LE_S16(pVertices0), READ_LE_S16(pVertices0 + 2)));
+    setCopReg(2, COP2D_Z0, sVec2_s16::fromValue(READ_LE_S16(pVertices0 + 4), 0));
+
+    setCopReg(2, COP2D_XY1, sVec2_s16::fromValue(READ_LE_S16(pVertices1), READ_LE_S16(pVertices1 + 2)));
+    setCopReg(2, COP2D_Z1, sVec2_s16::fromValue(READ_LE_S16(pVertices1 + 4), 0));
+
+    setCopReg(2, COP2D_XY2, sVec2_s16::fromValue(READ_LE_S16(pVertices2), READ_LE_S16(pVertices2 + 2)));
+    setCopReg(2, COP2D_Z2, sVec2_s16::fromValue(READ_LE_S16(pVertices2 + 4), 0));
 }
 
 void gte_ldv3(const SFP_VEC4* pVertices0, const SFP_VEC4* pVertices1, const SFP_VEC4* pVertices2)
