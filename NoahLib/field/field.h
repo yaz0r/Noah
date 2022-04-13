@@ -324,6 +324,10 @@ extern struct sSavePointMesh_1C* spriteCallback2Var2;
 extern int overrideTPageMode;
 extern s32 overrideTPageValue;
 
+extern MATRIX currentRenderingMatrix;
+extern OTTable* characterRenderingOT;
+extern int shapeTransfertDoubleBufferIndex;
+
 void flagAllocation(std::vector<u8>&);
 void unflagAllocation(std::vector<u8>&);
 

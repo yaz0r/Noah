@@ -25,11 +25,11 @@ void resetPerSubgroupTransforms(sSpriteActorCore* param_1)
 {
 	for (int i=0; i<8; i++)
 	{
-		(*param_1->m20->m34_perSubgroupTransform)[i].m0_translateX = 0;
-		(*param_1->m20->m34_perSubgroupTransform)[i].m1_translateY = 0;
-		(*param_1->m20->m34_perSubgroupTransform)[i].m2_rotateX = 0;
-		(*param_1->m20->m34_perSubgroupTransform)[i].m4_rotateY = 0;
-		(*param_1->m20->m34_perSubgroupTransform)[i].m6_rotateZ = 0;
+		(*param_1->m20->getAsSprite()->m34_perSubgroupTransform)[i].m0_translateX = 0;
+        (*param_1->m20->getAsSprite()->m34_perSubgroupTransform)[i].m1_translateY = 0;
+        (*param_1->m20->getAsSprite()->m34_perSubgroupTransform)[i].m2_rotateX = 0;
+        (*param_1->m20->getAsSprite()->m34_perSubgroupTransform)[i].m4_rotateY = 0;
+        (*param_1->m20->getAsSprite()->m34_perSubgroupTransform)[i].m6_rotateZ = 0;
 	}
 }
 
@@ -56,21 +56,21 @@ void executeSpriteBytecode2Sub0Sub0sub0(sSpriteActorCore* param_1, int param_2, 
 				}
 				else {
 					u32 uVar6 = bVar2 & 7;
-					if (param_1->m20->m34_perSubgroupTransform == nullptr) {
-						param_1->m20->m34_perSubgroupTransform = new std::array<sFieldEntitySub4_124, 8>;
+					if (param_1->m20->getAsSprite()->m34_perSubgroupTransform == nullptr) {
+						param_1->m20->getAsSprite()->m34_perSubgroupTransform = new std::array<sFieldEntitySub4_124, 8>;
 						resetPerSubgroupTransforms(param_1);
 					}
 					if ((bVar2 & 0x20) != 0) {
-						(*param_1->m20->m34_perSubgroupTransform)[uVar6].m0_translateX = READ_LE_U8(pbVar5);
-						(*param_1->m20->m34_perSubgroupTransform)[uVar6].m1_translateY = READ_LE_U8(pbVar4 + 2);
+						(*param_1->m20->getAsSprite()->m34_perSubgroupTransform)[uVar6].m0_translateX = READ_LE_U8(pbVar5);
+						(*param_1->m20->getAsSprite()->m34_perSubgroupTransform)[uVar6].m1_translateY = READ_LE_U8(pbVar4 + 2);
 						pbVar5 = pbVar4 + 3;
 					}
 					pbVar4 = pbVar5;
 					if ((bVar2 & 0x10) == 0) {
-						(*param_1->m20->m34_perSubgroupTransform)[uVar6].m6_rotateZ = 0;
+						(*param_1->m20->getAsSprite()->m34_perSubgroupTransform)[uVar6].m6_rotateZ = 0;
 					}
 					else {
-						(*param_1->m20->m34_perSubgroupTransform)[uVar6].m6_rotateZ = (ushort)READ_LE_U8(pbVar4) << 4;
+						(*param_1->m20->getAsSprite()->m34_perSubgroupTransform)[uVar6].m6_rotateZ = (ushort)READ_LE_U8(pbVar4) << 4;
 						pbVar4 += 1;
 					}
 				}
@@ -108,24 +108,24 @@ void executeSpriteBytecode2Sub0Sub0(sSpriteActorCore* param_1, int param_2, sFie
 							}
 						}
 						else {
-							if (param_1->m20->m34_perSubgroupTransform == nullptr) {
-								param_1->m20->m34_perSubgroupTransform = new std::array<sFieldEntitySub4_124, 8>;
+							if (param_1->m20->getAsSprite()->m34_perSubgroupTransform == nullptr) {
+								param_1->m20->getAsSprite()->m34_perSubgroupTransform = new std::array<sFieldEntitySub4_124, 8>;
 								resetPerSubgroupTransforms(param_1);
 							}
 							u32 uVar4 = bVar2 & 7;
 							if ((bVar2 & 0x20) != 0) {
-								(*param_1->m20->m34_perSubgroupTransform)[uVar4].m0_translateX = READ_LE_U8(pbVar6);
-								(*param_1->m20->m34_perSubgroupTransform)[uVar4].m1_translateY = READ_LE_U8(pbVar5 + 2);
+								(*param_1->m20->getAsSprite()->m34_perSubgroupTransform)[uVar4].m0_translateX = READ_LE_U8(pbVar6);
+								(*param_1->m20->getAsSprite()->m34_perSubgroupTransform)[uVar4].m1_translateY = READ_LE_U8(pbVar5 + 2);
 								pbVar6 = pbVar5 + 3;
 							}
 							pbVar5 = pbVar6;
 							if ((bVar2 & 0x10) == 0) {
-								(*param_1->m20->m34_perSubgroupTransform)[uVar4].m6_rotateZ = 0;
+								(*param_1->m20->getAsSprite()->m34_perSubgroupTransform)[uVar4].m6_rotateZ = 0;
 							}
 							else {
 								bVar2 = READ_LE_U8(pbVar5);
 								pbVar5 = pbVar5 + 1;
-								(*param_1->m20->m34_perSubgroupTransform)[uVar4].m6_rotateZ = (ushort)bVar2 << 4;
+								(*param_1->m20->getAsSprite()->m34_perSubgroupTransform)[uVar4].m6_rotateZ = (ushort)bVar2 << 4;
 							}
 						}
 					}
@@ -148,7 +148,7 @@ void addToSpriteTransferList(sSpriteActorCore* param_1, short param_2)
 	if ((param_1->m3C & 3) == 1) {
         if (param_1->m40 & 0x00100000) {
             param_1->m40 &= ~0x00100000;
-            if (param_1->m20->m34_perSubgroupTransform != nullptr) {
+            if (param_1->m20->getAsSprite()->m34_perSubgroupTransform != nullptr) {
                 resetPerSubgroupTransforms(param_1);
             }
         }
@@ -167,12 +167,12 @@ void addToSpriteTransferList(sSpriteActorCore* param_1, short param_2)
 					param_1->m34 = param_2;
 					return;
 				}
-				pCurrentHead = pCurrentHead->m20->m38_pNext;
+				pCurrentHead = pCurrentHead->m20->getAsSprite()->m38_pNext;
 			}
 		}
 		param_1->m34 = param_2;
 		param_1->m40 |= 0x20000;
-		param_1->m20->m38_pNext = spriteTransfertListHead;
+		param_1->m20->getAsSprite()->m38_pNext = spriteTransfertListHead;
         spriteTransfertListHead = param_1;
 	}
 	else {
@@ -387,7 +387,106 @@ void savePointCallback8Sub0(sSpriteActorCore* param_1)
     return;
 }
 
+MATRIX* TransMatrix(MATRIX* m, FP_VEC4* v)
+{
+    long lVar1;
+    long lVar2;
+
+    lVar1 = v->vy;
+    lVar2 = v->vz;
+    m->t[0] = v->vx;
+    m->t[1] = lVar1;
+    m->t[2] = lVar2;
+    return m;
+}
+
+void setupSpriteObjectMatrix(sSpriteActorCore* param_1)
+
+{
+    if ((param_1->m40 & 1) == 0) {
+        FP_VEC4 scale;
+        scale.vx = param_1->m20->m6_scale.vx;
+        scale.vy = param_1->m20->m6_scale.vy;
+        scale.vz = param_1->m20->m6_scale.vz;
+        createRotationMatrix(&param_1->m20->m0_rotation, &param_1->m20->mC_matrix);
+        ScaleMatrixL(&param_1->m20->mC_matrix, &scale);
+    }
+    else {
+        MATRIX scaleMatrix;
+        FP_VEC4 scale;
+
+        // make identity
+        scaleMatrix.m[0][0] = 0x1000;
+        scaleMatrix.m[0][1] = 0;
+        scaleMatrix.m[0][2] = 0;
+        scaleMatrix.m[1][0] = 0;
+        scaleMatrix.m[1][1] = 0x1000;
+        scaleMatrix.m[1][0] = 0;
+        scaleMatrix.m[2][0] = 0;
+        scaleMatrix.m[2][1] = 0;
+        scaleMatrix.m[2][2] = 0x1000;
+        scaleMatrix.t[0] = 0;
+        scaleMatrix.t[1] = 0;
+        scaleMatrix.t[2] = 0;
+
+        scale.vx = param_1->m20->m6_scale.vx;
+        scale.vy = param_1->m20->m6_scale.vy;
+        scale.vz = param_1->m20->m6_scale.vz;
+        ScaleMatrixL(&scaleMatrix, &scale);
+
+        MATRIX rotationMatrix;
+        createRotationMatrix(&param_1->m20->m0_rotation, &rotationMatrix);
+        MulMatrix0(&rotationMatrix, &scaleMatrix, &param_1->m20->mC_matrix);
+    }
+
+    if (param_1->m3A != 0) {
+        FP_VEC4 scale;
+        scale.vx = param_1->m3A / 2;
+        scale.vy = param_1->m3A / 2;
+        scale.vz = param_1->m3A / 2;
+        ScaleMatrix(&param_1->m20->mC_matrix, &scale);
+    }
+}
+
+void spriteCallback_render2_updateMatrix(sSpriteActorCore* param_1)
+{
+    if ((param_1->m3C >> 0x1c & 1) != 0) {
+        setupSpriteObjectMatrix(param_1);
+        param_1->m3C = param_1->m3C & 0xefffffff;
+    }
+    return;
+}
+
+void spriteCallback_render2(sSavePointMesh_1C* param_1) {
+    sSpriteActorCore* pSpriteActor = param_1->m4;
+
+    spriteCallback_render2_updateMatrix(pSpriteActor);
+
+    if (pSpriteActor->m20->getAsObject()->m34_pModelBlock) {
+        FP_VEC4 temp;
+        temp[0] = pSpriteActor->m0_position.vx.getIntegerPart();
+        temp[1] = pSpriteActor->m0_position.vy.getIntegerPart();
+        temp[2] = pSpriteActor->m0_position.vz.getIntegerPart();
+
+        TransMatrix(&pSpriteActor->m20->getAsObject()->mC_matrix, &temp);
+
+        MATRIX MStack56;
+        if (((pSpriteActor->m3C >> 24) & 1) == 0) {
+            CompMatrix(&currentRenderingMatrix, &pSpriteActor->m20->getAsObject()->mC_matrix, &MStack56);
+        }
+
+        SetRotMatrix(&MStack56);
+        SetTransMatrix(&MStack56);
+        submitModelForRendering(pSpriteActor->m20->getAsObject()->m34_pModelBlock, pSpriteActor->m20->getAsObject()->m2C[shapeTransfertDoubleBufferIndex], *characterRenderingOT, (pSpriteActor->m40 >> 16) & 4);
+    }
+}
+
 void savePointCallback8(sSavePointMesh_1C* param_1) {
+
+    // HACK!
+    spriteCallback_render2(param_1);
+
+
     OP_INIT_ENTITY_SCRIPT_sub0Sub9(param_1->m4);
     savePointCallback8Sub0(param_1->m4);
 
@@ -479,19 +578,19 @@ void initsFieldEntitySub4_B4(sFieldEntitySub4_B4_alt* pThis)
 
 void createSavePointMeshDataMode1(sSavePointMesh1* param_1)
 {
-    (param_1->m38_spriteActorCore).m20_alt = &param_1->mB4;
+    (param_1->m38_spriteActorCore).m20 = &param_1->mB4;
     initsFieldEntitySub4_B4(&param_1->mB4);
-    ((param_1->m38_spriteActorCore).m20_alt)->m30 = &param_1->mF4;
-    ((param_1->m38_spriteActorCore).m20_alt)->m34_pModelBlock = nullptr;
-    ((param_1->m38_spriteActorCore).m20_alt)->m38 = nullptr;
+    (param_1->m38_spriteActorCore).m20->getAsObject()->m30 = &param_1->mF4;
+    (param_1->m38_spriteActorCore).m20->getAsObject()->m34_pModelBlock = nullptr;
+    (param_1->m38_spriteActorCore).m20->getAsObject()->m38 = nullptr;
 }
 
 void createSavePointMeshDataMode2(sSavePointMesh2* param_1)
 {
-    (param_1->m38_spriteActorCore).m20_alt = &param_1->mB4;
+    (param_1->m38_spriteActorCore).m20 = &param_1->mB4;
     initsFieldEntitySub4_B4(&param_1->mB4);
-    ((param_1->m38_spriteActorCore).m20_alt)->m34_pModelBlock = nullptr;
-    ((param_1->m38_spriteActorCore).m20_alt)->m40 = 0;
+    (param_1->m38_spriteActorCore).m20->getAsObject()->m34_pModelBlock = nullptr;
+    (param_1->m38_spriteActorCore).m20->getAsObject()->m40 = 0;
 }
 
 
@@ -546,10 +645,6 @@ void spriteBytecode2ExtendedE0_Sub0Sub0Sub0(sSavePointMesh_1C* param_1, void (*p
 }
 
 void spriteCallback_render0(sSavePointMesh_1C* param_1) {
-    assert(0);
-}
-
-void spriteCallback_render2(sSavePointMesh_1C* param_1) {
     assert(0);
 }
 
@@ -652,12 +747,12 @@ void spriteBytecode2ExtendedE0(sSpriteActorCore* param_1, sPS1Pointer param_2, s
     pSavePointMesh->m38_spriteActorCore.mC_step.vy = param_1->mC_step.vy;
     pSavePointMesh->m38_spriteActorCore.mC_step.vz = param_1->mC_step.vz;
     if (savePointCreationMode2 != 0) {
-        (pSavePointMesh->m38_spriteActorCore.m20_alt)->m0_rotation[0] = (param_1->m20)->m0_rotation[0];
-        (pSavePointMesh->m38_spriteActorCore.m20_alt)->m0_rotation[1] = (param_1->m20)->m0_rotation[1];
-        (pSavePointMesh->m38_spriteActorCore.m20_alt)->m0_rotation[2] = (param_1->m20)->m0_rotation[2];
-        (pSavePointMesh->m38_spriteActorCore.m20_alt)->m6_scale[0] = (param_1->m20)->m6_scale[0];
-        (pSavePointMesh->m38_spriteActorCore.m20_alt)->m6_scale[1] = (param_1->m20)->m6_scale[1];
-        (pSavePointMesh->m38_spriteActorCore.m20_alt)->m6_scale[2] = (param_1->m20)->m6_scale[2];
+        (pSavePointMesh->m38_spriteActorCore.m20)->m0_rotation[0] = (param_1->m20)->m0_rotation[0];
+        (pSavePointMesh->m38_spriteActorCore.m20)->m0_rotation[1] = (param_1->m20)->m0_rotation[1];
+        (pSavePointMesh->m38_spriteActorCore.m20)->m0_rotation[2] = (param_1->m20)->m0_rotation[2];
+        (pSavePointMesh->m38_spriteActorCore.m20)->m6_scale[0] = (param_1->m20)->m6_scale[0];
+        (pSavePointMesh->m38_spriteActorCore.m20)->m6_scale[1] = (param_1->m20)->m6_scale[1];
+        (pSavePointMesh->m38_spriteActorCore.m20)->m6_scale[2] = (param_1->m20)->m6_scale[2];
     }
 
     setCurrentAnimationPtr(&pSavePointMesh->m38_spriteActorCore, param_2);
@@ -673,7 +768,7 @@ void updateAllSubsprites(sSpriteActorCore* param_1)
 			blendMode = blendMode - 1;
 		}
 		sColorAndCode colorAndcode = param_1->m28_colorAndCode;
-		std::vector<sFieldEntitySub4_B4_sub>::iterator psVar1 = param_1->m20->m30->begin();
+		std::vector<sFieldEntitySub4_B4_sub>::iterator psVar1 = param_1->m20->getAsSprite()->m30->begin();
 		int uVar4 = 0;
 		if ((param_1->m40 & 0xFF) >> 2 != 0) {
 			do {
@@ -847,13 +942,14 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
         sModelBlock* pNewModelBlock = new sModelBlock;
         pNewModelBlock->init(meshBlock.getPointer());
         pNewModelBlock->m_baseItForRelocation = meshBlock.getPointer();
-        if (param_1->m20_alt->m2C[0].size()) {
-            param_1->m20_alt->m2C[0].clear();
-            param_1->m20_alt->m2C[1].clear();
+        if (param_1->m20->getAsObject()->m2C[0].size()) {
+            param_1->m20->getAsObject()->m2C[0].clear();
+            param_1->m20->getAsObject()->m2C[1].clear();
         }
-        initModel1(*pNewModelBlock, param_1->m20_alt->m2C[0], param_1->m20_alt->m2C[1]);
-        initModel2(pNewModelBlock, param_1->m20_alt->m2C[0], 0);
-        param_1->m20_alt->m34_pModelBlock = pNewModelBlock;
+        initModel1(*pNewModelBlock, param_1->m20->getAsObject()->m2C[0], param_1->m20->getAsObject()->m2C[1]);
+        initModel2(pNewModelBlock, param_1->m20->getAsObject()->m2C[0], 0);
+        param_1->m20->getAsObject()->m2C[1] = param_1->m20->getAsObject()->m2C[0];
+        param_1->m20->getAsObject()->m34_pModelBlock = pNewModelBlock;
         break;
     }
 	case 0xF6:
@@ -1151,59 +1247,11 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub9(sSpriteActorCore* param_1)
 	return;
 }
 
-void setupSpriteObjectMatrix(sSpriteActorCore* param_1)
-
-{
-	if ((param_1->m40 & 1) == 0) {
-		FP_VEC4 scale;
-		scale.vx = param_1->m20->m6_scale.vx;
-		scale.vy = param_1->m20->m6_scale.vy;
-		scale.vz = param_1->m20->m6_scale.vz;
-		createRotationMatrix(&param_1->m20->m0_rotation, &param_1->m20->mC_spriteMatrix);
-		ScaleMatrixL(&param_1->m20->mC_spriteMatrix, &scale);
-	}
-	else {
-		MATRIX scaleMatrix;
-		FP_VEC4 scale;
-
-		// make identity
-		scaleMatrix.m[0][0] = 0x1000;
-		scaleMatrix.m[0][1] = 0;
-		scaleMatrix.m[0][2] = 0;
-		scaleMatrix.m[1][0] = 0;
-		scaleMatrix.m[1][1] = 0x1000;
-		scaleMatrix.m[1][0] = 0;
-		scaleMatrix.m[2][0] = 0;
-		scaleMatrix.m[2][1] = 0;
-		scaleMatrix.m[2][2] = 0x1000;
-		scaleMatrix.t[0] = 0;
-		scaleMatrix.t[1] = 0;
-		scaleMatrix.t[2] = 0;
-
-		scale.vx = param_1->m20->m6_scale.vx;
-		scale.vy = param_1->m20->m6_scale.vy;
-		scale.vz = param_1->m20->m6_scale.vz;
-		ScaleMatrixL(&scaleMatrix, &scale);
-
-		MATRIX rotationMatrix;
-		createRotationMatrix(&param_1->m20->m0_rotation, &rotationMatrix);
-		MulMatrix0(&rotationMatrix, &scaleMatrix, &param_1->m20->mC_spriteMatrix);
-	}
-
-	if (param_1->m3A != 0) {
-		FP_VEC4 scale;
-		scale.vx = param_1->m3A / 2;
-		scale.vy = param_1->m3A / 2;
-		scale.vz = param_1->m3A / 2;
-		ScaleMatrix(&param_1->m20->mC_spriteMatrix, &scale);
-	}
-}
-
 void initFieldEntitySub4Sub3(sSpriteActorCore* param_1, int param_2)
 {
 	sFieldEntitySub4_B4* psVar1;
 
-	psVar1 = param_1->m20;
+	psVar1 = param_1->m20->getAsSprite();
 	if (psVar1 != nullptr) {
 		param_1->m2C_scale = param_2;
 		psVar1->m6_scale.vx = param_2;
@@ -1287,9 +1335,9 @@ void setCurrentAnimationPtr(sSpriteActorCore* param_1, const sPS1Pointer startOf
 			}
 		}
 		if ((param_1->m3C & 3) == 1) {
-			param_1->m20->m3D = 0;
-			param_1->m20->m3C = 0;
-			if (((param_1->m40 >> 0x14 & 1) == 0) && (param_1->m20->m34_perSubgroupTransform != nullptr)) {
+			param_1->m20->getAsSprite()->m3D = 0;
+			param_1->m20->getAsSprite()->m3C = 0;
+			if (((param_1->m40 >> 0x14 & 1) == 0) && (param_1->m20->getAsSprite()->m34_perSubgroupTransform != nullptr)) {
 				resetPerSubgroupTransforms(param_1);
 			}
 		}
@@ -1558,9 +1606,9 @@ void initFieldEntitySub4Sub2(sSpriteActor* pThis)
 	pThis->m20 = &pThis->mB4;
 	initsFieldEntitySub4_B4(&pThis->mB4);
 	pThis->m7C = &pThis->mF4;
-	pThis->m20->m34_perSubgroupTransform = &pThis->m124;
+	pThis->m20->getAsSprite()->m34_perSubgroupTransform = &pThis->m124;
 	pThis->m24 = &pThis->m110;
-	pThis->m20->m38_pNext = 0;
+	pThis->m20->getAsSprite()->m38_pNext = 0;
 }
 
 sSpriteActor* initializeSpriteActor(sSpriteActor* param_1, sSpriteActorAnimationBundle* pSetup, int clutX, int clutY, int vramX, int vramY, int param_7)
@@ -1588,8 +1636,8 @@ sSpriteActor* initializeSpriteActor(sSpriteActor* param_1, sSpriteActorAnimation
 	param_1->m3C = param_1->m3C & 0xff00ffff | (initFieldVar2 & 0xf) << 0x14 | (initFieldVar2 & 0xf) << 0x10;;
 
 	int count = initFieldEntitySub4Sub4(pSetup->m8_pData);
-	param_1->m20->m2C = param_1->m20->m30 = new std::vector<sFieldEntitySub4_B4_sub>;
-	param_1->m20->m30->resize(count);
+	param_1->m20->getAsSprite()->m2C = param_1->m20->getAsSprite()->m30 = new std::vector<sFieldEntitySub4_B4_sub>;
+	param_1->m20->getAsSprite()->m30->resize(count);
 
 	param_1->m24->m4_vramLocation.vx = vramX;
 	param_1->m24->m4_vramLocation.vy = vramY;
@@ -1669,8 +1717,8 @@ void fieldActorCallback(sSpriteActorCore* pThis)
 
 void OP_INIT_ENTITY_SCRIPT_sub0Sub3(sSpriteActor* param_1, int param_2)
 {
-	delete param_1->m20->m2C;
-	sFieldEntitySub4_B4* psVar2 = param_1->m20;
+	delete param_1->m20->getAsSprite()->m2C;
+	sFieldEntitySub4_B4* psVar2 = param_1->m20->getAsSprite();
 	psVar2->m2C = psVar2->m30 = new std::vector<sFieldEntitySub4_B4_sub>;
 	psVar2->m30->resize(param_2);
 

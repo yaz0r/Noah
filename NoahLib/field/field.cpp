@@ -6602,7 +6602,7 @@ void uploadCharacterSpriteSub1(sSpriteActorCore* param_1, int param_2, sFieldEnt
     int bVar2 = READ_LE_U8(pbVar13);
     sPS1Pointer local_54 = pbVar13 + 4;
     sPS1Pointer pbVar18 = pbVar13 + (bVar2 & 0x3f) * 2 + 4;
-    std::vector<sFieldEntitySub4_B4_sub>::iterator psVar13 = param_1->m20->m30->begin();
+    std::vector<sFieldEntitySub4_B4_sub>::iterator psVar13 = param_1->m20->getAsSprite()->m30->begin();
     short sVar8 = (short)(iVar23 >> 0xc);
     if (iVar23 < 0) {
         sVar8 = (short)(iVar23 + 0xfff >> 0xc);
@@ -6646,23 +6646,23 @@ void uploadCharacterSpriteSub1(sSpriteActorCore* param_1, int param_2, sFieldEnt
                 }
                 else {
                     transformId = transformData & 7;
-                    if (param_1->m20->m34_perSubgroupTransform == nullptr) {
-                        param_1->m20->m34_perSubgroupTransform = new std::array<sFieldEntitySub4_124, 8>;
+                    if (param_1->m20->getAsSprite()->m34_perSubgroupTransform == nullptr) {
+                        param_1->m20->getAsSprite()->m34_perSubgroupTransform = new std::array<sFieldEntitySub4_124, 8>;
                         resetPerSubgroupTransforms(param_1);
                     }
                     if ((transformData & 0x20) != 0) {
-                        (*param_1->m20->m34_perSubgroupTransform)[transformId].m0_translateX = READ_LE_U8(pbVar18 + 1);
-                        (*param_1->m20->m34_perSubgroupTransform)[transformId].m1_translateY = READ_LE_U8(pbVar18 + 2);
+                        (*param_1->m20->getAsSprite()->m34_perSubgroupTransform)[transformId].m0_translateX = READ_LE_U8(pbVar18 + 1);
+                        (*param_1->m20->getAsSprite()->m34_perSubgroupTransform)[transformId].m1_translateY = READ_LE_U8(pbVar18 + 2);
                         pbVar19 = pbVar18 + 3;
                     }
                     pbVar18 = pbVar19;
                     if ((transformData & 0x10) == 0) {
-                        (*param_1->m20->m34_perSubgroupTransform)[transformId].m6_rotateZ = 0;
+                        (*param_1->m20->getAsSprite()->m34_perSubgroupTransform)[transformId].m6_rotateZ = 0;
                     }
                     else {
                         transformData = READ_LE_U8(pbVar18);
                         pbVar18 = pbVar18 + 1;
-                        (*param_1->m20->m34_perSubgroupTransform)[transformId].m6_rotateZ = (ushort)transformData << 4;
+                        (*param_1->m20->getAsSprite()->m34_perSubgroupTransform)[transformId].m6_rotateZ = (ushort)transformData << 4;
                     }
                 }
             }
@@ -6791,7 +6791,7 @@ void uploadCharacterSprite(sSpriteActorCore* param_1, int param_2, sFieldEntityS
             int uVar18 = 4;
             int uVar20 = 0;
 
-            std::vector<sFieldEntitySub4_B4_sub>::iterator pFieldEntitySub4_B4_sub = param_1->m20->m30->begin();
+            std::vector<sFieldEntitySub4_B4_sub>::iterator pFieldEntitySub4_B4_sub = param_1->m20->getAsSprite()->m30->begin();
 
             if ((bVar2 & 0x3f) != 0) {
                 do {
@@ -6818,24 +6818,24 @@ void uploadCharacterSprite(sSpriteActorCore* param_1, int param_2, sFieldEntityS
                             }
                         }
                         else {
-                            if (param_1->m20->m34_perSubgroupTransform == nullptr) {
-                                param_1->m20->m34_perSubgroupTransform = new std::array<sFieldEntitySub4_124, 8>;
+                            if (param_1->m20->getAsSprite()->m34_perSubgroupTransform == nullptr) {
+                                param_1->m20->getAsSprite()->m34_perSubgroupTransform = new std::array<sFieldEntitySub4_124, 8>;
                                 resetPerSubgroupTransforms(param_1);
                             }
                             uVar18 = bVar3 & 7;
                             if ((bVar3 & 0x20) != 0) {
-                                (*param_1->m20->m34_perSubgroupTransform)[uVar18].m0_translateX = READ_LE_U8(pbVar17);
-                                (*param_1->m20->m34_perSubgroupTransform)[uVar18].m1_translateY = READ_LE_U8(pbVar16 + 2);
+                                (*param_1->m20->getAsSprite()->m34_perSubgroupTransform)[uVar18].m0_translateX = READ_LE_U8(pbVar17);
+                                (*param_1->m20->getAsSprite()->m34_perSubgroupTransform)[uVar18].m1_translateY = READ_LE_U8(pbVar16 + 2);
                                 pbVar17 = pbVar16 + 3;
                             }
                             pbVar16 = pbVar17;
                             if ((bVar3 & 0x10) == 0) {
-                                (*param_1->m20->m34_perSubgroupTransform)[uVar18].m6_rotateZ = 0;
+                                (*param_1->m20->getAsSprite()->m34_perSubgroupTransform)[uVar18].m6_rotateZ = 0;
                             }
                             else {
                                 bVar3 = READ_LE_U8(pbVar16);
                                 pbVar16 = pbVar16 + 1;
-                                (*param_1->m20->m34_perSubgroupTransform)[uVar18].m6_rotateZ = (ushort)bVar3 << 4;
+                                (*param_1->m20->getAsSprite()->m34_perSubgroupTransform)[uVar18].m6_rotateZ = (ushort)bVar3 << 4;
                             }
                         }
                     }
@@ -6918,7 +6918,7 @@ void uploadCharacterSprites()
             else {
                 uploadCharacterSprite(psVar1, (uint)(ushort)psVar1->m34, psVar1->m24);
             }
-            psVar1 = psVar1->m20->m38_pNext;
+            psVar1 = psVar1->m20->getAsSprite()->m38_pNext;
         } while (psVar1 != (sSpriteActor*)0x0);
     }
     spriteTransfertListHead = (sSpriteActor*)0x0;
@@ -6970,16 +6970,16 @@ void renderFieldCharacterSpritesSub0Sub0(sSpriteActor* pSpriteSheet)
     SFP_VEC4 local_30;
     FP_VEC4 local_28;
     uint uVar1;
-    sFieldEntitySub4_B4* psVar2;
+    
     int iVar3;
     int iVar4;
 
     uVar1 = pSpriteSheet->m40 >> 8 & 0x1f;
-    iVar3 = (int)(char)pSpriteSheet->m20->m3C << uVar1;
+    iVar3 = (int)(char)pSpriteSheet->m20->getAsSprite()->m3C << uVar1;
     if ((pSpriteSheet->mAC >> 2 & 1) != 0) {
         iVar3 = -iVar3;
     }
-    iVar4 = ((int)(char)pSpriteSheet->m20->m3D << uVar1) * (int)pSpriteSheet->m2C_scale;
+    iVar4 = ((int)(char)pSpriteSheet->m20->getAsSprite()->m3D << uVar1) * (int)pSpriteSheet->m2C_scale;
     iVar3 = iVar3 * pSpriteSheet->m2C_scale;
     if (iVar4 < 0) {
         iVar4 = iVar4 + 0xfff;
@@ -6991,12 +6991,12 @@ void renderFieldCharacterSpritesSub0Sub0(sSpriteActor* pSpriteSheet)
     local_30.vy = (pSpriteSheet->m0_position).vy >> 0x10;
     local_30.vz = (pSpriteSheet->m0_position).vz >> 0x10;
     rotateVectorByMatrix(&currentRenderingMatrix, &local_30, &local_28);
-    psVar2 = pSpriteSheet->m20;
-    (psVar2->mC_spriteMatrix).t[0] = currentRenderingMatrix.t[0] + local_28.vx + (iVar3 >> 0xc);
-    (psVar2->mC_spriteMatrix).t[1] = currentRenderingMatrix.t[1] + local_28.vy + (iVar4 >> 0xc);
-    (psVar2->mC_spriteMatrix).t[2] = currentRenderingMatrix.t[2] + local_28.vz;
-    SetRotMatrix(&psVar2->mC_spriteMatrix);
-    SetTransMatrix(&psVar2->mC_spriteMatrix);
+    sFieldEntitySub4_B4_base* psVar2 = pSpriteSheet->m20;
+    (psVar2->mC_matrix).t[0] = currentRenderingMatrix.t[0] + local_28.vx + (iVar3 >> 0xc);
+    (psVar2->mC_matrix).t[1] = currentRenderingMatrix.t[1] + local_28.vy + (iVar4 >> 0xc);
+    (psVar2->mC_matrix).t[2] = currentRenderingMatrix.t[2] + local_28.vz;
+    SetRotMatrix(&psVar2->mC_matrix);
+    SetTransMatrix(&psVar2->mC_matrix);
 }
 
 SFP_VEC4 currentSpriteCharacterSize[4];
@@ -7007,7 +7007,7 @@ std::array<s16, 8> spriteMatrixTable = {
 
 void renderFieldCharacterSpritesSub0Sub1(sSpriteActor* pSpriteSheet, sTag* pTag)
 {
-    sFieldEntitySub4_B4* psVar7 = pSpriteSheet->m20;
+    sFieldEntitySub4_B4* psVar7 = pSpriteSheet->m20->getAsSprite();
     u32 uVar9 = pSpriteSheet->m40 >> 8 & 0x1f;
     s8 bVar1 = psVar7->m3D;
     s16 spriteWidth = (short)((int)(char)psVar7->m3C << uVar9);
@@ -7027,18 +7027,18 @@ void renderFieldCharacterSpritesSub0Sub1(sSpriteActor* pSpriteSheet, sTag* pTag)
             int matrixIdNeeded = pSpriteDefinition->m14 & 7;
             if (currentBoundMatrixId != matrixIdNeeded) { // need to change the matrix?
                 isVisible = (spriteMatrixTable[matrixIdNeeded] & (pSpriteSheet->m3C >> 8) & 0xFF) == 0;
-                if (pSpriteSheet->m20->m34_perSubgroupTransform == nullptr)
+                if (psVar7->m34_perSubgroupTransform == nullptr)
                 {
-                    SetRotMatrix(&pSpriteSheet->m20->mC_spriteMatrix);
-                    SetTransMatrix(&pSpriteSheet->m20->mC_spriteMatrix);
+                    SetRotMatrix(&pSpriteSheet->m20->mC_matrix);
+                    SetTransMatrix(&pSpriteSheet->m20->mC_matrix);
                 }
                 else
                 {
-                    sFieldEntitySub4_124* psVar8 = &(*pSpriteSheet->m20->m34_perSubgroupTransform)[matrixIdNeeded];
+                    sFieldEntitySub4_124* psVar8 = &(*psVar7->m34_perSubgroupTransform)[matrixIdNeeded];
                     if ((psVar8->m0_translateX == 0) && (psVar8->m1_translateY == 0) && (psVar8->m6_rotateZ == 0))
                     {
-                        SetRotMatrix(&pSpriteSheet->m20->mC_spriteMatrix);
-                        SetTransMatrix(&pSpriteSheet->m20->mC_spriteMatrix);
+                        SetRotMatrix(&pSpriteSheet->m20->mC_matrix);
+                        SetTransMatrix(&pSpriteSheet->m20->mC_matrix);
                     }
                     else
                     {
@@ -7067,10 +7067,10 @@ void renderFieldCharacterSpritesSub0Sub1(sSpriteActor* pSpriteSheet, sTag* pTag)
                         }
                         MATRIX MStack112;
                         createRotationMatrix(&localRotationVector, &MStack112);
-                        MStack112.t[0] = (pSpriteSheet->m20->mC_spriteMatrix).t[0] + (spriteTranslateX >> 0xc);
-                        MStack112.t[1] = (pSpriteSheet->m20->mC_spriteMatrix).t[1] + (spriteTranslateY >> 0xc);
-                        MStack112.t[2] = (pSpriteSheet->m20->mC_spriteMatrix).t[2];
-                        SetMulMatrix(&pSpriteSheet->m20->mC_spriteMatrix, &MStack112);
+                        MStack112.t[0] = (pSpriteSheet->m20->mC_matrix).t[0] + (spriteTranslateX >> 0xc);
+                        MStack112.t[1] = (pSpriteSheet->m20->mC_matrix).t[1] + (spriteTranslateY >> 0xc);
+                        MStack112.t[2] = (pSpriteSheet->m20->mC_matrix).t[2];
+                        SetMulMatrix(&pSpriteSheet->m20->mC_matrix, &MStack112);
                         SetTransMatrix(&MStack112);
                     }
                 }
@@ -7270,8 +7270,8 @@ void renderFieldCharacterSprites(OTTable& OT, int oddOrEven)
                             VStack200.vy = VStack200.vy * 5 >> 2;
                             VStack200.vz = VStack200.vz * 5 >> 2;
                         }
-                        pSpriteSheet->m20->mC_spriteMatrix = localRotationMatrix;
-                        ScaleMatrix(&pSpriteSheet->m20->mC_spriteMatrix, &VStack200);
+                        pSpriteSheet->m20->mC_matrix = localRotationMatrix;
+                        ScaleMatrix(&pSpriteSheet->m20->mC_matrix, &VStack200);
 
                         if (pFieldEntity->m4C_scriptEntity->m14_currentTriangleFlag & 0x200000)
                         {

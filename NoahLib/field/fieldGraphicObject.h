@@ -52,11 +52,20 @@ struct sFieldEntitySub4_B4_sub
 	//size 0x18
 };
 
-struct sFieldEntitySub4_B4
+struct sFieldEntitySub4_B4_base {
+    SFP_VEC4 m0_rotation;
+    SFP_VEC4 m6_scale;
+    MATRIX mC_matrix;
+
+    virtual struct sFieldEntitySub4_B4* getAsSprite() = 0;
+    virtual struct sFieldEntitySub4_B4_alt* getAsObject() = 0;
+};
+
+struct sFieldEntitySub4_B4 : public sFieldEntitySub4_B4_base
 {
-	SFP_VEC4 m0_rotation;
-	SFP_VEC4 m6_scale;
-	MATRIX mC_spriteMatrix;
+    virtual struct sFieldEntitySub4_B4* getAsSprite() { return this; }
+    virtual struct sFieldEntitySub4_B4_alt* getAsObject() { assert(0); return nullptr; }
+
     std::vector<sFieldEntitySub4_B4_sub>* m2C;
     std::vector<sFieldEntitySub4_B4_sub>* m30;
 	std::array<sFieldEntitySub4_124, 8>* m34_perSubgroupTransform;
@@ -66,11 +75,11 @@ struct sFieldEntitySub4_B4
 	//size ???
 };
 
-// size would be 0x54 or 0x58? Or ther is 2 versions of it
-struct sFieldEntitySub4_B4_alt
+// size would be 0x54 or 0x58? Or there is 2 versions of it
+struct sFieldEntitySub4_B4_alt : public sFieldEntitySub4_B4_base
 {
-    SFP_VEC4 m0_rotation;
-    SFP_VEC4 m6_scale;
+    virtual struct sFieldEntitySub4_B4* getAsSprite() { assert(0); return nullptr; }
+    virtual struct sFieldEntitySub4_B4_alt* getAsObject() { return this; }
 
     std::array<std::vector<struct sTag*>, 2> m2C;
     std::vector<sFieldEntitySub4_B4_sub>* m30;
@@ -101,8 +110,7 @@ struct sSpriteActorCore {
     FP_VEC3 mC_step;
     s32 m18_moveSpeed;
     s32 m1C;
-    sFieldEntitySub4_B4* m20 = nullptr;
-    sFieldEntitySub4_B4_alt* m20_alt = nullptr;
+    sFieldEntitySub4_B4_base* m20 = nullptr;
     sFieldEntitySub4_110* m24;
     sColorAndCode m28_colorAndCode;
     s16 m2C_scale;
