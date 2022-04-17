@@ -200,6 +200,7 @@ void initOpcodeTable()
 		.end();
 
 	m_opcode[0x2A]
+        .setComment("Toggle flag 0x20000 on current field script entity")
 		.end();
 
 	m_opcode[0x2C]
@@ -1112,9 +1113,11 @@ void initExtendedOpcodeTable()
 		.end();
 
 	m_extendedOpcode[0x4F]
+        .setName("ENABLE_MENU")
 		.end();
 
 	m_extendedOpcode[0x50]
+        .setName("DISABLE_MENU")
 		.end();
 
 	m_extendedOpcode[0x51]
@@ -1269,7 +1272,7 @@ void initExtendedOpcodeTable()
 		.end();
 
 	m_extendedOpcode[0x87]
-		.setComment("Wait for something")
+		.setName("WAIT_MENU")
 		.end();
 
 	m_extendedOpcode[0x8C]
@@ -1398,6 +1401,7 @@ void initExtendedOpcodeTable()
 		.end();
 
 	m_extendedOpcode[0xE0]
+        .setName("SET_PAUSE_DISABLED")
 		.addArgumentByte()
 		.end();
 }

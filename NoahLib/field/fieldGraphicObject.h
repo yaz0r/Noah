@@ -139,7 +139,7 @@ struct sSpriteActorCore {
     sPS1Pointer m64_spriteByteCode;
     void(*m68)(sSpriteActorCore*);
     void* m6C_pointerToOwnerStructure;
-    s32 m70;
+    sSpriteActorCore* m70;
     u32 m74;
     u32 m78;
     sFieldEntitySub4_F4* m7C;

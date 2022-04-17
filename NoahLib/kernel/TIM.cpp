@@ -7,15 +7,6 @@ extern std::array<u8, 2048 * 512> gVram;
 RECT TIM_crect;
 RECT TIM_prect;
 
-struct TIM_IMAGE
-{
-	u32 mode;
-	RECT* crect;
-	void* caddr;
-	RECT* prect;
-	void* paddr;
-};
-
 std::vector<u8>::iterator currentTIM;
 
 int OpenTIM(std::vector<u8>::iterator ptr)

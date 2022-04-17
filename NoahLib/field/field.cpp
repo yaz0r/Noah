@@ -19,11 +19,12 @@
 #include "kernel/TIM.h"
 #include "screenDistortion.h"
 #include "mecha/mechaOverlay.h"
+#include "menus/menuHandler.h"
 
 #include "SDL_gamecontroller.h"
 #include "SDL_keyboard.h"
 
-u32 numVsync = 0;
+u32 playTimeInVsync = 0;
 
 bool g_executeScripts = true;
 bool g_executeUpdateScripts = true;
@@ -270,7 +271,7 @@ void resetFieldDefault()
     MissingCode();
 
     compassDisabled = 0;
-    OPX_50Param = 0;
+    menuDisabled = 0;
     MissingCode();
     pcInitVar1 = 0;
     updateCharacterVar0 = 0;
@@ -2535,7 +2536,7 @@ void updateGearState(int param_1)
     return;
 }
 
-u8 OPX_50Param = 0;
+u8 menuDisabled = 0;
 u8 compassDisabled = 0;
 u16 OPX_80Params[8] = { 0,0,0,0,0,0,0,0 };
 s32 OPX_81Params[3] = { 0,0,0 };
@@ -2556,7 +2557,7 @@ int getCurrentDiscNumber()
 
 
 
-s8 OPX_E0Param = 0;
+s8 pauseDisabled = 0;
 
 void OPX_13Sub(int)
 {
@@ -7745,28 +7746,28 @@ void getInputDuringVsync(void)
                 switch (i)
                 {
                 case SDL_SCANCODE_Z:
-                    buttonMask = 0x40; // CROSS
+                    buttonMask |= 0x40; // CROSS
                     break;
                 case SDL_SCANCODE_X:
-                    buttonMask = 0x20; // CIRCLE
+                    buttonMask |= 0x20; // CIRCLE
                     break;
                 case SDL_SCANCODE_A:
-                    buttonMask = 0x80; // SQUARE
+                    buttonMask |= 0x80; // SQUARE
                     break;
                 case SDL_SCANCODE_S:
-                    buttonMask = 0x10; // TRIANGLE
+                    buttonMask |= 0x10; // TRIANGLE
                     break;
                 case SDL_SCANCODE_UP:
-                    buttonMask = 0x1000;
+                    buttonMask |= 0x1000;
                     break;
                 case SDL_SCANCODE_RIGHT:
-                    buttonMask = 0x2000;
+                    buttonMask |= 0x2000;
                     break;
                 case SDL_SCANCODE_DOWN:
-                    buttonMask = 0x4000;
+                    buttonMask |= 0x4000;
                     break;
                 case SDL_SCANCODE_LEFT:
-                    buttonMask = 0x8000;
+                    buttonMask |= 0x8000;
                     break;
                 default:
                     break;
@@ -7778,7 +7779,7 @@ void getInputDuringVsync(void)
     static u32 previousDownButtons = 0;
     static u32 numVsyncButtonHeld = 0;
 
-    newPadButtonForScripts[0].vx |= buttonMask;
+    newPadButtonForScripts[0].vx = buttonMask;
     newPadButtonForDialogs = (newPadButtonForScripts[0].vx ^ previousDownButtons) & newPadButtonForScripts[0].vx;
 
     if (newPadButtonForDialogs != 0) {
@@ -7791,7 +7792,7 @@ void getInputDuringVsync(void)
         previousDownButtons++;
         newPadButtonForField = newPadButtonForDialogs;
     }
-    else if(numVsync & 3)
+    else if(playTimeInVsync & 3)
     {
         newPadButtonForField = newPadButtonForDialogs;
     }
@@ -7839,7 +7840,7 @@ void incrementTime()
 
 void vsyncCallback(void)
 {
-    numVsync++;
+    playTimeInVsync++;
     getInputDuringVsync();
     saveInputs();
     incrementTime();
@@ -7992,6 +7993,17 @@ void fieldEntryPoint()
             }
         }
         ////
+
+        // TODO: this is whiting a larger test
+        {
+            if (((menuIdToOpen != 0xff) && (g_frameOddOrEven == 0)) && (((actorArray[playerControlledActor].m4C_scriptEntity)->m0_fieldScriptFlags.m_rawFlags & 0x1800) == 0)) {
+                //releaseAllDialogWindows();
+                MissingCode();
+                loadAndOpenMenu();
+                menuIdToOpen = 0xff;
+            }
+        }
+
         MissingCode();
 
         updateMusicState();

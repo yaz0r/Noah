@@ -220,7 +220,7 @@ extern s32 cameraInterpolationPositionNumSteps;
 
 extern s16 camera2Tan;
 
-extern u8 OPX_50Param;
+extern u8 menuDisabled;
 extern u8 compassDisabled;
 extern u16 OPX_80Params[8];
 extern s32 OPX_81Params[3];
@@ -232,8 +232,11 @@ extern s16 OPX_82Param4;
 extern s32 OPX_86Param;
 extern s32 OPX8E_param0;
 extern s32 OPX8E_param1;
-extern s8 OPX_E0Param;
+extern s8 pauseDisabled;
 extern u8 fieldBackgroundClearColor[3];
+
+extern u16 newPadButtonForDialogs;
+extern u16 newPadButtonForField;
 
 extern int playMusicAuthorized;
 extern int musicVar1;
@@ -327,6 +330,10 @@ extern s32 overrideTPageValue;
 extern MATRIX currentRenderingMatrix;
 extern OTTable* characterRenderingOT;
 extern int shapeTransfertDoubleBufferIndex;
+
+void initFontPalettes(short param_1, short param_2);
+
+int loadInputFromVSyncBuffer();
 
 void flagAllocation(std::vector<u8>&);
 void unflagAllocation(std::vector<u8>&);

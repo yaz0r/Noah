@@ -11,6 +11,7 @@
 #include "screenDistortion.h"
 #include "field.h"
 #include "mecha/mechaOverlay.h"
+#include "menus/menuHandler.h"
 
 // TODO: Cleanup
 s16 findTriangleInWalkMesh(int posX, int posZ, int walkmeshId, SFP_VEC4* param_4, FP_VEC4* param_5);
@@ -313,6 +314,12 @@ void OP_10()
 {
     pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0 = -1;
     OP_10Sub(0);
+}
+
+void OP_DISABLE_RANDOM_BATTLES()
+{
+    fieldRandomBattleVar = 0;
+    pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 1;
 }
 
 void OP_ADD_TO_CURRENT_PARTY()
@@ -768,7 +775,7 @@ void OP_SET_ACTOR_POSITION_2D(void)
 void OP_SET_ENTITY_WALKMESH_LAYER()
 {
     pCurrentFieldScriptActor->m10_walkmeshId = (ushort)pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1];
-    setCurrentActor2DPosition((int)(actorArray[currentFieldActorId].m4C_scriptEntity)->m20_position.vx, (int)(actorArray[currentFieldActorId].m4C_scriptEntity)->m20_position.vz);
+    setCurrentActor2DPosition((int)(actorArray[currentFieldActorId].m4C_scriptEntity)->m20_position.vx.getIntegerPart(), (int)(actorArray[currentFieldActorId].m4C_scriptEntity)->m20_position.vz.getIntegerPart());
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 2;
 }
 
@@ -1297,6 +1304,13 @@ void OP_53(void)
         pCurrentFieldScriptActor->mCC_scriptPC += 4;
     }
 }
+
+void OP_55(void)
+{
+    MissingCode();
+    pCurrentFieldScriptActor->mCC_scriptPC += 7;
+}
+
 
 void OP_58()
 {
@@ -2428,9 +2442,9 @@ void OP_SET_OFF_GEAR()
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
 }
 
-void OPX_50(void)
+void OP_DISABLE_MENU(void)
 {
-    OPX_50Param = 1;
+    menuDisabled = 1;
     pCurrentFieldScriptActor->mCC_scriptPC++;
 }
 
@@ -2443,7 +2457,7 @@ void OP_DISABLE_COMPASS(void)
 void OP_ENABLE_PLAYER_CONTROLS()
 {
     fieldRandomBattleVar = 0;
-    OPX_50Param = 0;
+    menuDisabled = 0;
     compassDisabled = 0;
     op99Var7 = op99Var7 & 0x3fff;
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 1;
@@ -2452,7 +2466,7 @@ void OP_ENABLE_PLAYER_CONTROLS()
 void OPX_54(void)
 {
     fieldRandomBattleVar = -1;
-    OPX_50Param = 1;
+    menuDisabled = 1;
     compassDisabled = 1;
     op99Var7 = op99Var7 | 0xc000;
     if ((playMusicAuthorized == 0) || (fieldExecuteVar3 == 0)) {
@@ -2463,6 +2477,14 @@ void OPX_54(void)
         pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 1;
     }
     return;
+}
+
+void OP_OPEN_LOAD_GAME_MENU()
+{
+    menuIdToOpen = 2;
+    breakCurrentScript = 1;
+    menuOpenCount = menuOpenCount + 1;
+    pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 1;
 }
 
 void OPX_5C(void)
@@ -2513,6 +2535,12 @@ void OP_SET_TRANSPARENCY_MODE()
 {
     setTransparencyMode(actorArray[currentFieldActorId].m4_pVramSpriteSheet, getImmediateOrVariableUnsigned(1));
     pCurrentFieldScriptActor->mCC_scriptPC += 3;
+}
+
+void OP_SET_2D_BACKGROUND()
+{
+    MissingCode();
+    pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 9;
 }
 
 void OPX_62(void)
@@ -2630,6 +2658,17 @@ void OPX_86(void)
 {
     OPX_86Param = pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1];
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 2;
+}
+
+void OP_WAIT_MENU()
+{
+    if (menuOpenCount == 0) {
+        pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 1;
+    }
+    else {
+        pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC - 1;
+    }
+    breakCurrentScript = 1;
 }
 
 void OPX_8C()
@@ -2784,9 +2823,9 @@ void OP_GET_CURRENT_DISC_NUMBER()
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
 }
 
-void OPX_E0(void)
+void OP_SET_PAUSE_DISABLED(void)
 {
-    OPX_E0Param = pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1];
+    pauseDisabled = pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1];
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 2;
 }
 

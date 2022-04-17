@@ -137,6 +137,30 @@ void SetSemiTrans(POLY_FT4* p, int abe)
 	}
 }
 
+void SetSemiTrans(POLY_F4* p, int abe)
+{
+    if (abe == 0)
+    {
+        p->code &= ~2;
+    }
+    else
+    {
+        p->code |= 2;
+    }
+}
+
+void SetSemiTrans(POLY_G4* p, int abe)
+{
+    if (abe == 0)
+    {
+        p->code &= ~2;
+    }
+    else
+    {
+        p->code |= 2;
+    }
+}
+
 DISPENV* SetDefDispEnv(DISPENV* env, int x, int y, int w, int h)
 {
 	(env->disp).x = (short)x;
@@ -216,6 +240,11 @@ DRAWENV* PutDrawEnv(DRAWENV* env)
 
 	currentDrawEnv = *env;
 	return env;
+}
+
+void SetDispMask(int mask)
+{
+    MissingCode();
 }
 
 sTag gEndTag;

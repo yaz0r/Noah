@@ -20,6 +20,7 @@ void initOpcodes()
     fieldScriptOpcodes[0x0C] = OP_UPDATE_CHARACTER_INFINITLY;
     fieldScriptOpcodes[0x0D] = OP_RETURN;
     fieldScriptOpcodes[0x10] = OP_10;
+    fieldScriptOpcodes[0x14] = OP_DISABLE_RANDOM_BATTLES;
     fieldScriptOpcodes[0x16] = OP_INIT_ENTITY_PC;
     fieldScriptOpcodes[0x15] = OP_15;
     fieldScriptOpcodes[0x17] = OP_17;
@@ -63,6 +64,7 @@ void initOpcodes()
     fieldScriptOpcodes[0x4C] = OP_4C;
     fieldScriptOpcodes[0x52] = OP_52;
     fieldScriptOpcodes[0x53] = OP_53;
+    fieldScriptOpcodes[0x55] = OP_55;
     fieldScriptOpcodes[0x57] = OP_57;
     fieldScriptOpcodes[0x58] = OP_58;
     fieldScriptOpcodes[0x59] = OP_WALK_RANDOM_DIRECTION;
@@ -202,13 +204,15 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0x4B] = OP_WAIT_LOADING_SPECIAL_2D_ANIMATION;
     fieldScriptOpcodes_EX[0x4D] = OPX_4D;
     fieldScriptOpcodes_EX[0x4E] = OP_FREE_SPECIAL_2D_ANIMATION;
-    fieldScriptOpcodes_EX[0x50] = OPX_50;
+    fieldScriptOpcodes_EX[0x50] = OP_DISABLE_MENU;
     fieldScriptOpcodes_EX[0x52] = OP_DISABLE_COMPASS;
     fieldScriptOpcodes_EX[0x53] = OP_ENABLE_PLAYER_CONTROLS;
     fieldScriptOpcodes_EX[0x54] = OPX_54;
+    fieldScriptOpcodes_EX[0x57] = OP_OPEN_LOAD_GAME_MENU;
     fieldScriptOpcodes_EX[0x5C] = OPX_5C;
     fieldScriptOpcodes_EX[0x5D] = OPX_5D;
     fieldScriptOpcodes_EX[0x5E] = OP_SET_TRANSPARENCY_MODE;
+    fieldScriptOpcodes_EX[0x60] = OP_SET_2D_BACKGROUND;
     fieldScriptOpcodes_EX[0x62] = OPX_62;
     fieldScriptOpcodes_EX[0x65] = OPX_65;
     fieldScriptOpcodes_EX[0x66] = OPX_66;
@@ -246,7 +250,7 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0xCB] = OPX_CB;
     fieldScriptOpcodes_EX[0xCC] = OPX_CC;
     fieldScriptOpcodes_EX[0xCD] = OP_GET_CURRENT_DISC_NUMBER;
-    fieldScriptOpcodes_EX[0xE0] = OPX_E0;
+    fieldScriptOpcodes_EX[0xE0] = OP_SET_PAUSE_DISABLED;
 }
 
 class fakeConstructor

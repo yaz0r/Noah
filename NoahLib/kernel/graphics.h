@@ -176,6 +176,46 @@ struct POLY_FT4 : public sTag
 	virtual void execute() override;
 };
 
+struct POLY_G4 : public sTag
+{
+    u8 r0; //4
+    u8 g0;
+    u8 b0;
+    u8 code; //7
+    sVec2_s16 x0y0;
+    u8 r1;
+    u8 g1;
+    u8 b1;
+    u8 pad1;
+    sVec2_s16 x1y1; // 10
+    u8 r2;
+    u8 g2;
+    u8 b2;
+    u8 pad2;
+    sVec2_s16 x2y2; //18
+    u8 r3;
+    u8 g3;
+    u8 b3;
+    u8 pad3;
+    sVec2_s16 x3y3; //20
+
+    virtual void execute() override {}
+};
+
+struct LINE_F3 : public sTag
+{
+    u8 r0; //4
+    u8 g0;
+    u8 b0;
+    u8 code; //7
+    sVec2_s16 x0y0;
+    sVec2_s16 x1y1; // 10
+    sVec2_s16 x2y2;
+    u32 pad;
+
+    virtual void execute() override {}
+};
+
 struct POLY_GT3 : public sTag
 {
     // 4
@@ -243,6 +283,8 @@ void SetSemiTrans(TILE* p, int abe);
 void SetSprt(SPRT* p);
 void SetSemiTrans(SPRT* p, int abe);
 void SetSemiTrans(POLY_FT4* p, int abe);
+void SetSemiTrans(POLY_F4* p, int abe);
+void SetSemiTrans(POLY_G4* p, int abe);
 
 sTag* ClearOTagR(sTag* ot, int n);
 void DrawOTag(sTag* ot);
@@ -250,3 +292,6 @@ void DrawOTag(sTag* ot);
 DISPENV* PutDispEnv(DISPENV* env);
 DRAWENV* PutDrawEnv(DRAWENV* env);
 
+void SetDispMask(int mask);
+
+void AddPrim(sTag* ot, sTag* p);

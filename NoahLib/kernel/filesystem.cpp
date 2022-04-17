@@ -237,8 +237,11 @@ void c_filesystemExplorer::frame()
                                     setCurrentDirectory(i, 0);
                                     readFile(j, buffer, 0, 0x80);
                                     FILE* fHandle = fopen("file.bin", "wb+");
-                                    fwrite(&buffer[0], 1, getFileSize(j), fHandle);
-                                    fclose(fHandle);
+                                    if(fHandle)
+                                    {
+                                        fwrite(&buffer[0], 1, getFileSize(j), fHandle);
+                                        fclose(fHandle);
+                                    }
                                 }
                                 ImGui::EndPopup();
                             }

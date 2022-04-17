@@ -109,6 +109,7 @@ extern std::array<u8, 3> dialogWindowColor;
 
 extern u16 windowOpenBF;
 
+void updateDialogTextImage(sDialogWindow18* param_1);
 void flagWindowOpenBF(uint param_1);
 void createDialogWindow(short x, short y, int dialogIndex, int windowIndex, int width, int height, int fieldActorId, int actorId, int mode, uint param_10, uint param_11);
 void initDialogWindows();
@@ -120,3 +121,4 @@ void stepDialogWindows();
 void addDialogWindowsToOT(sTag* OT, int oddOrEven);
 s8 addDialogWindowsToOTSub0(sDialogWindow18* param_1);
 void setupMultiChoice(sDialogWindow18* param_1, u8 R, u8 G, u8 B);
+std::vector<u8>::iterator getDialogParamPointer(std::vector<u8>& buffer, int param_2);

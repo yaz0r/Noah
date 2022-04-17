@@ -285,7 +285,7 @@ std::array<MATRIX, 2> mechaFieldArgs2;
 
 std::array<SFP_VEC4, 4> initMechaTempVar;
 
-void loadMechaTextures(sMechaDataTable1_sub4* param_1, short param_2, short tpageX, short tpageY, short param_5, short clutX, short clutY)
+void uploadTextureToVram(sMechaDataTable1_sub4* param_1, short param_2, short tpageX, short tpageY, short param_5, short clutX, short clutY)
 {
     MissingCode();
 }
@@ -744,7 +744,7 @@ void mechaInitNewMecha(int entryId, ushort flags, sMechaDataTable2* pData2, sMec
         if ((flags & 0x40) == 0) {
             uVar29 = ((pLoadedMecha->m4A & 4) == 0);
         }
-        loadMechaTextures(pData1->m4_textures, uVar29, tpageX, tpageY, uVar29, clutX, clutY);
+        uploadTextureToVram(pData1->m4_textures, uVar29, tpageX, tpageY, uVar29, clutX, clutY);
         mechaModelBlocksBufferForLoading = pData1->m8_modelBlocks;
 
         int iVar2;

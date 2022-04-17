@@ -61,13 +61,13 @@ void fieldDecompress(int size, std::vector<u8>::iterator inputStream, std::vecto
     decompress(inputStream, output);
 }
 
-std::vector<u8> mallocAndDecompress(std::vector<u8>& input)
+std::vector<u8> mallocAndDecompress(std::vector<u8>::iterator& input)
 {
-    int totalSize = READ_LE_U32(input.begin());
+    int totalSize = READ_LE_U32(input);
 
     std::vector<u8> output;
     output.resize(totalSize);
-    std::vector<u8>::iterator buffer = input.begin();
+    std::vector<u8>::iterator buffer = input;
     decompress(buffer, output);
     return output;
 }

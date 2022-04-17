@@ -728,7 +728,7 @@ void spriteBytecode2ExtendedE0(sSpriteActorCore* param_1, sPS1Pointer param_2, s
         pSavePointMesh->m38_spriteActorCore.m7C = (sFieldEntitySub4_F4*)0x0;
     }
 
-    pSavePointMesh->m38_spriteActorCore.m70 = (int)param_1;
+    pSavePointMesh->m38_spriteActorCore.m70 = param_1;
     pSavePointMesh->m38_spriteActorCore.m44_currentAnimationBundle = param_1->m44_currentAnimationBundle;
     pSavePointMesh->m38_spriteActorCore.m48_defaultAnimationbundle = param_1->m48_defaultAnimationbundle;
     pSavePointMesh->m38_spriteActorCore.m74 = param_1->m74;
@@ -813,7 +813,7 @@ u16 customVramUploadX;
 u16 customVramUploadY;
 sPS1Pointer customVramUploadPtr;
 
-void loadMechaTextures(sPS1Pointer param_1, short param_2, short tpageX, short tpageY, short param_5, short clutX, short clutY)
+void uploadTextureToVram(sPS1Pointer param_1, short param_2, short tpageX, short tpageY, short param_5, short clutX, short clutY)
 {
     int textureCount = READ_LE_U8(param_1);
     sPS1Pointer psVar2 = param_1 + textureCount * 4 + 4;
@@ -859,7 +859,11 @@ void loadMechaTextures(sPS1Pointer param_1, short param_2, short tpageX, short t
 
 void customVramUpload()
 {
-    loadMechaTextures(customVramUploadPtr, 1, customVramUploadX, customVramUploadY, 0,0,0);
+    uploadTextureToVram(customVramUploadPtr, 1, customVramUploadX, customVramUploadY, 0,0,0);
+}
+
+void registerSpriteCallback2_2(void* param_1) {
+    MissingCode();
 }
 
 void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS1Pointer param_3)
@@ -875,7 +879,7 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
 		updateAllSubsprites(param_1);
 		break;
 	case 0x96:
-		MissingCode();
+        registerSpriteCallback2_2(param_1->m6C_pointerToOwnerStructure);
 		break;
 	case 0xB3:
 		param_1->mA8.mxB= READ_LE_U8(param_3) & 0x3F;
@@ -884,18 +888,46 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
 		pushByteOnAnimationStack(param_1, READ_LE_U8(param_3));
 		break;
     case 0xBC: // VERY Complicated, used by save points
-        if ((READ_LE_U8(param_3) & 0x80) == 0) {
-            MissingCode();
-        }
-        switch (READ_LE_U8(param_3) & 0x3F)
         {
-        case 0x16:
-            MissingCode();
+            if ((READ_LE_U8(param_3) & 0x80) == 0) {
+                MissingCode();
+            }
+            bool bVar24 = (param_1->m3C >> 24) & 1;
+            SFP_VEC4 local_70;
+            switch (READ_LE_U8(param_3) & 0x3F)
+            {
+            case 0x16:
+                local_70.vx = param_1->m70->m0_position.vx.getIntegerPart();
+                local_70.vy = param_1->m70->m0_position.vy.getIntegerPart();
+                local_70.vz = param_1->m70->m0_position.vz.getIntegerPart();
+                bVar24 = 0;
+                break;
+            default:
+                assert(0);
+            }
+
+            if (bVar24 != 0) {
+                assert(0);
+                //ApplyMatrixSV(&currentRenderingMatrix, &local_70, &local_70);
+                local_70.vx = local_70.vx + (short)currentRenderingMatrix.t[0];
+                local_70.vy = local_70.vy + (short)currentRenderingMatrix.t[1];
+                local_70.vz = local_70.vz + (short)currentRenderingMatrix.t[2];
+            }
+
+            if ((READ_LE_U8(param_3) & 0x40) != 0) {
+                assert(0);
+                /*
+                *(short*)&param_1->field_0xa0 = local_70.vx;
+                *(short*)&param_1->field_0xa2 = local_70.vy;
+                *(short*)&param_1->field_0xa4 = local_70.vz;
+                * */
+                return;
+            }
+            (param_1->m0_position).vx = (int)local_70.vx << 0x10;
+            (param_1->m0_position).vy = (int)local_70.vy << 0x10;
+            (param_1->m0_position).vz = (int)local_70.vz << 0x10;
             break;
-        default:
-            assert(0);
         }
-        break;
 	case 0xA0: // set the move speed for the character
 		{
 			int iVar11 = READ_LE_U8(param_3 )* 0x10 * (fieldDrawEnvsInitialized + 1) * (int)param_1->m82;
@@ -926,8 +958,14 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
     case 0xA3:
         MissingCode(); // save point spinning?
         break;
-    case 0xA6:
-        MissingCode(); // save point spinning?
+    case 0xA6: // used by save point (move up and down)
+        if ((param_1->mA8.mx0) != 1) {
+            int iVar13 = READ_LE_S8(param_3) * 0x10 * (fieldDrawEnvsInitialized + 1) * (int)param_1->m82;
+            if (iVar13 < 0) {
+                iVar13 = iVar13 + 0xfff;
+            }
+            (param_1->mC_step).vy = (param_1->mC_step).vy + ((iVar13 >> 0xc) << 0x10) / (int)(param_1->mAC >> 7 & 0xfff);
+        }
         break;
 	case 0xC1:
 		MissingCode();
@@ -946,8 +984,46 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
 			param_1->m7C->mC = READ_LE_U16(param_3);
 		}
 		break;
-    case 0xCE:
-        MissingCode(); // save point spinning?
+    case 0xCE: // save point spinning
+        {
+            sFieldEntitySub4_B4_alt* psVar22 = param_1->m20->getAsObject();
+            if (psVar22 == nullptr) {
+                return;
+            }
+            u16 uVar1 = READ_LE_U16(param_3) & 0x1ff;
+            u32 sVar14 = uVar1 * 8;
+            u16 uVar16 = (int)(READ_LE_U8(param_3+1) << 0x18) >> 0x10 & 0xffff;
+            s32 uVar15 = uVar16 >> 9 & 7;
+            if ((param_1->mAC >> 2 & 1) != 0) {
+                sVar14 = uVar1 * -8;
+            }
+            if ((uVar16 >> 0xc & 1) == 0) {
+                if (uVar15 != 0) {
+                    sModelBlock* pasVar3 = psVar22->m34_pModelBlock;
+                    if (pasVar3 == nullptr) {
+                        return;
+                    }
+                    //(*pasVar3)[uVar15].m2_rotateY = (*pasVar3)[uVar15].m2_rotateY + sVar14;
+                    assert(0);
+                    return;
+                }
+                psVar22->m0_rotation[1] = psVar22->m0_rotation[1] + sVar14;
+            }
+            else {
+                if (uVar15 != 0) {
+                    assert(0);
+                    /*
+                    if (psVar22->m34_perSubgroupTransform == (sFieldEntitySub4_124(*)[8])0x0) {
+                        return;
+                    }
+                    (*psVar22->m34_perSubgroupTransform)[uVar15].m2_rotateY = sVar14;
+                    */
+                    return;
+                }
+                psVar22->m0_rotation[1] = sVar14;
+            }
+        }
+        param_1->m3C = param_1->m3C | 0x10000000;
         break;
 	case 0xd1:
 		MissingCode();
