@@ -47,8 +47,9 @@ bool noahInit(int argc, char* argv[])
 
     MissingCode();
 
-
-    fieldEntryPoint();
+    while (!gCloseApp) {
+        fieldEntryPoint();
+    }
 
     return true;
 }

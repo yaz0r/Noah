@@ -2543,6 +2543,13 @@ void OP_SET_2D_BACKGROUND()
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 9;
 }
 
+void OPX_61()
+{
+    MissingCode();
+    pCurrentFieldScriptActor->mCC_scriptPC++;
+    breakCurrentScript = 1;
+}
+
 void OPX_62(void)
 {
     MissingCode();
@@ -2623,6 +2630,16 @@ void OPX_82(void)
     OPX_82Param3[2] = getImmediateOrVariableUnsigned(0x17);
     pCurrentFieldScriptActor->mCC_scriptPC += 0x19;
     OPX_82Param4 = 1;
+}
+
+void OP_SET_BOOTMODE()
+{
+    if (bootModeReady != 0) {
+        fieldRandomBattleVar = -1;
+        bootModeReady = 0;
+        newBootMode = getImmediateOrVariableUnsigned(1);
+    }
+    pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
 }
 
 void OPX_84()

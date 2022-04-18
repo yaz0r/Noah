@@ -25,6 +25,8 @@
 #include "SDL_keyboard.h"
 
 u32 playTimeInVsync = 0;
+s32 bootModeReady = 0;
+s32 newBootMode = 0;
 
 bool g_executeScripts = true;
 bool g_executeUpdateScripts = true;
@@ -7915,6 +7917,30 @@ void updateMusicState()
     }
 }
 
+void bootGame(int param_1)
+{
+    MissingCode();
+}
+
+void fieldChangeGameMode(int mode) {
+    MissingCode();
+
+    switch (mode) {
+    case 3:
+        MissingCode();
+        fieldScriptEntityAlreadyInitialized = 0;
+        MissingCode();
+        if ((newBootMode & 0x80) != 0) {
+            initGameState();
+        }
+        setBootMode(newBootMode & 0x7f);
+        bootGame(0);
+        break;
+    default:
+        assert(0);
+    }
+}
+
 void fieldEntryPoint()
 {
     fieldDebugDisable = (runningOnDTL == -1);
@@ -7935,6 +7961,7 @@ void fieldEntryPoint()
     fieldExecuteVar3 = -1;
     fieldExecuteVar2 = -1;
     playMusicAuthorized = -1;
+    bootModeReady = -1;
 
     MissingCode();
 
@@ -7970,9 +7997,9 @@ void fieldEntryPoint()
 
         MissingCode();
         ////
-        if ((fieldChangePrevented == 0) /*&& (fieldChangePrevented2 == 0)*/)
+        if ((fieldChangePrevented == 0) && (fieldMusicLoadPending == 0))
         {
-            //if ((asyncLoadingVar1 == 0xff) && (DAT_Field__800adb90 == 0))
+            if ((asyncLoadingVar1 == 0xff) && (load2dAnimVar == 0))
             {
                 setCurrentDirectory(4, 0); //TODO: shouldn't be necessary!
                 if (loadNewField((fieldMapNumber & 0xfff) * 2, 0) == 0)
@@ -7989,6 +8016,23 @@ void fieldEntryPoint()
                             //fieldTransitionCompleted = 1;
                         }
                     }
+                }
+            }
+        }
+        if (g_frameOddOrEven == 1) {
+            MissingCode();
+            if (g_frameOddOrEven == 1) {
+                MissingCode();
+                if (((g_frameOddOrEven == 1) && (bootModeReady == 0))) {
+                    MissingCode();
+                    waitReadCompletion(0);
+                    if (currentFieldId1 != -1) {
+                        unflagAllocation(rawFieldBundle);
+                        rawFieldBundle.clear();
+                    }
+                    MissingCode();
+                    fieldChangeGameMode(3);
+                    return;
                 }
             }
         }

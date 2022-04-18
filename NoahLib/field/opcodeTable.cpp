@@ -213,6 +213,7 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0x5D] = OPX_5D;
     fieldScriptOpcodes_EX[0x5E] = OP_SET_TRANSPARENCY_MODE;
     fieldScriptOpcodes_EX[0x60] = OP_SET_2D_BACKGROUND;
+    fieldScriptOpcodes_EX[0x61] = OPX_61;
     fieldScriptOpcodes_EX[0x62] = OPX_62;
     fieldScriptOpcodes_EX[0x65] = OPX_65;
     fieldScriptOpcodes_EX[0x66] = OPX_66;
@@ -221,9 +222,11 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0x80] = OPX_80;
     fieldScriptOpcodes_EX[0x81] = OPX_81;
     fieldScriptOpcodes_EX[0x82] = OPX_82;
+    fieldScriptOpcodes_EX[0x83] = OP_SET_BOOTMODE;
     fieldScriptOpcodes_EX[0x84] = OPX_84;
     fieldScriptOpcodes_EX[0x85] = OPX_85;
     fieldScriptOpcodes_EX[0x86] = OPX_86;
+    fieldScriptOpcodes_EX[0x87] = OP_WAIT_MENU;
     fieldScriptOpcodes_EX[0x8C] = OPX_8C;
     fieldScriptOpcodes_EX[0x8E] = OPX_8E;
     fieldScriptOpcodes_EX[0x8F] = OPX_8F;

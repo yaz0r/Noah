@@ -5,6 +5,7 @@
 #include "kernel/filesystem.h"
 #include "kernel/TIM.h"
 #include "kernel/decompress.h"
+#include "kernel/gameState.h"
 
 s32 menuIdToOpen = 0xFF;
 s32 menuOpenCount;
@@ -22,6 +23,7 @@ struct sMenuContext_1D4 {
 };
 
 struct sMenuContext_32C {
+    u8 m4FE6;
 };
 
 struct sMenuContext_330 {
@@ -31,6 +33,8 @@ struct sMenuContext_33C {
     u8 m3;
     u8 m4_drawCursor;
     u8 m9_drawMainMenu;
+    u8 mA_354Enabled;
+    u8 mC;
 };
 
 struct sMenuContext_348 {
@@ -89,7 +93,7 @@ struct sMenuContext {
     u8 m32A;
     u32 m2D8_frameCounter;
     u32 m308_oddOrEven;
-    sMenuContext_32C* m32C;
+    sMenuContext_32C* m32C_memoryCardContext;
     sMenuContext_330* m330;
     s8 m336_menuSelectedEntry = 0;
     s8 m337_previousMenuSelectedEntry = 0;
@@ -211,11 +215,11 @@ void initMenuContext348(char param_1)
 void initMenuContext32C(char param_1)
 {
     if (!param_1) {
-        delete gMenuContext->m32C;
+        delete gMenuContext->m32C_memoryCardContext;
     }
     else {
-        gMenuContext->m32C = new sMenuContext_32C;
-        memset(gMenuContext->m32C, 0, sizeof(sMenuContext_32C));
+        gMenuContext->m32C_memoryCardContext = new sMenuContext_32C;
+        memset(gMenuContext->m32C_memoryCardContext, 0, sizeof(sMenuContext_32C));
     }
 }
 void initMenuContext(void)
@@ -950,6 +954,63 @@ void updateMenuSelection(u8 count, u8 selectedEntry, std::vector<std::array<u32,
     gMenuContext->m33C->m4_drawCursor = 1;
 }
 
+void resetCursorState(void)
+{
+    gMenuContext->m33C->m4_drawCursor = 0;
+    gMenuContext->m33C->m3 = 0;
+    return;
+}
+
+void countField33C_C(uint param_1, byte* param_2)
+{
+    byte* pbVar1;
+
+    if ((param_1 & 0xff) != 0) {
+        pbVar1 = param_2 + (param_1 & 0xff);
+        do {
+            *param_2 = 0;
+            param_2 = param_2 + 1;
+        } while ((int)param_2 < (int)pbVar1);
+    }
+    return;
+}
+
+u8 menuVarUnk0 = 1;
+u8 menuVarUnk1 = 1;
+
+int menu2_executeMainMenuSelection(byte param_1) {
+    
+    u8 flag0 = 1;
+    menuVarUnk1 = 1;
+    u8 flag1 = 1;
+
+    switch (gMenuContext->m336_menuSelectedEntry + param_1) {
+    case 9:
+        loadInitialGameState();
+        flag1 = 0;
+        flag0 = 0;
+        break;
+    default:
+        assert(0);
+    }
+
+    gMenuContext->m32C_memoryCardContext->m4FE6 = 0;
+    if (flag1 != 0) {
+        assert(0);
+    }
+
+    MissingCode();
+
+    gMenuContext->m350_mainMenu->m1192 = 0;
+    gMenuContext->m350_mainMenu->m1193 = 1;
+    gMenuContext->m33C->m4_drawCursor = 1;
+    gMenuContext->m33C->m3 = 1;
+    gMenuContext->m337_previousMenuSelectedEntry = -1;
+    gMenuContext->m33C->mA_354Enabled = 0;
+    menuVarUnk0 = 1;
+    return flag0;
+}
+
 void loadSaveGameMenuExecute() {
     u8 cVar1 = 1;
 
@@ -978,7 +1039,13 @@ void loadSaveGameMenuExecute() {
             gMenuContext->m2D8_frameCounter = 0;
             break;
         case 4:
-            assert(0);
+            gMenuContext->m350_mainMenu->m1192 = 1;
+            resetCursorState();
+            countField33C_C(8, &gMenuContext->m33C->mC);
+            gMenuContext->m348_cursor->m15B = 0x40;
+            cVar1 = menu2_executeMainMenuSelection(7);
+            menuVarUnk0 = 0;
+            gMenuContext->m2D8_frameCounter = 0;
             break;
         default:
             break;
@@ -995,11 +1062,14 @@ void loadSaveGameMenuExecute() {
             menuReturnState0 = 1;
         }
         if (cVar1 == '\0') {
-            //FUN_Menu2__801e8044(8, &gMenuContext->m33C->field_0xc);
-            assert(0);
+            countField33C_C(8, &gMenuContext->m33C->mC);
             return;
         }
     } while (true);
+}
+
+void checkCurrentDiscNumber(uint param_1) {
+    MissingCode();
 }
 
 void menu2_loadGame_entryPoint() {
@@ -1012,17 +1082,22 @@ void menu2_loadGame_entryPoint() {
     case 2:
         menuReturnState0 = 0;
         loadSaveGameMenuExecute();
-/*        gMenuContext->m33C->m9_drawMainMenu = 0;
+        gMenuContext->m33C->m9_drawMainMenu = 0;
         gMenuContext->m33C->m4_drawCursor = 0;
         gMenuContext->m33C->m3 = 0;
-        */
-        assert(0);
+        if (menuReturnState0 == '\0') {
+            checkCurrentDiscNumber(0);
+        }
+        else if (menuReturnState0 == '\x02') {
+            assert(0);
+        }
         break;
     default:
         assert(0);
         break;
     }
-    assert(0);
+    MissingCode();
+    //menu2_mainLoop();
 }
 
 void processDebugMenuForMenuList(void) {
@@ -1131,5 +1206,31 @@ void loadAndOpenMenu(void)
         ClearCacheAfterOverlayLoad();
         enterMenu();
         ClearCacheAfterOverlayLoad();
+        gDepthDivider = 2;
+        if ((menuReturnState0 == '\0') && ((menuIdToOpen & 0x7f) == 2)) {
+            //kernelAndFieldStatesSynced = 1;
+            MissingCode();
+            setVar(0x46, 0);
+            setVar(4, 4);
+            fieldMapNumber = 4;
+            //pKernelGameState->field1464_0x2320 = 0;
+            MissingCode();
+            pKernelGameState->m1930_fieldVarsBackup[1] = 0;
+            pKernelGameState->m231A_fieldID = 4;
+        }
+        if (menuReturnState0 == '\x02') {
+            MissingCode(); //kernelAndFieldStatesSynced = 1;
+            setVar(0x46, 2);
+            setVar(4, pKernelGameState->m231A_fieldID & 0x3fff);
+            if ((pKernelGameState->m231A_fieldID & 0x3fff) < 0x400) {
+                MissingCode();//pKernelGameState->field1464_0x2320 = pKernelGameState->m1930_fieldVarsBackup[0x2a];
+            }
+        }
+
+        MissingCode();
+
+        menuIdToOpen = 0xff;
+        initFontSystem();
+        menuOpenCount = 0;
     }
 }

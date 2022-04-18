@@ -36,4 +36,5 @@ extern sGameState gameState;
 extern sGameState* pKernelGameState;
 
 void initGameState();
+void loadInitialGameState();
 

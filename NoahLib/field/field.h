@@ -331,7 +331,14 @@ extern MATRIX currentRenderingMatrix;
 extern OTTable* characterRenderingOT;
 extern int shapeTransfertDoubleBufferIndex;
 
+extern s32 bootModeReady;
+extern s32 newBootMode;
+
+extern s32 gDepthDivider;
+
+
 void initFontPalettes(short param_1, short param_2);
+void initFontSystem();
 
 int loadInputFromVSyncBuffer();
 
