@@ -169,6 +169,7 @@ void initOpcodes()
     fieldScriptOpcodes[0xFF] = OP_FF;
 
     fieldScriptOpcodes_EX[0x01] = OP_RAND_ROTATION;
+    fieldScriptOpcodes_EX[0x02] = OP_IF_CHARACTER_IN_VIEW;
     fieldScriptOpcodes_EX[0x03] = OP_SET_CURRENT_ACTOR_SCALE;
     fieldScriptOpcodes_EX[0x04] = OPX_04;
     fieldScriptOpcodes_EX[0x07] = OPX_07;

@@ -150,7 +150,7 @@ void OP_4()
     }
 
     pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m18 = 7;
-    pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m3_scriptIndex = 0xFF;
+    pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m3_scriptIndex = -1;
 }
 
 void OP_CALL()
@@ -188,7 +188,7 @@ void OP_RETURN()
             assert(0);
         }
         pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m18 = 0xF;
-        pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m3_scriptIndex = 0xff;
+        pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m3_scriptIndex = -1;
         currentScriptFinished = 1;
         breakCurrentScript = 1;
     }
@@ -552,7 +552,7 @@ void OP_GET_ACTOR_FACING_ANGLE()
 void OP_STOP(void)
 {
     pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m18 = 0xF;
-    pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m3_scriptIndex = 0xff;
+    pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m3_scriptIndex = -1;
     currentScriptFinished = 1;
     breakCurrentScript = 1;
     return;
@@ -974,6 +974,57 @@ void OP_RAND_ROTATION()
     breakCurrentScript = 1;
     pCurrentFieldScriptActor->m104_rotation = uVar5;
     pCurrentFieldScriptActor->mCC_scriptPC++;
+}
+
+uint getCharacterToEntity(int param_1)
+{
+    uint uVar1;
+
+    uVar1 = readCharacter(param_1);
+    if (uVar1 == 0xff) {
+        uVar1 = partyToFieldEntityArrayMapping[0];
+    }
+    return uVar1;
+}
+
+
+void projectCharacterToScreen(int* param_1, int* param_2)
+{
+    int iVar1;
+    SFP_VEC4 local_48;
+    MATRIX MStack64;
+    sVec2_s16 local_20;
+    long lStack28;
+    long alStack24[2];
+
+    iVar1 = getCharacterToEntity(1);
+    CompMatrix(&currentProjectionMatrix, (MATRIX*)&actorArray[iVar1].m2C_matrixBackup, &MStack64);
+    local_48.vx = 0;
+    local_48.vy = 0;
+    local_48.vz = 0;
+    SetRotMatrix(&MStack64);
+    SetTransMatrix(&MStack64);
+    RotTransPers(&local_48, &local_20, &lStack28, alStack24);
+    *param_2 = (int)local_20.vy;
+    *param_1 = (int)local_20.vx;
+}
+
+void OP_IF_CHARACTER_IN_VIEW() {
+    s32 x, y;
+
+    projectCharacterToScreen(&x, &y);
+    if (updateAllEntitiesSub2Var0 == 0) {
+        if ((y - 0x21U < 0x9f) && (x - 0x21U < 0xff)) {
+            pCurrentFieldScriptActor->mCC_scriptPC += 4;
+        }
+        else {
+            pCurrentFieldScriptActor->mCC_scriptPC = readU16FromScript(2);
+        }
+        breakCurrentScript = 1;
+    }
+    else {
+        pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 4;
+    }
 }
 
 void OP_F3()
@@ -1728,7 +1779,7 @@ void OP_92()
     }
 
     pCurrentFieldScriptActor->mCE_currentScriptSlot = 0;
-    pCurrentFieldScriptActor->mCF = 0;
+    pCurrentFieldScriptActor->mCF_scriptSlotWaitedOn = 0;
     pCurrentFieldScriptActor->m84 = 0;
     pCurrentFieldScriptActor->m12C_flags &=  0xfffffe3f;
     breakCurrentScript = 1;
@@ -2009,17 +2060,6 @@ void OP_SET_CAMERA_TARGET_OVERRIDE()
     cameraTargetOverride[1] = iVar1 << 0x10;
     fieldExectuteMaxCycles = fieldExectuteMaxCycles + 1;
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 8;
-}
-
-uint getCharacterToEntity(int param_1)
-{
-    uint uVar1;
-
-    uVar1 = readCharacter(param_1);
-    if (uVar1 == 0xff) {
-        uVar1 = partyToFieldEntityArrayMapping[0];
-    }
-    return uVar1;
 }
 
 void OP_SET_DESIRED_CAMERA_TARGET_TO_ENTITY()
@@ -4021,7 +4061,7 @@ void OP_RUN_ENTITY_SCRIPT_ASYNC()
         else
         {
             pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m16_status = 0;
-            pEntity->m8C_scriptSlots[pEntity->mCF].m4_flags.m22 = 0;
+            pEntity->m8C_scriptSlots[pEntity->mCF_scriptSlotWaitedOn].m4_flags.m22 = 0;
         }
     }
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
@@ -4031,21 +4071,21 @@ void OP_RUN_ENTITY_SCRIPT_BLOCKING()
 {
     if (readCharacter(1) != 0xFF)
     {
-        int entityId = readCharacter(1);
-        sFieldScriptEntity* pEntity = actorArray[entityId].m4C_scriptEntity;
-        if ((pEntity->m4_flags.m_rawFlags & 0x100000) == 0)
+        int targetEntityId = readCharacter(1);
+        sFieldScriptEntity* pTargetEntity = actorArray[targetEntityId].m4C_scriptEntity;
+        if ((pTargetEntity->m4_flags.m_rawFlags & 0x100000) == 0)
         {
             int scriptStatus = pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m16_status;
             switch (scriptStatus)
             {
-            case 0:
-                if (isScriptAlreadyRunning(pEntity, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 2] & 0x1f) != -1)
+            case 0: //init
+                if (isScriptAlreadyRunning(pTargetEntity, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 2] & 0x1f) != -1)
                 {
                     // find a free slot
                     int foundSlot = -1;
                     for (int i = 0; i < 8; i++)
                     {
-                        if ((pEntity->m8C_scriptSlots[i].m4_flags.m18 == 0xf) && !pEntity->m8C_scriptSlots[i].m4_flags.m22)
+                        if ((pTargetEntity->m8C_scriptSlots[i].m4_flags.m18 == 0xf) && !pTargetEntity->m8C_scriptSlots[i].m4_flags.m22)
                         {
                             foundSlot = i;
                             break;
@@ -4059,32 +4099,32 @@ void OP_RUN_ENTITY_SCRIPT_BLOCKING()
                     u8 param = pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 2] & 0x1f;
                     u8 scriptId = param & 0x1F;
 
-                    pEntity->m8C_scriptSlots[foundSlot].m0_scriptPC = getScriptEntryPoint(entityId, scriptId);
-                    pEntity->m8C_scriptSlots[foundSlot].m4_flags.m18 = param >> 5;
-                    pEntity->m8C_scriptSlots[pCurrentFieldScriptActor->mCF].m4_flags.m22 = 1;
-                    pEntity->m8C_scriptSlots[foundSlot].m3_scriptIndex = scriptId;
-                    pCurrentFieldScriptActor->mCF = foundSlot;
+                    pTargetEntity->m8C_scriptSlots[foundSlot].m0_scriptPC = getScriptEntryPoint(targetEntityId, scriptId);
+                    pTargetEntity->m8C_scriptSlots[foundSlot].m4_flags.m18 = param >> 5;
+                    pTargetEntity->m8C_scriptSlots[pCurrentFieldScriptActor->mCF_scriptSlotWaitedOn].m4_flags.m22 = 1;
+                    pCurrentFieldScriptActor->mCF_scriptSlotWaitedOn = foundSlot;
                     pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m16_status = 1;
+                    pTargetEntity->m8C_scriptSlots[foundSlot].m3_scriptIndex = scriptId;
                     return;
                 }
                 // TODO: does this ever happen?
                 pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
                 return;
-            case 1:
-                if ((pEntity->mCE_currentScriptSlot == pCurrentFieldScriptActor->mCF) || (pEntity->m8C_scriptSlots[pCurrentFieldScriptActor->mCF].m4_flags.m18 == 0xf)) {
+            case 1: // waiting for script completion
+                if ((pTargetEntity->mCE_currentScriptSlot == pCurrentFieldScriptActor->mCF_scriptSlotWaitedOn) || (pTargetEntity->m8C_scriptSlots[pCurrentFieldScriptActor->mCF_scriptSlotWaitedOn].m4_flags.m18 == 0xf)) {
                     pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m16_status = 2;
                     return;
                 }
                 breakCurrentScript = 1;
                 return;
-            case 2:
-                if (pEntity->m8C_scriptSlots[pCurrentFieldScriptActor->mCF].m4_flags.m18 != 0xF)
+            case 2: // cleanup
+                if (pTargetEntity->m8C_scriptSlots[pCurrentFieldScriptActor->mCF_scriptSlotWaitedOn].m4_flags.m18 != 0xF)
                 {
                     breakCurrentScript = 1;
                     return;
                 }
                 pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m16_status = 0;
-                pEntity->m8C_scriptSlots[pEntity->mCF].m4_flags.m22 = 0;
+                pTargetEntity->m8C_scriptSlots[pCurrentFieldScriptActor->mCF_scriptSlotWaitedOn].m4_flags.m22 = 0;
                 break;
             default:
                 assert(0);
@@ -4094,7 +4134,7 @@ void OP_RUN_ENTITY_SCRIPT_BLOCKING()
         else
         {
             pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m16_status = 0;
-            pEntity->m8C_scriptSlots[pEntity->mCF].m4_flags.m22 = 0;
+            pTargetEntity->m8C_scriptSlots[pTargetEntity->mCF_scriptSlotWaitedOn].m4_flags.m22 = 0;
         }
     }
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
@@ -4117,7 +4157,7 @@ void OP_RUN_ENTITY_SCRIPT_UNKMODE()
                 {
                     return;
                 }
-                if ((pEntity->mCE_currentScriptSlot != pCurrentFieldScriptActor->mCF) && (pEntity->m8C_scriptSlots[pCurrentFieldScriptActor->mCF].m4_flags.m18 != 0xf))
+                if ((pEntity->mCE_currentScriptSlot != pCurrentFieldScriptActor->mCF_scriptSlotWaitedOn) && (pEntity->m8C_scriptSlots[pCurrentFieldScriptActor->mCF_scriptSlotWaitedOn].m4_flags.m18 != 0xf))
                 {
                     breakCurrentScript = 1;
                     return;
@@ -4125,7 +4165,7 @@ void OP_RUN_ENTITY_SCRIPT_UNKMODE()
 
                 pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
                 pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m16_status = 0;
-                pEntity->m8C_scriptSlots[pCurrentFieldScriptActor->mCF].m4_flags.m22 = 0;
+                pEntity->m8C_scriptSlots[pCurrentFieldScriptActor->mCF_scriptSlotWaitedOn].m4_flags.m22 = 0;
                 return;
             }
 
@@ -4151,9 +4191,9 @@ void OP_RUN_ENTITY_SCRIPT_UNKMODE()
 
                 pEntity->m8C_scriptSlots[foundSlot].m0_scriptPC = getScriptEntryPoint(entityId, scriptId);
                 pEntity->m8C_scriptSlots[foundSlot].m4_flags.m18 = param >> 5;
-                pEntity->m8C_scriptSlots[pCurrentFieldScriptActor->mCF].m4_flags.m22 = 1;
+                pEntity->m8C_scriptSlots[pCurrentFieldScriptActor->mCF_scriptSlotWaitedOn].m4_flags.m22 = 1;
                 pEntity->m8C_scriptSlots[foundSlot].m3_scriptIndex = scriptId;
-                pCurrentFieldScriptActor->mCF = foundSlot;
+                pCurrentFieldScriptActor->mCF_scriptSlotWaitedOn = foundSlot;
                 pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m16_status = 1;
                 return;
             }
@@ -4161,7 +4201,7 @@ void OP_RUN_ENTITY_SCRIPT_UNKMODE()
         else
         {
             pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m16_status = 0;
-            pEntity->m8C_scriptSlots[pEntity->mCF].m4_flags.m22 = 0;
+            pEntity->m8C_scriptSlots[pEntity->mCF_scriptSlotWaitedOn].m4_flags.m22 = 0;
         }
     }
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;

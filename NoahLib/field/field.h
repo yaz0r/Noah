@@ -27,7 +27,7 @@ struct sFieldScriptEntityScriptSlot
 {
     u16 m0_scriptPC;
     u8 m2_delay;
-    u8 m3_scriptIndex;
+    s8 m3_scriptIndex;
     union {
         struct {
             u32 m0 : 16;
@@ -101,7 +101,7 @@ struct sFieldScriptEntity
     std::array<sFieldScriptEntityScriptSlot, 8> m8C_scriptSlots;
     u16 mCC_scriptPC;
     s8 mCE_currentScriptSlot;
-    s8 mCF;
+    s8 mCF_scriptSlotWaitedOn;
     FP_VEC3 mD0_targetPositionOffset;
     s16 mE0_rotationLimit;
     s8 mE2;

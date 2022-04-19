@@ -878,6 +878,13 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
 		param_1->m28_colorAndCode.m3_code |= 1; // make transparent
 		updateAllSubsprites(param_1);
 		break;
+    case 0x94:
+        if ((param_1->m3C & 3) != 2) {
+            return;
+        }
+        param_1->m20->m0_rotation[1] = param_1->m70->m32;
+        param_1->m3C = param_1->m3C | 0x10000000;
+        break;
 	case 0x96:
         registerSpriteCallback2_2(param_1->m6C_pointerToOwnerStructure);
 		break;
@@ -897,6 +904,22 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
             switch (READ_LE_U8(param_3) & 0x3F)
             {
             case 0x16:
+                local_70.vx = param_1->m70->m0_position.vx.getIntegerPart();
+                local_70.vy = param_1->m70->m0_position.vy.getIntegerPart();
+                local_70.vz = param_1->m70->m0_position.vz.getIntegerPart();
+                bVar24 = 0;
+                break;
+            case 0x24:
+                // TODO: type-check that
+                ((sSavePointMeshAbstract*)param_1->m6C_pointerToOwnerStructure)->m0.m14 |= 0x40000000;
+                local_70.vx = param_1->m70->m0_position.vx.getIntegerPart();
+                local_70.vy = param_1->m70->m0_position.vy.getIntegerPart();
+                local_70.vz = param_1->m70->m0_position.vz.getIntegerPart();
+                bVar24 = 0;
+                break;
+            case 0x25:
+                // TODO: type-check that
+                ((sSavePointMeshAbstract*)param_1->m6C_pointerToOwnerStructure)->m0.m14 &= ~0x40000000;
                 local_70.vx = param_1->m70->m0_position.vx.getIntegerPart();
                 local_70.vy = param_1->m70->m0_position.vy.getIntegerPart();
                 local_70.vz = param_1->m70->m0_position.vz.getIntegerPart();

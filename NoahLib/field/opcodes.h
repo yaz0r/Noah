@@ -163,6 +163,7 @@ void OP_EXTENDED_OPCODE();
 void OP_FF();
 
 void OP_RAND_ROTATION();
+void OP_IF_CHARACTER_IN_VIEW();
 void OP_SET_CURRENT_ACTOR_SCALE();
 void OPX_04();
 void OPX_07();

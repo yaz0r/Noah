@@ -574,7 +574,7 @@ void initFieldScriptEntityValues(int index)
     pFieldScriptEntity->m88[1] = 0;
     pFieldScriptEntity->m88[0] = 0;
     pFieldScriptEntity->m84 = 0;
-    pFieldScriptEntity->mCF = 0;
+    pFieldScriptEntity->mCF_scriptSlotWaitedOn = 0;
     pFieldScriptEntity->mCE_currentScriptSlot = 0;
     pFieldScriptEntity->mE8_currentWalkSpeed = 0;
     pFieldScriptEntity->m10_walkmeshId = 0;

@@ -58,7 +58,7 @@ void initOpcodeTable()
 	m_opcode[0xA]
 		.setComment("CALL_IF_IN_TRIGGER")
 		.addArgumentTriggerIndex()
-		.addArgumentJumpLocation()
+		.addArgumentFunctionEntryPoint()
 		.end();
 
 	m_opcode[0xB]
@@ -917,6 +917,7 @@ void initExtendedOpcodeTable()
 		.end();
 
 	m_extendedOpcode[0x2]
+        .setName("IF_CHARACTER_IN_VIEW")
 		.addArgumentCharacter()
 		.addArgumentJumpLocation()
 		.end();
