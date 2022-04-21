@@ -149,8 +149,9 @@ void OP_4()
         }
     }
 
-    pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m18 = 7;
+    pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m18 = 0xF;
     pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m3_scriptIndex = -1;
+    breakCurrentScript = 1;
 }
 
 void OP_CALL()
@@ -303,9 +304,9 @@ void OP_10Sub(int param_1)
     if (pCurrentFieldScriptActor->mEA_forcedAnimation != 0xff) {
         animation = (int)pCurrentFieldScriptActor->mEA_forcedAnimation;
     }
-    if ((pCurrentFieldScriptActor->mE8_currentWalkSpeed != animation) && ((pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags & 0x2000000) == 0)) {
-        pCurrentFieldScriptActor->mE8_currentWalkSpeed = (short)animation;
-        updateEntityEventCode4(pSpriteActor, animation, pCurrentFieldEntity);
+    if ((pCurrentFieldScriptActor->mE8_currentAnimationId != animation) && ((pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags & 0x2000000) == 0)) {
+        pCurrentFieldScriptActor->mE8_currentAnimationId = (short)animation;
+        setVisualAnimation(pSpriteActor, animation, pCurrentFieldEntity);
     }
     updateEntityEventCode3Sub1(pSpriteActor, pCurrentFieldScriptActor->m104_rotation, pCurrentFieldEntity);
 }
@@ -713,7 +714,7 @@ void OP_UPDATE_CHARACTER()
                     if ((iRam800adb64 == 0xff) && (iVar2 = OP_UPDATE_CHARACTER_Sub0(pCurrentFieldScriptActor), psVar1 = pCurrentFieldScriptActor, iVar2 == 0)) {
                         pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags = pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags | 0x800;
                         numFollowStruct2 = numFollowStruct;
-                        psVar1->mE8_currentWalkSpeed = 0xff;
+                        psVar1->mE8_currentAnimationId = 0xff;
                         updateCharacterVar2 = updateCharacterVar3;
                     }
                     goto LAB_Field__8009f8e4;
@@ -1281,8 +1282,8 @@ int walkAndChangeField(int param_1, int param_2, int param_3, int param_4)
     psVar11->m104_rotation = uVar4;
     psVar11->m106_currentRotation = uVar4;
     psVar12->m18_moveSpeed = 0;
-    psVar11->mE8_currentWalkSpeed = 0;
-    updateEntityEventCode4(psVar12, 0, &actorArray[playerControlledActor]);
+    psVar11->mE8_currentAnimationId = 0;
+    setVisualAnimation(psVar12, 0, &actorArray[playerControlledActor]);
     breakCurrentScript = 1;
     psVar11->m8C_scriptSlots[psVar11->mCE_currentScriptSlot].m4_flags.raw = 0xffff;
     psVar11->m8C_scriptSlots[psVar11->mCE_currentScriptSlot].m4_flags.raw &= 0xfe7fffff;
@@ -2241,7 +2242,7 @@ void OP_22()
 
     psVar1 = pCurrentFieldScriptActor;
     actorArray[currentFieldActorId].m58_flags = actorArray[currentFieldActorId].m58_flags & 0xffdf;
-    psVar1->mE8_currentWalkSpeed = 0xff;
+    psVar1->mE8_currentAnimationId = 0xff;
     psVar1->m4_flags.m_rawFlags = psVar1->m4_flags.m_rawFlags & 0xfdffffff;
     psVar1->mCC_scriptPC = psVar1->mCC_scriptPC + 1;
 }

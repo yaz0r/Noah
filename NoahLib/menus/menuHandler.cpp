@@ -331,6 +331,9 @@ std::vector<std::array<u8, 2>> DAT_Menu2__801ea524 = { {
     {{0xB, 0xC}},
 }};
 
+u8 renderStringVar0 = 0;
+u16 renderStringVar1 = 0;
+
 u8 renderString(std::vector<u8>::iterator buffer, std::vector<u16>& param_2, ushort param_3, byte param_4) {
     sDialogWindow18 sDialogWindow18_temp;
     sDialogWindow18_temp.mA_width1 = param_3 | 1;
@@ -345,9 +348,9 @@ u8 renderString(std::vector<u8>::iterator buffer, std::vector<u16>& param_2, ush
     sDialogWindow18_temp.m0.vy = 0;
     sDialogWindow18_temp.m0.vx = 0;
     sDialogWindow18_temp.m69 = 100;
-    //DAT_8005a0c2 = param_4 & 1;
+    renderStringVar0 = param_4 & 1;
     sDialogWindow18_temp.m28_perLineBuffer.push_back(sDialogWindow18PerLineBufferEntry());
-    //DAT_8005a0c0 = 0;
+    renderStringVar1 = 0;
     sDialogWindow18_temp.m1C = buffer;
     sDialogWindow18_temp.m2C_inRamDialogTextImage = param_2;
     updateDialogTextImage(&sDialogWindow18_temp);

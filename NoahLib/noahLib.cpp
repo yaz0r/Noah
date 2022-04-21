@@ -41,6 +41,80 @@ bool noahInit(int argc, char* argv[])
 		initFont(fontData);
 	}
 
+    if (1) {
+        {
+            std::vector<u8> overlay;
+            readFile(0x10, overlay, 0, 0);
+            waitReadCompletion(0);
+            std::vector<u8> overlayDecompressed = mallocAndDecompress(overlay.begin());
+            FILE* fHandle = fopen((std::string("battle") + std::string(".ovl")).c_str(), "wb+");
+            if (fHandle) {
+                fwrite(&overlayDecompressed[0], 1, overlayDecompressed.size(), fHandle);
+                fclose(fHandle);
+            }
+        }
+
+        setCurrentDirectory(0x20, 0);
+        {
+            std::vector<u8> overlay;
+            readFile(0x1, overlay, 0, 0);
+            waitReadCompletion(0);
+            FILE* fHandle = fopen((std::string("battle_1") + std::string(".ovl")).c_str(), "wb+");
+            if (fHandle) {
+                fwrite(&overlay[0], 1, overlay.size(), fHandle);
+                fclose(fHandle);
+            }
+        }
+        setCurrentDirectory(0x10, 2);
+        {
+            std::vector<u8> overlay;
+            readFile(0x1, overlay, 0, 0);
+            waitReadCompletion(0);
+            FILE* fHandle = fopen((std::string("battle_10_2_1") + std::string(".ovl")).c_str(), "wb+");
+            if (fHandle) {
+                fwrite(&overlay[0], 1, overlay.size(), fHandle);
+                fclose(fHandle);
+            }
+        }
+        setCurrentDirectory(0x10, 0);
+        {
+            std::vector<u8> overlay;
+            readFile(0x4, overlay, 0, 0);
+            waitReadCompletion(0);
+            FILE* fHandle = fopen((std::string("battle_10_0_4") + std::string(".ovl")).c_str(), "wb+");
+            if (fHandle) {
+                fwrite(&overlay[0], 1, overlay.size(), fHandle);
+                fclose(fHandle);
+            }
+        }
+        setCurrentDirectory(0x10, 2);
+        {
+            std::vector<u8> overlay;
+            readFile(0x6, overlay, 0, 0);
+            waitReadCompletion(0);
+            FILE* fHandle = fopen((std::string("battle_debug") + std::string(".ovl")).c_str(), "wb+");
+            if (fHandle) {
+                fwrite(&overlay[0], 1, overlay.size(), fHandle);
+                fclose(fHandle);
+            }
+        }
+        setCurrentDirectory(0, 1);
+    }
+
+    if (0) {
+        {
+            std::vector<u8> overlay;
+            readFile(0xF, overlay, 0, 0);
+            waitReadCompletion(0);
+            std::vector<u8> overlayDecompressed = mallocAndDecompress(overlay.begin());
+            FILE* fHandle = fopen((std::string("worldmap") + std::string(".ovl")).c_str(), "wb+");
+            if (fHandle) {
+                fwrite(&overlayDecompressed[0], 1, overlayDecompressed.size(), fHandle);
+                fclose(fHandle);
+            }
+        }
+    }
+
     MissingCode();
 
     initGameState();

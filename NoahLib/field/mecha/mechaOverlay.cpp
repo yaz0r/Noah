@@ -9,6 +9,9 @@ u32 NumMechas;
 std::array<s16, 4> mechaList;
 std::array<u8, 4> mechaList2;
 
+s16 mechaPlayAnimationVar0 = 0;
+s16 mechaPlayAnimationVar1 = 0;
+
 void waitForLoading(void)
 {
     int iVar1;
@@ -618,7 +621,7 @@ void processMechaAnimData(sLoadedMechas* param_1, sMechaInitVar2* param_2, int p
     }
 }
 
-void initMechaTransforms2(sLoadedMechas* param_1, sLoadedMechas* param_2, sMechaInitVar2* param_3, int param_4)
+void initMechaAnimation(sLoadedMechas* param_1, sLoadedMechas* param_2, sMechaInitVar2* param_3, int param_4)
 {
     if ((param_1 != (sLoadedMechas*)0x0) && (param_2 != (sLoadedMechas*)0x0)) {
         if (param_1->m2A[1] == 0) {
@@ -634,8 +637,7 @@ void initMechaTransforms2(sLoadedMechas* param_1, sLoadedMechas* param_2, sMecha
             param_1->m54_bytecode1 = nullptr;
             param_1->m4C_bytecode3 = nullptr;
             param_1->m23 = 0;
-            //param_1->m10A = DAT_Mecha__801e863c;
-            MissingCode();
+            param_1->m10A = mechaPlayAnimationVar0;
             processMechaAnimData(param_1, param_3, -1, 1);
         }
         else {
@@ -846,7 +848,7 @@ void mechaInitNewMecha(int entryId, ushort flags, sMechaDataTable2* pData2, sMec
     if ((flags & 0x40) == 0) {
         pLoadedMecha->mB0 = &pData2->m8;
         initMechaTransforms1(pLoadedMecha, &mechaInitVar2, &pData2->m4.m8, &pData2->m4.m4);
-        initMechaTransforms2(pLoadedMecha, pLoadedMecha, &mechaInitVar2, 0);
+        initMechaAnimation(pLoadedMecha, pLoadedMecha, &mechaInitVar2, 0);
     }
 
     if ((flags & 2) == 0) {
@@ -1220,6 +1222,15 @@ void initMechaFieldArgs2(MATRIX& param_1, short param_2, short param_3, short pa
     param_1.m[2][1] = param_9;
     param_1.m[2][2] = param_10;
     return;
+}
+
+void mechaPlayAnimation(ushort param_1, short param_2, int param_3) {
+    mechaPlayAnimationVar0 = param_2;
+    mechaPlayAnimationVar1 = param_1;
+    loadedMechas[param_1]->m35 = 0;
+    if (loadedMechas[param_1]) {
+        initMechaAnimation(loadedMechas[param_1], loadedMechas[param_1], &mechaInitVar2, param_3);
+    }
 }
 
 void convertMatrixToBgfx(MATRIX* pInputMatrix, float* finalMatrix)

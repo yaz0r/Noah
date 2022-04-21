@@ -108,7 +108,7 @@ struct sFieldScriptEntity
     s8 mE3;
     s16 mE4_playableCharacterId;
     s16 mE6;
-    s16 mE8_currentWalkSpeed;
+    s16 mE8_currentAnimationId;
     s16 mEA_forcedAnimation;
     s16 mEC_elevation;
     s32 mF0;
@@ -400,7 +400,7 @@ void setupRGBCalcSlot0_fadeToBlack(int);
 void setPolyUV(POLY_FT4* poly, ushort u0, ushort v0, ushort u1, ushort v1, ushort u2, ushort v2, ushort u3, ushort v3);
 
 void updateEntityEventCode3Sub1(struct sSpriteActor* param_1, ushort rotation, sFieldEntity* param_3);
-void updateEntityEventCode4(struct sSpriteActor* param_1, int param_2, sFieldEntity* param_3);
+void setVisualAnimation(struct sSpriteActor* param_1, int param_2, sFieldEntity* param_3);
 
 void waitForReadFinished(void);
 void startLoadingPlayableCharacters();

@@ -576,7 +576,7 @@ void initFieldScriptEntityValues(int index)
     pFieldScriptEntity->m84 = 0;
     pFieldScriptEntity->mCF_scriptSlotWaitedOn = 0;
     pFieldScriptEntity->mCE_currentScriptSlot = 0;
-    pFieldScriptEntity->mE8_currentWalkSpeed = 0;
+    pFieldScriptEntity->mE8_currentAnimationId = 0;
     pFieldScriptEntity->m10_walkmeshId = 0;
     pFieldScriptEntity->mEC_elevation = 0;
 
@@ -664,8 +664,8 @@ void initCharacterShadowPoly(sFieldEntity2dSprite* pSprite)
     pSprite->m20_Poly[0].tpage = GetTPage(0, 2, 0x280, 0x1e0);
     pSprite->m20_Poly[0].clut = GetClut(0x100, 0xf3);
     SetSemiTrans(p, 1);
-    pSprite->m20_Poly[0].x0y0.vx = 0xe0;
-    pSprite->m20_Poly[0].x0y0.vy = 0xe0;
+    pSprite->m20_Poly[0].v0 = 0xe0;
+    pSprite->m20_Poly[0].v1 = 0xe0;
     pSprite->m20_Poly[0].u0 = '\0';
     pSprite->m20_Poly[0].u1 = '\x0f';
     pSprite->m20_Poly[0].u2 = '\0';
@@ -4666,7 +4666,9 @@ int updateEntityEventCode3Sub3(FP_VEC3* param_1, sFieldScriptEntity* param_2, st
     return 0;
 }
 
-void updateEntityEventCode4(sSpriteActor* param_1, int param_2, sFieldEntity* param_3)
+std::array<s16, 4> updateEntityEventCode4Table1;
+
+void setVisualAnimation(sSpriteActor* param_1, int param_2, sFieldEntity* param_3)
 {
     sFieldScriptEntity* psVar1;
 
@@ -4686,8 +4688,21 @@ void updateEntityEventCode4(sSpriteActor* param_1, int param_2, sFieldEntity* pa
                 spriteActorSetPlayingAnimation(param_1, param_2);
             }
         }
-        else {
-            assert(0);
+        else{
+            static const std::array<u8, 12> updateEntityEventCode4Table0 = { {
+                    1,2,2,2,
+                    0,0,0,6,
+                    0,0,0,0
+            } };
+
+            if (param_2 < 0x10) {
+                mechaPlayAnimation(psVar1->m12C_flags >> 0xd & 7, 0, updateEntityEventCode4Table0[param_2]);
+                updateEntityEventCode4Table1[psVar1->m12C_flags >> 0xd & 7] = updateEntityEventCode4Table0[param_2];
+            }
+            else {
+                mechaPlayAnimation(psVar1->m12C_flags >> 0xd & 7, 0, param_2 - 0x10);
+                updateEntityEventCode4Table1[psVar1->m12C_flags >> 0xd & 7] = param_2 - 0x10;
+            }
         }
     }
     return;
@@ -4707,12 +4722,12 @@ void updateEntityEventCode3(int index, sFieldEntity* pFieldEntity, sFieldScriptE
     if ((((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x4000) != 0) && ((padButtonForScripts[0].vx & 0x40) != 0)) && (playerCanRun == 1)) {
         walkSpeed = 2;
     }
-    if (((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x1800) != 0) && (pFieldScriptEntity->mE8_currentWalkSpeed != walkSpeed)) {
-        if (pFieldScriptEntity->mE8_currentWalkSpeed == 1) {
+    if (((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x1800) != 0) && (pFieldScriptEntity->mE8_currentAnimationId != walkSpeed)) {
+        if (pFieldScriptEntity->mE8_currentAnimationId == 1) {
             walkSpeed = 1;
         }
         else {
-            if (pFieldScriptEntity->mE8_currentWalkSpeed == 2) {
+            if (pFieldScriptEntity->mE8_currentAnimationId == 2) {
                 walkSpeed = 2;
             }
         }
@@ -4809,39 +4824,39 @@ void updateEntityEventCode3(int index, sFieldEntity* pFieldEntity, sFieldScriptE
 
     pFieldScriptEntity->m4_flags.m_rawFlags &= ~0x1000;
 
-    int walkSpeed2;
+    int animationId;
 
     if ((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x800) == 0) {
         if (((int)pFieldScriptEntity->m104_rotation & 0x8000U) != 0) {
             walkSpeed = pFieldScriptEntity->mE6;
         }
         moveMask = getWalkmeshTriangleFlag(pFieldScriptEntity);
-        walkSpeed2 = walkSpeed;
+        animationId = walkSpeed;
         if ((moveMask & 0x200000) != 0) {
             if (((int)pFieldScriptEntity->m104_rotation & 0x8000U) != 0) {
-                walkSpeed2 = 6;
-                if (pFieldScriptEntity->mE8_currentWalkSpeed != 6) goto LAB_Field__800830ac;
+                animationId = 6;
+                if (pFieldScriptEntity->mE8_currentAnimationId != 6) goto LAB_Field__800830ac;
                 pFieldScriptEntity->m4_flags.m_rawFlags = pFieldScriptEntity->m4_flags.m_rawFlags | 0x1000;
             }
-            walkSpeed2 = 6;
+            animationId = 6;
         }
     }
     else
     {
-        walkSpeed2 = updateEntityEventCode4Var1;
+        animationId = updateEntityEventCode4Var1;
         if (updateEntityEventCode4Var0 == 0) {
             if (((pFieldEntity->m4_pVramSpriteSheet->m0_position).vy >> 16) == pFieldEntity->m4_pVramSpriteSheet->m84) {
                 pFieldEntity->m4_pVramSpriteSheet->m18_moveSpeed = 0;
-                walkSpeed2 = updateEntityEventCode4Var1;
+                animationId = updateEntityEventCode4Var1;
             }
             else {
                 if (walkSpeed == 2) {
                     pFieldEntity->m4_pVramSpriteSheet->m18_moveSpeed = pFieldEntity->m4_pVramSpriteSheet->m82 * 0x60;
-                    walkSpeed2 = updateEntityEventCode4Var1;
+                    animationId = updateEntityEventCode4Var1;
                 }
                 else {
                     pFieldEntity->m4_pVramSpriteSheet->m18_moveSpeed = pFieldEntity->m4_pVramSpriteSheet->m82 * 0x30;
-                    walkSpeed2 = updateEntityEventCode4Var1;
+                    animationId = updateEntityEventCode4Var1;
                 }
             }
         }
@@ -4849,11 +4864,11 @@ void updateEntityEventCode3(int index, sFieldEntity* pFieldEntity, sFieldScriptE
 
 LAB_Field__800830ac:
     if (pFieldScriptEntity->mEA_forcedAnimation != 0xff) {
-        walkSpeed2 = pFieldScriptEntity->mEA_forcedAnimation;
+        animationId = pFieldScriptEntity->mEA_forcedAnimation;
     }
-    if (((int)pFieldScriptEntity->mE8_currentWalkSpeed != (int)walkSpeed2) && ((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x2000000) == 0)) {
-        pFieldScriptEntity->mE8_currentWalkSpeed = walkSpeed2;
-        updateEntityEventCode4(pFieldEntity->m4_pVramSpriteSheet, walkSpeed2, pFieldEntity);
+    if (((int)pFieldScriptEntity->mE8_currentAnimationId != (int)animationId) && ((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x2000000) == 0)) {
+        pFieldScriptEntity->mE8_currentAnimationId = animationId;
+        setVisualAnimation(pFieldEntity->m4_pVramSpriteSheet, animationId, pFieldEntity);
     }
     if ((pFieldScriptEntity->m14_currentTriangleFlag & 0x100U) != 0) {
         stepVector.vx = stepVector.vx >> 1;
@@ -7310,7 +7325,7 @@ void renderFieldCharacterSprites(OTTable& OT, int oddOrEven)
                             spriteDepth = spriteDepth + -2;
                         }
 
-                        if ((ushort)(pScriptEntity->mE8_currentWalkSpeed + 0x22U) < 2) {
+                        if ((ushort)(pScriptEntity->mE8_currentAnimationId + 0x22U) < 2) {
                             assert(0);
                         }
                         else

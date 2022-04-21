@@ -224,6 +224,8 @@ void initMechaFieldArgs2(MATRIX& param_1, short param_2, short param_3, short pa
 
 void renderMechasForDebugFieldRenderer(int viewId);
 
+void mechaPlayAnimation(ushort param_1, short param_2, int param_3);
+
 extern std::vector<u8> mechaOverlayBuffer;
 extern u32 NumMechas;
 extern std::array<s16, 4> mechaList;
