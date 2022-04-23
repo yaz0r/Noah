@@ -133,7 +133,7 @@ struct sMechaInitVar4
 struct sLoadedMechas {
     sMechaInitVar4* m0;
     std::vector<sLoadedMecha_sub4>* m4;
-    std::vector<sMechaDataTable2_4_8>* m8;
+    std::vector<sMechaDataTable2_4_8>* m8_bytecodeTable;
     u32 mC;
     sMechaDataTable2_4_8* m10_bytecode0;
     sMechaDataTable2_4::sMechaDataTable2_4_4_array* m14;

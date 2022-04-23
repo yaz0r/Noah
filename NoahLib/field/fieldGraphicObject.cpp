@@ -36,7 +36,7 @@ void resetPerSubgroupTransforms(sSpriteActorCore* param_1)
 
 void executeSpriteBytecode2Sub0Sub0sub0(sSpriteActorCore* param_1, int param_2, sFieldEntitySub4_110* param_3)
 {
-	sPS1Pointer psVar4 = param_3->m0 + READ_LE_U16(param_3->m0 + param_2 * 2);
+	sPS1Pointer psVar4 = param_3->m0_spriteData->rawPointer + READ_LE_U16(param_3->m0_spriteData->rawPointer + param_2 * 2);
 	u32 bVar1 = READ_LE_U8(psVar4);
 	u32 uVar7 = 0;
 	sPS1Pointer pbVar4 = psVar4 + (bVar1 & 0x3f) * 2 + 4;
@@ -85,14 +85,14 @@ void executeSpriteBytecode2Sub0Sub0sub0(sSpriteActorCore* param_1, int param_2, 
 	}
 }
 
-void executeSpriteBytecode2Sub0Sub0(sSpriteActorCore* param_1, int param_2, sFieldEntitySub4_110* param_3)
+void executeSpriteBytecode2Sub0Sub0(sSpriteActorCore* param_1, int frameId, sFieldEntitySub4_110* param_3)
 {
-	sPS1Pointer puVar4 = param_3->m0;
-	if (param_2 < (int)((READ_LE_U16(puVar4) & 0x1ff) + 1)) {
+	sPS1Pointer puVar4 = param_3->m0_spriteData->rawPointer;
+	if (frameId < param_3->m0_spriteData->m0_header.mx01FF_frameCount + 1) {
 		if ((READ_LE_U16(puVar4) & 0x8000) == 0) {
-			u8 bVar1 = READ_LE_U8(puVar4 + READ_LE_U16(puVar4 + param_2 * 2));
+			u8 bVar1 = READ_LE_U8(puVar4 + READ_LE_U16(puVar4 + frameId * 2));
 			uint uVar7 = 0;
-			sPS1Pointer pbVar5 = puVar4 + READ_LE_U16(puVar4 + param_2 * 2) + (bVar1 & 0x3f) * 4 + 6;
+			sPS1Pointer pbVar5 = puVar4 + READ_LE_U16(puVar4 + frameId * 2) + (bVar1 & 0x3f) * 4 + 6;
 			if ((bVar1 & 0x3f) != 0) {
 				do {
 					while (true) {
@@ -139,7 +139,7 @@ void executeSpriteBytecode2Sub0Sub0(sSpriteActorCore* param_1, int param_2, sFie
 			}
 		}
 		else {
-			executeSpriteBytecode2Sub0Sub0sub0(param_1, param_2, param_3);
+			executeSpriteBytecode2Sub0Sub0sub0(param_1, frameId, param_3);
 		}
 	}
 }
@@ -163,21 +163,21 @@ void addToSpriteTransferList(sSpriteActorCore* param_1, short param_2)
 				if (pCurrentHead == param_1) {
 					sFieldEntitySub4_110* psVar3 = param_1->m24_vramData;
 					if (((psVar3 != &sFieldEntitySub4_110_8005a474) && (psVar3 != &sFieldEntitySub4_110_8006be10)) && ((param_1->m40 >> 0x13 & 1) == 0)) {
-						executeSpriteBytecode2Sub0Sub0(param_1, param_1->m34, psVar3);
+						executeSpriteBytecode2Sub0Sub0(param_1, param_1->m34_currentSpriteFrame, psVar3);
 					}
-					param_1->m34 = param_2;
+					param_1->m34_currentSpriteFrame = param_2;
 					return;
 				}
 				pCurrentHead = pCurrentHead->m20->getAsSprite()->m38_pNext;
 			}
 		}
-		param_1->m34 = param_2;
+		param_1->m34_currentSpriteFrame = param_2;
 		param_1->m40 |= 0x20000;
 		param_1->m20->getAsSprite()->m38_pNext = spriteTransfertListHead;
         spriteTransfertListHead = param_1;
 	}
 	else {
-		param_1->m34 = 0;
+		param_1->m34_currentSpriteFrame = 0;
 	}
 }
 
@@ -513,7 +513,7 @@ void initFieldEntitySub4Sub1(sSpriteActorCore* param_1)
     param_1->m3A = 0;
     param_1->m30 = 0;
     param_1->m32 = 0;
-    param_1->m34 = 0;
+    param_1->m34_currentSpriteFrame = 0;
     param_1->mA8.clear();
     param_1->m3C = param_1->m3C & 0xfe00ffe3;
     param_1->m40 = param_1->m40 & 0xfffe0003;
@@ -589,10 +589,14 @@ void createSavePointMeshDataMode2(sSavePointMesh2* param_1)
     (param_1->m38_spriteActorCore).m20->getAsObject()->m40 = 0;
 }
 
-
-int initFieldEntitySub4Sub4(const sPS1Pointer& param_1)
+int initFieldEntitySub4Sub5Sub1(const sFieldEntitySub4_110_0* param_1)
 {
-    return (READ_LE_U16(param_1) >> 9) & 0x3F;
+    return param_1->m0_header.mx8000_isVramPrebacked;
+}
+
+int initFieldEntitySub4Sub4(const sFieldEntitySub4_110_0* param_1)
+{
+    return param_1->m0_header.m_0x7E00;
 }
 
 sSavePointMeshAbstract* createSavePointMeshData(int mode1, int mode2, sFieldEntitySub4_110* param_3, int param_4, sSavePointMesh1* param_5)
@@ -609,7 +613,7 @@ sSavePointMeshAbstract* createSavePointMeshData(int mode1, int mode2, sFieldEnti
         }
         {
             sSavePointMesh1* pNewSavePoint1 = new sSavePointMesh1;
-            int numF4 = initFieldEntitySub4Sub4(param_3->m0) - 1;
+            int numF4 = initFieldEntitySub4Sub4(param_3->m0_spriteData) - 1;
             pNewSavePoint = allocateSavePointMeshData(pNewSavePoint1, param_5);
             pNewSavePoint1->mF4.resize(numF4);
             createSavePointMeshDataMode1(pNewSavePoint1);
@@ -704,7 +708,7 @@ void spriteBytecode2ExtendedE0(sSpriteActorCore* param_1, sPS1Pointer param_2, s
     pSavePointMesh->m38_spriteActorCore.m18_moveSpeed = param_1->m18_moveSpeed;
     pSavePointMesh->m38_spriteActorCore.m32 = param_1->m32;
     pSavePointMesh->m38_spriteActorCore.m2C_scale = param_1->m2C_scale;
-    pSavePointMesh->m38_spriteActorCore.m34 = param_1->m34;
+    pSavePointMesh->m38_spriteActorCore.m34_currentSpriteFrame = param_1->m34_currentSpriteFrame;
     savePointCreationMode1 = (uint)param_1->mB0 >> 9 & 1;
     pSavePointMesh->m38_spriteActorCore.mB0 = pSavePointMesh->m38_spriteActorCore.mB0 & 0xfffffdff | savePointCreationMode1 << 9;
 
@@ -1229,7 +1233,7 @@ void executeSpriteBytecode2(sSpriteActorCore* param_1)
 
 			if (bytecode < 0x10)
 			{
-				addToSpriteTransferList(param_1, param_1->m34 + 1);
+				addToSpriteTransferList(param_1, param_1->m34_currentSpriteFrame + 1);
 				waitDelay = (bytecode & 0xf) + 1;
 			}
 			else if (bytecode < 0x20)
@@ -1240,7 +1244,7 @@ void executeSpriteBytecode2(sSpriteActorCore* param_1)
 			}
 			else if (bytecode < 0x30)
 			{
-				param_1->m34--;
+				param_1->m34_currentSpriteFrame--;
 				executeSpriteBytecode2Sub1(param_1);
 				waitDelay = (bytecode & 0xf) + 1;
 			}
@@ -1526,7 +1530,7 @@ void executeSpriteBytecode(sSpriteActorCore* param_1, sPS1Pointer param_2, uint 
 			param_1->m64_spriteByteCode = pBytecode + 1;
 			if (bytecode < 0x10)
 			{
-				addToSpriteTransferList(param_1, param_1->m34 + 1);
+				addToSpriteTransferList(param_1, param_1->m34_currentSpriteFrame + 1);
 				unaff_s3 = (bytecode & 0xf) + 1;
 			}
 			else if (bytecode < 0x20)
@@ -1537,7 +1541,7 @@ void executeSpriteBytecode(sSpriteActorCore* param_1, sPS1Pointer param_2, uint 
 			}
 			else if (bytecode < 0x30)
 			{
-				addToSpriteTransferList(param_1, param_1->m34 - 1);
+				addToSpriteTransferList(param_1, param_1->m34_currentSpriteFrame - 1);
 				unaff_s3 = (bytecode & 0xf) + 1;
 			}
 
@@ -1661,7 +1665,7 @@ void initFieldEntitySub4Sub5Sub0(sFieldEntitySub4_110* param_1, sSpriteActorAnim
 	param_1->m4_vramLocation = param_3_vramLocation;
 	param_1->m8_clut = clut;
 	param_1->mC = param_2->mC_pData;
-	param_1->m0 = param_2->m8_pData;
+	param_1->m0_spriteData = &param_2->m8_pData;
 	initFieldVar4 = 0;
 	param_1->m10_startOfAnimationContainer = &param_2->m4_animations;
 
@@ -1682,11 +1686,6 @@ void deleteFieldEntitySub4(sSpriteActor* param_1)
 }
 
 
-int initFieldEntitySub4Sub5Sub1(const sPS1Pointer& param_1)
-{
-	return READ_LE_U8(param_1 + 1) >> 7;
-}
-
 void setAnimationBundle(sSpriteActorCore* param_1, sSpriteActorAnimationBundle* pAnimationBundle)
 {
 	sFieldEntitySub4_110* psVar2 = param_1->m24_vramData;
@@ -1697,7 +1696,7 @@ void setAnimationBundle(sSpriteActorCore* param_1, sSpriteActorAnimationBundle* 
 			param_1->m3C = param_1->m3C | 0x40000000;
 		}
 		if (isBattleOverlayLoaded != '\0') {
-			if (initFieldEntitySub4Sub5Sub1(psVar2->m0) == 0) {
+			if (initFieldEntitySub4Sub5Sub1(psVar2->m0_spriteData) == 0) {
 				psVar2->m4_vramLocation.vx = 0x300;
 				psVar2->m4_vramLocation.vy = 0x100;
 			}
@@ -1729,7 +1728,7 @@ void spriteActorSetPlayingAnimation(sSpriteActorCore* param_1, int animationId)
 		if (animationId < 0) {
 			setAnimationBundle(param_1, param_1->m4C_specialAnimation);
 			if ((isBattleOverlayLoaded != 0) &&
-				(iVar3 = initFieldEntitySub4Sub5Sub1(param_1->m24_vramData->m0), iVar3 == 0)) {
+				(iVar3 = initFieldEntitySub4Sub5Sub1(param_1->m24_vramData->m0_spriteData), iVar3 == 0)) {
 				param_1->m24_vramData->m4_vramLocation.vx = 0x100;
 				param_1->m24_vramData->m4_vramLocation.vy = 0x300;
 			}
@@ -1786,7 +1785,7 @@ sSpriteActor* initializeSpriteActor(sSpriteActor* param_1, sSpriteActorAnimation
 	param_1->m6C_pointerToOwnerStructure = param_1;
 	param_1->m3C = param_1->m3C & 0xff00ffff | (initFieldVar2 & 0xf) << 0x14 | (initFieldVar2 & 0xf) << 0x10;;
 
-	int count = initFieldEntitySub4Sub4(pSetup->m8_pData);
+	int count = initFieldEntitySub4Sub4(&pSetup->m8_pData);
 	param_1->m20->getAsSprite()->m2C = param_1->m20->getAsSprite()->m30 = new std::vector<sFieldEntitySub4_B4_sub>;
 	param_1->m20->getAsSprite()->m30->resize(count);
 
@@ -1817,7 +1816,7 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub4(sSpriteActor* param_1, int param_2, int* par
 	pbVar2 = (*param_1->m24_vramData->m10_startOfAnimationContainer)[0];
 	bVar1 = READ_LE_U8(pbVar2 + READ_LE_U16(pbVar2 + 4) + 4);
 	uVar5 = (uint)bVar1;
-	pbVar2 = param_1->m24_vramData->m0;
+	pbVar2 = param_1->m24_vramData->m0_spriteData->rawPointer;
 	iVar3 = uVar5 << 1;
 	if (bVar1 != 0) {
 		uVar5 = uVar5 - 1;

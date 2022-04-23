@@ -79,7 +79,7 @@
         <scriptEntity ID="47" Name=""/>
         <scriptEntity ID="48" Name=""/>
         <scriptEntity ID="49" Name=""/>
-        <scriptEntity ID="50" Name="Exits to worldmap"/>
+        <scriptEntity ID="50" Name="Exit Lahan"/>
         <scriptEntity ID="51" Name="To Alice House"/>
         <scriptEntity ID="52" Name=""/>
         <scriptEntity ID="53" Name="To beginner&apos;s hall"/>
@@ -294,7 +294,71 @@
         <scriptEntity ID="20" Name="Chest 2"/>
         <scriptEntity ID="21" Name=""/>
     </fieldInfo>
-    <fieldInfo ID="15" Name="Outside Lahan - Mountain path"/>
+    <fieldInfo ID="15" Name="Outside Lahan - Mountain path">
+        <scriptEntity ID="0" Name=""/>
+        <scriptEntity ID="1" Name=""/>
+        <scriptEntity ID="2" Name=""/>
+        <scriptEntity ID="3" Name=""/>
+        <scriptEntity ID="4" Name=""/>
+        <scriptEntity ID="5" Name=""/>
+        <scriptEntity ID="6" Name=""/>
+        <scriptEntity ID="7" Name=""/>
+        <scriptEntity ID="8" Name=""/>
+        <scriptEntity ID="9" Name=""/>
+        <scriptEntity ID="10" Name=""/>
+        <scriptEntity ID="11" Name=""/>
+        <scriptEntity ID="12" Name=""/>
+        <scriptEntity ID="13" Name="Bird nest"/>
+        <scriptEntity ID="14" Name=""/>
+        <scriptEntity ID="15" Name=""/>
+        <scriptEntity ID="16" Name=""/>
+        <scriptEntity ID="17" Name=""/>
+        <scriptEntity ID="18" Name=""/>
+        <scriptEntity ID="19" Name=""/>
+        <scriptEntity ID="20" Name=""/>
+        <scriptEntity ID="21" Name=""/>
+        <scriptEntity ID="22" Name=""/>
+        <scriptEntity ID="23" Name=""/>
+        <scriptEntity ID="24" Name=""/>
+        <scriptEntity ID="25" Name=""/>
+        <scriptEntity ID="26" Name=""/>
+        <scriptEntity ID="27" Name=""/>
+        <scriptEntity ID="28" Name=""/>
+        <scriptEntity ID="29" Name=""/>
+        <scriptEntity ID="30" Name=""/>
+        <scriptEntity ID="31" Name=""/>
+        <scriptEntity ID="32" Name=""/>
+        <scriptEntity ID="33" Name=""/>
+        <scriptEntity ID="34" Name=""/>
+        <scriptEntity ID="35" Name=""/>
+        <scriptEntity ID="36" Name=""/>
+        <scriptEntity ID="37" Name=""/>
+        <scriptEntity ID="38" Name=""/>
+        <scriptEntity ID="39" Name=""/>
+        <scriptEntity ID="40" Name=""/>
+        <scriptEntity ID="41" Name=""/>
+        <scriptEntity ID="42" Name=""/>
+        <scriptEntity ID="43" Name=""/>
+        <scriptEntity ID="44" Name=""/>
+        <scriptEntity ID="45" Name=""/>
+        <scriptEntity ID="46" Name=""/>
+        <scriptEntity ID="47" Name=""/>
+        <scriptEntity ID="48" Name=""/>
+        <scriptEntity ID="49" Name=""/>
+        <scriptEntity ID="50" Name=""/>
+        <scriptEntity ID="51" Name=""/>
+        <scriptEntity ID="52" Name=""/>
+        <scriptEntity ID="53" Name=""/>
+        <scriptEntity ID="54" Name=""/>
+        <scriptEntity ID="55" Name=""/>
+        <scriptEntity ID="56" Name=""/>
+        <scriptEntity ID="57" Name=""/>
+        <scriptEntity ID="58" Name=""/>
+        <scriptEntity ID="59" Name=""/>
+        <scriptEntity ID="60" Name=""/>
+        <scriptEntity ID="61" Name=""/>
+        <scriptEntity ID="62" Name=""/>
+    </fieldInfo>
     <fieldInfo ID="16" Name="Outside Lahan - Gears fly over Citan&apos;s"/>
     <fieldInfo ID="17" Name="Citan&apos;s House">
         <scriptEntity ID="0" Name="Director"/>
@@ -1002,7 +1066,36 @@
     <fieldInfo ID="593" Name="Krelian&apos;s Lab - Citan blows the last gate generator"/>
     <fieldInfo ID="594" Name="Krelian&apos;s Lab - corridor to Krelian&apos;s private lab"/>
     <fieldInfo ID="595" Name="Krelian&apos;s Lab - Krelian&apos;s private lab"/>
-    <fieldInfo ID="596" Name="Krelian&apos;s Lab - the rendezvous point"/>
+    <fieldInfo ID="596" Name="Krelian&apos;s Lab - the rendezvous point">
+        <scriptEntity ID="0" Name=""/>
+        <scriptEntity ID="1" Name=""/>
+        <scriptEntity ID="2" Name=""/>
+        <scriptEntity ID="3" Name=""/>
+        <scriptEntity ID="4" Name=""/>
+        <scriptEntity ID="5" Name=""/>
+        <scriptEntity ID="6" Name=""/>
+        <scriptEntity ID="7" Name=""/>
+        <scriptEntity ID="8" Name=""/>
+        <scriptEntity ID="9" Name=""/>
+        <scriptEntity ID="10" Name=""/>
+        <scriptEntity ID="11" Name=""/>
+        <scriptEntity ID="12" Name=""/>
+        <scriptEntity ID="13" Name=""/>
+        <scriptEntity ID="14" Name=""/>
+        <scriptEntity ID="15" Name=""/>
+        <scriptEntity ID="16" Name=""/>
+        <scriptEntity ID="17" Name=""/>
+        <scriptEntity ID="18" Name=""/>
+        <scriptEntity ID="19" Name=""/>
+        <scriptEntity ID="20" Name=""/>
+        <scriptEntity ID="21" Name=""/>
+        <scriptEntity ID="22" Name=""/>
+        <scriptEntity ID="23" Name=""/>
+        <scriptEntity ID="24" Name=""/>
+        <scriptEntity ID="25" Name=""/>
+        <scriptEntity ID="26" Name="Party edit memory cube"/>
+        <scriptEntity ID="27" Name="Save point"/>
+    </fieldInfo>
     <fieldInfo ID="597" Name="Krelian&apos;s Lab - corridor SE from 596"/>
     <fieldInfo ID="598" Name="Krelian&apos;s Lab - corridor SW from 596"/>
     <fieldInfo ID="599" Name="Krelian&apos;s Lab - useless corridor"/>

@@ -939,7 +939,7 @@ int prim3_init(u8* displayList, u8* meshBlock, int initParam)
 
 int prim4_init(u8* displayList, u8* meshBlock, int initParam)
 {
-    assert(READ_LE_U8(displayList + 3) == 0x20); // colored triangle
+    //assert(READ_LE_U8(displayList + 3) == 0x20); // colored triangle
 
     POLY_F3* pNewPoly = new POLY_F3;
 
@@ -6634,7 +6634,7 @@ void renderObjects()
 
 void uploadCharacterSpriteSub1(sSpriteActorCore* param_1, int param_2, sFieldEntitySub4_110* param_3)
 {
-    sPS1Pointer puVar16 = param_3->m0;
+    sPS1Pointer puVar16 = param_3->m0_spriteData->rawPointer;
     sPS1Pointer pbVar13 = puVar16 + READ_LE_U16(puVar16 + param_2 * 2);
     int iVar23 = READ_LE_U8(pbVar13 + 3) * param_1->m2C_scale;
     int bVar2 = READ_LE_U8(pbVar13);
@@ -6661,7 +6661,7 @@ void uploadCharacterSpriteSub1(sSpriteActorCore* param_1, int param_2, sFieldEnt
         do {
             psVar13->m9 = 0;
             psVar13->m8 = 0;
-            psVar13->m14 &= ~0x20;
+            psVar13->m14.m0x20_tileFlipY = 0;
             while (true) {
                 u8 transformData = READ_LE_U8(pbVar18);
                 if ((transformData & 0x80) == 0)
@@ -6669,7 +6669,7 @@ void uploadCharacterSpriteSub1(sSpriteActorCore* param_1, int param_2, sFieldEnt
                 sPS1Pointer pbVar19 = pbVar18 + 1;
                 if ((transformData & 0x40) == 0) {
                     if ((transformData & 4) != 0) {
-                        psVar13->m14 = psVar13->m14 | 0x20;
+                        psVar13->m14.m0x20_tileFlipY = 1;
                     }
                     if ((transformData & 1) != 0) {
                         psVar13->m8 = READ_LE_U8(pbVar19);
@@ -6711,11 +6711,11 @@ void uploadCharacterSpriteSub1(sSpriteActorCore* param_1, int param_2, sFieldEnt
 
             s8 texcoordStartX;
             if ((bVar4 & 1) == 0) {
-                psVar13->m14 &= ~8;
+                psVar13->m14.m0x8 = 0;
                 texcoordStartX = (char)(((ushort)(param_3->m4_vramLocation).vx & 0x3f) >> 2);
             }
             else {
-                psVar13->m14 |= 8;
+                psVar13->m14.m0x8 = 1;
                 texcoordStartX = (char)(((ushort)(param_3->m4_vramLocation).vx & 0x3f) >> 1);
             }
 
@@ -6755,12 +6755,12 @@ void uploadCharacterSpriteSub1(sSpriteActorCore* param_1, int param_2, sFieldEnt
                                 psVar13->mC_clut = uVar9;
                                 */
             }
-            psVar13->m14 = (psVar13->m14 & ~7) | transformId;
+            psVar13->m14.m0x0 = transformId;
             psVar13->m4_texcoordX = texcoordStartX + READ_LE_U8(pbVar19 + 1);
             psVar13->m5_texcoordY = texcoordStartY + READ_LE_U8(pbVar19 + 2);
             psVar13->m6_width = READ_LE_U8(pbVar19 + 3);
             psVar13->m7_height = READ_LE_U8(pbVar19 + 4);
-            psVar13->m14 = psVar13->m14 & 0xffffffefU | READ_LE_U8(pbVar18) >> 2 & 0x10;
+            psVar13->m14.m0x10_tileFlipX = READ_LE_U8(pbVar18) >> 6;
             if ((bVar2 & 0x80) == 0) {
                 psVar13->m0 = READ_LE_S8(pbVar18 + 1);
                 psVar13->m2 = READ_LE_S8(pbVar18 + 2);
@@ -6780,167 +6780,176 @@ void uploadCharacterSpriteSub1(sSpriteActorCore* param_1, int param_2, sFieldEnt
     param_1->m40 = param_1->m40 & 0xffffff03 | (uVar22 & 0x3f) << 2;
 }
 
-void uploadCharacterSprite(sSpriteActorCore* param_1, int param_2, sFieldEntitySub4_110* param_3)
+void uploadCharacterSprite(sSpriteActorCore* param_1, int spriteFrame, sFieldEntitySub4_110* param_3)
 {
-    param_1->m40 = param_1->m40 & 0xfff5ffff;
-    sPS1Pointer dataPtr = param_3->m0;
-    if (param_2 < (int)((READ_LE_U16(dataPtr) & 0x1ff) + 1)) {
+    param_1->m40 &= ~0x000a0000;
+    sPS1Pointer dataPtr = param_3->m0_spriteData->rawPointer;
+    if (spriteFrame < param_3->m0_spriteData->m0_header.mx01FF_frameCount + 1) {
         if ((param_1->m3C >> 0x1e & 1) != 0) {
-            param_1->m3C = param_1->m3C & 0xbfffffff;
+            param_1->m3C &= ~0x40000000;
             sPS1Pointer puVar10 = param_3->mC;
             if (READ_LE_U16(puVar10) != 0) {
-                u16 local_58 = (param_3->m8_clut).vx;
-                u16 local_56 = (param_3->m8_clut).vy;
-                u16 local_52 = 1;
-                u16 local_54 = READ_LE_U16(puVar10) << 4;
-
                 // Transfer the clut
                 sPS1Pointer clutData = puVar10 + (uint)READ_LE_U16(puVar10) * ((param_1->m3C >> 16) & 0xf0) * 2 + 4;
-                int width = ((uint)READ_LE_U16(puVar10) << 0x14) >> 0x10;
-                addToShapeTransfertTable(clutData, param_3->m8_clut.vx, param_3->m8_clut.vy, width, 1);
+                int clutSize = READ_LE_U16(puVar10) * 16;
+                addToShapeTransfertTable(clutData, param_3->m8_clut.vx, param_3->m8_clut.vy, clutSize, 1);
             }
         }
-        if ((READ_LE_U16(dataPtr) & 0x8000) == 0) {
+        if (!param_3->m0_spriteData->m0_header.mx8000_isVramPrebacked) {
             // character sprite needs to be uploaded every frame (playable characters)
             sVec2_s16 vramLocation = param_1->m24_vramData->m4_vramLocation;
-            sPS1Pointer subDataPtr = dataPtr + READ_LE_U16(dataPtr + param_2 * 2);
+            sPS1Pointer framePtr = param_3->m0_spriteData->m4_frames[spriteFrame].rawPointer;
+            sFieldEntitySub4_110_0_frame& frame = param_3->m0_spriteData->m4_frames[spriteFrame];
+
             if ((param_1->m40 >> 0xd & 0xf) == 0xe) {
                 //uploadCharacterSpriteSub0(&vramLocation, subDataPtr[4]);
                 assert(0);
             }
 
-            int height = READ_LE_U8(subDataPtr + 3) * param_1->m2C_scale;
-            u8 bVar2 = READ_LE_U8(subDataPtr);
-            sPS1Pointer puVar19 = subDataPtr + 6;
-            sPS1Pointer pbVar16 = subDataPtr + (bVar2 & 0x3f) * 4 + 6;
+            u8 frameHeader = READ_LE_U8(framePtr);
+            u8 numSubSprites = (frameHeader & 0x3f);
+            sPS1Pointer puVar19 = framePtr + 6;
+            sPS1Pointer pSubSprite = framePtr + 6 + numSubSprites * 4;
+            int height = READ_LE_U8(framePtr + 3) * param_1->m2C_scale;
             if (height < 0) {
-                height = height + 0xfff;
+                height += 0xfff;
             }
             param_1->m36 = (short)(height >> 0xc);
-            height = READ_LE_U8(subDataPtr + 1) * (int)param_1->m2C_scale;
-            if (height < 0) {
-                height = height + 0xfff;
+
+            int width = READ_LE_U8(framePtr + 1) * param_1->m2C_scale;
+            if (width < 0) {
+                width += 0xfff;
             }
-            param_1->m38 = (short)(height >> 0xc);
+            param_1->m38 = (short)(width >> 0xc);
+
             int bVar7 = *(byte*)&param_1->m3C >> 5;
-            int uVar12 = (uint)vramLocation.vx & 0x3f;
-            int uVar9 = (uint)vramLocation.vy;
+            int baseTexcoordX = (uint)vramLocation.vx & 0x3f;
             sColorAndCode colorAndCode = param_1->m28_colorAndCode;
             int uVar18 = 4;
             int uVar20 = 0;
 
             std::vector<sFieldEntitySub4_B4_sub>::iterator pFieldEntitySub4_B4_sub = param_1->m20->getAsSprite()->m30->begin();
 
-            if ((bVar2 & 0x3f) != 0) {
+            if ((frameHeader & 0x3f) != 0) {
                 do {
                     pFieldEntitySub4_B4_sub->m9 = 0;
                     pFieldEntitySub4_B4_sub->m8 = 0;
-                    pFieldEntitySub4_B4_sub->m14 = pFieldEntitySub4_B4_sub->m14 & 0xffffffdf;
+                    pFieldEntitySub4_B4_sub->m14.m0x20_tileFlipY = 0;
                     while (true) {
-                        int bVar3 = READ_LE_U8(pbVar16);
-                        if ((bVar3 & 0x80) == 0) break;
-                        sPS1Pointer pbVar17 = pbVar16 + 1;
+                        int bVar3 = READ_LE_U8(pSubSprite);
+                        if ((bVar3 & 0x80) == 0)
+                            break;
+
                         if ((bVar3 & 0x40) == 0) {
+                            sPS1Pointer pbVar17 = pSubSprite + 1;
                             if ((bVar3 & 4) != 0) {
-                                pFieldEntitySub4_B4_sub->m14 = pFieldEntitySub4_B4_sub->m14 | 0x20;
+                                pFieldEntitySub4_B4_sub->m14.m0x20_tileFlipY = 1;
                             }
                             if ((bVar3 & 1) != 0) {
                                 pFieldEntitySub4_B4_sub->m8 = READ_LE_U8(pbVar17);
-                                pbVar17 = pbVar16 + 2;
+                                pbVar17 = pSubSprite + 2;
                             }
-                            pbVar16 = pbVar17;
+                            pSubSprite = pbVar17;
                             if ((bVar3 & 2) != 0) {
-                                bVar3 = READ_LE_U8(pbVar16);
-                                pbVar16 = pbVar16 + 1;
+                                bVar3 = READ_LE_U8(pSubSprite);
+                                pSubSprite = pSubSprite + 1;
                                 pFieldEntitySub4_B4_sub->m9 = bVar3;
                             }
                         }
                         else {
+                            sPS1Pointer pbVar17 = pSubSprite + 1;
                             if (param_1->m20->getAsSprite()->m34_perSubgroupTransform == nullptr) {
                                 param_1->m20->getAsSprite()->m34_perSubgroupTransform = new std::array<sFieldEntitySub4_124, 8>;
                                 resetPerSubgroupTransforms(param_1);
                             }
                             uVar18 = bVar3 & 7;
                             if ((bVar3 & 0x20) != 0) {
-                                (*param_1->m20->getAsSprite()->m34_perSubgroupTransform)[uVar18].m0_translateX = READ_LE_U8(pbVar17);
-                                (*param_1->m20->getAsSprite()->m34_perSubgroupTransform)[uVar18].m1_translateY = READ_LE_U8(pbVar16 + 2);
-                                pbVar17 = pbVar16 + 3;
+                                (*param_1->m20->getAsSprite()->m34_perSubgroupTransform)[uVar18].m0_translateX = READ_LE_U8(pSubSprite + 1);
+                                (*param_1->m20->getAsSprite()->m34_perSubgroupTransform)[uVar18].m1_translateY = READ_LE_U8(pSubSprite + 2);
+                                pbVar17 = pSubSprite + 3;
                             }
-                            pbVar16 = pbVar17;
+                            pSubSprite = pbVar17;
                             if ((bVar3 & 0x10) == 0) {
                                 (*param_1->m20->getAsSprite()->m34_perSubgroupTransform)[uVar18].m6_rotateZ = 0;
                             }
                             else {
-                                bVar3 = READ_LE_U8(pbVar16);
-                                pbVar16 = pbVar16 + 1;
+                                bVar3 = READ_LE_U8(pSubSprite);
+                                pSubSprite = pSubSprite + 1;
                                 (*param_1->m20->getAsSprite()->m34_perSubgroupTransform)[uVar18].m6_rotateZ = (ushort)bVar3 << 4;
                             }
                         }
                     }
-                    int uVar5 = READ_LE_U16(puVar19 + 2);
                     sPS1Pointer pbVar17 = dataPtr + READ_LE_U16(puVar19) * 4;
-                    int uVar10 = READ_LE_U16(puVar19 + 2) >> 5 & 0x3f;
+
+                    int uVar5 = READ_LE_U16(puVar19 + 2);
                     int uVar6 = READ_LE_U16(pbVar17 + 2);
                     puVar19 = puVar19 + 4;
-                    int cVar15 = (char)(uVar5 & 0x1f);
-                    int bVar3;
-                    u32 uVar14;
-                    if ((uVar6 & 1) == 0) {
-                        cVar15 = (char)(uVar12 << 2) + cVar15 * '\x04';
-                        bVar3 = READ_LE_U8(pbVar17) >> 2;
-                        uVar14 = pFieldEntitySub4_B4_sub->m14 & 0xfffffff7;
+                    int tileOffsetInTexcoordX = uVar5 & 0x1f;
+                    int tileOffsetInTexcoordY = uVar5 >> 5 & 0x3f;
+                    int width;
+
+                    int colorDepth = uVar6 & 1; // 0: 4bit, 1: 8bit
+
+                    if (colorDepth == 0) {
+                        // 4bit
+                        pFieldEntitySub4_B4_sub->m4_texcoordX = (baseTexcoordX + tileOffsetInTexcoordX) * 4;
+                        width = READ_LE_U8(pbVar17) >> 2;
+                        pFieldEntitySub4_B4_sub->m14.m0x8 = 0;
                     }
                     else {
-                        cVar15 = (char)(uVar12 << 1) + cVar15 * '\x02';
-                        bVar3 = READ_LE_U8(pbVar17) >> 1;
-                        uVar14 = pFieldEntitySub4_B4_sub->m14 | 8;
+                        // 8bit
+                        pFieldEntitySub4_B4_sub->m4_texcoordX = (baseTexcoordX + tileOffsetInTexcoordX) * 2;
+                        width = READ_LE_U8(pbVar17) >> 1;
+                        pFieldEntitySub4_B4_sub->m14.m0x8 = 1;
                     }
-                    pFieldEntitySub4_B4_sub->m14 = uVar14;
-                    pFieldEntitySub4_B4_sub->m4_texcoordX = cVar15;
-                    pFieldEntitySub4_B4_sub->m14 = pFieldEntitySub4_B4_sub->m14 & 0xfffffff8U | uVar18;
-                    int local_56 = (char)uVar10;
-                    pFieldEntitySub4_B4_sub->m5_texcoordY = local_56 + (char)uVar9;
+                    pFieldEntitySub4_B4_sub->m14.m0x0 = uVar18;
+                    pFieldEntitySub4_B4_sub->m5_texcoordY = vramLocation.vy + tileOffsetInTexcoordY;
                     pFieldEntitySub4_B4_sub->m6_width = READ_LE_U8(pbVar17);
                     pFieldEntitySub4_B4_sub->m7_height = READ_LE_U8(pbVar17 + 1);
-                    pFieldEntitySub4_B4_sub->m14 = pFieldEntitySub4_B4_sub->m14 & 0xffffffefU | READ_LE_U8(pbVar16) >> 2 & 0x10;
-                    int bVar4 = READ_LE_U8(pbVar16);
-                    int bVar8 = bVar4 >> 4;
+
+                    int bVar4 = READ_LE_U8(pSubSprite);
+
+                    int unkBit = (bVar4 >> 6) & 1;
+                    int blending = (bVar4 >> 4) & 3;
+                    int clutXOffset = (bVar4 >> 0) & 0xf;
+
+                    pFieldEntitySub4_B4_sub->m14.m0x10_tileFlipX = unkBit;
+
                     pFieldEntitySub4_B4_sub->m10_colorAndCode = colorAndCode;
-                    uVar14 = bVar8 & 3;
-                    if (((bVar8 & 3) != 0) || (uVar14 = (uint)bVar7, bVar7 != 0)) {
-                        uVar14 = uVar14 - 1;
-                        (pFieldEntitySub4_B4_sub->m10_colorAndCode).m3_code = (pFieldEntitySub4_B4_sub->m10_colorAndCode).m3_code | 2;
+
+                    if (blending || (blending = (uint)bVar7, bVar7 != 0)) {
+                        blending = blending - 1;
+                        (pFieldEntitySub4_B4_sub->m10_colorAndCode).m3_code |= 2; // enable ABE (semi-transparent)
                     }
-                    pFieldEntitySub4_B4_sub->mA_tpage =
-                        (ushort)((uVar6 & 1) << 7) | (ushort)((uVar14 & 3) << 5) | (short)(vramLocation.vy & 0x100U) >> 4 | (ushort)(((uint)vramLocation.vx & 0x3ff) >> 6) |
-                        (ushort)(((ushort)vramLocation.vy & 0x200) << 2);
-                    u16 uVar11 = GetClut((int)(param_3->m8_clut).vx + (bVar4 & 0xf) * 0x10, (int)(param_3->m8_clut).vy);
-                    pFieldEntitySub4_B4_sub->mC_clut = uVar11;
-                    addToShapeTransfertTable(pbVar17 + 4, (short)((((uint)vramLocation.vx & 0xffff) + (uint)(uVar5 & 0x1f)) * 0x10000 >> 0x10), vramLocation.vy + uVar10, (ushort)bVar3, (ushort)READ_LE_U8(pbVar17 + 1));
-                    if ((bVar2 & 0x80) == 0) {
-                        pFieldEntitySub4_B4_sub->m0 = (short)(char)READ_LE_U8(pbVar16 + 1);
-                        pFieldEntitySub4_B4_sub->m2 = (short)(char)READ_LE_U8(pbVar16 + 2);
+
+                    pFieldEntitySub4_B4_sub->mA_tpage = GetTPage(colorDepth, blending, vramLocation.vx, vramLocation.vy);
+                    pFieldEntitySub4_B4_sub->mC_clut = GetClut(param_3->m8_clut.vx + clutXOffset * 0x10, param_3->m8_clut.vy);
+
+                    addToShapeTransfertTable(pbVar17 + 4, vramLocation.vx + tileOffsetInTexcoordX, vramLocation.vy + tileOffsetInTexcoordY, (ushort)width, (ushort)READ_LE_U8(pbVar17 + 1));
+                    if ((frameHeader & 0x80) == 0) {
+                        pFieldEntitySub4_B4_sub->m0 = (short)(char)READ_LE_U8(pSubSprite + 1);
+                        pFieldEntitySub4_B4_sub->m2 = (short)(char)READ_LE_U8(pSubSprite + 2);
                     }
                     else {
-                        pFieldEntitySub4_B4_sub->m0 = (ushort)READ_LE_U8(pbVar16 + 1) | (ushort)(((uint)READ_LE_U8(pbVar16 + 2) << 0x18) >> 0x10);
-                        pbVar17 = pbVar16 + 3;
-                        sPS1Pointer pbVar1 = pbVar16 + 4;
-                        pbVar16 = pbVar16 + 2;
+                        pFieldEntitySub4_B4_sub->m0 = (ushort)READ_LE_U8(pSubSprite + 1) | (ushort)(((uint)READ_LE_U8(pSubSprite + 2) << 0x18) >> 0x10);
+                        pbVar17 = pSubSprite + 3;
+                        sPS1Pointer pbVar1 = pSubSprite + 4;
+                        pSubSprite = pSubSprite + 2;
                         pFieldEntitySub4_B4_sub->m2 = (ushort)READ_LE_U8(pbVar17) | (ushort)(((uint)READ_LE_U8(pbVar1) << 0x18) >> 0x10);
                     }
                     pFieldEntitySub4_B4_sub = pFieldEntitySub4_B4_sub + 1;
                     uVar20 = uVar20 + 1;
-                    pbVar16 = pbVar16 + 3;
-                } while (uVar20 != (bVar2 & 0x3f));
+                    pSubSprite = pSubSprite + 3;
+                } while (uVar20 != (frameHeader & 0x3f));
             }
             param_1->m40 = param_1->m40 & 0xffffff03 | (uVar20 & 0x3f) << 2;
             sPS1Pointer pointer;
             pointer.makeNull();
-            addToShapeTransfertTable(pointer, vramLocation.vx, vramLocation.vy, READ_LE_U8(subDataPtr + 4), READ_LE_U8(subDataPtr + 5));
+            addToShapeTransfertTable(pointer, vramLocation.vx, vramLocation.vy, READ_LE_U8(framePtr + 4), READ_LE_U8(framePtr + 5));
         }
         else
         {
-            uploadCharacterSpriteSub1(param_1, param_2, param_3);
+            uploadCharacterSpriteSub1(param_1, spriteFrame, param_3);
         }
     }
 }
@@ -6950,11 +6959,11 @@ void uploadCharacterSprites()
     sSpriteActorCore* psVar1 = spriteTransfertListHead;
     if (spriteTransfertListHead != (sSpriteActor*)0x0) {
         do {
-            if ((ushort)psVar1->m34 == 0) {
-                psVar1->m40 = psVar1->m40 & 0xffffff03;
+            if ((ushort)psVar1->m34_currentSpriteFrame == 0) {
+                psVar1->m40 &= ~0x000000fc;
             }
             else {
-                uploadCharacterSprite(psVar1, (uint)(ushort)psVar1->m34, psVar1->m24_vramData);
+                uploadCharacterSprite(psVar1, psVar1->m34_currentSpriteFrame, psVar1->m24_vramData);
             }
             psVar1 = psVar1->m20->getAsSprite()->m38_pNext;
         } while (psVar1 != (sSpriteActor*)0x0);
@@ -7062,7 +7071,7 @@ void renderFieldCharacterSpritesSub0Sub1(sSpriteActor* pSpriteSheet, sTag* pTag)
         for (int i = 0; i < numPolyInSprite; i++)
         {
             sFieldEntitySub4_B4_sub* pSpriteDefinition = &(*psVar7->m30)[i];
-            int matrixIdNeeded = pSpriteDefinition->m14 & 7;
+            int matrixIdNeeded = pSpriteDefinition->m14.m0x0;
             if (currentBoundMatrixId != matrixIdNeeded) { // need to change the matrix?
                 isVisible = (spriteMatrixTable[matrixIdNeeded] & (pSpriteSheet->m3C >> 8) & 0xFF) == 0;
                 if (psVar7->m34_perSubgroupTransform == nullptr)
@@ -7120,6 +7129,7 @@ void renderFieldCharacterSpritesSub0Sub1(sSpriteActor* pSpriteSheet, sTag* pTag)
 
                 POLY_FT4* p = (POLY_FT4*)shapeTransfertTableCurrentEntry;
                 memcpy(p, temp, sizeof(POLY_FT4));
+                delete temp;
 
                 shapeTransfertTableCurrentEntry += sizeof(POLY_FT4);
 
@@ -7147,24 +7157,27 @@ void renderFieldCharacterSpritesSub0Sub1(sSpriteActor* pSpriteSheet, sTag* pTag)
                 }
                 currentSpriteCharacterSize[3].vx = sVar11 + spriteHeight;
                 currentSpriteCharacterSize[2].vx = sVar11;
-                if (((uint)pSpriteDefinition->m14 >> 4 & 1) == 0) {
+                if (!pSpriteDefinition->m14.m0x10_tileFlipX) {
                     currentSpriteCharacterSize[2].vx = currentSpriteCharacterSize[3].vx;
                     currentSpriteCharacterSize[3].vx = sVar11;
                 }
                 currentSpriteCharacterSize[1].vy = currentSpriteCharacterSize[3].vy + sVar13;
-                if (((uint)pSpriteDefinition->m14 >> 5 & 1) == 0) {
+                if (!pSpriteDefinition->m14.m0x20_tileFlipY) {
                     currentSpriteCharacterSize[1].vy = currentSpriteCharacterSize[3].vy;
                     currentSpriteCharacterSize[3].vy = currentSpriteCharacterSize[3].vy + sVar13;
                 }
-                spriteHeight = (short)((int)(char)psVar7->m3D << uVar9);
-                currentSpriteCharacterSize[0].vy = currentSpriteCharacterSize[1].vy - spriteHeight;
-                currentSpriteCharacterSize[1].vy = currentSpriteCharacterSize[1].vy - spriteHeight;
-                currentSpriteCharacterSize[2].vy = currentSpriteCharacterSize[3].vy - spriteHeight;
-                currentSpriteCharacterSize[3].vy = currentSpriteCharacterSize[3].vy - spriteHeight;
-                currentSpriteCharacterSize[0].vx = currentSpriteCharacterSize[3].vx - spriteWidth;
-                currentSpriteCharacterSize[1].vx = currentSpriteCharacterSize[2].vx - spriteWidth;
-                currentSpriteCharacterSize[2].vx = currentSpriteCharacterSize[2].vx - spriteWidth;
-                currentSpriteCharacterSize[3].vx = currentSpriteCharacterSize[3].vx - spriteWidth;
+
+                {
+                    int spriteHeight = (short)((int)(char)psVar7->m3D << uVar9);
+                    currentSpriteCharacterSize[0].vy = currentSpriteCharacterSize[1].vy - spriteHeight;
+                    currentSpriteCharacterSize[1].vy = currentSpriteCharacterSize[1].vy - spriteHeight;
+                    currentSpriteCharacterSize[2].vy = currentSpriteCharacterSize[3].vy - spriteHeight;
+                    currentSpriteCharacterSize[3].vy = currentSpriteCharacterSize[3].vy - spriteHeight;
+                    currentSpriteCharacterSize[0].vx = currentSpriteCharacterSize[3].vx - spriteWidth;
+                    currentSpriteCharacterSize[1].vx = currentSpriteCharacterSize[2].vx - spriteWidth;
+                    currentSpriteCharacterSize[2].vx = currentSpriteCharacterSize[2].vx - spriteWidth;
+                    currentSpriteCharacterSize[3].vx = currentSpriteCharacterSize[3].vx - spriteWidth;
+                }
 
                 long lStack60;
                 long lStack56;

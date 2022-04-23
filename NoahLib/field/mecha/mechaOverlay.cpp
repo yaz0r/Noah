@@ -626,7 +626,7 @@ void initMechaAnimation(sLoadedMechas* param_1, sLoadedMechas* param_2, sMechaIn
     if ((param_1 != (sLoadedMechas*)0x0) && (param_2 != (sLoadedMechas*)0x0)) {
         if (param_1->m2A[1] == 0) {
             if (param_4 < 0x50) {
-                param_1->m10_bytecode0 = &(*param_2->m8)[param_4];
+                param_1->m10_bytecode0 = &(*param_2->m8_bytecodeTable)[param_4];
             }
             else {
                 assert(0);
@@ -655,7 +655,7 @@ void initMechaTransforms1(sLoadedMechas* param_1, sMechaInitVar2* param_2, std::
     param_1->m3C = -1;
     param_1->m5C = -1;
     param_1->m39 = 0x6b;
-    param_1->m8 = param_3;
+    param_1->m8_bytecodeTable = param_3;
     param_1->mC = 0;
     param_1->m10_bytecode0 = nullptr;
     param_1->m14 = param_4;

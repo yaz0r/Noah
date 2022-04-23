@@ -48,7 +48,16 @@ struct sFieldEntitySub4_B4_sub
 	s16 mA_tpage;
 	u16 mC_clut;
 	sColorAndCode m10_colorAndCode;
-	u32 m14;
+
+    union {
+        struct {
+            u32 m0x0 : 3;
+            u32 m0x8 : 1;
+            u32 m0x10_tileFlipX : 1;
+            u32 m0x20_tileFlipY : 1;
+        };
+        u32 raw;
+    } m14;
 	//size 0x18
 };
 
@@ -90,7 +99,7 @@ struct sFieldEntitySub4_B4_alt : public sFieldEntitySub4_B4_base
 
 struct sFieldEntitySub4_110
 {
-	sPS1Pointer m0;
+    struct sFieldEntitySub4_110_0* m0_spriteData;
 	sVec2_s16 m4_vramLocation;
 	sVec2_s16 m8_clut;
 	sPS1Pointer mC;
@@ -116,7 +125,7 @@ struct sSpriteActorCore {
     s16 m2C_scale;
     s16 m30;
     s16 m32;
-    s16 m34;
+    s16 m34_currentSpriteFrame;
     s16 m36;
     s16 m38;
     s16 m3A;
