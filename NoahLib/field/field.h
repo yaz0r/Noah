@@ -54,6 +54,8 @@ struct sFieldScriptEntity_flags0
             u32 m7 : 1;
             u32 m8 : 3;
             u32 m11 : 1;
+            u32 m12_unk : 2;
+            u32 m14_isPlayerControlled : 1;
         };
         u32 m_rawFlags = 0;
     };

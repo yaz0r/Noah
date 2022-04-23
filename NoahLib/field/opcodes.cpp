@@ -455,7 +455,8 @@ void  OP_REMOVE_FROM_CURRENT_PARTY()
         else {
             playerControlledActor = partyToFieldEntityArrayMapping[0];
             (actorArray[partyToFieldEntityArrayMapping[0]].m4C_scriptEntity)->m0_fieldScriptFlags.m_rawFlags &= ~0x80;
-            (actorArray[partyToFieldEntityArrayMapping[0]].m4C_scriptEntity)->m0_fieldScriptFlags.m_rawFlags |= 0x4400;
+            (actorArray[partyToFieldEntityArrayMapping[0]].m4C_scriptEntity)->m0_fieldScriptFlags.m_rawFlags |= 0x0400;
+            (actorArray[partyToFieldEntityArrayMapping[0]].m4C_scriptEntity)->m0_fieldScriptFlags.m14_isPlayerControlled = 1;
         }
     }
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 2;
@@ -659,7 +660,7 @@ void checkForRandomEncounter()
 
 void OP_UPDATE_CHARACTER()
 {
-    if ((pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags & 0x4000) == 0) {
+    if (!pCurrentFieldScriptActor->m0_fieldScriptFlags.m14_isPlayerControlled) {
         if (updateCharacterVar0 == 0) {
             pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags = pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags | 0x1000000;
         }
@@ -854,7 +855,7 @@ void OP_INIT_ENTITY_PC(void)
     if (iVar4 == -1) {
         OP_INIT_ENTITY_SCRIPT_sub0(currentFieldActorId, 0, &partyCharacterBuffers[0], 1, 0, 0, 1);
         psVar7 = pCurrentFieldScriptActor;
-        pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags |= 1;
+        pCurrentFieldScriptActor->m0_fieldScriptFlags.m0_updateScriptDisabled = 1;
         currentScriptFinished = 1;
         breakCurrentScript = 1;
         uVar5 = psVar7->m4_flags.m_rawFlags | 0x100000;
@@ -864,7 +865,8 @@ void OP_INIT_ENTITY_PC(void)
             playerControlledActor = currentFieldActorId;
             actorCameraTracked = currentFieldActorId;
             psVar7->m0_fieldScriptFlags.m_rawFlags &= ~0x80;
-            psVar7->m0_fieldScriptFlags.m_rawFlags |= 0x4400;
+            psVar7->m0_fieldScriptFlags.m_rawFlags |= 0x0400;
+            psVar7->m0_fieldScriptFlags.m14_isPlayerControlled = 1;
         }
         iVar2 = currentFieldActorId;
         partyToFieldEntityArrayMapping[iVar4] = currentFieldActorId;
@@ -1122,7 +1124,7 @@ void OP_F6()
     if (bVar2 < 2) {
         if (bVar2 != 0) goto LAB_Field__8008e9d8;
         if ((pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags & 0x8000) != 0) {
-            pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags = pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags & 0xffff7fff;
+            pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags &= ~0x8000;
         }
         psVar5 = pCurrentFieldScriptActor;
         if ((pCurrentFieldScriptActor->m4_flags.m_rawFlags & 0x80000) == 0) goto LAB_Field__8008e9d8;
@@ -1216,7 +1218,7 @@ void OP_46(void)
 
 void enablePlayerFlag80(void)
 {
-    (actorArray[playerControlledActor].m4C_scriptEntity)->m0_fieldScriptFlags.m_rawFlags = (actorArray[playerControlledActor].m4C_scriptEntity)->m0_fieldScriptFlags.m_rawFlags | 0x80;
+    (actorArray[playerControlledActor].m4C_scriptEntity)->m0_fieldScriptFlags.m_rawFlags |= 0x80;
     return;
 }
 
@@ -1447,9 +1449,9 @@ void OP_57(void)
             (pCurrentFieldScriptActor->m20_position).vx = iVar6 << 0x10;
             (pCurrentFieldScriptActor->m20_position).vy = iVar8 << 0x10;
             (pCurrentFieldScriptActor->m20_position).vz = iVar7 << 0x10;
-            pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags = pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags & 0xfffeffff;
+            pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags &= ~0x10000;
             pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 0xd;
-            pCurrentFieldScriptActor->m4_flags.m_rawFlags = pCurrentFieldScriptActor->m4_flags.m_rawFlags & 0xffdfffff;
+            pCurrentFieldScriptActor->m4_flags.m_rawFlags &= ~0x00200000;
         }
 
         actorArray[currentFieldActorId].mC_matrix.t[0] = (pCurrentFieldScriptActor->m20_position).vx >> 0x10;
@@ -3141,7 +3143,7 @@ void OPX_21()
     if (iVar2 == -1) {
         OP_INIT_ENTITY_SCRIPT_sub0(currentFieldActorId, 0, &partyCharacterBuffers[0], 1, 0, 0, 1);
         psVar1 = pCurrentFieldScriptActor;
-        pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags = pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags | 1;
+        pCurrentFieldScriptActor->m0_fieldScriptFlags.m0_updateScriptDisabled = 1;
         currentScriptFinished = 1;
         breakCurrentScript = 1;
         psVar1->m4_flags.m_rawFlags = psVar1->m4_flags.m_rawFlags | 0x100000;

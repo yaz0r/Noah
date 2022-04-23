@@ -3844,7 +3844,7 @@ void exectueEntitiesUpdateFunction()
         numEntitiesToUpdate = 1;
     }
 
-    MissingCode();
+    playerCanRun = 0;
 
     numDialogWindowsCreatedThisFrame = 0;
     if (!g_executeUpdateScripts)
@@ -4718,17 +4718,17 @@ void updateEntityEventCode3(int index, sFieldEntity* pFieldEntity, sFieldScriptE
         return;
     }
 
-    int walkSpeed = 1;
-    if ((((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x4000) != 0) && ((padButtonForScripts[0].vx & 0x40) != 0)) && (playerCanRun == 1)) {
-        walkSpeed = 2;
+    int animationId = 1;
+    if (((pFieldScriptEntity->m0_fieldScriptFlags.m14_isPlayerControlled) && ((padButtonForScripts[0].vx & 0x40) != 0)) && (playerCanRun == 1)) {
+        animationId = 2;
     }
-    if (((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x1800) != 0) && (pFieldScriptEntity->mE8_currentAnimationId != walkSpeed)) {
+    if (((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x1800) != 0) && (pFieldScriptEntity->mE8_currentAnimationId != animationId)) {
         if (pFieldScriptEntity->mE8_currentAnimationId == 1) {
-            walkSpeed = 1;
+            animationId = 1;
         }
         else {
             if (pFieldScriptEntity->mE8_currentAnimationId == 2) {
-                walkSpeed = 2;
+                animationId = 2;
             }
         }
     }
@@ -4802,7 +4802,7 @@ void updateEntityEventCode3(int index, sFieldEntity* pFieldEntity, sFieldScriptE
     }
     else
     {
-        walkSpeed = pFieldScriptEntity->mE6;
+        animationId = pFieldScriptEntity->mE6;
         pFieldScriptEntity->m104_rotation = pFieldScriptEntity->m104_rotation | 0x8000;
 
         bMoved = false;
@@ -4824,14 +4824,11 @@ void updateEntityEventCode3(int index, sFieldEntity* pFieldEntity, sFieldScriptE
 
     pFieldScriptEntity->m4_flags.m_rawFlags &= ~0x1000;
 
-    int animationId;
-
     if ((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x800) == 0) {
         if (((int)pFieldScriptEntity->m104_rotation & 0x8000U) != 0) {
-            walkSpeed = pFieldScriptEntity->mE6;
+            animationId = pFieldScriptEntity->mE6;
         }
         moveMask = getWalkmeshTriangleFlag(pFieldScriptEntity);
-        animationId = walkSpeed;
         if ((moveMask & 0x200000) != 0) {
             if (((int)pFieldScriptEntity->m104_rotation & 0x8000U) != 0) {
                 animationId = 6;
@@ -4850,7 +4847,7 @@ void updateEntityEventCode3(int index, sFieldEntity* pFieldEntity, sFieldScriptE
                 animationId = updateEntityEventCode4Var1;
             }
             else {
-                if (walkSpeed == 2) {
+                if (animationId == 2) {
                     pFieldEntity->m4_pVramSpriteSheet->m18_moveSpeed = pFieldEntity->m4_pVramSpriteSheet->m82 * 0x60;
                     animationId = updateEntityEventCode4Var1;
                 }
@@ -7008,7 +7005,7 @@ bool disableCharacterShadowsRendering = 0;
 
 
 
-void renderFieldCharacterSpritesSub0Sub0(sSpriteActor* pSpriteSheet)
+void setupSpriteActorTransform(sSpriteActor* pSpriteSheet)
 {
     if ((isBattleOverlayLoaded != '\0') || (isOtherOverlayLoaded != '\0')) {
         assert(0);
@@ -7052,7 +7049,7 @@ std::array<s16, 8> spriteMatrixTable = {
     1,2,4,8,0x10,0x20,0x40,0x80,
 };
 
-void renderFieldCharacterSpritesSub0Sub1(sSpriteActor* pSpriteSheet, sTag* pTag)
+void submitSpriteActorToRendering(sSpriteActor* pSpriteSheet, sTag* pTag)
 {
     sFieldEntitySub4_B4* psVar7 = pSpriteSheet->m20->getAsSprite();
     u32 uVar9 = pSpriteSheet->m40 >> 8 & 0x1f;
@@ -7224,10 +7221,10 @@ void renderFieldCharacterSpritesSub0Sub2(sSpriteActor* pSpriteSheet, sTag* pTag)
     MissingCode();
 }
 
-void renderFieldCharacterSpritesSub0(sSpriteActor* pSpriteSheet, sTag* pTag)
+void renderSpriteActor(sSpriteActor* pSpriteSheet, sTag* pTag)
 {
-    renderFieldCharacterSpritesSub0Sub0(pSpriteSheet);
-    renderFieldCharacterSpritesSub0Sub1(pSpriteSheet, pTag);
+    setupSpriteActorTransform(pSpriteSheet);
+    submitSpriteActorToRendering(pSpriteSheet, pTag);
     if ((pSpriteSheet->m3C >> 2 & 1) != 0) {
         renderFieldCharacterSpritesSub0Sub2(pSpriteSheet, pTag);
     }
@@ -7347,7 +7344,7 @@ void renderFieldCharacterSprites(OTTable& OT, int oddOrEven)
                             if ((pScriptEntity->m4_flags.m_rawFlags & 0x2000000) == 0) {
                                 if ((pScriptEntity->m134.m5) == 0) {
                                     MissingCode();
-                                    renderFieldCharacterSpritesSub0(pSpriteSheet, &OT[spriteDepth]);
+                                    renderSpriteActor(pSpriteSheet, &OT[spriteDepth]);
                                 }
                                 else
                                 {
