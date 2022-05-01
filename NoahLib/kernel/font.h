@@ -10,3 +10,4 @@ extern std::vector<u8> dialogFontVarPtr;
 extern u8* dialogFontVarPtr2;
 
 void initFont(std::vector<u8>& fontData);
+void setupPrintDialogTextVar(std::vector<u8>& fontData);

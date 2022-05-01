@@ -892,6 +892,11 @@ int prim1_init(u8* displayList, u8* meshBlock, int initParam)
     return 0;
 }
 
+int prim2_init(u8* displayList, u8* meshBlock, int initParam) {
+    MissingCode();
+    return 1;
+}
+
 struct CVECTOR {
     u8 r;
     u8 g;
@@ -1150,9 +1155,9 @@ void genericTrianglePrim_28(u8* meshSubBlock, int count, int outputPrimSize, uin
 
     for (int i = 0; i < count; i++)
     {
-        POLY_FT4* pOutputPrim = (POLY_FT4*)*currentModelInstanceDrawPrims;
+        POLY_GT3* pOutputPrim = (POLY_GT3*)*currentModelInstanceDrawPrims;
         currentModelInstanceDrawPrims++;
-        assert(outputPrimSize == 0x14);
+        assert(outputPrimSize == 0x28);
 
         u8* pVertices1 = currentModelBlockVertices + READ_LE_U16(meshSubBlock) * 8;
         u8* pVertices2 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 2) * 8;
@@ -1386,6 +1391,16 @@ void prim4_0(u8* meshSubBlock, int count)
 void prim5_2(u8* meshSubBlock, int count)
 {
     prim5_2generic(meshSubBlock, count, 0x20, 0x7, 0x8);
+}
+
+void prim6_2(u8* meshSubBlock, int count)
+{
+    prim5_2generic(meshSubBlock, count, 0x28, 0x9, 0xC);
+}
+
+void prim6_3(u8* meshSubBlock, int count)
+{
+    assert(0);
 }
 
 void primD_2generic(u8* meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
@@ -1631,12 +1646,12 @@ struct sPolyTypeRenderDefinition
 const std::array<sPolyTypeRenderDefinition, 17> polyRenderDefs = { {
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	prim0_init,	8,	0x4,	0x04}, // 0x0 POLY_FT3 with light
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	prim1_init,	8,	0x8,	0x20}, // 0x1 POLY_FT3
-    {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x4,	0x1C}, // 0x2
+    {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	prim2_init,	8,	0x4,	0x1C}, // 0x2
     {	prim3_0,	nullptr,	nullptr,	nullptr,	prim3_0,	prim3_0,	prim3_init,	8,	0x8,	0x28}, // 0x3 POLY_GT3
     {	prim4_0,	prim4_0,	nullptr,	nullptr,	prim4_0,	prim4_0,	prim4_init,	8,	0x4,	0x14}, // 0x4 POLY_F3
     {	prim5_0,	nullptr,	prim5_2,	nullptr,	nullptr,	nullptr,	prim5_init,	8,	0x8,	0x20}, // 0x5 POLY_FT3
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x4,	0x1C}, // 0x6
-    {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x8,	0x28}, // 0x7
+    {	prim3_0,	prim3_0,	prim6_2,	prim6_3,	prim3_0,	prim3_0,	prim3_init,	8,	0x8,	0x28}, // 0x7
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	prim8_init,	8,	0x4,	0x18}, // 0x8 POLY_F4
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	prim9_init,	8,	0xC,	0x28}, // 0x9 POLY_FT4
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x4,	0x24}, // 0xA
@@ -3856,8 +3871,17 @@ void exectueEntitiesUpdateFunction()
         sFieldEntity* pFieldEntity = &actorArray[i];
         if (((pFieldEntity->m58_flags & 0xf00) != 0) && ((pFieldEntity->m4C_scriptEntity->m4_flags.m_rawFlags & 0x100000) == 0))
         {
-            MissingCode();
-
+            if (fieldExecuteVar1 != 0) {
+                if (fieldExecuteVar2 == 0) {
+                    return;
+                }
+                if (fieldExecuteVar3 == 0) {
+                    return;
+                }
+                if (fieldChangePrevented == 0) {
+                    return;
+                }
+            }
             pCurrentFieldScriptActor = pFieldEntity->m4C_scriptEntity;
             pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags &= ~0x1000000;
             currentFieldActorId = i;
@@ -4668,24 +4692,24 @@ int updateEntityEventCode3Sub3(FP_VEC3* param_1, sFieldScriptEntity* param_2, st
 
 std::array<s16, 4> updateEntityEventCode4Table1;
 
-void setVisualAnimation(sSpriteActor* param_1, int param_2, sFieldEntity* param_3)
+void setVisualAnimation(sSpriteActor* param_1, int animationId, sFieldEntity* param_3)
 {
     sFieldScriptEntity* psVar1;
 
     if ((param_3->m58_flags & 0x40) != 0) {
-        if ((param_2 != 3) && (updateEntityEventCode4Var0 == 0)) {
+        if ((animationId != 3) && (updateEntityEventCode4Var0 == 0)) {
             param_3->m4C_scriptEntity->m0_fieldScriptFlags.m11 = 0;
         }
-        if (param_2 == 0xff) {
-            param_2 = 0;
+        if (animationId == 0xff) {
+            animationId = 0;
         }
-        if (param_2 != updateEntityEventCode4Var1) {
+        if (animationId != updateEntityEventCode4Var1) {
             param_3->m4C_scriptEntity->m0_fieldScriptFlags.m11 = 0;
         }
         psVar1 = param_3->m4C_scriptEntity;
         if ((psVar1->m4_flags.m_rawFlags & 0x2000) == 0) {
             if ((psVar1->m4_flags.m_rawFlags & 0x1000000) == 0) {
-                spriteActorSetPlayingAnimation(param_1, param_2);
+                spriteActorSetPlayingAnimation(param_1, animationId);
             }
         }
         else{
@@ -4695,13 +4719,13 @@ void setVisualAnimation(sSpriteActor* param_1, int param_2, sFieldEntity* param_
                     0,0,0,0
             } };
 
-            if (param_2 < 0x10) {
-                mechaPlayAnimation(psVar1->m12C_flags >> 0xd & 7, 0, updateEntityEventCode4Table0[param_2]);
-                updateEntityEventCode4Table1[psVar1->m12C_flags >> 0xd & 7] = updateEntityEventCode4Table0[param_2];
+            if (animationId < 0x10) {
+                mechaPlayAnimation(psVar1->m12C_flags >> 0xd & 7, 0, updateEntityEventCode4Table0[animationId]);
+                updateEntityEventCode4Table1[psVar1->m12C_flags >> 0xd & 7] = updateEntityEventCode4Table0[animationId];
             }
             else {
-                mechaPlayAnimation(psVar1->m12C_flags >> 0xd & 7, 0, param_2 - 0x10);
-                updateEntityEventCode4Table1[psVar1->m12C_flags >> 0xd & 7] = param_2 - 0x10;
+                mechaPlayAnimation(psVar1->m12C_flags >> 0xd & 7, 0, animationId - 0x10);
+                updateEntityEventCode4Table1[psVar1->m12C_flags >> 0xd & 7] = animationId - 0x10;
             }
         }
     }
@@ -5463,6 +5487,57 @@ s32 EntityMoveCheck1Sub1(sFieldScriptEntity* pFieldScriptEntity, int walkmeshId,
     return 0;
 }
 
+
+struct sFollowStruct {
+    sFieldScriptEntity_flags0 m0_flags;
+    sFieldScriptEntity_flags4 m4_flags;
+    SFP_VEC4 m8_pos;
+    s16 m10;
+    s16 m12_animationId;
+    u16 m14_rotation;
+    std::array<s16, 4> m16_walkMeshTriangles;
+    FP_VEC3 m20;
+    FP_VEC4 m30;
+    s32 m40_currentTriangleFlag;
+    s8 m44_walkmeshId;
+};
+std::array<sFollowStruct, 32> followDataTable;
+
+s16 playerIsntPartyLeader = 0;
+std::array<s32, 3> partyToFollowStructMapping = { {0,0,0} };
+
+void initFollowStructForPlayer(s32 entityIndex) {
+    sFieldScriptEntity* pScriptEntity = actorArray[entityIndex].m4C_scriptEntity;
+    sSpriteActor* pSpriteActor = actorArray[entityIndex].m4_pVramSpriteSheet;
+    if (entityIndex == playerControlledActor) {
+        if (!noUpdatesToPartyMemebers) {
+            followDataTable[partyToFollowStructMapping[0]].m20.vx = (pSpriteActor->m0_spriteActorCore).mC_step.vx;
+            followDataTable[partyToFollowStructMapping[0]].m20.vy = (pSpriteActor->m0_spriteActorCore).mC_step.vy;
+            followDataTable[partyToFollowStructMapping[0]].m20.vz = (pSpriteActor->m0_spriteActorCore).mC_step.vz;
+            followDataTable[partyToFollowStructMapping[0]].m30.vx = (pScriptEntity->m50_surfaceNormal).vx;
+            followDataTable[partyToFollowStructMapping[0]].m30.vy = (pScriptEntity->m50_surfaceNormal).vy;
+            followDataTable[partyToFollowStructMapping[0]].m30.vz = (pScriptEntity->m50_surfaceNormal).vz;
+            followDataTable[partyToFollowStructMapping[0]].m14_rotation = pScriptEntity->m106_currentRotation & 0xfff;
+            followDataTable[partyToFollowStructMapping[0]].m10 = (pSpriteActor->m0_spriteActorCore).m84;
+            followDataTable[partyToFollowStructMapping[0]].m8_pos[0] = (pScriptEntity->m20_position).vx.getIntegerPart();
+            followDataTable[partyToFollowStructMapping[0]].m8_pos[1] = (pScriptEntity->m20_position).vy.getIntegerPart();
+            followDataTable[partyToFollowStructMapping[0]].m8_pos[2] = (pScriptEntity->m20_position).vz.getIntegerPart();
+            followDataTable[partyToFollowStructMapping[0]].m12_animationId = pScriptEntity->mE8_currentAnimationId;
+            followDataTable[partyToFollowStructMapping[0]].m40_currentTriangleFlag = pScriptEntity->m14_currentTriangleFlag;
+            followDataTable[partyToFollowStructMapping[0]].m0_flags = pScriptEntity->m0_fieldScriptFlags;
+            followDataTable[partyToFollowStructMapping[0]].m4_flags = pScriptEntity->m4_flags;
+
+            for (int i = 0; i < 4; i++) {
+                followDataTable[partyToFollowStructMapping[0]].m16_walkMeshTriangles[i] = pScriptEntity->m8_currentWalkMeshTriangle[i];
+            }
+
+            followDataTable[partyToFollowStructMapping[0]].m44_walkmeshId = (char)pScriptEntity->m10_walkmeshId;
+            entityUpdateVar0 = 0;
+            partyToFollowStructMapping[0] = partyToFollowStructMapping[0] - 1U & 0x1f;
+        }
+    }
+}
+
 int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntity, sFieldScriptEntity* pFieldScriptEntity, uint param_5)
 {
     sSpriteActor* pSpriteActor = actorArray[entityIndex].m4_pVramSpriteSheet;
@@ -5737,9 +5812,122 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
         }
     }
 
-    MissingCode();
-    //initFollowStructForPlayer(entityIndex);
+    initFollowStructForPlayer(entityIndex);
     return 0;
+}
+
+void updatePartyFollowLeader() {
+    if (!playerIsntPartyLeader) {
+        for (int i = 0; i < totalActors; i++) {
+            sFieldEntity* pActor = &actorArray[i];
+            sFieldScriptEntity* pScriptEntity = pActor->m4C_scriptEntity;
+            if ((((pScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x1000000) != 0) && (i != playerControlledActor)) && ((pActor->m58_flags & 0x20) == 0)) {
+                s32 partyPosition = findCharacterInParty(pScriptEntity->mE4_playableCharacterId);
+                if (partyPosition != -1) {
+                    std::array<s32, 3>::iterator puVar9 = partyToFollowStructMapping.begin() + partyPosition;
+                    updateEntityEventCode3Sub1(pActor->m4_pVramSpriteSheet, followDataTable[*puVar9].m14_rotation, pActor);
+                    sFieldScriptEntity_flags0 uVar7 = followDataTable[*puVar9].m0_flags;
+                    if (EntityMoveCheck1Var1 == 1) {
+                        *puVar9 = partyToFollowStructMapping[0] + 1U & 0x1f;
+                    LAB_Field__80081920:
+
+                        if ((uVar7.m_rawFlags & 0x800) == 0) {
+                            uVar7.m_rawFlags = pScriptEntity->m0_fieldScriptFlags.m_rawFlags & ~0x800;
+                        }
+                        else {
+                            uVar7.m_rawFlags = pScriptEntity->m0_fieldScriptFlags.m_rawFlags | 0x800;
+                        }
+                        pScriptEntity->m0_fieldScriptFlags = uVar7;
+
+                        s32 sVar1 = followDataTable[partyToFollowStructMapping[partyPosition]].m12_animationId;
+                        if (pScriptEntity->mE8_currentAnimationId != sVar1) {
+                            pScriptEntity->mE8_currentAnimationId = sVar1;
+                            if (sVar1 < 0) {
+                                pScriptEntity->mE8_currentAnimationId = 0;
+                            }
+                            setVisualAnimation(pActor->m4_pVramSpriteSheet, (int)pScriptEntity->mE8_currentAnimationId, pActor);
+                        }
+
+                        for (int i = 0; i < 4; i++) {
+                            pScriptEntity->m8_currentWalkMeshTriangle[i] = followDataTable[partyToFollowStructMapping[partyPosition]].m16_walkMeshTriangles[i];
+                        }
+
+                        pScriptEntity->m10_walkmeshId = followDataTable[partyToFollowStructMapping[partyPosition]].m44_walkmeshId;
+                        (pScriptEntity->m50_surfaceNormal).vx = followDataTable[partyToFollowStructMapping[partyPosition]].m30.vx;
+                        (pScriptEntity->m50_surfaceNormal).vy = followDataTable[partyToFollowStructMapping[partyPosition]].m30.vy;
+                        (pScriptEntity->m50_surfaceNormal).vz = followDataTable[partyToFollowStructMapping[partyPosition]].m30.vz;
+                        (pActor->m4_pVramSpriteSheet->m0_spriteActorCore).mC_step.vx = followDataTable[partyToFollowStructMapping[partyPosition]].m20.vx;
+                        (pActor->m4_pVramSpriteSheet->m0_spriteActorCore).mC_step.vy = followDataTable[partyToFollowStructMapping[partyPosition]].m20.vy;
+                        (pActor->m4_pVramSpriteSheet->m0_spriteActorCore).mC_step.vz = followDataTable[partyToFollowStructMapping[partyPosition]].m20.vz;
+                        (pActor->mC_matrix).t[0] = followDataTable[partyToFollowStructMapping[partyPosition]].m8_pos.vx;
+                        (pActor->mC_matrix).t[1] = followDataTable[partyToFollowStructMapping[partyPosition]].m8_pos.vy;
+                        (pActor->mC_matrix).t[2] = followDataTable[partyToFollowStructMapping[partyPosition]].m8_pos.vz;
+                        (pScriptEntity->m20_position).vx = (pActor->m4_pVramSpriteSheet->m0_spriteActorCore).m0_position.vx = (pActor->mC_matrix).t[0] << 0x10;
+                        (pScriptEntity->m20_position).vy = (pActor->m4_pVramSpriteSheet->m0_spriteActorCore).m0_position.vy = (pActor->mC_matrix).t[1] << 0x10;
+                        (pScriptEntity->m20_position).vz = (pActor->m4_pVramSpriteSheet->m0_spriteActorCore).m0_position.vz = (pActor->mC_matrix).t[2] << 0x10;
+                        (pActor->m4_pVramSpriteSheet->m0_spriteActorCore).m84 = followDataTable[partyToFollowStructMapping[partyPosition]].m10;
+                        pScriptEntity->m106_currentRotation = followDataTable[partyToFollowStructMapping[partyPosition]].m14_rotation;
+                        pScriptEntity->m104_rotation = followDataTable[partyToFollowStructMapping[partyPosition]].m14_rotation;
+                        partyToFollowStructMapping[partyPosition] = partyToFollowStructMapping[partyPosition] - 1 & 0x1f;
+                    }
+                    else {
+                        if (!uVar7.m11) {
+                            pScriptEntity->m4_flags.m_rawFlags &= ~0x1000;
+                            if ((pScriptEntity->m14_currentTriangleFlag & 0x420000U) != 0)
+                                assert(0);
+                            if (entityUpdateVar0 != -1) {
+                                int iVar8 = 0x14;
+                                if (partyPosition == 1) {
+                                    iVar8 = 10;
+                                }
+                                if ((partyToFollowStructMapping[0] + iVar8 & 0x1fU) != *puVar9)
+                                    continue;
+                                goto LAB_Field__800818c8;
+                            }
+                            if ((pActor->m4_pVramSpriteSheet->m0_spriteActorCore).m84 != *(short*)((int)&(pScriptEntity->m20_position).vy + 2)) goto LAB_Field__800818c8;
+                            if (pScriptEntity->mE8_currentAnimationId == 6) {
+                                pScriptEntity->m4_flags.m_rawFlags |= 0x1000;
+                                continue;
+                            }
+                            if (pScriptEntity->mE8_currentAnimationId == pScriptEntity->mE6)
+                                continue;
+                            pScriptEntity->mE8_currentAnimationId = pScriptEntity->mE6;
+                            if (pScriptEntity->mE8_currentAnimationId < 0) {
+                                pScriptEntity->mE8_currentAnimationId = 0;
+                            }
+                        }
+                        else {
+LAB_Field__800818c8:
+                            if (partyToFollowStructMapping[partyPosition] != partyToFollowStructMapping[0])
+                                goto LAB_Field__80081920;
+                            pScriptEntity->mE8_currentAnimationId = pScriptEntity->mE6;
+                            pScriptEntity->m0_fieldScriptFlags.m_rawFlags &= ~0x800;
+                            if ((int)((uint)(ushort)pScriptEntity->mE6 << 0x10) < 0) {
+                                pScriptEntity->mE8_currentAnimationId = 0;
+                            }
+
+                        }
+                        setVisualAnimation(pActor->m4_pVramSpriteSheet, (int)pScriptEntity->mE8_currentAnimationId, pActor);
+                    }
+                }
+            }
+        }
+    }
+    else {
+        for (int i = 0; i < totalActors; i++) {
+            sFieldEntity* pActor = &actorArray[i];
+            sFieldScriptEntity* pScriptEntity = pActor->m4C_scriptEntity;
+            if ((((pScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x1000000) != 0) && (i != playerControlledActor)) && ((pActor->m58_flags & 0x20) == 0)) {
+                if (pScriptEntity->mE8_currentAnimationId != pScriptEntity->mE6) {
+                    pScriptEntity->mE8_currentAnimationId = pScriptEntity->mE6;
+                    if (pScriptEntity->mE8_currentAnimationId < 0) {
+                        pScriptEntity->mE8_currentAnimationId = 0;
+                    }
+                    setVisualAnimation(pActor->m4_pVramSpriteSheet, pScriptEntity->mE8_currentAnimationId, pActor);
+                }
+            }
+        }
+    }
 }
 
 void updateScriptAndMoveEntities()
@@ -5777,18 +5965,33 @@ void updateScriptAndMoveEntities()
                     updateEntityEventCode3(i, pFieldEntity, pFieldScriptEntity);
                 }
             }
-            else
-            {
-                MissingCode();
+            else if(((pFieldScriptEntity->m4_flags.m_rawFlags & 0x1000000) == 0) || ((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x10000) != 0)) {
+                if ((pFieldScriptEntity->m4_flags.m_rawFlags & 0x200000) != 0) {
+                    if (pFieldScriptEntity->mE8_currentAnimationId != pFieldScriptEntity->mEA_forcedAnimation) {
+                        pFieldScriptEntity->mE8_currentAnimationId = pFieldScriptEntity->mEA_forcedAnimation;
+                        setVisualAnimation(pFieldEntity->m4_pVramSpriteSheet, pFieldEntity->m4C_scriptEntity->mEA_forcedAnimation, pFieldEntity);
+                    }
+                }
+            }
+            else if (pFieldScriptEntity->mE8_currentAnimationId != pFieldScriptEntity->mEA_forcedAnimation) {
+                pFieldScriptEntity->mEA_forcedAnimation = 2;
+                pFieldScriptEntity->mE8_currentAnimationId = pFieldScriptEntity->mEA_forcedAnimation;
+                spriteActorSetPlayingAnimation(pFieldEntity->m4_pVramSpriteSheet, pFieldScriptEntity->mEA_forcedAnimation);
             }
         }
     }
 
-    MissingCode();
+    if (fieldDebugDisable == 0)
+    {
+        assert(0); // "MOV CHECK0"
+    }
 
     EntityMoveCheck0(playerControlledActor, &actorArray[playerControlledActor], actorArray[playerControlledActor].m4C_scriptEntity);
 
-    MissingCode();
+    if (fieldDebugDisable == 0)
+    {
+        assert(0); // "MOV CHECK1"
+    }
 
     for (int i = 0; i < totalActors; i++)
     {
@@ -5810,7 +6013,13 @@ void updateScriptAndMoveEntities()
         startScriptsForCollisions(playerControlledActor, &actorArray[playerControlledActor], actorArray[playerControlledActor].m4C_scriptEntity);
     }
 
-    MissingCode();
+    updateEntityEventCode3Var2 = 1;
+    updatePartyFollowLeader();
+
+    if (fieldDebugDisable == 0)
+    {
+        assert(0); // "MOV CHECK3"
+    }
 }
 
 int updateAllEntitiesSub2Var0 = 0;

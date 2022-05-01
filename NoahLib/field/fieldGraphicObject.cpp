@@ -826,6 +826,10 @@ void uploadTextureToVram(sPS1Pointer param_1, short param_2, short tpageX, short
         switch (READ_LE_U32(psVar2)) {
         case 0x1100:
             switch (param_2) {
+            case 0:
+                uploadRect[0].x = READ_LE_U16(psVar2 + 4) + READ_LE_U16(psVar2 + 8);
+                uploadRect[0].y = READ_LE_U16(psVar2 + 6) + READ_LE_U16(psVar2 + 10);
+                break;
             case 1:
                 uploadRect[0].x = tpageX + READ_LE_U16(psVar2 + 8);
                 uploadRect[0].y = tpageY + READ_LE_U16(psVar2 + 10);
@@ -842,6 +846,10 @@ void uploadTextureToVram(sPS1Pointer param_1, short param_2, short tpageX, short
                 uploadRect[0].x = READ_LE_U16(psVar2 + 4) + READ_LE_U16(psVar2 + 8);
                 uploadRect[0].y = READ_LE_U16(psVar2 + 6) + READ_LE_U16(psVar2 + 10);
                 break;
+            case 1:
+                uploadRect[0].x = clutX + READ_LE_U16(psVar2 + 8);
+                uploadRect[0].y = clutY + READ_LE_U16(psVar2 + 10);
+                break;
             default:
                 assert(0);
                 break;
@@ -857,8 +865,6 @@ void uploadTextureToVram(sPS1Pointer param_1, short param_2, short tpageX, short
         LoadImage(uploadRect, psVar2 + 0x10);
         psVar2 = psVar2 + 0x10 + (int)uploadRect[0].w * (int)uploadRect[0].h * 2;
     }
-
-    MissingCode();
 }
 
 void customVramUpload()
@@ -1744,6 +1750,14 @@ void spriteActorSetPlayingAnimation(sSpriteActorCore* param_1, int animationId)
 			animationId = ~animationId;
 		}
 
+        // HACK: should not be required
+        {
+            if (animationId >= (*param_1->m24_vramData->m10_startOfAnimationContainer).size()) {
+                Hack("Out of bound animation id");
+                animationId = 0;
+            }
+        }
+
 		param_1->m40 = param_1->m40 | 0x100000;
 		param_1->m58_startOfCurrentAnimation = (*param_1->m24_vramData->m10_startOfAnimationContainer)[animationId];
 		setCurrentAnimationPtr(param_1, param_1->m58_startOfCurrentAnimation);
@@ -1797,9 +1811,10 @@ sSpriteActor* initializeSpriteActor(sSpriteActor* param_1, sSpriteActorAnimation
 	param_1->m48_defaultAnimationbundle = pSetup;
 
 	setAnimationBundle(param_1, pSetup);
-	//param_1->m60 = param_1->m24->m10_startOfAnimationContainer + (READ_LE_U16(param_1->m24->m10_startOfAnimationContainer) & 0x3F) + 1;
-	MissingCode();
 
+    //sPS1Pointer pAnim = (*param_1->m24_vramData->m10_startOfAnimationContainer)[0];
+    //param_1->m60_endOfAnimationContainer = pAnim + ((READ_LE_U16(pAnim) & 0x3F) + 1) * 2;
+    MissingCode();
 	spriteActorSetPlayingAnimation(param_1, 0);
 
 	return param_1;

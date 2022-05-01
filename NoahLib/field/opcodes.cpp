@@ -629,7 +629,6 @@ s16 updateCharacterVar1 = 0;
 s16 updateCharacterVar2 = 0;
 s16 updateCharacterVar3 = 0;
 s8 updateCharacterVar4 = 0;
-int numFollowStruct = 0;
 int numFollowStruct2 = 0;
 extern s32 iRam800adb64;
 extern s16 updateEntityEventCode4Var0;
@@ -714,7 +713,7 @@ void OP_UPDATE_CHARACTER()
                     int iVar2;
                     if ((iRam800adb64 == 0xff) && (iVar2 = OP_UPDATE_CHARACTER_Sub0(pCurrentFieldScriptActor), psVar1 = pCurrentFieldScriptActor, iVar2 == 0)) {
                         pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags = pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags | 0x800;
-                        numFollowStruct2 = numFollowStruct;
+                        numFollowStruct2 = partyToFollowStructMapping[0];
                         psVar1->mE8_currentAnimationId = 0xff;
                         updateCharacterVar2 = updateCharacterVar3;
                     }
@@ -729,7 +728,7 @@ void OP_UPDATE_CHARACTER()
         int iVar2 = OP_UPDATE_CHARACTER_Sub0(pCurrentFieldScriptActor);
         if (iVar2 == 0) {
             pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags = pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags | 0x800;
-            numFollowStruct2 = numFollowStruct;
+            numFollowStruct2 = partyToFollowStructMapping[0];
         }
     }
 LAB_Field__8009f910:
@@ -1365,31 +1364,29 @@ void OP_55(void)
     pCurrentFieldScriptActor->mCC_scriptPC += 7;
 }
 
+u8 kernelAndFieldStatesSynced = 1;
 
-void OP_58()
-{
-    byte bVar1;
-    int iVar2;
-    short sVar3;
-
-    bVar1 = pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 3];
-    if (bVar1 == 1) {
-        sVar3 = getImmediateOrVariableUnsigned(1);
-        actorArray[currentFieldActorId].m50_modelRotation[1] = sVar3;
+void OP_56(void) {
+    if ((((playMusicAuthorized == 0) || (fieldExecuteVar3 == 0)) || (loadCompleted != 0)) || ((fieldMusicLoadPending == -1 || (load2dAnimVar != 0)))) {
+        breakCurrentScript = 1;
     }
-    else if (bVar1 < 2) {
-        if (bVar1 == 0) {
-            sVar3 = getImmediateOrVariableUnsigned(1);
-            actorArray[currentFieldActorId].m50_modelRotation[0] = sVar3;
+    else {
+        syncKernelAndFieldStates();
+        fieldRandomBattleVar = -1;
+        fieldExecuteVar3 = 0;
+        pKernelGameState->m231A_fieldID = getVar80(1, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 9]);
+        pKernelGameState->m231E = getVar40(3, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 9]);
+        s32 uVar4 = getVar20(5, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 9]);
+        if ((uVar4 & 0xffff) == 0xffff || uVar4 == 0xffffffff) {
+            uVar4 = (uint)(ushort)cameraRotationBetweenEyeAndAt.vy;
         }
+        pKernelGameState->m231C_CameraYaw = (short)uVar4 + 0x800U & 0xfff;
+        pKernelGameState->m2320 = getVar10(7, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 9]);
+        OP_CHANGE_FIELD_WHEN_READY_Sub();
+        kernelAndFieldStatesSynced = 1;
+        breakCurrentScript = 1;
+        pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 10;
     }
-    else if (bVar1 == 2) {
-        sVar3 = getImmediateOrVariableUnsigned(1);
-        actorArray[currentFieldActorId].m50_modelRotation[2] = sVar3;
-    }
-    iVar2 = currentFieldActorId;
-    pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 4;
-    updateScriptActor3dRotation(iVar2);
 }
 
 void OP_57(void)
@@ -1497,6 +1494,33 @@ void OP_57(void)
     pCurrentFieldScriptActor->mD0_targetPositionOffset[2] = (iVar8 * 0x10000 - iVar15) / (iVar6 + 1);
     breakCurrentScript = 1;
 }
+
+void OP_58()
+{
+    byte bVar1;
+    int iVar2;
+    short sVar3;
+
+    bVar1 = pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 3];
+    if (bVar1 == 1) {
+        sVar3 = getImmediateOrVariableUnsigned(1);
+        actorArray[currentFieldActorId].m50_modelRotation[1] = sVar3;
+    }
+    else if (bVar1 < 2) {
+        if (bVar1 == 0) {
+            sVar3 = getImmediateOrVariableUnsigned(1);
+            actorArray[currentFieldActorId].m50_modelRotation[0] = sVar3;
+        }
+    }
+    else if (bVar1 == 2) {
+        sVar3 = getImmediateOrVariableUnsigned(1);
+        actorArray[currentFieldActorId].m50_modelRotation[2] = sVar3;
+    }
+    iVar2 = currentFieldActorId;
+    pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 4;
+    updateScriptActor3dRotation(iVar2);
+}
+
 
 void OP_WALK_RANDOM_DIRECTION()
 {
@@ -4290,27 +4314,27 @@ void OP_SETUP_FOG()
 
 void OPX_07()
 {
-    uint uVar1;
+    switch (pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1]) {
+    case 0:
+        pCurrentFieldScriptActor->m4_flags.m_rawFlags &= ~0x400;
+        break;
+    case 1:
+        pCurrentFieldScriptActor->m4_flags.m_rawFlags |= 0x400;
+        break;
+    default:
+        assert(0);
+    }
 
-    if (pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1] == 0) {
-        uVar1 = pCurrentFieldScriptActor->m4_flags.m_rawFlags & 0xfffffbff;
-    }
-    else {
-        if (pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1] != 1) goto LAB_Field__8008d664;
-        uVar1 = pCurrentFieldScriptActor->m4_flags.m_rawFlags | 0x400;
-    }
-    pCurrentFieldScriptActor->m4_flags.m_rawFlags = uVar1;
-LAB_Field__8008d664:
-    pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 2;
+    pCurrentFieldScriptActor->mCC_scriptPC += 2;
 }
 
 void OPX_09()
 {
     if (getImmediateOrVariableUnsigned(1) == 0) {
-        pCurrentFieldScriptActor->m4_flags.m_rawFlags &= ~0x800;
+        pCurrentFieldScriptActor->m4_flags.m_x800 = 0;
     }
     else {
-        pCurrentFieldScriptActor->m4_flags.m_rawFlags |= 0x800;
+        pCurrentFieldScriptActor->m4_flags.m_x800 = 1;
     }
     pCurrentFieldScriptActor->mCC_scriptPC += 3;
 }

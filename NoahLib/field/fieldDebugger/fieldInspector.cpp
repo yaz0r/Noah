@@ -931,6 +931,7 @@ public:
                 ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));
                 ImGui::Text("Failed to decode opcode 0x%02X (%d)", opcode, opcode & 0xFF);
                 ImGui::PopStyleColor();
+                currentPC++;
                 return false;
             }
             break;
@@ -962,6 +963,7 @@ public:
                 ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));
                 ImGui::Text("Failed to decode opcode 0x%02X (%d)", opcode, opcode & 0xFF);
                 ImGui::PopStyleColor();
+                currentPC++;
                 return false;
             }
             break;
@@ -1001,6 +1003,7 @@ public:
                 ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));
                 ImGui::Text("Failed to decode opcode 0x%02X (%d)", opcode, opcode & 0xFF);
                 ImGui::PopStyleColor();
+                currentPC++;
                 return false;
             }
             break;
@@ -1030,6 +1033,7 @@ public:
                 ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));
                 ImGui::Text("Failed to decode opcode 0x%02X (%d)", opcode, opcode & 0xFF);
                 ImGui::PopStyleColor();
+                currentPC++;
                 return false;
             }
             break;
@@ -1064,6 +1068,7 @@ public:
                 ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 0, 0, 1));
                 ImGui::Text("Failed to decode opcode 0x%02X (%d)", opcode, opcode & 0xFF);
                 ImGui::PopStyleColor();
+                currentPC++;
                 return false;
             }
             break;

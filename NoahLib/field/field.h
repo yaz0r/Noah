@@ -169,6 +169,8 @@ struct sFieldEntity
 extern std::vector<sFieldEntity> actorArray;
 extern std::array<s32, 3> currentParty;
 
+extern std::array<s32, 3> partyToFollowStructMapping;
+
 extern bool g_executeScripts;
 extern bool g_executeUpdateScripts;
 
@@ -338,6 +340,7 @@ extern s32 newBootMode;
 
 extern s32 gDepthDivider;
 
+void syncKernelAndFieldStates();
 
 void initFontPalettes(short param_1, short param_2);
 void initFontSystem();

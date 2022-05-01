@@ -40,7 +40,14 @@ bool noahInit(int argc, char* argv[])
         std::vector<u8> fontData = mallocAndDecompress(compressedFontData.begin());
 		initFont(fontData);
 	}
-
+    {
+        std::vector<u8> compressedData;
+        readFile(7, compressedData, 0, 0);
+        waitReadCompletion(0);
+        traceNextAlloc(0x30);
+        std::vector<u8> data = mallocAndDecompress(compressedData.begin());
+        setupPrintDialogTextVar(data);
+    }
     if (1) {
         {
             std::vector<u8> overlay;

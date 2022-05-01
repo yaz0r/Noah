@@ -118,16 +118,15 @@ void LoadImage(RECT* pRect, const u8* data)
 
 void LoadImage(RECT* pRect, sPS1Pointer data)
 {
-	auto vramIterator = gVram.begin() + pRect->y * 2048 + pRect->x * 2;
 	for (int y = 0; y < pRect->h; y++)
 	{
+        auto vramIterator = gVram.begin() + (pRect->y + y) * 2048 + pRect->x * 2;
+
 		for (int x = 0; x < pRect->w * 2; x++)
 		{
 			*vramIterator = READ_LE_U8(data);
 			vramIterator++;
 			data = data + 1;
 		}
-
-		vramIterator += 2048 - pRect->w * 2;
 	}
 }

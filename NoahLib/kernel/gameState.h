@@ -30,6 +30,9 @@ struct sGameState
     std::array<s8, 5> m22B1_isOnGear;
     u16 m2318_partyFrameLock;
     u16 m231A_fieldID;
+    s16 m231C_CameraYaw;
+    s16 m231E;
+    s16 m2320;
 };
 
 extern sGameState gameState;

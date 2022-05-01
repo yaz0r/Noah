@@ -52,7 +52,9 @@ bgfx::ProgramHandle getTILEShader()
 	return programHandle;
 }
 
-ImVec2 PSXResolution = { 320,240 };
+ImVec2 PSXInternalResolution = { 320,240 };
+float PSXRenderScaling = 2.f;
+ImVec2 PSXRenderResolution = { PSXInternalResolution.x * PSXRenderScaling, PSXInternalResolution.y * PSXRenderScaling };
 
 void DrawSync(int)
 {
@@ -340,25 +342,23 @@ void initPSXFB()
 			| BGFX_SAMPLER_V_CLAMP
 			;
 
-		PSXOutput_Texture = bgfx::createTexture2D(PSXResolution[0], PSXResolution[1], false, 0, bgfx::TextureFormat::BGRA8, BGFX_TEXTURE_RT | tsFlags);
+		PSXOutput_Texture = bgfx::createTexture2D( PSXRenderResolution[0], PSXRenderResolution[1], false, 0, bgfx::TextureFormat::BGRA8, BGFX_TEXTURE_RT | tsFlags);
 		std::array<bgfx::Attachment, 1> attachements;
 		attachements[0].init(PSXOutput_Texture);
 		PSXOutput_FB = bgfx::createFrameBuffer(1, &attachements[0], true);
 	}
 
-	bgfx::setViewRect(PSXOutput_bgfxView, 0, 0, PSXResolution[0], PSXResolution[1]);
-
 	float mtx_view[16];
 	float mtx_projection[16];
 
 	bx::mtxIdentity(mtx_view);
-	bx::mtxOrtho(mtx_projection, 0, PSXResolution[0], PSXResolution[1], 0, -1, 1, 0, 0);
+	bx::mtxOrtho(mtx_projection, 0, PSXInternalResolution[0], PSXInternalResolution[1], 0, -1, 1, 0, 0);
 
 	bgfx::setViewTransform(PSXOutput_bgfxView, mtx_view, mtx_projection);
 	//bgfx::setTransform(matrix);
 
 	bgfx::setViewFrameBuffer(PSXOutput_bgfxView, PSXOutput_FB);
-	bgfx::setViewRect(PSXOutput_bgfxView, 0, 0, PSXResolution[0], PSXResolution[1]);
+	bgfx::setViewRect(PSXOutput_bgfxView, 0, 0, PSXRenderResolution[0], PSXRenderResolution[1]);
 
 	bgfx::setViewClear(PSXOutput_bgfxView, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 255);
 
@@ -380,7 +380,7 @@ void drawPSXFB()
 {
 	if (ImGui::Begin("PSX Output"))
 	{
-		ImGui::Image(PSXOutput_Texture, ImVec2(PSXResolution[0]*2, PSXResolution[1]*2));
+		ImGui::Image(PSXOutput_Texture, ImVec2(PSXRenderResolution[0], PSXRenderResolution[1]));
 	}
 	ImGui::End();
 }

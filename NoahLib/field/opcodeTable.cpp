@@ -65,6 +65,7 @@ void initOpcodes()
     fieldScriptOpcodes[0x52] = OP_52;
     fieldScriptOpcodes[0x53] = OP_53;
     fieldScriptOpcodes[0x55] = OP_55;
+    fieldScriptOpcodes[0x56] = OP_56;
     fieldScriptOpcodes[0x57] = OP_57;
     fieldScriptOpcodes[0x58] = OP_58;
     fieldScriptOpcodes[0x59] = OP_WALK_RANDOM_DIRECTION;

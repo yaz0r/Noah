@@ -23,3 +23,15 @@ void initFont(std::vector<u8>& fontData)
 	dialogFontVarPtr2 = &dialogFontVarPtr[0] + READ_LE_U16(dialogFontVarPtr.begin() + 2);
 
 }
+
+void setupPrintDialogTextVar(std::vector<u8>& fontData)
+{
+    assert(fontData.size());
+    /*
+    flagAllocation(fontData);
+    printDialogTextVar = fontData;
+    printDialogTextVar2 = fontData;
+    doPointerRelocation(fontData);
+    printDialogTextVar = printDialogTextVar + 4;
+    */
+}

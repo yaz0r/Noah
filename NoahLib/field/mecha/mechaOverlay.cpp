@@ -4,6 +4,7 @@
 #include "kernel/filesystem.h"
 #include "kernel/gte.h"
 #include "bx/math.h"
+#include "field/fieldGraphicObject.h"
 
 u32 NumMechas;
 std::array<s16, 4> mechaList;
@@ -43,6 +44,12 @@ struct sMechaDataTable1_C {
 };
 
 struct sMechaDataTable1_sub4 {
+    void init(std::vector<u8>& inputData) {
+        m_raw = inputData;
+
+    }
+
+    std::vector<u8> m_raw;
 };
 
 struct sMechaDataTable1_10_4 {
@@ -93,6 +100,7 @@ struct sMechaDataTable1 {
         m_raw = input;
         std::vector<std::vector<u8>> relocatedData = doPointerRelocationAndSplit(input);
 
+        m4_textures.init(relocatedData[0]);
         m8_modelBlocks.init(relocatedData[1].begin(), relocatedData[1].size());
         mC.resize(relocatedData[2].size() / 4);
         for (int i = 0; i < mC.size(); i++) {
@@ -105,7 +113,7 @@ struct sMechaDataTable1 {
         return;
     }
 
-    sMechaDataTable1_sub4* m4_textures;
+    sMechaDataTable1_sub4 m4_textures;
     sModel m8_modelBlocks;
     std::vector<sMechaDataTable1_C> mC;
     sMechaDataTable1_10 *m10;
@@ -287,12 +295,6 @@ std::array<u8, 3> mechaBackColor = { 0,0,0 };
 std::array<MATRIX, 2> mechaFieldArgs2;
 
 std::array<SFP_VEC4, 4> initMechaTempVar;
-
-void uploadTextureToVram(sMechaDataTable1_sub4* param_1, short param_2, short tpageX, short tpageY, short param_5, short clutX, short clutY)
-{
-    MissingCode();
-}
-
 
 void sMechaModel_init(sModel& modelBlock, sMechaInitVar4* param_2)
 {
@@ -526,6 +528,23 @@ sMechaDataTable2_4_4* mechaOP_10_a(sLoadedMechas* param_1, uint param_2, u32* pa
     }
 }
 
+void mechaAnimOp23(sLoadedMechas* param_1, sLoadedMecha_sub4* param_2, u32 param_3) {
+    param_2->m7 = param_3 & 1;
+    if ((param_3 & 0x80) != 0) {
+        std::vector<sLoadedMecha_sub4>::iterator psVar1 = (*param_1->m4).begin();
+        int iVar2 = 1;
+        if (1 < psVar1->mA_numBones) {
+            do {
+                psVar1 = psVar1 + 1;
+                iVar2 = iVar2 + 1;
+                if (psVar1->m0_parentBone == param_2) {
+                    mechaAnimOp23(param_1, &(*psVar1), param_3);
+                }
+            } while (iVar2 < (*param_1->m4)[0].mA_numBones);
+        }
+    }
+}
+
 void processMechaAnimData(sLoadedMechas* param_1, sMechaInitVar2* param_2, int param_3, int param_4)
 {
     if (param_4 == 0) {
@@ -611,6 +630,10 @@ void processMechaAnimData(sLoadedMechas* param_1, sMechaInitVar2* param_2, int p
                 u32 dummy;
                 mechaOP_10_b(*param_1->m4, mechaOP_10_a(param_1, bytecodeHigher, &dummy));
             }
+            break;
+        case 0x23:
+            mechaAnimOp23(param_1, &(*param_1->m4)[*pNextBytecode], bytecodeHigher);
+            pNextBytecode = pCurrentByteCodePtr + 2;
             break;
         case 0x48:
             param_1->m36 = bytecodeHigher;
@@ -746,7 +769,11 @@ void mechaInitNewMecha(int entryId, ushort flags, sMechaDataTable2* pData2, sMec
         if ((flags & 0x40) == 0) {
             uVar29 = ((pLoadedMecha->m4A & 4) == 0);
         }
-        uploadTextureToVram(pData1->m4_textures, uVar29, tpageX, tpageY, uVar29, clutX, clutY);
+
+        // TODO: convert that properly
+        sPS1Pointer temp;
+        temp.setPointer(&pData1->m4_textures.m_raw[0]);
+        uploadTextureToVram(temp, uVar29, tpageX, tpageY, uVar29, clutX, clutY);
         mechaModelBlocksBufferForLoading = pData1->m8_modelBlocks;
 
         int iVar2;

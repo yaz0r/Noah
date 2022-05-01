@@ -144,7 +144,7 @@ struct sSpriteActorCore {
     sPS1Pointer m54;
     sPS1Pointer m58_startOfCurrentAnimation;
     sPS1Pointer m5C;
-    sPS1Pointer m60;
+    //sPS1Pointer m60_endOfAnimationContainer; weird thing, skipped its init for now
     sPS1Pointer m64_spriteByteCode;
     void(*m68)(sSpriteActorCore*);
     void* m6C_pointerToOwnerStructure;
@@ -263,3 +263,5 @@ void resetPerSubgroupTransforms(sSpriteActorCore* param_1);
 
 void setTransparencyMode(sSpriteActor* param_1, u32 mode);
 void setCurrentAnimationPtr(sSpriteActorCore* param_1, const sPS1Pointer startOfAnimation);
+
+void uploadTextureToVram(sPS1Pointer param_1, short param_2, short tpageX, short tpageY, short param_5, short clutX, short clutY);
