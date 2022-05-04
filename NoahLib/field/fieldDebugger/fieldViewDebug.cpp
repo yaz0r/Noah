@@ -7,7 +7,6 @@
 
 #include "field/walkMesh.h"
 
-#include "ImGuizmo.h"
 #include "SDL_scancode.h"
 #include "SDL_keyboard.h"
 #include "field/field.h"

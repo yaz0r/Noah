@@ -16,8 +16,6 @@
 //#include <../3rdparty/dear-imgui/widgets/file_list.h>
 //#include <../3rdparty/dear-imgui/widgets/gizmo.h>
 
-#include "ImGuizmo.h"
-
 #ifndef IMGUI_DEFINE_MATH_OPERATORS
 #define IMGUI_DEFINE_MATH_OPERATORS
 #endif
@@ -438,8 +436,6 @@ struct OcornutImguiContext
 #endif // USE_ENTRY
 
 		ImGui::NewFrame();
-
-		ImGuizmo::BeginFrame();
 	}
 
 	void endFrame()

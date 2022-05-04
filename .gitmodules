@@ -13,9 +13,6 @@
 [submodule "ThirdParty/imgui_club"]
 	path = ThirdParty/imgui_club
 	url = git@github.com:ocornut/imgui_club.git
-[submodule "ThirdParty/ImGuizmo"]
-	path = ThirdParty/ImGuizmo
-	url = git@github.com:CedricGuillemet/ImGuizmo.git
 [submodule "ThirdParty/tinyxml2"]
 	path = ThirdParty/tinyxml2
 	url = git@github.com:leethomason/tinyxml2.git
