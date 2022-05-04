@@ -139,7 +139,7 @@ int initBgfxGlue(int argc, char* argv[])
     }
 
     bgfx::Init initparam;
-#if BX_PLATFORM_LINUX || BX_PLATFORM_BSD
+#if defined(SDL_VIDEO_DRIVER_X11)
     initparam.platformData.ndt = wmi.info.x11.display;
     initparam.platformData.nwh = (void*)(uintptr_t)wmi.info.x11.window;
 #elif BX_PLATFORM_OSX

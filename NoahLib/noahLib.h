@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <array>
+#include <cstring>
 
 typedef uint8_t u8;
 typedef int8_t s8;
