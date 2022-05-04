@@ -4,11 +4,11 @@ struct TIM_IMAGE
 {
     u32 mode;
     struct RECT* crect;
-    void* caddr;
+    const void* caddr;
     struct RECT* prect;
-    void* paddr;
+    const void* paddr;
 };
-int OpenTIM(std::vector<u8>::iterator ptr);
+int OpenTIM(std::vector<u8>::const_iterator ptr);
 TIM_IMAGE* ReadTIM(TIM_IMAGE* timimg);
 
 void LoadImage(struct RECT* pRect, const u8* data);

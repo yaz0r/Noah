@@ -31,9 +31,9 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES iOS|tvOS|Darwin)
         "*.mm"
     )
 
-    set(OBJECTIVE_C_SRC
+    set(SOURCES
+     ${OBJECTIVE_C_SRC}
      ${SOURCES}
-     ${SRC_ROOT}
     )
 endif()
 

@@ -251,11 +251,11 @@ void initMenuContext(void)
     initMenuContext32C(1);
 }
 
-void loadMenuImageBundle(std::vector<u8>& imageBundle) {
+void loadMenuImageBundle(const std::vector<u8>& imageBundle) {
     s32 numImages = READ_LE_U32(imageBundle.begin());
 
     while (numImages != -1) {
-        std::vector<u8>::iterator imageData = imageBundle.begin() + READ_LE_U32(imageBundle.begin() + 4 * numImages);
+        std::vector<u8>::const_iterator imageData = imageBundle.begin() + READ_LE_U32(imageBundle.begin() + 4 * numImages);
 
         TIM_IMAGE tempTim;
         OpenTIM(imageData);
@@ -413,7 +413,7 @@ void initMenuContext_1DE0(sMenuContext_4E0* param_1, int param_2, int param_3, b
     param_1->m7F = 0;
 }
 
-void setupMenuContext4E0(sMenuContext_4E0* param_1, std::vector<std::array<u8,2>>::iterator& param_2, int startY, int count) {
+void setupMenuContext4E0(sMenuContext_4E0* param_1, const std::vector<std::array<u8,2>>::iterator& param_2, int startY, int count) {
     for (int i = 0; i < count; i +=2) {
         sMenuContext_4E0* pEntry = &param_1[i];
         sMenuContext_4E0* pEntry2 = &param_1[i+1];
@@ -880,7 +880,7 @@ void setupMainMenuWithConfig(int count, std::vector<std::array<u32, 2>>::iterato
     }
 }
 
-void j_setupMenuContext4E0(uint param_1, sMenuContext_4E0* param_2, std::vector<std::array<u8, 2>>::iterator& param_3)
+void j_setupMenuContext4E0(uint param_1, sMenuContext_4E0* param_2, const std::vector<std::array<u8, 2>>::iterator& param_3)
 {
     setupMenuContext4E0(param_2, param_3, 4, param_1 & 0xff);
     return;
@@ -973,7 +973,7 @@ void countField33C_C(uint param_1, byte* param_2)
         do {
             *param_2 = 0;
             param_2 = param_2 + 1;
-        } while ((int)param_2 < (int)pbVar1);
+        } while ((intptr_t)param_2 < (intptr_t)pbVar1);
     }
     return;
 }

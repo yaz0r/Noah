@@ -7,19 +7,19 @@ extern std::array<u8, 2048 * 512> gVram;
 RECT TIM_crect;
 RECT TIM_prect;
 
-std::vector<u8>::iterator currentTIM;
+std::vector<u8>::const_iterator currentTIM;
 
-int OpenTIM(std::vector<u8>::iterator ptr)
+int OpenTIM(std::vector<u8>::const_iterator ptr)
 {
 	currentTIM = ptr;
 	return 0;
 }
 
-int get_tim_addr(std::vector<u8>::iterator input, TIM_IMAGE* timimg)
+int get_tim_addr(std::vector<u8>::const_iterator input, TIM_IMAGE* timimg)
 {
 	if (READ_LE_U32(input) == 0x10)
 	{
-		std::vector<u8>::iterator timaddr = input + 8;
+		std::vector<u8>::const_iterator timaddr = input + 8;
 		timimg->mode = READ_LE_U32(input + 4);
 		int uVar3 = 0;
 		if ((timimg->mode & 8) == 0)
