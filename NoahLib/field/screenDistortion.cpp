@@ -1,4 +1,4 @@
-#include "NoahLib.h"
+#include "noahLib.h"
 #include "screenDistortion.h"
 #include "kernel/graphics.h"
 #include "fieldScriptSupport.h"

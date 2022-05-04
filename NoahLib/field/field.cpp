@@ -5884,7 +5884,8 @@ void updatePartyFollowLeader() {
                                     continue;
                                 goto LAB_Field__800818c8;
                             }
-                            if ((pActor->m4_pVramSpriteSheet->m0_spriteActorCore).m84 != *(short*)((int)&(pScriptEntity->m20_position).vy + 2)) goto LAB_Field__800818c8;
+                            if ((pActor->m4_pVramSpriteSheet->m0_spriteActorCore).m84 != pScriptEntity->m20_position.vy.getIntegerPart())
+                                goto LAB_Field__800818c8;
                             if (pScriptEntity->mE8_currentAnimationId == 6) {
                                 pScriptEntity->m4_flags.m_rawFlags |= 0x1000;
                                 continue;

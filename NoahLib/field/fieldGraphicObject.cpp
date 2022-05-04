@@ -341,7 +341,7 @@ void savePointCallback8Sub0Sub0(sSpriteActorCore* param_1)
         }
     }
     else {
-        if (*(short*)((int)&(param_1->m0_position).vy + 2) == param_1->m84) {
+        if (param_1->m0_position.vy.getIntegerPart() == param_1->m84) {
             return;
         }
         iVar3 = modulateSpeed(param_1, iVar2);
