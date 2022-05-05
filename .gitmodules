@@ -3,7 +3,7 @@
 	url = git@github.com:bkaradzic/bgfx.cmake.git
 [submodule "ThirdParty/SDL"]
 	path = ThirdParty/SDL
-	url = git@github.com:yaz0r/SDL.git
+	url = git@github.com:libsdl-org/SDL.git
 [submodule "ThirdParty/soloud.cmake/soloud"]
 	path = ThirdParty/soloud.cmake/soloud
 	url = git@github.com:yaz0r/soloud.git
