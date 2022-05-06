@@ -6,7 +6,7 @@ if not exist "%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
   echo "WARNING: You need VS 2017 version 15.2 or later (for vswhere.exe)"
 )
 
-for /f "usebackq tokens=*" %%i in (`"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" -version 17.0 -property installationPath`) do (
+for /f "usebackq tokens=*" %%i in (`"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" -version 16.0 -property installationPath`) do (
   set InstallDir=%%i
 )
 
@@ -16,8 +16,6 @@ if exist "!InstallDir!\VC\Auxiliary\Build\vcvars64.bat" (
   echo "Could not find !InstallDir!\VC\Auxiliary\Build\vcvars64.bat"
 )
 
-mkdir vs2022
-cd vs2022
-cmake -G "Visual Studio 17 2022" -A x64 ..\..\
+cmake -G "Visual Studio 16 2019" -A x64 -B build
 
 pause

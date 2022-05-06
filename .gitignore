@@ -1,6 +1,3 @@
 /data/iso
-/build/vs2019
-/build/vs2022
-/build/macos
-/build/linux
 /data/shaders/generated
+/build
