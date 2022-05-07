@@ -4,6 +4,26 @@
 #include "kernel/math.h"
 #include "kernel/graphics.h"
 
+enum controllerButtons {
+    L1 = 1 << 2, // 0x4
+    R1 = 1 << 3, // 0x8
+    TRIANGLE = 1 << 4, // 0x10
+    CIRCLE = 1 << 5, // 0x20
+    CROSS = 1 << 6, // 0x40
+    SQUARE = 1 << 7, // 0x80
+    SELECT = 1 << 8, // 0x100
+    START = 1 << 11, // 0x800
+    UP = 1 << 12, // 0x1000
+    RIGHT = 1 << 13, // 0x2000
+    DOWN = 1 << 14, // 0x4000
+    LEFT = 1 << 15, // 0x8000
+};
+
+struct sGameController {
+    u16 m0_buttons;
+    u16 m2;
+};
+
 struct sFieldEntitySub0
 {
     std::vector<sModelBlock>::iterator m4_pModelBlock;
@@ -261,7 +281,7 @@ extern const std::array<u16, 8> actorDirectionTable3;
 extern s32 load2dAnimVar;
 extern s32 loadCompleted;
 
-extern sVec2_s16 padButtonForScripts[2];
+extern std::array<sGameController, 2> padButtonForScripts;
 extern std::array<s16, 4> fieldInitVar1;
 
 extern bool g_LogOpcodes;

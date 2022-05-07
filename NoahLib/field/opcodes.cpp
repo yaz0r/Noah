@@ -680,7 +680,7 @@ void OP_UPDATE_CHARACTER()
         return;
     }
 
-    if ((padButtonForScripts[0].vx >> 12) != 0)
+    if ((padButtonForScripts[0].m0_buttons >> controllerButtons::UP) != 0)
     {
         checkForRandomEncounter();
     }
@@ -697,13 +697,13 @@ void OP_UPDATE_CHARACTER()
         }
     }
 
-    if (((updateCharacterVar1 < 0x21) || (updateCharacterVar1 = 0x20, (padButtonForScripts[0].vx & 0x80U) == 0)) || (((pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags & 0x1800) != 0 || (iRam800adb64 != 0xff)))) {
+    if (((updateCharacterVar1 < 0x21) || (updateCharacterVar1 = 0x20, (padButtonForScripts[0].m0_buttons & controllerButtons::SQUARE) == 0)) || (((pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags & 0x1800) != 0 || (iRam800adb64 != 0xff)))) {
         if (updateEntityEventCode4Var0 == 0) {
-            if (((((padButtonForDialogs & 0x80) != 0) && ((pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags & 0x1800) == 0)) && ((pCurrentFieldScriptActor->m14_currentTriangleFlag & 0x400000U) == 0)) &&
+            if (((((padButtonForDialogs & controllerButtons::SQUARE) != 0) && ((pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags & 0x1800) == 0)) && ((pCurrentFieldScriptActor->m14_currentTriangleFlag & 0x400000U) == 0)) &&
                 (iRam800adb64 == 0xff)) goto LAB_Field__8009f7fc;
         }
         else {
-            if ((padButtonForDialogs & 0x80) == 0) {
+            if ((padButtonForDialogs & controllerButtons::SQUARE) == 0) {
             LAB_Field__8009f8e4:
                 if (updateCharacterVar2 == 0) goto LAB_Field__8009f910;
             }
@@ -734,10 +734,10 @@ void OP_UPDATE_CHARACTER()
 LAB_Field__8009f910:
     int uVar4;
     if (updateCharacterVar4 == '\0') {
-        uVar4 = updateCharacterRotationOrder1[(ushort)padButtonForScripts[0].vx >> 0xc ^ 0xf];
+        uVar4 = updateCharacterRotationOrder1[(ushort)padButtonForScripts[0].m0_buttons >> 0xc ^ 0xf];
     }
     else {
-        uVar4 = updateCharacterRotationOrder2[(ushort)padButtonForScripts[0].vx >> 0xc ^ 0xf];
+        uVar4 = updateCharacterRotationOrder2[(ushort)padButtonForScripts[0].m0_buttons >> 0xc ^ 0xf];
     }
     if ((uVar4 & 0x8000) == 0) {
         uVar4 = uVar4 - camera2Tan & 0xfff;
@@ -3671,7 +3671,7 @@ void OP_SET_VAR_TRUE(void)
 
 void OP_JUMP_IF_PAD_MASK()
 {
-    jumpIfMask(padButtonForScripts[0].vx);
+    jumpIfMask(padButtonForScripts[0].m0_buttons);
 }
 
 void OP_SET_CURRENT_ACTOR_FLAGS()

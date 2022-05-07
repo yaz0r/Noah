@@ -137,7 +137,8 @@ s32 fieldTransitionMode = 0;
 u16 inputAllowedMask = 0xFFFF;
 u16 padButtonForField;
 u16 padButtonForField2;
-sVec2_s16 newPadButtonForScripts[2];
+
+std::array<sGameController, 2> newPadButtonForScripts;
 u16 inputAllowedMask2;
 u16 newPadButtonForDialogs;
 u16 newPadButtonForDialogs2;
@@ -174,8 +175,8 @@ void resetInputs()
 
     MissingCode();
 
-    newPadButtonForScripts[0].vx = 0;
-    newPadButtonForScripts[1].vx = 0;
+    newPadButtonForScripts[0].m0_buttons = 0;
+    newPadButtonForScripts[1].m0_buttons = 0;
 
     MissingCode();
 }
@@ -255,8 +256,8 @@ void resetFieldDefault()
 
     resetInputs();
     inputAllowedMask = 0xffff;
-    padButtonForScripts[0].vx = 0;
-    padButtonForScripts[1].vx = 0;
+    padButtonForScripts[0].m0_buttons = 0;
+    padButtonForScripts[1].m0_buttons = 0;
     padButtonForDialogs = 0;
     padButtonForDialogs2 = 0;
     padButtonForField = 0;
@@ -2582,7 +2583,7 @@ void OPX_13Sub(int)
 }
 
 
-sVec2_s16 padButtonForScripts[2];
+std::array<sGameController, 2> padButtonForScripts;
 
 
 int isScriptAlreadyRunning(sFieldScriptEntity* pEntity, int scriptIndex)
@@ -4743,8 +4744,8 @@ void updateEntityEventCode3(int index, sFieldEntity* pFieldEntity, sFieldScriptE
     }
 
     int animationId = 1;
-    if (((pFieldScriptEntity->m0_fieldScriptFlags.m14_isPlayerControlled) && ((padButtonForScripts[0].vx & 0x40) != 0)) && (playerCanRun == 1)) {
-        animationId = 2;
+    if (((pFieldScriptEntity->m0_fieldScriptFlags.m14_isPlayerControlled) && ((padButtonForScripts[0].m0_buttons & controllerButtons::CROSS) != 0)) && (playerCanRun == 1)) {
+        animationId = 2; // run
     }
     if (((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x1800) != 0) && (pFieldScriptEntity->mE8_currentAnimationId != animationId)) {
         if (pFieldScriptEntity->mE8_currentAnimationId == 1) {
@@ -4969,7 +4970,7 @@ void  startScriptsForCollisions(uint playerEntityIndex, sFieldEntity* pPlayerEnt
                     startScriptsForCollisionsVar0 = 0;
                 }
                 else {
-                    if ((((padButtonForDialogs & 0x20) == 0) || (bTrigger)) || ((pTestedScriptEntity->m4_flags.m_rawFlags & 0x4000000) != 0)) {
+                    if ((((padButtonForDialogs & controllerButtons::CIRCLE) == 0) || (bTrigger)) || ((pTestedScriptEntity->m4_flags.m_rawFlags & 0x4000000) != 0)) {
                         if ((pTestedScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0xa20000) == 0) {
                             scriptIndexToStart = '\x03';
                             newValueInFlags = 4;
@@ -5021,7 +5022,7 @@ void  startScriptsForCollisions(uint playerEntityIndex, sFieldEntity* pPlayerEnt
                     Square0(&tempVec3, &tempVec4);
 
                     s32 distance = tempVec2.vx + tempVec2.vz;
-                    if (((tempVec4.vz <= distance) || ((padButtonForDialogs & 0x20) == 0)) || ((bTrigger || ((pTestedScriptEntity->m4_flags.m_rawFlags & 0x4000000) != 0)))) {
+                    if (((tempVec4.vz <= distance) || ((padButtonForDialogs & controllerButtons::CIRCLE) == 0)) || ((bTrigger || ((pTestedScriptEntity->m4_flags.m_rawFlags & 0x4000000) != 0)))) {
                         if (((pTestedScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0xa20000) == 0) && (distance < tempVec4.vx)) {
                             scriptIndexToStart =  3;
                             newValueInFlags = 4;
@@ -5047,7 +5048,7 @@ void  startScriptsForCollisions(uint playerEntityIndex, sFieldEntity* pPlayerEnt
             {
                 if ((((pPlayerScriptEntity->m20_position.vy.getIntegerPart() - pPlayerScriptEntity->m18_boundingVolume.vy <= yDiff) && ((int)(yDiff - (uint)(ushort)pTestedScriptEntity->m18_boundingVolume.vy) <= pPlayerScriptEntity->m20_position.vy.getIntegerPart())) && (actorId != playerEntityIndex)) &&
                     (isPositionInEntityScriptBoundingVolume(pPlayerScriptEntity->m20_position.vx.getIntegerPart(), pPlayerScriptEntity->m20_position.vz.getIntegerPart(), pTestedScriptEntity, 0x10) == 0)) {
-                    if ((((padButtonForDialogs & 0x20) == 0) || (bTrigger)) || ((pTestedScriptEntity->m4_flags.m_rawFlags & 0x4000000) != 0)) {
+                    if ((((padButtonForDialogs & controllerButtons::CIRCLE) == 0) || (bTrigger)) || ((pTestedScriptEntity->m4_flags.m_rawFlags & 0x4000000) != 0)) {
                         if ((pTestedScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0xa20000) == 0) {
                             scriptIndexToStart = 3;
                             newValueInFlags = 4;
@@ -6180,14 +6181,16 @@ void updateCameraDolly()
             }
         }
 
-        if (((((padButtonForScripts[0].vx & 4U) != 0) && ((op99Var7 & 0x8000) == 0)) && (cameraDollyVar0 == 0)) &&
+        // Rotate camera left
+        if (((((padButtonForScripts[0].m0_buttons & controllerButtons::L1) != 0) && ((op99Var7 & 0x8000) == 0)) && (cameraDollyVar0 == 0)) &&
             (((cameraDirectionToDollyBitmask)[(int)((int)cameraRotationBetweenEyeAndAt.vy - 0x200U & 0xfff) >> 9] & DollyStop) == 0)) {
             cameraDollyVar1 = -0x400000;
             cameraDollyVar0 = 8;
             opA0_var0 = opA0_var0 + -0x200;
         }
 
-        if (((((padButtonForScripts[0].vx & 8U) != 0) && ((op99Var7 & 0x8000) == 0)) && (cameraDollyVar0 == 0)) &&
+        // Rotate camera right
+        if (((((padButtonForScripts[0].m0_buttons & controllerButtons::R1) != 0) && ((op99Var7 & 0x8000) == 0)) && (cameraDollyVar0 == 0)) &&
             (((cameraDirectionToDollyBitmask)[(int)((int)cameraRotationBetweenEyeAndAt.vy + 0x200U & 0xfff) >> 9] & DollyStop) == 0)) {
             cameraDollyVar1 = 0x400000;
             cameraDollyVar0 = 8;
@@ -7880,8 +7883,8 @@ int loadInputFromVSyncBuffer()
     }
     else {
         uVar2 = inputReplayOffset & 0xf;
-        newPadButtonForScripts[0].vx = inputReplayBuffer.m0_newPadButtonForScripts0[uVar2];
-        newPadButtonForScripts[1].vx = inputReplayBuffer.m20_newPadButtonForScripts1[uVar2];
+        newPadButtonForScripts[0].m0_buttons = inputReplayBuffer.m0_newPadButtonForScripts0[uVar2];
+        newPadButtonForScripts[1].m0_buttons = inputReplayBuffer.m20_newPadButtonForScripts1[uVar2];
         newPadButtonForDialogs = inputReplayBuffer.m40_newPadButtonForDialogs[uVar2];
         newPadButtonForDialogs2 = inputReplayBuffer.m60_newPadButtonForDialogs2[uVar2];
         newPadButtonForField = inputReplayBuffer.m80_newPadButtonForField[uVar2];
@@ -7947,19 +7950,20 @@ void getInputDuringVsync(void)
     u16 buttonMask = 0;
     if (controller)
     {
-        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_A) << 6; // Cross
-        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_B) << 5; // Circle
-        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_Y) << 4; // Triangle
-        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_X) << 7; // Square
-        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_START) << 11;
-        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_BACK) << 8;
-        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_UP) << 12;
-        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_DOWN) << 14;
-        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_LEFT) << 15;
-        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_RIGHT) << 13;
+        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_LEFTSHOULDER) ? controllerButtons::L1 : 0;
+        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER) ? controllerButtons::R1 : 0;
+        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_Y) ? controllerButtons::TRIANGLE : 0;
+        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_B) ? controllerButtons::CIRCLE : 0;
+        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_A) ? controllerButtons::CROSS : 0;
+        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_X) ? controllerButtons::SQUARE : 0;
+        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_BACK) ? controllerButtons::SELECT : 0;
+        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_START) ? controllerButtons::START : 0;
+        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_UP) ? controllerButtons::UP : 0;
+        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_RIGHT) ? controllerButtons::RIGHT : 0;
+        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_DOWN) ? controllerButtons::DOWN : 0;
+        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_LEFT) ? controllerButtons::LEFT : 0;
 
-        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_LEFTSHOULDER) << 2;
-        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER) << 3;
+
         /*
                 static bool pressRight = false;
                 if (SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_RIGHT))
@@ -7983,28 +7987,28 @@ void getInputDuringVsync(void)
                 switch (i)
                 {
                 case SDL_SCANCODE_Z:
-                    buttonMask |= 0x40; // CROSS
+                    buttonMask |= controllerButtons::CROSS; // CROSS
                     break;
                 case SDL_SCANCODE_X:
-                    buttonMask |= 0x20; // CIRCLE
+                    buttonMask |= controllerButtons::CIRCLE; // CIRCLE
                     break;
                 case SDL_SCANCODE_A:
-                    buttonMask |= 0x80; // SQUARE
+                    buttonMask |= controllerButtons::SQUARE; // SQUARE
                     break;
                 case SDL_SCANCODE_S:
-                    buttonMask |= 0x10; // TRIANGLE
+                    buttonMask |= controllerButtons::TRIANGLE; // TRIANGLE
                     break;
                 case SDL_SCANCODE_UP:
-                    buttonMask |= 0x1000;
+                    buttonMask |= controllerButtons::UP;
                     break;
                 case SDL_SCANCODE_RIGHT:
-                    buttonMask |= 0x2000;
+                    buttonMask |= controllerButtons::RIGHT;
                     break;
                 case SDL_SCANCODE_DOWN:
-                    buttonMask |= 0x4000;
+                    buttonMask |= controllerButtons::DOWN;
                     break;
                 case SDL_SCANCODE_LEFT:
-                    buttonMask |= 0x8000;
+                    buttonMask |= controllerButtons::LEFT;
                     break;
                 default:
                     break;
@@ -8016,13 +8020,13 @@ void getInputDuringVsync(void)
     static u32 previousDownButtons = 0;
     static u32 numVsyncButtonHeld = 0;
 
-    newPadButtonForScripts[0].vx = buttonMask;
-    newPadButtonForDialogs = (newPadButtonForScripts[0].vx ^ previousDownButtons) & newPadButtonForScripts[0].vx;
+    newPadButtonForScripts[0].m0_buttons = buttonMask;
+    newPadButtonForDialogs = (newPadButtonForScripts[0].m0_buttons ^ previousDownButtons) & newPadButtonForScripts[0].m0_buttons;
 
     if (newPadButtonForDialogs != 0) {
         numVsyncButtonHeld = 0;
     }
-    newPadButtonForField = newPadButtonForScripts[0].vx;
+    newPadButtonForField = newPadButtonForScripts[0].m0_buttons;
 
     if (numVsyncButtonHeld < 0x20)
     {
@@ -8036,7 +8040,7 @@ void getInputDuringVsync(void)
 
     MissingCode();
 
-    previousDownButtons = newPadButtonForScripts[0].vx;
+    previousDownButtons = newPadButtonForScripts[0].m0_buttons;
 
 }
 
@@ -8049,7 +8053,7 @@ void saveInputs()
     short sVar5;
     uint uVar6;
 
-    sVar5 = newPadButtonForScripts[1].vx;
+    sVar5 = newPadButtonForScripts[1].m0_buttons;
     uVar4 = newPadButtonForField2;
     uVar3 = newPadButtonForField;
     uVar2 = newPadButtonForDialogs2;
@@ -8058,7 +8062,7 @@ void saveInputs()
         uVar6 = inputReplayPosition2 & 0xf;
         inputReplayPosition2 = inputReplayPosition2 + 1;
         inputReplayPosition = inputReplayPosition + 1;
-        inputReplayBuffer.m0_newPadButtonForScripts0[uVar6] = newPadButtonForScripts[0].vx;
+        inputReplayBuffer.m0_newPadButtonForScripts0[uVar6] = newPadButtonForScripts[0].m0_buttons;
         inputReplayBuffer.m20_newPadButtonForScripts1[uVar6] = sVar5;
         inputReplayBuffer.m40_newPadButtonForDialogs[uVar6] = uVar1;
         inputReplayBuffer.m60_newPadButtonForDialogs2[uVar6] = uVar2;
@@ -8086,36 +8090,36 @@ void vsyncCallback(void)
 
 void updateFieldInputs()
 {
-    padButtonForScripts[0].vx = 0;
-    padButtonForScripts[1].vx = 0;
+    padButtonForScripts[0].m0_buttons = 0;
+    padButtonForScripts[1].m0_buttons = 0;
     padButtonForDialogs = 0;
     padButtonForDialogs2 = 0;
     padButtonForField = 0;
     padButtonForField2 = 0;
     while (loadInputFromVSyncBuffer()) {
-        padButtonForScripts[0].vx |= newPadButtonForScripts[0].vx & inputAllowedMask2;
-        padButtonForScripts[1].vx |= newPadButtonForScripts[1].vx;
+        padButtonForScripts[0].m0_buttons |= newPadButtonForScripts[0].m0_buttons & inputAllowedMask2;
+        padButtonForScripts[1].m0_buttons |= newPadButtonForScripts[1].m0_buttons;
         padButtonForDialogs |= newPadButtonForDialogs & inputAllowedMask2;
         padButtonForDialogs2 |= newPadButtonForDialogs2;
         padButtonForField |= newPadButtonForField & inputAllowedMask2;
         padButtonForField2 |= newPadButtonForField2;
     }
-    padButtonForScripts[0].vx &= inputAllowedMask;
+    padButtonForScripts[0].m0_buttons &= inputAllowedMask;
     padButtonForField &= inputAllowedMask;
     padButtonForDialogs &= inputAllowedMask;
     resetInputs();
     //FUN_Field__8007ae78(1, &DAT_80065848);
     MissingCode();
     if (updateAllEntitiesSub2Var0 != 0) {
-        padButtonForScripts[0].vx = 0;
-        padButtonForScripts[1].vx = 0;
+        padButtonForScripts[0].m0_buttons = 0;
+        padButtonForScripts[1].m0_buttons = 0;
         padButtonForDialogs = 0;
         padButtonForDialogs2 = 0;
         padButtonForField = 0;
         padButtonForField2 = 0;
     }
     if (playMusicAuthorized == 0) {
-        padButtonForDialogs = padButtonForDialogs & 0xff7f;
+        padButtonForDialogs &= ~controllerButtons::SQUARE;
     }
 }
 

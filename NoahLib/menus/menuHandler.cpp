@@ -672,40 +672,40 @@ void updateMenuInput(void) {
         if (loadInputFromVSyncBuffer() == 0) {
             break;
         }
-        if ((newPadButtonForField & 0x2000) != 0) {
+        if ((newPadButtonForField & controllerButtons::RIGHT) != 0) {
             FUN_Menu2__801c8574(1);
             newValue = 0;
         }
-        if ((newPadButtonForField & 0x4000) != 0) {
+        if ((newPadButtonForField & controllerButtons::DOWN) != 0) {
             newValue = 1;
         }
-        if ((newPadButtonForField & 0x8000) != 0) {
+        if ((newPadButtonForField & controllerButtons::LEFT) != 0) {
             FUN_Menu2__801c8574(1);
             newValue = 2;
         }
-        if ((newPadButtonForField & 0x1000) != 0) {
+        if ((newPadButtonForField & controllerButtons::UP) != 0) {
             FUN_Menu2__801c8574(1);
             newValue = 3;
         }
-        if ((newPadButtonForDialogs & 0x20) != 0) {
+        if ((newPadButtonForDialogs & controllerButtons::CIRCLE) != 0) {
             FUN_Menu2__801c8574(2);
             newValue = 4;
         }
-        if ((newPadButtonForDialogs & 0x40) != 0) {
+        if ((newPadButtonForDialogs & controllerButtons::CROSS) != 0) {
             FUN_Menu2__801c8574(3);
             newValue = 5;
         }
-        if ((newPadButtonForDialogs & 0x80) != 0) {
+        if ((newPadButtonForDialogs & controllerButtons::SQUARE) != 0) {
             newValue = 6;
         }
-        if ((newPadButtonForDialogs & 0x10) != 0) {
+        if ((newPadButtonForDialogs & controllerButtons::TRIANGLE) != 0) {
             newValue = 7;
         }
-        if ((newPadButtonForField & 4) != 0) {
+        if ((newPadButtonForField & controllerButtons::L1) != 0) {
             FUN_Menu2__801c8574(1);
             newValue = 10;
         }
-        if ((newPadButtonForField & 8) != 0) {
+        if ((newPadButtonForField & controllerButtons::R1) != 0) {
             FUN_Menu2__801c8574(1);
             newValue = 9;
         }
