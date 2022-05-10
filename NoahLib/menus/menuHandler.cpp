@@ -695,7 +695,7 @@ void updateMenuInput(void) {
             FUN_Menu2__801c8574(3);
             newValue = 5;
         }
-        if ((newPadButtonForDialogs & controllerButtons::SQUARE) != 0) {
+        if ((newPadButtonForDialogs & controllerButtons::JUMP) != 0) {
             newValue = 6;
         }
         if ((newPadButtonForDialogs & controllerButtons::TRIANGLE) != 0) {

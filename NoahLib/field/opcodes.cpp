@@ -562,24 +562,16 @@ void OP_STOP(void)
 
 void OPX_15()
 {
-    uint* puVar1;
-    int iVar2;
-    sFieldScriptEntity* psVar3;
-    uint uVar4;
-    int uVar5;
-
     actorArray[currentFieldActorId].m58_flags = actorArray[currentFieldActorId].m58_flags & 0xf07f | 0x200;
-    uVar4 = getImmediateOrVariableUnsigned(1);
-    uVar5 = getImmediateOrVariableUnsigned(3);
+    uint uVar4 = getImmediateOrVariableUnsigned(1);
+    int uVar5 = getImmediateOrVariableUnsigned(3);
     OP_INIT_ENTITY_SCRIPT_sub0(currentFieldActorId, uVar4, &fieldActorSetupParams[uVar4], 0, uVar5, uVar4 | 0x80, 1);
     OP_INIT_ENTITY_SCRIPT_sub1();
-    psVar3 = pCurrentFieldScriptActor;
-    puVar1 = &pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags;
-    pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 5;
-    psVar3->m0_fieldScriptFlags.m_rawFlags = *puVar1 & 0xffffff7f | 0x100;
-    iVar2 = currentFieldActorId;
-    psVar3->m4_flags.m_rawFlags = psVar3->m4_flags.m_rawFlags & 0xfffff7ff;
-    actorArray[iVar2].m58_flags = actorArray[iVar2].m58_flags & 0xffdf;
+    pCurrentFieldScriptActor->mCC_scriptPC += 5;
+    pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags &= ~0x80;
+    pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags |= 0x100;
+    pCurrentFieldScriptActor->m4_flags.m_x800 = 0;
+    actorArray[currentFieldActorId].m58_flags = actorArray[currentFieldActorId].m58_flags & 0xffdf;
 }
 
 void OPX_17(void)
@@ -627,7 +619,7 @@ void OP_INIT_ENTITY_NPC(void)
 
 s16 updateCharacterVar1 = 0;
 s16 updateCharacterVar2 = 0;
-s16 updateCharacterVar3 = 0;
+s16 updateCharacterVar2ResetValue = 0;
 s8 updateCharacterVar4 = 0;
 int numFollowStruct2 = 0;
 extern s32 iRam800adb64;
@@ -680,7 +672,8 @@ void OP_UPDATE_CHARACTER()
         return;
     }
 
-    if ((padButtonForScripts[0].m0_buttons >> controllerButtons::UP) != 0)
+    // this is a shortcut to test if any dpad buttons are pressed
+    if ((padButtonForScripts[0].m0_buttons >> 12) != 0)
     {
         checkForRandomEncounter();
     }
@@ -690,44 +683,53 @@ void OP_UPDATE_CHARACTER()
         updateCharacterVar1 = 0;
     }
     else {
-        if (((pCurrentFieldScriptActor->m68_oldPosition[0] == (pCurrentFieldScriptActor->m20_position.vx >> 16)) &&
-            (pCurrentFieldScriptActor->m68_oldPosition[1] == (pCurrentFieldScriptActor->m20_position.vy >> 16))) &&
-            (pCurrentFieldScriptActor->m68_oldPosition[2] == (pCurrentFieldScriptActor->m20_position.vz >> 16))) {
+        if (((pCurrentFieldScriptActor->m68_oldPosition[0] == (pCurrentFieldScriptActor->m20_position.vx.getIntegerPart())) &&
+            (pCurrentFieldScriptActor->m68_oldPosition[1] == (pCurrentFieldScriptActor->m20_position.vy.getIntegerPart()))) &&
+            (pCurrentFieldScriptActor->m68_oldPosition[2] == (pCurrentFieldScriptActor->m20_position.vz.getIntegerPart()))) {
             updateCharacterVar1 = updateCharacterVar1 + 1;
         }
     }
 
-    if (((updateCharacterVar1 < 0x21) || (updateCharacterVar1 = 0x20, (padButtonForScripts[0].m0_buttons & controllerButtons::SQUARE) == 0)) || (((pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags & 0x1800) != 0 || (iRam800adb64 != 0xff)))) {
+    // handle jump
+    if (((updateCharacterVar1 < 0x21) || (updateCharacterVar1 = 0x20, (padButtonForScripts[0].m0_buttons & controllerButtons::JUMP) == 0)) || (((pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags & 0x1800) != 0 || (iRam800adb64 != 0xff)))) {
         if (updateEntityEventCode4Var0 == 0) {
-            if (((((padButtonForDialogs & controllerButtons::SQUARE) != 0) && ((pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags & 0x1800) == 0)) && ((pCurrentFieldScriptActor->m14_currentTriangleFlag & 0x400000U) == 0)) &&
-                (iRam800adb64 == 0xff)) goto LAB_Field__8009f7fc;
+            if (padButtonForDialogs & controllerButtons::JUMP) {
+                if ((pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags & 0x1800) == 0) {
+                    if ((pCurrentFieldScriptActor->m14_currentTriangleFlag & 0x400000U) == 0) {
+                        if (iRam800adb64 == 0xff) {
+                            if (!OP_UPDATE_CHARACTER_Sub0(pCurrentFieldScriptActor)) {
+                                pCurrentFieldScriptActor->m0_fieldScriptFlags.mx800_isJumping = 1;
+                                numFollowStruct2 = partyToFollowStructMapping[0];
+                            }
+                        }
+                    }
+                }
+            }
         }
         else {
-            if ((padButtonForDialogs & controllerButtons::SQUARE) == 0) {
-            LAB_Field__8009f8e4:
-                if (updateCharacterVar2 == 0) goto LAB_Field__8009f910;
+            if ((padButtonForDialogs & controllerButtons::JUMP) == 0) {
+                if (updateCharacterVar2 != 0) {
+                    updateCharacterVar2--;
+                }
             }
             else {
                 if (updateCharacterVar2 == 0) {
-                    sFieldScriptEntity* psVar1;
-                    int iVar2;
-                    if ((iRam800adb64 == 0xff) && (iVar2 = OP_UPDATE_CHARACTER_Sub0(pCurrentFieldScriptActor), psVar1 = pCurrentFieldScriptActor, iVar2 == 0)) {
-                        pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags = pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags | 0x800;
+                    if ((iRam800adb64 == 0xff) && !OP_UPDATE_CHARACTER_Sub0(pCurrentFieldScriptActor)) {
+                        pCurrentFieldScriptActor->m0_fieldScriptFlags.mx800_isJumping = 1;
                         numFollowStruct2 = partyToFollowStructMapping[0];
-                        psVar1->mE8_currentAnimationId = 0xff;
-                        updateCharacterVar2 = updateCharacterVar3;
+                        pCurrentFieldScriptActor->mE8_currentAnimationId = 0xff;
+                        updateCharacterVar2 = updateCharacterVar2ResetValue;
                     }
-                    goto LAB_Field__8009f8e4;
+                    if (updateCharacterVar2 != 0) {
+                        updateCharacterVar2--;
+                    }
                 }
             }
-            updateCharacterVar2 = updateCharacterVar2 + -1;
         }
     }
     else {
-    LAB_Field__8009f7fc:
-        int iVar2 = OP_UPDATE_CHARACTER_Sub0(pCurrentFieldScriptActor);
-        if (iVar2 == 0) {
-            pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags = pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags | 0x800;
+        if (!OP_UPDATE_CHARACTER_Sub0(pCurrentFieldScriptActor)) {
+            pCurrentFieldScriptActor->m0_fieldScriptFlags.mx800_isJumping = 1;
             numFollowStruct2 = partyToFollowStructMapping[0];
         }
     }
@@ -1420,7 +1422,7 @@ void OP_57(void)
             (pCurrentFieldScriptActor->m20_position).vx += pCurrentFieldScriptActor->mD0_targetPositionOffset[0];
             (pCurrentFieldScriptActor->m20_position).vz += pCurrentFieldScriptActor->mD0_targetPositionOffset[2];
             (pCurrentFieldScriptActor->m20_position).vy += (actorArray[currentFieldActorId].m4_pVramSpriteSheet->mC_step).vy;
-            (actorArray[currentFieldActorId].m4_pVramSpriteSheet->mC_step).vy += actorArray[currentFieldActorId].m4_pVramSpriteSheet->m1C;
+            (actorArray[currentFieldActorId].m4_pVramSpriteSheet->mC_step).vy += actorArray[currentFieldActorId].m4_pVramSpriteSheet->m1C_gravity;
             if (((pCurrentFieldScriptActor->mD0_targetPositionOffset[0] != 0) || (pCurrentFieldScriptActor->mD0_targetPositionOffset[2] != 0)) && ((pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags & 0x8000) == 0)) {
                 s32 uVar5 = fp_atan2(pCurrentFieldScriptActor->mD0_targetPositionOffset);
                 pCurrentFieldScriptActor->m104_rotation = uVar5 | 0x8000;
@@ -1481,7 +1483,7 @@ void OP_57(void)
         iVar9 = (int)auStack104[iVar15].vy;
         pCurrentFieldScriptActor->m10_walkmeshId = (short)iVar15;
     }
-    int iVar15 = -((actorArray[currentFieldActorId].m4_pVramSpriteSheet->m1C * iVar6) / 2);
+    int iVar15 = -((actorArray[currentFieldActorId].m4_pVramSpriteSheet->m1C_gravity * iVar6) / 2);
     (actorArray[currentFieldActorId].m4_pVramSpriteSheet->mC_step).vy = iVar15;
     (actorArray[currentFieldActorId].m4_pVramSpriteSheet->mC_step).vy = iVar15 + (iVar9 * 0x10000 - (pCurrentFieldScriptActor->m20_position).vy) / iVar6;
     iVar9 = (pCurrentFieldScriptActor->m20_position).vx;
@@ -1645,8 +1647,8 @@ void OP_5C()
         if (numWalkMesh + -1 < (int)pCurrentFieldScriptActor->m10_walkmeshId) {
             pCurrentFieldScriptActor->m10_walkmeshId = 0;
         }
-        pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags = pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags | 0x20000;
-        pCurrentFieldScriptActor->m4_flags.m_rawFlags = pCurrentFieldScriptActor->m4_flags.m_rawFlags | 0xc00;
+        pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags |= 0x20000;
+        pCurrentFieldScriptActor->m4_flags.m_rawFlags |= 0xc00;
         pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
     }
 }
@@ -1654,7 +1656,7 @@ void OP_5C()
 void OP_PLAY_ANIMATION_EX()
 {
     OP_PLAY_ANIMATION();
-    pCurrentFieldScriptActor->m4_flags.m_rawFlags = pCurrentFieldScriptActor->m4_flags.m_rawFlags & 0xfffeffff;
+    pCurrentFieldScriptActor->m4_flags.m_rawFlags &= ~0x10000;
 }
 
 void OP_WAIT_ANIMATION_END()

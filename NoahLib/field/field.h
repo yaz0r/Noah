@@ -10,7 +10,7 @@ enum controllerButtons {
     TRIANGLE = 1 << 4, // 0x10
     CIRCLE = 1 << 5, // 0x20
     CROSS = 1 << 6, // 0x40
-    SQUARE = 1 << 7, // 0x80
+    JUMP = 1 << 7, // 0x80
     SELECT = 1 << 8, // 0x100
     START = 1 << 11, // 0x800
     UP = 1 << 12, // 0x1000
@@ -37,8 +37,8 @@ struct sFieldEntitySub0
 
 struct sFieldEntity2dSprite
 {
-    SFP_VEC4 m0_screenVertices[4];
-    POLY_FT4 m20_Poly[2];
+    SFP_VEC4 m0_shadowPolyVertices[4];
+    POLY_FT4 m20_shadowPoly[2];
     //size 0x70
 };
 
@@ -73,8 +73,9 @@ struct sFieldScriptEntity_flags0
             u32 m1_unk : 6;
             u32 m7 : 1;
             u32 m8 : 3;
-            u32 m11 : 1;
-            u32 m12_unk : 2;
+            u32 mx800_isJumping : 1; // 0x800
+            u32 m12_unk : 1;
+            u32 m13_unk : 1;
             u32 m14_isPlayerControlled : 1;
         };
         u32 m_rawFlags = 0;

@@ -248,7 +248,7 @@ s32 updateEntityEventCode3Var0 = 0;
 s32 updateEntityEventCode3Var1 = 0;
 s32 updateEntityEventCode3Var2 = 0;
 s16 updateEntityEventCode4Var0 = 0;
-s16 updateEntityEventCode4Var1 = 0;
+s16 jumpAnimationId = 0;
 
 void resetFieldDefault()
 {
@@ -264,7 +264,7 @@ void resetFieldDefault()
     padButtonForField2 = 0;
 
     MissingCode();
-    updateEntityEventCode4Var1 = 3;
+    jumpAnimationId = 3;
     numMaxMechaOverlayEntries = 0x40;
 
     MissingCode();
@@ -645,36 +645,36 @@ void initFieldScriptEntityValues(int index)
 
 void initCharacterShadowPoly(sFieldEntity2dSprite* pSprite)
 {
-    POLY_FT4* p = &pSprite->m20_Poly[0];
+    POLY_FT4* p = &pSprite->m20_shadowPoly[0];
     SetPolyFT4(p);
-    pSprite->m0_screenVertices[3].vx = -0x18;
-    pSprite->m0_screenVertices[3].vz = -0x18;
-    pSprite->m0_screenVertices[2].vz = -0x18;
-    pSprite->m0_screenVertices[1].vx = -0x18;
-    pSprite->m0_screenVertices[3].vy = 0;
-    pSprite->m0_screenVertices[2].vx = 0x18;
-    pSprite->m0_screenVertices[2].vy = 0;
-    pSprite->m0_screenVertices[1].vy = 0;
-    pSprite->m0_screenVertices[1].vz = 0x18;
-    pSprite->m0_screenVertices[0].vx = 0x18;
-    pSprite->m0_screenVertices[0].vy = 0;
-    pSprite->m0_screenVertices[0].vz = 0x18;
-    pSprite->m20_Poly[0].r0 = 0x80;
-    pSprite->m20_Poly[0].g0 = 0x80;
-    pSprite->m20_Poly[0].b0 = 0x80;
-    pSprite->m20_Poly[0].tpage = GetTPage(0, 2, 0x280, 0x1e0);
-    pSprite->m20_Poly[0].clut = GetClut(0x100, 0xf3);
+    pSprite->m0_shadowPolyVertices[3].vx = -0x18;
+    pSprite->m0_shadowPolyVertices[3].vz = -0x18;
+    pSprite->m0_shadowPolyVertices[2].vz = -0x18;
+    pSprite->m0_shadowPolyVertices[1].vx = -0x18;
+    pSprite->m0_shadowPolyVertices[3].vy = 0;
+    pSprite->m0_shadowPolyVertices[2].vx = 0x18;
+    pSprite->m0_shadowPolyVertices[2].vy = 0;
+    pSprite->m0_shadowPolyVertices[1].vy = 0;
+    pSprite->m0_shadowPolyVertices[1].vz = 0x18;
+    pSprite->m0_shadowPolyVertices[0].vx = 0x18;
+    pSprite->m0_shadowPolyVertices[0].vy = 0;
+    pSprite->m0_shadowPolyVertices[0].vz = 0x18;
+    pSprite->m20_shadowPoly[0].r0 = 0x80;
+    pSprite->m20_shadowPoly[0].g0 = 0x80;
+    pSprite->m20_shadowPoly[0].b0 = 0x80;
+    pSprite->m20_shadowPoly[0].tpage = GetTPage(0, 2, 0x280, 0x1e0);
+    pSprite->m20_shadowPoly[0].clut = GetClut(0x100, 0xf3);
     SetSemiTrans(p, 1);
-    pSprite->m20_Poly[0].v0 = 0xe0;
-    pSprite->m20_Poly[0].v1 = 0xe0;
-    pSprite->m20_Poly[0].u0 = '\0';
-    pSprite->m20_Poly[0].u1 = '\x0f';
-    pSprite->m20_Poly[0].u2 = '\0';
-    pSprite->m20_Poly[0].v2 = 0xef;
-    pSprite->m20_Poly[0].u3 = '\x0f';
-    pSprite->m20_Poly[0].v3 = 0xef;
+    pSprite->m20_shadowPoly[0].v0 = 0xe0;
+    pSprite->m20_shadowPoly[0].v1 = 0xe0;
+    pSprite->m20_shadowPoly[0].u0 = 0;
+    pSprite->m20_shadowPoly[0].u1 = 0xF;
+    pSprite->m20_shadowPoly[0].u2 = 0;
+    pSprite->m20_shadowPoly[0].v2 = 0xef;
+    pSprite->m20_shadowPoly[0].u3 = 0xF;
+    pSprite->m20_shadowPoly[0].v3 = 0xef;
 
-    pSprite->m20_Poly[1] = pSprite->m20_Poly[0];
+    pSprite->m20_shadowPoly[1] = pSprite->m20_shadowPoly[0];
 }
 
 int numInitializedFieldScriptEntities = 0;
@@ -1924,8 +1924,8 @@ void OP_INIT_ENTITY_SCRIPT_sub0(int actorId, int clutYEntry, sSpriteActorAnimati
         pFieldEntitySub4->mC_step.vx = 0;
         pFieldEntitySub4->mC_step.vy = 0;
         pFieldEntitySub4->mC_step.vz = 0;
-        pFieldEntitySub4->m1C = 0x10000;
-        pFieldEntitySub4->m84 = actorArray[actorId].mC_matrix.t[1] & 0xFFFF;
+        pFieldEntitySub4->m1C_gravity = 0x10000;
+        pFieldEntitySub4->m84_maxY = actorArray[actorId].mC_matrix.t[1] & 0xFFFF;
         if (!param_4)
         {
             actorArray[actorId].m4C_scriptEntity->m18_boundingVolume.vx = temp1 * 2;
@@ -1971,7 +1971,7 @@ void OP_INIT_ENTITY_SCRIPT_sub0(int actorId, int clutYEntry, sSpriteActorAnimati
 
     actorArray[actorId].m2C_matrixBackup.t = actorArray[actorId].mC_matrix.t;
 
-    pFieldEntitySub4->m84 = actorArray[actorId].mC_matrix.t[1] & 0xFFFF;
+    pFieldEntitySub4->m84_maxY = actorArray[actorId].mC_matrix.t[1] & 0xFFFF;
 
     pFieldEntitySub4->m0_position.vx = actorArray[actorId].m4C_scriptEntity->m20_position.vx;
     pFieldEntitySub4->m0_position.vy = actorArray[actorId].m4C_scriptEntity->m20_position.vy;
@@ -1990,7 +1990,7 @@ void OP_INIT_ENTITY_SCRIPT_sub1()
     actorArray[currentFieldActorId].m4_pVramSpriteSheet->m0_position.vz = pCurrentFieldScriptActor->m20_position.vz;
 
     actorArray[currentFieldActorId].m4_pVramSpriteSheet->mC_step.vy = 0;
-    actorArray[currentFieldActorId].m4_pVramSpriteSheet->m84 = pCurrentFieldScriptActor->m20_position.vy >> 16;
+    actorArray[currentFieldActorId].m4_pVramSpriteSheet->m84_maxY = pCurrentFieldScriptActor->m20_position.vy >> 16;
     pCurrentFieldScriptActor->m72_elevation = pCurrentFieldScriptActor->m20_position.vy >> 16;
 }
 
@@ -2171,7 +2171,7 @@ void setCurrentActor2DPosition(int posX, int posZ)
     actorArray[currentFieldActorId].mC_matrix.t[2] = posZ;
     actorArray[currentFieldActorId].m2C_matrixBackup.t[2] = posZ;
 
-    actorArray[currentFieldActorId].m4_pVramSpriteSheet->m84 = auStack72[pCurrentFieldScriptActor->m10_walkmeshId].vy;
+    actorArray[currentFieldActorId].m4_pVramSpriteSheet->m84_maxY = auStack72[pCurrentFieldScriptActor->m10_walkmeshId].vy;
 
     pCurrentFieldScriptActor->m20_position.vx = posX << 16;
     pCurrentFieldScriptActor->m20_position.vz = posZ << 16;
@@ -2235,7 +2235,7 @@ int getCharacter(int param_1)
     return iVar1;
 }
 
-int findCharacterInParty(int param_1)
+s32 findCharacterInParty(int param_1)
 {
     int iVar1;
     int* piVar2;
@@ -2244,7 +2244,7 @@ int findCharacterInParty(int param_1)
     if (param_1 != 0xff) {
         do {
             if (currentParty[iVar1] == 0xff) {
-                return 0xffffffff;
+                return -1;
             }
             if (currentParty[iVar1] == param_1) {
                 return iVar1;
@@ -2252,7 +2252,7 @@ int findCharacterInParty(int param_1)
             iVar1 = iVar1 + 1;
         } while (iVar1 < 3);
     }
-    return 0xffffffff;
+    return -1;
 }
 
 void updateScriptActor3dRotation(int index)
@@ -2356,7 +2356,8 @@ int spriteWalkToPositionOrActor(int param_1)
 
         pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0 = 0xFFFF;
         pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m23_walkMode = 0;
-        pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags &= ~0x2200800;
+        pCurrentFieldScriptActor->m0_fieldScriptFlags.mx800_isJumping = 0;
+        pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags &= ~0x2200000;
         return 0;
     }
     else
@@ -3960,7 +3961,7 @@ void updateEntityEventCode2(int index, sFieldEntity* pFieldEntity, sFieldScriptE
     int iVar12 = 0;
     s32 touchedActor;
     bool bApplyDelta = triangleFlags & 0x4000;
-    if ((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x41800) == 0)
+    if (!pFieldScriptEntity->m0_fieldScriptFlags.mx800_isJumping && ((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x41000) == 0))
     {
         if ((triangleFlags & 0x420000) != 0) {
             FP_VEC4 local_60;
@@ -3993,7 +3994,7 @@ void updateEntityEventCode2(int index, sFieldEntity* pFieldEntity, sFieldScriptE
             }
             iVar13 = iVar8 << 0x10;
             if (pFieldScriptEntity->mF0 >> 0x10 < iVar8) {
-                iVar13 = pFieldScriptEntity->mF0 + pFieldEntity->m4_pVramSpriteSheet->m1C;
+                iVar13 = pFieldScriptEntity->mF0 + pFieldEntity->m4_pVramSpriteSheet->m1C_gravity;
             }
             pFieldScriptEntity->mF0 = iVar13;
             pFieldEntity->m4_pVramSpriteSheet->mC_step.vy = pFieldScriptEntity->mF0 >> 1;
@@ -4699,13 +4700,13 @@ void setVisualAnimation(sSpriteActor* param_1, int animationId, sFieldEntity* pa
 
     if ((param_3->m58_flags & 0x40) != 0) {
         if ((animationId != 3) && (updateEntityEventCode4Var0 == 0)) {
-            param_3->m4C_scriptEntity->m0_fieldScriptFlags.m11 = 0;
+            param_3->m4C_scriptEntity->m0_fieldScriptFlags.mx800_isJumping = 0;
         }
         if (animationId == 0xff) {
             animationId = 0;
         }
-        if (animationId != updateEntityEventCode4Var1) {
-            param_3->m4C_scriptEntity->m0_fieldScriptFlags.m11 = 0;
+        if (animationId != jumpAnimationId) {
+            param_3->m4C_scriptEntity->m0_fieldScriptFlags.mx800_isJumping = 0;
         }
         psVar1 = param_3->m4C_scriptEntity;
         if ((psVar1->m4_flags.m_rawFlags & 0x2000) == 0) {
@@ -4849,7 +4850,7 @@ void updateEntityEventCode3(int index, sFieldEntity* pFieldEntity, sFieldScriptE
 
     pFieldScriptEntity->m4_flags.m_rawFlags &= ~0x1000;
 
-    if ((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x800) == 0) {
+    if (!pFieldScriptEntity->m0_fieldScriptFlags.mx800_isJumping) {
         if (((int)pFieldScriptEntity->m104_rotation & 0x8000U) != 0) {
             animationId = pFieldScriptEntity->mE6;
         }
@@ -4865,20 +4866,20 @@ void updateEntityEventCode3(int index, sFieldEntity* pFieldEntity, sFieldScriptE
     }
     else
     {
-        animationId = updateEntityEventCode4Var1;
+        animationId = jumpAnimationId;
         if (updateEntityEventCode4Var0 == 0) {
-            if (((pFieldEntity->m4_pVramSpriteSheet->m0_position).vy >> 16) == pFieldEntity->m4_pVramSpriteSheet->m84) {
+            if (((pFieldEntity->m4_pVramSpriteSheet->m0_position).vy.getIntegerPart()) == pFieldEntity->m4_pVramSpriteSheet->m84_maxY) {
                 pFieldEntity->m4_pVramSpriteSheet->m18_moveSpeed = 0;
-                animationId = updateEntityEventCode4Var1;
+                animationId = jumpAnimationId;
             }
             else {
                 if (animationId == 2) {
                     pFieldEntity->m4_pVramSpriteSheet->m18_moveSpeed = pFieldEntity->m4_pVramSpriteSheet->m82 * 0x60;
-                    animationId = updateEntityEventCode4Var1;
+                    animationId = jumpAnimationId;
                 }
                 else {
                     pFieldEntity->m4_pVramSpriteSheet->m18_moveSpeed = pFieldEntity->m4_pVramSpriteSheet->m82 * 0x30;
-                    animationId = updateEntityEventCode4Var1;
+                    animationId = jumpAnimationId;
                 }
             }
         }
@@ -5295,7 +5296,7 @@ LAB_Field__80084520:
     }
     if ((actorArray[playerEntityIndex].m4_pVramSpriteSheet)->m7C->mC == 1) {
         resetInputs();
-        pPlayerScriptEntity->m0_fieldScriptFlags.m_rawFlags &= ~0x800;
+        pPlayerScriptEntity->m0_fieldScriptFlags.mx800_isJumping = 0;
     }
 
     MissingCode();
@@ -5519,7 +5520,7 @@ void initFollowStructForPlayer(s32 entityIndex) {
             followDataTable[partyToFollowStructMapping[0]].m30.vy = (pScriptEntity->m50_surfaceNormal).vy;
             followDataTable[partyToFollowStructMapping[0]].m30.vz = (pScriptEntity->m50_surfaceNormal).vz;
             followDataTable[partyToFollowStructMapping[0]].m14_rotation = pScriptEntity->m106_currentRotation & 0xfff;
-            followDataTable[partyToFollowStructMapping[0]].m10 = (pSpriteActor->m0_spriteActorCore).m84;
+            followDataTable[partyToFollowStructMapping[0]].m10 = (pSpriteActor->m0_spriteActorCore).m84_maxY;
             followDataTable[partyToFollowStructMapping[0]].m8_pos[0] = (pScriptEntity->m20_position).vx.getIntegerPart();
             followDataTable[partyToFollowStructMapping[0]].m8_pos[1] = (pScriptEntity->m20_position).vy.getIntegerPart();
             followDataTable[partyToFollowStructMapping[0]].m8_pos[2] = (pScriptEntity->m20_position).vz.getIntegerPart();
@@ -5553,7 +5554,7 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
     }
     if (((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x10000) != 0) ||
         ((((entityIndex != playerControlledActor || (EntityMoveCheck1Var1 != '\x01')) && ((pSpriteActor->mC_step).vy == 0)) &&
-            (!updateEntityEventCode3Sub0(pFieldScriptEntity) && (pSpriteActor->m84 == (pFieldScriptEntity->m20_position.vy >> 16)))))) {
+            (!updateEntityEventCode3Sub0(pFieldScriptEntity) && (pSpriteActor->m84_maxY == (pFieldScriptEntity->m20_position.vy >> 16)))))) {
         return -1;
     }
 
@@ -5660,7 +5661,7 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
                 for (int i = 0; i < numWalkMesh + -1; i++)
                 {
                     if (pFieldScriptEntity->m10_walkmeshId == stackVar.m20_walkmeshId[i]) {
-                        pSpriteActor->m84 = stackVar.m0_altitude[i];
+                        pSpriteActor->m84_maxY = stackVar.m0_altitude[i];
                         break;
                     }
                 }
@@ -5684,7 +5685,7 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
         }
 
         (pFieldScriptEntity->m20_position).vx = stackVar.m78_position[0];
-        (pFieldScriptEntity->m20_position).vy = (pFieldScriptEntity->m20_position).vy + (pSpriteActor->mC_step).vy;
+        (pFieldScriptEntity->m20_position).vy += pSpriteActor->mC_step.vy;
         (pFieldScriptEntity->m20_position).vz = stackVar.m78_position[2];
 
         pFieldScriptEntity->m10_walkmeshId = sVar2;
@@ -5695,9 +5696,9 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
             pFieldScriptEntity->m8_currentWalkMeshTriangle[i] = stackVar.m88[i];
         }
 
-        if ((pFieldScriptEntity->m20_position.vy >> 16) < pSpriteActor->m84) {
-            if (pSpriteActor->m84 != sVar2) {
-                (pSpriteActor->mC_step).vy = (pSpriteActor->mC_step).vy + pSpriteActor->m1C;
+        if ((pFieldScriptEntity->m20_position.vy >> 16) < pSpriteActor->m84_maxY) {
+            if (pSpriteActor->m84_maxY != sVar2) {
+                (pSpriteActor->mC_step).vy += pSpriteActor->m1C_gravity;
             }
         }
         else {
@@ -5705,7 +5706,7 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
                 (pSpriteActor->mC_step).vy = 0;
             }
             pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags &= ~0x401000;
-            (pFieldScriptEntity->m20_position).vy = (int)pSpriteActor->m84 << 0x10;
+            (pFieldScriptEntity->m20_position).vy = (int)pSpriteActor->m84_maxY << 0x10;
         }
         (pSpriteActor->m0_position).vx = (pFieldScriptEntity->m20_position).vx;
         (pSpriteActor->m0_position).vy = (pFieldScriptEntity->m20_position).vy;
@@ -5719,16 +5720,16 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
     LAB_Field__80084fd0:
         if (updateEntityEventCode3Var1 == 0) {
             if (param_5 != 0) {
-                if (actorArray[entityIndex].m4_pVramSpriteSheet->m84 < maxAltitude + 10) {
+                if (actorArray[entityIndex].m4_pVramSpriteSheet->m84_maxY < maxAltitude + 10) {
                     pFieldScriptEntity->m74 = 0xff;
                 }
-                actorArray[entityIndex].m4_pVramSpriteSheet->m84 = maxAltitude;
+                actorArray[entityIndex].m4_pVramSpriteSheet->m84_maxY = maxAltitude;
                 (pFieldScriptEntity->m20_position).vy = maxAltitude << 0x10;
             }
         }
         else {
             if (param_5 < 2) {
-                actorArray[entityIndex].m4_pVramSpriteSheet->m84 = maxAltitude;
+                actorArray[entityIndex].m4_pVramSpriteSheet->m84_maxY = maxAltitude;
             }
         }
 
@@ -5744,9 +5745,9 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
         }
         if ((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x4000000) == 0) {
             int sVar1 = (pFieldScriptEntity->m20_position).vy >> 16;
-            if (psVar18->m84 <= sVar1) goto LAB_Field__80085104;
-            if (psVar18->m84 != sVar1) {
-                (psVar18->mC_step).vy += psVar18->m1C;
+            if (psVar18->m84_maxY <= sVar1) goto LAB_Field__80085104;
+            if (psVar18->m84_maxY != sVar1) {
+                (psVar18->mC_step).vy += psVar18->m1C_gravity; // this apply gravity when falling
             }
             pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags |= 0x1000;
             pFieldScriptEntity->mF0 = (psVar18->mC_step).vy;
@@ -5760,7 +5761,7 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
                 (psVar18->mC_step).vy = 0;
             }
             pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags &= ~0x401000;
-            (pFieldScriptEntity->m20_position).vy = (int)psVar18->m84 << 0x10;
+            (pFieldScriptEntity->m20_position).vy = (int)psVar18->m84_maxY << 0x10;
         }
         pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags &= ~0x4000000;
         int foundEntry = 0;
@@ -5776,7 +5777,7 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
         int foundEntryTriangle;
         if ((foundEntry == numWalkMesh + -1) &&
             ((foundEntryTriangle = (*walkMeshTriangle[pFieldScriptEntity->m10_walkmeshId])[pFieldScriptEntity->m8_currentWalkMeshTriangle[pFieldScriptEntity->m10_walkmeshId]].mD * 4, -1 < foundEntryTriangle ||
-                (foundEntryTriangle + psVar18->m84 <= ((pFieldScriptEntity->m20_position.vy >> 16) - (uint)(ushort)pFieldScriptEntity->m18_boundingVolume.vy))))) {
+                (foundEntryTriangle + psVar18->m84_maxY <= ((pFieldScriptEntity->m20_position.vy >> 16) - (uint)(ushort)pFieldScriptEntity->m18_boundingVolume.vy))))) {
             psVar18->m0_position.vx = (pFieldScriptEntity->m20_position).vx;
             psVar18->m0_position.vy = (pFieldScriptEntity->m20_position).vy;
             psVar18->m0_position.vz = (pFieldScriptEntity->m20_position).vz;
@@ -5797,8 +5798,8 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
                 pFieldScriptEntity->m8_currentWalkMeshTriangle[i] = stackVar.m88[i];
             }
 
-            if (pSpriteActor->m84 != (pFieldScriptEntity->m20_position.vy >> 16)) {
-                (pSpriteActor->mC_step).vy = (pSpriteActor->mC_step).vy + pSpriteActor->m1C;
+            if (pSpriteActor->m84_maxY != (pFieldScriptEntity->m20_position.vy.getIntegerPart())) {
+                (pSpriteActor->mC_step).vy += pSpriteActor->m1C_gravity;
             }
 
             if ((pSpriteActor->mC_step).vy < 0) {
@@ -5866,13 +5867,13 @@ void updatePartyFollowLeader() {
                         (pScriptEntity->m20_position).vx = (pActor->m4_pVramSpriteSheet->m0_spriteActorCore).m0_position.vx = (pActor->mC_matrix).t[0] << 0x10;
                         (pScriptEntity->m20_position).vy = (pActor->m4_pVramSpriteSheet->m0_spriteActorCore).m0_position.vy = (pActor->mC_matrix).t[1] << 0x10;
                         (pScriptEntity->m20_position).vz = (pActor->m4_pVramSpriteSheet->m0_spriteActorCore).m0_position.vz = (pActor->mC_matrix).t[2] << 0x10;
-                        (pActor->m4_pVramSpriteSheet->m0_spriteActorCore).m84 = followDataTable[partyToFollowStructMapping[partyPosition]].m10;
+                        (pActor->m4_pVramSpriteSheet->m0_spriteActorCore).m84_maxY = followDataTable[partyToFollowStructMapping[partyPosition]].m10;
                         pScriptEntity->m106_currentRotation = followDataTable[partyToFollowStructMapping[partyPosition]].m14_rotation;
                         pScriptEntity->m104_rotation = followDataTable[partyToFollowStructMapping[partyPosition]].m14_rotation;
                         partyToFollowStructMapping[partyPosition] = partyToFollowStructMapping[partyPosition] - 1 & 0x1f;
                     }
                     else {
-                        if (!uVar7.m11) {
+                        if (!uVar7.mx800_isJumping) {
                             pScriptEntity->m4_flags.m_rawFlags &= ~0x1000;
                             if ((pScriptEntity->m14_currentTriangleFlag & 0x420000U) != 0)
                                 assert(0);
@@ -5885,7 +5886,7 @@ void updatePartyFollowLeader() {
                                     continue;
                                 goto LAB_Field__800818c8;
                             }
-                            if ((pActor->m4_pVramSpriteSheet->m0_spriteActorCore).m84 != pScriptEntity->m20_position.vy.getIntegerPart())
+                            if ((pActor->m4_pVramSpriteSheet->m0_spriteActorCore).m84_maxY != pScriptEntity->m20_position.vy.getIntegerPart())
                                 goto LAB_Field__800818c8;
                             if (pScriptEntity->mE8_currentAnimationId == 6) {
                                 pScriptEntity->m4_flags.m_rawFlags |= 0x1000;
@@ -6003,7 +6004,7 @@ void updateScriptAndMoveEntities()
             if (((((pFieldScriptEntity->m4_flags.m_rawFlags & 0x600) != 0x200) && ((actorArray[i].m58_flags & 0xf80) == 0x200)) && ((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x10001) == 0)) &&
                 ((i != playerControlledActor &&
                     EntityMoveCheck1(i, 0x7fffffff, &actorArray[i], pFieldScriptEntity, 0) && (actorArray[i].m4_pVramSpriteSheet->m7C->mC == 1)))) {
-                pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags &= ~0x800;
+                pFieldScriptEntity->m0_fieldScriptFlags.mx800_isJumping = 0;
             }
         }
     }
@@ -7705,7 +7706,7 @@ void renderCharShadows(OTTable& OT, int oddOrEven)
                     setCopControlWord(2, 0x2800, currentProjectionMatrix.t[0]);
                     setCopControlWord(2, 0x3000, currentProjectionMatrix.t[1]);
                     setCopControlWord(2, 0x3800, currentProjectionMatrix.t[2]);
-                    setCopReg(2, 0, (uint)(pCurrentFieldEntity->mC_matrix).t[0] & 0xffff | (uint)(ushort)pCurrentFieldEntity->m4_pVramSpriteSheet->m84 << 0x10);
+                    setCopReg(2, 0, (uint)(pCurrentFieldEntity->mC_matrix).t[0] & 0xffff | (uint)(ushort)pCurrentFieldEntity->m4_pVramSpriteSheet->m84_maxY << 0x10);
                     setCopReg(2, 1, (pCurrentFieldEntity->mC_matrix).t[2]);
                     copFunction(2, 0x480012);
                     local_98.t[0] = getCopReg(2, 0x19);
@@ -7733,13 +7734,13 @@ void renderCharShadows(OTTable& OT, int oddOrEven)
 
                     long lStack72;
                     long lStack68;
-                    int lVar3 = RotAverage4(&psVar6->m0_screenVertices[0], &psVar6->m0_screenVertices[1], &psVar6->m0_screenVertices[2], &psVar6->m0_screenVertices[3],
-                        &psVar6->m20_Poly[oddOrEven].x0y0, &psVar6->m20_Poly[oddOrEven].x1y1, &psVar6->m20_Poly[oddOrEven].x2y2, &psVar6->m20_Poly[oddOrEven].x3y3, &lStack72, &lStack68);
+                    int lVar3 = RotAverage4(&psVar6->m0_shadowPolyVertices[0], &psVar6->m0_shadowPolyVertices[1], &psVar6->m0_shadowPolyVertices[2], &psVar6->m0_shadowPolyVertices[3],
+                        &psVar6->m20_shadowPoly[oddOrEven].x0y0, &psVar6->m20_shadowPoly[oddOrEven].x1y1, &psVar6->m20_shadowPoly[oddOrEven].x2y2, &psVar6->m20_shadowPoly[oddOrEven].x3y3, &lStack72, &lStack68);
 
                     sTag* pDestOT = &OT[lVar3 >> (gDepthDivider & 0x1F)];
 
-                    psVar6->m20_Poly[oddOrEven].m0_pNext = pDestOT->m0_pNext;
-                    pDestOT->m0_pNext = &psVar6->m20_Poly[oddOrEven];
+                    psVar6->m20_shadowPoly[oddOrEven].m0_pNext = pDestOT->m0_pNext;
+                    pDestOT->m0_pNext = &psVar6->m20_shadowPoly[oddOrEven];
                 }
             }
 
@@ -7955,7 +7956,7 @@ void getInputDuringVsync(void)
         buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_Y) ? controllerButtons::TRIANGLE : 0;
         buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_B) ? controllerButtons::CIRCLE : 0;
         buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_A) ? controllerButtons::CROSS : 0;
-        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_X) ? controllerButtons::SQUARE : 0;
+        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_X) ? controllerButtons::JUMP : 0;
         buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_BACK) ? controllerButtons::SELECT : 0;
         buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_START) ? controllerButtons::START : 0;
         buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_UP) ? controllerButtons::UP : 0;
@@ -7993,7 +7994,7 @@ void getInputDuringVsync(void)
                     buttonMask |= controllerButtons::CIRCLE; // CIRCLE
                     break;
                 case SDL_SCANCODE_A:
-                    buttonMask |= controllerButtons::SQUARE; // SQUARE
+                    buttonMask |= controllerButtons::JUMP; // SQUARE
                     break;
                 case SDL_SCANCODE_S:
                     buttonMask |= controllerButtons::TRIANGLE; // TRIANGLE
@@ -8119,7 +8120,7 @@ void updateFieldInputs()
         padButtonForField2 = 0;
     }
     if (playMusicAuthorized == 0) {
-        padButtonForDialogs &= ~controllerButtons::SQUARE;
+        padButtonForDialogs &= ~controllerButtons::JUMP;
     }
 }
 
@@ -8277,7 +8278,7 @@ void fieldEntryPoint()
         }
         ////
 
-        // TODO: this is whiting a larger test
+        // TODO: this is within a larger test
         {
             if (((menuIdToOpen != 0xff) && (g_frameOddOrEven == 0)) && (((actorArray[playerControlledActor].m4C_scriptEntity)->m0_fieldScriptFlags.m_rawFlags & 0x1800) == 0)) {
                 //releaseAllDialogWindows();

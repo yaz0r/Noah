@@ -317,35 +317,34 @@ void savePointCallback8Sub0Sub0_battle(sSpriteActorCore* param_1) {
 
 void savePointCallback8Sub0Sub0(sSpriteActorCore* param_1)
 {
+    if ((param_1->m3C >> 0x1a & 1) != 0) {
+        (param_1->m0_position).vy += modulateSpeed(param_1, (param_1->mC_step).vy >> 4) * 0x10;
+        (param_1->mC_step).vy += param_1->m1C_gravity;
+        return;
+    }
+
     short sVar1;
     int iVar2;
     int iVar3;
 
-    if ((param_1->m3C >> 0x1a & 1) != 0) {
-        iVar3 = modulateSpeed(param_1, (param_1->mC_step).vy >> 4);
-        iVar2 = param_1->m1C;
-        (param_1->m0_position).vy = (param_1->m0_position).vy + iVar3 * 0x10;
-        (param_1->mC_step).vy = (param_1->mC_step).vy + iVar2;
-        return;
-    }
     savePointCallback8Sub0Sub0_battle(param_1);
     iVar3 = (param_1->mC_step).vy;
     iVar2 = iVar3 >> 4;
-    if ((iVar3 < 1) || (param_1->m1C < 1)) {
+    if ((iVar3 < 1) || (param_1->m1C_gravity < 1)) {
         iVar3 = modulateSpeed(param_1, iVar2);
         iVar3 = (param_1->m0_position).vy + iVar3 * 0x10;
-        sVar1 = param_1->m84;
+        sVar1 = param_1->m84_maxY;
         (param_1->m0_position).vy = iVar3;
         if ((int)sVar1 <= iVar3 >> 0x10) {
             (param_1->m0_position).vy = (int)sVar1 << 0x10;
         }
     }
     else {
-        if (param_1->m0_position.vy.getIntegerPart() == param_1->m84) {
+        if (param_1->m0_position.vy.getIntegerPart() == param_1->m84_maxY) {
             return;
         }
         iVar3 = modulateSpeed(param_1, iVar2);
-        sVar1 = param_1->m84;
+        sVar1 = param_1->m84_maxY;
         iVar3 = (param_1->m0_position).vy + iVar3 * 0x10;
         (param_1->m0_position).vy = iVar3;
         if ((int)sVar1 <= iVar3 >> 0x10) {
@@ -354,7 +353,7 @@ void savePointCallback8Sub0Sub0(sSpriteActorCore* param_1)
             if (iVar3 < 0) {
                 iVar3 = iVar3 + 0xff;
             }
-            iVar2 = param_1->m1C;
+            iVar2 = param_1->m1C_gravity;
             iVar3 = iVar3 >> 8;
             (param_1->mC_step).vy = iVar3;
             if (iVar3 < 0) {
@@ -370,7 +369,7 @@ void savePointCallback8Sub0Sub0(sSpriteActorCore* param_1)
             return;
         }
     }
-    (param_1->mC_step).vy = (param_1->mC_step).vy + param_1->m1C;
+    (param_1->mC_step).vy += param_1->m1C_gravity;
     return;
 }
 
@@ -525,14 +524,14 @@ void initFieldEntitySub4Sub1(sSpriteActorCore* param_1)
     if (iVar1 < 0) {
         iVar1 = iVar1 + 0xfff;
     }
-    param_1->m1C = iVar1 >> 0xc;
+    param_1->m1C_gravity = iVar1 >> 0xc;
     param_1->m64_spriteByteCode.makeNull();
     param_1->m70 = 0;
     param_1->m44_currentAnimationBundle = 0;
     param_1->m68 = 0;
     param_1->m80 = 0;
     param_1->m8C_stackPosition = 0x10;
-    param_1->m84 = 0;
+    param_1->m84_maxY = 0;
     param_1->m6C_pointerToOwnerStructure = nullptr;
     param_1->m50 = 0;
 }
@@ -976,16 +975,13 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
             s32 tempNewAltitude = param_1->m7C->m0;
 
             if ((((uint)param_1->mA8.mx0) != 1) || (tempNewAltitude == 0)) {
-                s32 newValue = READ_LE_U8(param_3) * 0x10 * (fieldDrawEnvsInitialized + 1) * (int)param_1->m82;
+                s32 newValue = READ_LE_S8(param_3) * 0x10 * (fieldDrawEnvsInitialized + 1) * (int)param_1->m82;
                 if (newValue < 0) {
                     newValue += 0xfff;
                 }
                 tempNewAltitude = (newValue >> 0xc) << 8;
             }
-            (param_1->mC_step).vy = tempNewAltitude;
-            int iVar12 = (param_1->mC_step).vy << 8;
-            (param_1->mC_step).vy = iVar12;
-            (param_1->mC_step).vy = iVar12 / (int)(param_1->mAC >> 7 & 0xfff);
+            param_1->mC_step.vy = (tempNewAltitude << 8) / (int)(param_1->mAC >> 7 & 0xfff);
         }
         break;
     case 0xA3:
@@ -1014,7 +1010,7 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
 		break;
 	case 0xc6:
 		if (param_1->mA8.mx0) {
-			param_1->m7C->mC = READ_LE_U16(param_3);
+			param_1->m7C->mC = READ_LE_U8(param_3);
 		}
 		break;
     case 0xCE: // save point spinning
@@ -1326,21 +1322,21 @@ void executeSpriteBytecode2(sSpriteActorCore* param_1)
 			param_1->m9E_wait = 0;
 			executeSpriteBytecode2(param_1);
 			return;
-        case 0x86: // Happen when Fei jumps in cutscene after lahan battle.
+        case 0x86: // Happen when Fei jumps in cutscene after lahan battle. (or when jumping during gameplay)
             if (param_1->mC_step.vy < 0)
             {
                 param_1->m9E_wait = 1;
                 return;
             }
-            param_1->m64_spriteByteCode = param_1->m64_spriteByteCode + sizePerBytecodeTable[bytecode];
+            param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
             break;
-        case 0x87: // Happen when Fei jumps in cutscene after lahan battle.
-            if ((param_1->m0_position.vy >> 16) < param_1->m84)
+        case 0x87: // Happen when Fei jumps in cutscene after lahan battle. (or when jumping during gameplay)
+            if ((param_1->m0_position.vy.getIntegerPart()) < param_1->m84_maxY)
             {
                 param_1->m9E_wait = 1;
                 return;
             }
-            param_1->m64_spriteByteCode = param_1->m64_spriteByteCode + sizePerBytecodeTable[bytecode];
+            param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
             break;
 		case 0xA7:
 			param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
@@ -1429,7 +1425,6 @@ void initFieldEntitySub4Sub3(sSpriteActorCore* param_1, int param_2)
 
 void setCurrentAnimationPtr(sSpriteActorCore* param_1, const sPS1Pointer startOfAnimation)
 {
-	uint uVar1;
 	sFieldEntitySub4_B4* psVar2;
 	sFieldEntitySub4_F4* psVar3;
 	int iVar5;
@@ -1443,18 +1438,18 @@ void setCurrentAnimationPtr(sSpriteActorCore* param_1, const sPS1Pointer startOf
 	param_1->mA8.mx14 = flags;
 	param_1->m54 = startOfAnimation + offset2 + 4;
 
-	uVar1 = (uint)(flags >> 2) & 0x3f;
-	if ((flags >> 2 & 0x20) != 0) {
-		uVar1 = uVar1 | 0xffffffc0;
+    s32 gravityFactor = (flags >> 2) & 0x3f;
+	if (flags >> 2 & 0x20) {
+		gravityFactor |= 0xffffffc0;
 	}
 
-	param_1->m1C = uVar1 * 0x400;
+	param_1->m1C_gravity = gravityFactor * 0x400;
 	int iVar4 = (fieldDrawEnvsInitialized + 1) * (fieldDrawEnvsInitialized + 1) * param_1->m82;
 	if (iVar4 < 0) {
 		iVar4 = iVar4 + 0xfff;
 	}
-	iVar4 = uVar1 * 0x400 * (iVar4 >> 0xc);
-	param_1->m1C = iVar4;
+	iVar4 = gravityFactor * 0x400 * (iVar4 >> 0xc);
+	param_1->m1C_gravity = iVar4;
 
 	iVar5 = 0x10000 / (int)(param_1->mAC >> 7 & 0xfff);
 	iVar5 = iVar5 * iVar5;
@@ -1462,11 +1457,11 @@ void setCurrentAnimationPtr(sSpriteActorCore* param_1, const sPS1Pointer startOf
 		iVar5 = iVar5 + 0xff;
 	}
 	iVar4 = iVar4 * (iVar5 >> 8);
-	param_1->m1C = iVar4;
+	param_1->m1C_gravity = iVar4;
 	if (iVar4 < 0) {
 		iVar4 = iVar4 + 0xff;
 	}
-	param_1->m1C = iVar4 >> 8;
+	param_1->m1C_gravity = iVar4 >> 8;
 
 
 	if ((flags >> 0xb & 1) == 0) {

@@ -118,7 +118,7 @@ struct sSpriteActorCore {
     FP_VEC3 m0_position;
     FP_VEC3 mC_step;
     s32 m18_moveSpeed;
-    s32 m1C;
+    s32 m1C_gravity;
     sFieldEntitySub4_B4_base* m20 = nullptr;
     sFieldEntitySub4_110* m24_vramData;
     sColorAndCode m28_colorAndCode;
@@ -154,7 +154,7 @@ struct sSpriteActorCore {
     sFieldEntitySub4_F4* m7C;
     s16 m80;
     s16 m82;
-    s16 m84;
+    s16 m84_maxY;
     u16 m86_thisSize;
     s8 m8C_stackPosition;
     s8 m8D;
