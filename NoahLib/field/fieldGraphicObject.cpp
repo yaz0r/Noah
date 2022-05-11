@@ -962,7 +962,7 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
         }
 	case 0xA0: // set the move speed for the character
 		{
-			int iVar11 = READ_LE_U8(param_3 )* 0x10 * (fieldDrawEnvsInitialized + 1) * (int)param_1->m82;
+			int iVar11 = READ_LE_S8(param_3 )* 0x10 * (fieldDrawEnvsInitialized + 1) * (int)param_1->m82;
 			if (iVar11 < 0) {
 				iVar11 = iVar11 + 0xfff;
 			}
