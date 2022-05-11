@@ -11,7 +11,6 @@ add_subdirectory( ${THIRD_PARTY}/bgfx.cmake )
 
 add_subdirectory( ${THIRD_PARTY}/soloud.cmake )
 
-set(SDL_SHARED OFF CACHE BOOL "" FORCE)
 set(HAVE_LIBC ON CACHE BOOL "" FORCE)
 add_subdirectory( ${THIRD_PARTY}/SDL )
 
