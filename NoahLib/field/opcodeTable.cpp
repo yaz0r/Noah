@@ -100,6 +100,7 @@ void initOpcodes()
     fieldScriptOpcodes[0x85] = OP_IF_GAMEPROGRESS_GREATER;
     fieldScriptOpcodes[0x86] = OP_IF_GAMEPROGRESS_EQUAL;
     fieldScriptOpcodes[0x87] = OP_SET_GAMEPROGRESS;
+    fieldScriptOpcodes[0x91] = OP_IF_CHARACTER_IN_PARTY;
     fieldScriptOpcodes[0x92] = OP_92;
     fieldScriptOpcodes[0x93] = OP_ADD_ENDITY_TO_MECHA_LIST;
     fieldScriptOpcodes[0x98] = OP_CHANGE_FIELD_WHEN_READY2;
@@ -123,6 +124,7 @@ void initOpcodes()
     fieldScriptOpcodes[0xB6] = OP_B6;
     fieldScriptOpcodes[0xB7] = OP_B7;
     fieldScriptOpcodes[0xB8] = OP_B8;
+    fieldScriptOpcodes[0xB9] = OP_IF_CHARACTER_IN_AVAILABLE_PARTY;
     fieldScriptOpcodes[0xBA] = OP_ADD_FROM_AVAILABLE_PARTY;
     fieldScriptOpcodes[0xBB] = OP_REMOVE_FROM_AVAILABLE_PARTY;
     fieldScriptOpcodes[0xBC] = OP_INIT_ENTITY_SCRIPT;
@@ -206,14 +208,17 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0x4B] = OP_WAIT_LOADING_SPECIAL_2D_ANIMATION;
     fieldScriptOpcodes_EX[0x4D] = OPX_4D;
     fieldScriptOpcodes_EX[0x4E] = OP_FREE_SPECIAL_2D_ANIMATION;
+    fieldScriptOpcodes_EX[0x4F] = OP_ENABLE_MENU;
     fieldScriptOpcodes_EX[0x50] = OP_DISABLE_MENU;
     fieldScriptOpcodes_EX[0x52] = OP_DISABLE_COMPASS;
     fieldScriptOpcodes_EX[0x53] = OP_ENABLE_PLAYER_CONTROLS;
     fieldScriptOpcodes_EX[0x54] = OPX_54;
     fieldScriptOpcodes_EX[0x57] = OP_OPEN_LOAD_GAME_MENU;
+    fieldScriptOpcodes_EX[0x5B] = OPX_5B;
     fieldScriptOpcodes_EX[0x5C] = OPX_5C;
     fieldScriptOpcodes_EX[0x5D] = OPX_5D;
     fieldScriptOpcodes_EX[0x5E] = OP_SET_TRANSPARENCY_MODE;
+    fieldScriptOpcodes_EX[0x5F] = OPX_5F;
     fieldScriptOpcodes_EX[0x60] = OP_SET_2D_BACKGROUND;
     fieldScriptOpcodes_EX[0x61] = OPX_61;
     fieldScriptOpcodes_EX[0x62] = OPX_62;
@@ -249,6 +254,7 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0xA4] = OP_RESTORE_GEAR;
     fieldScriptOpcodes_EX[0xA5] = OPX_A5;
     fieldScriptOpcodes_EX[0xAF] = OPX_AF;
+    fieldScriptOpcodes_EX[0xB5] = OPX_B5;
     fieldScriptOpcodes_EX[0xB8] = OPX_B8;
     fieldScriptOpcodes_EX[0xBD] = OPX_BD;
     fieldScriptOpcodes_EX[0xC8] = OPX_C8;

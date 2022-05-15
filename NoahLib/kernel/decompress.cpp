@@ -53,7 +53,7 @@ void decompress(std::vector<u8>::const_iterator inputStream, std::vector<u8>& ou
         } while (bitCounter != 0);
     } while (outputStream - output.begin() < totalSize);
 
-    output.resize(totalSize);
+    //output.resize(totalSize);
 }
 
 void fieldDecompress(int size, std::vector<u8>::const_iterator inputStream, std::vector<u8>& output)

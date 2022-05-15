@@ -1131,3 +1131,52 @@ void SetDrawMove(DR_MOVE* p, RECT* rect, int x, int y)
     MissingCode();
 }
 
+void SetShadeTex(POLY_FT4* p, int tge)
+{
+    if (tge == 0) {
+        p->code &= ~1;
+    }
+    else {
+        p->code |= 1;
+    }
+}
+
+void SetPolyG4(POLY_G4* p)
+{
+    p->m3_size = 8;
+    p->code = 0x38;
+    return;
+}
+
+void setupPolyG4(POLY_G4* param_1, u8 param_2, u8 param_3, u8 param_4)
+{
+    SetPolyG4(param_1);
+    param_1->r0 = param_2;
+    param_1->g0 = param_3;
+    param_1->b0 = param_4;
+    param_1->r1 = param_2;
+    param_1->g1 = param_3;
+    param_1->b1 = param_4;
+    param_1->r2 = 0;
+    param_1->g2 = 0;
+    param_1->b2 = 0;
+    param_1->r3 = 0;
+    param_1->g3 = 0;
+    param_1->b3 = 0;
+    return;
+}
+
+void SetLineF3(LINE_F3* p)
+{
+    p->m3_size = 5;
+    p->code = 0x48;
+    p->pad = 0x55555555;
+    return;
+}
+
+void SetPolyF4(POLY_F4* p)
+{
+    p->m3_size = 5;
+    p->code = 0x28;
+    return;
+}

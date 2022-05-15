@@ -4,6 +4,7 @@
 #include "dialogWindows.h"
 #include "fieldScriptSupport.h"
 #include "kernel/TIM.h"
+#include "kernel/gameState.h"
 
 u16 textSpriteMode0 = 0;
 u16 textSpriteMode1 = 0;
@@ -1291,6 +1292,11 @@ void dialogSpecialCase9AndASub0(s16* param_1)
     return;
 }
 
+void dialogSpecialCase9AndA_2(sDialogWindow18* param_1, std::vector<u8>::iterator string) {
+    param_1->m20 = param_1->m1C_currentStringToPrint;
+    param_1->m1C_currentStringToPrint = string;
+    param_1->m10_flags |= 0x80;
+}
 
 void dialogSpecialCase9AndA(uint param_1, int param_2, int param_3) {
     
@@ -1385,7 +1391,7 @@ void updateDialogTextImage(sDialogWindow18* param_1)
 			return;
 		}
 
-		u8* pCharacterToPrint = &(*param_1->m1C);
+		u8* pCharacterToPrint = &(*param_1->m1C_currentStringToPrint);
 		u8 characterToPrint = *pCharacterToPrint;
 		printDialogTextVar = iVar14;
 
@@ -1399,22 +1405,22 @@ void updateDialogTextImage(sDialogWindow18* param_1)
 				return;
 			}
 			param_1->m10_flags &= ~0x80;
-			param_1->m1C = param_1->m20 + 1;
+			param_1->m1C_currentStringToPrint = param_1->m20 + 1;
 			iVar13 = iVar13 + -1;
 			iVar14 = printDialogTextVar;
 			break;
 		case 1: // end of line
 			(param_1->m0).vx = 100;
-			param_1->m1C++;
+			param_1->m1C_currentStringToPrint++;
 			return;
 		case 2:
 			param_1->m6B = '\x02';
 			param_1->m10_flags = param_1->m10_flags | 0x48;
-			param_1->m1C++;
-			if (*param_1->m1C != '\x01') {
+			param_1->m1C_currentStringToPrint++;
+			if (*param_1->m1C_currentStringToPrint != '\x01') {
 				return;
 			}
-			param_1->m1C++;
+			param_1->m1C_currentStringToPrint++;
 			return;
 		case 3:
 			assert(0);
@@ -1424,11 +1430,11 @@ void updateDialogTextImage(sDialogWindow18* param_1)
 			switch (pCharacterToPrint[1])
 			{
 			case 0:
-				param_1->m84_delay = param_1->m1C[2];
-				param_1->m1C += 3;
+				param_1->m84_delay = param_1->m1C_currentStringToPrint[2];
+				param_1->m1C_currentStringToPrint += 3;
 				return;
 			case 1:
-				if (param_1->m1C[2] == 0) {
+				if (param_1->m1C_currentStringToPrint[2] == 0) {
 					int bVar1 = param_1->m6A;
 					int bVar2 = param_1->m6A;
 					param_1->m6A = 0;
@@ -1437,21 +1443,35 @@ void updateDialogTextImage(sDialogWindow18* param_1)
 				}
 				else {
 					int bVar2 = param_1->m68;
-					iVar13 = iVar13 + param_1->m1C[2];
+					iVar13 = iVar13 + param_1->m1C_currentStringToPrint[2];
 					param_1->m68 = bVar1;
 					param_1->m69 = bVar1;
 					param_1->m6A = bVar2;
 				}
-				param_1->m1C = param_1->m1C + 3;
+				param_1->m1C_currentStringToPrint = param_1->m1C_currentStringToPrint + 3;
 				break;
 			case 2:
-				param_1->m84_delay = param_1->m1C[2];
-				param_1->m1C += 3;
+				param_1->m84_delay = param_1->m1C_currentStringToPrint[2];
+				param_1->m1C_currentStringToPrint += 3;
 				param_1->m6C_autoClose = 1;
 				return;
+            case 5: // print gear name
+            {
+                u8 characterToPrint = param_1->m1C_currentStringToPrint[2];
+                param_1->m1C_currentStringToPrint += 2;
+                if ((characterToPrint < 0x80) || (characterToPrint = gameState.m1D34_currentParty[characterToPrint - 0x80], characterToPrint != 0xff)) {
+                    dialogSpecialCase9AndA_2(param_1, gameState.m0_names[characterToPrint].begin());
+                }
+                else {
+                    assert(0);
+                    //dialogSpecialCase9AndA_2(param_1, getDialogParamPointer(printDialogTextVar->m68), 0);
+                }
+                iVar14 = printDialogTextVar;
+                continue;
+            }
             case 0xA:
-                param_1->m1C = param_1->m1C + 2;
-                dialogSpecialCase9AndA(param_1->m70[param_1->m1C[2]], 1, 0);
+                param_1->m1C_currentStringToPrint = param_1->m1C_currentStringToPrint + 2;
+                dialogSpecialCase9AndA(param_1->m70[param_1->m1C_currentStringToPrint[2]], 1, 0);
                 //dialogSpecialCase9AndA_2(param_1, &dialogSpecialCase9AndA_2Data);
                 MissingCode();
                 continue;
@@ -1461,8 +1481,8 @@ void updateDialogTextImage(sDialogWindow18* param_1)
 					param_1->m68 = 1;
 					param_1->m69 = 1;
 					param_1->m6A = bVar1;
-					bVar1 = param_1->m1C[2];
-					param_1->m1C = param_1->m1C + 3;
+					bVar1 = param_1->m1C_currentStringToPrint[2];
+					param_1->m1C_currentStringToPrint = param_1->m1C_currentStringToPrint + 3;
 					int uVar6 = (ushort)bVar1;
 					param_1->m88_delayBetweenCharacters = uVar6;
 					param_1->m86_currentDelayForNextCharacter = uVar6;
@@ -1494,7 +1514,7 @@ void updateDialogTextImage(sDialogWindow18* param_1)
 			printDialogCharacter(characterToPrint, uVar10, &param_1->m2C_inRamDialogTextImage[sVar3], (int)param_1->m12_widthPadded, param_1->m28_perLineBuffer[(param_1->m0).vy].m5A);
 			sVar3 = (param_1->m0).vy;
 			int sVar7 = (param_1->m0).vx + uVar4;
-			param_1->m1C += iVar13;
+			param_1->m1C_currentStringToPrint += iVar13;
 			(param_1->m0).vx = sVar7;
 			param_1->m28_perLineBuffer[sVar3].m58_widthDiv4 = sVar7;
 			break;
@@ -1515,7 +1535,7 @@ void updateAndRenderTextForDialogWindow(sDialogWindow18* param_1, sTag* OT, int 
 			return;
 		}
 		sDialogWindow18_8C* psVar8 = param_1->m8C;
-		param_1->m1C = psVar8->m4_dialogPointer;
+		param_1->m1C_currentStringToPrint = psVar8->m4_dialogPointer;
 		param_1->m8C = param_1->m8C->m0_pNext;
 		delete psVar8;
 		param_1->m82 = param_1->m82 + -1;

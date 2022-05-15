@@ -295,3 +295,9 @@ DRAWENV* PutDrawEnv(DRAWENV* env);
 void SetDispMask(int mask);
 
 void AddPrim(sTag* ot, sTag* p);
+void SetShadeTex(POLY_FT4* p, int tge);
+
+void SetPolyG4(POLY_G4* p);
+void setupPolyG4(POLY_G4* param_1, u8 param_2, u8 param_3, u8 param_4);
+void SetLineF3(LINE_F3* p);
+void SetPolyF4(POLY_F4* p);

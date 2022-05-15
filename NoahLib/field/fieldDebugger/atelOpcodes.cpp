@@ -1163,6 +1163,10 @@ void initExtendedOpcodeTable()
 		.addArgumentU16OrVar()
 		.end();
 
+    m_extendedOpcode[0x5B]
+        .addArgumentU16OrVar()
+        .end();
+
     m_extendedOpcode[0x5D]
         .addArgumentU16OrVar()
         .addArgumentU16OrVar()
@@ -1384,6 +1388,9 @@ void initExtendedOpcodeTable()
 		.addArgumentU16OrVar()
 		.addArgumentU16OrVar()
 		.end();
+
+    m_extendedOpcode[0xB5]
+        .end();
 
     m_extendedOpcode[0xB8]
         .addArgumentByte()

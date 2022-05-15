@@ -88,6 +88,11 @@ struct sFixedPoint
     sFixedPoint& operator=(s32 value) { m_value = value; return *this; }
 
     s32 getIntegerPart() { return m_value >> 16; }
+    static sFixedPoint fromValue(s32 value) {
+        sFixedPoint temp;
+        temp.m_value = value;
+        return temp;
+    }
 };
 
 struct FP_VEC3
@@ -96,7 +101,7 @@ struct FP_VEC3
     sFixedPoint vy;
     sFixedPoint vz;
 
-    s32 operator[](size_t idx) const
+    sFixedPoint operator[](size_t idx) const
     {
         switch (idx)
         {
@@ -108,11 +113,11 @@ struct FP_VEC3
             return vz;
         default:
             assert(0);
-            return 0;
+            return sFixedPoint::fromValue(0);
         }
     }
 
-    s32& operator[](size_t idx)
+    sFixedPoint& operator[](size_t idx)
     {
         switch (idx)
         {
@@ -124,7 +129,7 @@ struct FP_VEC3
             return vz;
         default:
             assert(0);
-            return vx;
+            return sFixedPoint::fromValue(0);
         }
     }
 };
@@ -195,6 +200,9 @@ struct SFP_VEC4 : public SFP_VEC3
         }
     }
 };
+
+typedef FP_VEC4 VECTOR;
+typedef SFP_VEC4 SVECTOR;
 
 #define MissingCode()
 #define Hack(x)

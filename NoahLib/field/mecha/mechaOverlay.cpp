@@ -153,7 +153,7 @@ void loadMechaOverlay_start(void)
     }
 
     for (int i = 0; i < NumMechas; i++) {
-        assert(mechaDataTable2[i] == nullptr);
+        //assert(mechaDataTable2[i] == nullptr);
         mechaOverlayBatchLoadingTable[i*2].m0_fileIndex = mechaList[i] + 0x6BA;
         mechaDataTable2_raw[i].resize(getFileSizeAligned(mechaList[i] + 0x6BA));
         mechaOverlayBatchLoadingTable[i*2].m4_loadPtr = &mechaDataTable2_raw[i];
@@ -918,6 +918,8 @@ void loadMechaOverlay_finalize(void)
 
         mechaInitNewMecha(i, 0, mechaDataTable2[i], mechaDataTable1[i], ((i + mechaList2[i]) * -0x40 + 0x240), 0x100, 0, i + 0xFC, &initMechaTempVar[i]);
         delete mechaDataTable1[i];
+        mechaDataTable1[i] = nullptr;
+        mechaDataTable1_raw[i].clear();
         mechaList3[i] = loadedMechas[i]->m1C_moveSpeed;
     }
 

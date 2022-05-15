@@ -136,7 +136,8 @@ struct sFieldScriptEntity
     s16 mEC_elevation;
     s32 mF0;
     std::array<s16, 3> mF4_scale3d;
-    std::array<s8, 6> mFC;
+    std::array<u8, 3> mFC;
+    std::array<u8, 3> mFF;
     s16 m102_numSteps;
     s16 m104_rotation;
     s16 m106_currentRotation;
@@ -213,8 +214,11 @@ extern int fieldScriptInitVar0;
 extern int currentScriptFinished;
 
 extern int asyncLoadingVar1;
-extern int asyncLoadingVar2;
 extern int fieldExecuteVar1;
+
+extern int asyncPartyCharacterLoadingIndex;
+extern std::vector<u8> asyncPartyCharacterLoadingBuffer;
+extern int asyncPartyCharacterLoadingCharacterIndex;
 
 extern std::array<sSpriteActorAnimationBundle, 3> partyCharacterBuffers;
 extern s16 actorCameraTracked;
@@ -400,7 +404,6 @@ void SetGeomOffset(s32, s32);
 int getCharacter(int param_1);
 int findCharacterInParty(int param_1);
 
-int isAsyncLoadingProhibited();
 int findFreePartySlot(int param_1, int* param_2);
 void setVar(int varIndex, s16 value);
 void startPartyCharacterASyncLoading(int partyCharacter, int partySlot);
@@ -441,3 +444,6 @@ void initModel1(sModelBlock& pModelBlock, std::vector<sTag*>& outputBuffer1, std
 void initModel2(sModelBlock* pModelBlock, std::vector<sTag*>& outputBuffer, int param_3);
 
 bool submitModelForRendering(sModelBlock* param_1, std::vector<sTag*>& param_2, OTTable& OT, int renderMode);
+
+void doPCCollisionCheckAfterLoading();
+void runInitScriptForNewlyLoadedPC(uint param_1);

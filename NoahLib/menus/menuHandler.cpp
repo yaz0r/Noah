@@ -351,21 +351,11 @@ u8 renderString(std::vector<u8>::iterator buffer, std::vector<u16>& param_2, ush
     renderStringVar0 = param_4 & 1;
     sDialogWindow18_temp.m28_perLineBuffer.push_back(sDialogWindow18PerLineBufferEntry());
     renderStringVar1 = 0;
-    sDialogWindow18_temp.m1C = buffer;
+    sDialogWindow18_temp.m1C_currentStringToPrint = buffer;
     sDialogWindow18_temp.m2C_inRamDialogTextImage = param_2;
     updateDialogTextImage(&sDialogWindow18_temp);
     param_2 = sDialogWindow18_temp.m2C_inRamDialogTextImage;
     return sDialogWindow18_temp.m28_perLineBuffer[0].m58_widthDiv4 << 2;
-}
-
-void SetShadeTex(POLY_FT4* p, int tge)
-{
-    if (tge == 0) {
-        p->code &= ~1;
-    }
-    else {
-        p->code |= 1;
-    }
 }
 
 void initMemoryCardTransparentPoly(POLY_FT4* param_1)
@@ -448,47 +438,6 @@ void initMenuContext4E0(void)
     setupMenuContext4E0(&gMenuContext->m4E0[0], DAT_Menu2__801ea524.begin(), 0, 4);
     loadBlankImage();
 }
-
-void SetPolyG4(POLY_G4* p)
-{
-    p->m3_size = 8;
-    p->code = 0x38;
-    return;
-}
-
-void setupPolyG4(POLY_G4* param_1, u8 param_2, u8 param_3, u8 param_4)
-{
-    SetPolyG4(param_1);
-    param_1->r0 = param_2;
-    param_1->g0 = param_3;
-    param_1->b0 = param_4;
-    param_1->r1 = param_2;
-    param_1->g1 = param_3;
-    param_1->b1 = param_4;
-    param_1->r2 = 0;
-    param_1->g2 = 0;
-    param_1->b2 = 0;
-    param_1->r3 = 0;
-    param_1->g3 = 0;
-    param_1->b3 = 0;
-    return;
-}
-
-void SetLineF3(LINE_F3* p)
-{
-    p->m3_size = 5;
-    p->code = 0x48;
-    p->pad = 0x55555555;
-    return;
-}
-
-void SetPolyF4(POLY_F4* p)
-{
-    p->m3_size = 5;
-    p->code = 0x28;
-    return;
-}
-
 
 void initPrimitives_348_cursor()
 {

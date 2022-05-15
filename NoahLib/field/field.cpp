@@ -20,6 +20,7 @@
 #include "screenDistortion.h"
 #include "mecha/mechaOverlay.h"
 #include "menus/menuHandler.h"
+#include "kernel/gte.h"
 
 #include "SDL_gamecontroller.h"
 #include "SDL_keyboard.h"
@@ -27,6 +28,7 @@
 u32 playTimeInVsync = 0;
 s32 bootModeReady = 0;
 s32 newBootMode = 0;
+s32 menuFadeState = 0;
 
 bool g_executeScripts = true;
 bool g_executeUpdateScripts = true;
@@ -510,7 +512,7 @@ void initFieldScriptEntityValues(int index)
     sFieldScriptEntity* pFieldScriptEntity = actorArray[index].m4C_scriptEntity;
 
     pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags = 0xB0;
-    pFieldScriptEntity->m4_flags.m_x800 = 1;
+    pFieldScriptEntity->m4_flags.m_rawFlags = 0x800;
     pFieldScriptEntity->m18_boundingVolume.vx = 0x10;
     pFieldScriptEntity->m18_boundingVolume.vz = 0x10;
     pFieldScriptEntity->m18_boundingVolume.vy = 0x60;
@@ -542,9 +544,9 @@ void initFieldScriptEntityValues(int index)
     pFieldScriptEntity->m11E = 0x200;
     pFieldScriptEntity->m1E_collisionRadius= pFieldScriptEntity->m18_boundingVolume.vx;
     pFieldScriptEntity->m12C_flags &= 0xfffffffc;
-    pFieldScriptEntity->mFC[5] = 0x80;
-    pFieldScriptEntity->mFC[4] = 0x80;
-    pFieldScriptEntity->mFC[3] = 0x80;
+    pFieldScriptEntity->mFF[2] = 0x80;
+    pFieldScriptEntity->mFF[1] = 0x80;
+    pFieldScriptEntity->mFF[0] = 0x80;
     pFieldScriptEntity->mFC[2] = 0x80;
     pFieldScriptEntity->mFC[1] = 0x80;
     pFieldScriptEntity->mFC[0] = 0x80;
@@ -859,7 +861,7 @@ int prim1_init(u8* displayList, u8* meshBlock, int initParam)
 {
     if (primD_isValid(displayList))
     {
-        assert(READ_LE_U8(displayList + 3) == 0x24); // triangle with texture
+        //assert(READ_LE_U8(displayList + 3) == 0x24); // triangle with texture
 
         POLY_FT3* pNewPoly = new POLY_FT3;
 
@@ -1995,13 +1997,6 @@ void OP_INIT_ENTITY_SCRIPT_sub1()
 }
 
 int asyncLoadingVar1 = 0xFF;
-int asyncLoadingVar2 = 0;
-
-int isAsyncLoadingProhibited()
-{
-    MissingCode();
-    return 0;
-}
 
 int findFreePartySlot(int param_1, int* param_2)
 {
@@ -2012,7 +2007,7 @@ int findFreePartySlot(int param_1, int* param_2)
         if (currentParty[iVar1] == param_1) {
             return -1;
         }
-        if (currentParty[iVar1])
+        if (currentParty[iVar1] == 0xFF)
             break;
         iVar1 = iVar1 + 1;
 
@@ -2993,6 +2988,325 @@ int shoudlGroundOTBeEnabled()
     return 0;
 }
 
+struct sBackgroundPoly {
+    std::array<std::array<POLY_FT4, 8>, 2> m0_FT4;
+    std::array<POLY_F4, 4> m280_F4;
+    std::array<POLY_G4, 2> m2E0_G4;
+    s32 m328;
+    s32 m32C;
+    s32 m330;
+    s16 m334;
+    s16 m336;
+    s16 m338;
+    s16 m33A;
+    s16 m33C;
+    s16 m33E;
+    s16 m340;
+    s16 m342;
+    s16 m344;
+    s16 m346;
+    s16 m348;
+    s16 m34A;
+} *backgroundPoly = nullptr;
+
+sBackgroundPoly* createBackgroundPoly(s32 param_1, int param_2, s32 param_3, s32 param_4, int clutX, int clutY, short param_7, int param_8, s32* param_9, s8* param_10, u16 param_11, s16 param_12, s16 param_13)
+{
+    sBackgroundPoly* pBackgroundPoly = new sBackgroundPoly;
+
+    pBackgroundPoly->m328 = param_3;
+    pBackgroundPoly->m32C = param_4;
+    pBackgroundPoly->m33C = param_9[0];
+    pBackgroundPoly->m33E = param_9[1];
+    pBackgroundPoly->m346 = param_11;
+    pBackgroundPoly->m348 = param_12;
+    pBackgroundPoly->m34A = param_13;
+    pBackgroundPoly->m340 = param_9[2];
+    if (param_9[2] < 0) {
+        pBackgroundPoly->m330 = -param_8;
+    }
+    else {
+        pBackgroundPoly->m330 = param_8;
+    }
+    pBackgroundPoly->m336 = param_2;
+    pBackgroundPoly->m334 = param_1;
+    pBackgroundPoly->m338 = param_7;
+    if (param_2 < 0) {
+        param_2 = param_2 + 0xff;
+    }
+    pBackgroundPoly->m33A = param_2 + (short)((uint)param_2 >> 8) * -0x100;
+
+    for (int i = 0; i < 2; i++) {
+        for (int j = 0; j < 8; j++) {
+            SetPolyFT4(&pBackgroundPoly->m0_FT4[i][j]);
+            SetShadeTex(&pBackgroundPoly->m0_FT4[i][j], 1);
+            pBackgroundPoly->m0_FT4[i][j].clut = GetClut(clutX, clutY);
+        }
+    }
+
+    if (!param_10) {
+        pBackgroundPoly->m344 = 0;
+    }
+    else {
+        pBackgroundPoly->m344 = 1;
+        for (int i = 0; i < 2; i++) {
+            SetPolyF4(&pBackgroundPoly->m280_F4[i]);
+            pBackgroundPoly->m280_F4[i].r0 = param_10[0];
+            pBackgroundPoly->m280_F4[i].g0 = param_10[1];
+            pBackgroundPoly->m280_F4[i].b0 = param_10[2];
+
+            pBackgroundPoly->m280_F4[i].x0y0.set(0, 0);
+            pBackgroundPoly->m280_F4[i].x1y1.set(320, 0);
+            pBackgroundPoly->m280_F4[i].x2y2.set(0, 0);
+            pBackgroundPoly->m280_F4[i].x3y3.set(320, 0);
+        }
+
+        for (int i = 0; i < 2; i++) {
+            SetPolyG4(&pBackgroundPoly->m2E0_G4[i]);
+            pBackgroundPoly->m2E0_G4[i].r0 = param_10[4];
+            pBackgroundPoly->m2E0_G4[i].g0 = param_10[5];
+            pBackgroundPoly->m2E0_G4[i].b0 = param_10[6];
+            pBackgroundPoly->m2E0_G4[i].r1 = param_10[4];
+            pBackgroundPoly->m2E0_G4[i].g1 = param_10[5];
+            pBackgroundPoly->m2E0_G4[i].b1 = param_10[6];
+            pBackgroundPoly->m2E0_G4[i].r2 = param_10[8];
+            pBackgroundPoly->m2E0_G4[i].g2 = param_10[9];
+            pBackgroundPoly->m2E0_G4[i].b2 = param_10[10];
+            pBackgroundPoly->m2E0_G4[i].r3 = param_10[8];
+            pBackgroundPoly->m2E0_G4[i].g3 = param_10[9];
+            pBackgroundPoly->m2E0_G4[i].b3 = param_10[10];
+            pBackgroundPoly->m2E0_G4[i].x0y0.set(0, 0);
+            pBackgroundPoly->m2E0_G4[i].x1y1.set(320, 0);
+            pBackgroundPoly->m2E0_G4[i].x2y2.set(0, 0);
+            pBackgroundPoly->m2E0_G4[i].x3y3.set(320, 0);
+        }
+
+        for (int i = 2; i < 4; i++) {
+            SetPolyF4(&pBackgroundPoly->m280_F4[i]);
+            pBackgroundPoly->m280_F4[i].r0 = param_10[8];
+            pBackgroundPoly->m280_F4[i].g0 = param_10[9];
+            pBackgroundPoly->m280_F4[i].b0 = param_10[10];
+
+            pBackgroundPoly->m280_F4[i].x0y0.set(0, 0);
+            pBackgroundPoly->m280_F4[i].x1y1.set(320, 0);
+            pBackgroundPoly->m280_F4[i].x2y2.set(0, 240);
+            pBackgroundPoly->m280_F4[i].x3y3.set(320, 240);
+        }
+    }
+
+    return pBackgroundPoly;
+}
+
+void computeBackgroundPoly(sBackgroundPoly* pBackgroundPoly, int param_2, int param_3, int param_4, sTag* pTag, uint oddOrEven)
+{
+    s32 iVar15 = pBackgroundPoly->m328;
+    s32 iVar17 = param_4 + 0x100;
+    if (iVar17 == 0) {
+        assert(0);
+    }
+    if ((iVar17 == -1) && (iVar15 << 8 == -0x80000000)) {
+        assert(0);
+    }
+    s32 iVar10 = (0x140 - (iVar15 << 8) / iVar17) / 2;
+    s32 iVar23 = iVar10 * param_4;
+    if (iVar23 < 0) {
+        iVar23 = iVar23 + 0xff;
+    }
+    iVar23 = (param_2 - (iVar10 + (iVar23 >> 8))) * 0x10000 >> 0x10;
+    iVar10 = iVar23 % iVar15;
+    if (iVar15 == 0) {
+        assert(0);
+    }
+    if ((iVar15 == -1) && (iVar23 == -0x80000000)) {
+        assert(0);
+    }
+    if (iVar10 << 0x10 < 0) {
+        iVar10 = (uint) * (ushort*)&pBackgroundPoly->m328 + iVar10;
+    }
+    iVar15 = 0;
+    if ((-1 < param_3) && (iVar23 = pBackgroundPoly->m32C << 8, param_3 <= pBackgroundPoly->m32C + 0xf0)) {
+        iVar15 = iVar23 / iVar17;
+        if (iVar17 == 0) {
+            assert(0);
+        }
+        if ((iVar17 == -1) && (iVar23 == -0x80000000)) {
+            assert(0);
+        }
+    }
+
+    s32 currentX = 0;
+    std::array<POLY_FT4, 8>& currentArray = pBackgroundPoly->m0_FT4[oddOrEven & 1];
+    if (0 < iVar15 << 0x10) {
+        s32 iVar11 = (int)pBackgroundPoly->m334;
+        s32 iVar21 = iVar11;
+        if (iVar11 < 0) {
+            iVar21 = iVar11 + 0x3f;
+        }
+        s32 iVar20 = param_4 + 0x100;
+        s32 sVar4 = pBackgroundPoly->m338;
+
+        for (int i = 0; i < 8; i++) {
+
+            POLY_FT4& p = currentArray[i];
+
+            u16* puVar19 = &(currentArray)[i].tpage;
+
+            s32 sVar16 = (short)iVar10;
+            s32 sVar5 = pBackgroundPoly->m338;
+            s32 uVar6 = pBackgroundPoly->m334;
+            s32 uVar12 = iVar10 + (iVar11 + (iVar21 >> 6) * -0x40 << (2U - (int)sVar4 & 0x1f) & 0xffffU) & (0x100 >> ((int)sVar5 & 0x1fU)) - 1U;
+            s32 iVar8 = 0x100 - uVar12;
+            if (pBackgroundPoly->m328 < (int)sVar16 + (iVar8 * 0x10000 >> 0x10)) {
+                iVar8 = (uint) * (ushort*)&pBackgroundPoly->m328 - iVar10;
+            }
+            s32 sVar7 = (short)iVar8;
+            iVar10 = (iVar8 << 0x10) >> 8;
+            iVar8 = iVar10 / iVar20;
+            if (iVar20 == 0) {
+                assert(0);
+            }
+            if ((iVar20 == -1) && (iVar10 == -0x80000000)) {
+                assert(0);
+            }
+            s32 uVar9 = currentX;
+            if (0x140 < (int)(short)uVar9 + (int)(short)iVar8) {
+                iVar8 = 320 - currentX;
+                iVar10 = (iVar8 * 0x10000 >> 0x10) * iVar20;
+                if (iVar10 < 0) {
+                    iVar10 = iVar10 + 0xff;
+                }
+                sVar7 = (short)((uint)iVar10 >> 8);
+            }
+            s32 iVar13 = pBackgroundPoly->m328;
+            iVar10 = (int)(short)(sVar16 + sVar7) % iVar13;
+            if (iVar13 == 0) {
+                assert(0);
+            }
+            if ((iVar13 == -1) && ((short)(sVar16 + sVar7) == -0x80000000)) {
+                assert(0);
+            }
+            currentX = currentX + iVar8;
+
+
+            p.x0y0.vx = uVar9;
+            p.x1y1.vx = currentX;
+            p.x2y2.vx = uVar9;
+            uVar9 = (s16)param_3;
+            p.x2y2.vy = uVar9;
+            p.x3y3.vx = (s16)currentX;
+            p.x3y3.vy = uVar9;
+            s32 uVar18 = (u8)uVar12;
+            p.u0 = uVar18;
+            uVar9 = uVar9 - (short)iVar15;
+            p.x0y0.vy = uVar9;
+            p.x1y1.vy = uVar9;
+            u8 uVar1 = *(u8*)&pBackgroundPoly->m33A;
+            s32 uVar14 = (char)sVar7 + uVar18 + 0xff;
+            p.u1 = uVar14;
+            p.v0 = uVar1;
+            uVar1 = *(u8*)&pBackgroundPoly->m33A;
+            p.u2 = uVar18;
+            p.v1 = uVar1;
+            s8 cVar2 = *(char*)&pBackgroundPoly->m33A;
+            s8 cVar3 = *(char*)&pBackgroundPoly->m32C;
+            *(u8*)(puVar19 + 7) = uVar14;
+            p.v2 = cVar2 + cVar3;
+            iVar8 = (int)(((uint)uVar6 + ((int)sVar16 >> (2U - (int)sVar5 & 0x1f))) * 0x10000) >> 0x10;
+            p.v3 = *(char*)&pBackgroundPoly->m33A + *(char*)&pBackgroundPoly->m32C;
+            if (iVar8 < 0) {
+                iVar8 = iVar8 + 0x3f;
+            }
+            iVar13 = (int)pBackgroundPoly->m336;
+            if (iVar13 < 0) {
+                iVar13 = iVar13 + 0xff;
+            }
+            p.tpage = GetTPage(pBackgroundPoly->m338, 0, (iVar8 >> 6) << 6, (iVar13 >> 8) << 8);
+
+            p.m0_pNext = pTag->m0_pNext;
+            pTag->m0_pNext = &p;
+
+            if (319 < currentX * 0x10000 >> 0x10) {
+                return;
+            }
+        }
+    }
+}
+
+void renderBackgroundPoly(sBackgroundPoly* pBackgroundPoly, SVECTOR* eye, SVECTOR* at, MATRIX* projectionMatrix, sTag* pTag, int oddOrEven)
+{
+    if (pBackgroundPoly == nullptr) {
+        return;
+    }
+
+    FP_VEC4 viewDir;
+    viewDir.vy = 0;
+    viewDir.vx = (int)at->vx - (int)eye->vx;
+    viewDir.vz = (int)at->vz - (int)eye->vz;
+
+    SFP_VEC4 viewDirNormalized;
+    VectorNormalS(&viewDir, &viewDirNormalized);
+
+    SVECTOR local_48;
+    {
+        s32 iVar5 = viewDirNormalized.vx * pBackgroundPoly->m340;
+        if (iVar5 < 0) iVar5 += 0xFFF;
+        local_48.vx = (iVar5 >> 0xC) + at->vx;
+        local_48.vy = pBackgroundPoly->m33E;
+        iVar5 = viewDirNormalized.vz * pBackgroundPoly->m340;
+        if (iVar5 < 0) iVar5 += 0xFFF;
+        local_48.vz = (iVar5 >> 0xC) + at->vz;
+    }
+
+    SetRotMatrix(projectionMatrix);
+    SetTransMatrix(projectionMatrix);
+    gte_ldv0(&local_48);
+    gte_rtps();
+
+    sVec2_s16 projectedPosition;
+    gte_stsxy(&projectedPosition);
+
+    s32 sVar4 = 0;
+    if (pBackgroundPoly->m348) {
+        assert(0);
+    }
+
+    s32 iVar5 = pBackgroundPoly->m328 * pBackgroundPoly->m330 * (ratan2(viewDir.vx, viewDir.vz) & 0xfff);
+    if (iVar5 < 0) {
+        iVar5 = iVar5 + 0xfff;
+    }
+    computeBackgroundPoly(pBackgroundPoly, iVar5 >> 0xc, (int)projectedPosition.vy, (int)sVar4, pTag, oddOrEven);
+
+    if (pBackgroundPoly->m344 < 1) {
+        return;
+    }
+
+    projectedPosition.vx = projectedPosition.vy - pBackgroundPoly->m32C;
+    if (0xf0 < projectedPosition.vx * 0x10000 >> 0x10) {
+        projectedPosition.vx = 0xf0;
+    }
+    if (0 < projectedPosition.vx) {
+        pBackgroundPoly->m280_F4[oddOrEven].x2y2.vy = projectedPosition.vx;
+        pBackgroundPoly->m280_F4[oddOrEven].x3y3.vy = projectedPosition.vx;
+
+        pBackgroundPoly->m280_F4[oddOrEven].m0_pNext = pTag->m0_pNext;
+        pTag->m0_pNext = &pBackgroundPoly->m280_F4[oddOrEven];
+    }
+}
+
+void renderBackgroundPolyIfEnabled() {
+    if ((OPX_82Param4 != 0) && (menuFadeState == 0)) {
+        SVECTOR eyePos;
+        SVECTOR eyeAt;
+
+        eyePos.vx = cameraEye[0].getIntegerPart();
+        eyePos.vy = cameraEye[1].getIntegerPart();
+        eyePos.vz = cameraEye[2].getIntegerPart();
+        eyeAt.vx = cameraAt[0].getIntegerPart();
+        eyeAt.vy = cameraAt[1].getIntegerPart();
+        eyeAt.vz = cameraAt[2].getIntegerPart();
+        renderBackgroundPoly(backgroundPoly, &eyePos, &eyeAt, &currentProjectionMatrix, &pCurrentFieldRenderingContext->m40D0_secondaryOT[linkOTIndex-1], g_frameOddOrEven);
+    }
+}
+
 void initFieldData()
 {
     resetFieldDefault();
@@ -3317,7 +3631,9 @@ void initFieldData()
 
     if (OPX_82Param4 != 0)
     {
-        MissingCode();
+        backgroundPoly = createBackgroundPoly
+        ((int)(short)OPX_80Params[0], (int)(short)OPX_80Params[1], (int)(short)OPX_80Params[2], (int)(short)OPX_80Params[3], (int)(short)OPX_80Params[4], (int)(short)OPX_80Params[5],
+            (int)(short)OPX_80Params[6], (int)(short)OPX_80Params[7], OPX_81Params, OPX_82Param0, (int)OPX_82Param3[0], (int)OPX_82Param3[1], (int)OPX_82Param3[2]);
     }
     initModel3(8, 0);
 
@@ -3343,8 +3659,7 @@ void initFieldData()
     currentFieldId1 = -1;
     currentFieldId0 = -1;
     setupObjectRenderModes();
-    MissingCode();
-
+    doPCCollisionCheckAfterLoading();
     int enableGroundOT = 1;
     if (OPX_82Param4 == 0) {
         enableGroundOT = shoudlGroundOTBeEnabled();
@@ -4065,7 +4380,6 @@ int updateEntityEventCode3Sub0(sFieldScriptEntity* param_1)
 
 void updateEntityEventCode3Sub1(sSpriteActor* param_1, ushort rotation, sFieldEntity* param_3)
 {
-    int iVar1;
     sFieldScriptEntity* psVar2;
     int iVar3;
     uint uVar4;
@@ -4081,36 +4395,32 @@ void updateEntityEventCode3Sub1(sSpriteActor* param_1, ushort rotation, sFieldEn
     }
     else {
         if (((int)(short)rotation & 0x8000U) != 0) goto LAB_Field__800821b0;
-        psVar2 = param_3->m4C_scriptEntity;
-        uVar4 = psVar2->m4_flags.m_rawFlags;
+        uVar4 = param_3->m4C_scriptEntity->m4_flags.m_rawFlags;
         if ((uVar4 & 0x2000) == 0) {
             if ((uVar4 & 0x80000) == 0) {
                 OP_INIT_ENTITY_SCRIPT_sub0Sub7(param_1, (int)(short)rotation);
             }
             else {
-                iVar3 = ((int)(0x40000 / (ushort)psVar2->m76) >> 8) * 0x20;
-                iVar1 = getAngleSin(rotation & 0xfff);
-                (param_1->mC_step).vx = (iVar1 * iVar3 >> 0xc) * (int)param_3->m4C_scriptEntity->mF4_scale3d[0];
-                iVar1 = getAngleCos(rotation & 0xfff);
-                (param_1->mC_step).vz = (-(iVar1 * iVar3) >> 0xc) * (int)param_3->m4C_scriptEntity->mF4_scale3d[2];
+                iVar3 = ((int)(0x40000 / (ushort)param_3->m4C_scriptEntity->m76) >> 8) * 0x20;
+                (param_1->mC_step).vx = (getAngleSin(rotation & 0xfff) * iVar3 >> 0xc) * (int)param_3->m4C_scriptEntity->mF4_scale3d[0];
+                (param_1->mC_step).vz = (-(getAngleCos(rotation & 0xfff) * iVar3) >> 0xc) * (int)param_3->m4C_scriptEntity->mF4_scale3d[2];
                 param_1->m18_moveSpeed = 0x4000000 / (ushort)param_3->m4C_scriptEntity->m76;
             }
             goto LAB_Field__800821bc;
         }
         if ((uVar4 & 0x20000) != 0) {
-            uVar4 = psVar2->m12C_flags;
+            uVar4 = param_3->m4C_scriptEntity->m12C_flags;
             assert(0);
             //(param_1->mC).vx = *(int*)(*(int*)(&DAT_801e8670 + (uVar4 >> 0xb & 0x1c)) + 0x128) * -0x10000;
             //(param_1->mC).vz = *(int*)(*(int*)(&DAT_801e8670 + (uVar4 >> 0xb & 0x1c)) + 0x130) * -0x10000;
             goto LAB_Field__800821bc;
         }
-        uVar4 = 0x80000 / (ushort)psVar2->m76;
+        uVar4 = 0x80000 / (ushort)param_3->m4C_scriptEntity->m76;
     }
+
     iVar3 = ((int)uVar4 >> 8) * 0x20;
-    iVar1 = getAngleSin(rotation & 0xfff);
-    (param_1->mC_step).vx = (iVar1 * iVar3 >> 0xc) * (int)param_3->m4C_scriptEntity->mF4_scale3d[0];
-    iVar1 = getAngleCos(rotation & 0xfff);
-    (param_1->mC_step).vz = (-(iVar1 * iVar3) >> 0xc) * (int)param_3->m4C_scriptEntity->mF4_scale3d[2];
+    (param_1->mC_step).vx = (getAngleSin(rotation & 0xfff) * iVar3 >> 0xc) * (int)param_3->m4C_scriptEntity->mF4_scale3d[0];
+    (param_1->mC_step).vz = (-(getAngleCos(rotation & 0xfff) * iVar3) >> 0xc) * (int)param_3->m4C_scriptEntity->mF4_scale3d[2];
 
 LAB_Field__800821bc:
     (param_1->mC_step).vx = (param_1->mC_step).vx & 0xfffff000;
@@ -7843,6 +8153,7 @@ void updateAndRenderField()
     MissingCode();
     updateAndRenderScreenDistortion();
     MissingCode();
+    renderBackgroundPolyIfEnabled();
     renderMechasInField();
     MissingCode();
     DrawSync(0);
@@ -8291,5 +8602,94 @@ void fieldEntryPoint()
         MissingCode();
 
         updateMusicState();
+    }
+}
+
+void copyActorPositions(int dest, int source) {
+    sFieldScriptEntity* pSourceScriptEntity = actorArray[source].m4C_scriptEntity;
+    sFieldScriptEntity* pDestScriptEntity = actorArray[dest].m4C_scriptEntity;
+
+    for (int i = 0; i < 4; i++) {
+        pDestScriptEntity->m8_currentWalkMeshTriangle[i] = pSourceScriptEntity->m8_currentWalkMeshTriangle[i];
+    }
+
+    pDestScriptEntity->m10_walkmeshId = pSourceScriptEntity->m10_walkmeshId;
+    pDestScriptEntity->m50_surfaceNormal = pSourceScriptEntity->m50_surfaceNormal;
+    pDestScriptEntity->m20_position = pSourceScriptEntity->m20_position;
+    pDestScriptEntity->mEC_elevation = pSourceScriptEntity->mEC_elevation;
+    pDestScriptEntity->m72_elevation = pSourceScriptEntity->m72_elevation;
+    pDestScriptEntity->m14_currentTriangleFlag = pSourceScriptEntity->m14_currentTriangleFlag;
+
+    actorArray[dest].m4_pVramSpriteSheet->m0_spriteActorCore.m84_maxY = actorArray[source].m4_pVramSpriteSheet->m0_spriteActorCore.m84_maxY;
+    actorArray[dest].m4_pVramSpriteSheet->m0_spriteActorCore.m0_position = actorArray[source].m4_pVramSpriteSheet->m0_spriteActorCore.m0_position;
+    actorArray[dest].mC_matrix.t = actorArray[source].mC_matrix.t;
+}
+
+void doPCCollisionCheckAfterLoading() {
+    EntityMoveCheck1(playerControlledActor, ((actorArray[playerControlledActor].m4C_scriptEntity)->m20_position).vy.getIntegerPart(), &actorArray[playerControlledActor],
+        actorArray[playerControlledActor].m4C_scriptEntity, 0); // TODO: what is the last argument supposed to be?
+
+    for (int i = 0; i < totalActors; i++) {
+        sFieldEntity* pFieldEntity = &actorArray[i];
+        sFieldScriptEntity* pFieldScriptEntity = pFieldEntity->m4C_scriptEntity;
+        if ((pFieldEntity->m58_flags & 0xF80) == 0x200) {
+            int partySlot = findCharacterInParty(pFieldScriptEntity->mE4_playableCharacterId);
+            if ((partySlot != -1) && (partySlot != 0)) {
+                EntityMoveCheck1(i, actorArray[i].m4C_scriptEntity->m20_position.vy.getIntegerPart(), pFieldEntity, pFieldScriptEntity, 0);// TODO: what is the last argument supposed to be?
+
+                actorArray[i].m4_pVramSpriteSheet->m0_position = actorArray[i].m4_pVramSpriteSheet->m0_spriteActorCore.m0_position;
+                pFieldEntity->mC_matrix.t = actorArray[playerControlledActor].mC_matrix.t;
+            }
+        }
+    }
+
+    partyToFollowStructMapping.fill(0);
+
+    for (int i = 0; i < 0x20; i++) {
+        initFollowStructForPlayer(playerControlledActor);
+    }
+}
+
+void runInitScriptForNewlyLoadedPC(uint param_1) {
+    sFieldEntity* backupCurrentFieldEntity = pCurrentFieldEntity;
+    sFieldScriptEntity* backupCurrentFieldScriptActor = pCurrentFieldScriptActor;
+
+    pKernelGameState->m1D30_partyMemberBitField |= 1 << (asyncPartyCharacterLoadingCharacterIndex & 0x1f);
+
+    int backupBreakCurrentScript = breakCurrentScript;
+    int backupCurrentFieldActorId = currentFieldActorId;
+    int backupFieldExecuteMaxCycles = fieldExectuteMaxCycles;
+
+    if (fieldExecuteVar1) {
+        u16 backScriptPC = backupCurrentFieldScriptActor->mCC_scriptPC;
+        for (int i = 0; i < totalActors; i++) {
+            u16 scriptEntryPoint = getScriptEntryPoint(i, 0);
+            // 0x16 is OP_INIT_ENTITY_PC
+            if ((pCurrentFieldScriptFile[scriptEntryPoint] == 0x16) && ((pCurrentFieldScriptFile + scriptEntryPoint)[1] == param_1)) {
+                pCurrentFieldEntity = &actorArray[i];
+                pCurrentFieldScriptActor = pCurrentFieldEntity->m4C_scriptEntity;
+                initFieldScriptEntityValues(i);
+                currentFieldActorId = i;
+                actorArray[i].m4C_scriptEntity->mCC_scriptPC = scriptEntryPoint;
+                currentScriptFinished = 0;
+                pCurrentFieldScriptActor->mCC_scriptPC = getScriptEntryPoint(i, 0);
+                copyActorPositions(i, playerControlledActor);
+                executeFieldScript(0xffff);
+                doPCCollisionCheckAfterLoading();
+                
+                pKernelGameState->m1D30_partyMemberBitField |= 1 << (asyncPartyCharacterLoadingCharacterIndex & 0x1f);
+
+                if (fieldMapNumber & 0xC000) {
+                    assert(0);
+                }
+            }
+        }
+
+        fieldExectuteMaxCycles = backupFieldExecuteMaxCycles;
+        currentFieldActorId = backupCurrentFieldActorId;
+        pCurrentFieldScriptActor = backupCurrentFieldScriptActor;
+        breakCurrentScript = backupBreakCurrentScript;
+        pCurrentFieldEntity = backupCurrentFieldEntity;
+        backupCurrentFieldScriptActor->mCC_scriptPC = backScriptPC;
     }
 }

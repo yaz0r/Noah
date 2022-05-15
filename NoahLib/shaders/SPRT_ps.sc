@@ -25,6 +25,15 @@ int readU4FromPDXVram(float x, float y)
     }
 }
 
+int readU16FromPSXVram(int x, int y)
+{
+    int CLUT0 = readU8FromPDXVram(x * 2, y);
+    int CLUT1 = readU8FromPDXVram(x * 2 + 1, y);
+
+    int CLUT = CLUT0 | (CLUT1 << 8);
+    return CLUT;
+}
+
 int getTexturePageXBase(int4 config)
 {
     return 64 * (config.x & 0xF);
@@ -65,25 +74,15 @@ int4 getTextureWindow(int config)
 
 int getTexturePageColors(int4 config)
 {
-    return ((config.x>>7) & 0x3);
+    int tpage = (config.y << 8) | config.x;
+    return ((tpage>>7) & 0x3);
 }
 
-float4 getCLUTForColor(int2 clutConfig, int colorIndex)
-{
-//    return float4(colorIndex / (float)0xF, 0,0,1);
-
-    int CLUT0 = readU8FromPDXVram((clutConfig.x * 16) * 2 + colorIndex * 2, clutConfig.y);
-    int CLUT1 = readU8FromPDXVram((clutConfig.x * 16) * 2 + colorIndex * 2 + 1, clutConfig.y);
-
-    int CLUT = CLUT0 | (CLUT1 << 8);
-
-    if(CLUT == 0)
-        discard;
-
-    int R = (CLUT >> 0) & 0x1F;
-    int G = (CLUT >> 5) & 0x1F;
-    int B = (CLUT >> 10) & 0x1F;
-    int A = (CLUT >> 15) & 1;
+float4 unpackU16Color(int colorInput) {
+    int R = (colorInput >> 0) & 0x1F;
+    int G = (colorInput >> 5) & 0x1F;
+    int B = (colorInput >> 10) & 0x1F;
+    int A = (colorInput >> 15) & 1;
 
     float4 result;
     result.x = R / (float)0x1F;
@@ -92,6 +91,16 @@ float4 getCLUTForColor(int2 clutConfig, int colorIndex)
     result.w = 1-A;
 
     return result;
+}
+
+float4 getCLUTForColor(int2 clutConfig, int colorIndex)
+{
+    int CLUT = readU16FromPSXVram(clutConfig.x * 16 + colorIndex, clutConfig.y);
+
+    if(CLUT == 0)
+        discard;
+
+    return unpackU16Color(CLUT);
 }
 
 void main()
@@ -110,10 +119,15 @@ void main()
         float4 color = getCLUTForColor(v_texcoord1, colorIndex);
         gl_FragColor = color;
     }
-    else
+    else if(texturePageColor == 1) // 8bit
     {
         int colorIndex = readU8FromPDXVram(texturePageBase.x * 2 + texcoordInPage.x, texturePageBase.y + texcoordInPage.y);
         float4 color = getCLUTForColor(v_texcoord1, colorIndex);
+        gl_FragColor = color;
+    }
+    else
+    {
+        float4 color = unpackU16Color(readU16FromPSXVram(texturePageBase.x + texcoordInPage.x, texturePageBase.y + texcoordInPage.y));
         gl_FragColor = color;
     }
 }

@@ -645,11 +645,11 @@ void fromFloat(FP_VEC4* v0, std::array<float, 3>& asFloat)
 	v0->vz = asFloat[2] * (float)0x10000;
 }
 
-int VectorNormal(FP_VEC4* v0, FP_VEC4* v1)
+int VectorNormalInner(FP_VEC4* input, FP_VEC4* output)
 {
-	setCopReg(2, 0x4800, v0->vx);
-	setCopReg(2, 0x5000, v0->vy);
-	setCopReg(2, 0x5800, v0->vz);
+	setCopReg(2, 0x4800, input->vx);
+	setCopReg(2, 0x5000, input->vy);
+	setCopReg(2, 0x5800, input->vz);
 	copFunction(2, 0xa00428);
 	int iVar2 = getCopReg(2, 0xc800);
 	int iVar3 = getCopReg(2, 0xd000);
@@ -665,14 +665,29 @@ int VectorNormal(FP_VEC4* v0, FP_VEC4* v1)
 		iVar2 = iVar4 << (uVar1 - 0x18 & 0x1f);
 	}
 	setCopReg(2, 0x4000, (int)SQRTables.ISQRT[iVar2 + -0x40]); // this can overflow back into SQRT
-	setCopReg(2, 0x4800, v0->vx);
-	setCopReg(2, 0x5000, v0->vy);
-	setCopReg(2, 0x5800, v0->vz);
+	setCopReg(2, 0x4800, input->vx);
+	setCopReg(2, 0x5000, input->vy);
+	setCopReg(2, 0x5800, input->vz);
 	copFunction(2, 0x190003d);
-	v1->vx = getCopReg(2, 0xc800) >> ((int)(0x1f - uVar1) >> 1 & 0x1fU);
-	v1->vy = getCopReg(2, 0xd000) >> ((int)(0x1f - uVar1) >> 1 & 0x1fU);
-	v1->vz = getCopReg(2, 0xd800) >> ((int)(0x1f - uVar1) >> 1 & 0x1fU);
+	output->vx = getCopReg(2, 0xc800) >> ((int)(0x1f - uVar1) >> 1 & 0x1fU);
+	output->vy = getCopReg(2, 0xd000) >> ((int)(0x1f - uVar1) >> 1 & 0x1fU);
+	output->vz = getCopReg(2, 0xd800) >> ((int)(0x1f - uVar1) >> 1 & 0x1fU);
 	return iVar4;
+}
+
+int VectorNormal(FP_VEC4* input, FP_VEC4* output)
+{
+    return VectorNormalInner(input, output);
+}
+
+int VectorNormalS(FP_VEC4* input, SFP_VEC4* output)
+{
+    FP_VEC4 tempOutput;
+    int result = VectorNormalInner(input, &tempOutput);
+    output->vx = tempOutput.vx;
+    output->vy = tempOutput.vy;
+    output->vz = tempOutput.vz;
+    return result;
 }
 
 void copyRotationMatrix(MATRIX* param_1, MATRIX* param_2)

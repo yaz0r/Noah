@@ -21,6 +21,7 @@ struct sGameStateA42
 
 struct sGameState
 {
+    std::array<std::vector<u8>, 31> m0_names;
     std::array<sGameStateA4, 11> m294;
     std::array<sGameStateA42, 20> m9A0_gears;
     std::array<u16, 512> m1930_fieldVarsBackup;

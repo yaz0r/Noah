@@ -786,10 +786,8 @@ void computeStepFromMoveSpeed(sSpriteActorCore* param1)
 	int iVar2;
 
 	iVar2 = ((param1->m18_moveSpeed >> 4) << 8) / (int)(param1->mAC >> 7 & 0xfff);
-	iVar1 = getAngleSin((int)param1->m32);
-	param1->mC_step.vx = (iVar1 >> 2) * iVar2 >> 6;
-	iVar1 = getAngleCos((int)param1->m32);
-	param1->mC_step.vz = -((iVar1 >> 2) * iVar2) >> 6;
+	param1->mC_step.vx = (getAngleSin((int)param1->m32) >> 2) * iVar2 >> 6;
+	param1->mC_step.vz = -((getAngleCos((int)param1->m32) >> 2) * iVar2) >> 6;
 }
 
 sStackElement* executeSpriteBytecode2Sub3(sSpriteActor* param_1, sPS1Pointer param_2)
