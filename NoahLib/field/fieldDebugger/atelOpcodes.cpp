@@ -86,11 +86,11 @@ void initOpcodeTable()
 		.end();
 
 	m_opcode[0x12]
-		.addArgumentByte()
-		.addArgumentU16OrVar()
-		.addArgumentU16OrVar()
-		.addArgumentU16OrVar()
-		.addArgumentU16OrVar()
+        .setName("CUSTOM_FIELD_TRANSITION")
+		.addArgumentU16OrVar("fieldId")
+		.addArgumentU16OrVar("param")
+		.addArgumentU16OrVar("transitionMode")
+		.addArgumentU16OrVar("fadeInLength")
 		.end();
 
 	m_opcode[0x14]
@@ -567,8 +567,8 @@ void initOpcodeTable()
 
 	m_opcode[0x98]
 		.setName("CHANGE_FIELD_WHEN_READY2")
-		.addArgumentU16OrVar()
-		.addArgumentU16OrVar()
+        .addArgumentU16OrVar("fieldId")
+        .addArgumentU16OrVar("param")
 		.end();
 
 	m_opcode[0x99]
@@ -1361,6 +1361,26 @@ void initExtendedOpcodeTable()
 
     m_extendedOpcode[0x99]
         .addArgumentByte()
+        .end();
+
+    m_extendedOpcode[0x9B]
+        .addArgumentU16OrVar()
+        .end();
+
+    m_extendedOpcode[0x9C]
+        .addArgumentU16OrVar()
+        .end();
+
+    m_extendedOpcode[0x9D]
+        .addArgumentU16OrVar()
+        .end();
+
+    m_extendedOpcode[0x9E]
+        .setName("SET_DRAW_ENV_CLIP")
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
         .end();
 
     m_extendedOpcode[0x9F]

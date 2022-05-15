@@ -20,6 +20,7 @@ void initOpcodes()
     fieldScriptOpcodes[0x0C] = OP_UPDATE_CHARACTER_INFINITLY;
     fieldScriptOpcodes[0x0D] = OP_RETURN;
     fieldScriptOpcodes[0x10] = OP_10;
+    fieldScriptOpcodes[0x12] = OP_CUSTOM_FIELD_TRANSITION;
     fieldScriptOpcodes[0x14] = OP_DISABLE_RANDOM_BATTLES;
     fieldScriptOpcodes[0x16] = OP_INIT_ENTITY_PC;
     fieldScriptOpcodes[0x15] = OP_15;
@@ -141,6 +142,7 @@ void initOpcodes()
     fieldScriptOpcodes[0xCB] = OP_IF_PLAYER_IN_TRIGGER;
     fieldScriptOpcodes[0xCD] = OP_CD;
     fieldScriptOpcodes[0xCE] = OP_CE;
+    fieldScriptOpcodes[0xCF] = OP_CF;
     fieldScriptOpcodes[0xD0] = OP_SET_DIALOG_WINDOW_PARAM;
     fieldScriptOpcodes[0xD2] = OP_SHOW_DIALOG_WINDOW_MODE0;
     fieldScriptOpcodes[0xD4] = OP_SHOW_DIALOG_WINDOW_FOR_OTHER_ACTOR_MODE0;
@@ -248,6 +250,9 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0x98] = OPX_98;
     fieldScriptOpcodes_EX[0x99] = OPX_99;
     fieldScriptOpcodes_EX[0x9A] = OPX_9A;
+    fieldScriptOpcodes_EX[0x9B] = OPX_9B;
+    fieldScriptOpcodes_EX[0x9C] = OPX_9C;
+    fieldScriptOpcodes_EX[0x9D] = OPX_9D;
     fieldScriptOpcodes_EX[0x9F] = OP_TOGGLE_FRAME_LOCK;
     fieldScriptOpcodes_EX[0xA1] = OP_ASSIGN_GEAR;
     fieldScriptOpcodes_EX[0xA2] = OPX_A2;

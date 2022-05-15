@@ -95,3 +95,4 @@ int VectorNormalS(FP_VEC4* input, SFP_VEC4* output);
 void OuterProduct12(FP_VEC4* a, FP_VEC4* b, FP_VEC4* r);
 long NCLIP(sVec2_s16 sxy0, sVec2_s16 sxy1, sVec2_s16 sxy2);
 void copyMatrix(MATRIX* param_1, MATRIX* param_2);
+MATRIX* TransMatrix(MATRIX* m, FP_VEC4* v);

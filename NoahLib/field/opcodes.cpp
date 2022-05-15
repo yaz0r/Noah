@@ -318,6 +318,20 @@ void OP_10()
     OP_10Sub(0);
 }
 
+void OP_CUSTOM_FIELD_TRANSITION()
+{
+    if ((((playMusicAuthorized == 0) || (fieldExecuteVar3 == 0)) || (loadCompleted != 0)) || ((fieldMusicLoadPending == -1 || (load2dAnimVar != 0)))) {
+        breakCurrentScript = 1;
+    }
+    else {
+        OP_CHANGE_FIELD_WHEN_READY2();
+        OP_CHANGE_FIELD_WHEN_READY_Sub();
+        fieldTransitionMode = getImmediateOrVariableUnsigned(0);
+        fieldTransitionFadeInLength = getImmediateOrVariableUnsigned(2);
+        pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 4;
+    }
+}
+
 void OP_DISABLE_RANDOM_BATTLES()
 {
     fieldRandomBattleVar = 0;
@@ -1375,8 +1389,6 @@ void OP_55(void)
     MissingCode();
     pCurrentFieldScriptActor->mCC_scriptPC += 7;
 }
-
-u8 kernelAndFieldStatesSynced = 1;
 
 void OP_56(void) {
     if ((((playMusicAuthorized == 0) || (fieldExecuteVar3 == 0)) || (loadCompleted != 0)) || ((fieldMusicLoadPending == -1 || (load2dAnimVar != 0)))) {
@@ -2917,6 +2929,24 @@ void OPX_9A()
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 9;
 }
 
+void OPX_9B()
+{
+    MissingCode();
+    pCurrentFieldScriptActor->mCC_scriptPC += 3;
+}
+
+void OPX_9C()
+{
+    MissingCode();
+    pCurrentFieldScriptActor->mCC_scriptPC += 3;
+}
+
+void OPX_9D()
+{
+    MissingCode();
+    pCurrentFieldScriptActor->mCC_scriptPC += 3;
+}
+
 void OP_TOGGLE_FRAME_LOCK()
 {
     int uVar1;
@@ -3815,6 +3845,15 @@ void OP_CE()
 {
     pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags &= ~0x800000;
     pCurrentFieldScriptActor->mCC_scriptPC++;
+}
+
+void OP_CF()
+{
+    pCurrentFieldScriptActor->m88[0] = pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1] * 2;
+    pCurrentFieldScriptActor->m88[1] = pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 2];
+    pCurrentFieldScriptActor->m82[0] = pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 3] * 3;
+    pCurrentFieldScriptActor->m82[1] = pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 4];
+    pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 5;
 }
 
 void OP_SET_DIALOG_WINDOW_PARAM()

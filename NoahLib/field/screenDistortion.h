@@ -2,6 +2,7 @@
 
 extern short screenDistortionRunning;
 extern short screenDistortionFadeOut;
+extern u32 screenDistrotionAllocated;
 
 void freeScreenDistortion();
 void setupScreenDistortion(int param_1);

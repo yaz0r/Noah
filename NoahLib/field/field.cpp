@@ -29,6 +29,7 @@ u32 playTimeInVsync = 0;
 s32 bootModeReady = 0;
 s32 newBootMode = 0;
 s32 menuFadeState = 0;
+u8 kernelAndFieldStatesSynced = 1;
 
 bool g_executeScripts = true;
 bool g_executeUpdateScripts = true;
@@ -135,6 +136,7 @@ int fieldModelRelocation(std::vector<u8>::iterator pModelData)
 s32 fieldChangePrevented = -1;
 s32 fieldMusicLoadPending = -1;
 s32 fieldTransitionMode = 0;
+s32 fieldTransitionFadeInLength = 0;
 
 u16 inputAllowedMask = 0xFFFF;
 u16 padButtonForField;
@@ -251,11 +253,19 @@ s32 updateEntityEventCode3Var1 = 0;
 s32 updateEntityEventCode3Var2 = 0;
 s16 updateEntityEventCode4Var0 = 0;
 s16 jumpAnimationId = 0;
+int cameraCollisionState = 0;
+enum class eCameraTrackingMode : s16
+{
+    e0_followPlayer = 0,
+};
+eCameraTrackingMode cameraTrackingMode = eCameraTrackingMode::e0_followPlayer;
+s32 EntityMoveCheck0Var0 = 0;
 
 void resetFieldDefault()
 {
     MissingCode();
 
+    setFieldDrawEnvClip(0, 0, 0x140, 0xe0);
     resetInputs();
     inputAllowedMask = 0xffff;
     padButtonForScripts[0].m0_buttons = 0;
@@ -294,7 +304,24 @@ void resetFieldDefault()
     onlyUpdateDirector = 0;
     fieldUseGroundOT = 0;
     load2dAnimVar = 0;
-    //screenDistrotionAllocated = 0;
+    screenDistrotionAllocated = 0;
+    updateEntityEventCode3Var1 = 0;
+    EntityMoveCheck0Var0 = 0;
+    MissingCode();
+    loadCompleted = 0;
+    playerCanRun = 0;
+    MissingCode();
+    cameraCollisionState = 0;
+    newBootMode = 0;
+    //partyPortraitPointers[2] = (undefined*)0x0;
+    menuFadeState = 0;
+    MissingCode();
+    kernelAndFieldStatesSynced = 0;
+    MissingCode();
+    cameraTrackingMode = eCameraTrackingMode::e0_followPlayer;
+    MissingCode();
+    fieldTransitionFadeInLength = 0x20;
+    fieldTransitionMode = 2;
     MissingCode();
     updateEntityEventCode3Var1 = 0;
     MissingCode();
@@ -4158,11 +4185,38 @@ void transitionFields()
         }
         MissingCode();
         break;
+    case 6:
+        setupRGBCalcSlot0_fadeToBlack(fieldTransitionFadeInLength);
+        for (int i = 0; i < fieldTransitionFadeInLength; i++) {
+            clearFieldOrderingTable();
+            MissingCode();
+        }
+        clearFieldOrderingTable();
+        MissingCode();
+        startLoadingPlayableCharacters();
+        finalizeLoadPlayableCharacters();
+        {
+            s32 fieldTransitionModeBackup = fieldTransitionMode;
+            s32 fieldTransitionFadeInLengthBackup = fieldTransitionFadeInLength;
+            initFieldData();
+            loadFieldGraphics();
+            MissingCode();
+            fieldTransitionFadeInLength = fieldTransitionFadeInLengthBackup;
+            fieldTransitionMode = fieldTransitionModeBackup;
+        }
+        if (fieldMusicLoadPending == -1) {
+            playMusic(currentlyPlayingMusic, 0);
+        }
+        setupRGBFaderSlot0_fadeIn(fieldTransitionFadeInLength);
+        break;
     default:
         assert(0);
         break;
     }
-
+    if (fieldTransitionMode != 6) {
+        //restoreBackBufferRamCopy();
+        MissingCode();
+    }
     fieldTransitionMode = 2;
     MissingCode();
 
@@ -5224,8 +5278,6 @@ void Vec3ToSVec3(SFP_VEC3* param_1, FP_VEC3* param_2)
     param_1->vz = param_2->vz.getIntegerPart();
     return;
 }
-
-s32 EntityMoveCheck0Var0 = 0;
 
 s32 computeDistanceBetweenActors(int param_1, int param_2)
 {
@@ -6537,8 +6589,6 @@ int checkCameraCollision(FP_VEC4*, std::array<s16, 6>&, std::array<s16, 4>&)
     return 0;
 }
 
-int cameraCollisionState = 0;
-
 void computeCameraEyeFromAt(FP_VEC4* param_1, FP_VEC4* param_2)
 {
     MATRIX MStack80;
@@ -6839,12 +6889,6 @@ void updateAllEntities()
         assert(0);
     }
 }
-
-enum class eCameraTrackingMode : s16
-{
-    e0_followPlayer = 0,
-};
-eCameraTrackingMode cameraTrackingMode = eCameraTrackingMode::e0_followPlayer;
 
 struct sUpdateCameraAtStruct
 {
@@ -8596,6 +8640,11 @@ void fieldEntryPoint()
                 MissingCode();
                 loadAndOpenMenu();
                 menuIdToOpen = 0xff;
+            }
+
+            if ((((padButtonForField & 0x10) != 0) && (menuDisabled == '\0')) && ((menuIdToOpen == 0xff && (playerCanRun == 1)))) {
+                menuIdToOpen = 0x80;
+                //menuOpenArg = (byte)DAT_Field__800b236c;
             }
         }
 

@@ -387,19 +387,6 @@ void savePointCallback8Sub0(sSpriteActorCore* param_1)
     return;
 }
 
-MATRIX* TransMatrix(MATRIX* m, FP_VEC4* v)
-{
-    long lVar1;
-    long lVar2;
-
-    lVar1 = v->vy;
-    lVar2 = v->vz;
-    m->t[0] = v->vx;
-    m->t[1] = lVar1;
-    m->t[2] = lVar2;
-    return m;
-}
-
 void setupSpriteObjectMatrix(sSpriteActorCore* param_1)
 
 {

@@ -37,6 +37,8 @@ void loadInitialGameState()
             gameState.m294[i].m78_partyData_gearNum = READ_LE_S8(rawGameState.begin() + 0x294 + 0xA4 * i + 0x78);
         }
 
+        gameState.m1924_Gold = READ_LE_U32(rawGameState.begin() + 0x1924);
+
         for (int i=0; i<3; i++)
         {
             gameState.m1D34_currentParty[i] = READ_LE_U8(rawGameState.begin() + 0x1D34 + i);

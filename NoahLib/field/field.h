@@ -365,6 +365,14 @@ extern s32 newBootMode;
 
 extern s32 gDepthDivider;
 
+extern u8 kernelAndFieldStatesSynced;
+
+extern s32 fieldTransitionMode;
+extern s32 fieldTransitionFadeInLength;
+extern u32 playTimeInVsync;
+
+void setFieldDrawEnvClip(short x, short y, short w, short h);
+
 void syncKernelAndFieldStates();
 
 void initFontPalettes(short param_1, short param_2);

@@ -24,6 +24,7 @@ struct sGameState
     std::array<std::vector<u8>, 31> m0_names;
     std::array<sGameStateA4, 11> m294;
     std::array<sGameStateA42, 20> m9A0_gears;
+    s32 m1924_Gold;
     std::array<u16, 512> m1930_fieldVarsBackup;
     u16 m1D30_partyMemberBitField;
     u16 m1D32_partyFrameMask;
