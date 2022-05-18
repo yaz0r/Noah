@@ -113,15 +113,33 @@ void main()
     texcoordInPage.x = (texcoordInPage.x % textureWindow.w) + textureWindow.x;
     texcoordInPage.y = (texcoordInPage.y % textureWindow.z) + textureWindow.y;
 
+    if(!gl_FrontFacing)
+    {
+        //if(dFdx(v_texcoord0.x) < 0){ texcoordInPage.x++;}
+        //if(dFdy(v_texcoord0.y) > 0){ texcoordInPage.y++;}
+        texcoordInPage.x++;
+        texcoordInPage.y++;
+    }
+    else {
+        if(dFdx(v_texcoord0.x) < 0){ texcoordInPage.x++;}
+        if(dFdy(v_texcoord0.y) > 0){ texcoordInPage.y++;}
+    }
+
+
+
     if(texturePageColor == 0) // 4bit
     {
-        int colorIndex = readU4FromPDXVram(texturePageBase.x * 4 + texcoordInPage.x, texturePageBase.y + texcoordInPage.y);
+        int texcoordX = texturePageBase.x * 4 + texcoordInPage.x;
+        int texcoordY = texturePageBase.y + texcoordInPage.y;
+        int colorIndex = readU4FromPDXVram(texcoordX, texcoordY);
         float4 color = getCLUTForColor(v_texcoord1, colorIndex);
         gl_FragColor = color;
     }
     else if(texturePageColor == 1) // 8bit
     {
-        int colorIndex = readU8FromPDXVram(texturePageBase.x * 2 + texcoordInPage.x, texturePageBase.y + texcoordInPage.y);
+        int texcoordX = texturePageBase.x * 2 + texcoordInPage.x;
+        int texcoordY = texturePageBase.y + texcoordInPage.y;
+        int colorIndex = readU8FromPDXVram(texcoordX, texcoordY);
         float4 color = getCLUTForColor(v_texcoord1, colorIndex);
         gl_FragColor = color;
     }

@@ -880,6 +880,20 @@ void POLY_FT4::execute()
 		pIndices[1] = 1;
 		pIndices[2] = 2;
 		pIndices[3] = 3;
+        /*
+        if (x1y1.vx < x0y0.vx) {
+            pVertices[0].texcoord[0]--;
+            pVertices[1].texcoord[0]--;
+            pVertices[2].texcoord[0]--;
+            pVertices[3].texcoord[0]--;
+        }*/
+        /*
+        if (x1y1.vy < x0y0.vy) {
+            pVertices[0].texcoord[1]++;
+            pVertices[1].texcoord[1]++;
+            pVertices[2].texcoord[1]++;
+            pVertices[3].texcoord[1]++;
+        }*/
 
 		u64 State = BGFX_STATE_WRITE_RGB
 			| BGFX_STATE_DEPTH_TEST_ALWAYS

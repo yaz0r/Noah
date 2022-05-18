@@ -7,6 +7,10 @@
 #include "kernel/decompress.h"
 #include "kernel/gameState.h"
 
+#include "menus/menuGold.h"
+
+sMenuContext *gMenuContext = nullptr;
+
 void updateMenuSelection(u8 count, u8 selectedEntry, std::vector<std::array<u32, 2>>::iterator config);
 
 s32 menuIdToOpen = 0xFF;
@@ -17,180 +21,6 @@ u8 menuToEnter = 0;
 
 std::vector<u8> menuSharedResources;
 std::vector<u8> menuOverlay;
-
-struct sMenuContext_1D4 {
-    DRAWENV m0_DrawEnv;
-    DISPENV m5C_DispEnv;
-    std::array<sTag, 16> m70_OT;
-};
-
-struct sMenuContext_32C {
-    u8 m4FE6;
-};
-
-struct sMenuContext_330 {
-};
-
-struct sMenuContext_33C {
-    std::array<u8, 3> m0_isInfoCardEnabled = { 0,0,0 };
-    u8 m3 = 0;
-    u8 m4_drawCursor = 0;
-    u8 m5_drawGold = 0;
-    u8 m6_drawPlayTime = 0;
-    u8 m9_drawMainMenu = 0;
-    u8 mA_354Enabled = 0;
-    u8 mC = 0;
-    std::array<u8, 7> m20_menuBoxEnabled = { 0,0,0,0,0,0,0 };
-    std::array<u8, 7> m27 = { 0,0,0,0,0,0,0 };
-};
-
-struct sMenuContext_348 {
-    std::array<POLY_FT4,2> m0;
-    std::array<POLY_G4, 2> m50_polyG4;
-    std::array<POLY_F4, 2> m98_poly;
-    std::array<LINE_F3, 2> mC8_lines;
-    std::array<LINE_F3, 2> mF8_lines;
-    std::array<DR_MODE, 2> m128;
-    std::array<DR_MODE, 2> m140;
-    u8 m158_oddOrEven = 0;
-    u8 m159_oddOrEven = 0;
-    u8 m15B = 0;
-};
-
-struct sMenuContext_350 {
-    std::array<std::array<POLY_FT4, 2>, 28> m0_polys;
-    std::array<std::array<POLY_FT4, 2>, 28> m8C0_polys;
-    RECT m1180;
-    u32 m1188_numEntries2;
-    u32 m118C_numEntries;
-    u8 m1190;
-    u8 m1191;
-    u8 m1192;
-    u8 m1193;
-};
-
-struct sMenuContext_354 {
-};
-
-struct sMenuContext_428 {
-};
-
-struct sMenuContext_4E0 {
-    std::array<POLY_FT4, 2> m0_polys;
-    std::vector<u16> m78_imageData;
-    RECT m70_rect;
-    u8 m7C_colorMode;
-    u8 m7E_stringWidth;
-    u8 m7F;
-};
-
-struct sMenuContext_340_goldOwned {
-    std::array<std::array<POLY_FT4, 2>, 9> m0_goldPolys;
-    std::array<POLY_FT4, 2> m2D0;
-    u32 m320_goldPolyLength;
-    u32 m324_oddOrEven;
-};
-
-struct sMenuContext_344_playTime {
-    std::array<std::array<POLY_FT4, 2>, 7> m0_playTimePolys;
-    std::array<std::array<POLY_FT4, 2>, 4> m230;
-    s32 m370_oddOrEven;
-};
-
-struct sMenuContext_39C {
-
-};
-
-struct sMenuContext_364 {
-    std::array<std::array<POLY_FT4, 2>, 4> m0;
-    std::array<std::array<POLY_FT4, 2>, 2> m140;
-    std::array<std::array<POLY_FT4, 2>, 2> m1E0;
-    std::array<std::array<POLY_FT4, 2>, 2> m280;
-    std::array<std::array<POLY_FT4, 2>, 2> m320;
-    std::array<POLY_FT4, 2> m3C0;
-    std::array<std::array<POLY_FT4, 2>, 2> m410;
-    std::array<POLY_G4, 2> m4B0;
-    std::array<DR_MODE, 2> m4F8;
-    std::array<std::array<SFP_VEC4, 4>, 4> m510;
-    std::array<SFP_VEC4, 4> m590;
-    std::array<SFP_VEC4, 4> m5B0;
-    std::array<SFP_VEC4, 4> m5D0;
-    std::array<SFP_VEC4, 4> m5F0;
-    std::array<SFP_VEC4, 4> m610;
-    std::array<SFP_VEC4, 4> m630;
-    std::array<SFP_VEC4, 4> m650;
-    std::array<SFP_VEC4, 4> m670;
-    std::array<SFP_VEC4, 4> m690;
-    std::array<SFP_VEC4, 4> m6B0;
-    std::array<std::array<SFP_VEC4, 4>, 2> m6D0;
-    s32 m710;
-    s32 m714_transformDisabled;
-    s32 m718;
-    s8 m71C_oddOrEven;
-    s8 m71D;
-};
-
-struct sMenuContext_380 {
-    s16 m0;
-    s16 m2;
-    s16 m4;
-    s16 m6;
-    s16 m8;
-    s16 mA;
-    s16 mC;
-    s8 m10;
-    s8 m11_draw380;
-    s8 m12;
-};
-
-struct sMenuContextMenuTile {
-    s32 m0;
-    s32 m4_tp;
-    s32 m8_clutX;
-    s32 mC_clutY;
-    s32 m10_tpageX;
-    s32 m14_tpageY;
-};
-
-struct sMenuContext {
-    std::array<sMenuContext_1D4, 2> m6C_drawContexts;
-    sMenuContext_1D4* m1D4_currentDrawContext = nullptr;
-    SFP_VEC4 m1D8_menuRotation = { 0,0,0,0};
-    FP_VEC4 m1E0_menuTranslation = { 0,0,0,0 };
-    SFP_VEC4 m218_menuRotation2 = { 0,0,0,0 };
-    FP_VEC4 m220_menuTranslation2 = { 0,0,0,0 };
-    std::vector<u8> m2DC_font;
-    std::vector<u8> m2E0_textBundle;
-    u32 m2E8;
-    u8 m325_menuButton;
-    u8 m327;
-    u8 m329;
-    u8 m32A;
-    u32 m2D8_frameCounter;
-    std::array<s32, 7> m302_playTimeString;
-    u32 m308_oddOrEven;
-    std::array<u8, 9> m31C_stringDisplayBuffer;
-    sMenuContext_32C* m32C_memoryCardContext;
-    sMenuContext_330* m330;
-    s8 m336_menuSelectedEntry = 0;
-    s8 m337_previousMenuSelectedEntry = 0;
-    s8 m338_currentSaveState = 2;
-    s8 m339;
-    sMenuContext_33C* m33C;
-    sMenuContext_340_goldOwned* m340_gold;
-    sMenuContext_344_playTime* m344_playTime;
-    sMenuContext_348* m348_cursor;
-    sMenuContext_350* m350_mainMenu;
-    sMenuContext_354* m354;
-    std::array<sMenuContext_364*, 7> m364_menuBoxes;
-    std::array<sMenuContext_380*, 7> m380;
-    std::array<sMenuContext_39C*, 3> m39C;
-    sMenuContext_428* m428;
-    std::array<sMenuContextMenuTile, 4> m46C_menuBorders;
-    std::array<sMenuContext_4E0,50> m4E0;
-    u8 m1E94;
-    u8 m1E95;
-}*gMenuContext;
 
 void setupMenuContext1D4(sMenuContext_1D4* param_1)
 {
@@ -416,6 +246,26 @@ void initMenuGlobals() {
         gMenuContext->m336_menuSelectedEntry = 1;
     }
     gMenuContext->m337_previousMenuSelectedEntry = -1;
+    gMenuContext->m326 = 0x3c;
+    gMenuContext->m334 = 0;
+    gMenuContext->m335 = 0;
+
+    MissingCode();
+    for (int i = 0; i < 3; i++) {
+        gMenuContext->m33C->m60[i] = 0;
+        s32 partyMemberIndex = gameState.m1D34_currentParty[i];
+        if ((partyMemberIndex == 0xff) || (gMenuContext->m30C[partyMemberIndex] == 0)) {
+            gMenuContext->m33C->m30[i] = -1;
+        }
+        else {
+            gMenuContext->m33C->m30[i] = partyMemberIndex;
+            gMenuContext->m32B++;
+            if (gameState.m294[gMenuContext->m33C->m30[i]].m78_partyData_gearNum != 0xff) {
+                gMenuContext->m33C->m60[i] = 1;
+                gMenuContext->m33B++;
+            }
+        }
+    }
 
     MissingCode();
     loadMenuSharedResources();
@@ -833,6 +683,23 @@ void drawMenuBoxes(void)
     return;
 }
 
+void drawCharacterInfoCards() {
+    for (int i = 0; i < 3; i++) {
+        if (gMenuContext->m33C->m0_isInfoCardEnabled[i]) {
+            sMenuContext_39C* pInfoCard = gMenuContext->m39C[i];
+            AddPrim(&gMenuContext->m1D4_currentDrawContext->m70_OT[4], &pInfoCard->m0_portraitPoly[pInfoCard->m1270_oddOrEven]);
+            AddPrim(&gMenuContext->m1D4_currentDrawContext->m70_OT[4], &pInfoCard->m50_NamePoly[pInfoCard->m1270_oddOrEven]);
+            /*drawMultiPolys(pInfoCard->m1279_NameLength, (sTag*)pInfoCard->mA0_NamePoly, (uint)pInfoCard->m1270_oddOrEven);
+            drawMultiPolys(pInfoCard->m1273_HPLength, (sTag*)pInfoCard->mAF0_PolyHP, (uint)pInfoCard->m1270_oddOrEven);
+            drawMultiPolys(pInfoCard->m1274_MaxHPLength, (sTag*)pInfoCard->mBE0_PolyMaxHP, (uint)pInfoCard->m1270_oddOrEven);
+            drawMultiPolys(pInfoCard->m1275_MPLength, (sTag*)pInfoCard->mCD0_PolyMP, (uint)pInfoCard->m1270_oddOrEven);
+            drawMultiPolys(pInfoCard->m1276_MaxMPLength, (sTag*)pInfoCard->mD70_PolyMaxMP, (uint)pInfoCard->m1270_oddOrEven);
+            drawMultiPolys(pInfoCard->m1277_E10Length, (sTag*)&pInfoCard->field_0xe10, (uint)pInfoCard->m1270_oddOrEven);
+            drawMultiPolys(pInfoCard->m1271_910Length, (sTag*)&pInfoCard->field_0x910, (uint)pInfoCard->m1270_oddOrEven);*/
+        }
+    }
+}
+
 void drawMenu0(void)
 {
     MissingCode();
@@ -843,7 +710,7 @@ void drawMenu0(void)
     MissingCode();
     /*drawMenu_34C();
     drawMenuMemoryCard();*/
-    //drawCharacterInfoCards();
+    drawCharacterInfoCards();
     /*FUN_Menu2__801ce660();
     drawMenu_35C();
     drawMenu_360();*/
@@ -875,7 +742,7 @@ void drawMenu2(void)
     //drawMenuMemoryCard();
     drawMainMenu();
     //drawMenuContext354();
-    //drawMenuBoxes();
+    drawMenuBoxes();
     MissingCode();
 }
 
@@ -1091,13 +958,13 @@ void initMenuContext33C_playTime(short x, short y)
 
     currentX = x + 0x18;
     for (int i = 3; i < 5; i++) {
-        setupStringInPolyFT4(gMenuContext->m2DC_font, gMenuContext->m302_playTimeString[i], &gMenuContext->m344_playTime->m0_playTimePolys[i], gMenuContext->m308_oddOrEven, currentX, y, 0x1000);
+        setupStringInPolyFT4(gMenuContext->m2DC_font, gMenuContext->m302_playTimeString[i], &gMenuContext->m344_playTime->m0_playTimePolys[i], gMenuContext->m308_oddOrEven, currentX + 8, y, 0x1000);
         currentX = currentX + 8;
     }
 
     currentX = x + 0x28;
     for (int i = 5; i < 7; i++) {
-        setupStringInPolyFT4(gMenuContext->m2DC_font, gMenuContext->m302_playTimeString[i], &gMenuContext->m344_playTime->m0_playTimePolys[i], gMenuContext->m308_oddOrEven, currentX, y, 0x1000);
+        setupStringInPolyFT4(gMenuContext->m2DC_font, gMenuContext->m302_playTimeString[i], &gMenuContext->m344_playTime->m0_playTimePolys[i], gMenuContext->m308_oddOrEven, currentX + 0x10, y, 0x1000);
         currentX = currentX + 8;
     }
 
@@ -1846,37 +1713,74 @@ void fillStringDisplayBuffer(uint param_1)
     return;
 }
 
-void updateGoldPolys(short x, short y)
+void setupMenuPolyFT4(POLY_FT4* param_1, short x, short y, u8 u, u8 v, short width, short height)
 {
-    int iVar2;
-    int iVar3;
-    short x_00;
+    u8 u1 = u + width;
+    u8 v1 = v + height;
 
-    fillStringDisplayBuffer(gameState.m1924_Gold);
-    iVar3 = 0;
-    gMenuContext->m340_gold->m320_goldPolyLength = 0;
-    x_00 = x;
-    do {
-        u8 character = gMenuContext->m31C_stringDisplayBuffer[iVar3];
-        iVar3 = iVar3 + 1;
-        if (character != 0xff) {
-            iVar2 = setupStringInPolyFT4
-            (gMenuContext->m2DC_font, character, &gMenuContext->m340_gold->m0_goldPolys[gMenuContext->m340_gold->m320_goldPolyLength], gMenuContext->m308_oddOrEven, x_00, y,
-                0x1000);
-            gMenuContext->m340_gold->m320_goldPolyLength = iVar2 + gMenuContext->m340_gold->m320_goldPolyLength;
-        }
-        x_00 = x_00 + 8;
-    } while (iVar3 < 9);
-    setupStringInPolyFT4(gMenuContext->m2DC_font, 0x10, &gMenuContext->m340_gold->m2D0, gMenuContext->m308_oddOrEven, x + 0x50, y, 0x1000);
-    gMenuContext->m33C->m5_drawGold = 1;
-    gMenuContext->m340_gold->m324_oddOrEven = gMenuContext->m308_oddOrEven;
+    param_1->x0y0.vx = x;
+    param_1->x0y0.vy = y;
+    param_1->x1y1.vy = y;
+    param_1->x2y2.vx = x;
+    param_1->u0 = u;
+    param_1->u2 = u;
+    param_1->x1y1.vx = x + width;
+    param_1->x2y2.vy = y + height;
+    param_1->x3y3.vx = x + width;
+    param_1->x3y3.vy = y + height;
+    param_1->v0 = v;
+    param_1->u1 = u1;
+    param_1->v1 = v;
+    param_1->v2 = v1;
+    param_1->u3 = u1;
+    param_1->v3 = v1;
+}
+
+static const std::array<u32, 19> infocardNameU = { {0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18} };
+static const std::array<u32, 19> infocardNameV = { {0x3B,0x48,0x48,0x55,0x55,0x62,0x62,0x6F,0x6F,0x7C,0x7C,0x89,0x89,0x96,0x96,0xA3,0xA3,0xB0,0xB0} };
+
+void updateCharacterPortraitAndName(s8 slot, uint characterId, short param_3, short param_4)
+{
+    setupStringInPolyFT4(gMenuContext->m2DC_font, slot + 0x14b, &gMenuContext->m39C[slot]->m0_portraitPoly, gMenuContext->m308_oddOrEven, param_3, param_4, 0x1000);
+    initMemoryCardTransparentPoly(&gMenuContext->m39C[slot]->m50_NamePoly[gMenuContext->m308_oddOrEven]);
+    gMenuContext->m39C[slot]->m50_NamePoly[gMenuContext->m308_oddOrEven].tpage = GetTPage(0, 0, 0x180, 0);
+    if ((gMenuContext->m33C->m30[slot] & 1U) == 0) {
+        gMenuContext->m39C[slot]->m50_NamePoly[gMenuContext->m308_oddOrEven].clut = textSpriteMode0;
+    }
+    else {
+        gMenuContext->m39C[slot]->m50_NamePoly[gMenuContext->m308_oddOrEven].clut = textSpriteMode1;
+    }
+
+    static short infocardNameX = 0x30;
+    static short infocardNameY = 0x11;
+    setupMenuPolyFT4(&gMenuContext->m39C[slot]->m50_NamePoly[gMenuContext->m308_oddOrEven], infocardNameX + param_3, infocardNameY + param_4, (infocardNameU[slot] & 0x3f) * 4, infocardNameV[slot], 0x48, 0xd);
+
     return;
 }
 
+void updateCharacterInfoCard(s8 slot, s8 param_2) {
+    if (slot != -1) {
+        sMenuContextSub0* psVar2 = &gMenuContext->m0[slot];
+        int iVar1 = psVar2->m18;
+        if (iVar1 < 0) {
+            iVar1 = iVar1 + 0xff;
+        }
+        int iVar3 = psVar2->m1C;
+        iVar1 = (iVar1 >> 8) + psVar2->m0;
+        if (iVar3 < 0) {
+            iVar3 = iVar3 + 0xff;
+        }
+        iVar3 = (iVar3 >> 8) + psVar2->m8;
 
-void updateGoldDisplay() {
-    iniMenuContext364And380(0, 0xd4, 0xb2, 0x60, 0x10, 0, 0, 4, 0);
-    updateGoldPolys(0xd8, 0xb6);
+        updateCharacterPortraitAndName(slot, param_2, iVar1, iVar3);
+        /*updateCharacterName(param_1, iVar1, iVar3);
+        updateCharacterHP(param_1, param_2, iVar1, iVar3);
+        updateCharacterMP(param_1, param_2, iVar1, iVar3);*/
+        MissingCode();
+
+        gMenuContext->m33C->m0_isInfoCardEnabled[slot] = 1;
+        gMenuContext->m39C[slot]->m1270_oddOrEven = gMenuContext->m308_oddOrEven;
+    }
 }
 
 void processLoadSaveMenuSub2(char param_1, char param_2)
@@ -1893,6 +1797,23 @@ void processLoadSaveMenuSub2(char param_1, char param_2)
         }
     }
     else {
+        gMenuContext->m0[0].m0 = 0x60;
+        gMenuContext->m0[0].m8 = 6;
+        gMenuContext->m0[1].m0 = 0x68;
+        gMenuContext->m0[1].m8 = 0x3e;
+        gMenuContext->m0[2].m0 = 0x70;
+        gMenuContext->m0[2].m8 = 0x76;
+        gMenuContext->m0[0].m1C = 0;
+        gMenuContext->m0[0].m18 = 0;
+        gMenuContext->m0[1].m1C = 0;
+        gMenuContext->m0[1].m18 = 0;
+        gMenuContext->m0[2].m1C = 0;
+        gMenuContext->m0[2].m18 = 0;
+        for (int i = 0; i < 3; i++) {
+            if (gMenuContext->m33C->m30[i] != -1) {
+                updateCharacterInfoCard(i, gMenuContext->m33C->m30[i]);
+            }
+        }
         MissingCode();
         if (param_2 == 0) {
             updateGoldDisplay();
@@ -1910,9 +1831,29 @@ void initMenuForPlaytime(void)
     return;
 }
 
+void renderCharacterNameInVram(uint param_1, uint param_2)
+{
+    std::vector<u16> inRamName;
+    inRamName.resize(0x3F6 / 2, 0);
+
+    if ((param_1 & 0xff) != 0xff) {
+        renderString(gameState.m0_names[param_1 & 0xfe].begin(), inRamName, 0x24, 0);
+        //renderString(gameState.m0_names[(param_1 & 0xfe) + 1].begin(), inRamName, 0x24, 1); // TODO: why?
+        MissingCode();
+    }
+    int iVar1 = (param_2 & 0xfe) /2;
+    RECT local_20;
+    local_20.x = infocardNameU[iVar1] + 0x180;
+    local_20.y = infocardNameV[iVar1];
+    local_20.w = 0x28;
+    local_20.h = 0xd;
+    LoadImage(&local_20, (u8*)&inRamName[0]);
+    DrawSync(0);
+}
+
 void setupMenu0()
 {
-    if (menuToEnter == '\0') {
+    if (menuToEnter == 0) {
         for (int i = 0; i < 2; i++) {
             gMenuContext->m364_menuBoxes[i] = new sMenuContext_364;
             gMenuContext->m380[i] = new sMenuContext_380;
@@ -1921,7 +1862,17 @@ void setupMenu0()
         MissingCode();
     }
     for (int i = 0; i < 3; i++) {
-        MissingCode();
+        if (gMenuContext->m33C->m30[i] != -1) {
+            renderCharacterNameInVram(gMenuContext->m33C->m30[i], i * 2);
+            s8 gearIndex = gameState.m294[(byte)gMenuContext->m33C->m30[i]].m78_partyData_gearNum;
+            if (gearIndex == -1)
+            {
+                //renderCharacterNameInVram(-1, 6 + 2 * i);
+            }
+            else {
+                //renderCharacterNameInVram(gearIndex + 0xB, 6 + 2 * i);
+            }
+        }
     }
     setupMainMenuWithConfig(8, mainMenuConfig.begin());
     processLoadSaveMenuSub2(1, 0);
