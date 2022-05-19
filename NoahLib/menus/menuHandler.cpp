@@ -220,6 +220,28 @@ void loadMenuImageBundle(const std::vector<u8>& imageBundle) {
     }
 }
 
+void computeMenuBorder(std::vector<u8>& param_1, int param_2, int* param_3, int* param_4, int* param_5, int* param_6, int* param_7, int* param_8)
+{
+    int iVar2;
+
+    std::vector<u8>::iterator data = param_1.begin() + READ_LE_U16(param_1.begin() + 4 + param_2 * 2);
+
+    *param_3 = READ_LE_S16(data + 0);
+    if (READ_LE_S16(data + 0x14) == 0) {
+        iVar2 = (int)((uint)(ushort)READ_LE_S16(data + 4) << 0x10) >> 0x14;
+    }
+    else {
+        iVar2 = (int)((uint)(ushort)READ_LE_S16(data + 4) << 0x10) >> 0x12;
+    }
+    *param_4 = READ_LE_S16(data + 0x14);
+    *param_5 = READ_LE_S16(data + 0x16);
+    *param_6 = READ_LE_S16(data + 0x18);
+    *param_7 = (short)(READ_LE_S16(data + 0x1A) & 0xffc0) + iVar2;
+    *param_8 = (int)(short)(READ_LE_S16(data + 0x1C) & 0xff00) + READ_LE_S16(data + 0x6);
+    return;
+}
+
+
 void loadMenuSharedResources() {
 
     std::vector<std::vector<u8>::iterator> relocatedPtr = doPointerRelocation(menuSharedResources);
@@ -230,6 +252,31 @@ void loadMenuSharedResources() {
 
     gMenuContext->m2DC_font = mallocAndDecompress(relocatedPtr[2]);
     gMenuContext->m2E0_textBundle = mallocAndDecompress(relocatedPtr[3]);
+
+    int menuBorderData[3][6];
+
+    computeMenuBorder(gMenuContext->m2DC_font, 0x0e0, &menuBorderData[0][0], &menuBorderData[0][1], &menuBorderData[0][2], &menuBorderData[0][3], &menuBorderData[0][4], &menuBorderData[0][5]);
+    computeMenuBorder(gMenuContext->m2DC_font, 0x14b, &menuBorderData[0][0], &menuBorderData[0][1], &menuBorderData[0][2], &menuBorderData[0][3], &menuBorderData[0][4], &menuBorderData[0][5]);
+    computeMenuBorder(gMenuContext->m2DC_font, 0x14c, &menuBorderData[1][0], &menuBorderData[1][1], &menuBorderData[1][2], &menuBorderData[1][3], &menuBorderData[1][4], &menuBorderData[1][5]);
+    computeMenuBorder(gMenuContext->m2DC_font, 0x14d, &menuBorderData[2][0], &menuBorderData[2][1], &menuBorderData[2][2], &menuBorderData[2][3], &menuBorderData[2][4], &menuBorderData[2][5]);
+
+    menuBorderData[1][4] += 0xC;
+
+    std::vector<u8> portraits = mallocAndDecompress(relocatedPtr[4]);
+    for (int i = 0; i < 3; i++) {
+        if (gMenuContext->m33C->m30[i] != -1) {
+            OpenTIM(portraits.begin() + gMenuContext->m33C->m30[i] * 0xB20);
+
+            TIM_IMAGE portraitTim;
+            ReadTIM(&portraitTim);
+            (portraitTim.crect)->x = menuBorderData[i][2];
+            (portraitTim.crect)->y = menuBorderData[i][3];
+            (portraitTim.prect)->x = menuBorderData[i][4];
+            (portraitTim.prect)->y = menuBorderData[i][5];
+            LoadImage(portraitTim.crect, (u8*)portraitTim.caddr);
+            LoadImage(portraitTim.prect, (u8*)portraitTim.paddr);
+        }
+    }
 
     MissingCode();
 }
@@ -300,9 +347,6 @@ std::vector<std::array<u8, 2>> DAT_Menu2__801ea524 = { {
     {{0xB, 0xC}},
 }};
 
-u8 renderStringVar0 = 0;
-u16 renderStringVar1 = 0;
-
 u8 renderString(std::vector<u8>::iterator buffer, std::vector<u16>& param_2, ushort param_3, byte param_4) {
     sDialogWindow18 sDialogWindow18_temp;
     sDialogWindow18_temp.mA_width1 = param_3 | 1;
@@ -317,9 +361,9 @@ u8 renderString(std::vector<u8>::iterator buffer, std::vector<u16>& param_2, ush
     sDialogWindow18_temp.m0.vy = 0;
     sDialogWindow18_temp.m0.vx = 0;
     sDialogWindow18_temp.m69 = 100;
-    renderStringVar0 = param_4 & 1;
     sDialogWindow18_temp.m28_perLineBuffer.push_back(sDialogWindow18PerLineBufferEntry());
-    renderStringVar1 = 0;
+    sDialogWindow18_temp.m28_perLineBuffer[0].m5A = param_4 & 1;
+    sDialogWindow18_temp.m28_perLineBuffer[0].m58_widthDiv4 = 0;
     sDialogWindow18_temp.m1C_currentStringToPrint = buffer;
     sDialogWindow18_temp.m2C_inRamDialogTextImage = param_2;
     updateDialogTextImage(&sDialogWindow18_temp);
@@ -443,27 +487,6 @@ void initPrimitives_348_cursor()
         SetDrawMode(&gMenuContext->m348_cursor->m128[i], 0, 0, GetTPage(0, 0, 0x140, 0x80), &localRect);
         SetDrawMode(&gMenuContext->m348_cursor->m140[i], 0, 0, GetTPage(0, 2, 0x180, 0x00), &localRect);
     }
-}
-
-void computeMenuBorder(std::vector<u8>& param_1, int param_2, int* param_3, int* param_4, int* param_5, int* param_6, int* param_7, int* param_8)
-{
-    int iVar2;
-
-    std::vector<u8>::iterator data = param_1.begin() + READ_LE_U16(param_1.begin() + 4 + param_2 * 2);
-
-    *param_3 = READ_LE_S16(data + 0);
-    if (READ_LE_S16(data + 0x14) == 0) {
-        iVar2 = (int)((uint)(ushort)READ_LE_S16(data + 4) << 0x10) >> 0x14;
-    }
-    else {
-        iVar2 = (int)((uint)(ushort)READ_LE_S16(data + 4) << 0x10) >> 0x12;
-    }
-    *param_4 = READ_LE_S16(data + 0x14);
-    *param_5 = READ_LE_S16(data + 0x16);
-    *param_6 = READ_LE_S16(data + 0x18);
-    *param_7 = (short)(READ_LE_S16(data + 0x1A) & 0xffc0) + iVar2;
-    *param_8 = (int)(short)(READ_LE_S16(data + 0x1C) & 0xff00) + READ_LE_S16(data + 0x6);
-    return;
 }
 
 void computeMenuBorders(void)
@@ -689,13 +712,15 @@ void drawCharacterInfoCards() {
             sMenuContext_39C* pInfoCard = gMenuContext->m39C[i];
             AddPrim(&gMenuContext->m1D4_currentDrawContext->m70_OT[4], &pInfoCard->m0_portraitPoly[pInfoCard->m1270_oddOrEven]);
             AddPrim(&gMenuContext->m1D4_currentDrawContext->m70_OT[4], &pInfoCard->m50_NamePoly[pInfoCard->m1270_oddOrEven]);
-            /*drawMultiPolys(pInfoCard->m1279_NameLength, (sTag*)pInfoCard->mA0_NamePoly, (uint)pInfoCard->m1270_oddOrEven);
-            drawMultiPolys(pInfoCard->m1273_HPLength, (sTag*)pInfoCard->mAF0_PolyHP, (uint)pInfoCard->m1270_oddOrEven);
-            drawMultiPolys(pInfoCard->m1274_MaxHPLength, (sTag*)pInfoCard->mBE0_PolyMaxHP, (uint)pInfoCard->m1270_oddOrEven);
-            drawMultiPolys(pInfoCard->m1275_MPLength, (sTag*)pInfoCard->mCD0_PolyMP, (uint)pInfoCard->m1270_oddOrEven);
-            drawMultiPolys(pInfoCard->m1276_MaxMPLength, (sTag*)pInfoCard->mD70_PolyMaxMP, (uint)pInfoCard->m1270_oddOrEven);
-            drawMultiPolys(pInfoCard->m1277_E10Length, (sTag*)&pInfoCard->field_0xe10, (uint)pInfoCard->m1270_oddOrEven);
-            drawMultiPolys(pInfoCard->m1271_910Length, (sTag*)&pInfoCard->field_0x910, (uint)pInfoCard->m1270_oddOrEven);*/
+            drawMultiPolys(pInfoCard->m1279_FixedStringLength, &pInfoCard->mA0_FixedStrings[0], pInfoCard->m1270_oddOrEven);
+            drawMultiPolys(pInfoCard->m1273_HPLength, &pInfoCard->mAF0_PolyHP[0], (uint)pInfoCard->m1270_oddOrEven);
+            drawMultiPolys(pInfoCard->m1274_MaxHPLength, &pInfoCard->mBE0_PolyMaxHP[0], (uint)pInfoCard->m1270_oddOrEven);
+            drawMultiPolys(pInfoCard->m1275_MPLength, &pInfoCard->mCD0_PolyMP[0], (uint)pInfoCard->m1270_oddOrEven);
+            drawMultiPolys(pInfoCard->m1276_MaxMPLength, &pInfoCard->mD70_PolyMaxMP[0], (uint)pInfoCard->m1270_oddOrEven);
+            drawMultiPolys(pInfoCard->m1277_E10Length, &pInfoCard->mE10_polys[0], (uint)pInfoCard->m1270_oddOrEven);
+            //drawMultiPolys(pInfoCard->m1278_E10Length2, &pInfoCard->m1040_polys[0], (uint)pInfoCard->m1270_oddOrEven); // Disabled in original exe
+            drawMultiPolys(pInfoCard->m1271_LevelLength, &pInfoCard->m910_LevelPolys[0], (uint)pInfoCard->m1270_oddOrEven);
+            //drawMultiPolys(pInfoCard->m1272_Level2Length, &pInfoCard->mA00_Level2Polys[0], (uint)pInfoCard->m1270_oddOrEven); // Disabled in original exe
         }
     }
 }
@@ -1754,29 +1779,160 @@ void updateCharacterPortraitAndName(s8 slot, uint characterId, short param_3, sh
     static short infocardNameX = 0x30;
     static short infocardNameY = 0x11;
     setupMenuPolyFT4(&gMenuContext->m39C[slot]->m50_NamePoly[gMenuContext->m308_oddOrEven], infocardNameX + param_3, infocardNameY + param_4, (infocardNameU[slot] & 0x3f) * 4, infocardNameV[slot], 0x48, 0xd);
-
-    return;
 }
 
-void updateCharacterInfoCard(s8 slot, s8 param_2) {
+void updateCharacterInfoCardFixedStrings(s8 slot, short param_2, short param_3) {
+    static const std::array<s8, 20> updateCharacterFixedStringsTable = { { //Note, this was a u32 in the original exe, but was using 0xFFFF as -1 and other values where never larger than a byte
+            -1, 0x15, 0x1F,
+            -1, 0x11, 0x19,
+            0x3E, 0xE, 0x19,
+            0x3E, 0x17, 0x28,
+            0x3B, 0x37, 0x37,
+            0x15, 0x1F, 0x1F,
+            -1, -1
+    } };
+
+    static const std::array<u8, 20> updateCharacterFixedStringsX = { {
+            0x48,          0x30,          0x38,          0x58,
+            0x30,          0x38,          0x58,          0x30,
+            0x38,          0x58,          0x80,          0x88,
+            0x90,          0x98,          0x98,          0xA8,
+            0xB0,          0xB0,          0x80,          0x80,
+
+    } };
+
+    static const std::array<u8, 20> updateCharacterFixedStringsY = { {
+            0x00,          0x08,          0x08,          0x08,
+            0x20,          0x20,          0x20,          0x28,
+            0x28,          0x28,          0x18,          0x18,
+            0x18,          0x18,          0x18,          0x18,
+            0x18,          0x18,          0x20,          0x28,
+    } };
+
+    sMenuContext_39C* pSlot = gMenuContext->m39C[slot];
+    pSlot->m1279_FixedStringLength = 0;
+    for (int i = 0; i < 20; i++) {
+        if (updateCharacterFixedStringsTable[i] != -1) {
+            pSlot->m1279_FixedStringLength += setupStringInPolyFT4(gMenuContext->m2DC_font, updateCharacterFixedStringsTable[i], &pSlot->mA0_FixedStrings[pSlot->m1279_FixedStringLength], gMenuContext->m308_oddOrEven, param_2 + updateCharacterFixedStringsX[i], param_3 + updateCharacterFixedStringsY[i], 0x1000);
+        }
+    }
+}
+
+void updateCharacterHP(uint slot, uint characterId, short X, short Y) {
+    int characterInfocardHPPositionX = 0x40;
+    int characterInfocardHPPositionY = 0x20;
+
+    sMenuContext_39C* pSlot = gMenuContext->m39C[slot];
+    fillStringDisplayBuffer(gameState.m294[characterId].m24_HP);
+    pSlot->m1273_HPLength = 0;
+    for (int i = 0; i < 3; i++) {
+        if (gMenuContext->m31C_stringDisplayBuffer[i + 6] != 0xff) {
+            pSlot->m1273_HPLength += setupStringInPolyFT4(gMenuContext->m2DC_font, gMenuContext->m31C_stringDisplayBuffer[i + 6], &pSlot->mAF0_PolyHP[pSlot->m1273_HPLength], gMenuContext->m308_oddOrEven, X + characterInfocardHPPositionX + 8 * i, Y + characterInfocardHPPositionY, 0x1000);
+        }
+    }
+
+    int characterInfocardMaxHPPositionX = 0x60;
+    int characterInfocardMaxHPPositionY = 0x20;
+
+    fillStringDisplayBuffer(gameState.m294[characterId].m26_MaxHP);
+    pSlot->m1274_MaxHPLength = 0;
+    for (int i = 0; i < 3; i++) {
+        if (gMenuContext->m31C_stringDisplayBuffer[i + 6] != 0xff) {
+            pSlot->m1274_MaxHPLength += setupStringInPolyFT4(gMenuContext->m2DC_font, gMenuContext->m31C_stringDisplayBuffer[i + 6], &pSlot->mBE0_PolyMaxHP[pSlot->m1274_MaxHPLength], gMenuContext->m308_oddOrEven, X + characterInfocardMaxHPPositionX + 8 * i, Y + characterInfocardMaxHPPositionY, 0x1000);
+        }
+    }
+}
+
+void updateCharacterMP(uint slot, uint characterId, short X, short Y) {
+    int characterInfocardMPPositionX = 0x48;
+    int characterInfocardMPPositionY = 0x28;
+
+    sMenuContext_39C* pSlot = gMenuContext->m39C[slot];
+    fillStringDisplayBuffer(gameState.m294[characterId].m28_MP);
+    pSlot->m1275_MPLength = 0;
+    for (int i = 0; i < 2; i++) {
+        if (gMenuContext->m31C_stringDisplayBuffer[i + 7] != 0xff) {
+            pSlot->m1275_MPLength += setupStringInPolyFT4(gMenuContext->m2DC_font, gMenuContext->m31C_stringDisplayBuffer[i + 7], &pSlot->mCD0_PolyMP[pSlot->m1275_MPLength], gMenuContext->m308_oddOrEven, X + characterInfocardMPPositionX + 8 * i, Y + characterInfocardMPPositionY, 0x1000);
+        }
+    }
+
+    int characterInfocardMaxMPPositionX = 0x60;
+    int characterInfocardMaxMPPositionY = 0x28;
+
+    fillStringDisplayBuffer(gameState.m294[characterId].m28_MP);
+    pSlot->m1276_MaxMPLength = 0;
+    for (int i = 0; i < 2; i++) {
+        if (gMenuContext->m31C_stringDisplayBuffer[i + 7] != 0xff) {
+            pSlot->m1276_MaxMPLength += setupStringInPolyFT4(gMenuContext->m2DC_font, gMenuContext->m31C_stringDisplayBuffer[i + 7], &pSlot->mD70_PolyMaxMP[pSlot->m1276_MaxMPLength], gMenuContext->m308_oddOrEven, X + characterInfocardMaxMPPositionX + 8 * i, Y + characterInfocardMaxMPPositionY, 0x1000);
+        }
+    }
+}
+
+void updateCharacterXP(uint slot, uint characterId, short X, short Y) {
+    sMenuContext_39C* pSlot = gMenuContext->m39C[slot];
+    fillStringDisplayBuffer(gameState.m294[characterId].m1C);
+    pSlot->m1277_E10Length = 0;
+    for (int i = 0; i < 7; i++) {
+        if (gMenuContext->m31C_stringDisplayBuffer[i + 2] != 0xff) {
+            pSlot->m1277_E10Length += setupStringInPolyFT4(gMenuContext->m2DC_font, gMenuContext->m31C_stringDisplayBuffer[i + 2], &pSlot->mE10_polys[pSlot->m1277_E10Length], gMenuContext->m308_oddOrEven, X + 0x88 + 8 * i, Y + 0x20, 0x1000);
+        }
+    }
+
+    fillStringDisplayBuffer(gameState.m294[characterId].m20);
+    pSlot->m1278_E10Length2 = 0;
+    for (int i = 0; i < 7; i++) {
+        if (gMenuContext->m31C_stringDisplayBuffer[i + 2] != 0xff) {
+            pSlot->m1278_E10Length2 += setupStringInPolyFT4(gMenuContext->m2DC_font, gMenuContext->m31C_stringDisplayBuffer[i + 2], &pSlot->m1040_polys[pSlot->m1278_E10Length2], gMenuContext->m308_oddOrEven, X + 0x88 + 8 * i, Y + 0x28, 0x1000);
+        }
+    }
+}
+
+void updateCharacterLevel(uint slot, uint characterId, short X, short Y) {
+    sMenuContext_39C* pSlot = gMenuContext->m39C[slot];
+    fillStringDisplayBuffer(gameState.m294[characterId].m3A_Level);
+    pSlot->m1271_LevelLength = 0;
+    for (int i = 0; i < 3; i++) {
+        if (gMenuContext->m31C_stringDisplayBuffer[i + 6] != 0xff) {
+            pSlot->m1271_LevelLength += setupStringInPolyFT4(gMenuContext->m2DC_font, gMenuContext->m31C_stringDisplayBuffer[i + 6], &pSlot->m910_LevelPolys[pSlot->m1271_LevelLength], gMenuContext->m308_oddOrEven, X + 0x40 + 8 * i, Y + 0x8, 0x1000);
+        }
+    }
+
+    fillStringDisplayBuffer(gameState.m294[characterId].m3B_Level2);
+    pSlot->m1272_Level2Length = 0;
+    for (int i = 0; i < 3; i++) {
+        if (gMenuContext->m31C_stringDisplayBuffer[i + 6] != 0xff) {
+            pSlot->m1272_Level2Length += setupStringInPolyFT4(gMenuContext->m2DC_font, gMenuContext->m31C_stringDisplayBuffer[i + 6], &pSlot->mA00_Level2Polys[pSlot->m1272_Level2Length], gMenuContext->m308_oddOrEven, X + 0x60 + 8 * i, Y + 0x8, 0x1000);
+        }
+    }
+
+    for(int i=0; i< pSlot->m1272_Level2Length; i++){
+        SetShadeTex(&pSlot->mA00_Level2Polys[i][gMenuContext->m308_oddOrEven], 0);
+        pSlot->mA00_Level2Polys[i][gMenuContext->m308_oddOrEven].r0 = 0;
+        pSlot->mA00_Level2Polys[i][gMenuContext->m308_oddOrEven].g0 = 0x80;
+        pSlot->mA00_Level2Polys[i][gMenuContext->m308_oddOrEven].b0 = 0x0;
+    }
+}
+
+void updateCharacterInfoCard(s8 slot, s8 characterId) {
     if (slot != -1) {
         sMenuContextSub0* psVar2 = &gMenuContext->m0[slot];
-        int iVar1 = psVar2->m18;
-        if (iVar1 < 0) {
-            iVar1 = iVar1 + 0xff;
+        int infocardX = psVar2->m18;
+        if (infocardX < 0) {
+            infocardX = infocardX + 0xff;
         }
-        int iVar3 = psVar2->m1C;
-        iVar1 = (iVar1 >> 8) + psVar2->m0;
-        if (iVar3 < 0) {
-            iVar3 = iVar3 + 0xff;
+        int infocardY = psVar2->m1C;
+        infocardX = (infocardX >> 8) + psVar2->m0;
+        if (infocardY < 0) {
+            infocardY = infocardY + 0xff;
         }
-        iVar3 = (iVar3 >> 8) + psVar2->m8;
+        infocardY = (infocardY >> 8) + psVar2->m8;
 
-        updateCharacterPortraitAndName(slot, param_2, iVar1, iVar3);
-        /*updateCharacterName(param_1, iVar1, iVar3);
-        updateCharacterHP(param_1, param_2, iVar1, iVar3);
-        updateCharacterMP(param_1, param_2, iVar1, iVar3);*/
-        MissingCode();
+        updateCharacterPortraitAndName(slot, characterId, infocardX, infocardY);
+        updateCharacterInfoCardFixedStrings(slot, infocardX, infocardY);
+        updateCharacterHP(slot, characterId, infocardX, infocardY);
+        updateCharacterMP(slot, characterId, infocardX, infocardY);
+        updateCharacterXP(slot, characterId, infocardX, infocardY);
+        updateCharacterLevel(slot, characterId, infocardX, infocardY);
 
         gMenuContext->m33C->m0_isInfoCardEnabled[slot] = 1;
         gMenuContext->m39C[slot]->m1270_oddOrEven = gMenuContext->m308_oddOrEven;
@@ -1838,8 +1994,7 @@ void renderCharacterNameInVram(uint param_1, uint param_2)
 
     if ((param_1 & 0xff) != 0xff) {
         renderString(gameState.m0_names[param_1 & 0xfe].begin(), inRamName, 0x24, 0);
-        //renderString(gameState.m0_names[(param_1 & 0xfe) + 1].begin(), inRamName, 0x24, 1); // TODO: why?
-        MissingCode();
+        renderString(gameState.m0_names[(param_1 & 0xfe) + 1].begin(), inRamName, 0x24, 1);
     }
     int iVar1 = (param_2 & 0xfe) /2;
     RECT local_20;
@@ -1867,10 +2022,10 @@ void setupMenu0()
             s8 gearIndex = gameState.m294[(byte)gMenuContext->m33C->m30[i]].m78_partyData_gearNum;
             if (gearIndex == -1)
             {
-                //renderCharacterNameInVram(-1, 6 + 2 * i);
+                renderCharacterNameInVram(-1, 6 + 2 * i);
             }
             else {
-                //renderCharacterNameInVram(gearIndex + 0xB, 6 + 2 * i);
+                renderCharacterNameInVram(gearIndex + 0xB, 6 + 2 * i);
             }
         }
     }

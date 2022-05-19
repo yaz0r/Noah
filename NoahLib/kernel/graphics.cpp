@@ -80,88 +80,12 @@ void InitGeom()
 	setCopControlWord(2, 0xc800, 0);
 }
 
-void SetPolyFT4(POLY_FT4* p)
-{
-	p->m3_size = 9;
-	p->code = 0x2C;
-}
-
 u16 GetTPage(int tp, int abr, int x, int y)
 {
 	return (u16)((ushort)((tp & 3U) << 7) | (ushort)((abr & 3U) << 5) | (ushort)((int)(y & 0x100U) >> 4) | (ushort)((int)(x & 0x3ffU) >> 6) | (ushort)((y & 0x200U) << 2));
 }
 
-void SetTile(TILE* p)
-{
-	p->m3_size = 3;
-	p->code = 0x60;
-}
 
-void SetSemiTrans(TILE* p, int abe)
-{
-	if (abe == 0)
-	{
-		p->code &= ~2;
-	}
-	else
-	{
-		p->code |= 2;
-	}
-}
-
-void SetSprt(SPRT* p)
-{
-	p->m3_size = 4;
-	p->code = 0x64;
-}
-
-void SetSemiTrans(SPRT* p, int abe)
-{
-	if (abe == 0)
-	{
-		p->code &= ~2;
-	}
-	else
-	{
-		p->code |= 2;
-	}
-}
-
-void SetSemiTrans(POLY_FT4* p, int abe)
-{
-	if (abe == 0)
-	{
-		p->code &= ~2;
-	}
-	else
-	{
-		p->code |= 2;
-	}
-}
-
-void SetSemiTrans(POLY_F4* p, int abe)
-{
-    if (abe == 0)
-    {
-        p->code &= ~2;
-    }
-    else
-    {
-        p->code |= 2;
-    }
-}
-
-void SetSemiTrans(POLY_G4* p, int abe)
-{
-    if (abe == 0)
-    {
-        p->code &= ~2;
-    }
-    else
-    {
-        p->code |= 2;
-    }
-}
 
 DISPENV* SetDefDispEnv(DISPENV* env, int x, int y, int w, int h)
 {
@@ -1140,28 +1064,6 @@ void DR_MOVE::execute()
     MissingCode();
 }
 
-void SetDrawMove(DR_MOVE* p, RECT* rect, int x, int y)
-{
-    MissingCode();
-}
-
-void SetShadeTex(POLY_FT4* p, int tge)
-{
-    if (tge == 0) {
-        p->code &= ~1;
-    }
-    else {
-        p->code |= 1;
-    }
-}
-
-void SetPolyG4(POLY_G4* p)
-{
-    p->m3_size = 8;
-    p->code = 0x38;
-    return;
-}
-
 void setupPolyG4(POLY_G4* param_1, u8 param_2, u8 param_3, u8 param_4)
 {
     SetPolyG4(param_1);
@@ -1177,20 +1079,5 @@ void setupPolyG4(POLY_G4* param_1, u8 param_2, u8 param_3, u8 param_4)
     param_1->r3 = 0;
     param_1->g3 = 0;
     param_1->b3 = 0;
-    return;
-}
-
-void SetLineF3(LINE_F3* p)
-{
-    p->m3_size = 5;
-    p->code = 0x48;
-    p->pad = 0x55555555;
-    return;
-}
-
-void SetPolyF4(POLY_F4* p)
-{
-    p->m3_size = 5;
-    p->code = 0x28;
     return;
 }

@@ -8481,7 +8481,13 @@ void updateFieldInputs()
 
 void syncKernelAndFieldStates()
 {
-    MissingCode();
+    if (kernelAndFieldStatesSynced != 1) {
+        MissingCode();
+        for (int i = 0; i < 3; i++) {
+            pKernelGameState->m1D34_currentParty[i] = currentParty[i];
+        }
+        MissingCode();
+    }
 }
 
 void fieldPerFrameReset()

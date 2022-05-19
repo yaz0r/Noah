@@ -34,6 +34,14 @@ void loadInitialGameState()
         // NOTE: this was originally just a cast
         for (int i = 0; i < 11; i++)
         {
+            gameState.m294[i].m1C = READ_LE_S16(rawGameState.begin() + 0x294 + 0xA4 * i + 0x1C);
+            gameState.m294[i].m20 = READ_LE_S16(rawGameState.begin() + 0x294 + 0xA4 * i + 0x20);
+            gameState.m294[i].m24_HP = READ_LE_S16(rawGameState.begin() + 0x294 + 0xA4 * i + 0x24);
+            gameState.m294[i].m26_MaxHP = READ_LE_S16(rawGameState.begin() + 0x294 + 0xA4 * i + 0x24);
+            gameState.m294[i].m28_MP= READ_LE_S16(rawGameState.begin() + 0x294 + 0xA4 * i + 0x28);
+            gameState.m294[i].m2A_MaxMP = READ_LE_S16(rawGameState.begin() + 0x294 + 0xA4 * i + 0x2A);
+            gameState.m294[i].m3A_Level = READ_LE_S16(rawGameState.begin() + 0x294 + 0xA4 * i + 0x3A);
+            gameState.m294[i].m3B_Level2 = READ_LE_S16(rawGameState.begin() + 0x294 + 0xA4 * i + 0x3B);
             gameState.m294[i].m78_partyData_gearNum = READ_LE_S8(rawGameState.begin() + 0x294 + 0xA4 * i + 0x78);
         }
 

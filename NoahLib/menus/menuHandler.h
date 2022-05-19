@@ -82,8 +82,25 @@ struct sMenuContext_344_playTime {
 struct sMenuContext_39C {
     std::array<POLY_FT4, 2> m0_portraitPoly;
     std::array<POLY_FT4, 2> m50_NamePoly;
-    std::array<std::array<POLY_FT4, 20>, 4> mA0_NamePoly;
+    std::array<std::array<POLY_FT4, 2>, 20> mA0_FixedStrings;
+    std::array<std::array<POLY_FT4, 2>, 3> m910_LevelPolys;
+    std::array<std::array<POLY_FT4, 2>, 3> mA00_Level2Polys;
+    std::array<std::array<POLY_FT4, 2>, 3> mAF0_PolyHP;
+    std::array<std::array<POLY_FT4, 2>, 3> mBE0_PolyMaxHP;
+    std::array<std::array<POLY_FT4, 2>, 2> mCD0_PolyMP;
+    std::array<std::array<POLY_FT4, 2>, 2> mD70_PolyMaxMP;
+    std::array<std::array<POLY_FT4, 2>, 7> mE10_polys;
+    std::array<std::array<POLY_FT4, 2>, 7> m1040_polys;
     s8 m1270_oddOrEven;
+    s8 m1271_LevelLength;
+    s8 m1272_Level2Length;
+    s8 m1273_HPLength;
+    s8 m1274_MaxHPLength;
+    s8 m1275_MPLength;
+    s8 m1276_MaxMPLength;
+    s8 m1277_E10Length;
+    s8 m1278_E10Length2;
+    s8 m1279_FixedStringLength;
 };
 
 struct sMenuContext_364 {
