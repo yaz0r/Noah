@@ -129,7 +129,7 @@ struct FP_VEC3
             return vz;
         default:
             assert(0);
-            return sFixedPoint::fromValue(0);
+            return vx;
         }
     }
 };

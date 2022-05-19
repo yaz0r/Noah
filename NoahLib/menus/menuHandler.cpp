@@ -307,7 +307,7 @@ void initMenuGlobals() {
         else {
             gMenuContext->m33C->m30[i] = partyMemberIndex;
             gMenuContext->m32B++;
-            if (gameState.m294[gMenuContext->m33C->m30[i]].m78_partyData_gearNum != 0xff) {
+            if (gameState.m294[gMenuContext->m33C->m30[i]].m78_partyData_gearNum != -1) {
                 gMenuContext->m33C->m60[i] = 1;
                 gMenuContext->m33B++;
             }
@@ -339,7 +339,7 @@ void loadBlankImage(void)
     LoadImage(&localRect, buffer);
     DrawSync(0);
 
-    delete buffer;
+    delete[] buffer;
 }
 
 std::vector<std::array<u8, 2>> DAT_Menu2__801ea524 = { {
@@ -1953,7 +1953,7 @@ void infocardAnimationStep(s8 slot) {
             gMenuContext->m0[slot].m1C_YOffset += gMenuContext->m0[slot].m14_YStep;
         }
         else {
-            gMenuContext->m0[slot].m1C_YOffset - -gMenuContext->m0[slot].m14_YStep;
+            gMenuContext->m0[slot].m1C_YOffset -= gMenuContext->m0[slot].m14_YStep;
         }
     }
 

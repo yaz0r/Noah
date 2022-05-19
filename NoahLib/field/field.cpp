@@ -8224,7 +8224,7 @@ void updateAndRenderField()
 int runningOnDTL = -1;
 int startOfUpdateFieldTime = 0;
 
-void logFieldRenderingEvent(char* param_1)
+void logFieldRenderingEvent(const char* param_1)
 {
     MissingCode();
 }
