@@ -1155,18 +1155,11 @@ void resetCursorState(void)
     return;
 }
 
-void countField33C_C(uint param_1, byte* param_2)
+void countField33C_C(u8 count, std::array<u8, 8>& array)
 {
-    byte* pbVar1;
-
-    if ((param_1 & 0xff) != 0) {
-        pbVar1 = param_2 + (param_1 & 0xff);
-        do {
-            *param_2 = 0;
-            param_2 = param_2 + 1;
-        } while ((intptr_t)param_2 < (intptr_t)pbVar1);
+    for(int i=0; i<count; i++) {
+        array[i] = 0;
     }
-    return;
 }
 
 u8 menuVarUnk0 = 1;
@@ -1252,7 +1245,7 @@ void loadSaveGameMenuExecute() {
         case 4:
             gMenuContext->m350_mainMenu->m1192 = 1;
             resetCursorState();
-            countField33C_C(8, &gMenuContext->m33C->mC);
+            countField33C_C(8, gMenuContext->m33C->mC);
             gMenuContext->m348_cursor->m15B = 0x40;
             cVar1 = menu2_executeMainMenuSelection(7);
             menuVarUnk0 = 0;
@@ -1273,7 +1266,7 @@ void loadSaveGameMenuExecute() {
             menuReturnState0 = 1;
         }
         if (cVar1 == '\0') {
-            countField33C_C(8, &gMenuContext->m33C->mC);
+            countField33C_C(8, gMenuContext->m33C->mC);
             return;
         }
     } while (true);
@@ -1320,7 +1313,7 @@ void mainMenuExecute() {
             if (bVar1) {
                 gMenuContext->m350_mainMenu->m1192 = 1;
                 resetCursorState();
-                countField33C_C(8, &gMenuContext->m33C->mC);
+                countField33C_C(8, gMenuContext->m33C->mC);
                 continueMenu = menu2_executeMainMenuSelection(0);
             }
             break;
@@ -2055,10 +2048,10 @@ std::vector<std::array<u8, 2>> mainMenuConfig2 = { {
     {{0x2, 0x2}},
 } };
 
-void processLoadSaveMenuSub2(char param_1, char param_2)
+void processLoadSaveMenuSub2(bool show, bool hideGold)
 {
-    if (param_1 == '\0') {
-        countField33C_C(8, &gMenuContext->m33C->mC);
+    if (!show) {
+        countField33C_C(8, gMenuContext->m33C->mC);
         setupInfoCardAnimation(0x60, 6, 0x100, 0x86, 8, 0);
         setupInfoCardAnimation(0x68, 0x3e, 0x108, 0x3e, 8, 1);
         setupInfoCardAnimation(0x70, 0x76, 0x110, -10, 8, 2);
@@ -2088,11 +2081,11 @@ void processLoadSaveMenuSub2(char param_1, char param_2)
 
     MissingCode();
 
-    if (param_1 == 0) {
+    if (!show) {
         gMenuContext->m33C->m0_isInfoCardEnabled[2] = 0;
         gMenuContext->m33C->m0_isInfoCardEnabled[1] = 0;
         gMenuContext->m33C->m0_isInfoCardEnabled[0] = 0;
-        if (param_2 == 0) {
+        if (!hideGold) {
             gMenuContext->m33C->m20_menuBoxEnabled[0] = 0;
             gMenuContext->m33C->m5_drawGold = 0;
         }
@@ -2116,7 +2109,7 @@ void processLoadSaveMenuSub2(char param_1, char param_2)
             }
         }
         MissingCode();
-        if (param_2 == 0) {
+        if (!hideGold) {
             updateGoldDisplay();
         }
         gMenuContext->m33C->m20_menuBoxEnabled[1] = 1;
@@ -2175,7 +2168,7 @@ void setupMenu0()
         }
     }
     setupMainMenuWithConfig(8, mainMenuConfig.begin());
-    processLoadSaveMenuSub2(1, 0);
+    processLoadSaveMenuSub2(true, false);
     initMenuForPlaytime();
 }
 

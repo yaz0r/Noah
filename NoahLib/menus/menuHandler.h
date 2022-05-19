@@ -26,7 +26,7 @@ struct sMenuContext_33C {
     u8 m6_drawPlayTime = 0;
     u8 m9_drawMainMenu = 0;
     u8 mA_354Enabled = 0;
-    u8 mC = 0;
+    std::array<u8, 8> mC = { 0,0,0,0,0,0,0,0 };
     std::array<u8, 7> m20_menuBoxEnabled = { 0,0,0,0,0,0,0 };
     std::array<u8, 7> m27 = { 0,0,0,0,0,0,0 };
     std::array<s8, 3> m30 = { 0,0,0 };
