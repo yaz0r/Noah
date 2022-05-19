@@ -156,9 +156,17 @@ struct sMenuContextMenuTile {
 
 struct sMenuContextSub0 {
     s32 m0;
+    s32 m4;
     s32 m8;
-    s32 m18;
-    s32 m1C;
+    s32 mC;
+    s32 m10_XStep;
+    s32 m14_YStep;
+    s32 m18_XOffset;
+    s32 m1C_YOffset;
+    s8 m20_XReversed;
+    s8 m21_YReversed;
+    s8 m22_numSteps;
+    s8 m23;
 };
 
 struct sMenuContext {

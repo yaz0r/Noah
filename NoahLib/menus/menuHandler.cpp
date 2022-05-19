@@ -1916,15 +1916,16 @@ void updateCharacterLevel(uint slot, uint characterId, short X, short Y) {
 void updateCharacterInfoCard(s8 slot, s8 characterId) {
     if (slot != -1) {
         sMenuContextSub0* psVar2 = &gMenuContext->m0[slot];
-        int infocardX = psVar2->m18;
+        int infocardX = psVar2->m18_XOffset;
         if (infocardX < 0) {
             infocardX = infocardX + 0xff;
         }
-        int infocardY = psVar2->m1C;
-        infocardX = (infocardX >> 8) + psVar2->m0;
+        int infocardY = psVar2->m1C_YOffset;
         if (infocardY < 0) {
             infocardY = infocardY + 0xff;
         }
+
+        infocardX = (infocardX >> 8) + psVar2->m0;
         infocardY = (infocardY >> 8) + psVar2->m8;
 
         updateCharacterPortraitAndName(slot, characterId, infocardX, infocardY);
@@ -1939,8 +1940,152 @@ void updateCharacterInfoCard(s8 slot, s8 characterId) {
     }
 }
 
+void infocardAnimationStep(s8 slot) {
+    for(int i=0; i< gMenuContext->m0[slot].m22_numSteps; i++) {
+        if (gMenuContext->m0[slot].m20_XReversed == '\0') {
+            gMenuContext->m0[slot].m18_XOffset += gMenuContext->m0[slot].m10_XStep;
+        }
+        else {
+            gMenuContext->m0[slot].m18_XOffset -= gMenuContext->m0[slot].m10_XStep;
+        }
+
+        if (gMenuContext->m0[slot].m21_YReversed == '\0') {
+            gMenuContext->m0[slot].m1C_YOffset += gMenuContext->m0[slot].m14_YStep;
+        }
+        else {
+            gMenuContext->m0[slot].m1C_YOffset - -gMenuContext->m0[slot].m14_YStep;
+        }
+    }
+
+    int iVar7;
+    int iVar5;
+    int iVar2;
+
+    sMenuContextSub0* psVar6 = &gMenuContext->m0[slot];
+    if (psVar6->m10_XStep == 0x100) {
+        if (psVar6->m20_XReversed != '\0') {
+            iVar7 = psVar6->m18_XOffset;
+            if (iVar7 < 0) {
+                iVar7 = iVar7 + 0xff;
+            }
+            if (psVar6->m4 <= (iVar7 >> 8) + psVar6->m0) {
+                return;
+            }
+            goto LAB_Menu2__801c850c;
+        }
+        iVar7 = psVar6->m18_XOffset;
+        if (iVar7 < 0) {
+            iVar7 = iVar7 + 0xff;
+        }
+        iVar5 = psVar6->m0;
+        iVar2 = psVar6->m4;
+    }
+    else {
+        if (psVar6->m21_YReversed != '\0') {
+            iVar7 = psVar6->m1C_YOffset;
+            if (iVar7 < 0) {
+                iVar7 = iVar7 + 0xff;
+            }
+            if (psVar6->mC <= (iVar7 >> 8) + psVar6->m8) {
+                return;
+            }
+            goto LAB_Menu2__801c850c;
+        }
+        iVar7 = psVar6->m1C_YOffset;
+        if (iVar7 < 0) {
+            iVar7 = iVar7 + 0xff;
+        }
+        iVar5 = psVar6->m8;
+        iVar2 = psVar6->mC;
+    }
+    if ((iVar7 >> 8) + iVar5 <= iVar2) {
+        return;
+    }
+LAB_Menu2__801c850c:
+    psVar6->m23 = 1;
+    return;
+}
+
+void setupInfoCardAnimation(int X1, int X2, int Y1, int Y2, byte numSteps, byte slot) {
+    int iVar3;
+    int iVar4;
+
+    gMenuContext->m0[slot].m0 = X1;
+    gMenuContext->m0[slot].m8 = X2;
+    gMenuContext->m0[slot].m4 = Y1;
+    gMenuContext->m0[slot].mC = Y2;
+
+    if (Y1 < X1) {
+        iVar4 = X1 - Y1;
+        gMenuContext->m0[slot].m20_XReversed = 1;
+    }
+    else {
+        iVar4 = Y1 - X1;
+        gMenuContext->m0[slot].m20_XReversed = 0;
+    }
+
+    if (Y2 < X2) {
+        iVar3 = X2 - Y2;
+        gMenuContext->m0[slot].m21_YReversed = 1;
+    }
+    else {
+        iVar3 = Y2 - X2;
+        gMenuContext->m0[slot].m21_YReversed = 0;
+    }
+
+    if (iVar4 < iVar3) {
+        gMenuContext->m0[slot].m14_YStep = 0x100;
+        gMenuContext->m0[slot].m10_XStep = (iVar4 << 8) / iVar3;
+    }
+    else {
+        gMenuContext->m0[slot].m10_XStep = 0x100;
+        gMenuContext->m0[slot].m14_YStep = (iVar3 << 8) / iVar4;
+    }
+
+    gMenuContext->m0[slot].m22_numSteps = numSteps;
+    gMenuContext->m0[slot].m18_XOffset = 0;
+    gMenuContext->m0[slot].m1C_YOffset = 0;
+    gMenuContext->m0[slot].m23 = 0;
+}
+
+std::vector<std::array<u8, 2>> mainMenuConfig2 = { {
+    {{0xA, 0x7}},
+    {{0x6, 0x5}},
+    {{0x4, 0x3}},
+    {{0x2, 0x2}},
+} };
+
 void processLoadSaveMenuSub2(char param_1, char param_2)
 {
+    if (param_1 == '\0') {
+        countField33C_C(8, &gMenuContext->m33C->mC);
+        setupInfoCardAnimation(0x60, 6, 0x100, 0x86, 8, 0);
+        setupInfoCardAnimation(0x68, 0x3e, 0x108, 0x3e, 8, 1);
+        setupInfoCardAnimation(0x70, 0x76, 0x110, -10, 8, 2);
+    }
+    else {
+        j_setupMenuContext4E0(8, &gMenuContext->m4E0[1], mainMenuConfig2.begin());
+        setupInfoCardAnimation(0x100, 0x86, 0x60, 6, 8, 0);
+        setupInfoCardAnimation(0x108, 0x3e, 0x68, 0x3e, 8, 1);
+        setupInfoCardAnimation(0x70, 0x76, 0x110, -10, 8, 2);
+    }
+
+    MissingCode();
+
+    while ((gMenuContext->m0[0].m23 == 0) || (gMenuContext->m0[1].m23 == 0) || (gMenuContext->m0[1].m23 == 0)) {
+        for (int i = 0; i < 3; i++) {
+            if (gMenuContext->m33C->m30[i] != -1) {
+                updateCharacterInfoCard(i, gMenuContext->m33C->m30[i]);
+            }
+        }
+        menuDraw();
+        for (int i = 0; i < 3; i++) {
+            if (gMenuContext->m33C->m30[i] != -1) {
+                infocardAnimationStep(i);
+            }
+        }
+    }
+
     MissingCode();
 
     if (param_1 == 0) {
@@ -1959,12 +2104,12 @@ void processLoadSaveMenuSub2(char param_1, char param_2)
         gMenuContext->m0[1].m8 = 0x3e;
         gMenuContext->m0[2].m0 = 0x70;
         gMenuContext->m0[2].m8 = 0x76;
-        gMenuContext->m0[0].m1C = 0;
-        gMenuContext->m0[0].m18 = 0;
-        gMenuContext->m0[1].m1C = 0;
-        gMenuContext->m0[1].m18 = 0;
-        gMenuContext->m0[2].m1C = 0;
-        gMenuContext->m0[2].m18 = 0;
+        gMenuContext->m0[0].m1C_YOffset = 0;
+        gMenuContext->m0[0].m18_XOffset = 0;
+        gMenuContext->m0[1].m1C_YOffset = 0;
+        gMenuContext->m0[1].m18_XOffset = 0;
+        gMenuContext->m0[2].m1C_YOffset = 0;
+        gMenuContext->m0[2].m18_XOffset = 0;
         for (int i = 0; i < 3; i++) {
             if (gMenuContext->m33C->m30[i] != -1) {
                 updateCharacterInfoCard(i, gMenuContext->m33C->m30[i]);
