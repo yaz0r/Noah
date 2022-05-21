@@ -355,6 +355,32 @@ u32 getBlending(u32 code, u32 tpage, u64& State)
 	return 0;
 }
 
+bgfx::VertexLayout& GetLayout() {
+    static bgfx::VertexLayout layout;
+    if (layout.getStride() == 0) {
+        layout
+            .begin()
+            .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
+            .add(bgfx::Attrib::Color0, 4, bgfx::AttribType::Float)
+            .add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
+            .add(bgfx::Attrib::TexCoord1, 2, bgfx::AttribType::Int16) // CLUT
+            .add(bgfx::Attrib::TexCoord2, 4, bgfx::AttribType::Uint8) // Texpage
+            .add(bgfx::Attrib::TexCoord3, 4, bgfx::AttribType::Uint8) // TextureWindow
+            .end();
+    }
+    return layout;
+}
+
+struct sVertice
+{
+    float v[3];
+    float color[4];
+    float texcoord[2];
+    u16 CLUT[2];
+    u8 Texpage[4];
+    u8 TextureWindow[4];
+};
+
 void SPRT::execute()
 {
 	float matrix[16];
@@ -363,30 +389,10 @@ void SPRT::execute()
 	bgfx::setTransform(matrix);
     if(1)
 	{
-		bgfx::VertexLayout layout;
-		layout
-			.begin()
-			.add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
-			.add(bgfx::Attrib::Color0, 3, bgfx::AttribType::Float)
-			.add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
-			.add(bgfx::Attrib::TexCoord1, 2, bgfx::AttribType::Int16) // CLUT
-			.add(bgfx::Attrib::TexCoord2, 4, bgfx::AttribType::Uint8) // Texpage
-			.add(bgfx::Attrib::TexCoord3, 4, bgfx::AttribType::Uint8) // TextureWindow
-			.end();
-
 		bgfx::TransientVertexBuffer vertexBuffer;
 		bgfx::TransientIndexBuffer indexBuffer;
-		bgfx::allocTransientBuffers(&vertexBuffer, layout, 4, &indexBuffer, 4);
+		bgfx::allocTransientBuffers(&vertexBuffer, GetLayout(), 4, &indexBuffer, 4);
 
-		struct sVertice
-		{
-			float v[3];
-			float color[3];
-			float texcoord[2];
-			u16 CLUT[2];
-			u8 Texpage[4];
-			u8 TextureWindow[4];
-		};
 
 		sVertice* pVertices = (sVertice*)vertexBuffer.data;
 		u16* pIndices = (u16*)indexBuffer.data;
@@ -473,30 +479,9 @@ void TILE::execute()
 	bgfx::setTransform(matrix);
     if(1)
 	{
-		bgfx::VertexLayout layout;
-		layout
-			.begin()
-			.add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
-			.add(bgfx::Attrib::Color0, 4, bgfx::AttribType::Float)
-			.add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
-			.add(bgfx::Attrib::TexCoord1, 2, bgfx::AttribType::Int16) // CLUT
-			.add(bgfx::Attrib::TexCoord2, 4, bgfx::AttribType::Uint8) // Texpage
-			.add(bgfx::Attrib::TexCoord3, 4, bgfx::AttribType::Uint8) // TextureWindow
-			.end();
-
 		bgfx::TransientVertexBuffer vertexBuffer;
 		bgfx::TransientIndexBuffer indexBuffer;
-		bgfx::allocTransientBuffers(&vertexBuffer, layout, 4, &indexBuffer, 4);
-
-		struct sVertice
-		{
-			float v[3];
-			float color[4];
-			float texcoord[2];
-			u16 CLUT[2];
-			u8 Texpage[4];
-			u8 TextureWindow[4];
-		};
+		bgfx::allocTransientBuffers(&vertexBuffer, GetLayout(), 4, &indexBuffer, 4);
 
 		sVertice* pVertices = (sVertice*)vertexBuffer.data;
 		u16* pIndices = (u16*)indexBuffer.data;
@@ -560,30 +545,9 @@ void POLY_F3::execute()
     bgfx::setTransform(matrix);
     if (1)
     {
-        bgfx::VertexLayout layout;
-        layout
-            .begin()
-            .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
-            .add(bgfx::Attrib::Color0, 3, bgfx::AttribType::Float)
-            .add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
-            .add(bgfx::Attrib::TexCoord1, 2, bgfx::AttribType::Int16) // CLUT
-            .add(bgfx::Attrib::TexCoord2, 4, bgfx::AttribType::Uint8) // Texpage
-            .add(bgfx::Attrib::TexCoord3, 4, bgfx::AttribType::Uint8) // TextureWindow
-            .end();
-
         bgfx::TransientVertexBuffer vertexBuffer;
         bgfx::TransientIndexBuffer indexBuffer;
-        bgfx::allocTransientBuffers(&vertexBuffer, layout, 3, &indexBuffer, 3);
-
-        struct sVertice
-        {
-            float v[3];
-            float color[3];
-            float texcoord[2];
-            u16 CLUT[2];
-            u8 Texpage[4];
-            u8 TextureWindow[4];
-        };
+        bgfx::allocTransientBuffers(&vertexBuffer, GetLayout(), 3, &indexBuffer, 3);
 
         sVertice* pVertices = (sVertice*)vertexBuffer.data;
         u16* pIndices = (u16*)indexBuffer.data;
@@ -642,30 +606,9 @@ void POLY_F4::execute()
     bgfx::setTransform(matrix);
     if (1)
     {
-        bgfx::VertexLayout layout;
-        layout
-            .begin()
-            .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
-            .add(bgfx::Attrib::Color0, 3, bgfx::AttribType::Float)
-            .add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
-            .add(bgfx::Attrib::TexCoord1, 2, bgfx::AttribType::Int16) // CLUT
-            .add(bgfx::Attrib::TexCoord2, 4, bgfx::AttribType::Uint8) // Texpage
-            .add(bgfx::Attrib::TexCoord3, 4, bgfx::AttribType::Uint8) // TextureWindow
-            .end();
-
         bgfx::TransientVertexBuffer vertexBuffer;
         bgfx::TransientIndexBuffer indexBuffer;
-        bgfx::allocTransientBuffers(&vertexBuffer, layout, 4, &indexBuffer, 4);
-
-        struct sVertice
-        {
-            float v[3];
-            float color[3];
-            float texcoord[2];
-            u16 CLUT[2];
-            u8 Texpage[4];
-            u8 TextureWindow[4];
-        };
+        bgfx::allocTransientBuffers(&vertexBuffer, GetLayout(), 4, &indexBuffer, 4);
 
         sVertice* pVertices = (sVertice*)vertexBuffer.data;
         u16* pIndices = (u16*)indexBuffer.data;
@@ -729,30 +672,9 @@ void POLY_FT4::execute()
 	bgfx::setTransform(matrix);
     if(1)
 	{
-		bgfx::VertexLayout layout;
-		layout
-			.begin()
-			.add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
-			.add(bgfx::Attrib::Color0, 3, bgfx::AttribType::Float)
-			.add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
-			.add(bgfx::Attrib::TexCoord1, 2, bgfx::AttribType::Int16) // CLUT
-			.add(bgfx::Attrib::TexCoord2, 4, bgfx::AttribType::Uint8) // Texpage
-			.add(bgfx::Attrib::TexCoord3, 4, bgfx::AttribType::Uint8) // TextureWindow
-			.end();
-
 		bgfx::TransientVertexBuffer vertexBuffer;
 		bgfx::TransientIndexBuffer indexBuffer;
-		bgfx::allocTransientBuffers(&vertexBuffer, layout, 4, &indexBuffer, 4);
-
-		struct sVertice
-		{
-			float v[3];
-			float color[3];
-			float texcoord[2];
-			u16 CLUT[2];
-			u8 Texpage[4];
-			u8 TextureWindow[4];
-		};
+		bgfx::allocTransientBuffers(&vertexBuffer, GetLayout(), 4, &indexBuffer, 4);
 
 		sVertice* pVertices = (sVertice*)vertexBuffer.data;
 		u16* pIndices = (u16*)indexBuffer.data;
@@ -849,30 +771,9 @@ void POLY_FT3::execute()
 
 	bgfx::setTransform(matrix);
 	{
-		bgfx::VertexLayout layout;
-		layout
-			.begin()
-			.add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
-			.add(bgfx::Attrib::Color0, 3, bgfx::AttribType::Float)
-			.add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
-			.add(bgfx::Attrib::TexCoord1, 2, bgfx::AttribType::Int16) // CLUT
-			.add(bgfx::Attrib::TexCoord2, 4, bgfx::AttribType::Uint8) // Texpage
-			.add(bgfx::Attrib::TexCoord3, 4, bgfx::AttribType::Uint8) // TextureWindow
-			.end();
-
 		bgfx::TransientVertexBuffer vertexBuffer;
 		bgfx::TransientIndexBuffer indexBuffer;
-		bgfx::allocTransientBuffers(&vertexBuffer, layout, 3, &indexBuffer, 3);
-
-		struct sVertice
-		{
-			float v[3];
-			float color[3];
-			float texcoord[2];
-			u16 CLUT[2];
-			u8 Texpage[4];
-			u8 TextureWindow[4];
-		};
+		bgfx::allocTransientBuffers(&vertexBuffer, GetLayout(), 3, &indexBuffer, 3);
 
 		sVertice* pVertices = (sVertice*)vertexBuffer.data;
 		u16* pIndices = (u16*)indexBuffer.data;
@@ -947,30 +848,9 @@ void POLY_GT3::execute()
 
     bgfx::setTransform(matrix);
     {
-        bgfx::VertexLayout layout;
-        layout
-            .begin()
-            .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
-            .add(bgfx::Attrib::Color0, 3, bgfx::AttribType::Float)
-            .add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
-            .add(bgfx::Attrib::TexCoord1, 2, bgfx::AttribType::Int16) // CLUT
-            .add(bgfx::Attrib::TexCoord2, 4, bgfx::AttribType::Uint8) // Texpage
-            .add(bgfx::Attrib::TexCoord3, 4, bgfx::AttribType::Uint8) // TextureWindow
-            .end();
-
         bgfx::TransientVertexBuffer vertexBuffer;
         bgfx::TransientIndexBuffer indexBuffer;
-        bgfx::allocTransientBuffers(&vertexBuffer, layout, 3, &indexBuffer, 3);
-
-        struct sVertice
-        {
-            float v[3];
-            float color[3];
-            float texcoord[2];
-            u16 CLUT[2];
-            u8 Texpage[4];
-            u8 TextureWindow[4];
-        };
+        bgfx::allocTransientBuffers(&vertexBuffer, GetLayout(), 3, &indexBuffer, 3);
 
         sVertice* pVertices = (sVertice*)vertexBuffer.data;
         u16* pIndices = (u16*)indexBuffer.data;
