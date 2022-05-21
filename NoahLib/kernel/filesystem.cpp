@@ -2,6 +2,10 @@
 #include "filesystem.h"
 #include "isoManager.h"
 #include "imgui.h"
+#include "tinyxml2.h"
+#include "kernel/decompress.h"
+
+const char filesystemDebugFileName[] = "debuginfo/filesystem.xml";
 
 #include "../imgui_club/imgui_memory_editor/imgui_memory_editor.h"
 
@@ -38,6 +42,113 @@ int getNumFilesInDirectory(int directory)
         return 0;
 
     return fatDirectoryTableBuffer[directory].mNumFilesInDirectory;
+}
+
+
+struct sfilesysttemDebugInfo
+{
+    std::vector<std::string> mDirectories;
+    std::vector<std::string> mFiles;
+} gFilesystemDebugInfo;
+
+void filessystemDebugInfo_save()
+{
+    tinyxml2::XMLDocument filesystemDebugInfo;
+
+    // write directories
+    {
+        tinyxml2::XMLElement* directoriesXML = filesystemDebugInfo.NewElement("directories");
+        filesystemDebugInfo.InsertEndChild(directoriesXML);
+
+        for (int i = 0; i < gFilesystemDebugInfo.mDirectories.size(); i++)
+        {
+            if (gFilesystemDebugInfo.mDirectories[i].length())
+            {
+                tinyxml2::XMLElement* directoryXML = directoriesXML->InsertNewChildElement("directory");
+
+                directoryXML->SetAttribute("ID", i);
+                directoryXML->SetAttribute("Name", gFilesystemDebugInfo.mDirectories[i].c_str());
+            }
+        }
+    }
+
+    // write files
+    {
+        tinyxml2::XMLElement* filesXML = filesystemDebugInfo.NewElement("files");
+        filesystemDebugInfo.InsertEndChild(filesXML);
+
+        for (int i = 0; i < gFilesystemDebugInfo.mFiles.size(); i++)
+        {
+            if (gFilesystemDebugInfo.mFiles[i].length())
+            {
+                tinyxml2::XMLElement* fileXML = filesXML->InsertNewChildElement("file");
+
+                fileXML->SetAttribute("ID", i);
+                fileXML->SetAttribute("Name", gFilesystemDebugInfo.mFiles[i].c_str());
+            }
+        }
+    }
+
+    filesystemDebugInfo.SaveFile(filesystemDebugFileName);
+
+}
+
+void filessystemDebugInfo_load()
+{
+    tinyxml2::XMLDocument filesystemDebugInfo;
+    if (filesystemDebugInfo.LoadFile(filesystemDebugFileName) != tinyxml2::XML_SUCCESS)
+    {
+        // build debug field debug info
+
+        gFilesystemDebugInfo.mDirectories.clear();
+        gFilesystemDebugInfo.mDirectories.resize(fatDirectoryTableBuffer.size());
+
+        gFilesystemDebugInfo.mFiles.clear();
+        gFilesystemDebugInfo.mFiles.resize(fatFileTableBuffer.size());
+
+        filessystemDebugInfo_save();
+    }
+    else
+    {
+        // init empty structure
+        gFilesystemDebugInfo.mDirectories.clear();
+        gFilesystemDebugInfo.mDirectories.resize(fatDirectoryTableBuffer.size());
+
+        gFilesystemDebugInfo.mFiles.clear();
+        gFilesystemDebugInfo.mFiles.resize(fatFileTableBuffer.size());
+
+        // load directories
+        {
+            tinyxml2::XMLElement* directoriesXML = filesystemDebugInfo.FirstChildElement("directories");
+            tinyxml2::XMLElement* directoryXML = directoriesXML->FirstChildElement("directory");
+
+            while (directoryXML)
+            {
+                int directoryId = directoryXML->IntAttribute("ID");
+                const char* nameAttribute = nullptr;
+                directoryXML->QueryStringAttribute("Name", &nameAttribute);
+                gFilesystemDebugInfo.mDirectories[directoryId] = nameAttribute;
+
+                directoryXML = directoryXML->NextSiblingElement("directory");
+            }
+        }
+
+        // load files
+        {
+            tinyxml2::XMLElement* filesXML = filesystemDebugInfo.FirstChildElement("files");
+            tinyxml2::XMLElement* fileXML = filesXML->FirstChildElement("file");
+
+            while (fileXML)
+            {
+                int fileId = fileXML->IntAttribute("ID");
+                const char* nameAttribute = nullptr;
+                fileXML->QueryStringAttribute("Name", &nameAttribute);
+                gFilesystemDebugInfo.mFiles[fileId] = nameAttribute;
+
+                fileXML = fileXML->NextSiblingElement("file");
+            }
+        }
+    }
 }
 
 void initCDAndFileSystem(std::vector<s_fileTableEntry>* fileTable, std::vector<s_directoryEntry>* directoryTable, int mode)
@@ -116,6 +227,7 @@ void initCDAndFileSystem(std::vector<s_fileTableEntry>* fileTable, std::vector<s
         }
     }
 
+    filessystemDebugInfo_load();
 }
 
 int startOfDirectoryFileIndex = 0;
@@ -163,7 +275,7 @@ std::vector<class c_fileHexView*> gFileHexView;
 class c_fileHexView
 {
 public:
-    c_fileHexView(int directory, int file)
+    c_fileHexView(int directory, int file, bool bDecompress)
     {
         char buffer[256];
         sprintf(buffer, "%d/%d", directory, file);
@@ -171,6 +283,14 @@ public:
 
         setCurrentDirectory(directory, 0);
         readFile(file, mBuffer, 0, 0x80);
+
+        if (bDecompress) {
+            std::vector<u8> decompressedBuffer;
+            int totalSize = READ_LE_U32(mBuffer.begin());
+            decompressedBuffer.resize(totalSize);
+            decompress(mBuffer.begin(), decompressedBuffer);
+            mBuffer = decompressedBuffer;
+        }
     }
 
     bool frame()
@@ -192,13 +312,16 @@ private:
     std::vector<u8> mBuffer;
 };
 
-void createHexView(int directory, int file)
+void createHexView(int directory, int file, bool bDecompress = false)
 {
-    gFileHexView.push_back(new c_fileHexView(directory, file));
+    gFileHexView.push_back(new c_fileHexView(directory, file, bDecompress));
 }
 
 void c_filesystemExplorer::frame()
 {
+    std::string popupToOpen = "";
+    static int fileToRename = -1;
+    static char filenameBuffer[512] = "";
     if (ImGui::Begin("FileSystemExplorer"))
     {
         for (int i = 0; i < fatDirectoryTableBuffer.size() - 1; i++)
@@ -206,23 +329,29 @@ void c_filesystemExplorer::frame()
             setCurrentDirectory(i, 0);
             if(fatDirectoryTableBuffer[i].mNumFilesInDirectory)
             {
-                if (ImGui::TreeNode(fatDirectoryTableBuffer[i].mName.c_str()))
+                std::string name = "Directory " + std::to_string(i);
+                if (gFilesystemDebugInfo.mDirectories[i].length()) {
+                    name = gFilesystemDebugInfo.mDirectories[i];
+                }
+
+                if (ImGui::TreeNode(name.c_str()))
                 {
                     int numFiles = getNumFilesInDirectory(i);
-                    for (int j = 0; j < numFiles; j++)
+                    for (int j = 1; j < numFiles; j++)
                     {
-                        char buffer[256];
+                        int realFileIndex = fatDirectoryTableBuffer[i].m0_firstFileIndex + j;
+                        std::string name = "File " + std::to_string(realFileIndex);
                         if (getFileSize(j) <= 0)
                         {
-                            sprintf(buffer, "file %d (deleted)", j);
-                        }
-                        else
-                        {
-                            sprintf(buffer, "file %d", j);
+                            name += "(deleted)";
+                            continue;
                         }
 
-                        std::string name = buffer;
+                        if (gFilesystemDebugInfo.mFiles[realFileIndex].length()) {
+                            name = gFilesystemDebugInfo.mFiles[realFileIndex];
+                        }
 
+                        ImGui::PushID(j);
                         if (ImGui::TreeNodeEx(name.c_str(), ImGuiTreeNodeFlags_Leaf))
                         {
                             if (ImGui::BeginPopupContextItem(name.c_str()))
@@ -230,6 +359,10 @@ void c_filesystemExplorer::frame()
                                 if (ImGui::MenuItem("Show Hex"))
                                 {
                                     createHexView(i, j);
+                                }
+                                if (ImGui::MenuItem("Show Hex (decompress first)"))
+                                {
+                                    createHexView(i, j, true);
                                 }
                                 if (ImGui::MenuItem("Dump"))
                                 {
@@ -243,10 +376,16 @@ void c_filesystemExplorer::frame()
                                         fclose(fHandle);
                                     }
                                 }
+                                if (ImGui::MenuItem("Rename")) {
+                                    popupToOpen = "RenameFile";
+                                    fileToRename = fatDirectoryTableBuffer[i].m0_firstFileIndex + j;
+                                    strcpy(filenameBuffer, gFilesystemDebugInfo.mFiles[fileToRename].c_str());
+                                }
                                 ImGui::EndPopup();
                             }
                             ImGui::TreePop();
                         }
+                        ImGui::PopID();
                     }
                     ImGui::TreePop();
                 }
@@ -255,6 +394,33 @@ void c_filesystemExplorer::frame()
         
     }
     ImGui::End();
+
+    if (popupToOpen.length())
+    {
+        ImGui::OpenPopup(popupToOpen.c_str());
+        popupToOpen.clear();
+    }
+
+    //ImGui::SetNextWindowSize(ImVec2(500, 500));
+    if (ImGui::BeginPopup("RenameFile"))
+    {
+        ImGui::PushID("##");
+
+        if (ImGui::InputText("", filenameBuffer, sizeof(filenameBuffer), ImGuiInputTextFlags_EnterReturnsTrue) || ImGui::Button("OK"))
+        {
+            gFilesystemDebugInfo.mFiles[fileToRename] = filenameBuffer;
+            filessystemDebugInfo_save();
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::SameLine();
+        if (ImGui::Button("Cancel"))
+        {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::PopID();
+        ImGui::EndPopup();
+    }
 
     for (int i = 0; i < gFileHexView.size(); i++)
     {

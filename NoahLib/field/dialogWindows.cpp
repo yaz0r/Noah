@@ -1808,3 +1808,12 @@ void setupMultiChoice(sDialogWindow18* param_1, u8 R, u8 G, u8 B)
         param_1->m28_perLineBuffer[i].m0[0][0].b0 = B;
     }
 }
+
+void releaseAllDialogWindows(void)
+{
+    for (int i = 0; i < 4; i++) {
+        if (!gDialogWindows[i].m40E) {
+            releaseDialogWindow(i);
+        }
+    }
+}

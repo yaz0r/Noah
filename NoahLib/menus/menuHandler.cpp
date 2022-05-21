@@ -8,6 +8,7 @@
 #include "kernel/gameState.h"
 
 #include "menus/menuGold.h"
+#include "menus/statusMenu.h"
 
 sMenuContext *gMenuContext = nullptr;
 
@@ -1182,7 +1183,10 @@ int menu2_executeMainMenuSelection(byte param_1) {
     case 0: // exit
         flag1 = 0;
         flag0 = 0;
-        break;         
+        break;        
+    case 6:
+        flag1 = openStatusMenu();
+        break;
     case 8:
         if (processLoadSaveMenu(1, 0)) {
             menuReturnState0 = 2;
@@ -1321,6 +1325,7 @@ void mainMenuExecute() {
         case 5:
             continueMenu = 0;
             break;
+        case 7:
         case 8:
             break;
         default:
@@ -2060,7 +2065,7 @@ void processLoadSaveMenuSub2(bool show, bool hideGold)
         j_setupMenuContext4E0(8, &gMenuContext->m4E0[1], mainMenuConfig2.begin());
         setupInfoCardAnimation(0x100, 0x86, 0x60, 6, 8, 0);
         setupInfoCardAnimation(0x108, 0x3e, 0x68, 0x3e, 8, 1);
-        setupInfoCardAnimation(0x70, 0x76, 0x110, -10, 8, 2);
+        setupInfoCardAnimation(0x110, -10, 0x70, 0x76, 8, 2);
     }
 
     MissingCode();
@@ -2108,7 +2113,7 @@ void processLoadSaveMenuSub2(bool show, bool hideGold)
                 updateCharacterInfoCard(i, gMenuContext->m33C->m30[i]);
             }
         }
-        MissingCode();
+        playMenuSoundEffect(0x5d);
         if (!hideGold) {
             updateGoldDisplay();
         }
@@ -2340,4 +2345,8 @@ void loadAndOpenMenu(void)
         initFontSystem();
         menuOpenCount = 0;
     }
+}
+
+void playMenuSoundEffect(uint param_1) {
+    MissingCode();
 }

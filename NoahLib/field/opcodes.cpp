@@ -1390,7 +1390,7 @@ void OP_55(void)
     pCurrentFieldScriptActor->mCC_scriptPC += 7;
 }
 
-void OP_56(void) {
+void OP_WORLDMAP(void) {
     if ((((playMusicAuthorized == 0) || (fieldExecuteVar3 == 0)) || (loadCompleted != 0)) || ((fieldMusicLoadPending == -1 || (load2dAnimVar != 0)))) {
         breakCurrentScript = 1;
     }
@@ -2929,21 +2929,24 @@ void OPX_9A()
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 9;
 }
 
-void OPX_9B()
+void OP_TRANSITION_EFFECT_1()
 {
-    MissingCode();
+    fullScreenTransitionEffectRenderParam = getImmediateOrVariableUnsigned(1);
+    fullScreenTransitionEffectRenderMode = 1;
     pCurrentFieldScriptActor->mCC_scriptPC += 3;
 }
 
-void OPX_9C()
+void OP_TRANSITION_EFFECT_2()
 {
-    MissingCode();
+    fullScreenTransitionEffectRenderParam = getImmediateOrVariableUnsigned(1);
+    fullScreenTransitionEffectRenderMode = 2;
     pCurrentFieldScriptActor->mCC_scriptPC += 3;
 }
 
-void OPX_9D()
+void OP_TRANSITION_EFFECT_3()
 {
-    MissingCode();
+    fullScreenTransitionEffectRenderParam = getImmediateOrVariableUnsigned(1);
+    fullScreenTransitionEffectRenderMode = 3;
     pCurrentFieldScriptActor->mCC_scriptPC += 3;
 }
 

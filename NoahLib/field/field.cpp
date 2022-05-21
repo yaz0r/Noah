@@ -116,6 +116,9 @@ s16 OP_B6SubVar0 = 0;
 s16 OP_B6Var1 = 0;
 s16 OP_B6Var2 = 0;
 
+u32 fullScreenTransitionEffectRenderMode = 0;
+u32 fullScreenTransitionEffectRenderParam = 0;
+
 const std::array<s8, 12> characterMappingTable = {
     0,1,2,3,4,5,6,7,8,2,6,0
 };
@@ -320,6 +323,8 @@ void resetFieldDefault()
     MissingCode();
     cameraTrackingMode = eCameraTrackingMode::e0_followPlayer;
     MissingCode();
+    fullScreenTransitionEffectRenderMode = 0;
+    fullScreenTransitionEffectRenderParam = 0;
     fieldTransitionFadeInLength = 0x20;
     fieldTransitionMode = 2;
     MissingCode();
@@ -8542,6 +8547,61 @@ void fieldChangeGameMode(int mode) {
     }
 }
 
+
+bool isControllerConnected(int port) {
+    return true;
+}
+
+void decompressPauseSignToVram(short param_1, short param_2) {
+    MissingCode();
+}
+
+void pauseMusic() {
+    MissingCode();
+}
+
+void resumeMusic() {
+    MissingCode();
+}
+
+void checkSoftReboot() {
+    if (newPadButtonForScripts[0].m0_buttons == 0x90c) {
+        assert(0);
+    }
+}
+
+void renderFullScreenTransitionEffect() {
+    switch (fullScreenTransitionEffectRenderMode) {
+    case 0:
+        break;
+    default:
+        assert(0);
+    }
+}
+
+bool isFieldTransitionPermittedByLoading() {
+    MissingCode();
+    return false;
+}
+
+void flushFrame() {
+    DrawSync(0);
+    VSync(0);
+}
+
+void startFieldTransition(void) {
+    MissingCode();
+
+    if (NumMechas != 0) {
+        freeMechaModule();
+        ClearCacheAfterOverlayLoad();
+        flushFrame();
+        mechaOverlayBuffer.clear();
+    }
+
+    MissingCode();
+}
+
 void fieldEntryPoint()
 {
     fieldDebugDisable = (runningOnDTL == -1);
@@ -8587,14 +8647,44 @@ void fieldEntryPoint()
 
     MissingCode();
 
+    bool bVar2 = false;
+
     while (!noahFrame_end())
     {
         noahFrame_start();
 
         MissingCode();
         ////
+        u32 playTimeBeginningOfLoop = playTimeInVsync;
+        if (!isControllerConnected(0)) {
+            pauseMusic();
+            decompressPauseSignToVram(0x88, (g_frameOddOrEven + 1U & 1) << 8 | 100);
+            do {
+                DrawSync(0);
+                VSync(2);
+                updateFieldInputs();
+                checkSoftReboot();
+            } while (!isControllerConnected(0));
+            resumeMusic();
+        }
+
+        /* pause when player press start */
+        if ((((padButtonForField & 0x800) != 0) && ((padButtonForScripts[0].m0_buttons & 0x40U) == 0)) && (pauseDisabled == '\0')) {
+            playTimeInVsync = playTimeBeginningOfLoop;
+            pauseMusic();
+            decompressPauseSignToVram(0x88, (g_frameOddOrEven + 1U & 1) << 8 | 100);
+            do {
+                DrawSync(0);
+                VSync(2);
+                updateFieldInputs();
+                checkSoftReboot();
+            } while ((padButtonForField & 0x800) == 0);
+            resumeMusic();
+        }
+
         fieldPerFrameReset();
         updateAndRenderField();
+        renderFullScreenTransitionEffect();
 
         MissingCode();
         ////
@@ -8654,8 +8744,37 @@ void fieldEntryPoint()
             }
         }
 
-        MissingCode();
-
+        bool iVar3;
+        if ((((bootModeReady == -1) && (playMusicAuthorized == -1)) && (fieldExecuteVar3 == -1)) && ((iVar3 = isFieldTransitionPermittedByLoading(), iVar3 == 0 && (fieldChangePrevented == -1)))) {
+            if ((padButtonForScripts[0].m0_buttons & 3U) == 0) {
+                bVar2 = false;
+            }
+            /*
+            if ((((padButtonForScripts[0].m0_buttons & 1U) != 0) && (playerCanRun == 1)) && (((padButtonForScripts[0].m0_buttons & 2U) != 0 && (!bVar2)))) {
+                bVar2 = true;
+                FUN_Field__800798bc();
+                if (((menuIdToOpen == 0xff) && (((actorArray[playerControlledActor].m4C_scriptEntity)->m0_fieldScriptFlags & 0x1800) == 0)) && (DAT_80059179 == '\0')) {
+                    FUN_Field__800ace90();
+                }
+            }
+            if ((((padButtonForField & 0x100) != 0) && (fieldChangePrevented == -1)) && (playerCanRun == 1)) {
+                openFieldMenu();
+            }*/
+            MissingCode();
+            if ((iRam800adb70 != 0) && (g_frameOddOrEven == 1)) {
+                startFieldTransition();
+                iRam800adb70 = 0;
+            }
+            if (((menuIdToOpen != 0xff) && (g_frameOddOrEven == 0)) && (((actorArray[playerControlledActor].m4C_scriptEntity)->m0_fieldScriptFlags & 0x1800) == 0)) {
+                releaseAllDialogWindows();
+                loadAndOpenMenu();
+                menuIdToOpen = 0xff;
+            }
+            if ((((padButtonForField & 0x10) != 0) && (menuDisabled == '\0')) && ((menuIdToOpen == 0xff && (playerCanRun == 1)))) {
+                menuIdToOpen = 0x80;
+                //menuOpenArg = (byte)DAT_Field__800b236c;
+            }
+        }
         updateMusicState();
     }
 }

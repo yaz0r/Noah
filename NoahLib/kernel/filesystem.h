@@ -42,3 +42,6 @@ int isCDBusy();
 int waitReadCompletion(int);
 std::vector<std::vector<u8>::iterator> doPointerRelocation(std::vector<u8>& inputData);
 std::vector<std::vector<u8>> doPointerRelocationAndSplit(std::vector<u8>& inputData);
+
+void filessystemDebugInfo_load();
+void filessystemDebugInfo_save();

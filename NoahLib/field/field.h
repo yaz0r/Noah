@@ -371,6 +371,9 @@ extern s32 fieldTransitionMode;
 extern s32 fieldTransitionFadeInLength;
 extern u32 playTimeInVsync;
 
+extern u32 fullScreenTransitionEffectRenderParam;
+extern u32 fullScreenTransitionEffectRenderMode;
+
 void setFieldDrawEnvClip(short x, short y, short w, short h);
 
 void syncKernelAndFieldStates();

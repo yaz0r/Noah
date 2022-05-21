@@ -116,9 +116,9 @@ void main()
     if(!gl_FrontFacing)
     {
         //if(dFdx(v_texcoord0.x) < 0){ texcoordInPage.x++;}
-        //if(dFdy(v_texcoord0.y) > 0){ texcoordInPage.y++;}
+        if(dFdy(v_texcoord0.y) > 0){ texcoordInPage.y++;}
         texcoordInPage.x++;
-        texcoordInPage.y++;
+        //texcoordInPage.y++;
     }
     else {
         if(dFdx(v_texcoord0.x) < 0){ texcoordInPage.x++;}

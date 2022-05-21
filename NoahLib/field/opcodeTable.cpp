@@ -66,7 +66,7 @@ void initOpcodes()
     fieldScriptOpcodes[0x52] = OP_52;
     fieldScriptOpcodes[0x53] = OP_53;
     fieldScriptOpcodes[0x55] = OP_55;
-    fieldScriptOpcodes[0x56] = OP_56;
+    fieldScriptOpcodes[0x56] = OP_WORLDMAP;
     fieldScriptOpcodes[0x57] = OP_57;
     fieldScriptOpcodes[0x58] = OP_58;
     fieldScriptOpcodes[0x59] = OP_WALK_RANDOM_DIRECTION;
@@ -250,9 +250,9 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0x98] = OPX_98;
     fieldScriptOpcodes_EX[0x99] = OPX_99;
     fieldScriptOpcodes_EX[0x9A] = OPX_9A;
-    fieldScriptOpcodes_EX[0x9B] = OPX_9B;
-    fieldScriptOpcodes_EX[0x9C] = OPX_9C;
-    fieldScriptOpcodes_EX[0x9D] = OPX_9D;
+    fieldScriptOpcodes_EX[0x9B] = OP_TRANSITION_EFFECT_1;
+    fieldScriptOpcodes_EX[0x9C] = OP_TRANSITION_EFFECT_2;
+    fieldScriptOpcodes_EX[0x9D] = OP_TRANSITION_EFFECT_3;
     fieldScriptOpcodes_EX[0x9F] = OP_TOGGLE_FRAME_LOCK;
     fieldScriptOpcodes_EX[0xA1] = OP_ASSIGN_GEAR;
     fieldScriptOpcodes_EX[0xA2] = OPX_A2;

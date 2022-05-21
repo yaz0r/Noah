@@ -344,6 +344,7 @@ void initOpcodeTable()
 		.end();
 
 	m_opcode[0x56]
+        .setName("WORLDMAP")
 		.addArgumentS16OrVar(0x80)
 		.addArgumentS16OrVar(0x40)
 		.addArgumentS16OrVar(0x20)
@@ -1364,14 +1365,17 @@ void initExtendedOpcodeTable()
         .end();
 
     m_extendedOpcode[0x9B]
+        .setName("TRANSITION_EFFECT_1")
         .addArgumentU16OrVar()
         .end();
 
     m_extendedOpcode[0x9C]
+        .setName("TRANSITION_EFFECT_2")
         .addArgumentU16OrVar()
         .end();
 
     m_extendedOpcode[0x9D]
+        .setName("TRANSITION_EFFECT_3")
         .addArgumentU16OrVar()
         .end();
 

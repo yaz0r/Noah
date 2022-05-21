@@ -1,0 +1,46 @@
+<directories>
+    <directory ID="4" Name="Fields"/>
+	<directory ID="28" Name="Wds"/>
+</directories>
+
+<files>
+    <file ID="21" Name="videoPlayer.prg"/>
+    <file ID="23" Name="system.cnf"/>
+    <file ID="24" Name="xenogears.prg"/>
+    <file ID="37" Name="battlingMinigame.prg"/>
+    <file ID="38" Name="field.prg"/>
+    <file ID="39" Name="worldmap.prg"/>
+    <file ID="40" Name="battle.prg"/>
+    <file ID="41" Name="menu.prg"/>
+    <file ID="429" Name="Fei"/>
+    <file ID="430" Name="Elly"/>
+    <file ID="431" Name="Citan"/>
+    <file ID="432" Name="Bart"/>
+    <file ID="433" Name="Billy"/>
+    <file ID="434" Name="Rico"/>
+    <file ID="435" Name="Emer"/>
+    <file ID="436" Name="ChuChu"/>
+    <file ID="437" Name="Maria"/>
+    <file ID="438" Name="Citan2"/>
+    <file ID="439" Name="Emer2"/>
+    <file ID="591" Name="fieldCompass.timBundle"/>
+    <file ID="592" Name="field.seq"/>
+    <file ID="593" Name="videoPlayer.prg"/>
+    <file ID="597" Name="fieldDebugger.prg"/>
+    <file ID="608" Name="field0_bin"/>
+    <file ID="609" Name="field0.timBundle"/>
+    <file ID="2145" Name="fieldMechaOverlay"/>
+    <file ID="2146" Name="fieldMecha0_0"/>
+    <file ID="2147" Name="fieldMecha0_1"/>
+    <file ID="2338" Name="SpecialAnim0"/>
+    <file ID="2398" Name="FeiPainting"/>
+    <file ID="2595" Name="menuSharedResources"/>
+    <file ID="2597" Name="initialGameState"/>
+    <file ID="2599" Name="menu0.prg"/>
+    <file ID="2600" Name="menu1.prg"/>
+    <file ID="2601" Name="menu2.prg"/>
+    <file ID="2602" Name="menu3.prg"/>
+    <file ID="2603" Name="menu4.prg"/>
+    <file ID="2604" Name="menu5.prg"/>
+    <file ID="2605" Name="menu6.prg"/>
+</files>
