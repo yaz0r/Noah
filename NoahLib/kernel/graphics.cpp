@@ -41,17 +41,6 @@ bgfx::ProgramHandle getSPRTShader()
 	return programHandle;
 }
 
-bgfx::ProgramHandle getTILEShader()
-{
-	static bgfx::ProgramHandle programHandle = BGFX_INVALID_HANDLE;
-	if (!bgfx::isValid(programHandle))
-	{
-		programHandle = loadBgfxProgram("TILE_vs", "TILE_ps");
-	}
-
-	return programHandle;
-}
-
 ImVec2 PSXInternalResolution = { 320,240 };
 float PSXRenderScaling = 2.f;
 ImVec2 PSXRenderResolution = { PSXInternalResolution.x * PSXRenderScaling, PSXInternalResolution.y * PSXRenderScaling };
@@ -533,7 +522,7 @@ void TILE::execute()
 			s_PSXVramUniformHandle = bgfx::createUniform("s_PSXVram", bgfx::UniformType::Sampler);
 		}
 		bgfx::setTexture(0, s_PSXVramUniformHandle, m_vramTextureHandle);
-		bgfx::submit(PSXOutput_bgfxView, getTILEShader());
+		bgfx::submit(PSXOutput_bgfxView, getSPRTShader());
 	}
 }
 
@@ -594,7 +583,7 @@ void POLY_F3::execute()
             s_PSXVramUniformHandle = bgfx::createUniform("s_PSXVram", bgfx::UniformType::Sampler);
         }
         bgfx::setTexture(0, s_PSXVramUniformHandle, m_vramTextureHandle);
-        bgfx::submit(PSXOutput_bgfxView, getTILEShader());
+        bgfx::submit(PSXOutput_bgfxView, getSPRTShader());
     }
 }
 
