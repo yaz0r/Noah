@@ -269,6 +269,8 @@ void SetTile(TILE* p);
 
 void SetSprt(SPRT* p);
 
+void setPolyUV(POLY_FT4* poly, ushort u0, ushort v0, ushort u1, ushort v1, ushort u2, ushort v2, ushort u3, ushort v3);
+
 template<typename T>
 void SetShadeTex(T* p, int tge)
 {

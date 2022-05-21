@@ -6,6 +6,7 @@
 #include "kernel/TIM.h"
 #include "kernel/decompress.h"
 #include "kernel/gameState.h"
+#include "kernel/memory.h"
 
 #include "menus/menuGold.h"
 #include "menus/statusMenu.h"
@@ -2242,7 +2243,7 @@ void enterMenu(void)
     gMenuContext = new sMenuContext;
 
     gMenuContext->m325_menuButton = 8;
-    initModel3(2, 0);
+    resetMemoryAllocStats(2, 0);
 
     gMenuContext->m1D4_currentDrawContext = &gMenuContext->m6C_drawContexts[1];
 

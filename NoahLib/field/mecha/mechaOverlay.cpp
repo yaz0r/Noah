@@ -5,6 +5,7 @@
 #include "kernel/gte.h"
 #include "bx/math.h"
 #include "field/fieldGraphicObject.h"
+#include "kernel/memory.h"
 
 u32 NumMechas;
 std::array<s16, 4> mechaList;
@@ -225,7 +226,7 @@ void initMechaInitVar2Sub0(sMechaInitVar2* param_1) {
 void initMechaInitVar2(sMechaInitVar2* param_1, int param_2) {
     if (param_2 > 0) {
         param_1->m6 = param_2;
-        initModel3(4, 0);
+        resetMemoryAllocStats(4, 0);
         param_1->m0.resize(param_2);
         if (param_1->m0.size()) {
             initMechaInitVar2Sub0(param_1);
@@ -256,7 +257,7 @@ void initMechaInitVar3Sub(sMechaInitVar3* param_1) {
 }
 
 void initMechaInitVar3(sMechaInitVar3* param_1, int param_2) {
-    initModel3(4, 0);
+    resetMemoryAllocStats(4, 0);
     param_1->m4 = param_2;
     param_1->m6 = 0;
     param_1->m0.resize(param_2 + 1);
@@ -554,7 +555,7 @@ void processMechaAnimData(sLoadedMechas* param_1, sMechaInitVar2* param_2, int p
         return;
     }
 
-    initModel3(4, 0);
+    resetMemoryAllocStats(4, 0);
 
     // step the mecha forward?
     for (int i = 0; i < param_4; i++) {
@@ -712,7 +713,7 @@ void initMechaTransforms1(sLoadedMechas* param_1, sMechaInitVar2* param_2, std::
 
 void mechaInitNewMecha(int entryId, ushort flags, sMechaDataTable2* pData2, sMechaDataTable1* pData1, ushort tpageX, ushort tpageY, ushort clutX, short clutY, SFP_VEC3* param_9)
 {
-    initModel3(4, 0);
+    resetMemoryAllocStats(4, 0);
     if (9 < entryId) {
         return;
     }
@@ -923,7 +924,7 @@ void loadMechaOverlay_finalize(void)
         mechaList3[i] = loadedMechas[i]->m1C_moveSpeed;
     }
 
-    initModel3(8, 0);
+    resetMemoryAllocStats(8, 0);
 }
 
 void loadMechaOVerlayAndRegisterMechas(void)

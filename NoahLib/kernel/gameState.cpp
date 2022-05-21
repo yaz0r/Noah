@@ -6,12 +6,12 @@
 sGameState gameState;
 sGameState* pKernelGameState = nullptr;
 
-void initModel3(int, int); // TODO: cleanup
+void resetMemoryAllocStats(int, int); // TODO: cleanup
 
 void loadInitialGameState()
 {
     setCurrentDirectory(0x10, 0);
-    initModel3(2, 0);
+    resetMemoryAllocStats(2, 0);
     int size = getFileSizeAligned(3);
 
     {

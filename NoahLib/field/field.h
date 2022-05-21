@@ -229,6 +229,9 @@ extern const std::array<s8, 12> characterMappingTable;
 extern s16 pcInitVar2;
 extern std::array<int, 3> unkPartyTable;
 
+extern bool isBackBufferRamCopyEnabled;
+extern s32 cameraDeltaTan;
+
 extern s32 opA0_var0;
 extern s32 opA0_var1;
 extern FP_VEC3 desiredCameraPosition;
@@ -374,6 +377,8 @@ extern u32 playTimeInVsync;
 extern u32 fullScreenTransitionEffectRenderParam;
 extern u32 fullScreenTransitionEffectRenderMode;
 
+extern s16 updateCharacterVar1;
+
 void setFieldDrawEnvClip(short x, short y, short w, short h);
 
 void syncKernelAndFieldStates();
@@ -437,8 +442,6 @@ void resetRGBFaderToBlack(int index);
 void setupRGBFaderSlot0_fadeIn(int);
 void setupRGBCalcSlot0_fadeToBlack(int);
 
-void setPolyUV(POLY_FT4* poly, ushort u0, ushort v0, ushort u1, ushort v1, ushort u2, ushort v2, ushort u3, ushort v3);
-
 void updateEntityEventCode3Sub1(struct sSpriteActor* param_1, ushort rotation, sFieldEntity* param_3);
 void setVisualAnimation(struct sSpriteActor* param_1, int param_2, sFieldEntity* param_3);
 
@@ -448,7 +451,6 @@ void finalizeLoadPlayableCharacters();
 int getGearForCharacter(int param_1);
 
 void ClearCacheAfterOverlayLoad();
-void initModel3(int, int);
 
 int fieldModelRelocation(std::vector<u8>::iterator pModelData);
 void initModel1(sModelBlock& pModelBlock, std::vector<sTag*>& outputBuffer1, std::vector<sTag*>& outputBuffer2);

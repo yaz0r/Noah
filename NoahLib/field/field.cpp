@@ -21,6 +21,8 @@
 #include "mecha/mechaOverlay.h"
 #include "menus/menuHandler.h"
 #include "kernel/gte.h"
+#include "field/particles/particles.h"
+#include "kernel/memory.h"
 
 #include "SDL_gamecontroller.h"
 #include "SDL_keyboard.h"
@@ -30,6 +32,7 @@ s32 bootModeReady = 0;
 s32 newBootMode = 0;
 s32 menuFadeState = 0;
 u8 kernelAndFieldStatesSynced = 1;
+s16 updateCharacterVar1 = 0;
 
 bool g_executeScripts = true;
 bool g_executeUpdateScripts = true;
@@ -330,8 +333,15 @@ void resetFieldDefault()
     MissingCode();
     updateEntityEventCode3Var1 = 0;
     MissingCode();
+    currentParticleCreatorId = 0;
+    updateCharacterVar1 = 0;
     actorCameraTracked = 0;
     MissingCode();
+    disableParticles = 0;
+    menuIdToOpen = 0xff;
+    MissingCode();
+
+    op99Var4 = 0x1000;
     linkOTIndex = 0x720;
 
     MissingCode();
@@ -373,6 +383,8 @@ void resetFieldDefault()
     resetCameraData();
     resetPortraitLoadingStatus();
 
+    MissingCode();
+    resetParticleEffectsTable();
     MissingCode();
 }
 
@@ -1834,11 +1846,6 @@ void sprintf_screen(const char* format, ...)
     MissingCode();
 }
 
-void initModel3(int, int)
-{
-    MissingCode();
-}
-
 sSavePointMesh_1C* spriteCallback2Var1 = nullptr;
 sSavePointMesh_1C* spriteCallback2Var2 = nullptr;
 sSavePointMesh_1C* spriteCallback2Var3 = nullptr;
@@ -1888,7 +1895,7 @@ void execSpritesCallbacks2()
 
 void OP_INIT_ENTITY_SCRIPT_sub0(int actorId, int clutYEntry, sSpriteActorAnimationBundle* pSetup, int param_4, int clutXEntry, int param_6, int param_7)
 {
-    initModel3(8, 0);
+    resetMemoryAllocStats(8, 0);
     actorArray[actorId].m4C_scriptEntity->m127 = clutYEntry;
     actorArray[actorId].m4C_scriptEntity->m126 = param_6;
     actorArray[actorId].m4C_scriptEntity->m134.m0 = clutXEntry;
@@ -1981,7 +1988,7 @@ void OP_INIT_ENTITY_SCRIPT_sub0(int actorId, int clutYEntry, sSpriteActorAnimati
 
     spriteActorSetPlayingAnimation(pFieldEntitySub4, 0);
     OP_INIT_ENTITY_SCRIPT_sub0Sub7(pFieldEntitySub4, 0);
-    initModel3(8, 0);
+    resetMemoryAllocStats(8, 0);
 
     pFieldEntitySub4->m7C->m14_actorId = actorId;
     OP_INIT_ENTITY_SCRIPT_sub0Sub8(pFieldEntitySub4, &fieldActorCallback);
@@ -2941,66 +2948,6 @@ MATRIX currentProjectionMatrix;
 s32 updateCameraInterpolationVar0 = 0;
 s32 updateCameraInterpolationVar1 = 0;
 
-void setPolyUV(POLY_FT4* poly, ushort u0, ushort v0, ushort u1, ushort v1, ushort u2, ushort v2, ushort u3, ushort v3)
-{
-    if ((int)((uint)u0 << 0x10) < 0) {
-        u0 = 0;
-    }
-    if ((int)((uint)u1 << 0x10) < 0) {
-        u1 = 0;
-    }
-    if ((int)((uint)u2 << 0x10) < 0) {
-        u2 = 0;
-    }
-    if ((int)((uint)u3 << 0x10) < 0) {
-        u3 = 0;
-    }
-    if ((int)((uint)v0 << 0x10) < 0) {
-        v0 = 0;
-    }
-    if ((int)((uint)v1 << 0x10) < 0) {
-        v1 = 0;
-    }
-    if ((int)((uint)v2 << 0x10) < 0) {
-        v2 = 0;
-    }
-    if ((int)((uint)v3 << 0x10) < 0) {
-        v3 = 0;
-    }
-    if (0xff < (short)u0) {
-        u0 = 0xff;
-    }
-    if (0xff < (short)u1) {
-        u1 = 0xff;
-    }
-    if (0xff < (short)u2) {
-        u2 = 0xff;
-    }
-    if (0xff < (short)u3) {
-        u3 = 0xff;
-    }
-    if (0xff < (short)v0) {
-        v0 = 0xff;
-    }
-    if (0xff < (short)v1) {
-        v1 = 0xff;
-    }
-    if (0xff < (short)v2) {
-        v2 = 0xff;
-    }
-    if (0xff < (short)v3) {
-        v3 = 0xff;
-    }
-    poly->u0 = u0;
-    poly->v0 = v0;
-    poly->u1 = u1;
-    poly->v1 = v1;
-    poly->u2 = u2;
-    poly->v2 = v2;
-    poly->u3 = u3;
-    poly->v3 = v3;
-}
-
 int shoudlGroundOTBeEnabled()
 {
     int iVar1;
@@ -3588,9 +3535,9 @@ void initFieldData()
             actorArray[i].m0->m8[1] = actorArray[i].m0->m8[0];
             if (actorArray[i].m58_flags & 0x2000)
             {
-                initModel3(3, 0);
+                resetMemoryAllocStats(3, 0);
                 actorArray[i].m0->m14 = initModelDynamicVertices(&(*actorArray[i].m0->m4_pModelBlock));
-                initModel3(8, 0);
+                resetMemoryAllocStats(8, 0);
             }
             initModel5(&(*actorArray[i].m0->m4_pModelBlock));
         }
@@ -3617,7 +3564,7 @@ void initFieldData()
     rawFieldBundleForDebug = rawFieldBundle;
     rawFieldBundle.clear();
 
-    initModel3(5, 0);
+    resetMemoryAllocStats(5, 0);
 
     allocateShapeTransfert(0x3c00);
 
@@ -3667,7 +3614,7 @@ void initFieldData()
         ((int)(short)OPX_80Params[0], (int)(short)OPX_80Params[1], (int)(short)OPX_80Params[2], (int)(short)OPX_80Params[3], (int)(short)OPX_80Params[4], (int)(short)OPX_80Params[5],
             (int)(short)OPX_80Params[6], (int)(short)OPX_80Params[7], OPX_81Params, OPX_82Param0, (int)OPX_82Param3[0], (int)OPX_82Param3[1], (int)OPX_82Param3[2]);
     }
-    initModel3(8, 0);
+    resetMemoryAllocStats(8, 0);
 
     cameraAt2.vx = actorArray[actorCameraTracked].mC_matrix.t[0] << 16;
     cameraAt2.vy = actorArray[actorCameraTracked].mC_matrix.t[1] << 16;
@@ -3978,7 +3925,7 @@ void bootField()
 
 void allocatePartyCharacterBuffers()
 {
-    initModel3(8, 0);
+    resetMemoryAllocStats(8, 0);
 
     partyCharacterBuffersRaw[0].resize(0x14000);
     partyCharacterBuffersRaw[1].resize(0x14000);
@@ -8142,11 +8089,6 @@ void renderChars()
     }
 }
 
-void renderParticles()
-{
-    MissingCode();
-}
-
 void ClearImage(RECT* pRect, u8 r, u8 g, u8 b)
 {
     MissingCode();
@@ -8198,7 +8140,7 @@ void updateAndRenderField()
     MissingCode();
     renderObjects();
     renderChars();
-    renderParticles();
+    updateParticles();
     MissingCode();
     updateAndRenderScreenDistortion();
     MissingCode();
@@ -8765,7 +8707,7 @@ void fieldEntryPoint()
                 startFieldTransition();
                 iRam800adb70 = 0;
             }
-            if (((menuIdToOpen != 0xff) && (g_frameOddOrEven == 0)) && (((actorArray[playerControlledActor].m4C_scriptEntity)->m0_fieldScriptFlags & 0x1800) == 0)) {
+            if (((menuIdToOpen != 0xff) && (g_frameOddOrEven == 0)) && (((actorArray[playerControlledActor].m4C_scriptEntity)->m0_fieldScriptFlags.m_rawFlags & 0x1800) == 0)) {
                 releaseAllDialogWindows();
                 loadAndOpenMenu();
                 menuIdToOpen = 0xff;

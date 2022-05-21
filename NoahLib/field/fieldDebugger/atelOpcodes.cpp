@@ -1293,6 +1293,7 @@ void initExtendedOpcodeTable()
 		.end();
 
 	m_extendedOpcode[0x8F]
+        .setName("RESET_PARTICLE_CONFIGS")
 		.addArgumentCharacter()
 		.addArgumentU16OrVar()
 		.addArgumentU16OrVar()
@@ -1300,55 +1301,61 @@ void initExtendedOpcodeTable()
 		.end();
 
 	m_extendedOpcode[0x90]
-		.addArgumentU16OrVar()
-		.addArgumentU16OrVar()
-		.addArgumentU16OrVar()
-		.addArgumentU16OrVar()
+        .setName("SETUP_PARTICLE")
+		.addArgumentU16OrVar("slot")
+		.addArgumentU16OrVar("maxParticles")
+		.addArgumentU16OrVar("sWait")
+		.addArgumentU16OrVar("eWait")
 		.end();
 
 	m_extendedOpcode[0x91]
-		.addArgumentS16OrVar(0x80)
-		.addArgumentS16OrVar(0x40)
-		.addArgumentS16OrVar(0x20)
-		.addArgumentS16OrVar(0x10)
-		.addArgumentS16OrVar(0x8)
-		.addArgumentS16OrVar(0x4)
+        .setName("SETUP_PARTICLE_POSITION")
+		.addArgumentS16OrVar(0x80, "sPosX")
+		.addArgumentS16OrVar(0x40, "sPosY")
+		.addArgumentS16OrVar(0x20, "sPosZ")
+		.addArgumentS16OrVar(0x10, "ePosX")
+		.addArgumentS16OrVar(0x8, "ePosY")
+		.addArgumentS16OrVar(0x4, "ePosZ")
 		.addSignControlByte()
 		.end();
 
 	m_extendedOpcode[0x92]
-		.addArgumentS16OrVar(0x80)
-		.addArgumentS16OrVar(0x40)
-		.addArgumentS16OrVar(0x20)
-		.addArgumentS16OrVar(0x10)
-		.addArgumentS16OrVar(0x8)
-		.addArgumentS16OrVar(0x4)
+        .setName("SETUP_LIFE1")
+		.addArgumentS16OrVar(0x80, "speed")
+        .addArgumentS16OrVar(0x40, "gravityX")
+        .addArgumentS16OrVar(0x20, "gravityY")
+        .addArgumentS16OrVar(0x10, "gravityZ")
+		.addArgumentS16OrVar(0x8, "sRange")
+		.addArgumentS16OrVar(0x4, "eRange")
 		.addSignControlByte()
 		.end();
 
 	m_extendedOpcode[0x93]
-		.addArgumentU16OrVar()
-		.addArgumentU16OrVar()
-		.addArgumentU16OrVar()
-		.addArgumentU16OrVar()
-		.addArgumentU16OrVar()
+        .setName("SETUP_LIFE2")
+		.addArgumentU16OrVar("psWait")
+		.addArgumentU16OrVar("peWait")
+		.addArgumentU16OrVar("shape")
+		.addArgumentU16OrVar("flags1")
+		.addArgumentU16OrVar("flags2")
 		.end();
 
 	m_extendedOpcode[0x94]
-		.addArgumentS16OrVar(0x80)
-		.addArgumentS16OrVar(0x40)
-		.addArgumentS16OrVar(0x20)
-		.addArgumentS16OrVar(0x10)
+        .setName("SETUP_SCALE")
+		.addArgumentS16OrVar(0x80, "scaleX")
+        .addArgumentS16OrVar(0x40, "scaleY")
+        .addArgumentS16OrVar(0x20, "scaleOffsetX")
+		.addArgumentS16OrVar(0x10, "scaleOffsetY")
 		.addSignControlByte()
 		.end();
 
 	m_extendedOpcode[0x95]
-		.addArgumentS16OrVar(0x80)
-		.addArgumentS16OrVar(0x40)
-		.addArgumentS16OrVar(0x20)
-		.addArgumentS16OrVar(0x10)
-		.addArgumentS16OrVar(0x8)
-		.addArgumentS16OrVar(0x4)
+        .setName("SETUP_PARTICLE_COLOR")
+		.addArgumentS16OrVar(0x80,"R")
+		.addArgumentS16OrVar(0x40,"G")
+		.addArgumentS16OrVar(0x20,"B")
+		.addArgumentS16OrVar(0x10, "offsetR")
+		.addArgumentS16OrVar(0x8, "offsetG")
+		.addArgumentS16OrVar(0x4, "offsetB")
 		.addSignControlByte()
 		.end();
 
@@ -1357,6 +1364,7 @@ void initExtendedOpcodeTable()
 		.end();
 
 	m_extendedOpcode[0x97]
+        .setName("STOP_PARTICLE_EFFECT")
 		.addArgumentByte()
 		.end();
 

@@ -55,3 +55,63 @@ void SetPolyF4(POLY_F4* p)
     p->code = 0x28;
     return;
 }
+
+void setPolyUV(POLY_FT4* poly, ushort u0, ushort v0, ushort u1, ushort v1, ushort u2, ushort v2, ushort u3, ushort v3)
+{
+    if ((int)((uint)u0 << 0x10) < 0) {
+        u0 = 0;
+    }
+    if ((int)((uint)u1 << 0x10) < 0) {
+        u1 = 0;
+    }
+    if ((int)((uint)u2 << 0x10) < 0) {
+        u2 = 0;
+    }
+    if ((int)((uint)u3 << 0x10) < 0) {
+        u3 = 0;
+    }
+    if ((int)((uint)v0 << 0x10) < 0) {
+        v0 = 0;
+    }
+    if ((int)((uint)v1 << 0x10) < 0) {
+        v1 = 0;
+    }
+    if ((int)((uint)v2 << 0x10) < 0) {
+        v2 = 0;
+    }
+    if ((int)((uint)v3 << 0x10) < 0) {
+        v3 = 0;
+    }
+    if (0xff < (short)u0) {
+        u0 = 0xff;
+    }
+    if (0xff < (short)u1) {
+        u1 = 0xff;
+    }
+    if (0xff < (short)u2) {
+        u2 = 0xff;
+    }
+    if (0xff < (short)u3) {
+        u3 = 0xff;
+    }
+    if (0xff < (short)v0) {
+        v0 = 0xff;
+    }
+    if (0xff < (short)v1) {
+        v1 = 0xff;
+    }
+    if (0xff < (short)v2) {
+        v2 = 0xff;
+    }
+    if (0xff < (short)v3) {
+        v3 = 0xff;
+    }
+    poly->u0 = u0;
+    poly->v0 = v0;
+    poly->u1 = u1;
+    poly->v1 = v1;
+    poly->u2 = u2;
+    poly->v2 = v2;
+    poly->u3 = u3;
+    poly->v3 = v3;
+}
