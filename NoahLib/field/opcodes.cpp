@@ -1935,6 +1935,12 @@ void OP_SET_SCREEN_GEOMETRY()
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 7;
 }
 
+void OP_SET_DOLLY_STOP()
+{
+    DollyStop = getImmediateOrVariableUnsigned(1);
+    pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
+}
+
 void OP_A2()
 {
     if ((op99Var7 & pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1]) == 0) {
@@ -2699,6 +2705,12 @@ void OPX_66(void)
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 9;
 }
 
+void OP_SET_LINK_OT(void)
+{
+    linkOTIndex = getImmediateOrVariableUnsigned(1);
+    pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
+}
+
 void OPX_6B(void)
 {
     MissingCode();
@@ -3063,6 +3075,11 @@ void OP_GET_CURRENT_DISC_NUMBER()
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
 }
 
+void OP_SET_MAX_MECHA() {
+    numMaxMechaOverlayEntries = getImmediateOrVariableUnsigned(1);
+    pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
+}
+
 void OP_SET_PAUSE_DISABLED(void)
 {
     pauseDisabled = pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1];
@@ -3301,7 +3318,7 @@ void OPX_1C(void)
     return;
 }
 
-void OPX_1E(void)
+void OP_SWITCH_MAP_TO_GEARS(void)
 {
     fieldMapNumber = fieldMapNumber | 0xc000;
     waitForReadFinished();
@@ -3345,6 +3362,11 @@ void OPX_21()
         actorArray[iVar2].m58_flags &= ~0x20;
     }
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
+}
+
+void OPX_23() {
+    MissingCode();
+    pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 0x14;
 }
 
 void OP_23(void)
@@ -4005,6 +4027,11 @@ void OP_SET_OBJECT_SWIVEL_ON_Z_AXIS(void)
     pCurrentFieldScriptActor->m12C_flags |= 3;
     pCurrentFieldScriptActor->m70_rotationForRendering = getImmediateOrVariableUnsigned(1);
     pCurrentFieldScriptActor->mCC_scriptPC += 3;
+}
+
+void OP_DA() {
+    MissingCode();
+    pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 0x11;
 }
 
 void OP_DB()

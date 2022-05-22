@@ -1095,7 +1095,7 @@ int prim9_init(u8* displayList, u8* meshBlock, int initParam)
 
 int primC_init(u8* displayList, u8* meshBlock, int initParam)
 {
-    assert(READ_LE_U8(displayList + 3) == 0x28); // quad with color
+    //assert(READ_LE_U8(displayList + 3) == 0x28); // quad with color
 
     POLY_F4* pNewPoly = new POLY_F4;
 
@@ -8087,11 +8087,6 @@ void renderChars()
     }
 }
 
-void ClearImage(RECT* pRect, u8 r, u8 g, u8 b)
-{
-    MissingCode();
-}
-
 void shapeTransfert()
 {
     sShapeTransfert* rect;
@@ -8099,7 +8094,7 @@ void shapeTransfert()
     rect = (sShapeTransfert*)shapeTransfertTable[shapeTransfertDoubleBufferIndex];
     while (rect != (sShapeTransfert*)0x0) {
         if (rect->m8_pData.getPointer() == nullptr) {
-            ClearImage(&rect->m0_rect, '\0', '\0', '\0');
+            ClearImage(&rect->m0_rect, 0, 0, 0);
         }
         else {
             LoadImage(&rect->m0_rect, rect->m8_pData);
@@ -8150,6 +8145,20 @@ void updateAndRenderField()
     addDialogWindowsToOT(&pCurrentFieldRenderingContext->m80D4_uiOT[0], g_frameOddOrEven);
     VSync(0);
     MissingCode();
+
+    u8 clearR = fieldBackgroundClearColor[0];
+    u8 clearG = fieldBackgroundClearColor[1];
+    u8 clearB = fieldBackgroundClearColor[2];
+    if (updateAllEntitiesSub2Var0 != 0) {
+        if (fieldTransitionMode == 3) {
+            assert(0);
+        }
+        clearR = clearG = clearB = 0;
+    }
+    ClearImage(&pCurrentFieldRenderingContext->m5C_backgroundRect.clip, clearR, clearG, clearB);
+
+    MissingCode();
+
     shapeTransfert();
     MissingCode();
 
@@ -8511,12 +8520,7 @@ void checkSoftReboot() {
 }
 
 void renderFullScreenTransitionEffect() {
-    switch (fullScreenTransitionEffectRenderMode) {
-    case 0:
-        break;
-    default:
-        assert(0);
-    }
+    MissingCode();
 }
 
 bool isFieldTransitionPermittedByLoading() {

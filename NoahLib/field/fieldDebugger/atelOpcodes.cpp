@@ -371,6 +371,10 @@ void initOpcodeTable()
         .setOpcodeBreakExecutionFlow()
 		.end();
 
+    m_opcode[0x5C]
+        .addArgumentU16OrVar()
+        .end();
+
 	m_opcode[0x5D]
 		.setName("PLAY_ANIMATION_EX")
 		.addArgumentByte()
@@ -556,6 +560,9 @@ void initOpcodeTable()
 		.addArgumentJumpLocation()
 		.end();
 
+    m_opcode[0x92]
+        .end();
+
 	m_opcode[0x93]
 		.setName("ADD_ENDITY_TO_MECHA_LIST")
 		.addArgumentU16OrVar()
@@ -600,6 +607,11 @@ void initOpcodeTable()
 		.addArgumentU16OrVar()
 		.addArgumentU16OrVar()
 		.end();
+
+    m_opcode[0xA1]
+        .setName("SET_DOLLY_STOP")
+        .addArgumentU16OrVar()
+        .end();
 
 	m_opcode[0xA2]
 		.setComment("Wait for mask to clear")
@@ -788,6 +800,17 @@ void initOpcodeTable()
     m_opcode[0xD9]
         .setName("SET_OBJECT_SWIVEL_ON_Z_AXIS")
         .addArgumentU16OrVar()
+        .end();
+
+    m_opcode[0xDA]
+        .addArgumentU16()
+        .addArgumentU16()
+        .addArgumentU16()
+        .addArgumentU16()
+        .addArgumentU16()
+        .addArgumentU16()
+        .addArgumentU16()
+        .addArgumentU16()
         .end();
 
 	m_opcode[0xDB]
@@ -1003,6 +1026,11 @@ void initExtendedOpcodeTable()
 		.addArgumentS16OrVar(0x20)
 		.addSignControlByte()
 		.end();
+
+    m_extendedOpcode[0x1E]
+        .setName("SWITCH_MAP_TO_GEARS")
+        .addArgumentByte()
+        .end();
 
 	m_extendedOpcode[0x23]
 		.addArgumentS16OrVar(0x80)
@@ -1221,6 +1249,11 @@ void initExtendedOpcodeTable()
 		.addArgumentCharacter()
 		.end();
 
+    m_extendedOpcode[0x6A]
+        .setName("SET_LINK_OT")
+        .addArgumentU16OrVar()
+        .end();
+
 	m_extendedOpcode[0x6B]
 		.addArgumentU16OrVar()
 		.addArgumentU16OrVar()
@@ -1434,6 +1467,11 @@ void initExtendedOpcodeTable()
 		.addArgumentU16OrVar("unused?")
 		.addArgumentU16OrVar("unused?")
 		.end();
+    
+    m_extendedOpcode[0xCE]
+        .setName("SET_MAX_MECHA")
+        .addArgumentU16OrVar()
+        .end();
 
 	m_extendedOpcode[0xCD]
 		.setName("GET_CURRENT_DISC_NUMBER")

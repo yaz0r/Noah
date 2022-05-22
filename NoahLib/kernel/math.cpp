@@ -293,7 +293,9 @@ void RotTrans(SFP_VEC4* rotation, FP_VEC4* output, long* flag)
 	output->vx = getCopReg(2, 0x19);
 	output->vy = getCopReg(2, 0x1a);
 	output->vz = getCopReg(2, 0x1b);
-	*flag = getCopControlWord(2, 0xF800);
+    if (flag) {
+        *flag = getCopControlWord(2, 0xF800);
+    }
 }
 
 void Square0(FP_VEC3* v0, FP_VEC3* v1)

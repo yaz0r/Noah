@@ -860,6 +860,20 @@ void registerSpriteCallback2_2(void* param_1) {
     MissingCode();
 }
 
+void setGraphicEntityScale(sSpriteActorCore* param_1, int param_2)
+{
+    sFieldEntitySub4_B4_base* psVar1;
+
+    psVar1 = param_1->m20;
+    if (psVar1 != nullptr) {
+        param_1->m2C_scale = param_2;
+        psVar1->m6_scale.vx = param_2;
+        psVar1->m6_scale.vy = param_2;
+        psVar1->m6_scale.vz = param_2;
+        param_1->m3C = param_1->m3C | 0x10000000;
+    }
+}
+
 void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS1Pointer param_3)
 {
 	switch (bytecode & 0xff) {
@@ -1061,6 +1075,9 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
 	case 0xe0:
 		spriteBytecode2ExtendedE0(param_1, param_3 + READ_LE_S16(param_3), param_1->m24_vramData);
 		break;
+    case 0xe7:
+        setGraphicEntityScale(param_1, param_1->m2C_scale + READ_LE_S16(param_3));
+        break;
 	case 0xF0:
 		return;
 	case 0xf1:
@@ -1389,20 +1406,6 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub9(sSpriteActorCore* param_1)
 	return;
 }
 
-void initFieldEntitySub4Sub3(sSpriteActorCore* param_1, int param_2)
-{
-	sFieldEntitySub4_B4* psVar1;
-
-	psVar1 = param_1->m20->getAsSprite();
-	if (psVar1 != nullptr) {
-		param_1->m2C_scale = param_2;
-		psVar1->m6_scale.vx = param_2;
-		psVar1->m6_scale.vy = param_2;
-		psVar1->m6_scale.vz = param_2;
-		param_1->m3C = param_1->m3C | 0x10000000;
-	}
-}
-
 //header is
 //u16 m0: flags
 //u16 m2: offset to byte code
@@ -1465,7 +1468,7 @@ void setCurrentAnimationPtr(sSpriteActorCore* param_1, const sPS1Pointer startOf
 		}
 		if ((flags >> 0xd & 1) == 0) {
 			if (isBattleOverlayLoaded != '\0') {
-				initFieldEntitySub4Sub3(param_1, (short)OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1_var);
+				setGraphicEntityScale(param_1, (short)OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1_var);
 				goto LAB_800236f4;
 			}
 		}
@@ -1759,7 +1762,7 @@ sSpriteActor* initializeSpriteActor(sSpriteActor* param_1, sSpriteActorAnimation
 {
 	initFieldEntitySub4Sub1(param_1);
 	initFieldEntitySub4Sub2(param_1);
-	initFieldEntitySub4Sub3(param_1, 0x1000);
+	setGraphicEntityScale(param_1, 0x1000);
 
 	param_1->m3C = (param_1->m3C & ~0x3) | 1;
 	param_1->m40 &= ~0x0001E000;

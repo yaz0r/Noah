@@ -111,6 +111,7 @@ void initOpcodes()
     fieldScriptOpcodes[0x9C] = OP_WAIT_DIALOG;
     fieldScriptOpcodes[0x9D] = OP_9D;
     fieldScriptOpcodes[0xA0] = OP_SET_SCREEN_GEOMETRY;
+    fieldScriptOpcodes[0xA1] = OP_SET_DOLLY_STOP;
     fieldScriptOpcodes[0xA2] = OP_A2;
     fieldScriptOpcodes[0xA3] = OP_SET_DESIRED_CAMERA_POSITION;
     fieldScriptOpcodes[0xA4] = OP_A4;
@@ -149,6 +150,7 @@ void initOpcodes()
     fieldScriptOpcodes[0xD6] = OP_D6;
     fieldScriptOpcodes[0xD7] = OP_SET_OBJECT_SWIVEL_ON_X_AXIS;
     fieldScriptOpcodes[0xD9] = OP_SET_OBJECT_SWIVEL_ON_Z_AXIS;
+    fieldScriptOpcodes[0xDA] = OP_DA;
     fieldScriptOpcodes[0xDB] = OP_DB;
     fieldScriptOpcodes[0xDC] = OP_DC;
     fieldScriptOpcodes[0xDE] = OP_DE;
@@ -191,8 +193,9 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0x19] = OP_REMOVE_FROM_CURRENT_PARTY;
     fieldScriptOpcodes_EX[0x1A] = OP_FINALIZE_PARTY_CHARACTER_LOADING;
     fieldScriptOpcodes_EX[0x1C] = OPX_1C;
-    fieldScriptOpcodes_EX[0x1E] = OPX_1E;
+    fieldScriptOpcodes_EX[0x1E] = OP_SWITCH_MAP_TO_GEARS;
     fieldScriptOpcodes_EX[0x21] = OPX_21;
+    fieldScriptOpcodes_EX[0x23] = OPX_23;
     fieldScriptOpcodes_EX[0x26] = OP_SETUP_SCREEN_DISTORTION;
     fieldScriptOpcodes_EX[0x27] = OP_SCREEN_DISTORTION_FADE_OUT;
     fieldScriptOpcodes_EX[0x3A] = OP_SET_PARTY_FRAME_MASK;
@@ -226,6 +229,7 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0x62] = OPX_62;
     fieldScriptOpcodes_EX[0x65] = OPX_65;
     fieldScriptOpcodes_EX[0x66] = OPX_66;
+    fieldScriptOpcodes_EX[0x6A] = OP_SET_LINK_OT;
     fieldScriptOpcodes_EX[0x6B] = OPX_6B;
     fieldScriptOpcodes_EX[0x7F] = OPX_7F;
     fieldScriptOpcodes_EX[0x80] = OPX_80;
@@ -266,6 +270,7 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0xCB] = OPX_CB;
     fieldScriptOpcodes_EX[0xCC] = OPX_CC;
     fieldScriptOpcodes_EX[0xCD] = OP_GET_CURRENT_DISC_NUMBER;
+    fieldScriptOpcodes_EX[0xCE] = OP_SET_MAX_MECHA;
     fieldScriptOpcodes_EX[0xE0] = OP_SET_PAUSE_DISABLED;
 }
 

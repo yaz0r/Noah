@@ -955,3 +955,15 @@ void setupPolyG4(POLY_G4* param_1, u8 param_2, u8 param_3, u8 param_4)
     param_1->b3 = 0;
     return;
 }
+
+void ClearImage(RECT* pRect, u8 r, u8 g, u8 b)
+{
+    u32 colorClearValue = r;
+    colorClearValue <<= 8;
+    colorClearValue |= g;
+    colorClearValue <<= 8;
+    colorClearValue |= b;
+    colorClearValue <<= 8;
+    colorClearValue |= 0xFF;
+    bgfx::setViewClear(PSXOutput_bgfxView, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, colorClearValue);
+}
