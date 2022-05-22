@@ -2,6 +2,25 @@
 
 #include "kernel/math.h"
 
+struct sColorAndCode
+{
+    u8 m0_r;
+    u8 m1_g;
+    u8 m2_b;
+    union {
+        struct {
+            u8 textureBlending : 1;
+            u8 semiTransparent : 1;
+            u8 textured : 1;
+            u8 quad : 1;
+            u8 gouraud : 1;
+            u8 command : 3;
+        };
+        u8 m3_code;
+    };
+    
+};
+
 struct sTag
 {
     sTag* m0_pNext = nullptr;
@@ -14,10 +33,15 @@ typedef std::array<sTag, 4096> OTTable;
 
 struct TILE : public sTag
 {
-    u8 r0;
-    u8 g0;
-    u8 b0;
-    u8 code;
+    union {
+        struct {
+            u8 r0; //4
+            u8 g0;
+            u8 b0;
+            u8 code; //7
+        };
+        sColorAndCode m_colorAndCode;
+    };
     s16 x0;
     s16 y0;
     s16 w;
@@ -28,10 +52,15 @@ struct TILE : public sTag
 
 struct SPRT : public sTag
 {
-    u8 r0;
-    u8 g0;
-    u8 b0;
-    u8 code;
+    union {
+        struct {
+            u8 r0; //4
+            u8 g0;
+            u8 b0;
+            u8 code; //7
+        };
+        sColorAndCode m_colorAndCode;
+    };
     s16 x0;
     s16 y0;
     u8 u0;
@@ -99,10 +128,15 @@ struct DRAWENV
 
 struct POLY_F3 : public sTag
 {
-    u8 r0; //4
-    u8 g0;
-    u8 b0;
-    u8 code;
+    union {
+        struct {
+            u8 r0; //4
+            u8 g0;
+            u8 b0;
+            u8 code; //7
+        };
+        sColorAndCode m_colorAndCode;
+    };
     sVec2_s16 x0y0;
     sVec2_s16 x1y1;
     sVec2_s16 x2y2;
@@ -113,10 +147,15 @@ struct POLY_F3 : public sTag
 
 struct POLY_F4 : public sTag
 {
-    u8 r0; //4
-    u8 g0;
-    u8 b0;
-    u8 code;
+    union {
+        struct {
+            u8 r0; //4
+            u8 g0;
+            u8 b0;
+            u8 code; //7
+        };
+        sColorAndCode m_colorAndCode;
+    };
     sVec2_s16 x0y0;
     sVec2_s16 x1y1;
     sVec2_s16 x2y2;
@@ -128,10 +167,15 @@ struct POLY_F4 : public sTag
 
 struct POLY_FT3 : public sTag
 {
-    u8 r0; //4
-    u8 g0;
-    u8 b0;
-    u8 code; //7
+    union {
+        struct {
+            u8 r0; //4
+            u8 g0;
+            u8 b0;
+            u8 code; //7
+        };
+        sColorAndCode m_colorAndCode;
+    };
     sVec2_s16 x0y0;
     u8 u0; //C
     u8 v0;
@@ -151,10 +195,15 @@ struct POLY_FT3 : public sTag
 
 struct POLY_FT4 : public sTag
 {
-    u8 r0; //4
-    u8 g0;
-    u8 b0;
-    u8 code; //7
+    union {
+        struct {
+            u8 r0; //4
+            u8 g0;
+            u8 b0;
+            u8 code; //7
+        };
+        sColorAndCode m_colorAndCode;
+    };
     sVec2_s16 x0y0;
     u8 u0; //C
     u8 v0;
@@ -178,10 +227,15 @@ struct POLY_FT4 : public sTag
 
 struct POLY_G4 : public sTag
 {
-    u8 r0; //4
-    u8 g0;
-    u8 b0;
-    u8 code; //7
+    union {
+        struct {
+            u8 r0; //4
+            u8 g0;
+            u8 b0;
+            u8 code; //7
+        };
+        sColorAndCode m_colorAndCode;
+    };
     sVec2_s16 x0y0;
     u8 r1;
     u8 g1;
@@ -204,10 +258,15 @@ struct POLY_G4 : public sTag
 
 struct LINE_F3 : public sTag
 {
-    u8 r0; //4
-    u8 g0;
-    u8 b0;
-    u8 code; //7
+    union {
+        struct {
+            u8 r0; //4
+            u8 g0;
+            u8 b0;
+            u8 code; //7
+        };
+        sColorAndCode m_colorAndCode;
+    };
     sVec2_s16 x0y0;
     sVec2_s16 x1y1; // 10
     sVec2_s16 x2y2;
@@ -218,11 +277,15 @@ struct LINE_F3 : public sTag
 
 struct POLY_GT3 : public sTag
 {
-    // 4
-    u8 r0;
-    u8 g0;
-    u8 b0;
-    u8 code;
+    union {
+        struct {
+            u8 r0; //4
+            u8 g0;
+            u8 b0;
+            u8 code; //7
+        };
+        sColorAndCode m_colorAndCode;
+    };
     // 8
     sVec2_s16 x0y0;
     // 0xC

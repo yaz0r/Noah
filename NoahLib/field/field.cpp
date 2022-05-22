@@ -1084,8 +1084,6 @@ int prim9_init(u8* displayList, u8* meshBlock, int initParam)
         pNewPoly->u3 = READ_LE_U8(displayList + 10);
         pNewPoly->v3 = READ_LE_U8(displayList + 11);
 
-        MissingCode();
-
         currentModeBlock18 += 8;
         *currentModelInstanceDrawPrims = pNewPoly;
         currentModelInstanceDrawPrims++;

@@ -11,7 +11,7 @@ struct sParticle {
     SVECTOR m38_scale;
     SVECTOR m40_scaleStep;
     std::array<u8, 4> m48_color;
-    std::array<u8, 4> m4C_colorStep;
+    std::array<s8, 4> m4C_colorStep;
     std::array<POLY_FT4, 2> m50;
     std::array<SFP_VEC4, 4> mA0_worldspaceVertices;
     // size 0xC0
@@ -41,7 +41,7 @@ struct sParticleConfig {
     SVECTOR m5A_scale;
     SVECTOR m62_scaleOffset;
     std::array<u8, 4> m6A_color;
-    std::array<u8, 4> m6E_colorOffset;
+    std::array<s8, 4> m6E_colorOffset;
     s16 m72;
     s16 m74;
     s16 m76_rotationAngle;

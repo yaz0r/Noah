@@ -1,5 +1,6 @@
 #pragma once
 #include "kernel/math.h"
+#include "psx/gpuprims.h"
 
 extern int spriteCallback2Var0;
 extern s8 isBattleOverlayLoaded;
@@ -13,14 +14,6 @@ struct sFieldEntitySub4_124
 	s16 m4_rotateY;
 	s16 m6_rotateZ;
 	//size 8
-};
-
-struct sColorAndCode
-{
-	u8 m0_r;
-	u8 m1_g;
-	u8 m2_b;
-	u8 m3_code;
 };
 
 struct sFieldEntitySub4_F4

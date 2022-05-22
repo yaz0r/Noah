@@ -1,4 +1,4 @@
-$input v_texcoord0, v_texcoord1, v_texcoord2, v_textureWindow
+$input v_texcoord0, v_texcoord1, v_texcoord2, v_textureWindow, v_color0
 
 #include "bgfx_shader.sh"
 
@@ -105,47 +105,67 @@ float4 getCLUTForColor(int2 clutConfig, int colorIndex)
 
 void main()
 {
-    int texturePageColor = getTexturePageColors(v_texcoord2);
-    int2 texturePageBase = getTexturePageBase(v_texcoord2);
-    int4 textureWindow = getTextureWindow(v_textureWindow.x | (v_textureWindow.y << 8) | (v_textureWindow.z << 16) | (v_textureWindow.w << 24));
+    int code = v_color0.w;
+    bool textureBlendingDisabled = code & 0x1;
+    bool transparent = code & 0x2;
+    bool textured = code & 0x4;
+    bool gouraud = code & 0x10;
 
-    int2 texcoordInPage = (int2)v_texcoord0.xy;
-    texcoordInPage.x = (texcoordInPage.x % textureWindow.w) + textureWindow.x;
-    texcoordInPage.y = (texcoordInPage.y % textureWindow.z) + textureWindow.y;
+    float4 color = float4(0,0,0,1);
 
-    if(!gl_FrontFacing)
-    {
-        //if(dFdx(v_texcoord0.x) < 0){ texcoordInPage.x++;}
-        if(dFdy(v_texcoord0.y) > 0){ texcoordInPage.y++;}
-        texcoordInPage.x++;
-        //texcoordInPage.y++;
+    if(textured) {
+        int texturePageColor = getTexturePageColors(v_texcoord2);
+        int2 texturePageBase = getTexturePageBase(v_texcoord2);
+        int4 textureWindow = getTextureWindow(v_textureWindow.x | (v_textureWindow.y << 8) | (v_textureWindow.z << 16) | (v_textureWindow.w << 24));
+
+        int2 texcoordInPage = (int2)v_texcoord0.xy;
+        texcoordInPage.x = (texcoordInPage.x % textureWindow.w) + textureWindow.x;
+        texcoordInPage.y = (texcoordInPage.y % textureWindow.z) + textureWindow.y;
+
+        if(!gl_FrontFacing)
+        {
+            //if(dFdx(v_texcoord0.x) < 0){ texcoordInPage.x++;}
+            if(dFdy(v_texcoord0.y) > 0){ texcoordInPage.y++;}
+            texcoordInPage.x++;
+            //texcoordInPage.y++;
+        }
+        else {
+            if(dFdx(v_texcoord0.x) < 0){ texcoordInPage.x++;}
+            if(dFdy(v_texcoord0.y) > 0){ texcoordInPage.y++;}
+        }
+
+
+
+        if(texturePageColor == 0) // 4bit
+        {
+            int texcoordX = texturePageBase.x * 4 + texcoordInPage.x;
+            int texcoordY = texturePageBase.y + texcoordInPage.y;
+            int colorIndex = readU4FromPDXVram(texcoordX, texcoordY);
+            color = getCLUTForColor(v_texcoord1, colorIndex);        
+        }
+        else if(texturePageColor == 1) // 8bit
+        {
+            int texcoordX = texturePageBase.x * 2 + texcoordInPage.x;
+            int texcoordY = texturePageBase.y + texcoordInPage.y;
+            int colorIndex = readU8FromPDXVram(texcoordX, texcoordY);
+            color = getCLUTForColor(v_texcoord1, colorIndex);
+        }
+        else
+        {
+            color = unpackU16Color(readU16FromPSXVram(texturePageBase.x + texcoordInPage.x, texturePageBase.y + texcoordInPage.y));
+        }
+
+        if(!textureBlendingDisabled) {
+            //color.xyz *= v_color0.xyz / (float)0x80;
+            color.xyz = (((color.xyz * 255.f) * v_color0.xyz) / 128.f) / 255.f;
+        }
     }
     else {
-        if(dFdx(v_texcoord0.x) < 0){ texcoordInPage.x++;}
-        if(dFdy(v_texcoord0.y) > 0){ texcoordInPage.y++;}
+        color.xyz = v_color0.xyz / (float)0xFF;
     }
 
 
+    //colorFromTexture.xyz *= v_color0/(float)0x80;
 
-    if(texturePageColor == 0) // 4bit
-    {
-        int texcoordX = texturePageBase.x * 4 + texcoordInPage.x;
-        int texcoordY = texturePageBase.y + texcoordInPage.y;
-        int colorIndex = readU4FromPDXVram(texcoordX, texcoordY);
-        float4 color = getCLUTForColor(v_texcoord1, colorIndex);
-        gl_FragColor = color;
-    }
-    else if(texturePageColor == 1) // 8bit
-    {
-        int texcoordX = texturePageBase.x * 2 + texcoordInPage.x;
-        int texcoordY = texturePageBase.y + texcoordInPage.y;
-        int colorIndex = readU8FromPDXVram(texcoordX, texcoordY);
-        float4 color = getCLUTForColor(v_texcoord1, colorIndex);
-        gl_FragColor = color;
-    }
-    else
-    {
-        float4 color = unpackU16Color(readU16FromPSXVram(texturePageBase.x + texcoordInPage.x, texturePageBase.y + texcoordInPage.y));
-        gl_FragColor = color;
-    }
+    gl_FragColor = color;
 }

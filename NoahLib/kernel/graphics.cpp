@@ -35,7 +35,7 @@ bgfx::ProgramHandle getSPRTShader()
 	static bgfx::ProgramHandle programHandle = BGFX_INVALID_HANDLE;
 	if (!bgfx::isValid(programHandle))
 	{
-		programHandle = loadBgfxProgram("SPRT_vs", "SPRT_ps");
+		programHandle = loadBgfxProgram("PSXGeneric_vs", "PSXGeneric_ps");
 	}
 
 	return programHandle;
@@ -350,7 +350,7 @@ bgfx::VertexLayout& GetLayout() {
         layout
             .begin()
             .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
-            .add(bgfx::Attrib::Color0, 4, bgfx::AttribType::Float)
+            .add(bgfx::Attrib::Color0, 4, bgfx::AttribType::Uint8)
             .add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
             .add(bgfx::Attrib::TexCoord1, 2, bgfx::AttribType::Int16) // CLUT
             .add(bgfx::Attrib::TexCoord2, 4, bgfx::AttribType::Uint8) // Texpage
@@ -363,7 +363,8 @@ bgfx::VertexLayout& GetLayout() {
 struct sVertice
 {
     float v[3];
-    float color[4];
+    u8 color[3];
+    u8 gpuCode;
     float texcoord[2];
     u16 CLUT[2];
     u8 Texpage[4];
@@ -402,6 +403,14 @@ void SPRT::execute()
 			pVertices[i].TextureWindow[2] = (pCurrentDrMode->code[1] >> 16) & 0xFF;
 			pVertices[i].TextureWindow[3] = 0;
 		}
+
+        for (int i = 0; i < 4; i++)
+        {
+            pVertices[i].color[0] = r0;
+            pVertices[i].color[1] = g0;
+            pVertices[i].color[2] = b0;
+            pVertices[i].gpuCode = code;
+        }
 
 		float localU0 = u0;
 		float localV0 = v0;
@@ -477,10 +486,10 @@ void TILE::execute()
 
 		for (int i = 0; i < 4; i++)
 		{
-			pVertices[i].color[0] = r0 / 255.f;
-			pVertices[i].color[1] = g0 / 255.f;
-			pVertices[i].color[2] = b0 / 255.f;
-			pVertices[i].color[3] = 1.f - ((r0 & 0x80) / (float)0x80);
+            pVertices[i].color[0] = r0;
+            pVertices[i].color[1] = g0;
+            pVertices[i].color[2] = b0;
+            pVertices[i].gpuCode = code;
 		}
 
 		pVertices[0].v[0] = x0;
@@ -543,10 +552,10 @@ void POLY_F3::execute()
 
         for (int i = 0; i < 3; i++)
         {
-            pVertices[i].color[0] = r0 / 255.f;
-            pVertices[i].color[1] = g0 / 255.f;
-            pVertices[i].color[2] = b0 / 255.f;
-            pVertices[i].color[3] = 1.f - ((r0 & 0x80) / (float)0x80);
+            pVertices[i].color[0] = r0;
+            pVertices[i].color[1] = g0;
+            pVertices[i].color[2] = b0;
+            pVertices[i].gpuCode = code;
         }
 
         pVertices[0].v[0] = x0y0.vx;
@@ -604,10 +613,10 @@ void POLY_F4::execute()
 
         for (int i = 0; i < 4; i++)
         {
-            pVertices[i].color[0] = r0 / 255.f;
-            pVertices[i].color[1] = g0 / 255.f;
-            pVertices[i].color[2] = b0 / 255.f;
-            pVertices[i].color[3] = 1.f - ((r0 & 0x80) / (float)0x80);
+            pVertices[i].color[0] = r0;
+            pVertices[i].color[1] = g0;
+            pVertices[i].color[2] = b0;
+            pVertices[i].gpuCode = code;
         }
 
         pVertices[0].v[0] = x0y0.vx;
@@ -687,6 +696,14 @@ void POLY_FT4::execute()
 			pVertices[i].TextureWindow[3] = 0xE2;
 		}
 
+        for (int i = 0; i < 4; i++)
+        {
+            pVertices[i].color[0] = r0;
+            pVertices[i].color[1] = g0;
+            pVertices[i].color[2] = b0;
+            pVertices[i].gpuCode = code;
+        }
+
 		pVertices[0].v[0] = x0y0.vx;
 		pVertices[0].v[1] = x0y0.vy;
 		pVertices[0].v[2] = 0;
@@ -715,20 +732,6 @@ void POLY_FT4::execute()
 		pIndices[1] = 1;
 		pIndices[2] = 2;
 		pIndices[3] = 3;
-        /*
-        if (x1y1.vx < x0y0.vx) {
-            pVertices[0].texcoord[0]--;
-            pVertices[1].texcoord[0]--;
-            pVertices[2].texcoord[0]--;
-            pVertices[3].texcoord[0]--;
-        }*/
-        /*
-        if (x1y1.vy < x0y0.vy) {
-            pVertices[0].texcoord[1]++;
-            pVertices[1].texcoord[1]++;
-            pVertices[2].texcoord[1]++;
-            pVertices[3].texcoord[1]++;
-        }*/
 
 		u64 State = BGFX_STATE_WRITE_RGB
 			| BGFX_STATE_DEPTH_TEST_ALWAYS
@@ -767,7 +770,7 @@ void POLY_FT3::execute()
 		sVertice* pVertices = (sVertice*)vertexBuffer.data;
 		u16* pIndices = (u16*)indexBuffer.data;
 
-		for (int i = 0; i < 4; i++)
+		for (int i = 0; i < 3; i++)
 		{
 			pVertices[i].CLUT[0] = clut & 0x3F;
 			pVertices[i].CLUT[1] = (clut >> 6) & 0x1FF;
@@ -785,6 +788,14 @@ void POLY_FT3::execute()
 			pVertices[i].TextureWindow[2] = (textureWindow >> 16) & 0xFF;
 			pVertices[i].TextureWindow[3] = 0xE2;
 		}
+
+        for (int i = 0; i < 3; i++)
+        {
+            pVertices[i].color[0] = r0;
+            pVertices[i].color[1] = g0;
+            pVertices[i].color[2] = b0;
+            pVertices[i].gpuCode = code;
+        }
 
 		pVertices[0].v[0] = x0y0.vx;
 		pVertices[0].v[1] = x0y0.vy;
@@ -844,7 +855,7 @@ void POLY_GT3::execute()
         sVertice* pVertices = (sVertice*)vertexBuffer.data;
         u16* pIndices = (u16*)indexBuffer.data;
 
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < 3; i++)
         {
             pVertices[i].CLUT[0] = clut & 0x3F;
             pVertices[i].CLUT[1] = (clut >> 6) & 0x1FF;
@@ -863,26 +874,20 @@ void POLY_GT3::execute()
             pVertices[i].TextureWindow[3] = 0xE2;
         }
 
-        {
-            pVertices[0].color[0] = r0 / 255.f;
-            pVertices[0].color[1] = g0 / 255.f;
-            pVertices[0].color[2] = b0 / 255.f;
-            pVertices[0].color[3] = 1.f - ((r0 & 0x80) / (float)0x80);
-        }
+        pVertices[0].color[0] = r0;
+        pVertices[0].color[1] = g0;
+        pVertices[0].color[2] = b0;
+        pVertices[0].gpuCode = code;
 
-        {
-            pVertices[1].color[0] = r1 / 255.f;
-            pVertices[1].color[1] = g1 / 255.f;
-            pVertices[1].color[2] = b1 / 255.f;
-            pVertices[1].color[3] = 1.f - ((r1 & 0x80) / (float)0x80);
-        }
+        pVertices[1].color[0] = r1;
+        pVertices[1].color[1] = g1;
+        pVertices[1].color[2] = b2;
+        pVertices[1].gpuCode = code;
 
-        {
-            pVertices[2].color[0] = r2 / 255.f;
-            pVertices[2].color[1] = g2 / 255.f;
-            pVertices[2].color[2] = b2 / 255.f;
-            pVertices[2].color[3] = 1.f - ((r2 & 0x80) / (float)0x80);
-        }
+        pVertices[2].color[0] = r2;
+        pVertices[2].color[1] = g2;
+        pVertices[2].color[2] = b2;
+        pVertices[2].gpuCode = code;
 
         pVertices[0].v[0] = x0y0.vx;
         pVertices[0].v[1] = x0y0.vy;
