@@ -1521,7 +1521,7 @@ void OP_57(void)
     breakCurrentScript = 1;
 }
 
-void OP_58()
+void OP_SET_ANGLE_AXIS_ROTATION()
 {
     byte bVar1;
     int iVar2;
@@ -3086,10 +3086,13 @@ void OP_SET_PAUSE_DISABLED(void)
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 2;
 }
 
-void OPX_A5()
+void OP_SETUP_PARTICLE_ANGLE()
 {
-    MissingCode();
-    pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 0x7;
+    particleCreationSetup.m0[particleCreationSlot].m24 = getImmediateOrVariableUnsigned(1);
+    particleCreationSetup.m0[particleCreationSlot].m2A_flags |= getImmediateOrVariableUnsigned(3) << 8;
+    particleCreationSetup.m0[particleCreationSlot].m76_rotationAngle = getImmediateOrVariableUnsigned(5);
+    fieldExectuteMaxCycles += 4;
+    pCurrentFieldScriptActor->mCC_scriptPC += 0x7;
 }
 
 void OPX_AF()
@@ -3112,13 +3115,41 @@ void OPX_B8()
 
 void OPX_BD()
 {
-    MissingCode();
+    sFieldScriptEntity* psVar1;
+    int iVar2;
+    ushort uVar3;
+
+    uVar3 = 0;
+    iVar2 = getImmediateOrVariableUnsigned(1);
+    psVar1 = pCurrentFieldScriptActor;
+    if (iVar2 == 1) {
+        uVar3 = 0x80;
+    }
+    else if (iVar2 == 2) {
+        uVar3 = 0x40;
+    }
+    particleCreationSetup.m0[particleCreationSlot].m2A_flags = particleCreationSetup.m0[particleCreationSlot].m2A_flags | uVar3;
+    fieldExectuteMaxCycles += 4;
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 0x7;
+}
+
+void OPX_C8Sub(long slot)
+{
+    particleCreationSetup.m0[particleCreationSlot].m30[slot].vx = getVar80(1, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 0x11]);
+    particleCreationSetup.m0[particleCreationSlot].m30[slot].vy = getVar40(3, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 0x11]);
+    particleCreationSetup.m0[particleCreationSlot].m30[slot + 1].vx = getVar20(5, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 0x11]);
+    particleCreationSetup.m0[particleCreationSlot].m30[slot + 1].vy = getVar10(7, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 0x11]);
+    particleCreationSetup.m0[particleCreationSlot].m30[slot + 2].vx = getVar08(9, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 0x11]);
+    particleCreationSetup.m0[particleCreationSlot].m30[slot + 2].vy = getVar04(0xb, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 0x11]);
+    particleCreationSetup.m0[particleCreationSlot].m30[slot + 3].vx = getVar02(0xd, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 0x11]);
+    particleCreationSetup.m0[particleCreationSlot].m30[slot + 3].vy = getVar01(0xf, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 0x11]);
+    fieldExectuteMaxCycles += 4;
+    pCurrentFieldScriptActor->mCC_scriptPC += 0x12;
 }
 
 void OPX_C8()
 {
-    MissingCode();
+    OPX_C8Sub(0);
 }
 
 void OPX_CB()
@@ -4534,6 +4565,15 @@ void OPX_07()
     }
 
     pCurrentFieldScriptActor->mCC_scriptPC += 2;
+}
+
+void OP_SET_3D_SCALE() {
+    ((actorArray[currentFieldActorId].m4_pVramSpriteSheet)->m0_spriteActorCore).m2C_scale = 0xc00;
+    pCurrentFieldScriptActor->mF4_scale3d[0] = getImmediateOrVariableUnsigned(1);
+    pCurrentFieldScriptActor->mF4_scale3d[1] = getImmediateOrVariableUnsigned(3);
+    pCurrentFieldScriptActor->mF4_scale3d[2] = getImmediateOrVariableUnsigned(5);
+    updateScriptActor3dRotation(currentFieldActorId);
+    pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 7;
 }
 
 void OPX_09()

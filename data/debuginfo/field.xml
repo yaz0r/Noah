@@ -1157,7 +1157,30 @@
     <fieldInfo ID="655" Name="Mahanon - Razael&apos;s Tree"/>
     <fieldInfo ID="656" Name="Mahanon - Grahf gloats over the defeated Fei"/>
     <fieldInfo ID="657" Name="Golgoda - Krelian tests Elly"/>
-    <fieldInfo ID="658" Name="Shevat - Id shows Fei the Lacan memories(THE long cutscene)"/>
+    <fieldInfo ID="658" Name="Shevat - Id shows Fei the Lacan memories(THE long cutscene)">
+        <scriptEntity ID="0" Name=""/>
+        <scriptEntity ID="1" Name="Fei"/>
+        <scriptEntity ID="2" Name=""/>
+        <scriptEntity ID="3" Name=""/>
+        <scriptEntity ID="4" Name=""/>
+        <scriptEntity ID="5" Name=""/>
+        <scriptEntity ID="6" Name=""/>
+        <scriptEntity ID="7" Name=""/>
+        <scriptEntity ID="8" Name=""/>
+        <scriptEntity ID="9" Name=""/>
+        <scriptEntity ID="10" Name=""/>
+        <scriptEntity ID="11" Name=""/>
+        <scriptEntity ID="12" Name=""/>
+        <scriptEntity ID="13" Name="Cross core and particles"/>
+        <scriptEntity ID="14" Name="Cross sub part"/>
+        <scriptEntity ID="15" Name="Cross sub part 2"/>
+        <scriptEntity ID="16" Name="Cross sub part 3"/>
+        <scriptEntity ID="17" Name=""/>
+        <scriptEntity ID="18" Name=""/>
+        <scriptEntity ID="19" Name=""/>
+        <scriptEntity ID="20" Name=""/>
+        <scriptEntity ID="21" Name="Cutscene controller"/>
+    </fieldInfo>
     <fieldInfo ID="659" Name="Point of Sephirot - Fei&apos;s friends interrupt Id&apos;s &apos;contact&apos;"/>
     <fieldInfo ID="660" Name="Point of Sephirot - birth of the pre - Xenogears"/>
     <fieldInfo ID="661" Name="Point of Sephirot - later in 660 cutscene"/>

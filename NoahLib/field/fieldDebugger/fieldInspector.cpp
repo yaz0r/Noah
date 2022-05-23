@@ -883,7 +883,7 @@ public:
         ImGui::Text("  0x%04X\t", currentPC); ImGui::SameLine();
 
         u16 opcode = readU8FromScript(0);
-
+        //printf("opcode: 0x%02X\n", opcode);
         if (opcode == 0xFE)
         {
             currentPC++;

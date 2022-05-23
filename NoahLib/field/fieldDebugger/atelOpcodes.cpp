@@ -85,6 +85,14 @@ void initOpcodeTable()
 		.setComment("Doesn't do anything")
 		.end();
 
+    m_opcode[0x10]
+        .addArgumentByte()
+        .addArgumentS16OrVar(0x80)
+        .addArgumentS16OrVar(0x40)
+        .addArgumentS16OrVar(0x20)
+        .addSignControlByte()
+        .end();
+
 	m_opcode[0x12]
         .setName("CUSTOM_FIELD_TRANSITION")
 		.addArgumentU16OrVar("fieldId")
@@ -339,8 +347,8 @@ void initOpcodeTable()
 		.end();
 
 	m_opcode[0x53]
-        .setName("FOLLOW_ENTITY")
 		.addArgumentCharacter()
+        .addArgumentU16OrVar()
 		.end();
 
 	m_opcode[0x56]
@@ -355,7 +363,9 @@ void initOpcodeTable()
 	// opcode 0x57 is dynamic
 
     m_opcode[0x58]
-        .setName("SET_DESIRED_CAMERA_TARGET_TO_ENTITY")
+        .setName("SET_ANGLE_AXIS_ROTATION")
+        .addArgumentU16OrVar("angle")
+        .addArgumentByte("axis")
         .end();
 
 	m_opcode[0x59]
@@ -959,6 +969,13 @@ void initExtendedOpcodeTable()
 		.addArgumentByte()
 		.end();
 
+    m_extendedOpcode[0x8]
+        .setName("SET_3D_SCALE")
+        .addArgumentU16OrVar("scaleX")
+        .addArgumentU16OrVar("scaleY")
+        .addArgumentU16OrVar("scaleZ")
+        .end();
+
     m_extendedOpcode[0x9]
         .addArgumentU16OrVar()
         .end();
@@ -1449,9 +1466,10 @@ void initExtendedOpcodeTable()
 		.end();
 
 	m_extendedOpcode[0xA5]
+        .setName("SETUP_PARTICLE_ANGLE")
 		.addArgumentU16OrVar()
-		.addArgumentU16OrVar()
-		.addArgumentU16OrVar()
+		.addArgumentU16OrVar("flags")
+		.addArgumentU16OrVar("angle")
 		.end();
 
     m_extendedOpcode[0xB5]
@@ -1468,6 +1486,18 @@ void initExtendedOpcodeTable()
 		.addArgumentU16OrVar("unused?")
 		.end();
     
+    m_extendedOpcode[0xC8]
+        .addArgumentS16OrVar(0x80)
+        .addArgumentS16OrVar(0x40)
+        .addArgumentS16OrVar(0x20)
+        .addArgumentS16OrVar(0x10)
+        .addArgumentS16OrVar(0x8)
+        .addArgumentS16OrVar(0x4)
+        .addArgumentS16OrVar(0x2)
+        .addArgumentS16OrVar(0x1)
+        .addSignControlByte()
+        .end();
+
     m_extendedOpcode[0xCE]
         .setName("SET_MAX_MECHA")
         .addArgumentU16OrVar()

@@ -32,6 +32,8 @@ int getVar20(int param_1, uint param_2);
 int getVar10(int param_1, uint param_2);
 int getVar08(int param_1, uint param_2);
 int getVar04(int param_1, uint param_2);
+int getVar02(int param_1, uint param_2);
+int getVar01(int param_1, uint param_2);
 
 u32 getCameraDirection(void);
 

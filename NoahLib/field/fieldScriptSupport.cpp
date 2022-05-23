@@ -128,6 +128,38 @@ int getVar04(int param_1, uint param_2)
     return iVar2;
 }
 
+int getVar02(int param_1, uint param_2)
+{
+    ushort uVar1;
+    int iVar2;
+
+    if ((param_2 & 0x02) == 0) {
+        uVar1 = readU16FromScript(param_1);
+        iVar2 = getVariable((uint)uVar1);
+    }
+    else {
+        iVar2 = readS16FromScript(param_1);
+        iVar2 = (int)(short)iVar2;
+    }
+    return iVar2;
+}
+
+int getVar01(int param_1, uint param_2)
+{
+    ushort uVar1;
+    int iVar2;
+
+    if ((param_2 & 0x01) == 0) {
+        uVar1 = readU16FromScript(param_1);
+        iVar2 = getVariable((uint)uVar1);
+    }
+    else {
+        iVar2 = readS16FromScript(param_1);
+        iVar2 = (int)(short)iVar2;
+    }
+    return iVar2;
+}
+
 uint readCharacter(int param_1)
 {
     uint uVar1;

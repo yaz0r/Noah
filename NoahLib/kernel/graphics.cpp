@@ -5,6 +5,8 @@
 #include "imguiBGFX.h"
 #include "kernel/gte.h"
 
+#include "field/field.h" //HACK to get the current rect for clear
+
 bgfx::TextureHandle m_vramTextureHandle = BGFX_INVALID_HANDLE;
 
 const bgfx::TextureHandle& getPSXVramTextureHandle()
@@ -965,5 +967,8 @@ void ClearImage(RECT* pRect, u8 r, u8 g, u8 b)
     colorClearValue |= b;
     colorClearValue <<= 8;
     colorClearValue |= 0xFF;
-    bgfx::setViewClear(PSXOutput_bgfxView, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, colorClearValue);
+    if (pRect == &pCurrentFieldRenderingContext->m5C_backgroundRect.clip) {
+        bgfx::setViewClear(PSXOutput_bgfxView, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, colorClearValue);
+    }
+    
 }

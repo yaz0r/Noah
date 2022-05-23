@@ -68,7 +68,7 @@ void initOpcodes()
     fieldScriptOpcodes[0x55] = OP_55;
     fieldScriptOpcodes[0x56] = OP_WORLDMAP;
     fieldScriptOpcodes[0x57] = OP_57;
-    fieldScriptOpcodes[0x58] = OP_58;
+    fieldScriptOpcodes[0x58] = OP_SET_ANGLE_AXIS_ROTATION;
     fieldScriptOpcodes[0x59] = OP_WALK_RANDOM_DIRECTION;
     fieldScriptOpcodes[0x5A] = OP_5A;
     fieldScriptOpcodes[0x5B] = resetFieldScriptActor;
@@ -180,6 +180,7 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0x03] = OP_SET_CURRENT_ACTOR_SCALE;
     fieldScriptOpcodes_EX[0x04] = OPX_04;
     fieldScriptOpcodes_EX[0x07] = OPX_07;
+    fieldScriptOpcodes_EX[0x08] = OP_SET_3D_SCALE;
     fieldScriptOpcodes_EX[0x09] = OPX_09;
     fieldScriptOpcodes_EX[0x0A] = OPX_0A;
     fieldScriptOpcodes_EX[0x0C] = OPX_0C;
@@ -261,7 +262,7 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0xA1] = OP_ASSIGN_GEAR;
     fieldScriptOpcodes_EX[0xA2] = OPX_A2;
     fieldScriptOpcodes_EX[0xA4] = OP_RESTORE_GEAR;
-    fieldScriptOpcodes_EX[0xA5] = OPX_A5;
+    fieldScriptOpcodes_EX[0xA5] = OP_SETUP_PARTICLE_ANGLE;
     fieldScriptOpcodes_EX[0xAF] = OPX_AF;
     fieldScriptOpcodes_EX[0xB5] = OPX_B5;
     fieldScriptOpcodes_EX[0xB8] = OPX_B8;

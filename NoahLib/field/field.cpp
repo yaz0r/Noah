@@ -4111,6 +4111,22 @@ void freeFieldData()
     MissingCode();
 }
 
+void setupScreenTransitionPoly(int param_1, int param_2) {
+    MissingCode();
+}
+
+void updateScreenEffectSlots(sTag*,int)
+{
+    MissingCode();
+}
+void renderScreenTransitionPoly(void) {
+    MissingCode();
+}
+
+void renderScreenTransition() {
+    MissingCode();
+}
+
 void transitionFields()
 {
     MissingCode();
@@ -4121,6 +4137,33 @@ void transitionFields()
 
     switch (fieldTransitionMode)
     {
+    case 0:
+        setupScreenTransitionPoly(0, 0);
+        setupRGBCalcSlot0_fadeToBlack(fieldTransitionFadeInLength);
+        for(int i=0; i< fieldTransitionFadeInLength; i++) {
+            clearFieldOrderingTable();
+            updateScreenEffectSlots(&pCurrentFieldRenderingContext->m80D4_uiOT[0], g_frameOddOrEven);
+            renderScreenTransitionPoly();
+            renderScreenTransition();
+        }
+        clearFieldOrderingTable();
+        MissingCode();
+        startLoadingPlayableCharacters();
+        finalizeLoadPlayableCharacters();
+        {
+            s32 fieldTransitionModeBackup = fieldTransitionMode;
+            s32 fieldTransitionFadeInLengthBackup = fieldTransitionFadeInLength;
+            initFieldData();
+            loadFieldGraphics();
+            MissingCode();
+            fieldTransitionFadeInLength = fieldTransitionFadeInLengthBackup;
+            fieldTransitionMode = fieldTransitionModeBackup;
+        }
+        if (fieldMusicLoadPending == -1) {
+            playMusic(currentlyPlayingMusic, 0);
+        }
+        setupRGBFaderSlot0_fadeIn(fieldTransitionFadeInLength);
+        break;
     case 2:
         MissingCode();
         startLoadingPlayableCharacters();
@@ -7841,7 +7884,7 @@ void renderFieldCharacterSprites(OTTable& OT, int oddOrEven)
 
                         if (pFieldEntity->m4C_scriptEntity->m14_currentTriangleFlag & 0x200000)
                         {
-                            assert(0);
+                            MissingCode();
                         }
 
                         if ((disableFogForCharacters == '\0') && (isFogSetup != 0)) {
