@@ -398,8 +398,7 @@ void updateParticle(sParticleConfig* particleEffect, sParticle* pParticle, MATRI
         return;
     }
 
-    pParticle->m2_life2--;
-    if (pParticle->m2_life2 != 1) {
+    if (pParticle->m2_life2-- != 1) {
         return;
     }
 
