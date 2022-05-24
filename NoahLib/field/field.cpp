@@ -6800,7 +6800,7 @@ void updateAllEntities()
 
     cameraTan = ratan2(cameraAt[2] - cameraEye[2], cameraAt[0] - cameraEye[0]) + -0x400;
     camera2Tan = ratan2(cameraAt2.vz - cameraEye2.vz, cameraAt2.vx - cameraEye2.vx) + -0x400;
-    cameraDeltaTan = ratan2(length2d(cameraAt[0] - cameraEye[0] >> 0x10, cameraAt[2] - cameraEye[2] >> 0x10), cameraAt[1] - cameraEye[1] >> 0x10);
+    cameraDeltaTan = ratan2(length2d((cameraAt[0] - cameraEye[0]) >> 0x10, (cameraAt[2] - cameraEye[2]) >> 0x10), (cameraAt[1] - cameraEye[1]) >> 0x10);
 
     sCurrentCameraVectors cameraVectors;
     pCurrentCameraVectors = &cameraVectors;
@@ -6960,7 +6960,7 @@ bool isObjectOcluded(sFieldEntitySub0* param_1)
     RotTransPers(&local_38, &local_2c, alStack40, &lStack48);
     iVar3 = -1;
     if (((iVar4 < OPX8E_param1 + 0xe0) && (-OPX8E_param1 < local_2c.vy)) && ((int)sVar2 < OPX8E_param0 + 0x140)) {
-        iVar3 = -(-OPX8E_param0 < local_2c.vx ^ 1);
+        iVar3 = -(-(OPX8E_param0 < local_2c.vx) ^ 1);
     }
 
     Hack("Force isObjectOcluded to return false");
@@ -7201,7 +7201,7 @@ void uploadCharacterSpriteSub1(sSpriteActorCore* param_1, int param_2, sFieldEnt
     std::vector<sFieldEntitySub4_B4_sub>::iterator psVar13 = param_1->m20->getAsSprite()->m30->begin();
     short sVar8 = (short)(iVar23 >> 0xc);
     if (iVar23 < 0) {
-        sVar8 = (short)(iVar23 + 0xfff >> 0xc);
+        sVar8 = (short)((iVar23 + 0xfff) >> 0xc);
     }
     param_1->m36 = sVar8;
     iVar23 = READ_LE_U8(pbVar13 + 1) * param_1->m2C_scale;
@@ -7683,11 +7683,7 @@ void submitSpriteActorToRendering(sSpriteActor* pSpriteSheet, sTag* pTag)
             }
             if (isVisible)
             {
-                POLY_FT4* temp = new POLY_FT4;
-
-                POLY_FT4* p = (POLY_FT4*)shapeTransfertTableCurrentEntry;
-                memcpy(p, temp, sizeof(POLY_FT4));
-                delete temp;
+                POLY_FT4* p = new(shapeTransfertTableCurrentEntry) POLY_FT4;
 
                 shapeTransfertTableCurrentEntry += sizeof(POLY_FT4);
 

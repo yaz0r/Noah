@@ -165,7 +165,7 @@ void renderCompass()
 	FP_VEC4 local_40 = {
 		0,
 		cameraEye[1] - cameraAt[1],
-		length2d(cameraEye[0] - cameraAt[0] >> 0x10,cameraEye[2] - cameraAt[2] >> 0x10) * -0x10000,
+		length2d((cameraEye[0] - cameraAt[0]) >> 0x10,(cameraEye[2] - cameraAt[2]) >> 0x10) * -0x10000,
 	};
 
 	MATRIX MStack200;

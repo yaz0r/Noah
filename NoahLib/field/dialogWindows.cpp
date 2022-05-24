@@ -699,9 +699,9 @@ void dialogWindowSetupForRendering(sTag* OT, int oddOrEven, int windowIndex)
             int numFramesPassedInAnimation = dialogWindowOpenAnimationNumFrames - gDialogWindows[windowIndex].m408_openAnimationCounter;
             int XOffset = ((windowWidth << 0x10) / numFramesTimesTwo) * numFramesPassedInAnimation;
             int YOffset = ((windowHeight << 0x10) / numFramesTimesTwo) * numFramesPassedInAnimation;
-            windowX = (windowX + (windowWidth - (windowWidth2 >> 0x1f) >> 1)) - (XOffset >> 0x10);
+            windowX = (windowX + ((windowWidth - (windowWidth2 >> 0x1f)) >> 1)) - (XOffset >> 0x10);
             windowWidth = XOffset * 2 >> 0x10;
-            windowY = (windowY + (windowHeight - (windowHeight2 >> 0x1f) >> 1)) - (YOffset >> 0x10);
+            windowY = (windowY + ((windowHeight - (windowHeight2 >> 0x1f)) >> 1)) - (YOffset >> 0x10);
             windowHeight = YOffset * 2 >> 0x10;
             if (windowWidth < 0x10) {
                 windowX = windowX - (0x10 - windowWidth) / 2;
@@ -724,13 +724,8 @@ void dialogWindowSetupForRendering(sTag* OT, int oddOrEven, int windowIndex)
 				sDialogWindow18* windowSubStruct = &gDialogWindows[windowIndex].m18;
 				int sVar2 = getWindowSubStructX(windowSubStruct);
 				int sVar3 = getWindowSubStructY(windowSubStruct);
-				RECT local_90;
-				local_90.x = dialogWindowsRectConfigs[dialogWindowsFrameCount2].x;
-				local_90.y = dialogWindowsRectConfigs[dialogWindowsFrameCount2].y;
-				local_90.w = dialogWindowsRectConfigs[dialogWindowsFrameCount2].w;
-				local_90.h = dialogWindowsRectConfigs[dialogWindowsFrameCount2].h;
 				u16 TPage = GetTPage(0, 0, 0x298, 0x1c0);
-				SetDrawMode(&gDialogWindows[windowIndex].m3C8[oddOrEven], 0, 0, (uint)TPage, &local_90);
+				SetDrawMode(&gDialogWindows[windowIndex].m3C8[oddOrEven], 0, 0, (uint)TPage, &dialogWindowsRectConfigs[dialogWindowsFrameCount2]);
 				gDialogWindows[windowIndex].m3E0_Sprt[oddOrEven].x0 = sVar2;
 				gDialogWindows[windowIndex].m3E0_Sprt[oddOrEven].y0 = sVar3 + 4;
 
