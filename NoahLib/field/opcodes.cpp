@@ -3289,8 +3289,21 @@ void OPX_3C()
 
 void OPX_3D()
 {
-    MissingCode();
-    pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 10;
+    sFieldScriptEntity* psVar1;
+    short sVar2;
+    int iVar3;
+
+    iVar3 = getVar80(1, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 9]);
+    sVar2 = getVar40(3, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 9]);
+    psVar1 = pCurrentFieldScriptActor;
+    mechaFieldArgs2[0].m[iVar3][0] = sVar2;
+    sVar2 = getVar20(5, pCurrentFieldScriptFile[psVar1->mCC_scriptPC + 9]);
+    psVar1 = pCurrentFieldScriptActor;
+    mechaFieldArgs2[0].m[iVar3][1] = sVar2;
+    sVar2 = getVar10(7, pCurrentFieldScriptFile[psVar1->mCC_scriptPC + 9]);
+    psVar1 = pCurrentFieldScriptActor;
+    mechaFieldArgs2[0].m[iVar3][2] = sVar2;
+    psVar1->mCC_scriptPC = psVar1->mCC_scriptPC + 10;
 }
 
 void OPX_3E()

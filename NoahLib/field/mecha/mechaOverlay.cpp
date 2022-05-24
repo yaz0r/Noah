@@ -484,9 +484,9 @@ void mechaOP_10_b(std::vector<sLoadedMecha_sub4>& param_1, sMechaDataTable2_4_4*
             if ((pBone->m4C[0] != sVar1[0]) || (pBone->m4C[1] != sVar1[1]) || (pBone->m4C[2] != sVar1[2])) {
                 if ((pBone->m68[0].size() == 0) || (pBone->m68[0][0]->m3_size != -1))
                 {
-                    pBone->m4C[0] = sVar1[0];
-                    pBone->m4C[1] = sVar1[1];
-                    pBone->m4C[2] = sVar1[2];
+                    pBone->m54_rotationAngles[0] = sVar1[0];
+                    pBone->m54_rotationAngles[1] = sVar1[1];
+                    pBone->m54_rotationAngles[2] = sVar1[2];
                     pBone->m4 = 1;
                     pBone->m5 = 1;
                 }
@@ -498,12 +498,12 @@ void mechaOP_10_b(std::vector<sLoadedMecha_sub4>& param_1, sMechaDataTable2_4_4*
             pShortData++;
             counter1++;
 
-            if ((pBone->m54_rotationAngles[0] != sVar1[0]) || (pBone->m54_rotationAngles[1] != sVar1[1]) || (pBone->m54_rotationAngles[2] != sVar1[2])) {
+            if ((pBone->m5C_translation[0] != sVar1[0]) || (pBone->m5C_translation[1] != sVar1[1]) || (pBone->m5C_translation[2] != sVar1[2])) {
                 if ((pBone->m68[1].size() == 0) || (pBone->m68[1][0]->m3_size != -1))
                 {
-                    pBone->m54_rotationAngles[0] = sVar1[0];
-                    pBone->m54_rotationAngles[1] = sVar1[1];
-                    pBone->m54_rotationAngles[2] = sVar1[2];
+                    pBone->m5C_translation[0] = sVar1[0];
+                    pBone->m5C_translation[1] = sVar1[1];
+                    pBone->m5C_translation[2] = sVar1[2];
                     pBone->m4 = 1;
                 }
             }
@@ -518,7 +518,7 @@ sMechaDataTable2_4_4* mechaOP_10_a(sLoadedMechas* param_1, uint param_2, u32* pa
         param_2 = param_1->m2A[0] & 0x7f;
         *param_3 = param_1->m2A[0] & 0x80;
     }
-    int iVar1 = (param_2 & 0xff) * 4;
+    int iVar1 = (param_2 & 0xff);
     if ((param_2 & 0xff) < 0x40) {
         return &param_1->m14->m4[iVar1];
     }
@@ -650,7 +650,7 @@ void initMechaAnimation(sLoadedMechas* param_1, sLoadedMechas* param_2, sMechaIn
     if ((param_1 != (sLoadedMechas*)0x0) && (param_2 != (sLoadedMechas*)0x0)) {
         if (param_1->m2A[1] == 0) {
             if (param_4 < 0x50) {
-                param_1->m10_bytecode0 = &(*param_2->m8_bytecodeTable)[param_4];
+                param_1->m10_bytecode0 = &(*param_2->m8_bytecodeTable)[param_4][0];
             }
             else {
                 assert(0);
@@ -674,7 +674,7 @@ void initMechaAnimation(sLoadedMechas* param_1, sLoadedMechas* param_2, sMechaIn
     }
 }
 
-void initMechaTransforms1(sLoadedMechas* param_1, sMechaInitVar2* param_2, std::vector<sMechaDataTable2_4_8>* param_3, sMechaDataTable2_4::sMechaDataTable2_4_4_array* param_4)
+void initMechaTransforms1(sLoadedMechas* param_1, sMechaInitVar2* param_2, std::vector<std::vector<sMechaDataTable2_4_8>>* param_3, sMechaDataTable2_4::sMechaDataTable2_4_4_array* param_4)
 {
     param_1->m3C = -1;
     param_1->m5C = -1;
@@ -1105,11 +1105,11 @@ void updateMechAnimSub1(std::vector<sLoadedMecha_sub4>& param_1, int param_2) {
             pBone->mC.t[2] = pBone->m5C_translation[2];
 
             if (pBone->m0_parentBone == nullptr) {
-                MissingCode();
+                pBone->m2C = pBone->mC;
             }
             else
             {
-                CompMatrix(&pBone->m2C, &pBone->mC, &pBone->m2C);
+                CompMatrix(&pBone->m0_parentBone->m2C, &pBone->mC, &pBone->m2C);
             }
         }
     }

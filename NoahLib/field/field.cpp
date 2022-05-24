@@ -1268,6 +1268,80 @@ void genericTrianglePrim_28(u8* meshSubBlock, int count, int outputPrimSize, uin
     }
 }
 
+void prim1_1(u8* meshSubBlock, int count) {
+    MissingCode();
+    Hack("TODO: this is not correct and implemented as a shortcut");
+
+    OTTable& pOT = *currentOTEntry;
+    int depthGranularity = gDepthDivider + 2;
+
+    for (int i = 0; i < count; i++)
+    {
+        POLY_FT3* pOutputPrim = (POLY_FT3*)*currentModelInstanceDrawPrims;
+        currentModelInstanceDrawPrims++;
+
+        u8* pVertices1 = currentModelBlockVertices + READ_LE_U16(meshSubBlock) * 8;
+        u8* pVertices2 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 2) * 8;
+        u8* pVertices3 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 4) * 8;
+        meshSubBlock += 8;
+
+        gte_ldv3(pVertices1, pVertices2, pVertices3);
+        gte_rtpt();
+
+        int flagsTriangle0;
+        gte_stlzc(&flagsTriangle0);
+
+        sVec2_s16 xy0;
+        sVec2_s16 xy1;
+        sVec2_s16 xy2;
+        gte_stsxy3(&xy0, &xy1, &xy2);
+
+        if (flagsTriangle0 > 0)
+        {
+            gte_nclip(); // write the normal to mac0
+
+            int normalMagnitude;
+            gte_getMAC0(&normalMagnitude);
+
+            if (normalMagnitude > 0) // is first triangle facing screen
+            {
+                // TODO: this is not how the original code works, but this works for now
+
+                // X clip
+                if (std::min<int>(std::min<int>(xy0.vx, xy1.vx), xy2.vx) > screenClippingX)
+                    continue;
+                if (std::max<int>(std::max<int>(xy0.vx, xy1.vx), xy2.vx) < 0)
+                    continue;
+
+                // Y clip
+                if (std::min<int>(std::min<int>(xy0.vy, xy1.vy), xy2.vy) > (screenClippingY >> 16))
+                    continue;
+                if (std::max<int>(std::max<int>(xy0.vy, xy1.vy), xy2.vy) < 0)
+                    continue;
+
+                pOutputPrim->x0y0 = xy0;
+                pOutputPrim->x1y1 = xy1;
+                pOutputPrim->x2y2 = xy2;
+
+                int sz0, sz1, sz2;
+                gte_stsz3(&sz0, &sz1, &sz2);
+
+                if (sz0 && sz1 && sz2) {
+                    int polyz = std::max<int>(sz0, sz1);
+                    polyz = std::max<int>(sz2, polyz);
+                    fieldPolyCount = fieldPolyCount + 1;
+                    assert(polyz);
+
+                    sTag* sDestTag = pOT[polyz >> (depthGranularity & 0x1f)].m0_pNext;
+                    pOT[polyz >> (depthGranularity & 0x1f)].m0_pNext = pOutputPrim;
+                    pOutputPrim->m0_pNext = sDestTag;
+                    pOutputPrim->m3_size = 7;
+                }
+            }
+        }
+    }
+}
+
 void genericTrianglePrim_20(u8* meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
 {
     OTTable& pOT = *currentOTEntry;
@@ -1690,7 +1764,7 @@ struct sPolyTypeRenderDefinition
 
 const std::array<sPolyTypeRenderDefinition, 17> polyRenderDefs = { {
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	prim0_init,	8,	0x4,	0x04}, // 0x0 POLY_FT3 with light
-    {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	prim1_init,	8,	0x8,	0x20}, // 0x1 POLY_FT3
+    {	prim5_0,	prim1_1,	prim5_2,	nullptr,	nullptr,	nullptr,	prim1_init,	8,	0x8,	0x20}, // 0x1 POLY_FT3
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	prim2_init,	8,	0x4,	0x1C}, // 0x2
     {	prim3_0,	nullptr,	nullptr,	nullptr,	prim3_0,	prim3_0,	prim3_init,	8,	0x8,	0x28}, // 0x3 POLY_GT3
     {	prim4_0,	prim4_0,	nullptr,	nullptr,	prim4_0,	prim4_0,	prim4_init,	8,	0x4,	0x14}, // 0x4 POLY_F3
@@ -5053,8 +5127,6 @@ std::array<s16, 4> updateEntityEventCode4Table1;
 
 void setVisualAnimation(sSpriteActor* param_1, int animationId, sFieldEntity* param_3)
 {
-    sFieldScriptEntity* psVar1;
-
     if ((param_3->m58_flags & 0x40) != 0) {
         if ((animationId != 3) && (updateEntityEventCode4Var0 == 0)) {
             param_3->m4C_scriptEntity->m0_fieldScriptFlags.mx800_isJumping = 0;
@@ -5065,9 +5137,9 @@ void setVisualAnimation(sSpriteActor* param_1, int animationId, sFieldEntity* pa
         if (animationId != jumpAnimationId) {
             param_3->m4C_scriptEntity->m0_fieldScriptFlags.mx800_isJumping = 0;
         }
-        psVar1 = param_3->m4C_scriptEntity;
-        if ((psVar1->m4_flags.m_rawFlags & 0x2000) == 0) {
-            if ((psVar1->m4_flags.m_rawFlags & 0x1000000) == 0) {
+
+        if ((param_3->m4C_scriptEntity->m4_flags.m_rawFlags & 0x2000) == 0) {
+            if ((param_3->m4C_scriptEntity->m4_flags.m_rawFlags & 0x1000000) == 0) {
                 spriteActorSetPlayingAnimation(param_1, animationId);
             }
         }
@@ -5079,13 +5151,14 @@ void setVisualAnimation(sSpriteActor* param_1, int animationId, sFieldEntity* pa
             } };
 
             if (animationId < 0x10) {
-                mechaPlayAnimation(psVar1->m12C_flags >> 0xd & 7, 0, updateEntityEventCode4Table0[animationId]);
-                updateEntityEventCode4Table1[psVar1->m12C_flags >> 0xd & 7] = updateEntityEventCode4Table0[animationId];
+                animationId = updateEntityEventCode4Table0[animationId];
             }
             else {
-                mechaPlayAnimation(psVar1->m12C_flags >> 0xd & 7, 0, animationId - 0x10);
-                updateEntityEventCode4Table1[psVar1->m12C_flags >> 0xd & 7] = animationId - 0x10;
+                animationId -= 0x10;
             }
+            mechaPlayAnimation(param_3->m4C_scriptEntity->m12C_flags >> 0xd & 7, 0, animationId);
+            updateEntityEventCode4Table1[param_3->m4C_scriptEntity->m12C_flags >> 0xd & 0x7] = animationId;
+
         }
     }
     return;

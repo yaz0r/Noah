@@ -52,16 +52,14 @@ struct sMechaDataTable2_4 {
             }
         }
 
-        {
-            std::vector<u8> tempM8 = relocatedData[1];
-            int count = tempM8.size() / 2;
-            m8.resize(count);
-            for (int i = 0; i < count; i++) {
-                m8[i] = READ_LE_U16(tempM8.begin() + 2 * i);
+        m8.reserve(relocatedData.size() - 1);
+        for (int i = 1; i < relocatedData.size(); i++) {
+            std::vector<sMechaDataTable2_4_8> bytecode;
+            for (int j = 0; j < relocatedData[i].size() / 2; j++) {
+                bytecode.push_back(READ_LE_U16(relocatedData[i].begin() + j * 2));
             }
+            m8.push_back(bytecode);
         }
-        mC = relocatedData[2];
-        m10 = relocatedData[3];
     }
 
     struct sMechaDataTable2_4_4_array {
@@ -69,9 +67,7 @@ struct sMechaDataTable2_4 {
         std::vector<sMechaDataTable2_4_4> m4;
     } m4;
 
-    std::vector<sMechaDataTable2_4_8> m8;
-    std::vector<u8> mC;
-    std::vector<u8> m10;
+    std::vector<std::vector<sMechaDataTable2_4_8>> m8;
 
     std::vector<u8> m_raw;
 };
@@ -133,7 +129,7 @@ struct sMechaInitVar4
 struct sLoadedMechas {
     sMechaInitVar4* m0;
     std::vector<sLoadedMecha_sub4>* m4;
-    std::vector<sMechaDataTable2_4_8>* m8_bytecodeTable;
+    std::vector<std::vector<sMechaDataTable2_4_8>>* m8_bytecodeTable;
     u32 mC;
     sMechaDataTable2_4_8* m10_bytecode0;
     sMechaDataTable2_4::sMechaDataTable2_4_4_array* m14;
