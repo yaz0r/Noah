@@ -359,6 +359,9 @@ extern struct sSavePointMesh_1C* spriteCallback2Var2;
 extern int overrideTPageMode;
 extern s32 overrideTPageValue;
 
+extern int initModel2Sub0Var1;
+extern s32 primD_initSub0Sub1Var1;
+
 extern MATRIX currentRenderingMatrix;
 extern OTTable* characterRenderingOT;
 extern int shapeTransfertDoubleBufferIndex;

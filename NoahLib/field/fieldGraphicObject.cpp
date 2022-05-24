@@ -797,6 +797,14 @@ void setupOverrideTPage(uint x, uint y)
     overrideTPageValue = GetTPage(0, 0, x & 0xffff, y & 0xffff) & 0x1f;
 }
 
+void setupOverrideClut(uint x, uint y)
+{
+    u16 uVar1 = GetClut(x & 0xffff, y & 0xffff);
+    initModel2Sub0Var1 = 0;
+    primD_initSub0Sub1Var1 = uVar1 & 0xfff0;
+    return;
+}
+
 u16 customVramUploadX;
 u16 customVramUploadY;
 sPS1Pointer customVramUploadPtr;

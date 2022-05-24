@@ -393,7 +393,8 @@ std::vector<sLoadedMecha_sub4>* processMechaMesh(sMechaInitVar4* param_1, std::v
             initModel1(*param_1->m0[it2->m0], it->m68[0], it->m68[1]);
             assert(it->m68[0].size());
             if (useTpageAndClut) {
-                MissingCode();
+                setupOverrideTPage(tpageX, tpageY);
+                setupOverrideClut(clutX, clutY);
             }
             initModel2(param_1->m0[it2->m0], it->m68[0], param_3);
             it->m68[1] = it->m68[0];

@@ -258,3 +258,5 @@ void setTransparencyMode(sSpriteActor* param_1, u32 mode);
 void setCurrentAnimationPtr(sSpriteActorCore* param_1, const sPS1Pointer startOfAnimation);
 
 void uploadTextureToVram(sPS1Pointer param_1, short param_2, short tpageX, short tpageY, short param_5, short clutX, short clutY);
+void setupOverrideTPage(uint x, uint y);
+void setupOverrideClut(uint x, uint y);
