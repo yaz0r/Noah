@@ -136,7 +136,7 @@
         <scriptEntity ID="1" Name="Fei"/>
         <scriptEntity ID="2" Name="Citan"/>
         <scriptEntity ID="3" Name="Dan"/>
-        <scriptEntity ID="4" Name=""/>
+        <scriptEntity ID="4" Name="Weltall"/>
         <scriptEntity ID="5" Name=""/>
         <scriptEntity ID="6" Name=""/>
         <scriptEntity ID="7" Name=""/>
@@ -480,7 +480,14 @@
     <fieldInfo ID="25" Name="Blackmoon Forest - Fei and Elly by campfire"/>
     <fieldInfo ID="26" Name="Blackmoon Forest - Citan chats with Elly"/>
     <fieldInfo ID="27" Name="Elly&apos;s Flashback (Flying Weltall)"/>
-    <fieldInfo ID="28" Name="Elly&apos;s Flashback (Crash Landing)"/>
+    <fieldInfo ID="28" Name="Elly&apos;s Flashback (Crash Landing)">
+        <scriptEntity ID="0" Name="Director"/>
+        <scriptEntity ID="1" Name="Elly"/>
+        <scriptEntity ID="2" Name="Mecha_26"/>
+        <scriptEntity ID="3" Name="camera"/>
+        <scriptEntity ID="4" Name="Mecha_8"/>
+        <scriptEntity ID="5" Name="Mecha_8_2"/>
+    </fieldInfo>
     <fieldInfo ID="29" Name="Dazil - Water room"/>
     <fieldInfo ID="30" Name="Dazil - House with gossiping Aveh guards"/>
     <fieldInfo ID="31" Name="Dazil - House"/>

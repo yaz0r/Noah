@@ -208,6 +208,7 @@ struct sLoadedMechas {
     // size 0x134
 };
 
+extern std::array<s16, 4> mechaCurrentAnimation;
 extern std::array<sLoadedMechas*, 10> loadedMechas;
 extern std::array<int, 10> mechaList3;
 
@@ -221,6 +222,8 @@ void initMechaFieldArgs2(MATRIX& param_1, short param_2, short param_3, short pa
 void renderMechasForDebugFieldRenderer(int viewId);
 
 void mechaPlayAnimation(ushort param_1, short param_2, int param_3);
+
+void getMechaBoneMatrix(MATRIX* param_1, void* param_2, int mechaIndex, int boneIndex);
 
 extern std::vector<u8> mechaOverlayBuffer;
 extern u32 NumMechas;

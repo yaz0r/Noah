@@ -2053,7 +2053,7 @@ void OP_ROTATE_CAMERA_RELATIVE(void)
     return;
 }
 
-void OP_AC()
+void OP_SETUP_CAMERA_INTERPOLATION_STEPS()
 {
     switch (pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1] & 0xf)
     {
@@ -2831,6 +2831,12 @@ void OP_WAIT_MENU()
     breakCurrentScript = 1;
 }
 
+void OP_SETUP_MECHA_FIELD_ARGS()
+{
+    MissingCode();
+    pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 0x12;
+}
+
 void OPX_8C()
 {
     MissingCode();
@@ -3274,15 +3280,13 @@ void OP_CLEAR_PARTY_FRAME_MASK()
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
 }
 
-void OPX_3C()
+void OP_MECHA_PLAY_ANIMATION()
 {
     if (fieldExecuteVar1 != 0) {
-        short uVar1 = getImmediateOrVariableUnsigned(1);
-        int uVar2 = getImmediateOrVariableUnsigned(3);
-        MissingCode();
-        int iVar3 = getImmediateOrVariableUnsigned(1);
-        uVar1 = getImmediateOrVariableUnsigned(3);
-        MissingCode();
+        int mechaId = getImmediateOrVariableUnsigned(1);
+        int animationId = getImmediateOrVariableUnsigned(3);
+        mechaPlayAnimation(mechaId, 0, animationId);
+        mechaCurrentAnimation[mechaId] = animationId;
     }
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 5;
 }

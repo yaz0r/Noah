@@ -683,6 +683,11 @@ void initOpcodeTable()
 		.addArgumentU16OrVar()
 		.end();
 
+    m_opcode[0xB6]
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .end();
+
 	m_opcode[0xB7]
 		.end();
 
@@ -942,6 +947,9 @@ void initOpcodeTable()
 		.addArgumentDialogId()
 		.addArgumentByte()
 		.end();
+
+    m_opcode[0xFF]
+        .end();
 }
 
 void initExtendedOpcodeTable()
@@ -1090,6 +1098,7 @@ void initExtendedOpcodeTable()
 		.end();
 
 	m_extendedOpcode[0x3C]
+        .setName("MECHA_PLAY_ANIMATION")
 		.addArgumentU16OrVar()
 		.addArgumentU16OrVar()
 		.end();
@@ -1330,6 +1339,19 @@ void initExtendedOpcodeTable()
 	m_extendedOpcode[0x87]
 		.setName("WAIT_MENU")
 		.end();
+
+    m_extendedOpcode[0x88]
+        .setName("SETUP_MECHA_FIELD_ARGS")
+        .addArgumentS16OrVar(0x80)
+        .addArgumentS16OrVar(0x40)
+        .addArgumentS16OrVar(0x20)
+        .addArgumentS16OrVar(0x10)
+        .addArgumentS16OrVar(0x8)
+        .addArgumentS16OrVar(0x4)
+        .addArgumentS16OrVar(0x2)
+        .addArgumentS16OrVar(0x1)
+        .addSignControlByte()
+        .end();
 
 	m_extendedOpcode[0x8C]
 		.addArgumentU16OrVar()

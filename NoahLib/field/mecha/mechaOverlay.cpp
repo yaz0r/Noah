@@ -14,6 +14,9 @@ std::array<u8, 4> mechaList2;
 s16 mechaPlayAnimationVar0 = 0;
 s16 mechaPlayAnimationVar1 = 0;
 
+std::array<s16, 4> mechaCurrentAnimation;
+u32 mechaBytecodeToggle = 0;
+
 void waitForLoading(void)
 {
     int iVar1;
@@ -547,6 +550,16 @@ void mechaAnimOp23(sLoadedMechas* param_1, sLoadedMecha_sub4* param_2, u32 param
     }
 }
 
+void mechaOP_13(sMechaInitVar2* param_1, std::vector<sLoadedMecha_sub4>& param_2, sMechaDataTable2_4_4* param_3, int param_4, byte param_5, byte param_6, char param_7) {
+    MissingCode();
+}
+
+void mechaOP_19(sLoadedMechas* param_1)
+{
+    param_1->m98 = -1;
+    return;
+}
+
 void processMechaAnimData(sLoadedMechas* param_1, sMechaInitVar2* param_2, int param_3, int param_4)
 {
     if (param_4 == 0) {
@@ -600,12 +613,27 @@ void processMechaAnimData(sLoadedMechas* param_1, sMechaInitVar2* param_2, int p
         pNextBytecode = pCurrentByteCodePtr + 1;
 
         u8 bytecodeLower = _currentByteCode & 0xFF;
-        u8 bytecodeHigher = (_currentByteCode >> 8) & 0xFF;
+        u16 bytecodeHigher = (_currentByteCode >> 8) & 0xFF;
+
+        u32 local_100;
 
         switch (_currentByteCode & 0xFF) {
         case 0:
             continueBytecodeExecution = 0;
             pNextBytecode = pCurrentByteCodePtr;
+            break;
+        case 1:
+            if (param_3 != -1) {
+                _currentByteCode = *pNextBytecode;
+                param_1->m40 += param_3;
+                if (_currentByteCode < param_1->m40) {
+                    param_1->m40 = 0;
+                    param_3 = 0;
+                    pNextBytecode = pCurrentByteCodePtr + 2;
+                    break;
+                }
+            }
+            continueBytecodeExecution = 0;
             break;
         case 0x8:
             mechaOP_8(param_2, param_1->m4);
@@ -627,11 +655,52 @@ void processMechaAnimData(sLoadedMechas* param_1, sMechaInitVar2* param_2, int p
             param_1->m82[1] = 0;
             param_1->m82[2] = 0;
             break;
+        case 0xF:
+            break; // TODO: really?
         case 0x10:
+            mechaOP_10_b(*param_1->m4, mechaOP_10_a(param_1, bytecodeHigher, &local_100));
+            break;
+        case 0x11:
             {
-                u32 dummy;
-                mechaOP_10_b(*param_1->m4, mechaOP_10_a(param_1, bytecodeHigher, &dummy));
+                u32 local_100;
+                sMechaDataTable2_4_4* pbVar8 = mechaOP_10_a(param_1, bytecodeHigher, &local_100);
+                _currentByteCode = *pNextBytecode;
+                pNextBytecode = pCurrentByteCodePtr + 2;
+                if (local_100 == 0) {
+                    MissingCode();
+                }
             }
+            break;
+        case 0x13:
+            {
+                u8 previousByteCode = _currentByteCode;
+                u8 preBytecodeHigher = bytecodeHigher;
+                bytecodeHigher = *pNextBytecode;
+                _currentByteCode = pCurrentByteCodePtr[2];
+                pNextBytecode = pCurrentByteCodePtr + 3;
+                sMechaDataTable2_4_4* psVar7 = mechaOP_10_a(param_1, bytecodeHigher, &local_100);
+                if (mechaBytecodeToggle == 0) {
+                    mechaOP_13(param_2, *param_1->m4, psVar7, _currentByteCode >> 8, preBytecodeHigher, previousByteCode, bytecodeHigher >> 8);
+                }
+                else {
+                    mechaOP_10_b(*param_1->m4, psVar7);
+                }
+                param_3 = 0xffffffff;
+                mechaOP_19(param_1);
+            }
+            break;
+        case 0x1D:
+            MissingCode();
+            pNextBytecode = pCurrentByteCodePtr + 10;
+            break;
+        case 0x21:
+            param_1->m3C = bytecodeHigher;
+            if (param_3 != -1) {
+                if (bytecodeHigher == 0)
+                    break;
+            }
+            continueBytecodeExecution = 0;
+            pNextBytecode = pCurrentByteCodePtr;
             break;
         case 0x23:
             mechaAnimOp23(param_1, &(*param_1->m4)[*pNextBytecode], bytecodeHigher);
@@ -640,18 +709,22 @@ void processMechaAnimData(sLoadedMechas* param_1, sMechaInitVar2* param_2, int p
         case 0x48:
             param_1->m36 = bytecodeHigher;
             break;
+        case 0x62:
+            MissingCode();
+            pNextBytecode = pCurrentByteCodePtr + 5;
+            break;
         default:
             assert(0);
         }
     }
 }
 
-void initMechaAnimation(sLoadedMechas* param_1, sLoadedMechas* param_2, sMechaInitVar2* param_3, int param_4)
+void initMechaAnimation(sLoadedMechas* param_1, sLoadedMechas* param_2, sMechaInitVar2* param_3, int animationId)
 {
     if ((param_1 != (sLoadedMechas*)0x0) && (param_2 != (sLoadedMechas*)0x0)) {
         if (param_1->m2A[1] == 0) {
-            if (param_4 < 0x50) {
-                param_1->m10_bytecode0 = &(*param_2->m8_bytecodeTable)[param_4][0];
+            if (animationId < 0x50) {
+                param_1->m10_bytecode0 = &(*param_2->m8_bytecodeTable)[animationId][0];
             }
             else {
                 assert(0);
@@ -670,7 +743,7 @@ void initMechaAnimation(sLoadedMechas* param_1, sLoadedMechas* param_2, sMechaIn
                 param_1->m2A[1] = param_1->m2A[1] + 1;
             }
             param_1->m2A[param_1->m2A[1]] = param_2->m20_mechaEntryId;
-            param_1->m2A[param_1->m2A[1] + 4] = param_4;
+            param_1->m2A[param_1->m2A[1] + 4] = animationId;
         }
     }
 }
@@ -1255,12 +1328,12 @@ void initMechaFieldArgs2(MATRIX& param_1, short param_2, short param_3, short pa
     return;
 }
 
-void mechaPlayAnimation(ushort param_1, short param_2, int param_3) {
-    mechaPlayAnimationVar0 = param_2;
-    mechaPlayAnimationVar1 = param_1;
-    loadedMechas[param_1]->m35 = 0;
-    if (loadedMechas[param_1]) {
-        initMechaAnimation(loadedMechas[param_1], loadedMechas[param_1], &mechaInitVar2, param_3);
+void mechaPlayAnimation(ushort mechaId, short mechaId2, int animationId) {
+    mechaPlayAnimationVar0 = mechaId2;
+    mechaPlayAnimationVar1 = mechaId;
+    loadedMechas[mechaId]->m35 = 0;
+    if (loadedMechas[mechaId]) {
+        initMechaAnimation(loadedMechas[mechaId], loadedMechas[mechaId], &mechaInitVar2, animationId);
     }
 }
 
@@ -1289,6 +1362,18 @@ void renderMechasForDebugFieldRenderer(int viewId)
                 }
                 m4It++;
             }
+        }
+    }
+}
+
+void getMechaBoneMatrix(MATRIX* param_1, void* param_2, int mechaIndex, int boneIndex) {
+    sLoadedMechas* pMecha = loadedMechas[mechaIndex];
+    if (pMecha != (sLoadedMechas*)0x0) {
+        if (boneIndex == 0) {
+            *param_1 = (*pMecha->m4)[0].mC;
+        }
+        else {
+            CompMatrix(&(*pMecha->m4)[0].mC, &(*pMecha->m4)[boneIndex].m2C, param_1);
         }
     }
 }

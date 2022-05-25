@@ -4,6 +4,7 @@
 #include "kernel/memory.h"
 #include "kernel/graphics.h"
 #include "field/field.h"
+#include "field/mecha/mechaOverlay.h"
 
 s32 disableParticles = 0;
 
@@ -421,6 +422,19 @@ void updateParticle(sParticleConfig* particleEffect, sParticle* pParticle, MATRI
             attachement.vx = ((actorArray[particleEffect->m52].m4C_scriptEntity)->m20_position).vx.getIntegerPart();
             attachement.vy = ((actorArray[particleEffect->m52].m4C_scriptEntity)->m20_position).vy.getIntegerPart();
             attachement.vz = ((actorArray[particleEffect->m52].m4C_scriptEntity)->m20_position).vz.getIntegerPart();
+        }
+        break;
+    case 1:
+        {
+            getMechaBoneMatrix(&local_a8, nullptr, particleEffect->m72, particleEffect->m74);
+            SetRotMatrix(&local_a8);
+            SetTransMatrix(&local_a8);
+            SVECTOR local_b0;
+            local_b0.vx = (particleEffect->mC_sPos).vx;
+            local_b0.vy = (particleEffect->mC_sPos).vy;
+            local_b0.vz = (particleEffect->mC_sPos).vz;
+            RotTrans(&local_b0, &attachement, nullptr);
+            particleEffect->m50 = 0x1000;
         }
         break;
     case 2:
