@@ -42,89 +42,6 @@ std::vector<u8> mechaOverlayBuffer;
 
 std::array<sLoadingBatchCommands, 16> mechaOverlayBatchLoadingTable;
 
-struct sMechaDataTable1_C {
-    s16 m0;
-    s16 m2;
-};
-
-struct sMechaDataTable1_sub4 {
-    void init(std::vector<u8>& inputData) {
-        m_raw = inputData;
-
-    }
-
-    std::vector<u8> m_raw;
-};
-
-struct sMechaDataTable1_10_4 {
-    sMechaDataTable1_10_4(std::vector<u8>& input) {
-        m_raw = input;
-
-        std::vector<u8>::iterator it = input.begin();
-
-        m2[0] = READ_LE_S16(it + 2);
-        m2[1] = READ_LE_S16(it + 2 + 2);
-        m2[2] = READ_LE_S16(it + 2 + 4);
-
-        m8 = READ_LE_S16(it + 8);
-        mA = READ_LE_U8(it + 0xA);
-        mC = READ_LE_S16(it + 0xC);
-        mE = READ_LE_U8(it + 0xE);
-        m10 = READ_LE_U8(it + 0x10);
-        m12 = READ_LE_U8(it + 0x12);
-    }
-
-
-    std::array<s16, 3> m2;
-    s16 m8;
-    u8 mA;
-    s16 mC;
-    u8 mE;
-    u8 m10;
-    u8 m12;
-
-    std::vector<u8> m_raw;
-};
-
-struct sMechaDataTable1_10 {
-    sMechaDataTable1_10(std::vector<u8>& input) {
-        m_raw = input;
-        std::vector<std::vector<u8>> relocatedData = doPointerRelocationAndSplit(input);
-
-        assert(input.size() == 0x20);
-        m4 = new sMechaDataTable1_10_4(relocatedData[0]);
-    }
-    sMechaDataTable1_10_4 *m4;
-
-    std::vector<u8> m_raw;
-};
-
-struct sMechaDataTable1 {
-    sMechaDataTable1(std::vector<u8>& input) {
-        m_raw = input;
-        std::vector<std::vector<u8>> relocatedData = doPointerRelocationAndSplit(input);
-
-        m4_textures.init(relocatedData[0]);
-        m8_modelBlocks.init(relocatedData[1].begin(), relocatedData[1].size());
-        mC.resize(relocatedData[2].size() / 4);
-        for (int i = 0; i < mC.size(); i++) {
-            mC[i].m0 = READ_LE_S16(relocatedData[2].begin() + i * 4 + 0);
-            mC[i].m2 = READ_LE_S16(relocatedData[2].begin() + i * 4 + 2);
-        }
-
-        m10 = new sMechaDataTable1_10(relocatedData[3]);
-
-        return;
-    }
-
-    sMechaDataTable1_sub4 m4_textures;
-    sModel m8_modelBlocks;
-    std::vector<sMechaDataTable1_C> mC;
-    sMechaDataTable1_10 *m10;
-
-    std::vector<u8> m_raw;
-};
-
 std::array<sMechaDataTable1*, 9> mechaDataTable1;
 std::array<std::vector<u8>, 9> mechaDataTable1_raw;
 
@@ -560,12 +477,12 @@ void mechaOP_19(sLoadedMechas* param_1)
     return;
 }
 
-void processMechaAnimData(sLoadedMechas* param_1, sMechaInitVar2* param_2, int param_3, int param_4)
+void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int param_3, int param_4)
 {
     if (param_4 == 0) {
         return;
     }
-    if (param_1->m10_bytecode0 == 0) {
+    if (pMecha->m10_bytecode0 == 0) {
         return;
     }
 
@@ -573,38 +490,38 @@ void processMechaAnimData(sLoadedMechas* param_1, sMechaInitVar2* param_2, int p
 
     // step the mecha forward?
     for (int i = 0; i < param_4; i++) {
-        param_1->m70[0] += param_1->m76[0];
-        param_1->m70[1] += param_1->m76[1];
-        param_1->m70[2] += param_1->m76[2];
+        pMecha->m70[0] += pMecha->m76[0];
+        pMecha->m70[1] += pMecha->m76[1];
+        pMecha->m70[2] += pMecha->m76[2];
 
-        param_1->m7C[0] += param_1->m82[0];
-        param_1->m7C[1] += param_1->m82[1];
-        param_1->m7C[2] += param_1->m82[2];
+        pMecha->m7C[0] += pMecha->m82[0];
+        pMecha->m7C[1] += pMecha->m82[1];
+        pMecha->m7C[2] += pMecha->m82[2];
 
-        (*param_1->m4)[0].m54_rotationAngles[0] += param_1->m70[0] >> 3;
-        (*param_1->m4)[0].m54_rotationAngles[1] += param_1->m70[1] >> 3;
-        (*param_1->m4)[0].m54_rotationAngles[2] += param_1->m70[2] >> 3;
+        (*pMecha->m4)[0].m54_rotationAngles[0] += pMecha->m70[0] >> 3;
+        (*pMecha->m4)[0].m54_rotationAngles[1] += pMecha->m70[1] >> 3;
+        (*pMecha->m4)[0].m54_rotationAngles[2] += pMecha->m70[2] >> 3;
 
         SFP_VEC4 local_120;
-        local_120.vx = ((int)param_1->m7C[0] * (int)(*param_1->m4)[0].m4C[0] >> 0xc);
-        local_120.vy = ((int)param_1->m7C[1] * (int)(*param_1->m4)[0].m4C[1] >> 0xc);
-        local_120.vz = ((int)param_1->m7C[2] * (int)(*param_1->m4)[0].m4C[2] >> 0xc);
+        local_120.vx = ((int)pMecha->m7C[0] * (int)(*pMecha->m4)[0].m4C[0] >> 0xc);
+        local_120.vy = ((int)pMecha->m7C[1] * (int)(*pMecha->m4)[0].m4C[1] >> 0xc);
+        local_120.vz = ((int)pMecha->m7C[2] * (int)(*pMecha->m4)[0].m4C[2] >> 0xc);
 
         FP_VEC4 local_130;
-        rotateVectorByMatrix(&(*param_1->m4)[0].m2C, &local_120, &local_130);
+        rotateVectorByMatrix(&(*pMecha->m4)[0].m2C, &local_120, &local_130);
 
-        (*param_1->m4)[0].m5C_translation[0] += (param_1->m1C_moveSpeed * local_130.vx >> 0xc);
-        (*param_1->m4)[0].m5C_translation[1] += (param_1->m1C_moveSpeed * local_130.vy >> 0xc);
-        (*param_1->m4)[0].m5C_translation[2] += (param_1->m1C_moveSpeed * local_130.vz >> 0xc);
+        (*pMecha->m4)[0].m5C_translation[0] += (pMecha->m1C_moveSpeed * local_130.vx >> 0xc);
+        (*pMecha->m4)[0].m5C_translation[1] += (pMecha->m1C_moveSpeed * local_130.vy >> 0xc);
+        (*pMecha->m4)[0].m5C_translation[2] += (pMecha->m1C_moveSpeed * local_130.vz >> 0xc);
     }
 
     bool continueBytecodeExecution = true;
-    sMechaDataTable2_4_8* pNextBytecode = param_1->m10_bytecode0;
+    sMechaDataTable2_4_8* pNextBytecode = pMecha->m10_bytecode0;
 
     while (1) {
         sMechaDataTable2_4_8* pCurrentByteCodePtr = pNextBytecode;
         if (!continueBytecodeExecution) {
-            param_1->m10_bytecode0 = pCurrentByteCodePtr;
+            pMecha->m10_bytecode0 = pCurrentByteCodePtr;
             MissingCode();
             return;
         }
@@ -625,9 +542,9 @@ void processMechaAnimData(sLoadedMechas* param_1, sMechaInitVar2* param_2, int p
         case 1:
             if (param_3 != -1) {
                 _currentByteCode = *pNextBytecode;
-                param_1->m40 += param_3;
-                if (_currentByteCode < param_1->m40) {
-                    param_1->m40 = 0;
+                pMecha->m40 += param_3;
+                if (_currentByteCode < pMecha->m40) {
+                    pMecha->m40 = 0;
                     param_3 = 0;
                     pNextBytecode = pCurrentByteCodePtr + 2;
                     break;
@@ -636,34 +553,34 @@ void processMechaAnimData(sLoadedMechas* param_1, sMechaInitVar2* param_2, int p
             continueBytecodeExecution = 0;
             break;
         case 0x8:
-            mechaOP_8(param_2, param_1->m4);
+            mechaOP_8(param_2, pMecha->m4);
             break;
         case 0xA:
-            mechaOP_A(param_2, &(*param_1->m4)[0], bytecodeHigher, 7);
+            mechaOP_A(param_2, &(*pMecha->m4)[0], bytecodeHigher, 7);
             break;
         case 0xC:
-            param_1->m70[0] = 0;
-            param_1->m70[1] = 0;
-            param_1->m70[2] = 0;
-            param_1->m76[0] = 0;
-            param_1->m76[1] = 0;
-            param_1->m76[2] = 0;
-            param_1->m7C[0] = 0;
-            param_1->m7C[1] = 0;
-            param_1->m7C[2] = 0;
-            param_1->m82[0] = 0;
-            param_1->m82[1] = 0;
-            param_1->m82[2] = 0;
+            pMecha->m70[0] = 0;
+            pMecha->m70[1] = 0;
+            pMecha->m70[2] = 0;
+            pMecha->m76[0] = 0;
+            pMecha->m76[1] = 0;
+            pMecha->m76[2] = 0;
+            pMecha->m7C[0] = 0;
+            pMecha->m7C[1] = 0;
+            pMecha->m7C[2] = 0;
+            pMecha->m82[0] = 0;
+            pMecha->m82[1] = 0;
+            pMecha->m82[2] = 0;
             break;
         case 0xF:
             break; // TODO: really?
         case 0x10:
-            mechaOP_10_b(*param_1->m4, mechaOP_10_a(param_1, bytecodeHigher, &local_100));
+            mechaOP_10_b(*pMecha->m4, mechaOP_10_a(pMecha, bytecodeHigher, &local_100));
             break;
         case 0x11:
             {
                 u32 local_100;
-                sMechaDataTable2_4_4* pbVar8 = mechaOP_10_a(param_1, bytecodeHigher, &local_100);
+                sMechaDataTable2_4_4* pbVar8 = mechaOP_10_a(pMecha, bytecodeHigher, &local_100);
                 _currentByteCode = *pNextBytecode;
                 pNextBytecode = pCurrentByteCodePtr + 2;
                 if (local_100 == 0) {
@@ -678,15 +595,15 @@ void processMechaAnimData(sLoadedMechas* param_1, sMechaInitVar2* param_2, int p
                 bytecodeHigher = *pNextBytecode;
                 _currentByteCode = pCurrentByteCodePtr[2];
                 pNextBytecode = pCurrentByteCodePtr + 3;
-                sMechaDataTable2_4_4* psVar7 = mechaOP_10_a(param_1, bytecodeHigher, &local_100);
+                sMechaDataTable2_4_4* psVar7 = mechaOP_10_a(pMecha, bytecodeHigher, &local_100);
                 if (mechaBytecodeToggle == 0) {
-                    mechaOP_13(param_2, *param_1->m4, psVar7, _currentByteCode >> 8, preBytecodeHigher, previousByteCode, bytecodeHigher >> 8);
+                    mechaOP_13(param_2, *pMecha->m4, psVar7, _currentByteCode >> 8, preBytecodeHigher, previousByteCode, bytecodeHigher >> 8);
                 }
                 else {
-                    mechaOP_10_b(*param_1->m4, psVar7);
+                    mechaOP_10_b(*pMecha->m4, psVar7);
                 }
                 param_3 = 0xffffffff;
-                mechaOP_19(param_1);
+                mechaOP_19(pMecha);
             }
             break;
         case 0x1D:
@@ -694,7 +611,7 @@ void processMechaAnimData(sLoadedMechas* param_1, sMechaInitVar2* param_2, int p
             pNextBytecode = pCurrentByteCodePtr + 10;
             break;
         case 0x21:
-            param_1->m3C = bytecodeHigher;
+            pMecha->m3C = bytecodeHigher;
             if (param_3 != -1) {
                 if (bytecodeHigher == 0)
                     break;
@@ -703,11 +620,11 @@ void processMechaAnimData(sLoadedMechas* param_1, sMechaInitVar2* param_2, int p
             pNextBytecode = pCurrentByteCodePtr;
             break;
         case 0x23:
-            mechaAnimOp23(param_1, &(*param_1->m4)[*pNextBytecode], bytecodeHigher);
+            mechaAnimOp23(pMecha, &(*pMecha->m4)[*pNextBytecode], bytecodeHigher);
             pNextBytecode = pCurrentByteCodePtr + 2;
             break;
         case 0x48:
-            param_1->m36 = bytecodeHigher;
+            pMecha->m36 = bytecodeHigher;
             break;
         case 0x62:
             MissingCode();
@@ -1008,7 +925,8 @@ void loadMechaOVerlayAndRegisterMechas(void)
 }
 
 void freeMecha(int index) {
-    MissingCode();
+    loadedMechas[index] = nullptr;
+    MissingCode(); // don't forget to also clear mechaDataTable1 mechaDataTable2 (raw versions)
 }
 
 void freeMechaModule()

@@ -221,7 +221,7 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0x54] = OPX_54;
     fieldScriptOpcodes_EX[0x57] = OP_OPEN_LOAD_GAME_MENU;
     fieldScriptOpcodes_EX[0x5B] = OPX_5B;
-    fieldScriptOpcodes_EX[0x5C] = OPX_5C;
+    fieldScriptOpcodes_EX[0x5C] = OP_LOAD_NEW_MECHA;
     fieldScriptOpcodes_EX[0x5D] = OPX_5D;
     fieldScriptOpcodes_EX[0x5E] = OP_SET_TRANSPARENCY_MODE;
     fieldScriptOpcodes_EX[0x5F] = OPX_5F;

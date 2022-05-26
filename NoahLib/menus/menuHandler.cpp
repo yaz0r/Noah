@@ -818,7 +818,7 @@ void updateMenuInput(void) {
             FUN_Menu2__801c8574(1);
             newValue = 3;
         }
-        if ((newPadButtonForDialogs & controllerButtons::CIRCLE) != 0) {
+        if ((newPadButtonForDialogs & controllerButtons::INTERACT) != 0) {
             FUN_Menu2__801c8574(2);
             newValue = 4;
         }

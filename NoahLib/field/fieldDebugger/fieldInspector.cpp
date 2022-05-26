@@ -1008,6 +1008,7 @@ public:
             }
             break;
         case 0xFE5C:
+            dynamicOpcode.setName("LOAD_NEW_MECHA");
             switch (readU8FromScript(1))
             {
             case 0:

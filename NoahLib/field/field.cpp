@@ -85,6 +85,8 @@ s32 walkMeshVar4 = 0;
 s16 isFogSetup = 0;
 s16 cameraTan = 0;
 
+s16 deltaMoveVar0 = 0;
+
 s16 entityMoveSpeedFactor = 0;
 
 int g_frameOddOrEven = 0;
@@ -129,8 +131,18 @@ const std::array<s8, 12> characterMappingTable = {
 s16 pcInitVar2 = 0;
 std::array<int, 3> unkPartyTable;
 
-
 u8 fieldBackgroundClearColor[3];
+
+SFP_VEC4 renderModelRotationAngles;
+MATRIX renderModelRotationMatrix;
+s32 cameraDeltaTan;
+
+MATRIX currentProjectionMatrix;
+
+s32 updateCameraInterpolationVar0 = 0;
+s32 updateCameraInterpolationVar1 = 0;
+
+
 
 int fieldModelRelocation(std::vector<u8>::iterator pModelData)
 {
@@ -343,15 +355,13 @@ void resetFieldDefault()
 
     op99Var4 = 0x1000;
     linkOTIndex = 0x720;
-
     MissingCode();
-
-    fieldTransitionMode = 2;
-
-    MissingCode();
-
+    fieldObjectRenderingVar2.pad = 0x80;
+    asyncLoadingVar1 = 0xFF;
     entityMoveSpeedFactor = 0x1000;
-
+    renderModelRotationAngles.vx = 0;
+    renderModelRotationAngles.vy = 0;
+    renderModelRotationAngles.vz = 0;
     MissingCode();
 
     fieldChangePrevented = -1;
@@ -359,7 +369,13 @@ void resetFieldDefault()
     inputAllowedMask2 = 0xFFFF;
 
     MissingCode();
-
+    g_frameOddOrEven = 0;
+    MissingCode();
+    updateEntityEventCode3Var2 = 0;
+    MissingCode();
+    playerControlledActor = 0;
+    deltaMoveVar0 = 0;
+    windowOpenBF = 0;
     fieldRandomBattleVar = 0;
 
     MissingCode();
@@ -2760,10 +2776,9 @@ void OPX_45()
     psVar2->mE6 = (ushort)bVar1;
 }
 
-s16 OPX47Var = 0;
 void OPX_47()
 {
-    OPX47Var = getImmediateOrVariableUnsigned(1);
+    fieldObjectRenderingVar2.pad = getImmediateOrVariableUnsigned(1);
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
 }
 
@@ -3158,15 +3173,6 @@ void setupObjectRenderModes()
         }
     }
 }
-
-SFP_VEC4 renderModelRotationAngles;
-MATRIX renderModelRotationMatrix;
-s32 cameraDeltaTan;
-
-MATRIX currentProjectionMatrix;
-
-s32 updateCameraInterpolationVar0 = 0;
-s32 updateCameraInterpolationVar1 = 0;
 
 int shoudlGroundOTBeEnabled()
 {
@@ -4515,8 +4521,6 @@ std::array<s16, 8> deltaMoveTable1 = {
     0x400, 0x600, 0x800, 0xA00
 };
 
-s16 deltaMoveVar0 = 0;
-
 void computeDeltaMove(FP_VEC3* param_1, int param_2, uint param_3)
 {
     int iVar1;
@@ -5545,7 +5549,7 @@ void  startScriptsForCollisions(uint playerEntityIndex, sFieldEntity* pPlayerEnt
                     startScriptsForCollisionsVar0 = 0;
                 }
                 else {
-                    if ((((padButtonForDialogs & controllerButtons::CIRCLE) == 0) || (bTrigger)) || ((pTestedScriptEntity->m4_flags.m_rawFlags & 0x4000000) != 0)) {
+                    if ((((padButtonForDialogs & controllerButtons::INTERACT) == 0) || (bTrigger)) || ((pTestedScriptEntity->m4_flags.m_rawFlags & 0x4000000) != 0)) {
                         if ((pTestedScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0xa20000) == 0) {
                             scriptIndexToStart = '\x03';
                             newValueInFlags = 4;
@@ -5597,7 +5601,7 @@ void  startScriptsForCollisions(uint playerEntityIndex, sFieldEntity* pPlayerEnt
                     Square0(&tempVec3, &tempVec4);
 
                     s32 distance = tempVec2.vx + tempVec2.vz;
-                    if (((tempVec4.vz <= distance) || ((padButtonForDialogs & controllerButtons::CIRCLE) == 0)) || ((bTrigger || ((pTestedScriptEntity->m4_flags.m_rawFlags & 0x4000000) != 0)))) {
+                    if (((tempVec4.vz <= distance) || ((padButtonForDialogs & controllerButtons::INTERACT) == 0)) || ((bTrigger || ((pTestedScriptEntity->m4_flags.m_rawFlags & 0x4000000) != 0)))) {
                         if (((pTestedScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0xa20000) == 0) && (distance < tempVec4.vx)) {
                             scriptIndexToStart =  3;
                             newValueInFlags = 4;
@@ -5623,7 +5627,7 @@ void  startScriptsForCollisions(uint playerEntityIndex, sFieldEntity* pPlayerEnt
             {
                 if ((((pPlayerScriptEntity->m20_position.vy.getIntegerPart() - pPlayerScriptEntity->m18_boundingVolume.vy <= yDiff) && ((int)(yDiff - (uint)(ushort)pTestedScriptEntity->m18_boundingVolume.vy) <= pPlayerScriptEntity->m20_position.vy.getIntegerPart())) && (actorId != playerEntityIndex)) &&
                     (isPositionInEntityScriptBoundingVolume(pPlayerScriptEntity->m20_position.vx.getIntegerPart(), pPlayerScriptEntity->m20_position.vz.getIntegerPart(), pTestedScriptEntity, 0x10) == 0)) {
-                    if ((((padButtonForDialogs & controllerButtons::CIRCLE) == 0) || (bTrigger)) || ((pTestedScriptEntity->m4_flags.m_rawFlags & 0x4000000) != 0)) {
+                    if ((((padButtonForDialogs & controllerButtons::INTERACT) == 0) || (bTrigger)) || ((pTestedScriptEntity->m4_flags.m_rawFlags & 0x4000000) != 0)) {
                         if ((pTestedScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0xa20000) == 0) {
                             scriptIndexToStart = 3;
                             newValueInFlags = 4;
@@ -7070,7 +7074,7 @@ void updateAllEntities()
                     s32 iVar8;
                     s32 sVar5;
                     if (((psVar10->m14_currentTriangleFlag & 0x200000U) == 0) || (iVar9 = 0x200, (psVar10->m0_fieldScriptFlags.m_rawFlags & 0x1800) != 0)) {
-                        sVar5 = OPX47Var;
+                        sVar5 = fieldObjectRenderingVar2.pad;
                         if ((uVar7 & 0x2000) == 0) {
                             sVar5 = psVar10->m11E;
                         }
@@ -8521,7 +8525,7 @@ void getInputDuringVsync(void)
         buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_LEFTSHOULDER) ? controllerButtons::L1 : 0;
         buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER) ? controllerButtons::R1 : 0;
         buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_Y) ? controllerButtons::TRIANGLE : 0;
-        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_B) ? controllerButtons::CIRCLE : 0;
+        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_B) ? controllerButtons::INTERACT : 0;
         buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_A) ? controllerButtons::CROSS : 0;
         buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_X) ? controllerButtons::JUMP : 0;
         buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_BACK) ? controllerButtons::SELECT : 0;
@@ -8558,7 +8562,7 @@ void getInputDuringVsync(void)
                     buttonMask |= controllerButtons::CROSS; // CROSS
                     break;
                 case SDL_SCANCODE_X:
-                    buttonMask |= controllerButtons::CIRCLE; // CIRCLE
+                    buttonMask |= controllerButtons::INTERACT; // CIRCLE
                     break;
                 case SDL_SCANCODE_A:
                     buttonMask |= controllerButtons::JUMP; // SQUARE

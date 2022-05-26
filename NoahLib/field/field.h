@@ -8,7 +8,7 @@ enum controllerButtons {
     L1 = 1 << 2, // 0x4
     R1 = 1 << 3, // 0x8
     TRIANGLE = 1 << 4, // 0x10
-    CIRCLE = 1 << 5, // 0x20
+    INTERACT = 1 << 5, // 0x20
     CROSS = 1 << 6, // 0x40
     JUMP = 1 << 7, // 0x80
     SELECT = 1 << 8, // 0x100

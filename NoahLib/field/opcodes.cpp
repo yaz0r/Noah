@@ -1866,7 +1866,6 @@ void OP_ADD_ENDITY_TO_MECHA_LIST()
     mechaList2[NumMechas] = 0;
     pCurrentFieldScriptActor->m12C_flags = pCurrentFieldScriptActor->m12C_flags & 0xffff1fff | (NumMechas & 7) << 0xd;
     NumMechas = NumMechas + 1;
-    MissingCode();
 }
 
 void OP_SET_CAMERA_INTERPOLATION_RATE(void)
@@ -2609,7 +2608,7 @@ void OPX_5B() {
     pCurrentFieldScriptActor += 3;
 }
 
-void OPX_5C(void)
+void OP_LOAD_NEW_MECHA(void)
 {
     int iVar5;
     if ((loadCompleted != 0) || (iVar5 = isLoadCompleted(), iVar5 != 0)) {
@@ -2618,20 +2617,63 @@ void OPX_5C(void)
         return;
     }
 
-    MissingCode();
+    pCurrentFieldScriptActor->m4_flags.m_rawFlags = pCurrentFieldScriptActor->m4_flags.m_rawFlags & 0xffffdfff;
+    setCurrentDirectory(4, 0);
+    int mechaIndex = pCurrentFieldScriptActor->m12C_flags >> 0xd & 7;
 
     switch (pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1])
     {
     case 0:
-        MissingCode();
+        loadedMechas[mechaIndex]->m34 = 0;
         pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 2;
         break;
     case 1:
-        MissingCode();
+        freeMecha(mechaIndex);
+        {
+            int newMechaIndex = getImmediateOrVariableUnsigned(5);
+
+            mechaOverlayBatchLoadingTable[0].m0_fileIndex = newMechaIndex * 2 + 0x6BA;
+            mechaOverlayBatchLoadingTable[0].m4_loadPtr = &mechaDataTable2_raw[mechaIndex];
+            mechaDataTable2_raw[mechaIndex].resize(getFileSizeAligned(newMechaIndex * 2 + 0x6BA));
+
+            mechaOverlayBatchLoadingTable[1].m0_fileIndex = newMechaIndex * 2 + 0x6BB;
+            mechaOverlayBatchLoadingTable[1].m4_loadPtr = &mechaDataTable1_raw[mechaIndex];
+            mechaDataTable1_raw[mechaIndex].resize(getFileSizeAligned(newMechaIndex * 2 + 0x6BB));
+
+            mechaOverlayBatchLoadingTable[2].m0_fileIndex = 0;
+            mechaOverlayBatchLoadingTable[2].m4_loadPtr = nullptr;
+
+            batchStartLoadingFiles(&mechaOverlayBatchLoadingTable[0], 0);
+        }
         pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 2;
         break;
     case 2:
-        pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 4;
+        if (waitReadCompletion(1) == 0) {
+            mechaDataTable2[mechaIndex] = new sMechaDataTable2(mechaDataTable2_raw[mechaIndex]);
+            mechaDataTable1[mechaIndex] = new sMechaDataTable1(mechaDataTable1_raw[mechaIndex]);
+            mechaInitNewMecha(mechaIndex, 0, mechaDataTable2[mechaIndex], mechaDataTable1[mechaIndex], (ushort)(((mechaIndex + mechaList2[mechaIndex]) * -0x40 + 0x240) * 0x10000 >> 0x10), 0x100, 0,
+                (short)((mechaIndex + 0xfc) * 0x10000 >> 0x10), &initMechaTempVar[mechaIndex]);
+
+            mechaList3[mechaIndex] = loadedMechas[mechaIndex]->m1C_moveSpeed;
+
+            delete mechaDataTable1[mechaIndex];
+            mechaDataTable1[mechaIndex] = nullptr;
+            mechaDataTable1_raw[mechaIndex].clear();
+
+            pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 4;
+
+            pCurrentFieldScriptActor->m4_flags.m_rawFlags |= 0x2000;
+
+            loadedMechas[mechaIndex]->m1C_moveSpeed = pCurrentFieldScriptActor->mF4_scale3d[0] * 5 >> 6;
+
+            loadedMechas[mechaIndex]->m60 = pCurrentFieldScriptActor->m20_position[1].getIntegerPart();
+
+            (*loadedMechas[mechaIndex]->m4)[0].m5C_translation[0] = pCurrentFieldScriptActor->m20_position[0].getIntegerPart();
+            (*loadedMechas[mechaIndex]->m4)[0].m5C_translation[2] = pCurrentFieldScriptActor->m20_position[2].getIntegerPart();
+        }
+        else {
+            pCurrentFieldScriptActor->mCC_scriptPC -= 1;
+        }
         break;
     default:
         assert(0);

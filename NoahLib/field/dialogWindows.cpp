@@ -1709,7 +1709,7 @@ void addDialogWindowsToOT(sTag* OT, int oddOrEven)
 					gDialogWindows[i].m3C4 = 0;
 				}
 
-				if ((padButtonForDialogs & controllerButtons::CIRCLE) != 0) {
+				if ((padButtonForDialogs & controllerButtons::INTERACT) != 0) {
 					gDialogWindows[i].m37C = 0xffff;
 					actorArray[gDialogWindows[i].m416_fieldActorId].m4C_scriptEntity->m81_selectedMultichoiceLine = gDialogWindows[i].m382_CurrentMultiChoiceSelection + gDialogWindows[i].m37E_startOfMultiChoice;
 					addDialogWindowsToOTSub1(&gDialogWindows[i].m18);
@@ -1746,7 +1746,7 @@ void addDialogWindowsToOT(sTag* OT, int oddOrEven)
 							gDialogWindows[i].m3C4 = 0;
 						}
 
-						if (((padButtonForDialogs & controllerButtons::CIRCLE) != 0) && (gDialogWindows[i].m410 == 0)) {
+						if (((padButtonForDialogs & controllerButtons::INTERACT) != 0) && (gDialogWindows[i].m410 == 0)) {
 							gDialogWindows[i].m37C = -1;
 							actorArray[gDialogWindows[i].m416_fieldActorId].m4C_scriptEntity->m81_selectedMultichoiceLine = gDialogWindows[i].m382_CurrentMultiChoiceSelection + gDialogWindows[i].m37E_startOfMultiChoice;
 							addDialogWindowsToOTSub1(&gDialogWindows[i].m18);

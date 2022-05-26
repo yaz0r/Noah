@@ -2,6 +2,7 @@
 #include "kernel/math.h"
 #include "kernel/filesystem.h"
 #include "kernel/graphics.h"
+#include "field/fieldModel.h"
 
 typedef u16 sMechaDataTable2_4_8;
 
@@ -91,6 +92,89 @@ struct sMechaDataTable2 {
 
     sMechaDataTable2_4 m4;
     sMechaDataTable2_8 m8;
+
+    std::vector<u8> m_raw;
+};
+
+struct sMechaDataTable1_C {
+    s16 m0;
+    s16 m2;
+};
+
+struct sMechaDataTable1_sub4 {
+    void init(std::vector<u8>& inputData) {
+        m_raw = inputData;
+
+    }
+
+    std::vector<u8> m_raw;
+};
+
+struct sMechaDataTable1_10_4 {
+    sMechaDataTable1_10_4(std::vector<u8>& input) {
+        m_raw = input;
+
+        std::vector<u8>::iterator it = input.begin();
+
+        m2[0] = READ_LE_S16(it + 2);
+        m2[1] = READ_LE_S16(it + 2 + 2);
+        m2[2] = READ_LE_S16(it + 2 + 4);
+
+        m8 = READ_LE_S16(it + 8);
+        mA = READ_LE_U8(it + 0xA);
+        mC = READ_LE_S16(it + 0xC);
+        mE = READ_LE_U8(it + 0xE);
+        m10 = READ_LE_U8(it + 0x10);
+        m12 = READ_LE_U8(it + 0x12);
+    }
+
+
+    std::array<s16, 3> m2;
+    s16 m8;
+    u8 mA;
+    s16 mC;
+    u8 mE;
+    u8 m10;
+    u8 m12;
+
+    std::vector<u8> m_raw;
+};
+
+struct sMechaDataTable1_10 {
+    sMechaDataTable1_10(std::vector<u8>& input) {
+        m_raw = input;
+        std::vector<std::vector<u8>> relocatedData = doPointerRelocationAndSplit(input);
+
+        assert(input.size() == 0x20);
+        m4 = new sMechaDataTable1_10_4(relocatedData[0]);
+    }
+    sMechaDataTable1_10_4* m4;
+
+    std::vector<u8> m_raw;
+};
+
+struct sMechaDataTable1 {
+    sMechaDataTable1(std::vector<u8>& input) {
+        m_raw = input;
+        std::vector<std::vector<u8>> relocatedData = doPointerRelocationAndSplit(input);
+
+        m4_textures.init(relocatedData[0]);
+        m8_modelBlocks.init(relocatedData[1].begin(), relocatedData[1].size());
+        mC.resize(relocatedData[2].size() / 4);
+        for (int i = 0; i < mC.size(); i++) {
+            mC[i].m0 = READ_LE_S16(relocatedData[2].begin() + i * 4 + 0);
+            mC[i].m2 = READ_LE_S16(relocatedData[2].begin() + i * 4 + 2);
+        }
+
+        m10 = new sMechaDataTable1_10(relocatedData[3]);
+
+        return;
+    }
+
+    sMechaDataTable1_sub4 m4_textures;
+    sModel m8_modelBlocks;
+    std::vector<sMechaDataTable1_C> mC;
+    sMechaDataTable1_10* m10;
 
     std::vector<u8> m_raw;
 };
@@ -224,6 +308,18 @@ void renderMechasForDebugFieldRenderer(int viewId);
 void mechaPlayAnimation(ushort param_1, short param_2, int param_3);
 
 void getMechaBoneMatrix(MATRIX* param_1, void* param_2, int mechaIndex, int boneIndex);
+void freeMecha(int index);
+void mechaInitNewMecha(int entryId, ushort flags, sMechaDataTable2* pData2, sMechaDataTable1* pData1, ushort tpageX, ushort tpageY, ushort clutX, short clutY, SFP_VEC3* param_9);
+
+extern std::array<sMechaDataTable1*, 9> mechaDataTable1;
+extern std::array<std::vector<u8>, 9> mechaDataTable1_raw;
+
+extern std::array<sMechaDataTable2*, 9> mechaDataTable2;
+extern std::array<std::vector<u8>, 9> mechaDataTable2_raw;
+
+extern std::array<SFP_VEC4, 4> initMechaTempVar;
+
+extern std::array<sLoadingBatchCommands, 16> mechaOverlayBatchLoadingTable;
 
 extern std::vector<u8> mechaOverlayBuffer;
 extern u32 NumMechas;

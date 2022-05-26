@@ -215,7 +215,7 @@ void OP_ENABLE_PLAYER_CONTROLS();
 void OPX_54();
 void OP_OPEN_LOAD_GAME_MENU();
 void OPX_5B();
-void OPX_5C();
+void OP_LOAD_NEW_MECHA();
 void OPX_5D();
 void OP_SET_TRANSPARENCY_MODE();
 void OPX_5F();
