@@ -4,7 +4,7 @@
 
 extern int spriteCallback2Var0;
 extern s8 isBattleOverlayLoaded;
-extern s8 isOtherOverlayLoaded;
+extern s8 isWorldMapOverlayLoaded;
 
 struct sFieldEntitySub4_124
 {

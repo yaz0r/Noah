@@ -145,7 +145,8 @@ DRAWENV currentDrawEnv;
 
 DISPENV* PutDispEnv(DISPENV* env)
 {
-	MissingCode();
+    noahFrame_end();
+    noahFrame_start();
 
 	currentDispEnv = *env;
 	return env;
@@ -164,8 +165,6 @@ void SetDispMask(int mask)
     MissingCode();
 }
 
-sTag gEndTag;
-
 sTag* ClearOTagR(sTag* ot, int n)
 {
 	sTag* pCurrent = ot;
@@ -176,8 +175,7 @@ sTag* ClearOTagR(sTag* ot, int n)
 		pCurrent->m3_size = 0;
 	}
 
-	ot->m0_pNext = &gEndTag;
-	ot->m3_size = 0;
+    TermPrim(ot);
 
 	return ot;
 }
@@ -300,11 +298,9 @@ void drawPSXFB()
 	ImGui::End();
 }
 
-DR_MODE* pCurrentDrMode = nullptr;
-
 void DR_MODE::execute()
 {
-	pCurrentDrMode = this;
+    gCurrentDrawMode = *this;
 }
 
 void DR_ENV::execute()
@@ -394,15 +390,15 @@ void SPRT::execute()
 			pVertices[i].CLUT[0] = clut & 0x3F;
 			pVertices[i].CLUT[1] = (clut >> 6) & 0x1FF;
 
-			assert(((pCurrentDrMode->code[0] >> 24) & 0xFF) == 0xE1);
-			pVertices[i].Texpage[0] = pCurrentDrMode->code[0] & 0xFF;
-			pVertices[i].Texpage[1] = (pCurrentDrMode->code[0] >> 8) & 0xFF;
-			pVertices[i].Texpage[2] = (pCurrentDrMode->code[0] >> 16) & 0xFF;
+			assert(((gCurrentDrawMode.code[0] >> 24) & 0xFF) == 0xE1);
+			pVertices[i].Texpage[0] = gCurrentDrawMode.code[0] & 0xFF;
+			pVertices[i].Texpage[1] = (gCurrentDrawMode.code[0] >> 8) & 0xFF;
+			pVertices[i].Texpage[2] = (gCurrentDrawMode.code[0] >> 16) & 0xFF;
 			pVertices[i].Texpage[3] = 0xE1;
 
-			pVertices[i].TextureWindow[0] = pCurrentDrMode->code[1] & 0xFF;
-			pVertices[i].TextureWindow[1] = (pCurrentDrMode->code[1] >> 8) & 0xFF;
-			pVertices[i].TextureWindow[2] = (pCurrentDrMode->code[1] >> 16) & 0xFF;
+			pVertices[i].TextureWindow[0] = gCurrentDrawMode.code[1] & 0xFF;
+			pVertices[i].TextureWindow[1] = (gCurrentDrawMode.code[1] >> 8) & 0xFF;
+			pVertices[i].TextureWindow[2] = (gCurrentDrawMode.code[1] >> 16) & 0xFF;
 			pVertices[i].TextureWindow[3] = 0;
 		}
 
@@ -453,7 +449,7 @@ void SPRT::execute()
 			| BGFX_STATE_MSAA
 			| BGFX_STATE_PT_TRISTRIP;
 
-		u32 blendRGBA = getBlending(code, pCurrentDrMode->code[0], State);
+		u32 blendRGBA = getBlending(code, gCurrentDrawMode.code[0], State);
 
 		bgfx::setState(State, blendRGBA);
 
@@ -520,7 +516,7 @@ void TILE::execute()
 			| BGFX_STATE_MSAA
 			| BGFX_STATE_PT_TRISTRIP;
 
-		u32 blendRGBA = getBlending(code, pCurrentDrMode->code[0], State);
+		u32 blendRGBA = getBlending(code, gCurrentDrawMode.code[0], State);
 
 		bgfx::setState(State, blendRGBA);
 
@@ -581,7 +577,7 @@ void POLY_F3::execute()
             | BGFX_STATE_MSAA
             | BGFX_STATE_PT_TRISTRIP;
 
-        u32 blendRGBA = getBlending(code, pCurrentDrMode->code[0], State);
+        u32 blendRGBA = getBlending(code, gCurrentDrawMode.code[0], State);
 
         bgfx::setState(State, blendRGBA);
 
@@ -647,7 +643,7 @@ void POLY_F4::execute()
             | BGFX_STATE_MSAA
             | BGFX_STATE_PT_TRISTRIP;
 
-        u32 blendRGBA = getBlending(code, pCurrentDrMode->code[0], State);
+        u32 blendRGBA = getBlending(code, gCurrentDrawMode.code[0], State);
 
         bgfx::setState(State, blendRGBA);
 
@@ -971,4 +967,110 @@ void ClearImage(RECT* pRect, u8 r, u8 g, u8 b)
         bgfx::setViewClear(PSXOutput_bgfxView, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, colorClearValue);
     }
     
+}
+
+u32 currentTpage = 0;
+
+void DR_TPAGE::execute()
+{
+    currentTpage = code[0];
+}
+
+void SPRT_8::execute()
+{
+    float matrix[16];
+    bx::mtxIdentity(matrix);
+
+    bgfx::setTransform(matrix);
+    if (1)
+    {
+        bgfx::TransientVertexBuffer vertexBuffer;
+        bgfx::TransientIndexBuffer indexBuffer;
+        bgfx::allocTransientBuffers(&vertexBuffer, GetLayout(), 4, &indexBuffer, 4);
+
+
+        sVertice* pVertices = (sVertice*)vertexBuffer.data;
+        u16* pIndices = (u16*)indexBuffer.data;
+
+        for (int i = 0; i < 4; i++)
+        {
+            pVertices[i].CLUT[0] = clut & 0x3F;
+            pVertices[i].CLUT[1] = (clut >> 6) & 0x1FF;
+
+            pVertices[i].Texpage[0] = currentTpage & 0xFF;
+            pVertices[i].Texpage[1] = (currentTpage >> 8) & 0xFF;
+            pVertices[i].Texpage[2] = (currentTpage >> 16) & 0xFF;
+            pVertices[i].Texpage[3] = 0xE1;
+
+            pVertices[i].TextureWindow[0] = gCurrentDrawMode.code[1] & 0xFF;
+            pVertices[i].TextureWindow[1] = (gCurrentDrawMode.code[1] >> 8) & 0xFF;
+            pVertices[i].TextureWindow[2] = (gCurrentDrawMode.code[1] >> 16) & 0xFF;
+            pVertices[i].TextureWindow[3] = 0;
+        }
+
+        for (int i = 0; i < 4; i++)
+        {
+            pVertices[i].color[0] = r0;
+            pVertices[i].color[1] = g0;
+            pVertices[i].color[2] = b0;
+            pVertices[i].gpuCode = code;
+        }
+
+        int w = 8;
+        int h = 8;
+
+        float localU0 = u0;
+        float localV0 = v0;
+        float localU1 = u0 + w;
+        float localV1 = v0 + h;
+
+        pVertices[0].v[0] = x0;
+        pVertices[0].v[1] = y0;
+        pVertices[0].v[2] = 0;
+        pVertices[0].texcoord[0] = localU0;
+        pVertices[0].texcoord[1] = localV0;
+
+        pVertices[1].v[0] = x0 + w;
+        pVertices[1].v[1] = y0;
+        pVertices[1].v[2] = 0;
+        pVertices[1].texcoord[0] = localU1;
+        pVertices[1].texcoord[1] = localV0;
+
+        pVertices[2].v[0] = x0 + w;
+        pVertices[2].v[1] = y0 + h;
+        pVertices[2].v[2] = 0;
+        pVertices[2].texcoord[0] = localU1;
+        pVertices[2].texcoord[1] = localV1;
+
+        pVertices[3].v[0] = x0;
+        pVertices[3].v[1] = y0 + h;
+        pVertices[3].v[2] = 0;
+        pVertices[3].texcoord[0] = localU0;
+        pVertices[3].texcoord[1] = localV1;
+
+        pIndices[0] = 0;
+        pIndices[1] = 1;
+        pIndices[2] = 3;
+        pIndices[3] = 2;
+
+        u64 State = BGFX_STATE_WRITE_RGB
+            | BGFX_STATE_DEPTH_TEST_ALWAYS
+            | BGFX_STATE_MSAA
+            | BGFX_STATE_PT_TRISTRIP;
+
+        u32 blendRGBA = getBlending(code, gCurrentDrawMode.code[0], State);
+
+        bgfx::setState(State, blendRGBA);
+
+        bgfx::setVertexBuffer(0, &vertexBuffer);
+        bgfx::setIndexBuffer(&indexBuffer);
+
+        static bgfx::UniformHandle s_PSXVramUniformHandle = BGFX_INVALID_HANDLE;
+        if (!bgfx::isValid(s_PSXVramUniformHandle))
+        {
+            s_PSXVramUniformHandle = bgfx::createUniform("s_PSXVram", bgfx::UniformType::Sampler);
+        }
+        bgfx::setTexture(0, s_PSXVramUniformHandle, m_vramTextureHandle);
+        bgfx::submit(PSXOutput_bgfxView, getSPRTShader());
+    }
 }

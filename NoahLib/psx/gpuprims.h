@@ -50,6 +50,26 @@ struct TILE : public sTag
     virtual void execute() override;
 };
 
+struct SPRT_8 : public sTag
+{
+    union {
+        struct {
+            u8 r0; //4
+            u8 g0;
+            u8 b0;
+            u8 code; //7
+        };
+        sColorAndCode m_colorAndCode;
+    };
+    s16 x0;
+    s16 y0;
+    u8 u0;
+    u8 v0;
+    u16 clut;
+
+    virtual void execute() override;
+};
+
 struct SPRT : public sTag
 {
     union {
@@ -107,6 +127,13 @@ struct DR_MODE : public sTag
 struct DR_MOVE : public sTag
 {
     u32 code[5];
+
+    virtual void execute() override;
+};
+
+struct DR_TPAGE : public sTag
+{
+    u32 code[1];
 
     virtual void execute() override;
 };
@@ -324,6 +351,9 @@ void SetPolyFT4(POLY_FT4* p);
 void SetPolyG4(POLY_G4* p);
 void SetLineF3(LINE_F3* p);
 void SetPolyF4(POLY_F4* p);
+void SetPolyF3(POLY_F3* p);
+
+void TermPrim(sTag*);
 
 void SetDrawMode(DR_MODE* p, int dfe, int dtd, int tpage, RECT* tw);
 void SetDrawMove(DR_MOVE* p, RECT* rect, int x, int y);
@@ -331,6 +361,8 @@ void SetDrawMove(DR_MOVE* p, RECT* rect, int x, int y);
 void SetTile(TILE* p);
 
 void SetSprt(SPRT* p);
+
+void SetDrawTPage(DR_TPAGE* p, int dfe, int dtd, int tpage);
 
 void setPolyUV(POLY_FT4* poly, ushort u0, ushort v0, ushort u1, ushort v1, ushort u2, ushort v2, ushort u3, ushort v3);
 
@@ -357,3 +389,5 @@ void SetSemiTrans(T* p, int abe)
         p->code |= 2;
     }
 }
+
+extern DR_MODE gCurrentDrawMode;

@@ -218,8 +218,9 @@ struct sMenuContext {
 
 extern sMenuContext *gMenuContext;
 
+void enterMenu(void);
+
 void loadAndOpenMenu(void);
-void setBootMode(int);
 
 void fillStringDisplayBuffer(uint param_1);
 int setupStringInPolyFT4(std::vector<u8>& fontData, int character, std::array<POLY_FT4, 2>* polyArray, int oddOrEven, short x, short y, ushort scale);

@@ -23,6 +23,7 @@
 #include "kernel/gte.h"
 #include "field/particles/particles.h"
 #include "kernel/memory.h"
+#include "kernel/gameMode.h"
 
 #include "SDL_gamecontroller.h"
 #include "SDL_keyboard.h"
@@ -7791,7 +7792,7 @@ bool disableCharacterShadowsRendering = 0;
 
 void setupSpriteActorTransform(sSpriteActor* pSpriteSheet)
 {
-    if ((isBattleOverlayLoaded != '\0') || (isOtherOverlayLoaded != '\0')) {
+    if ((isBattleOverlayLoaded != '\0') || (isWorldMapOverlayLoaded != '\0')) {
         assert(0);
     }
 
@@ -8419,6 +8420,9 @@ void updateAndRenderField()
     }
     ClearImage(&pCurrentFieldRenderingContext->m5C_backgroundRect.clip, clearR, clearG, clearB);
 
+    PutDispEnv(&pCurrentFieldRenderingContext->mB8_displayEnv);
+    PutDrawEnv(&pCurrentFieldRenderingContext->m0_drawEnv);
+
     MissingCode();
 
     shapeTransfert();
@@ -8646,9 +8650,31 @@ void saveInputs()
     }
 }
 
+s32 timeOverflow = 0;
+s32 timeVSyncCount = 0;
+extern u32 timeSeconds;
+extern u32 timeMinutes;
+extern u32 timeHours;
 void incrementTime()
 {
-    MissingCode();
+    if (timeOverflow == 0) {
+        timeVSyncCount += 1;
+        if (timeVSyncCount == 0x3c) {
+            timeVSyncCount = 0;
+            timeSeconds += 1;
+        }
+        if (timeSeconds == 0x3c) {
+            timeSeconds = 0;
+            timeMinutes += 1;
+        }
+        if (timeMinutes == 0x3c) {
+            timeMinutes = 0;
+            timeHours += 1;
+        }
+        if (timeHours == 100) {
+            timeOverflow = 1;
+        }
+    }
 }
 
 void vsyncCallback(void)
@@ -8734,11 +8760,6 @@ void updateMusicState()
     }
 }
 
-void bootGame(int param_1)
-{
-    MissingCode();
-}
-
 void fieldChangeGameMode(int mode) {
     MissingCode();
 
@@ -8750,7 +8771,7 @@ void fieldChangeGameMode(int mode) {
         if ((newBootMode & 0x80) != 0) {
             initGameState();
         }
-        setBootMode(newBootMode & 0x7f);
+        setGameMode(newBootMode & 0x7f);
         bootGame(0);
         break;
     default:
@@ -8855,10 +8876,8 @@ void fieldEntryPoint()
 
     bool bVar2 = false;
 
-    while (!noahFrame_end())
+    do
     {
-        noahFrame_start();
-
         MissingCode();
         ////
         u32 playTimeBeginningOfLoop = playTimeInVsync;
@@ -8982,7 +9001,7 @@ void fieldEntryPoint()
             }
         }
         updateMusicState();
-    }
+    }while (1);
 }
 
 void copyActorPositions(int dest, int source) {

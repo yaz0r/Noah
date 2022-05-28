@@ -383,6 +383,7 @@ extern u32 fullScreenTransitionEffectRenderMode;
 extern s16 updateCharacterVar1;
 
 extern int linkOTIndex;
+extern int runningOnDTL;
 
 void setFieldDrawEnvClip(short x, short y, short w, short h);
 

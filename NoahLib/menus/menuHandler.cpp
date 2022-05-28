@@ -7,6 +7,7 @@
 #include "kernel/decompress.h"
 #include "kernel/gameState.h"
 #include "kernel/memory.h"
+#include "kernel/gameMode.h"
 
 #include "menus/menuGold.h"
 #include "menus/statusMenu.h"
@@ -68,10 +69,6 @@ void setupMenuContextTransforms(void)
 
     gMenuContext->m2E8 = 1;
     gMenuContext->m329 = 0;
-}
-
-void setBootMode(int) {
-    MissingCode();
 }
 
 void initMenuContext33C(char param_1)
@@ -1033,9 +1030,6 @@ void menuDraw() {
     DrawOTag(&gMenuContext->m1D4_currentDrawContext->m70_OT[0xf]);
 
     MissingCode();
-
-    noahFrame_end();
-    noahFrame_start();
 }
 
 std::vector<std::array<u32, 2>> saveGameMainMenuConfig = { {
@@ -2227,7 +2221,7 @@ void processDebugMenuForMenuList(void) {
     case 2:
     case 6:
         menu2_loadGame_entryPoint();
-        setBootMode(1);
+        setGameMode(1);
         break;
     default:
         assert(0);

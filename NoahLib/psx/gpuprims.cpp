@@ -1,10 +1,23 @@
 #include "noahLib.h"
 #include "psx/gpuprims.h"
 
+DR_MODE gCurrentDrawMode;
+
+void TermPrim(sTag* p) {
+    p->m0_pNext = nullptr;
+    p->m3_size = 0;
+}
+
 void SetPolyFT4(POLY_FT4* p)
 {
     p->m3_size = 9;
     p->code = 0x2C;
+}
+
+void SetPolyF3(POLY_F3* p)
+{
+    p->m3_size = 4;
+    p->code = 0x20;
 }
 
 void SetTile(TILE* p)
@@ -114,4 +127,20 @@ void setPolyUV(POLY_FT4* poly, ushort u0, ushort v0, ushort u1, ushort v1, ushor
     poly->v2 = v2;
     poly->u3 = u3;
     poly->v3 = v3;
+}
+
+void SetDrawTPage(DR_TPAGE* p, int dfe, int dtd, int tpage) {
+    uint uVar1;
+    uint uVar2;
+
+    p->m3_size = 1;
+    uVar2 = 0xe1000000;
+    if (dtd != 0) {
+        uVar2 = 0xe1000200;
+    }
+    uVar1 = tpage & 0x9ff;
+    if (dfe != 0) {
+        uVar1 |= 0x400;
+    }
+    p->code[0] = uVar2 | uVar1;
 }

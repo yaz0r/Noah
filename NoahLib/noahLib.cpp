@@ -6,6 +6,7 @@
 #include "kernel/gameState.h"
 #include "kernel/decompress.h"
 #include "kernel/graphics.h"
+#include "kernel/gameMode.h"
 #include "kernel/font.h"
 #include "field/field.h"
 #include "field/fieldDebugger/fieldInspector.h"
@@ -128,8 +129,10 @@ bool noahInit(int argc, char* argv[])
 
     MissingCode();
 
+    setGameMode(6); // for into movie?
+
     while (!gCloseApp) {
-        fieldEntryPoint();
+        bootGame(0);
     }
 
     return true;
