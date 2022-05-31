@@ -204,14 +204,6 @@ void mechaInitOverlay(int mechaMaxCount)
     }
 }
 
-void SetBackColor(long rbk, long gbk, long bbk)
-{
-    setCopControlWord(2, 0x6800, rbk << 4);
-    setCopControlWord(2, 0x7000, gbk << 4);
-    setCopControlWord(2, 0x7800, bbk << 4);
-    return;
-}
-
 std::array<u8, 3> mechaBackColor = { 0,0,0 };
 std::array<MATRIX, 2> mechaFieldArgs2;
 

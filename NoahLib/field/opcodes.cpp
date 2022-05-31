@@ -1407,7 +1407,7 @@ void OP_WORLDMAP(void) {
             uVar4 = (uint)(ushort)cameraRotationBetweenEyeAndAt.vy;
         }
         pKernelGameState->m231C_CameraYaw = (short)uVar4 + 0x800U & 0xfff;
-        pKernelGameState->m2320 = getVar10(7, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 9]);
+        pKernelGameState->m2320_worldmapMode = getVar10(7, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 9]);
         OP_CHANGE_FIELD_WHEN_READY_Sub();
         kernelAndFieldStatesSynced = 1;
         breakCurrentScript = 1;

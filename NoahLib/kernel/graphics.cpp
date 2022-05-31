@@ -1074,3 +1074,35 @@ void SPRT_8::execute()
         bgfx::submit(PSXOutput_bgfxView, getSPRTShader());
     }
 }
+
+void ResetGraph(s32) {
+    MissingCode();
+}
+
+void SetBackColor(long rbk, long gbk, long bbk)
+{
+    setCopControlWord(2, 0x6800, rbk << 4);
+    setCopControlWord(2, 0x7000, gbk << 4);
+    setCopControlWord(2, 0x7800, bbk << 4);
+    return;
+}
+
+std::array<u8, 3> fogNearColor;
+void setFogNearColor(byte param_1, byte param_2, byte param_3) {
+    fogNearColor[0] = param_1;
+    fogNearColor[1] = param_2;
+    fogNearColor[2] = param_3;
+}
+
+void SetFarColor(long rfc, long gfc, long bfc) {
+    MissingCode();
+}
+
+void SetFogNearFar(long a, long b, long h) {
+    MissingCode();
+}
+
+int MoveImage(RECT* rect, int x, int y) {
+    MissingCode();
+    return 0;
+}

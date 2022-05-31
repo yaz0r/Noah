@@ -24,6 +24,7 @@
 #include "field/particles/particles.h"
 #include "kernel/memory.h"
 #include "kernel/gameMode.h"
+#include "worldmap/worldmap.h"
 
 #include "SDL_gamecontroller.h"
 #include "SDL_keyboard.h"

@@ -529,11 +529,6 @@ void setupMainMenu(void)
 
 u8 menuReturnState0 = 0;
 
-int MoveImage(RECT* rect, int x, int y) {
-    MissingCode();
-    return 0;
-}
-
 void drawMenuBackground(void)
 {
     AddPrim(&gMenuContext->m1D4_currentDrawContext->m70_OT[8], &gMenuContext->m348_cursor->m98_poly[gMenuContext->m308_oddOrEven]);

@@ -263,22 +263,46 @@ struct POLY_G4 : public sTag
         };
         sColorAndCode m_colorAndCode;
     };
-    sVec2_s16 x0y0;
+    union {
+        struct {
+            s16 x0;
+            s16 y0;
+        };
+        sVec2_s16 x0y0;
+    };
     u8 r1;
     u8 g1;
     u8 b1;
     u8 pad1;
-    sVec2_s16 x1y1; // 10
+    union {
+        struct {
+            s16 x1;
+            s16 y1;
+        };
+        sVec2_s16 x1y1;
+    };
     u8 r2;
     u8 g2;
     u8 b2;
     u8 pad2;
-    sVec2_s16 x2y2; //18
+    union {
+        struct {
+            s16 x2;
+            s16 y2;
+        };
+        sVec2_s16 x2y2;
+    };
     u8 r3;
     u8 g3;
     u8 b3;
     u8 pad3;
-    sVec2_s16 x3y3; //20
+    union {
+        struct {
+            s16 x3;
+            s16 y3;
+        };
+        sVec2_s16 x3y3;
+    };
 
     virtual void execute() override {}
 };
@@ -352,6 +376,7 @@ void SetPolyG4(POLY_G4* p);
 void SetLineF3(LINE_F3* p);
 void SetPolyF4(POLY_F4* p);
 void SetPolyF3(POLY_F3* p);
+void SetPolyFT3(POLY_FT3* p);
 
 void TermPrim(sTag*);
 

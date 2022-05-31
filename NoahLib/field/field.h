@@ -385,6 +385,13 @@ extern s16 updateCharacterVar1;
 extern int linkOTIndex;
 extern int runningOnDTL;
 
+void resetInputs();
+void checkSoftReboot();
+
+void clearShapeTransfertTableEntry(int param_1);
+void uploadCharacterSprites();
+void shapeTransfert();
+
 void setFieldDrawEnvClip(short x, short y, short w, short h);
 
 void syncKernelAndFieldStates();

@@ -20,6 +20,12 @@ void SetPolyF3(POLY_F3* p)
     p->code = 0x20;
 }
 
+void SetPolyFT3(POLY_FT3* p)
+{
+    p->m3_size = 7;
+    p->code = 0x24;
+}
+
 void SetTile(TILE* p)
 {
     p->m3_size = 3;

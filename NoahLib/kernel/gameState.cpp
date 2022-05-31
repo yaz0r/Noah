@@ -52,7 +52,9 @@ void loadInitialGameState()
             gameState.m1D34_currentParty[i] = READ_LE_U8(rawGameState.begin() + 0x1D34 + i);
         }
 
+
         gameState.m231A_fieldID = READ_LE_U16(rawGameState.begin() + 0x231A);
+        gameState.m2320_worldmapMode = READ_LE_U16(rawGameState.begin() + 0x2320);
         //gameState.m231A_fieldID = 0; // override to boot in debug room
     }
 
