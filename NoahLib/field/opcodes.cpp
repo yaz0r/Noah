@@ -233,7 +233,7 @@ void OP_10Sub(int param_1)
         int X = getVar80(2, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 8]) * 0x10000;
         int Z = getVar40(4, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 8]) * 0x10000;
         int Y = getVar20(6, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 8]) * 0x10000;
-        int distance = distance3d(X - (pCurrentFieldScriptActor->m20_position).vx >> 0x10, Y - (pCurrentFieldScriptActor->m20_position).vy >> 0x10, Z - (pCurrentFieldScriptActor->m20_position).vz >> 0x10);
+        int distance = distance3d((X - (pCurrentFieldScriptActor->m20_position).vx) >> 0x10, (Y - (pCurrentFieldScriptActor->m20_position).vy) >> 0x10, (Z - (pCurrentFieldScriptActor->m20_position).vz) >> 0x10);
 
         pCurrentFieldScriptActor->m102_numSteps = distance / walkSpeed;
         if (pCurrentFieldScriptActor->m102_numSteps == 0) {
@@ -577,7 +577,7 @@ void OP_GET_ACTOR_POSITION(void)
 
 void OP_GET_ACTOR_FACING_ANGLE()
 {
-    setVar(readU16FromScript(1), (pCurrentFieldScriptActor->m106_currentRotation + 0x100 >> 9) + 2U & 7);
+    setVar(readU16FromScript(1), ((pCurrentFieldScriptActor->m106_currentRotation + 0x100) >> 9) + 2U & 7);
     pCurrentFieldScriptActor->mCC_scriptPC += 3;
 }
 
@@ -1076,11 +1076,11 @@ void OP_F3()
     iVar3 = desiredCameraTarget[2];
     iVar2 = desiredCameraTarget[1];
     iVar1 = desiredCameraTarget[0];
-    iVar8 = distance3d(desiredCameraPosition[0] - desiredCameraTarget[0] >> 0x10, desiredCameraPosition[1] - desiredCameraTarget[1] >> 0x10, desiredCameraPosition[2] - desiredCameraTarget[2] >> 0x10);
+    iVar8 = distance3d((desiredCameraPosition[0] - desiredCameraTarget[0]) >> 0x10, (desiredCameraPosition[1] - desiredCameraTarget[1]) >> 0x10, (desiredCameraPosition[2] - desiredCameraTarget[2]) >> 0x10);
     op99Var4 = 0x1000;
     lVar9 = ratan2(iVar3 - iVar6, iVar1 - iVar4);
-    lVar10 = length2d(iVar4 - iVar1 >> 0x10, iVar6 - iVar3 >> 0x10);
-    lVar10 = ratan2(lVar10, iVar2 - iVar5 >> 0x10);
+    lVar10 = length2d((iVar4 - iVar1) >> 0x10, (iVar6 - iVar3) >> 0x10);
+    lVar10 = ratan2(lVar10, (iVar2 - iVar5) >> 0x10);
     uVar7 = readU16FromScript(1);
     setVar((uint)uVar7, 0xfc00U - (short)lVar9 & 0xfff);
     uVar7 = readU16FromScript(3);

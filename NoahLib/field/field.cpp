@@ -2708,7 +2708,7 @@ void setCurrentActorRotation2(s16 param_1)
 
 int getCurrentActorRotationIn8Cardinal()
 {
-    return (pCurrentFieldScriptActor->m106_currentRotation + 0x100 >> 9) + 2U & 7;
+    return ((pCurrentFieldScriptActor->m106_currentRotation + 0x100) >> 9) + 2U & 7;
 }
 
 void setCurrentActorTargetRotation(s16 param_1)
@@ -3360,7 +3360,7 @@ void computeBackgroundPoly(sBackgroundPoly* pBackgroundPoly, int param_2, int pa
             s32 sVar16 = (short)iVar10;
             s32 sVar5 = pBackgroundPoly->m338;
             s32 uVar6 = pBackgroundPoly->m334;
-            s32 uVar12 = iVar10 + (iVar11 + (iVar21 >> 6) * -0x40 << (2U - (int)sVar4 & 0x1f) & 0xffffU) & (0x100 >> ((int)sVar5 & 0x1fU)) - 1U;
+            s32 uVar12 = iVar10 + ((iVar11 + (iVar21 >> 6) * -0x40) << (2U - (int)sVar4 & 0x1f) & 0xffffU) & (0x100 >> ((int)sVar5 & 0x1fU)) - 1U;
             s32 iVar8 = 0x100 - uVar12;
             if (pBackgroundPoly->m328 < (int)sVar16 + (iVar8 * 0x10000 >> 0x10)) {
                 iVar8 = (uint) * (ushort*)&pBackgroundPoly->m328 - iVar10;
@@ -4638,7 +4638,7 @@ int updateEntityEventCode3Sub0(sFieldScriptEntity* param_1)
     iVar1 = -1;
     if (((((((param_1->m14_currentTriangleFlag & 0x420000U) == 0) && (iVar1 = -1, updateEntityEventCode3Var1 == 0)) && (iVar1 = -1, param_1->m30_stepVector.vx == 0)) &&
         ((iVar1 = -1, param_1->m30_stepVector.vy == 0 && (iVar1 = -1, param_1->m30_stepVector.vz == 0)))) &&
-        ((iVar1 = -1, updateEntityEventCode3Var2 == 1 && ((iVar1 = -1, param_1->m74 == 0xff && (iVar1 = -1, (param_1->m0_fieldScriptFlags.m_rawFlags & 0x401800) == 0)))))) &&
+        ((iVar1 = -1, updateEntityEventCode3Var2 == 1 && ((iVar1 = -1, param_1->m74 == -1 && (iVar1 = -1, (param_1->m0_fieldScriptFlags.m_rawFlags & 0x401800) == 0)))))) &&
         (((param_1->m4_flags.m_rawFlags & 1) == 0 || (iVar1 = -1, param_1->m10_walkmeshId != 0)))) {
         if (((param_1->m4_flags.m_rawFlags & 2) == 0) || (param_1->m10_walkmeshId != 1)) {
             iVar1 = 0;
@@ -4709,7 +4709,7 @@ int updateEntityEventCode3Sub2(FP_VEC3* param_1, sFieldScriptEntity* param_2)
 
     if ((param_2->m12C_flags & 0x1000) != 0) {
         sVec2_s16 position;
-        position.set(((param_2->m20_position).vx + param_1->vx >> 0x10), ((param_2->m20_position).vz + param_1->vz >> 0x10));
+        position.set((((param_2->m20_position).vx + param_1->vx) >> 0x10), (((param_2->m20_position).vz + param_1->vz) >> 0x10));
 
         std::vector<sVec2_s16>& pasVar3 = param_2->m114_movementBoundingZone;
         std::array<sVec2_s16, 4> boundingZone;
@@ -5258,7 +5258,7 @@ int updateEntityEventCode3Sub3(FP_VEC3* param_1, sFieldScriptEntity* param_2, st
     }
     local_58.vx = -local_88.vx >> 8;
     local_58.vz = -local_88.vz >> 8;
-    local_58.vy = local_68.vy * 0x10000 - (param_2->m20_position).vy >> 8;
+    local_58.vy = (local_68.vy * 0x10000 - (param_2->m20_position).vy) >> 8;
     VectorNormal(&local_58, &local_48);
     lVar2 = length2d(local_88.vx >> 8, local_88.vz >> 8);
 
@@ -6662,22 +6662,22 @@ void updateCameraInterpolationSub2()
     s32 iVar2;
     s32 iVar1 = op99Var5 * op99Var5;
     s32 iVar3 = op99Var6 * op99Var6;
-    if ((cameraEye[0] >> 0x10 != cameraEye2.vx >> 0x10) && (iVar2 = cameraEye2.vx - cameraEye[0] >> 0x10, iVar3 <= iVar2 * iVar2)) {
+    if ((cameraEye[0] >> 0x10 != cameraEye2.vx >> 0x10) && (iVar2 = (cameraEye2.vx - cameraEye[0]) >> 0x10, iVar3 <= iVar2 * iVar2)) {
         cameraEye[0] = cameraEye[0] + (cameraEye2.vx - cameraEye[0]) / op99Var6;
     }
-    if ((cameraEye[2] >> 0x10 != cameraEye2.vz >> 0x10) && (iVar2 = cameraEye2.vz - cameraEye[2] >> 0x10, iVar3 <= iVar2 * iVar2)) {
+    if ((cameraEye[2] >> 0x10 != cameraEye2.vz >> 0x10) && (iVar2 = (cameraEye2.vz - cameraEye[2]) >> 0x10, iVar3 <= iVar2 * iVar2)) {
         cameraEye[2] = cameraEye[2] + (cameraEye2.vz - cameraEye[2]) / op99Var6;
     }
-    if ((cameraEye[1] >> 0x10 != cameraEye2.vy >> 0x10) && (iVar2 = cameraEye2.vy - cameraEye[1] >> 0x10, iVar3 <= iVar2 * iVar2)) {
+    if ((cameraEye[1] >> 0x10 != cameraEye2.vy >> 0x10) && (iVar2 = (cameraEye2.vy - cameraEye[1]) >> 0x10, iVar3 <= iVar2 * iVar2)) {
         cameraEye[1] = cameraEye[1] + (cameraEye2.vy - cameraEye[1]) / op99Var6;
     }
-    if ((cameraAt[0] >> 0x10 != cameraAt2.vx >> 0x10) && (iVar3 = cameraAt2.vx - cameraAt[0] >> 0x10, iVar1 <= iVar3 * iVar3)) {
+    if ((cameraAt[0] >> 0x10 != cameraAt2.vx >> 0x10) && (iVar3 = (cameraAt2.vx - cameraAt[0]) >> 0x10, iVar1 <= iVar3 * iVar3)) {
         cameraAt[0] = cameraAt[0] + (cameraAt2.vx - cameraAt[0]) / op99Var5;
     }
-    if ((cameraAt[2] >> 0x10 != cameraAt2.vz >> 0x10) && (iVar3 = cameraAt2.vz - cameraAt[2] >> 0x10, iVar1 <= iVar3 * iVar3)) {
+    if ((cameraAt[2] >> 0x10 != cameraAt2.vz >> 0x10) && (iVar3 = (cameraAt2.vz - cameraAt[2]) >> 0x10, iVar1 <= iVar3 * iVar3)) {
         cameraAt[2] = cameraAt[2] + (cameraAt2.vz - cameraAt[2]) / op99Var5;
     }
-    if ((cameraAt[1] >> 0x10 != cameraAt2.vy >> 0x10) && (iVar3 = cameraAt2.vy - cameraAt[1] >> 0x10, iVar1 <= iVar3 * iVar3)) {
+    if ((cameraAt[1] >> 0x10 != cameraAt2.vy >> 0x10) && (iVar3 = (cameraAt2.vy - cameraAt[1]) >> 0x10, iVar1 <= iVar3 * iVar3)) {
         cameraAt[1] = cameraAt[1] + (cameraAt2.vy - cameraAt[1]) / op99Var5;
     }
 

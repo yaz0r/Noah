@@ -155,7 +155,7 @@ void renderCompass()
 			}
 		}
 	}
-
+	
 	compassDataRect.w = 0x80;
 	LoadImage(&compassDataRect, (u8*)&compassData1[0][0]);
 	SetGeomScreen(0x80);

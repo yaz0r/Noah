@@ -125,10 +125,10 @@ public:
         ImGui::Text("Num image bundle 2 entries: %d", READ_LE_U32(rawFieldImageBundle2.begin()));
         ImGui::Text("Num bundle3 entries: %d", READ_LE_U32(rawFieldModels.begin()));
         ImGui::Text("Num fieldScript num entities: %d", READ_LE_U32(rawFieldScriptData.begin() + 0x80));
-        ImGui::Text("Num triggers: %d", fieldTriggerData.size());
-        ImGui::Text("Dialog bundle size: %d", rawFieldDialogBundle.size());
+        ImGui::Text("Num triggers: %lu", fieldTriggerData.size());
+        ImGui::Text("Dialog bundle size: %lu", rawFieldDialogBundle.size());
         ImGui::Text("Walkmesh entries: %d", walkMesh.m0_count);
-        ImGui::Text("Map entities size: %d", fieldActorSetupParams.size());
+        ImGui::Text("Map entities size: %lu", fieldActorSetupParams.size());
 
         ImGui::Separator();
         ImGui::Text("Scene setup");
@@ -463,7 +463,7 @@ public:
                     decodedString += "<`>";
                     break;
                 case 0x88:
-                    decodedString += "<°>";
+                    decodedString += "<ï¿½>";
                     break;
                 case 0x89:
                     decodedString += "<=>";
@@ -509,7 +509,7 @@ public:
         ImVec2 child_size = ImVec2(300, ImGui::GetTextLineHeightWithSpacing() * numLines);
         if (ImGui::BeginChildFrame(index + 1, child_size))
         {
-            ImGui::Text(decodedString.c_str());
+            ImGui::Text("%s", decodedString.c_str());
         }
         ImGui::EndChildFrame();
     }
@@ -874,11 +874,11 @@ public:
         currentPC = inputPC;
         if (currentPC == currentTracePC)
         {
-            ImGui::Text("->", currentPC); ImGui::SameLine();
+            ImGui::Text("->"); ImGui::SameLine();
         }
         else
         {
-            ImGui::Text("  ", currentPC); ImGui::SameLine();
+            ImGui::Text("  "); ImGui::SameLine();
         }
         ImGui::Text("  0x%04X\t", currentPC); ImGui::SameLine();
 
@@ -1441,11 +1441,11 @@ public:
             {
                 char buffer[1024];
                 sprintf(buffer, "0x%02X: ", entityId);
-                ImGui::Text(buffer);
+                ImGui::Text("%s", buffer);
                 ImGui::SameLine();
             }
 
-            ImGui::Text(EntityName.c_str());
+            ImGui::Text("%s", EntityName.c_str());
             ImGui::SameLine();
 
             if (ImGui::Button("Rename"))

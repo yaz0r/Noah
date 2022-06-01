@@ -519,12 +519,12 @@ s32 dialogWindowFlag2 = 0;
 
 u32 getCameraDirection(void)
 {
-	return 7U - (camera2Tan + -0x100 >> 9) & 7;
+	return 7U - ((camera2Tan + -0x100) >> 9) & 7;
 }
 
 uint getPlayerCharacterDir(void)
 {
-	return ((actorArray[playerControlledActor].m4C_scriptEntity)->m106_currentRotation + 0x100 >> 9) + 2U & 7;
+	return (((actorArray[playerControlledActor].m4C_scriptEntity)->m106_currentRotation + 0x100) >> 9) + 2U & 7;
 }
 
 void SaveFieldAndDirections(void)

@@ -1620,7 +1620,7 @@ void setSpriteActorAngle(sSpriteActorCore* param_1, short angle)
 		break;
 	case 2:
 	{
-		newAngle = angle + 0x500 >> 9 & 7;
+		newAngle = (angle + 0x500) >> 9 & 7;
 		if (newAngle > 4)
 		{
 			newAngle = newAngle - 5 ^ 3;

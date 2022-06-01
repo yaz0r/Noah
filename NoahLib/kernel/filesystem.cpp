@@ -255,7 +255,7 @@ int getFileSizeAligned(int fileIndex)
     int size2 = size + 3;
     if (size2 < 0)
     {
-        size2 + size + 6;
+        size2 = size + 6;
     }
     return size2 & ~3;
 }

@@ -189,7 +189,7 @@ bgfx::TextureHandle getTexture(u16 status, u16 clut, bool abe, int alpha)
     }
 
     bgfx::TextureHandle newHandle = bgfx::createTexture2D(256,256, false, 1, bgfx::TextureFormat::RGBA8, 0, bgfx::copy(texture, 256 * 256 * 4));
-    delete texture;
+    delete[] texture;
 
     texInfoMap[texInfo] = newHandle;
 
