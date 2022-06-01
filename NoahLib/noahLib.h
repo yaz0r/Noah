@@ -204,5 +204,6 @@ struct SFP_VEC4 : public SFP_VEC3
 typedef FP_VEC4 VECTOR;
 typedef SFP_VEC4 SVECTOR;
 
-#define MissingCode(x)
-#define Hack(x)
+void MissingCode(const char* arg = "");
+void Hack(const char* arg = "");
+

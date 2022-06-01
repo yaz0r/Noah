@@ -56,7 +56,7 @@ void initOpcodeTable()
 		.end();
 
 	m_opcode[0xA]
-		.setComment("CALL_IF_IN_TRIGGER")
+		.setName("CALL_IF_IN_TRIGGER")
 		.addArgumentTriggerIndex()
 		.addArgumentFunctionEntryPoint()
 		.end();
@@ -857,6 +857,7 @@ void initOpcodeTable()
         .end();
 
 	m_opcode[0xE6]
+        .setName("SET_CAMERA_LIMITS")
 		.addArgumentS16()
 		.addArgumentS16()
 		.addArgumentS16()

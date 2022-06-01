@@ -290,7 +290,7 @@ extern s32 load2dAnimVar;
 extern s32 loadCompleted;
 
 extern std::array<sGameController, 2> padButtonForScripts;
-extern std::array<s16, 4> fieldInitVar1;
+extern std::array<s16, 4> cameraLimits;
 
 extern bool g_LogOpcodes;
 extern bool g_BreakOnMissingOpcode;

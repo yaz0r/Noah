@@ -60,7 +60,7 @@ std::vector<u8> rawFieldImageBundle;
 std::vector<u8> rawFieldImageBundle2;
 
 
-std::array<s16, 4> fieldInitVar1;
+std::array<s16, 4> cameraLimits;
 
 s32 totalObjects;
 
@@ -3720,10 +3720,10 @@ void initFieldData()
         }
     }
 
-    fieldInitVar1[0] = 1;
-    fieldInitVar1[1] = 1;
-    fieldInitVar1[2] = 1;
-    fieldInitVar1[3] = 1;
+    cameraLimits[0] = 1;
+    cameraLimits[1] = 1;
+    cameraLimits[2] = 1;
+    cameraLimits[3] = 1;
 
     setupField3d(rawFieldBundle.begin() + 0x154);
 
@@ -5082,6 +5082,8 @@ int updateEntityEventCode3Sub4Sub1(FP_VEC3* deltaStep, FP_VEC4* position, sField
 
             switch (collisionFlag)
             {
+            case 0:
+                return -1;
             case 1:
                 param_4[0] = pWalkMeshVertices[pWalkMeshTriangles[tempTriangleId].m0_verticeIndex[1]];
                 param_4[1] = pWalkMeshVertices[pWalkMeshTriangles[tempTriangleId].m0_verticeIndex[2]];
@@ -5095,6 +5097,7 @@ int updateEntityEventCode3Sub4Sub1(FP_VEC3* deltaStep, FP_VEC4* position, sField
                 param_4[1] = pWalkMeshVertices[pWalkMeshTriangles[tempTriangleId].m0_verticeIndex[2]];
                 break;
             default:
+                assert(0);
                 return -1;
             }
             uVar2 = -1;
@@ -6801,10 +6804,161 @@ void updateCameraDolly()
     }
 }
 
-int checkCameraCollision(FP_VEC4*, std::array<s16, 6>&, std::array<s16, 4>&)
+int checkCameraCollision(FP_VEC4* param_1, std::array<SFP_VEC4, 2>& param_2, std::array<s16, 4>& output)
 {
-    MissingCode();
-    return 0;
+    s32 X = param_1->vx >> 16;
+    s32 Z = param_1->vz >> 16;
+
+    sVec2_s16 refPos = sVec2_s16::fromValue(X, Z);
+
+    s32 posX = cameraLimits[0];
+    if (posX <= X) {
+        s32 temp = posX + cameraLimits[2];
+        posX = X;
+        if (temp < X) {
+            posX = temp;
+        }
+    }
+
+    s32 posZ = cameraLimits[1];
+    if (Z <= posZ) {
+        s32 temp = posZ + cameraLimits[3];
+        posZ = Z;
+        if (Z < temp) {
+            posZ = temp;
+        }
+    }
+
+    sVec2_s16 refPos2 = sVec2_s16::fromValue(posX, posZ);
+
+    SFP_VEC4 asStack80;
+    FP_VEC4 FStack72;
+    s32 triangleId = findTriangleInWalkMesh(posX, posZ, numWalkMesh -1, &asStack80, &FStack72);
+
+    std::vector<sWalkMesh::sTriangleData>::iterator pCollisionTriangles = walkMeshTriangle[numWalkMesh - 1]->begin();
+    std::vector<SFP_VEC4>::iterator pVertices = walkMeshVertices[numWalkMesh - 1]->begin();
+
+    int lastTriangle;
+    int collisionFlag;
+    int iterationCount = 0;
+    for (iterationCount = 0; iterationCount < 0xF0; iterationCount++)
+    {
+        sVec2_s16 vert0;
+        sVec2_s16 vert1;
+        sVec2_s16 vert2;
+
+        sWalkMesh::sTriangleData& pTriangle = pCollisionTriangles[triangleId];
+        vert0.set(pVertices[pTriangle.m0_verticeIndex[0]].vx, pVertices[pTriangle.m0_verticeIndex[0]].vz); // s4
+        vert1.set(pVertices[pTriangle.m0_verticeIndex[1]].vx, pVertices[pTriangle.m0_verticeIndex[1]].vz); // s3
+        vert2.set(pVertices[pTriangle.m0_verticeIndex[2]].vx, pVertices[pTriangle.m0_verticeIndex[2]].vz); // s1
+
+        lastTriangle = triangleId;
+
+        collisionFlag = 0;
+        if (NCLIP(vert0, vert1, refPos) < 0) {
+            collisionFlag |= 1;
+        }
+
+        if (NCLIP(vert1, vert2, refPos) < 0) {
+            collisionFlag |= 2;
+        }
+
+        if (NCLIP(vert2, vert0, refPos) < 0) {
+            collisionFlag |= 4;
+        }
+        if (collisionFlag < 8) {
+            switch (collisionFlag)
+            {
+            case 0:
+                iterationCount = 0xFF;
+                break;
+            case 1:
+                triangleId = pTriangle.m6_connectivity[0];
+                break;
+            case 2:
+                triangleId = pTriangle.m6_connectivity[1];
+                break;
+            case 3:
+                if (NCLIP(vert1, refPos, refPos2) < 0) // a0 s4 s3
+                {
+                    triangleId = pTriangle.m6_connectivity[0];
+                }
+                else {
+                    triangleId = pTriangle.m6_connectivity[1];
+                }
+                break;
+            case 4:
+                triangleId = pTriangle.m6_connectivity[2];
+                break;
+            case 5:
+                if (NCLIP(vert0, refPos, refPos2) < 0) // a2,s4,s3
+                {
+                    triangleId = pTriangle.m6_connectivity[2];
+                }
+                else {
+                    triangleId = pTriangle.m6_connectivity[0];
+                }
+                break;
+            case 6:
+                if (NCLIP(vert2, refPos, refPos2) < 0) // v1,s4,s3
+                {
+                    triangleId = pTriangle.m6_connectivity[1];
+                }
+                else {
+                    triangleId = pTriangle.m6_connectivity[2];
+                }
+                break;
+            case 7:
+                triangleId = -1;
+                break;
+            default:
+                assert(0);
+            }
+        }
+
+        if (((*walkMeshVar1)[pCollisionTriangles[triangleId].mC_indexInWalkmeshData1] & 0x800000) == 0) {
+            triangleId = -1;
+            if ((triangleId != -1) && (iterationCount != 0xF0)) {
+                return 0;
+            }
+            break;
+        }
+
+        // reached the edge of the mesh
+        if (triangleId == -1)
+        {
+            break;
+        }
+    }
+
+    switch (collisionFlag)
+    {
+    case 0:
+        break;
+    case 1:
+        param_2[0] = pVertices[pCollisionTriangles[lastTriangle].m0_verticeIndex[1]];
+        param_2[1] = pVertices[pCollisionTriangles[lastTriangle].m0_verticeIndex[2]];
+        break;
+    case 2:
+        param_2[0] = pVertices[pCollisionTriangles[lastTriangle].m0_verticeIndex[1]];
+        param_2[1] = pVertices[pCollisionTriangles[lastTriangle].m0_verticeIndex[2]];
+        break;
+    case 4:
+        param_2[0] = pVertices[pCollisionTriangles[lastTriangle].m0_verticeIndex[1]];
+        param_2[1] = pVertices[pCollisionTriangles[lastTriangle].m0_verticeIndex[2]];
+        break;
+    default:
+        assert(0);
+        return -1;
+    }
+
+
+    output[0] = X;
+    output[1] = Z;
+    output[2] = posX;
+    output[3] = posZ;
+
+    return -1;
 }
 
 void computeCameraEyeFromAt(FP_VEC4* param_1, FP_VEC4* param_2)
@@ -6825,16 +6979,62 @@ void computeCameraEyeFromAt(FP_VEC4* param_1, FP_VEC4* param_2)
     return;
 }
 
+s8 cameraCollisionVar0 = 0;
+
+void updateCameraInterpolationSub1Sub0(std::array<s16, 4>& param_1, std::array<s16, 4>& param_2, std::array<s16, 2>& param_3)
+{
+    int iVar1;
+    VECTOR local_48;
+    VECTOR local_38;
+    VECTOR local_28;
+
+    local_28.vy = 0;
+    local_28.vx = (int)param_1[2] - (int)param_1[0];
+    local_28.vz = (int)param_1[3] - (int)param_1[1];
+    VectorNormal(&local_28, &local_48);
+    local_28.vy = 0;
+    local_28.vx = (int)param_2[2] - (int)param_2[0];
+    local_28.vz = (int)param_2[3] - (int)param_2[1];
+    VectorNormal(&local_28, &local_38);
+    iVar1 = local_38.vx * local_48.vz - local_38.vz * local_48.vx >> 0xc;
+    if (iVar1 == 0) {
+        iVar1 = 0;
+    }
+    else {
+        iVar1 = (((int)param_2[1] - (int)param_1[1]) * local_48.vx - ((int)param_2[0] - (int)param_1[0]) * local_48.vz) / iVar1;
+    }
+    param_3[0] = param_2[0] + (short)(iVar1 * local_38.vx >> 0xc);
+    param_3[1] = param_2[1] + (short)(iVar1 * local_38.vz >> 0xc);
+}
+
 void updateCameraInterpolationSub1(FP_VEC4* param_1, int elevation)
 {
     FP_VEC4 local_48;
     local_48.vx = param_1->vx;
     local_48.vy = 0;
     local_48.vz = param_1->vz;
-    std::array<s16, 6> collisionResult;
+    std::array<SFP_VEC4, 2> collisionResult;
     std::array<s16, 4> collisionResult2;
     if (checkCameraCollision(&local_48, collisionResult, collisionResult2) == -1) {
-        assert(0);
+        std::array<s16, 4> local_60;
+        local_60[0] = collisionResult[0].vx;
+        local_60[1] = collisionResult[0].vz;
+        local_60[2] = collisionResult[1].vx;
+        local_60[3] = collisionResult[1].vz;
+
+        std::array<s16, 2> local_50;
+        updateCameraInterpolationSub1Sub0(local_60, collisionResult2, local_50);
+        cameraAt2.vx = (int)local_50[0] << 0x10;
+        cameraAt2.vz = (int)local_50[1] << 0x10;
+        if (cameraCollisionVar0 == '\0') {
+            if (cameraCollisionState == 0) {
+                cameraCollisionState = 1;
+                cameraAt2.vy = elevation << 0x10;
+            }
+        }
+        else {
+            cameraAt2.vy = param_1->vy + -0x200000;
+        }
     }
     else {
         cameraAt2.vx = param_1->vx;

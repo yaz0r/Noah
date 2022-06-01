@@ -256,3 +256,11 @@ s32 READ_LE_S32(const std::vector<u8>::const_iterator& inputStream)
 {
     return READ_LE_S32(&inputStream[0]);
 }
+
+void MissingCode(const char* arg) {
+
+}
+
+void Hack(const char* arg) {
+
+}

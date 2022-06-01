@@ -157,7 +157,7 @@ void initOpcodes()
     fieldScriptOpcodes[0xDF] = OP_DF;
     fieldScriptOpcodes[0xE1] = OP_VRAM_OPERATION;
     fieldScriptOpcodes[0xE5] = OP_SETUP_FOG;
-    fieldScriptOpcodes[0xE6] = OP_E6;
+    fieldScriptOpcodes[0xE6] = OP_SET_CAMERA_LIMITS;
     fieldScriptOpcodes[0xE7] = OP_SET_BACKGROUND_CLEAR_COLOR;
     fieldScriptOpcodes[0xEC] = ORBIT;
     fieldScriptOpcodes[0xEE] = OP_EE;

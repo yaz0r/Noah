@@ -4190,12 +4190,12 @@ void OP_DF(void)
     return;
 }
 
-void OP_E6(void)
+void OP_SET_CAMERA_LIMITS(void)
 {
-    fieldInitVar1[0] = readS16FromScript(1);
-    fieldInitVar1[1] = readS16FromScript(3);
-    fieldInitVar1[2] = readS16FromScript(5);
-    fieldInitVar1[3] = -readS16FromScript(7);
+    cameraLimits[0] = readS16FromScript(1);
+    cameraLimits[1] = readS16FromScript(3);
+    cameraLimits[2] = readS16FromScript(5);
+    cameraLimits[3] = -readS16FromScript(7);
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 9;
 }
 

@@ -151,7 +151,7 @@ void OP_DE();
 void OP_DF();
 void OP_VRAM_OPERATION();
 void OP_SETUP_FOG();
-void OP_E6();
+void OP_SET_CAMERA_LIMITS();
 void OP_SET_BACKGROUND_CLEAR_COLOR();
 void ORBIT();
 void OP_EE();
