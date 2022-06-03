@@ -3,11 +3,12 @@
 #include "worldmap.h"
 
 #include "worldmapTaskFader.h"
-
+#include "worldmapTaskGround.h"
 
 const std::vector<sWorldTaskDefinition> worldmapMode0_tasks = { {
     {&worldmap_taskFader_init, &worldmap_taskFader_update},
     // TODO: the rest
+    {&worldmap_taskGround_init, &worldmap_taskGround_update}
 } };
 
 void callAllWorlmapObjects() {

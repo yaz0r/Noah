@@ -8,6 +8,11 @@
 #include "field/field.h"
 #include "worldmapTask.h"
 #include "worldmapTaskFader.h"
+#include "worldmapMinimap.h"
+
+SVECTOR worldmapRotation = { 0,0,0,0 };
+VECTOR worldmapRadarPosition = { 0,0,0,0 };
+s32 worldmapGeometryOffsetY = 0;
 
 s8 isWorldMapOverlayLoaded = 0;
 s32 currentWorldmapMode = 0;
@@ -78,14 +83,12 @@ void worldmapMode0_init(void) {
     batchStartLoadingFiles(&worldmapLoadingCommands[0], 0);
 }
 
-s32 worldmapFogH;
-
 void initWorldmapGraphics(void)
 {
     long a;
 
     ResetGraph(1);
-    worldmapFogH = 0x100;
+    worldmapMinimapScale = 0x100;
     SetGeomScreen(0x100);
     SetDefDrawEnv(&worldmapRenderingStructs[0].m0_DrawEnv, 0, 0, 0x140, 0xd8);
     SetDefDrawEnv(&worldmapRenderingStructs[1].m0_DrawEnv, 0, 0xd8, 0x140, 0xd8);
@@ -122,7 +125,7 @@ void initWorldmapGraphics(void)
     if (exitWorldMapMode == 2) {
         a = 0xb00;
     }
-    SetFogNearFar(a, 0xe80, worldmapFogH);
+    SetFogNearFar(a, 0xe80, worldmapMinimapScale);
     return;
 }
 
@@ -328,6 +331,9 @@ void worldmapMode0_update(void) {
     worldmapFadeRunning = 1;
 
     MissingCode();
+    initWorldmapMinimap();
+    MissingCode();
+
     if (isWorldmapModeFlagSet == 0) {
         MissingCode("Start worldmap music");
     }

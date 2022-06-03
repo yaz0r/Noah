@@ -843,4 +843,17 @@ void gte_stsz4(int* sz0, int* sz1, int* sz2, int* sz3)
 	*sz3 = getCopReg(2, 0x9800);
 }
 
+void gte_SetRotMatrix(const MATRIX* m) {
+    setCopControlWord(2, 0, sVec2_s16::fromValue(m->m[0][0], m->m[0][1]));
+    setCopControlWord(2, 0x800, sVec2_s16::fromValue(m->m[0][2], m->m[1][0]));
+    setCopControlWord(2, 0x1000, sVec2_s16::fromValue(m->m[1][1], m->m[1][2]));
+    setCopControlWord(2, 0x1800, sVec2_s16::fromValue(m->m[2][0], m->m[2][1]));
+    setCopControlWord(2, 0x2000, sVec2_s16::fromValue(m->m[2][2], 0));
+}
+
+void gte_SetTransMatrix(const MATRIX* m) {
+    setCopControlWord(2, 0x2800, m->t[0]);
+    setCopControlWord(2, 0x3000, m->t[1]);
+    setCopControlWord(2, 0x3800, m->t[2]);
+}
 

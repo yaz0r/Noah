@@ -33,4 +33,8 @@ extern sWorldmapRenderingStruct* pCurrentWorldmapRenderingStruct;
 extern s8 isWorldMapOverlayLoaded;
 extern s32 worldmapOddOrEven;
 
+extern SVECTOR worldmapRotation;
+extern VECTOR worldmapRadarPosition;
+extern s32 worldmapGeometryOffsetY;
+
 void worldmapEntryPoint(void);

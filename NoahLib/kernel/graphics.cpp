@@ -467,6 +467,73 @@ void SPRT::execute()
 
 }
 
+void POLY_G3::execute()
+{
+    float matrix[16];
+    bx::mtxIdentity(matrix);
+
+    bgfx::setTransform(matrix);
+    if (1)
+    {
+        bgfx::TransientVertexBuffer vertexBuffer;
+        bgfx::TransientIndexBuffer indexBuffer;
+        bgfx::allocTransientBuffers(&vertexBuffer, GetLayout(), 3, &indexBuffer, 3);
+
+        sVertice* pVertices = (sVertice*)vertexBuffer.data;
+        u16* pIndices = (u16*)indexBuffer.data;
+
+        for (int i = 0; i < 3; i++)
+        {
+            pVertices[i].gpuCode = code;
+        }
+
+        pVertices[0].v[0] = x0;
+        pVertices[0].v[1] = y0;
+        pVertices[0].v[2] = 0;
+        pVertices[0].color[0] = r0;
+        pVertices[0].color[1] = g0;
+        pVertices[0].color[2] = b0;
+
+        pVertices[1].v[0] = x1;
+        pVertices[1].v[1] = y1;
+        pVertices[1].v[2] = 0;
+        pVertices[1].color[0] = r1;
+        pVertices[1].color[1] = g1;
+        pVertices[1].color[2] = b1;
+
+        pVertices[2].v[0] = x2;
+        pVertices[2].v[1] = y2;
+        pVertices[2].v[2] = 0;
+        pVertices[2].color[0] = r2;
+        pVertices[2].color[1] = g2;
+        pVertices[2].color[2] = b2;
+
+        pIndices[0] = 0;
+        pIndices[1] = 1;
+        pIndices[2] = 2;
+
+        u64 State = BGFX_STATE_WRITE_RGB
+            | BGFX_STATE_DEPTH_TEST_ALWAYS
+            | BGFX_STATE_MSAA
+            | BGFX_STATE_PT_TRISTRIP;
+
+        u32 blendRGBA = getBlending(code, gCurrentDrawMode.code[0], State);
+
+        bgfx::setState(State, blendRGBA);
+
+        bgfx::setVertexBuffer(0, &vertexBuffer);
+        bgfx::setIndexBuffer(&indexBuffer);
+
+        static bgfx::UniformHandle s_PSXVramUniformHandle = BGFX_INVALID_HANDLE;
+        if (!bgfx::isValid(s_PSXVramUniformHandle))
+        {
+            s_PSXVramUniformHandle = bgfx::createUniform("s_PSXVram", bgfx::UniformType::Sampler);
+        }
+        bgfx::setTexture(0, s_PSXVramUniformHandle, m_vramTextureHandle);
+        bgfx::submit(PSXOutput_bgfxView, getSPRTShader());
+    }
+}
+
 void TILE::execute()
 {
 	float matrix[16];

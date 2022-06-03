@@ -47,6 +47,13 @@ void SetShadeTex(POLY_FT4* p, int tge)
     }
 }
 
+void SetPolyG3(POLY_G3* p)
+{
+    p->m3_size = 6;
+    p->code = 0x30;
+    return;
+}
+
 void SetPolyG4(POLY_G4* p)
 {
     p->m3_size = 8;

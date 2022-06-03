@@ -34,6 +34,7 @@ struct sGameState
     std::array<s16, 4> m182C;
     u16 m1834;
     u16 m1836;
+    s16 m1842_disableWorldmapMinimap;
     std::array<s16, 2> m1844;
     s16 m1848;
     s32 m1924_Gold;

@@ -220,6 +220,45 @@ struct POLY_FT3 : public sTag
     virtual void execute() override;
 };
 
+struct POLY_G3 : public sTag {
+    union {
+        struct {
+            u8 r0; //4
+            u8 g0;
+            u8 b0;
+            u8 code; //7
+        };
+        sColorAndCode m_colorAndCode;
+    };
+    union {
+        struct {
+            s16 x0;
+            s16 y0;
+        };
+        sVec2_s16 x0y0;
+    };
+    uint8_t r1, g1, b1, pad1;
+    union {
+        struct {
+            s16 x1;
+            s16 y1;
+        };
+        sVec2_s16 x1y1;
+    };
+    uint8_t r2, g2, b2, pad2;
+    union {
+        struct {
+            s16 x2;
+            s16 y2;
+        };
+        sVec2_s16 x2y2;
+    };
+
+    virtual void execute() override;
+};
+
+void SetPolyG3(POLY_G3* p);
+
 struct POLY_FT4 : public sTag
 {
     union {
@@ -231,19 +270,43 @@ struct POLY_FT4 : public sTag
         };
         sColorAndCode m_colorAndCode;
     };
-    sVec2_s16 x0y0;
+    union {
+        struct {
+            s16 x0;
+            s16 y0;
+        };
+        sVec2_s16 x0y0;
+    };
     u8 u0; //C
     u8 v0;
     u16 clut;
-    sVec2_s16 x1y1; // 10
+    union {
+        struct {
+            s16 x1;
+            s16 y1;
+        };
+        sVec2_s16 x1y1;
+    };
     u8 u1; // 14
     u8 v1;
     u16 tpage;
-    sVec2_s16 x2y2; //18
+    union {
+        struct {
+            s16 x2;
+            s16 y2;
+        };
+        sVec2_s16 x2y2;
+    };
     u8 u2; //1C
     u8 v2;
     u16 pad1;
-    sVec2_s16 x3y3; //20
+    union {
+        struct {
+            s16 x3;
+            s16 y3;
+        };
+        sVec2_s16 x3y3;
+    };
     u8 u3; //24
     u8 v3;
     u16 pad2;
