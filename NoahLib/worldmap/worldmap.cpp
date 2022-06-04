@@ -10,10 +10,14 @@
 #include "worldmapTaskFader.h"
 #include "worldmapMinimap.h"
 #include "kernel/gameMode.h"
+#include "sprite/spriteSetup.h"
 
+VECTOR worldmapPosition;
+u32 worldmapGamestate1824;
 SVECTOR worldmapRotation = { 0,0,0,0 };
 VECTOR worldmapRadarPosition = { 0,0,0,0 };
 s32 worldmapGeometryOffsetY = 0;
+s32 worldmapInitialPositionIndex;
 
 s8 isWorldMapOverlayLoaded = 0;
 s32 currentWorldmapMode = 0;
@@ -31,7 +35,8 @@ struct sWorldmapModes {
     void (*m8_free)();
 };
 
-std::array<std::vector<u8>, 3 > worldmapPartySprites;
+std::array<sSpriteActorAnimationBundle*, 3 > worldmapPartySprites;
+std::array<std::vector<u8>, 3 > worldmapPartySpritesRaw;
 std::array<std::vector<u8>, 3 > worldmapPartyGearSprites;
 s32 worldmapNumFilesPending = 0;
 
@@ -46,11 +51,11 @@ sWorldmapRenderingStruct* pCurrentWorldmapRenderingStruct = nullptr;
 void worldmapMode0_init(void) {
     for (int i = 0; i < 3; i++) {
         if (gameState.m1D34_currentParty[i] == 0xFF) {
-            worldmapPartySprites[i].clear();
+            worldmapPartySpritesRaw[i].clear();
             worldmapPartyGearSprites[i].clear();
         }
         else {
-            worldmapPartySprites[i].resize(getFileSizeAligned(gameState.m1D34_currentParty[i] + 2));
+            worldmapPartySpritesRaw[i].resize(getFileSizeAligned(gameState.m1D34_currentParty[i] + 2));
             if (gameState.m294[i].m78_partyData_gearNum == -1) {
                 worldmapPartyGearSprites[i].clear();
             }
@@ -66,7 +71,7 @@ void worldmapMode0_init(void) {
     for (int i = 0; i < 3; i++) {
         if (gameState.m1D34_currentParty[i] != 0xFF) {
             it->m0_fileIndex = gameState.m1D34_currentParty[i] + 2;
-            it->m4_loadPtr = &worldmapPartySprites[i];
+            it->m4_loadPtr = &worldmapPartySpritesRaw[i];
             it++;
             worldmapNumFilesPending++;
             if (gameState.m294[i].m78_partyData_gearNum != -1) {
@@ -308,6 +313,57 @@ void createWorlmapPolyFT4Array3(void) {
     }
 }
 
+void getGamestate182C(VECTOR* param_1)
+{
+    param_1->vx = (int)gameState.m182C.vx << 0xc;
+    param_1->vy = (int)gameState.m182C.vy << 0xc;
+    param_1->vz = (int)gameState.m182C.vz << 0xc;
+    return;
+}
+
+void setupWorldmapPositionFromField() {
+    gameState.m1836 = 0;
+    if (true) {
+        switch (worldMapGearMode) {
+        case 1:
+        case 2:
+            worldmapGamestate1824 = (uint)(ushort)gameState.m1824;
+            worldmapPosition.vx = (uint)(ushort)gameState.m1820_worldmapPosition[0] << 0xc;
+            worldmapPosition.vz = (uint)(ushort)gameState.m1820_worldmapPosition[1] << 0xc;
+            break;
+        default:
+            getGamestate182C(&worldmapPosition);
+            worldmapGamestate1824 = (uint)(ushort)gameState.m182C.pad;
+        }
+    }
+}
+
+void setupWorldmapPositionFromFileData(int param_1) {
+    if ((gameState.m1834 & 0x2000) == 0) {
+        std::vector<u8>::iterator worldmapInitialPosition = worldmapFile1Buffer_4_0;
+
+        while (READ_LE_S16(worldmapInitialPosition + 2) != -1) {
+            if (READ_LE_S16(worldmapInitialPosition + 2) == param_1) {
+                worldmapPosition.vx = ((s32)READ_LE_S16(worldmapInitialPosition)) << 0xc;
+                worldmapPosition.vy = 0;
+                worldmapPosition.vz = ((s32)READ_LE_S16(worldmapInitialPosition + 4)) << 0xc;
+                return;
+            }
+
+            worldmapInitialPosition += 8;
+        }
+
+        worldmapPosition.vx = 0;
+        worldmapPosition.vy = 0;
+        worldmapPosition.vz = 0;
+    }
+    else {
+        gameState.m1834 = gameState.m1834 & 0xdfff;
+        getGamestate182C(&worldmapPosition);
+        worldmapGamestate1824 = (uint)(ushort)gameState.m182C.pad;
+    }
+}
+
 void worldmapMode0_update(void) {
     initWorldmapGraphics();
 
@@ -319,6 +375,10 @@ void worldmapMode0_update(void) {
     MoveImage(&local_18, 0x2c0, 0x100);
     worldmapFadeIn(0x40, 0, 4, 2);
     waitReadCompletion(0);
+    //################
+    worldmapPartySprites[0] = new sSpriteActorAnimationBundle();
+    worldmapPartySprites[0]->init(worldmapPartySpritesRaw[0].begin());
+    //################
     worldmapMode8_init();
     do {
     } while (2 < isCDBusy());
@@ -330,6 +390,19 @@ void worldmapMode0_update(void) {
     worldmapFadePolyStep = 4;
     MissingCode();
     worldmapFadeRunning = 1;
+
+    MissingCode();
+    if (gameState.m1836 == 0) {
+        if (isWorldmapModeFlagSet == 0) {
+            setupWorldmapPositionFromFileData(worldmapInitialPositionIndex);
+        }
+        else {
+            assert(0);
+        }
+    }
+    else {
+        setupWorldmapPositionFromField();
+    }
 
     MissingCode();
     initWorldmapMinimap();
@@ -533,7 +606,7 @@ void worldmapMainLoop(void) {
 
         shapeTransfert();
         MissingCode();
-        //SetGeomOffset(0xa0, worldmapGeometryOffsetY);
+        SetGeomOffset(0xa0, worldmapGeometryOffsetY);
         DrawOTag(&pCurrentWorldmapRenderingStruct->m70_OT[0x3ff]);
 
     } while (continueWorldmapLoop != 0);
@@ -551,7 +624,7 @@ void worldmapEntryPoint(void) {
     isWorldMapOverlayLoaded = 1;
 
     if (gameState.m2320_worldmapMode == 0) {
-        gameState.m231E = 0xfff;
+        gameState.m231E_worldmapInitialPositionIndex = 0xfff;
         gameState.m231C_CameraYaw = 0xc00;
         gameState.m231A_fieldID = 0x400;
         gameState.m2320_worldmapMode = 1;
@@ -573,8 +646,8 @@ void worldmapEntryPoint(void) {
         gameState.m294[9].m78_partyData_gearNum = 3;
         gameState.m1836 = 1;
         gameState.m182C[3] = 0;
-        gameState.m1820 = 0x7580;
-        gameState.m1824 = 0;
+        gameState.m1820_worldmapPosition[0] = 0x7580;
+        gameState.m1820_worldmapPosition[1] = 0;
         gameState.m1D34_currentParty[0] = 0;
         gameState.m22B1_isOnGear[0] = 0;
         gameState.m22B1_isOnGear[1] = 0;
@@ -602,6 +675,7 @@ void worldmapEntryPoint(void) {
     allocateWorldMapsOT();
     setupWorldmapGearMode();
     isWorldmapModeFlagSet = (uint)((gameState.m2320_worldmapMode & 0x8000U) != 0);
+    worldmapInitialPositionIndex = gameState.m231E_worldmapInitialPositionIndex;
     MissingCode();
 
     currentWorldmapMode = gameState.m2320_worldmapMode & 0x7fff;

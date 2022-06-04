@@ -1401,7 +1401,7 @@ void OP_WORLDMAP(void) {
         fieldRandomBattleVar = -1;
         fieldExecuteVar3 = 0;
         pKernelGameState->m231A_fieldID = getVar80(1, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 9]);
-        pKernelGameState->m231E = getVar40(3, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 9]);
+        pKernelGameState->m231E_worldmapInitialPositionIndex = getVar40(3, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 9]);
         s32 uVar4 = getVar20(5, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 9]);
         if ((uVar4 & 0xffff) == 0xffff || uVar4 == 0xffffffff) {
             uVar4 = (uint)(ushort)cameraRotationBetweenEyeAndAt.vy;

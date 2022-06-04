@@ -36,5 +36,8 @@ extern s32 worldmapOddOrEven;
 extern SVECTOR worldmapRotation;
 extern VECTOR worldmapRadarPosition;
 extern s32 worldmapGeometryOffsetY;
+extern s32 worldMapGearMode;
+
+extern std::array<struct sSpriteActorAnimationBundle*, 3 > worldmapPartySprites;
 
 void worldmapEntryPoint(void);

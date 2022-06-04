@@ -140,7 +140,7 @@ void worldmapRenderMinimap() {
         createRotationMatrix(&rotationAngles, &radarMatrix);
 
         radarMatrix.t[0] = (worldmapRadarPosition.vx >> 0xC) / 0x13B + 0x30;
-        radarMatrix.t[1] = (worldmapRadarPosition.vz >> 0xC) / 0x155 + 0x78 - worldmapGeometryOffsetY;
+        radarMatrix.t[1] = ((worldmapRadarPosition.vz >> 0xC) / 0x155 + 0x78) - worldmapGeometryOffsetY;
         radarMatrix.t[2] = worldmapMinimapScale;
 
         gte_SetRotMatrix(&radarMatrix);
@@ -166,15 +166,16 @@ void worldmapRenderMinimap() {
             switch (i)
             {
             case 0x18:
-                p.x0 = ((gameState.m182C.vx * 0x1A01A01A1 >> 0x21) >> 8) + 0xCF;
-                p.y0 = ((gameState.m182C.vz * 0x180601807 >> 0x21) >> 8) + 0x77;
+                p.x0 = (((gameState.m182C.vx * 0x1A01A01A1) >> 0x21) >> 8) + 0xCF;
+                p.y0 = (((gameState.m182C.vz * 0x180601807) >> 0x21) >> 8) + 0x77;
+                break;
             case 0x19:
-                p.x0 = ((gameState.m184E.vx * 0x1A01A01A1 >> 0x21) >> 8) + 0xCF;
-                p.y0 = ((gameState.m184E.vz * 0x180601807 >> 0x21) >> 8) + 0x77;
+                p.x0 = (((gameState.m184E.vx * 0x1A01A01A1) >> 0x21) >> 8) + 0xCF;
+                p.y0 = (((gameState.m184E.vz * 0x180601807) >> 0x21) >> 8) + 0x77;
                 break;
             case 0x1A:
-                p.x0 = ((gameState.m1844[0] * 0x1A01A01A1 >> 0x21) >> 8) + 0xCF;
-                p.y0 = ((gameState.m1844[1] * 0x180601807 >> 0x21) >> 8) + 0x77;
+                p.x0 = (((gameState.m1844[0] * 0x1A01A01A1) >> 0x21) >> 8) + 0xCF;
+                p.y0 = (((gameState.m1844[1] * 0x180601807) >> 0x21) >> 8) + 0x77;
                 break;
             default:
                 p.x0 = worldmapMinimapPOIsCoordinates[i][0] + 0xD0;
@@ -190,4 +191,74 @@ void worldmapRenderMinimap() {
 
     worldmapMinimapBackgroundPoly[worldmapOddOrEven].m0_pNext = pCurrentWorldmapRenderingStruct->m70_OT[0].m0_pNext;
     pCurrentWorldmapRenderingStruct->m70_OT[0].m0_pNext = &worldmapMinimapBackgroundPoly[worldmapOddOrEven];
+}
+
+s32 worldmap_taskMinimapY_init(int param_1) {
+    sWorldmapState* psVar1;
+
+    psVar1 = gWorldmapState;
+    if (0 < worldMapGearMode) {
+        if (worldMapGearMode < 6) {
+            worldmapGeometryOffsetY = 0x8c;
+        }
+        else if (worldMapGearMode < 8) {
+            worldmapGeometryOffsetY = 0x78;
+            gWorldmapState->m0[param_1].m20 = 1;
+        }
+    }
+    psVar1->m0[param_1].m50 = worldmapGeometryOffsetY << 0xc;
+    return 1;
+}
+
+s32 worldmap_taskMinimapY_update(int param_1) {
+    short sVar1;
+    sWorldmapState* psVar2;
+    short sVar3;
+    int iVar4;
+
+    psVar2 = gWorldmapState;
+    sVar1 = gWorldmapState->m0[param_1].m4;
+    if (sVar1 == 9) {
+        sVar3 = 1;
+    }
+    else {
+        sVar3 = 2;
+        if (sVar1 != 10) goto LAB_worldmap__800922e8;
+    }
+    gWorldmapState->m0[param_1].m4 = 0;
+    psVar2->m0[param_1].m20 = sVar3;
+LAB_worldmap__800922e8:
+    sVar1 = psVar2->m0[param_1].m20;
+    if (sVar1 == 1) {
+        iVar4 = psVar2->m0[param_1].m50 + -0x1000;
+        psVar2->m0[param_1].m50 = iVar4;
+        worldmapGeometryOffsetY = iVar4 >> 0xc;
+        if (0x77 < worldmapGeometryOffsetY) {
+            return 1;
+        }
+        iVar4 = 0x78000;
+        worldmapGeometryOffsetY = 0x78;
+    }
+    else {
+        if (sVar1 < 2) {
+            if (sVar1 != 0) {
+                return 1;
+            }
+            return 3;
+        }
+        if (sVar1 != 2) {
+            return 1;
+        }
+        iVar4 = psVar2->m0[param_1].m50 + 0x1000;
+        psVar2->m0[param_1].m50 = iVar4;
+        worldmapGeometryOffsetY = iVar4 >> 0xc;
+        if (worldmapGeometryOffsetY < 0x8c) {
+            return 1;
+        }
+        iVar4 = 0x8c000;
+        worldmapGeometryOffsetY = 0x8c;
+    }
+    psVar2->m0[param_1].m50 = iVar4;
+    psVar2->m0[param_1].m20 = 0;
+    return 1;
 }

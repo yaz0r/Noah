@@ -28,7 +28,7 @@ struct sGameState
     std::array<std::vector<u8>, 31> m0_names;
     std::array<sGameStateA4, 11> m294;
     std::array<sGameStateA42, 20> m9A0_gears;
-    s16 m1820;
+    std::array<s16, 2> m1820_worldmapPosition;
     s16 m1822;
     s16 m1824;
     SVECTOR m182C;
@@ -47,7 +47,7 @@ struct sGameState
     u16 m2318_partyFrameLock;
     u16 m231A_fieldID;
     s16 m231C_CameraYaw;
-    s16 m231E;
+    s16 m231E_worldmapInitialPositionIndex;
     s16 m2320_worldmapMode;
 };
 
