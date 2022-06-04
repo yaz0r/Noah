@@ -31,12 +31,13 @@ struct sGameState
     s16 m1820;
     s16 m1822;
     s16 m1824;
-    std::array<s16, 4> m182C;
+    SVECTOR m182C;
     u16 m1834;
     u16 m1836;
     s16 m1842_disableWorldmapMinimap;
     std::array<s16, 2> m1844;
     s16 m1848;
+    SVECTOR m184E;
     s32 m1924_Gold;
     std::array<u16, 512> m1930_fieldVarsBackup;
     u16 m1D30_partyMemberBitField;

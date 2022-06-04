@@ -106,5 +106,5 @@ void kernelBootMenu(void) {
         } while (menuQuit != 0);
     } while (oddOrEven == 0);
     DrawSync(0);
-    //bootGame(0); // don't recurse
+    bootGame(0);
 }

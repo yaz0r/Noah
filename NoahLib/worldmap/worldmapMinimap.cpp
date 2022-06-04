@@ -4,8 +4,11 @@
 #include "psx/gpuprims.h"
 #include "kernel/graphics.h"
 #include "kernel/gte.h"
+#include "kernel/gameState.h"
 
 s32 worldmapMinimapScale = 0;
+
+DR_TPAGE worldmapMinimapDrTpage;
 
 std::array<POLY_FT4, 2> worldmapMinimapBackgroundPoly;
 std::array<std::array<POLY_G3, 4>, 2> worldmapMinimapRadar;
@@ -24,6 +27,42 @@ static const std::array<std::array<SVECTOR, 3>, 4> worldmapMinimapRadarShape = {
     {{
         {0,0,0,0}, {0x4, -11, 0, 0}, {0x8, -8, 0, 0},
     }},
+} };
+
+static const std::array<std::array<s16, 2>, 32> worldmapMinimapPOIsCoordinates = { {
+    {{0x54, 0x24}},
+    {{0x44, 0x29}},
+    {{0x37, 0x22}},
+    {{0x3A, 0x18}},
+    {{0x3E, 0x14}},
+    {{0x36, 0x14}},
+    {{0x4E, 0x14}},
+    {{0x4D, 0x09}},
+    {{0x39, 0x11}},
+    {{0x1D, 0x51}},
+    {{0x18, 0x44}},
+    {{0x0A, 0x47}},
+    {{0x1F, 0x39}},
+    {{0x0F, 0x3A}},
+    {{0x33, 0x30}},
+    {{0x3B, 0x59}},
+    {{0x5C, 0x52}},
+    {{0x11, 0x06}},
+    {{0x10, 0x23}},
+    {{0x08, 0x09}},
+    {{0x58, 0x45}},
+    {{0x5A, 0x31}},
+    {{0x5E, 0x1F}},
+    {{0x5F, 0x1D}},
+
+    {{-1 , 0}},
+    {{-1 , 0}},
+    {{-1 , 0}},
+    {{-1 , 0}},
+    {{-1 , 0}},
+    {{-1 , 0}},
+    {{-1 , 0}},
+    {{-1 , 0}},
 } };
 
 void initWorldmapMinimap()
@@ -53,20 +92,25 @@ void initWorldmapMinimap()
     SetSemiTrans(&worldmapMinimapBackgroundPoly[0], 1);
     worldmapMinimapBackgroundPoly[1] = worldmapMinimapBackgroundPoly[0];
 
+    SetDrawTPage(&worldmapMinimapDrTpage, 1, 0, GetTPage(0, 1, 0x380, 0x100));
+
     for (int i = 0; i < 2; i++) {
         for (int j = 0; j < 4; j++) {
-            SetPolyG3(&worldmapMinimapRadar[i][j]);
-            worldmapMinimapRadar[i][j].r0 = 0xFF;
-            worldmapMinimapRadar[i][j].g0 = 0x40;
-            worldmapMinimapRadar[i][j].b0 = 0x40;
+            POLY_G3& p = worldmapMinimapRadar[i][j];
 
-            worldmapMinimapRadar[i][j].r1 = 0;
-            worldmapMinimapRadar[i][j].g1 = 0;
-            worldmapMinimapRadar[i][j].b1 = 0;
+            SetPolyG3(&p);
+            p.r0 = 0xFF;
+            p.g0 = 0x40;
+            p.b0 = 0x40;
 
-            worldmapMinimapRadar[i][j].r2 = 0;
-            worldmapMinimapRadar[i][j].g2 = 0;
-            worldmapMinimapRadar[i][j].b2 = 0;
+            p.r1 = 0;
+            p.g1 = 0;
+            p.b1 = 0;
+
+            p.r2 = 0;
+            p.g2 = 0;
+            p.b2 = 0;
+            SetSemiTrans(&p, 1);
         }
     }
 
@@ -110,7 +154,39 @@ void worldmapRenderMinimap() {
         p++;
     }
 
-    MissingCode();
+    worldmapMinimapDrTpage.m0_pNext = pCurrentWorldmapRenderingStruct->m70_OT[0].m0_pNext;
+    pCurrentWorldmapRenderingStruct->m70_OT[0].m0_pNext = &worldmapMinimapDrTpage;
+
+    //TODO: Check if that's correct and not endian dependent
+    u32 POIsBF = *(u32*)&gameState.m1930_fieldVarsBackup[254];
+    for (int i = 0; i < 0x20; i++) {
+        if (POIsBF & 1) {
+            TILE& p = worldmapMinimapPOIsPolys[worldmapOddOrEven][i];
+
+            switch (i)
+            {
+            case 0x18:
+                p.x0 = ((gameState.m182C.vx * 0x1A01A01A1 >> 0x21) >> 8) + 0xCF;
+                p.y0 = ((gameState.m182C.vz * 0x180601807 >> 0x21) >> 8) + 0x77;
+            case 0x19:
+                p.x0 = ((gameState.m184E.vx * 0x1A01A01A1 >> 0x21) >> 8) + 0xCF;
+                p.y0 = ((gameState.m184E.vz * 0x180601807 >> 0x21) >> 8) + 0x77;
+                break;
+            case 0x1A:
+                p.x0 = ((gameState.m1844[0] * 0x1A01A01A1 >> 0x21) >> 8) + 0xCF;
+                p.y0 = ((gameState.m1844[1] * 0x180601807 >> 0x21) >> 8) + 0x77;
+                break;
+            default:
+                p.x0 = worldmapMinimapPOIsCoordinates[i][0] + 0xD0;
+                p.y0 = worldmapMinimapPOIsCoordinates[i][1] + 0x78;
+                break;
+            }
+
+            p.m0_pNext = pCurrentWorldmapRenderingStruct->m70_OT[0].m0_pNext;
+            pCurrentWorldmapRenderingStruct->m70_OT[0].m0_pNext = &p;
+        }
+        POIsBF >>= 1;
+    }
 
     worldmapMinimapBackgroundPoly[worldmapOddOrEven].m0_pNext = pCurrentWorldmapRenderingStruct->m70_OT[0].m0_pNext;
     pCurrentWorldmapRenderingStruct->m70_OT[0].m0_pNext = &worldmapMinimapBackgroundPoly[worldmapOddOrEven];

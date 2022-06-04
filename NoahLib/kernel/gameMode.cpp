@@ -41,10 +41,18 @@ void setGameMode(int newGameMode) {
 
 void bootGame(int param_1)
 {
-    MissingCode();
-    int currentBootMode = bootMode;
-    MissingCode();
-    setGameMode(0);
-    gameModes[currentBootMode].entryPoint();
+    static bool bootGameRecurse = 0;
+    if (bootGameRecurse == 0) {
+        MissingCode();
+        int currentBootMode = bootMode;
+        MissingCode();
+        setGameMode(0);
+    
+        bootGameRecurse = 1;
+        gameModes[currentBootMode].entryPoint();
+        assert(bootGameRecurse == 1);
+        bootGameRecurse = 0;
+    }
+    
     //bootGame(0); HACK: no recurion
 }

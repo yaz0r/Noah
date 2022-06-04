@@ -9,6 +9,7 @@
 #include "worldmapTask.h"
 #include "worldmapTaskFader.h"
 #include "worldmapMinimap.h"
+#include "kernel/gameMode.h"
 
 SVECTOR worldmapRotation = { 0,0,0,0 };
 VECTOR worldmapRadarPosition = { 0,0,0,0 };
@@ -592,8 +593,8 @@ void worldmapEntryPoint(void) {
         gameState.m1848 = 1;
         gameState.m1844[0] = SHORT_ARRAY_worldmap__8009af80[(ushort)gameState.m1844[1]];
         gameState.m1844[1] = SHORT_ARRAY_worldmap__8009af90[(ushort)gameState.m1844[1]];
-        //gameState.m1930_fieldVarsBackup._508_4_ = 0x7ffffff;
-        MissingCode();
+        //TODO: Check if that's correct and not endian dependent
+        *(u32*)&gameState.m1930_fieldVarsBackup[254] = 0x7FFFFFFF;
     }
     resetMemoryAllocStats(3, 0);
     setCurrentDirectory(0x24, 0);
@@ -638,5 +639,5 @@ void worldmapEntryPoint(void) {
 
     isWorldMapOverlayLoaded = 0;
     worldmapFlushCacheAndSync();
-    //bootGame(0); // No to avoid recursion
+    bootGame(0);
 }

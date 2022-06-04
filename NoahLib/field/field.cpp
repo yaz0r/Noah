@@ -8930,6 +8930,12 @@ void syncKernelAndFieldStates()
             pKernelGameState->m1D34_currentParty[i] = currentParty[i];
         }
         MissingCode();
+
+        setVar(0xc, (timeMinutes << 8) | timeSeconds);
+        setVar(0xe, timeHours);
+        setVar(0x1e, actorArray[playerControlledActor].m4C_scriptEntity->m20_position.vx.getIntegerPart());
+        setVar(0x20, actorArray[playerControlledActor].m4C_scriptEntity->m20_position.vz.getIntegerPart());
+        setVar(0x22, actorArray[playerControlledActor].m4C_scriptEntity->m20_position.vy.getIntegerPart());
     }
 }
 
@@ -8965,6 +8971,12 @@ void fieldChangeGameMode(int mode) {
     MissingCode();
 
     switch (mode) {
+    case 1: // worldmap
+        MissingCode("Clear music when going to worldmap");
+        MissingCode("MechaOverlayLoading check");
+        setGameMode(3);
+        bootGame(0);
+        break;
     case 3:
         MissingCode();
         fieldScriptEntityAlreadyInitialized = 0;
@@ -9137,7 +9149,16 @@ void fieldEntryPoint()
             }
         }
         if (g_frameOddOrEven == 1) {
-            MissingCode();
+            if ((fieldExecuteVar3 == 0) && !isFieldTransitionPermittedByLoading()) {
+                waitReadCompletion(0);
+                if (currentFieldId1 != -1) {
+                    unflagAllocation(rawFieldBundle);
+                    rawFieldBundle.clear();
+                }
+                MissingCode();
+                fieldChangeGameMode(1);
+                return;
+            }
             if (g_frameOddOrEven == 1) {
                 MissingCode();
                 if (((g_frameOddOrEven == 1) && (bootModeReady == 0))) {

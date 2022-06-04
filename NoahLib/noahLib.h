@@ -194,6 +194,8 @@ struct SFP_VEC4 : public SFP_VEC3
             return vy;
         case 2:
             return vz;
+        case 3:
+            return pad;
         default:
             assert(0);
             return pad;
