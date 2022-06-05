@@ -385,6 +385,11 @@ extern s16 updateCharacterVar1;
 extern int linkOTIndex;
 extern int runningOnDTL;
 
+void setCurrentRenderingMatrix(MATRIX* pMatrix);
+void renderSpriteActor(sSpriteActor* pSpriteSheet, sTag* pTag);
+
+void allocateShapeTransfert(int param_1);
+
 void resetInputs();
 void checkSoftReboot();
 

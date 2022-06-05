@@ -7994,7 +7994,7 @@ bool disableCharacterShadowsRendering = 0;
 void setupSpriteActorTransform(sSpriteActor* pSpriteSheet)
 {
     if ((isBattleOverlayLoaded != '\0') || (isWorldMapOverlayLoaded != '\0')) {
-        assert(0);
+        spriteCallback_render2_updateMatrix(pSpriteSheet);
     }
 
     SFP_VEC4 local_30;

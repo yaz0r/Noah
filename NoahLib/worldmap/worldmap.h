@@ -8,8 +8,16 @@ struct sWorldmapStateEntry {
     s32(*m1C_update)(s32 index);
     s16 m20;
     s16 m22;
+    s16 m24;
+    VECTOR m28_position;
+    s32 m38;
+    s32 m3C;
+    s32 m40;
+    s16 m48;
+    s16 m4A;
     struct sSpriteActor* m4C;
     s32 m50;
+    s32 m5C;
 };
 
 struct sWorldmapState {
@@ -33,10 +41,17 @@ extern sWorldmapRenderingStruct* pCurrentWorldmapRenderingStruct;
 extern s8 isWorldMapOverlayLoaded;
 extern s32 worldmapOddOrEven;
 
+extern VECTOR worldmapPosition;
 extern SVECTOR worldmapRotation;
 extern VECTOR worldmapRadarPosition;
 extern s32 worldmapGeometryOffsetY;
 extern s32 worldMapGearMode;
+extern u32 worldmapGamestate1824;
+extern s16 worldmapVar_8009d52c;
+
+extern MATRIX worldmapMainMatrix2;
+extern s32 worldmapMatrixMode;
+extern SVECTOR worldmapCameraVector;
 
 extern std::array<struct sSpriteActorAnimationBundle*, 3 > worldmapPartySprites;
 

@@ -260,4 +260,6 @@ void uploadTextureToVram(sPS1Pointer param_1, short param_2, short tpageX, short
 void setupOverrideTPage(uint x, uint y);
 void setupOverrideClut(uint x, uint y);
 
+void spriteCallback_render2_updateMatrix(sSpriteActorCore* param_1);
+
 void setGraphicEntityScale(sSpriteActorCore* param_1, int param_2);

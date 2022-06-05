@@ -24,6 +24,10 @@ s32 currentWorldmapMode = 0;
 s32 worldMapGearMode = 0;
 s32 exitWorldMapMode;
 s32 currentBattleMusicId;
+s16 worldmapVar_8009d52c;
+
+MATRIX worldmapMainMatrix2;
+s32 worldmapMatrixMode;
 
 std::array<u8, 3> worldMapFarColor = { {0xC0, 0xD0, 0xF0} };
 
@@ -47,6 +51,7 @@ s32 worldmapOddOrEven;
 s32 continueWorldmapLoop;
 
 sWorldmapRenderingStruct* pCurrentWorldmapRenderingStruct = nullptr;
+SVECTOR worldmapCameraVector = { 0x0758,0,0x02c0 };
 
 void worldmapMode0_init(void) {
     for (int i = 0; i < 3; i++) {
@@ -389,6 +394,8 @@ void worldmapMode0_update(void) {
     worldmapFadePolyAbr = 2;
     worldmapFadePolyStep = 4;
     MissingCode();
+    worldmapMatrixMode = 0;
+    fieldDrawEnvsInitialized = 1;
     worldmapFadeRunning = 1;
 
     MissingCode();
@@ -406,6 +413,8 @@ void worldmapMode0_update(void) {
 
     MissingCode();
     initWorldmapMinimap();
+    MissingCode();
+    allocateShapeTransfert(0x1400);
     MissingCode();
 
     if (isWorldmapModeFlagSet == 0) {
@@ -628,7 +637,10 @@ void worldmapEntryPoint(void) {
         gameState.m231C_CameraYaw = 0xc00;
         gameState.m231A_fieldID = 0x400;
         gameState.m2320_worldmapMode = 1;
+        Hack("Don't use yggdrazil for worldmap debug mode");
         gameState.m1834 = 0x4003;
+        gameState.m1834 = 0x0000;
+
         gameState.m182C[0] = 0x6680;
         gameState.m182C[1] = -0x100;
         gameState.m182C[2] = 0x2a00;
@@ -647,7 +659,8 @@ void worldmapEntryPoint(void) {
         gameState.m1836 = 1;
         gameState.m182C[3] = 0;
         gameState.m1820_worldmapPosition[0] = 0x7580;
-        gameState.m1820_worldmapPosition[1] = 0;
+        gameState.m1820_worldmapPosition[1] = 0x2c00;
+        gameState.m1824 = 0;
         gameState.m1D34_currentParty[0] = 0;
         gameState.m22B1_isOnGear[0] = 0;
         gameState.m22B1_isOnGear[1] = 0;

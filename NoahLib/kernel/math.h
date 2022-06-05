@@ -51,6 +51,10 @@ struct MATRIX
 
 typedef MATRIX sMatrix;
 
+MATRIX* RotMatrixX(long r, MATRIX* m);
+MATRIX* RotMatrixY(long r, MATRIX* m);
+MATRIX* RotMatrixZ(long r, MATRIX* m);
+
 MATRIX* SetMulMatrix(MATRIX* m0, MATRIX* m1);
 void createRotationMatrix(SFP_VEC4*, MATRIX*);
 MATRIX* ScaleMatrixL(MATRIX* m, FP_VEC4* v);
