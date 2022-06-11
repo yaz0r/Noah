@@ -8020,7 +8020,7 @@ void setupSpriteActorTransform(sSpriteActor* pSpriteSheet)
     local_30.vx = (pSpriteSheet->m0_position).vx >> 0x10;
     local_30.vy = (pSpriteSheet->m0_position).vy >> 0x10;
     local_30.vz = (pSpriteSheet->m0_position).vz >> 0x10;
-    rotateVectorByMatrix(&currentRenderingMatrix, &local_30, &local_28);
+    ApplyMatrix(&currentRenderingMatrix, &local_30, &local_28);
     sFieldEntitySub4_B4_base* psVar2 = pSpriteSheet->m20;
     (psVar2->mC_matrix).t[0] = currentRenderingMatrix.t[0] + local_28.vx + (iVar3 >> 0xc);
     (psVar2->mC_matrix).t[1] = currentRenderingMatrix.t[1] + local_28.vy + (iVar4 >> 0xc);

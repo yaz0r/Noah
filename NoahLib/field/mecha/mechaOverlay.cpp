@@ -500,7 +500,7 @@ void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int pa
         local_120.vz = ((int)pMecha->m7C[2] * (int)(*pMecha->m4)[0].m4C[2] >> 0xc);
 
         FP_VEC4 local_130;
-        rotateVectorByMatrix(&(*pMecha->m4)[0].m2C, &local_120, &local_130);
+        ApplyMatrix(&(*pMecha->m4)[0].m2C, &local_120, &local_130);
 
         (*pMecha->m4)[0].m5C_translation[0] += (pMecha->m1C_moveSpeed * local_130.vx >> 0xc);
         (*pMecha->m4)[0].m5C_translation[1] += (pMecha->m1C_moveSpeed * local_130.vy >> 0xc);
@@ -1032,12 +1032,6 @@ void updateMechAnimSub0(sLoadedMechas* param_1)
         (*param_1->m4)[0].m5C_translation[1] = param_1->m60;
     }
     return;
-}
-
-void RotMatrixYXZ(SFP_VEC4* r, MATRIX* m)
-{
-    MissingCode();
-    return createRotationMatrix(r, m);
 }
 
 void updateMechAnimSub1(std::vector<sLoadedMecha_sub4>& param_1, int param_2) {

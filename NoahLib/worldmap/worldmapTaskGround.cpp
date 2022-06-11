@@ -16,13 +16,31 @@ s32 worldmap_taskGround_init(s32 index) {
     return 1;
 }
 
-VECTOR worldmapRadarPosition3 = { 0,0,0 };
-
 void computeWormapSpritePosition(VECTOR* v) {
-    MissingCode();
-    /*v->vx = 0;
-    v->vy = 0;
-    v->vz = 0;*/
+    int iVar1;
+    int iVar2;
+
+    iVar2 = v->vx;
+    if (iVar2 < -0x4000000) {
+        iVar1 = worldmapProjVar0 * 0x800000;
+    }
+    else {
+        if (iVar2 < 0x4000001) goto LAB_worldmap__800934d8;
+        iVar1 = worldmapProjVar0 * -0x800000;
+    }
+    v->vx = iVar2 + iVar1;
+LAB_worldmap__800934d8:
+    iVar2 = v->vz;
+    if (iVar2 < -0x4000000) {
+        iVar1 = worldmapProjVar1 * 0x800000;
+    }
+    else {
+        if (iVar2 < 0x4000001) {
+            return;
+        }
+        iVar1 = worldmapProjVar1 * -0x800000;
+    }
+    v->vz = iVar2 + iVar1;
 }
 
 void worldmapDrawSpriteActors() {
@@ -122,14 +140,14 @@ void setupWorldmapMatrix1(SVECTOR* param_1) {
         worldmapRotationmatrixX = worldmapMainMatrix2;
 
         FP_VEC4 temp2;
-        rotateVectorByMatrix(&worldmapRotationmatrixX, &temp, &temp2);
+        ApplyMatrix(&worldmapRotationmatrixX, &temp, &temp2);
         TransMatrix(&worldmapMainMatrix2, &temp2);
     }
 }
 
 s32 worldmap_taskGround_update(s32 index) {
     if (worldmapMatrixMode == 0) {
-        setupWorldmapMatrix1(&worldmapCameraVector);
+        setupWorldmapMatrix1(&worldmapCameraVector.m0);
     }
     else {
         //setupWorldmapMatrix2(&worldmapCameraVector);

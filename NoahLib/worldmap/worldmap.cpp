@@ -29,6 +29,12 @@ s16 worldmapVar_8009d52c;
 MATRIX worldmapMainMatrix2;
 s32 worldmapMatrixMode;
 
+s32 worldmapProjVar0;
+s32 worldmapProjVar1;
+
+VECTOR worldmapRadarPosition3 = { 0,0,0 };
+
+
 std::array<u8, 3> worldMapFarColor = { {0xC0, 0xD0, 0xF0} };
 
 std::array<sWorldmapRenderingStruct, 2> worldmapRenderingStructs;
@@ -51,7 +57,7 @@ s32 worldmapOddOrEven;
 s32 continueWorldmapLoop;
 
 sWorldmapRenderingStruct* pCurrentWorldmapRenderingStruct = nullptr;
-SVECTOR worldmapCameraVector = { 0x0758,0,0x02c0 };
+sWorldmapCameraState worldmapCameraVector = { { 0x0758,0,0x02c0 } };
 
 void worldmapMode0_init(void) {
     for (int i = 0; i < 3; i++) {
@@ -576,7 +582,8 @@ void initWorldMap(int param_1, int param_2)
     worldmapFile3 = *psVar1 + 3;
     worldmapFile2 = *psVar1 + 2;
     worldmapFile4 = *psVar1 + 4;
-    MissingCode();
+    worldmapProjVar0 = psVar1[1];
+    worldmapProjVar1 = psVar1[2];
     worldmapFile1 = *psVar1 + 1;
     worldmapFile6 = *psVar1 + 6;
     worldmapFile5 = *psVar1 + 5;

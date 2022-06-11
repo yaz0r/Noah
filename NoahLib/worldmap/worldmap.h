@@ -17,7 +17,12 @@ struct sWorldmapStateEntry {
     s16 m4A;
     struct sSpriteActor* m4C;
     s32 m50;
+    s32 m54;
+    s32 m58;
     s32 m5C;
+    s32 m60;
+    const std::array<s16, 4>* m64;
+    const std::array<s16, 4>* m68;
 };
 
 struct sWorldmapState {
@@ -51,7 +56,20 @@ extern s16 worldmapVar_8009d52c;
 
 extern MATRIX worldmapMainMatrix2;
 extern s32 worldmapMatrixMode;
-extern SVECTOR worldmapCameraVector;
+
+struct sWorldmapCameraState {
+    SVECTOR m0;
+    SVECTOR m8;
+    VECTOR m10;
+};
+
+extern sWorldmapCameraState worldmapCameraVector;
+
+extern VECTOR worldmapRadarPosition3;
+
+extern s32 worldmapProjVar0;
+extern s32 worldmapProjVar1;
+
 
 extern std::array<struct sSpriteActorAnimationBundle*, 3 > worldmapPartySprites;
 

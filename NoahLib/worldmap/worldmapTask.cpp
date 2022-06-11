@@ -6,12 +6,14 @@
 #include "worldmapTaskFader.h"
 #include "worldmapTaskGround.h"
 #include "worldmapPlayer.h"
+#include "worldmapTaskCamera.h"
 
 const std::vector<sWorldTaskDefinition> worldmapMode0_tasks = { {
     {&worldmap_taskFader_init, &worldmap_taskFader_update},
     {&worldmapMode0_taskPlayer_init, &worldmapMode0_taskPlayer_update},
     // TODO: the rest
 
+    {&worldmap_taskCamera_init, &worldmap_taskCamera_update},
     {&worldmap_taskMinimapY_init, &worldmap_taskMinimapY_update},
 
     {&worldmap_taskGround_init, &worldmap_taskGround_update}

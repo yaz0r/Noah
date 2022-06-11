@@ -69,7 +69,7 @@ void resetMatrixTranslation(MATRIX* m);
 MATRIX* MulRotationMatrix(const MATRIX* m0, MATRIX* m1);
 void RotTrans(SFP_VEC4* rotation, FP_VEC4* output, long* flag);
 void copyRotationMatrix(MATRIX* param_1, MATRIX* param_2);
-FP_VEC4* rotateVectorByMatrix(MATRIX* m, SFP_VEC4* inputVector, FP_VEC4* outputVector);
+FP_VEC4* ApplyMatrix(MATRIX* m, SFP_VEC4* inputVector, FP_VEC4* outputVector);
 
 void Square0(FP_VEC3* v0, FP_VEC3* v1);
 s32 SquareRoot0(s32 value);
@@ -101,5 +101,6 @@ long NCLIP(sVec2_s16 sxy0, sVec2_s16 sxy1, sVec2_s16 sxy2);
 void copyMatrix(MATRIX* param_1, MATRIX* param_2);
 MATRIX* TransMatrix(MATRIX* m, FP_VEC4* v);
 MATRIX* RotMatrixZYX(SVECTOR* r, MATRIX* m);
+MATRIX* RotMatrixYXZ(SFP_VEC4* r, MATRIX* m);
 VECTOR* ApplyRotMatrixLV(VECTOR* $2, VECTOR* $3);
 VECTOR* ApplyRotMatrix(SVECTOR* $2, VECTOR* $3);

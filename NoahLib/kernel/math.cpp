@@ -492,7 +492,7 @@ s32 length2d(s32 param_1, s32 param_2)
 	return SquareRoot0(local_18.vx + local_18.vy);
 }
 
-FP_VEC4* rotateVectorByMatrix(MATRIX* m, SFP_VEC4* inputVector, FP_VEC4* outputVector)
+FP_VEC4* ApplyMatrix(MATRIX* m, SFP_VEC4* inputVector, FP_VEC4* outputVector)
 {
 #if 0
 	outputVector->vx = m->m[0][0] * inputVector->vx + m->m[1][0] * inputVector->vy + m->m[2][0] * inputVector->vz;
@@ -553,7 +553,7 @@ void computeMatrix(MATRIX* pOutputMatrix, FP_VEC4* param_2, FP_VEC4* param_3, FP
         (s16)((param_2->vz >> 16) * 3),
     };
 
-	rotateVectorByMatrix(pOutputMatrix, &local_20, &local_60);
+	ApplyMatrix(pOutputMatrix, &local_20, &local_60);
 
 	pOutputMatrix->t[0] = -local_60.vx;
 	pOutputMatrix->t[1] = -local_60.vy;
@@ -846,6 +846,39 @@ MATRIX* RotMatrixZ(long r, MATRIX* m)
     return m;
 }
 
+MATRIX* RotMatrixYXZ(SFP_VEC4* r, MATRIX* m)
+{
+    // correct Psy-Q implementation
+    int c0, c1, c2;
+    int s0, s1, s2;
+
+    c0 = rcos(r->vx);
+    c1 = rcos(r->vy);
+    c2 = rcos(r->vz);
+    s0 = rsin(r->vx);
+    s1 = rsin(r->vy);
+    s2 = rsin(r->vz);
+
+    // Y-axis
+    m->m[1][0] = FIXED(s2 * c0);
+    m->m[1][1] = FIXED(c2 * c0);
+    m->m[1][2] = -s0;
+
+    // X-axis
+    int x0 = FIXED(s1 * s0);
+    m->m[0][0] = FIXED(c1 * c2) + FIXED(x0 * s2);
+    m->m[0][1] = FIXED(x0 * c2) - FIXED(c1 * s2);
+    m->m[0][2] = FIXED(s1 * c0);
+
+    // Z-axis
+    int z0 = FIXED(c1 * s0);
+    m->m[2][1] = FIXED(s1 * s2) + FIXED(z0 * c2);
+    m->m[2][0] = FIXED(z0 * s2) - FIXED(s1 * c2);
+    m->m[2][2] = FIXED(c1 * c0);
+
+    return m;
+}
+
 MATRIX* RotMatrixZYX(SVECTOR* r, MATRIX* m)
 {
 #if 0
@@ -966,5 +999,3 @@ VECTOR* ApplyRotMatrixLV(VECTOR* v0, VECTOR* v1)
 #endif
     return v1;
 }
-
-VECTOR* ApplyRotMatrix(SVECTOR* $2, VECTOR* $3);
