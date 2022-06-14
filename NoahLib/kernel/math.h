@@ -97,6 +97,7 @@ void setIdentityMatrix(MATRIX* param_1);
 int VectorNormal(FP_VEC4* input, FP_VEC4* output);
 int VectorNormalS(FP_VEC4* input, SFP_VEC4* output);
 void OuterProduct12(FP_VEC4* a, FP_VEC4* b, FP_VEC4* r);
+void OuterProduct0(VECTOR* $2, VECTOR* $3, VECTOR* v2);
 long NCLIP(sVec2_s16 sxy0, sVec2_s16 sxy1, sVec2_s16 sxy2);
 void copyMatrix(MATRIX* param_1, MATRIX* param_2);
 MATRIX* TransMatrix(MATRIX* m, FP_VEC4* v);

@@ -130,3 +130,39 @@ void LoadImage(RECT* pRect, sPS1Pointer data)
 		}
 	}
 }
+
+void StoreImage(RECT* pRect, std::vector<u16>& output)
+{
+    std::vector<u16>::iterator p = output.begin();
+    for (int y = 0; y < pRect->h; y++)
+    {
+        auto vramIterator = gVram.begin() + (pRect->y + y) * 2048 + pRect->x * 2;
+
+        for (int x = 0; x < pRect->w; x++)
+        {
+            *p = READ_LE_U16(&vramIterator[0]);
+            p++;
+            vramIterator += 2;
+        }
+    }
+}
+
+void loadMenuImageBundle(const std::vector<u8>& imageBundle) {
+    s32 numImages = READ_LE_U32(imageBundle.begin());
+
+    while (numImages != -1) {
+        std::vector<u8>::const_iterator imageData = imageBundle.begin() + READ_LE_U32(imageBundle.begin() + 4 * numImages);
+
+        TIM_IMAGE tempTim;
+        OpenTIM(imageData);
+        ReadTIM(&tempTim);
+        if (tempTim.caddr != nullptr) {
+            DrawSync(0);
+            LoadImage(tempTim.crect, (u8*)tempTim.caddr);
+        }
+        DrawSync(0);
+        LoadImage(tempTim.prect, (u8*)tempTim.paddr);
+
+        numImages--;
+    }
+}

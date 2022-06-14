@@ -11,6 +11,9 @@ struct TIM_IMAGE
 int OpenTIM(std::vector<u8>::const_iterator ptr);
 TIM_IMAGE* ReadTIM(TIM_IMAGE* timimg);
 
+void StoreImage(struct RECT* rect, std::vector<u16>& output);
 void LoadImage(struct RECT* pRect, const u8* data);
-void LoadImage(RECT* pRect, sPS1Pointer data);
+void LoadImage(struct RECT* pRect, sPS1Pointer data);
 void loadTimToVram(std::vector<u8>::iterator ptr, short imageX, short imageY, short palX, short palY, short palW, short palH);
+
+void loadMenuImageBundle(const std::vector<u8>& imageBundle);

@@ -199,26 +199,6 @@ void initMenuContext(void)
     initMenuContext32C(1);
 }
 
-void loadMenuImageBundle(const std::vector<u8>& imageBundle) {
-    s32 numImages = READ_LE_U32(imageBundle.begin());
-
-    while (numImages != -1) {
-        std::vector<u8>::const_iterator imageData = imageBundle.begin() + READ_LE_U32(imageBundle.begin() + 4 * numImages);
-
-        TIM_IMAGE tempTim;
-        OpenTIM(imageData);
-        ReadTIM(&tempTim);
-        if (tempTim.caddr != nullptr) {
-            DrawSync(0);
-            LoadImage(tempTim.crect, (u8*)tempTim.caddr);
-        }
-        DrawSync(0);
-        LoadImage(tempTim.prect, (u8*)tempTim.paddr);
-
-        numImages--;
-    }
-}
-
 void computeMenuBorder(std::vector<u8>& param_1, int param_2, int* param_3, int* param_4, int* param_5, int* param_6, int* param_7, int* param_8)
 {
     int iVar2;

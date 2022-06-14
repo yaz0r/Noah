@@ -23,6 +23,8 @@ struct s_directoryEntry
 extern std::vector<s_fileTableEntry> fatFileTableBuffer;
 extern std::vector<s_directoryEntry> fatDirectoryTableBuffer;
 
+s32 getCdromFnd();
+
 struct sLoadingBatchCommands
 {
     u16 m0_fileIndex;

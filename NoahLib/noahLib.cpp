@@ -8,6 +8,7 @@
 #include "kernel/graphics.h"
 #include "kernel/gameMode.h"
 #include "kernel/font.h"
+#include "debug/vram.h"
 #include "field/field.h"
 #include "field/fieldDebugger/fieldInspector.h"
 #include "field/fieldDebugger/fieldViewDebug.h"
@@ -154,6 +155,8 @@ bool noahFrame_end()
     fieldInspector_frame();
 
     fieldViewDebug_step();
+
+    vramDebug_frame();
 
     drawPSXFB();
 

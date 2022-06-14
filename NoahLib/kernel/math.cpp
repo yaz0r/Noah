@@ -633,6 +633,53 @@ void OuterProduct12(FP_VEC4* a, FP_VEC4* b, FP_VEC4* r)
 #endif
 }
 
+s32 gte_stR11R12() {
+    return getCopControlWord(2, 0);
+}
+
+s32 gte_stR22R23() {
+    return getCopControlWord(2, 0x1000);
+}
+
+s32 gte_stR33() {
+    return getCopControlWord(2, 0x2000);
+}
+
+void gte_ldR11R12(s32 value) {
+    setCopControlWord(2, 0, value);
+}
+
+void gte_ldR22R23(s32 value) {
+    setCopControlWord(2, 0x1000, value);
+}
+
+void gte_ldR33(s32 value) {
+    setCopControlWord(2, 0x2000, value);
+}
+
+void gte_ldopv2(VECTOR* v) {
+    setCopReg(2, 11, v->vz);
+    setCopReg(2, 9, v->vx);
+    setCopReg(2, 10, v->vy);
+}
+
+void OuterProduct0(VECTOR* $2, VECTOR* $3, VECTOR* v2)
+{
+    s32 uVar1 = gte_stR11R12();
+    s32 uVar2 = gte_stR22R23();
+    s32 uVar3 = gte_stR33();
+    gte_ldR11R12($2->vx);
+    gte_ldR22R23($2->vy);
+    gte_ldR33($2->vz);
+    gte_ldopv2($3);
+    gte_op0();
+    gte_stlvnl(v2);
+    gte_ldR11R12(uVar1);
+    gte_ldR22R23(uVar2);
+    gte_ldR33(uVar3);
+    return;
+}
+
 void toFloat(FP_VEC4* v0, std::array<float, 3>& output)
 {
 	output[0] = v0->vx / (float)0x10000;

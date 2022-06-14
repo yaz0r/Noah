@@ -11,6 +11,8 @@
 #include "worldmapMinimap.h"
 #include "kernel/gameMode.h"
 #include "sprite/spriteSetup.h"
+#include "kernel/TIM.h"
+#include "worldmapWorldStreaming.h"
 
 VECTOR worldmapPosition;
 u32 worldmapGamestate1824;
@@ -32,8 +34,15 @@ s32 worldmapMatrixMode;
 s32 worldmapProjVar0;
 s32 worldmapProjVar1;
 
-VECTOR worldmapRadarPosition3 = { 0,0,0 };
+u16 worldmapInput1_0;
+u16 worldmapInput1_1;
+u16 worldmapInput2_0;
+u16 worldmapInput2_1;
+u16 worldmapInput3_0;
+u16 worldmapInput3_1;
 
+VECTOR worldmapRadarPosition3 = { 0,0,0 };
+VECTOR worldmapGridInputPosition = { 0,0,0 };
 
 std::array<u8, 3> worldMapFarColor = { {0xC0, 0xD0, 0xF0} };
 
@@ -57,7 +66,7 @@ s32 worldmapOddOrEven;
 s32 continueWorldmapLoop;
 
 sWorldmapRenderingStruct* pCurrentWorldmapRenderingStruct = nullptr;
-sWorldmapCameraState worldmapCameraVector = { { 0x0758,0,0x02c0 } };
+sWorldmapCameraState worldmapCameraVector;
 
 void worldmapMode0_init(void) {
     for (int i = 0; i < 3; i++) {
@@ -375,6 +384,123 @@ void setupWorldmapPositionFromFileData(int param_1) {
     }
 }
 
+std::array<u8, 3> DAT_worldmap__800704dc = { { 0xE0, 0xF5, 0xFF } };
+std::array<u16, 16> SHORT_ARRAY_8009bce0;
+
+void tweakWorldmapTexture(std::vector<u16>::iterator& param_1, std::vector<u16>::iterator& param_2, int param_3, const std::array<u8, 3>& param_4) {
+    u8 bVar1 = param_4[0];
+    u8 bVar2 = param_4[1];
+    u8 bVar3 = param_4[2];
+    s32 iVar8 = 0;
+    if (0 < param_3) {
+        s32 iVar5 = 0;
+        do {
+            s32 iVar9 = iVar5 / param_3;
+            if (param_3 == 0) {
+                assert(0);
+            }
+            if ((param_3 == -1) && (iVar5 == -0x80000000)) {
+                assert(0);
+            }
+            s32 iVar7 = 0;
+            iVar5 = 0x1000 - iVar9;
+            std::vector<u16>::iterator puVar6 = param_1;
+            do {
+                u16 uVar4 = *puVar6;
+                if (uVar4 == 0) {
+                    *param_2 = uVar4;
+                }
+                else {
+                    *param_2 = *puVar6 & 0x8000 | (ushort)((uVar4 & 0x1f) * 8 * iVar5 + (uint)bVar1 * iVar9 >> 0xf) | (ushort)(((*puVar6 >> 2 & 0xf8) * iVar5 + (uint)bVar2 * iVar9 >> 0xf) << 5) |
+                        (ushort)(((*puVar6 >> 7 & 0xf8) * iVar5 + (uint)bVar3 * iVar9 >> 0xf) << 10);
+                }
+                iVar7 = iVar7 + 1;
+                puVar6 = puVar6 + 1;
+                param_2 = param_2 + 1;
+            } while (iVar7 < 0x100);
+            iVar8 = iVar8 + 1;
+            iVar5 = iVar8 * 0x1000;
+        } while (iVar8 < param_3);
+    }
+}
+
+std::array<u16, 0x40> USHORT_ARRAY_8009ccb4;
+std::array<u16, 8> USHORT_ARRAY_8009cd54;
+
+void loadWorldmapTextureFromFile2(void) {
+    loadMenuImageBundle(mallocAndDecompress(worldmapFile2Buffer.begin())); // Those are ground textures
+    DrawSync(0);
+    worldmapFile2Buffer.clear();
+
+    std::vector<u16> buffer0;
+    buffer0.resize(0x200);
+
+    std::vector<u16> buffer1;
+    buffer1.resize(0x4000);
+
+    RECT local_30;
+    local_30.y = 0x1e0;
+    local_30.x = 0;
+    local_30.w = 0x100;
+    local_30.h = 2;
+    StoreImage(&local_30, buffer0);
+    DrawSync(0);
+    tweakWorldmapTexture(buffer0.begin(), buffer1.begin(), 0x20, worldMapFarColor);
+    tweakWorldmapTexture(buffer0.begin() + 0x100, buffer1.begin() + 0x2000, 0x20, worldMapFarColor);
+    local_30.y = 0x1b0;
+    local_30.x = 0;
+    local_30.w = 0x100;
+    local_30.h = 0x40;
+    LoadImage(&local_30, (u8*)&buffer1[0]);
+    DrawSync(0);
+
+    for (int i = 0; i < 0x40; i++) {
+        USHORT_ARRAY_8009ccb4[i] = GetClut((int)local_30.x, (int)local_30.y + i);
+    }
+
+    for (int i = 0; i < 4; i++) {
+        USHORT_ARRAY_8009cd54[i] = GetTPage(1, 0, 0x200 + 0x80 * i, 0);
+    }
+    for (int i = 4; i < 8; i++) {
+        USHORT_ARRAY_8009cd54[i] = GetTPage(1, 0, 0x200 + 0x80 * i, 0x100);
+    }
+}
+
+void loadWorldmapTextureFromFile3(void) {
+    // there was some code dealing with aligning the color in stack memory, but that seems unnecessary
+
+    loadMenuImageBundle(mallocAndDecompress(worldmapFile3Buffer.begin())); // Those are generic worlmap shared resources
+    DrawSync(0);
+    worldmapFile3Buffer.clear();
+
+    std::vector<u16> buffer0;
+    buffer0.resize(0x100);
+
+    std::vector<u16> buffer1;
+    buffer1.resize(0x1000);
+
+    RECT local_30;
+    local_30.x = 0;
+    local_30.y = 0x1F0;
+    local_30.w = 0x100;
+    local_30.h = 1;
+    StoreImage(&local_30, buffer0);
+
+    DrawSync(0);
+    tweakWorldmapTexture(buffer0.begin(), buffer1.begin(), 0x10, DAT_worldmap__800704dc);
+
+    local_30.x = 0;
+    local_30.y = 0x1f0;
+    local_30.w = 0x100;
+    local_30.h = 0xf;
+    LoadImage(&local_30, (u8*)&buffer1[0]);
+    DrawSync(0);
+
+    for (int i = 0; i < 0x10; i++) {
+        SHORT_ARRAY_8009bce0[i] = GetClut((int)local_30.x, (int)local_30.y + i);
+    }
+}
+
 void worldmapMode0_update(void) {
     initWorldmapGraphics();
 
@@ -403,6 +529,8 @@ void worldmapMode0_update(void) {
     worldmapMatrixMode = 0;
     fieldDrawEnvsInitialized = 1;
     worldmapFadeRunning = 1;
+    MissingCode();
+    worldmapDotInit();
 
     MissingCode();
     if (gameState.m1836 == 0) {
@@ -416,6 +544,9 @@ void worldmapMode0_update(void) {
     else {
         setupWorldmapPositionFromField();
     }
+    waitReadCompletion(0);
+    loadWorldmapTextureFromFile3();
+    loadWorldmapTextureFromFile2();
 
     MissingCode();
     initWorldmapMinimap();
@@ -425,6 +556,18 @@ void worldmapMode0_update(void) {
 
     if (isWorldmapModeFlagSet == 0) {
         MissingCode("Start worldmap music");
+    }
+    else {
+        assert(0);
+    }
+
+    setCurrentDirectory(0x24, 0);
+    if (isWorldmapModeFlagSet == 0) {
+        setupInitialGrid(&worldmapPosition);
+        do {
+            loadWorldmapChunk();
+            VSync(0);
+        } while (1 < isWorldStreamingDone());
     }
     else {
         assert(0);
@@ -526,10 +669,6 @@ void setupWorldmapGearMode(void)
     return;
 }
 
-void allocateWorldmapData(void) {
-    MissingCode();
-}
-
 static const std::array<s16, 8> SHORT_ARRAY_worldmap__8009af80 = { {
     0x5B00, 0x4720, 0x3A78, 0x2CE3,
     0x0C00, 0x79A8, 0x6DF4, 0x6414
@@ -597,6 +736,28 @@ void worldmapMainLoop(void) {
     worldmapOddOrEven = 1;
     continueWorldmapLoop = 1;
     do {
+        MissingCode();
+
+        worldmapInput3_1 = 0;
+        worldmapInput2_1 = 0;
+        worldmapInput1_1 = 0;
+        worldmapInput3_0 = 0;
+        worldmapInput2_0 = 0;
+        worldmapInput1_0 = 0;
+
+        while (loadInputFromVSyncBuffer()) {
+            worldmapInput1_0 = worldmapInput1_0 | newPadButtonForScripts[0].m0_buttons;
+            worldmapInput1_1 = worldmapInput1_1 | newPadButtonForScripts[1].m0_buttons;
+            worldmapInput2_0 = worldmapInput2_0 | newPadButtonForDialogs;
+            worldmapInput2_1 = worldmapInput2_1 | newPadButtonForDialogs2;
+            worldmapInput3_0 = worldmapInput3_0 | newPadButtonForField;
+            worldmapInput3_1 = worldmapInput3_1 | newPadButtonForField2;
+        }
+
+        while (loadWorldmapChunk() == 3) {
+            VSync(0);
+        }
+
         MissingCode();
 
         if (pCurrentWorldmapRenderingStruct == &worldmapRenderingStructs[0]) {

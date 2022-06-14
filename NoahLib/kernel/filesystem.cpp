@@ -151,8 +151,19 @@ void filessystemDebugInfo_load()
     }
 }
 
+s32 cdromFnd = 0;
+
+s32 getCdromFnd() {
+    return cdromFnd;
+}
+
 void initCDAndFileSystem(std::vector<s_fileTableEntry>* fileTable, std::vector<s_directoryEntry>* directoryTable, int mode)
 {
+    cdromFnd = mode;
+    if (mode == -1) {
+        cdromFnd = 0;
+    }
+
     // stuff
 
     {

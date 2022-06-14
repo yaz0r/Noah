@@ -7,6 +7,7 @@
 #include "field/field.h"
 #include "field/fieldGraphicObject.h"
 #include "kernel/gte.h"
+#include "worldmapWorldStreaming.h"
 
 void drawWorlmapPolyFT4Array1(void) {
     MissingCode();
@@ -156,6 +157,16 @@ s32 worldmap_taskGround_update(s32 index) {
     MissingCode();
     drawWorlmapPolyFT4Array1();
     worldmapDrawSpriteActors();
+    MissingCode();
+
+    setWorldmapGridUpdateMask(&worldmapGridInputPosition);
+    if (worldmapGridUpdateMask != 0) {
+        updateWorldmapGrids(&worldmapRadarPosition3);
+        streamWorldmap0();
+        streamWorldmap1();
+    }
+    worldmapGroundPrepareRenderingTable(&worldmapRadarPosition3);
+    drawWorldmapGround(pCurrentWorldmapRenderingStruct->m70_OT, pCurrentWorldmapRenderingStruct->m74_polyFT3.begin(), &worldmapRadarPosition3);
     MissingCode();
 
     if (gameState.m1842_disableWorldmapMinimap == 0) {

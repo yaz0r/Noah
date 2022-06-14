@@ -709,6 +709,15 @@ void gte_rtpt()
 	copFunction(2, 0x280030);
 }
 
+void gte_op0() {
+    copFunction(2, 0x0170000C);
+}
+
+void gte_rt()
+{
+    copFunction(2, 0x0480012);
+}
+
 void gte_nclip()
 {
 	copFunction(2, 0x1400006);
@@ -740,10 +749,39 @@ void gte_ldv0(const SFP_VEC4* pVertices0)
 	setCopReg(2, COP2D_Z0, sVec2_s16::fromValue(pVertices0->vz, 0));
 }
 
+void gte_ldv2(SVECTOR* pVertices0) {
+    setCopReg(2, COP2D_XY2, sVec2_s16::fromValue(pVertices0->vx, pVertices0->vy));
+    setCopReg(2, COP2D_Z2, sVec2_s16::fromValue(pVertices0->vz, 0));
+}
+
 void gte_ldv0(u8* pVertices)
 {
     setCopReg(2, COP2D_XY0, sVec2_s16::fromValue(READ_LE_S16(pVertices), READ_LE_S16(pVertices + 2)));
     setCopReg(2, COP2D_Z0, sVec2_s16::fromValue(READ_LE_S16(pVertices + 4), 0));
+}
+
+void gte_ldVXY0(struct SFP_VEC4* pInput) {
+    setCopReg(2, COP2D_XY0, sVec2_s16::fromValue(pInput->vx, pInput->vy));
+}
+
+void gte_ldVZ0(s16* pInput) {
+    setCopReg(2, COP2D_Z0, sVec2_s16::fromValue(*pInput, 0));
+}
+
+void gte_ldVXY1(struct SFP_VEC4* pInput) {
+    setCopReg(2, COP2D_XY1, sVec2_s16::fromValue(pInput->vx, pInput->vy));
+}
+
+void gte_ldVZ1(s16* pInput) {
+    setCopReg(2, COP2D_Z1, sVec2_s16::fromValue(*pInput, 0));
+}
+
+void gte_ldVXY2(struct SFP_VEC4* pInput) {
+    setCopReg(2, COP2D_XY2, sVec2_s16::fromValue(pInput->vx, pInput->vy));
+}
+
+void gte_ldVZ2(s16* pInput) {
+    setCopReg(2, COP2D_Z2, sVec2_s16::fromValue(*pInput, 0));
 }
 
 void gte_ldv0(std::vector<u8>::iterator& pVertices)
@@ -800,14 +838,51 @@ void gte_stlvnl(VECTOR* pOutput)
     pOutput->vz = getCopReg(2, 0xD800);
 }
 
+void read_sz_fifo3(short* z0, short* z1, short* z2) {
+    *z0 = getCopReg(2, 0x800 * 17);
+    *z1 = getCopReg(2, 0x800 * 18);
+    *z2 = getCopReg(2, 0x800 * 19);
+}
+
+s32 gte_stFLAG()
+{
+    return getCopControlWord(2, 0x800 * 31);
+}
+
+s32 gte_stMAC0()
+{
+    return getCopReg(2, 0x800 * 24);
+}
+
+s32 gte_stIR0()
+{
+    return getCopReg(2, 0x800 * 8);
+}
+
+s32 gte_stSXY0()
+{
+    return getCopReg(2, 0x800 * 12);
+}
+
+s32 gte_stSXY1()
+{
+    return getCopReg(2, 0x800 * 13);
+}
+
+s32 gte_stSXY2()
+{
+    return getCopReg(2, 0x800 * 14);
+}
+
+
 void gte_stlzc(int* pOutput)
 {
-	*pOutput = getCopReg(2, 0xf800);
+	*pOutput = getCopReg(2, 0x800 * 31);
 }
 
 void gte_getMAC0(int* pOutput)
 {
-	*pOutput = getCopReg(2, 0xC000);
+	*pOutput = getCopReg(2, 0x800 * 24);
 }
 
 void gte_stsxy3(sVec2_s16* xy0, sVec2_s16* xy1, sVec2_s16* xy2)

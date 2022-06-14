@@ -268,7 +268,9 @@ extern s8 pauseDisabled;
 extern u8 fieldBackgroundClearColor[3];
 
 extern u16 newPadButtonForDialogs;
+extern u16 newPadButtonForDialogs2;
 extern u16 newPadButtonForField;
+extern u16 newPadButtonForField2;
 
 extern int playMusicAuthorized;
 extern int musicVar1;
@@ -478,3 +480,5 @@ bool submitModelForRendering(sModelBlock* param_1, std::vector<sTag*>& param_2, 
 
 void doPCCollisionCheckAfterLoading();
 void runInitScriptForNewlyLoadedPC(uint param_1);
+
+extern std::array<sGameController, 2> newPadButtonForScripts;

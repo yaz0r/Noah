@@ -262,11 +262,6 @@ void renderCompass()
 int compassGraphicDataLoaded = 0;
 std::vector<u8> compassGraphicDataStaging;
 
-void StoreImage(RECT* rect, std::vector<u16>& output)
-{
-	MissingCode();
-}
-
 struct RECT2
 {
 	s16 imageX;
