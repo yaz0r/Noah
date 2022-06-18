@@ -3,9 +3,166 @@
 #include "worldmap.h"
 #include "kernel/gameState.h"
 #include "kernel/trigo.h"
+#include "worldmapWorldStreaming.h"
 
-s32 worldmapGetAltitudeFor2dPoint(s32, s32) {
-    return 0;
+u8* getWorldChunkForPosition(int x, int y)
+{
+    bool bVar1;
+    int iVar3;
+    int iVar5;
+    ushort uVar8;
+
+    int tileY = y >> 0x14;
+    int tileX = x >> 0x14;
+    if (tileY < 0) {
+        tileY = tileY + 7;
+    }
+    if (tileX < 0) {
+        tileX = tileX + 7;
+    }
+
+    uint inTileX = x >> 0xc & 0x7ff;
+    uint inTileY = y >> 0xc & 0x7ff;
+    bVar1 = 0x3ff < inTileX;
+    if (bVar1) {
+        inTileX = inTileX - 0x400;
+    }
+    uVar8 = (ushort)bVar1;
+    if (0x3ff < inTileY) {
+        uVar8 = bVar1 | 2;
+        inTileY = inTileY - 0x400;
+    }
+    iVar3 = (int)inTileY >> 4;
+    if (iVar3 < 0) {
+        iVar3 = iVar3 + 7;
+    }
+    iVar5 = (int)inTileX >> 4;
+    if (iVar5 < 0) {
+        iVar5 = iVar5 + 7;
+    }
+
+    int tileId = (((tileY/8) * worldmapSizeX + (tileX/8)) * 0x10000 >> 0xe) / 4;
+    return worldmapChunks[tileId] + ((short)uVar8 * 0x144 + (((iVar3 >> 3) * 9 + (iVar5 >> 3)) * 0x10000 >> 0xe));
+}
+
+void averageVector(VECTOR* param_1, VECTOR* param_2, VECTOR* param_3)
+{
+    int iVar1;
+    int iVar2;
+    int iVar3;
+
+    iVar2 = param_3->vy;
+    iVar1 = -(param_3->vz * (param_1->vz - param_2->vz)) - param_3->vx * (param_1->vx - param_2->vx);
+    iVar3 = iVar1 / iVar2;
+    if (iVar2 == 0) {
+        assert(0);
+    }
+    if ((iVar2 == -1) && (iVar1 == -0x80000000)) {
+        assert(0);
+    }
+    param_1->vy = iVar3;
+    param_1->vy = iVar3 + param_2->vy;
+    return;
+}
+
+
+s32 DAT_worldmap__8009b244 = 0xB50;
+s32 DAT_worldmap__8009b24c = 0xFFFFF4B0;
+s32 DAT_worldmap__8009b254 = 0xB50;
+s32 DAT_worldmap__8009b25c = 0xB50;
+
+void interpolateWorldPosition(VECTOR* param_1, int x, int y)
+{
+    byte bVar1;
+    byte* pcVar2;
+    uint uVar2;
+    uint uVar3;
+
+    VECTOR DAT_1f800000;
+    VECTOR VECTOR_1f800010;
+
+    pcVar2 = getWorldChunkForPosition(x, y);
+    if (x < 0) {
+        x = x + 7;
+    }
+    uVar2 = x >> 3 & 0xffff;
+    if (y < 0) {
+        y = y + 7;
+    }
+    uVar3 = y >> 3 & 0xffff;
+    if ((pcVar2[1] & 0x80) == 0) {
+        if ((int)((uVar2 - 0x10000) * DAT_worldmap__8009b244 + -uVar3 * DAT_worldmap__8009b24c) < 0) {
+            DAT_1f800000.vx = -0x10;
+            VECTOR_1f800010.vz = 0;
+            DAT_1f800000.vy = (int)(char)pcVar2[0x24] - (int)(char)pcVar2[4];
+            bVar1 = *pcVar2;
+        }
+        else {
+            DAT_1f800000.vx = 0;
+            VECTOR_1f800010.vz = -0x10;
+            DAT_1f800000.vy = (int)(char)pcVar2[0x28] - (int)(char)pcVar2[4];
+            bVar1 = pcVar2[0x24];
+        }
+        VECTOR_1f800010.vx = -0x10;
+        DAT_1f800000.vz = -0x10;
+        VECTOR_1f800010.vy = (int)(char)bVar1 - (int)(char)pcVar2[4];
+    }
+    else if ((int)(uVar2 * DAT_worldmap__8009b254 + -uVar3 * DAT_worldmap__8009b25c) < 0) {
+        DAT_1f800000.vx = 0x10;
+        DAT_1f800000.vz = -0x10;
+        VECTOR_1f800010.vx = 0;
+        VECTOR_1f800010.vz = -0x10;
+        DAT_1f800000.vy = (int)(char)pcVar2[0x28] - (int)(char)*pcVar2;
+        VECTOR_1f800010.vy = (int)(char)pcVar2[0x24] - (int)(char)*pcVar2;
+    }
+    else {
+        DAT_1f800000.vx = 0x10;
+        VECTOR_1f800010.vx = 0x10;
+        DAT_1f800000.vz = 0;
+        VECTOR_1f800010.vz = -0x10;
+        DAT_1f800000.vy = (int)(char)pcVar2[4] - (int)(char)*pcVar2;
+        VECTOR_1f800010.vy = (int)(char)pcVar2[0x28] - (int)(char)*pcVar2;
+    }
+
+    VECTOR VECTOR_1f800020;
+    OuterProduct0(&VECTOR_1f800010, &DAT_1f800000, &VECTOR_1f800020);
+    VectorNormal(&VECTOR_1f800020, param_1);
+    return;
+}
+
+s32 worldmapGetAltitudeFor2dPoint(s32 x, s32 y) {
+    u8 bVar1;
+    int iVar2;
+    VECTOR local_40;
+    VECTOR local_30;
+    VECTOR VStack32;
+
+    byte* pcVar2 = getWorldChunkForPosition(x, y);
+    if (pcVar2 == nullptr)
+        return 0;
+    iVar2 = x;
+    if (x < 0) {
+        iVar2 = x + 7;
+    }
+    local_40.vx = iVar2 >> 3 & 0xffff;
+    iVar2 = y;
+    if (y < 0) {
+        iVar2 = y + 7;
+    }
+    local_40.vz = -(iVar2 >> 3 & 0xffffU);
+    if ((pcVar2[1] & 0x80) == 0) {
+        local_30.vx = 0x10000;
+        bVar1 = pcVar2[4];
+    }
+    else {
+        local_30.vx = 0;
+        bVar1 = *pcVar2;
+    }
+    local_30.vz = 0;
+    local_30.vy = (int)(char)bVar1 << 0xc;
+    interpolateWorldPosition(&VStack32, x, y);
+    averageVector(&local_40, &local_30, &VStack32);
+    return local_40.vy << 3;
 }
 
 s32 worldmapMode0_taskPlayer_init(int param_1)
@@ -104,11 +261,11 @@ s32 worldmapUpdatePlayerControls(sWorldmapStateEntry* param_1) {
 
 void checkWorldmapPositionSub0(VECTOR* param_1)
 {
-    if (worldmapProjVar0 * 0x800000 <= param_1->vx) {
-        param_1->vx = param_1->vx + worldmapProjVar0 * -0x800000;
+    if (worldmapSizeX * 0x800000 <= param_1->vx) {
+        param_1->vx = param_1->vx + worldmapSizeX * -0x800000;
     }
     if (param_1->vx < 0) {
-        param_1->vx = param_1->vx + worldmapProjVar0 * 0x800000;
+        param_1->vx = param_1->vx + worldmapSizeX * 0x800000;
     }
     if (worldmapProjVar1 * 0x800000 <= param_1->vz) {
         param_1->vz = param_1->vz + worldmapProjVar1 * -0x800000;

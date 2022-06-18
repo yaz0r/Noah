@@ -66,7 +66,7 @@ extern sWorldmapCameraState worldmapCameraVector;
 extern VECTOR worldmapRadarPosition3;
 extern VECTOR worldmapGridInputPosition;
 
-extern s32 worldmapProjVar0;
+extern s32 worldmapSizeX;
 extern s32 worldmapProjVar1;
 extern s32 continueWorldmapLoop;
 extern s32 exitWorldMapMode;

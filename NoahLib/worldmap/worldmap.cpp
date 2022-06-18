@@ -31,7 +31,7 @@ s16 worldmapVar_8009d52c;
 MATRIX worldmapMainMatrix2;
 s32 worldmapMatrixMode;
 
-s32 worldmapProjVar0;
+s32 worldmapSizeX;
 s32 worldmapProjVar1;
 
 u16 worldmapInput1_0;
@@ -462,7 +462,7 @@ void loadWorldmapTextureFromFile2(void) {
         USHORT_ARRAY_8009cd54[i] = GetTPage(1, 0, 0x200 + 0x80 * i, 0);
     }
     for (int i = 4; i < 8; i++) {
-        USHORT_ARRAY_8009cd54[i] = GetTPage(1, 0, 0x200 + 0x80 * i, 0x100);
+        USHORT_ARRAY_8009cd54[i] = GetTPage(1, 0, 0x180 + 0x80 * (i - 4), 0x100);
     }
 }
 
@@ -721,7 +721,7 @@ void initWorldMap(int param_1, int param_2)
     worldmapFile3 = *psVar1 + 3;
     worldmapFile2 = *psVar1 + 2;
     worldmapFile4 = *psVar1 + 4;
-    worldmapProjVar0 = psVar1[1];
+    worldmapSizeX = psVar1[1];
     worldmapProjVar1 = psVar1[2];
     worldmapFile1 = *psVar1 + 1;
     worldmapFile6 = *psVar1 + 6;

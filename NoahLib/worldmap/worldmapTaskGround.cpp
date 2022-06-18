@@ -23,11 +23,11 @@ void computeWormapSpritePosition(VECTOR* v) {
 
     iVar2 = v->vx;
     if (iVar2 < -0x4000000) {
-        iVar1 = worldmapProjVar0 * 0x800000;
+        iVar1 = worldmapSizeX * 0x800000;
     }
     else {
         if (iVar2 < 0x4000001) goto LAB_worldmap__800934d8;
-        iVar1 = worldmapProjVar0 * -0x800000;
+        iVar1 = worldmapSizeX * -0x800000;
     }
     v->vx = iVar2 + iVar1;
 LAB_worldmap__800934d8:
@@ -167,6 +167,7 @@ s32 worldmap_taskGround_update(s32 index) {
     }
     worldmapGroundPrepareRenderingTable(&worldmapRadarPosition3);
     drawWorldmapGround(pCurrentWorldmapRenderingStruct->m70_OT, pCurrentWorldmapRenderingStruct->m74_polyFT3.begin(), &worldmapRadarPosition3);
+    worldmapWaterWave = worldmapWaterWave + 0x40;
     MissingCode();
 
     if (gameState.m1842_disableWorldmapMinimap == 0) {

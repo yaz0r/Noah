@@ -6,6 +6,9 @@ extern std::array<u16, 81> worldmapGrid;
 extern std::array<u16, 81> worldmapGrid2;
 
 extern u32 worldmapGridUpdateMask;
+extern s32 worldmapWaterWave;
+
+extern std::array<u8*, 256> worldmapChunks;
 
 void allocateWorldmapData(void);
 void streamWorldmap0(void);

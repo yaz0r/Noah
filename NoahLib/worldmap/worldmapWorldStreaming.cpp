@@ -7,8 +7,8 @@
 #include "kernel/gte.h"
 #include "kernel/trigo.h"
 
-s32 drawWorldmapGroundCellVar0;
-s32 drawWorldmapGroundCellVar1;
+s32 worldmapWaterWave2;
+s32 worldmapWaterWave;
 
 std::array<u16, 81> worldmapGrid;
 std::array<u16, 81> worldmapGrid2;
@@ -33,6 +33,8 @@ s32 worldmapNextCellIndex;
 s32 worldmapCellLoadSlot;
 s32 worldmapStreamingStateMachineState;
 s32 worldmapStreamingStateMachineNumPendingLoads;
+
+std::array<u8*, 256> worldmapChunks;
 
 void loadWorldmapChunkFromCD(sWorldmapCellFromCD* param_1) {
     // NOTE: this is not how the original code works at all
@@ -202,8 +204,6 @@ void allocateWorldmapData(void)
     return;
 }
 
-std::array<u8*, 256> worldmapChunks;
-
 int setWorldmapCellTriangleValue(int param_1, int param_2, u8* param_3)
 {
     int iVar1;
@@ -366,14 +366,14 @@ void streamWorldmap1(void)
                 iVar6 = (int)(short)*puVar8;
                 if (worldmapChunks[iVar6] == (byte*)0x0) {
                     pbVar4 = (byte*)malloc(0x710);
-                    iVar13 = iVar6 / worldmapProjVar0;
-                    if (worldmapProjVar0 == 0) {
+                    iVar13 = iVar6 / worldmapSizeX;
+                    if (worldmapSizeX == 0) {
                         assert(0);
                     }
-                    if ((worldmapProjVar0 == -1) && (iVar6 == -0x80000000)) {
+                    if ((worldmapSizeX == -1) && (iVar6 == -0x80000000)) {
                         assert(0);
                     }
-                    iVar14 = (iVar6 % worldmapProjVar0) * worldmapProjVar1;
+                    iVar14 = (iVar6 % worldmapSizeX) * worldmapProjVar1;
                     bVar2 = true;
                     worldmapChunks[iVar6] = pbVar4;
                     setWorldmapCellTriangleValue(iVar10 + iVar14 + iVar13, 0x710, pbVar4);
@@ -400,14 +400,14 @@ void streamWorldmap1(void)
                 else {
                     if (!bVar2) goto LAB_worldmap__80099018;
                     iVar12 = getFileStartSector(worldmapFile10);
-                    if (worldmapProjVar0 == 0) {
+                    if (worldmapSizeX == 0) {
                         assert(0);
                     }
-                    if ((worldmapProjVar0 == -1) && (iVar6 == -0x80000000)) {
+                    if ((worldmapSizeX == -1) && (iVar6 == -0x80000000)) {
                         assert(0);
                     }
                     pbVar4 = *ppbVar7;
-                    iVar12 = iVar12 + (iVar6 % worldmapProjVar0) * worldmapProjVar1 + iVar6 / worldmapProjVar0;
+                    iVar12 = iVar12 + (iVar6 % worldmapSizeX) * worldmapProjVar1 + iVar6 / worldmapSizeX;
                 }
                 setWorldmapCellTriangleValue(iVar12, 0x710, pbVar4);
             }
@@ -449,14 +449,14 @@ void streamWorldmap1(void)
                 iVar6 = (int)(short)*puVar8;
                 if (worldmapChunks[iVar6] == (byte*)0x0) {
                     pbVar4 = (byte*)malloc(0x710);
-                    iVar13 = iVar6 / worldmapProjVar0;
-                    if (worldmapProjVar0 == 0) {
+                    iVar13 = iVar6 / worldmapSizeX;
+                    if (worldmapSizeX == 0) {
                         assert(0);
                     }
-                    if ((worldmapProjVar0 == -1) && (iVar6 == -0x80000000)) {
+                    if ((worldmapSizeX == -1) && (iVar6 == -0x80000000)) {
                         assert(0);
                     }
-                    iVar14 = (iVar6 % worldmapProjVar0) * 0x800 * worldmapProjVar1;
+                    iVar14 = (iVar6 % worldmapSizeX) * 0x800 * worldmapProjVar1;
                     bVar2 = true;
                     worldmapChunks[iVar6] = pbVar4;
                     setWorldmapCellQuadValue(iVar10, iVar14 + iVar13 * 0x800, 0x710, pbVar4);
@@ -483,14 +483,14 @@ void streamWorldmap1(void)
                 else {
                     if (!bVar2) goto LAB_worldmap__800992cc;
                     iVar12 = getFilenameFromPC(worldmapFile10);
-                    if (worldmapProjVar0 == 0) {
+                    if (worldmapSizeX == 0) {
                         assert(0);
                     }
-                    if ((worldmapProjVar0 == -1) && (iVar10 == -0x80000000)) {
+                    if ((worldmapSizeX == -1) && (iVar10 == -0x80000000)) {
                         assert(0);
                     }
                     pbVar4 = *ppbVar7;
-                    iVar10 = (iVar10 % worldmapProjVar0) * 0x800 * worldmapProjVar1 + (iVar10 / worldmapProjVar0) * 0x800;
+                    iVar10 = (iVar10 % worldmapSizeX) * 0x800 * worldmapProjVar1 + (iVar10 / worldmapSizeX) * 0x800;
                 }
                 setWorldmapCellQuadValue(iVar12, iVar10, 0x710, pbVar4);
             }
@@ -549,7 +549,7 @@ void setWorldmapGridUpdateMask(VECTOR* param_1)
 
 void updateWorldmapGrids(VECTOR* param_1) {
     s32 iVar6 = worldmapProjVar1;
-    s32 iVar5 = worldmapProjVar0;
+    s32 iVar5 = worldmapSizeX;
     s32 posX = param_1->vx >> 0xc;
     if (posX < 0) {
         posX = posX + 7;
@@ -561,10 +561,10 @@ void updateWorldmapGrids(VECTOR* param_1) {
     }
     posZ = (posZ >> 3) + (worldmapGridPosition.vz + 2) * -0x100;
     if (posX < 0) {
-        posX = posX + worldmapProjVar0 * 0x100;
+        posX = posX + worldmapSizeX * 0x100;
     }
-    else if (worldmapProjVar0 * 0x100 < posX) {
-        posX = posX + worldmapProjVar0 * -0x100;
+    else if (worldmapSizeX * 0x100 < posX) {
+        posX = posX + worldmapSizeX * -0x100;
     }
     if (posZ < 0) {
         posZ = posZ + worldmapProjVar1 * 0x100;
@@ -697,8 +697,8 @@ void setupInitialGrid(VECTOR* param_1)
     } while (-1 < iVar2);
     MissingCode();
 
-    drawWorldmapGroundCellVar1 = 0;
-    drawWorldmapGroundCellVar0 = 0x400;
+    worldmapWaterWave = 0;
+    worldmapWaterWave2 = 0x400;
     worldmapGridInputPosition.vx = param_1->vx & 0x7fffff;
     worldmapGridPosition.vx = 2;
     worldmapGridPosition.vy = 0;
@@ -1080,22 +1080,21 @@ void worldmapGroundPrepareRenderingTable(VECTOR* param_1) {
 
 int renderWorldmapGroundVar1;
 
-std::array<SVECTOR, 8* 8 * 8> DAT_1f800000; // TODO: size?
+std::array<SVECTOR, 9*9> DAT_1f800000;
 static std::array<u16, 8> DAT_1f800308;
 static std::array<u16, 0x40> DAT_1f800288;
 
 void drawWorldmapGroundCellSub0(uint* param_1, std::vector<sTag>& OT, std::vector<POLY_FT3>::iterator& outputTriangles)
 {
     s32 currentNumUsedTriangles = renderWorldmapGroundVar1;
-    auto pVector = DAT_1f800000.begin();
 
     for (int i = 0; i < 8; i++) {
         for (int j = 0; j < 8; j++) {
-            auto r0 = pVector;
+            auto r0 = &DAT_1f800000[i * 9 + j];
 
-            u32 quadParams = *param_1;
+            u32 quadParams = param_1[i * 9 + j];
 
-            s32 quadParam1 = quadParams << 0x10;
+            u32 quadParam1 = quadParams << 0x10;
             s32 quadParam2 = quadParams >> 0xc & 0xf0 | quadParams >> 8 & 0xf000;
             s32 quadParam3 = quadParams >> 0xd & 3;
 
@@ -1142,7 +1141,7 @@ void drawWorldmapGroundCellSub0(uint* param_1, std::vector<sTag>& OT, std::vecto
             gte_ldVZ2(&r0[9].vz);
 
             u32 _triV1;
-            if ((int)quadParam1 < 0) {
+            if (quadParam1 & 0x80000000) {
                 gte_ldVXY1(&(*r0) + 10);
                 gte_ldVZ1(&r0[10].vz);
                 _triV1 = UV3;
@@ -1187,9 +1186,9 @@ void drawWorldmapGroundCellSub0(uint* param_1, std::vector<sTag>& OT, std::vecto
                                     IR0 = 0xffffff >> 0xc;
                                 }
 
-                                u16 tpage = DAT_1f800308[(quadParam1 >> 0x17 & 0xe) / 2];
+                                u16 tpage = DAT_1f800308[quadParam1 >> 0x18 & 0x7];
                                 //u16 clut = DAT_1f800288[IR0 + (quadParam1 >> 0x15 & 0x40) / 2];
-                                u16 clut = DAT_1f800288[0];
+                                u16 clut = DAT_1f800288[IR0>>7 + (quadParam1 >> 0x15 & 0x40) / 2];
 
                                 currentNumUsedTriangles++;
                                 pOutputTriangle->x0y0 = _triXY0;
@@ -1209,82 +1208,81 @@ void drawWorldmapGroundCellSub0(uint* param_1, std::vector<sTag>& OT, std::vecto
                     }
                 }
 
-                gte_ldVXY0(&(*r0) + 1);
-                gte_ldVZ0(&r0[1].vz);
-                gte_ldVXY1(&(*r0) + 10);
-                gte_ldVZ1(&r0[10].vz);
+                {
+                    gte_ldVXY0(&(*r0) + 1);
+                    gte_ldVZ0(&r0[1].vz);
+                    gte_ldVXY1(&(*r0) + 10);
+                    gte_ldVZ1(&r0[10].vz);
 
-                s32 UV2or0;
-                if ((int)quadParam1 < 0) {
-                    gte_ldv2(&(*r0));
-                    UV2or0 = (ushort)UV0;
-                }
-                else {
-                    gte_ldVXY2(&(*r0) + 9);
-                    gte_ldVZ2(&r0[9].vz);
-                    UV2or0 = UV2;
-                }
-                gte_rtpt_b();
+                    s32 UV2or0;
+                    if (quadParam1 & 0x80000000) {
+                        gte_ldv2(&(*r0));
+                        UV2or0 = (ushort)UV0;
+                    }
+                    else {
+                        gte_ldVXY2(&(*r0) + 9);
+                        gte_ldVZ2(&r0[9].vz);
+                        UV2or0 = UV2;
+                    }
+                    gte_rtpt_b();
 
-                s32 triangleFlag = gte_stFLAG();
-                sVec2_s16 _triXY0 = sVec2_s16::fromS32(gte_stSXY0());
-                if (-1 < triangleFlag) {
-                    sVec2_s16 _triXY1 = sVec2_s16::fromS32(gte_stSXY1());
-                    sVec2_s16 _triXY2 = sVec2_s16::fromS32(gte_stSXY2());
+                    s32 triangleFlag = gte_stFLAG();
+                    sVec2_s16 _triXY0 = sVec2_s16::fromS32(gte_stSXY0());
+                    if (-1 < triangleFlag) {
+                        sVec2_s16 _triXY1 = sVec2_s16::fromS32(gte_stSXY1());
+                        sVec2_s16 _triXY2 = sVec2_s16::fromS32(gte_stSXY2());
 
-                    POLY_FT3* pOutputTriangle = &(*outputTriangles);
+                        POLY_FT3* pOutputTriangle = &(*outputTriangles);
 
-                    if (((_triXY0.vx < 0x140) || (_triXY1.vx < 0x140)) || (_triXY2.vx < 0x140)) {
-                        if (((_triXY0.vy < 0xD8) || (_triXY1.vy < 0xD8)) || (_triXY2.vy < 0xD8)) {
-                            s16 sz0;
-                            s16 sz1;
-                            s16 sz2;
-                            read_sz_fifo3(&sz0, &sz1, &sz2);
-                            s32 zMin = sz0;
-                            if (sz0 <= sz1) {
-                                zMin = sz1;
-                            }
-                            if (zMin <= sz2) {
-                                zMin = sz2;
-                            }
-                            s32 depth = zMin >> 4;
-                            if (depth < 0xF00) {
-                                gte_nclip();
+                        if (((_triXY0.vx < 0x140) || (_triXY1.vx < 0x140)) || (_triXY2.vx < 0x140)) {
+                            if (((_triXY0.vy < 0xD8) || (_triXY1.vy < 0xD8)) || (_triXY2.vy < 0xD8)) {
+                                s16 sz0;
+                                s16 sz1;
+                                s16 sz2;
+                                read_sz_fifo3(&sz0, &sz1, &sz2);
+                                s32 zMin = sz0;
+                                if (sz0 <= sz1) {
+                                    zMin = sz1;
+                                }
+                                if (zMin <= sz2) {
+                                    zMin = sz2;
+                                }
+                                s32 depth = zMin >> 4;
+                                if (depth < 0xF00) {
+                                    gte_nclip();
 
-                                s32 triangleFlag = gte_stMAC0();
-                                s32 IR0 = gte_stIR0();
+                                    s32 triangleFlag = gte_stMAC0();
+                                    s32 IR0 = gte_stIR0();
 
-                                if (triangleFlag > 0) {
-                                    if (IR0 > 0xFFF) {
-                                        IR0 = 0xffffff >> 0xc;
+                                    if (triangleFlag > 0) {
+                                        if (IR0 > 0xFFF) {
+                                            IR0 = 0xffffff >> 0xc;
+                                        }
+
+                                        u16 tpage = DAT_1f800308[quadParam1 >> 0x18 & 0x7];
+                                        //u16 clut = DAT_1f800288[IR0 + (quadParam1 >> 0x15 & 0x40) / 2];
+                                        u16 clut = DAT_1f800288[IR0>>7 + (quadParam1 >> 0x15 & 0x40) / 2];
+
+                                        currentNumUsedTriangles++;
+                                        pOutputTriangle->x0y0 = _triXY0;
+                                        pOutputTriangle->x1y1 = _triXY1;
+                                        pOutputTriangle->x2y2 = _triXY2;
+                                        *(u16*)&pOutputTriangle->u2 = UV2or0;
+                                        *(u16*)&pOutputTriangle->u0 = UV1;
+                                        pOutputTriangle->clut = clut;
+                                        *(u16*)&pOutputTriangle->u1 = UV3;
+                                        pOutputTriangle->tpage = tpage;
+                                        pOutputTriangle->m3_size = 0x7;
+                                        pOutputTriangle->m0_pNext = OT[depth].m0_pNext;
+                                        OT[depth].m0_pNext = pOutputTriangle;
+                                        outputTriangles = outputTriangles + 1;
                                     }
-
-                                    u16 tpage = DAT_1f800308[(quadParam1 >> 0x17 & 0xe) / 2];
-                                    //u16 clut = DAT_1f800288[IR0 + (quadParam1 >> 0x15 & 0x40) / 2];
-                                    u16 clut = DAT_1f800288[0];
-
-                                    currentNumUsedTriangles++;
-                                    pOutputTriangle->x0y0 = _triXY0;
-                                    pOutputTriangle->x1y1 = _triXY1;
-                                    pOutputTriangle->x2y2 = _triXY2;
-                                    *(u16*)&pOutputTriangle->u2 = UV2or0;
-                                    *(u16*)&pOutputTriangle->u0 = UV1;
-                                    pOutputTriangle->clut = clut;
-                                    *(u16*)&pOutputTriangle->u1 = UV3;
-                                    pOutputTriangle->tpage = tpage;
-                                    pOutputTriangle->m3_size = 0x7;
-                                    pOutputTriangle->m0_pNext = OT[depth].m0_pNext;
-                                    OT[depth].m0_pNext = pOutputTriangle;
-                                    outputTriangles = outputTriangles + 1;
                                 }
                             }
                         }
                     }
                 }
-
             }
-            pVector++;
-            param_1++;
         }
     }
 
@@ -1292,50 +1290,41 @@ void drawWorldmapGroundCellSub0(uint* param_1, std::vector<sTag>& OT, std::vecto
 }
 
 void drawWorldmapGroundCell(uint* param_1, std::vector<sTag>& param_2, std::vector<POLY_FT3>::iterator& param_3, SVECTOR* param_4) {
-    short sVar1;
     short sVar2;
-    uint uVar3;
-    uint uVar4;
+    int uVar3;
     uint uVar6;
-    int iVar7;
     uint* puVar8;
-    short sVar9;
-    uint uVar10;
-    int iVar11;
 
     auto pOutputSVector = DAT_1f800000.begin();
-    iVar11 = 8;
-    sVar1 = param_4->vx;
-    sVar9 = param_4->vz;
+    s16 tileStartX = param_4->vx;
+    s16 tileStartZ = param_4->vz;
     puVar8 = param_1;
-    uVar10 = drawWorldmapGroundCellVar0;
-    do {
-        iVar7 = 8;
-        sVar2 = rcossin_tbl[2*(uVar10 & 0xfff)];
-        uVar4 = (int)sVar1;
-        uVar6 = drawWorldmapGroundCellVar1;
-        do {
-            uVar3 = *puVar8;
+    uint currentWave2 = worldmapWaterWave2;
+    for (int i = 0; i < 9; i++) {
+        sVar2 = rcossin_tbl[2 * (currentWave2 & 0xfff)];
+        s32 currentX = tileStartX;
+        uVar6 = worldmapWaterWave;
+        for (int j = 0; j < 9; j++) {
+            uVar3 = param_1[i * 9 + j];
             if ((uVar3 & 0x1000) == 0) {
                 uVar3 = (int)(uVar3 << 0x18) >> 5;
             }
             else {
-                uVar3 = (((int)rcossin_tbl[2*(uVar6 & 0xfff)] * sVar2 * 2 >> 0x14) + ((int)(uVar3 << 0x18) >> 0x15)) * 0x10000;
+                uVar3 = (((int)rcossin_tbl[2 * (uVar6 & 0xfff)] * sVar2 * 2 >> 0x14) + ((int)(uVar3 << 0x18) >> 0x15)) * 0x10000;
             }
-            pOutputSVector->vx = uVar4;
+            pOutputSVector->vx = currentX;
             pOutputSVector->vy = uVar3 >> 16;
-            pOutputSVector->vz = sVar9;
+            pOutputSVector->vz = tileStartZ;
 
-            uVar4 = uVar4 + 0x80;
+            currentX = currentX + 0x80;
             pOutputSVector++;
             puVar8 = puVar8 + 1;
-            iVar7 = iVar7 + -1;
             uVar6 = uVar6 + 0x200;
-        } while (iVar7 != -1);
-        sVar9 = sVar9 + -0x80;
-        iVar11 = iVar11 + -1;
-        uVar10 = uVar10 + 0x200;
-    } while (iVar11 != -1);
+
+        }
+        tileStartZ = tileStartZ + -0x80;
+        currentWave2 = currentWave2 + 0x200;
+    };
     drawWorldmapGroundCellSub0(param_1, param_2, param_3);
     return;
 }
@@ -1384,20 +1373,22 @@ void drawWorldmapGround(std::vector<sTag>& param_1, std::vector<POLY_FT3>::itera
                         drawWorldmapGroundCell(pbVar4, param_1, param_2 + renderWorldmapGroundVar1, &SVECTOR_1f800328);
                     }
                     if ((worldmapGroundRenderingTable[iVar5 / 4].vy) != -1) {
-                        drawWorldmapGroundCell(pbVar4 + 0x144, param_1, param_2 + renderWorldmapGroundVar1, &SVECTOR_1f800330);
+                        drawWorldmapGroundCell(pbVar4 + 0x144 / 4, param_1, param_2 + renderWorldmapGroundVar1, &SVECTOR_1f800330);
                     }
                     if ((worldmapGroundRenderingTable[iVar5 / 4 + 1].vx) != -1) {
-                        drawWorldmapGroundCell(pbVar4 + 0x288, param_1, param_2 + renderWorldmapGroundVar1, &SVECTOR_1f800338);
+                        drawWorldmapGroundCell(pbVar4 + 0x288 / 4, param_1, param_2 + renderWorldmapGroundVar1, &SVECTOR_1f800338);
                     }
-                    if ((worldmapGroundRenderingTable[iVar5 / 4 + 1].vy) == -1)
-                        goto LAB_worldmap__80099694;
+                    if ((worldmapGroundRenderingTable[iVar5 / 4 + 1].vy) != -1) {
+                        drawWorldmapGroundCell(pbVar4 + 0x3cc / 4, param_1, param_2 + renderWorldmapGroundVar1, &SVECTOR_1f800340);
+                    }
                 }
                 else {
                     drawWorldmapGroundCell(pbVar4, param_1, param_2 + renderWorldmapGroundVar1, &SVECTOR_1f800328);
-                    drawWorldmapGroundCell(pbVar4 + 0x144, param_1, param_2 + renderWorldmapGroundVar1, &SVECTOR_1f800330);
-                    drawWorldmapGroundCell(pbVar4 + 0x288, param_1, param_2 + renderWorldmapGroundVar1, &SVECTOR_1f800338);
+                    drawWorldmapGroundCell(pbVar4 + 0x144 / 4, param_1, param_2 + renderWorldmapGroundVar1, &SVECTOR_1f800330);
+                    drawWorldmapGroundCell(pbVar4 + 0x288 / 4, param_1, param_2 + renderWorldmapGroundVar1, &SVECTOR_1f800338);
+                    drawWorldmapGroundCell(pbVar4 + 0x3cc / 4, param_1, param_2 + renderWorldmapGroundVar1, &SVECTOR_1f800340);
                 }
-                drawWorldmapGroundCell(pbVar4 + 0x3cc, param_1, param_2 + renderWorldmapGroundVar1, &SVECTOR_1f800340);
+
             }
         LAB_worldmap__80099694:
             iVar7 = iVar7 + 1;
