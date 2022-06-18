@@ -209,3 +209,5 @@ typedef SFP_VEC4 SVECTOR;
 void MissingCode(const char* arg = "");
 void Hack(const char* arg = "");
 
+#define trap(x) assert(0)
+

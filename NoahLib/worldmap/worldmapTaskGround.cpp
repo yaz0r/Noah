@@ -70,9 +70,7 @@ void worldmapDrawSpriteActors() {
             tempPosition.vz = pEntity->m4C->m0_spriteActorCore.m0_position.vz.getIntegerPart();
             gte_ldv0(&tempPosition);
             gte_rtps();
-            //gte_stsz(&depths[i]);
-            depths[i] = 0;
-            MissingCode();
+            gte_stsz(&depths[i]);
         }
     }
 

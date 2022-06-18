@@ -1153,9 +1153,84 @@ void drawWorldmapGroundCellSub0(uint* param_1, std::vector<sTag>& OT, std::vecto
             }
             gte_rtpt_b();
 
-            s32 triangleFlag = gte_stFLAG();
+            // near clip
+            if (gte_stFLAG() & 0x80000000)
+                continue;
+
             sVec2_s16 _triXY0 = sVec2_s16::fromS32(gte_stSXY0());
-            if (-1 < triangleFlag) {
+            sVec2_s16 _triXY1 = sVec2_s16::fromS32(gte_stSXY1());
+            sVec2_s16 _triXY2 = sVec2_s16::fromS32(gte_stSXY2());
+
+            POLY_FT3* pOutputTriangle = &(*outputTriangles);
+
+            if (((_triXY0.vx < 0x140) || (_triXY1.vx < 0x140)) || (_triXY2.vx < 0x140)) {
+                if (((_triXY0.vy < 0xD8) || (_triXY1.vy < 0xD8)) || (_triXY2.vy < 0xD8)) {
+                    s16 sz0;
+                    s16 sz1;
+                    s16 sz2;
+                    read_sz_fifo3(&sz0, &sz1, &sz2);
+                    s32 zMin = sz0;
+                    if (sz0 <= sz1) {
+                        zMin = sz1;
+                    }
+                    if (zMin <= sz2) {
+                        zMin = sz2;
+                    }
+                    s32 depth = zMin >> 4;
+                    if (zMin < 0xF00) {
+
+                        // backface clipping
+                        gte_nclip();
+                        if (gte_stMAC0() > 0) {
+                            s32 IR0 = gte_stIR0();
+                            if (IR0 > 0xFFF) {
+                                IR0 = 0xffffff >> 0xc;
+                            }
+
+                            u16 tpage = DAT_1f800308[quadParam1 >> 0x18 & 0x7];
+                            u16 clut = DAT_1f800288[(IR0>>7) + (quadParam1 >> 0x15 & 0x40) / 2];
+
+                            currentNumUsedTriangles++;
+                            pOutputTriangle->x0y0 = _triXY0;
+                            pOutputTriangle->x1y1 = _triXY1;
+                            pOutputTriangle->x2y2 = _triXY2;
+                            *(u16*)&pOutputTriangle->u2 = UV2;
+                            *(u16*)&pOutputTriangle->u0 = UV0;
+                            pOutputTriangle->clut = clut;
+                            *(u16*)&pOutputTriangle->u1 = _triV1;
+                            pOutputTriangle->tpage = tpage;
+                            pOutputTriangle->m3_size = 0x7;
+                            pOutputTriangle->m0_pNext = OT[depth].m0_pNext;
+                            OT[depth].m0_pNext = pOutputTriangle;
+                            outputTriangles = outputTriangles + 1;
+                        }
+                    }
+                }
+            }
+
+            {
+                gte_ldVXY0(&(*r0) + 1);
+                gte_ldVZ0(&r0[1].vz);
+                gte_ldVXY1(&(*r0) + 10);
+                gte_ldVZ1(&r0[10].vz);
+
+                s32 UV2or0;
+                if (quadParam1 & 0x80000000) {
+                    gte_ldv2(&(*r0));
+                    UV2or0 = (ushort)UV0;
+                }
+                else {
+                    gte_ldVXY2(&(*r0) + 9);
+                    gte_ldVZ2(&r0[9].vz);
+                    UV2or0 = UV2;
+                }
+                gte_rtpt_b();
+
+                // near clip
+                if (gte_stFLAG() & 0x80000000)
+                    continue;
+
+                sVec2_s16 _triXY0 = sVec2_s16::fromS32(gte_stSXY0());
                 sVec2_s16 _triXY1 = sVec2_s16::fromS32(gte_stSXY1());
                 sVec2_s16 _triXY2 = sVec2_s16::fromS32(gte_stSXY2());
 
@@ -1175,109 +1250,33 @@ void drawWorldmapGroundCellSub0(uint* param_1, std::vector<sTag>& OT, std::vecto
                             zMin = sz2;
                         }
                         s32 depth = zMin >> 4;
-                        if (depth < 0xF00) {
-                            gte_nclip();
-                            
-                            s32 triangleFlag = gte_stMAC0();
-                            s32 IR0 = gte_stIR0();
+                        if (zMin < 0xF00) {
 
-                            if (triangleFlag > 0) {
+                            // backface clipping
+                            gte_nclip();
+                            if (gte_stMAC0() > 0) {
+
+                                s32 IR0 = gte_stIR0();
                                 if (IR0 > 0xFFF) {
                                     IR0 = 0xffffff >> 0xc;
                                 }
 
                                 u16 tpage = DAT_1f800308[quadParam1 >> 0x18 & 0x7];
-                                //u16 clut = DAT_1f800288[IR0 + (quadParam1 >> 0x15 & 0x40) / 2];
-                                u16 clut = DAT_1f800288[IR0>>7 + (quadParam1 >> 0x15 & 0x40) / 2];
+                                u16 clut = DAT_1f800288[(IR0>>7) + (quadParam1 >> 0x15 & 0x40) / 2];
 
                                 currentNumUsedTriangles++;
                                 pOutputTriangle->x0y0 = _triXY0;
                                 pOutputTriangle->x1y1 = _triXY1;
                                 pOutputTriangle->x2y2 = _triXY2;
-                                *(u16*)&pOutputTriangle->u2 = UV2;
-                                *(u16*)&pOutputTriangle->u0 = UV0;
+                                *(u16*)&pOutputTriangle->u2 = UV2or0;
+                                *(u16*)&pOutputTriangle->u0 = UV1;
                                 pOutputTriangle->clut = clut;
-                                *(u16*)&pOutputTriangle->u1 = _triV1;
+                                *(u16*)&pOutputTriangle->u1 = UV3;
                                 pOutputTriangle->tpage = tpage;
                                 pOutputTriangle->m3_size = 0x7;
                                 pOutputTriangle->m0_pNext = OT[depth].m0_pNext;
                                 OT[depth].m0_pNext = pOutputTriangle;
                                 outputTriangles = outputTriangles + 1;
-                            }
-                        }
-                    }
-                }
-
-                {
-                    gte_ldVXY0(&(*r0) + 1);
-                    gte_ldVZ0(&r0[1].vz);
-                    gte_ldVXY1(&(*r0) + 10);
-                    gte_ldVZ1(&r0[10].vz);
-
-                    s32 UV2or0;
-                    if (quadParam1 & 0x80000000) {
-                        gte_ldv2(&(*r0));
-                        UV2or0 = (ushort)UV0;
-                    }
-                    else {
-                        gte_ldVXY2(&(*r0) + 9);
-                        gte_ldVZ2(&r0[9].vz);
-                        UV2or0 = UV2;
-                    }
-                    gte_rtpt_b();
-
-                    s32 triangleFlag = gte_stFLAG();
-                    sVec2_s16 _triXY0 = sVec2_s16::fromS32(gte_stSXY0());
-                    if (-1 < triangleFlag) {
-                        sVec2_s16 _triXY1 = sVec2_s16::fromS32(gte_stSXY1());
-                        sVec2_s16 _triXY2 = sVec2_s16::fromS32(gte_stSXY2());
-
-                        POLY_FT3* pOutputTriangle = &(*outputTriangles);
-
-                        if (((_triXY0.vx < 0x140) || (_triXY1.vx < 0x140)) || (_triXY2.vx < 0x140)) {
-                            if (((_triXY0.vy < 0xD8) || (_triXY1.vy < 0xD8)) || (_triXY2.vy < 0xD8)) {
-                                s16 sz0;
-                                s16 sz1;
-                                s16 sz2;
-                                read_sz_fifo3(&sz0, &sz1, &sz2);
-                                s32 zMin = sz0;
-                                if (sz0 <= sz1) {
-                                    zMin = sz1;
-                                }
-                                if (zMin <= sz2) {
-                                    zMin = sz2;
-                                }
-                                s32 depth = zMin >> 4;
-                                if (depth < 0xF00) {
-                                    gte_nclip();
-
-                                    s32 triangleFlag = gte_stMAC0();
-                                    s32 IR0 = gte_stIR0();
-
-                                    if (triangleFlag > 0) {
-                                        if (IR0 > 0xFFF) {
-                                            IR0 = 0xffffff >> 0xc;
-                                        }
-
-                                        u16 tpage = DAT_1f800308[quadParam1 >> 0x18 & 0x7];
-                                        //u16 clut = DAT_1f800288[IR0 + (quadParam1 >> 0x15 & 0x40) / 2];
-                                        u16 clut = DAT_1f800288[IR0>>7 + (quadParam1 >> 0x15 & 0x40) / 2];
-
-                                        currentNumUsedTriangles++;
-                                        pOutputTriangle->x0y0 = _triXY0;
-                                        pOutputTriangle->x1y1 = _triXY1;
-                                        pOutputTriangle->x2y2 = _triXY2;
-                                        *(u16*)&pOutputTriangle->u2 = UV2or0;
-                                        *(u16*)&pOutputTriangle->u0 = UV1;
-                                        pOutputTriangle->clut = clut;
-                                        *(u16*)&pOutputTriangle->u1 = UV3;
-                                        pOutputTriangle->tpage = tpage;
-                                        pOutputTriangle->m3_size = 0x7;
-                                        pOutputTriangle->m0_pNext = OT[depth].m0_pNext;
-                                        OT[depth].m0_pNext = pOutputTriangle;
-                                        outputTriangles = outputTriangles + 1;
-                                    }
-                                }
                             }
                         }
                     }

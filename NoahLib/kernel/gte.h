@@ -38,6 +38,7 @@ void gte_stsxy(sVec2_s16* xy);
 void gte_stlvnl(VECTOR* pOutput);
 void gte_ldlvl(VECTOR* pInput);
 
+void gte_stsz(s32* output);
 
 void gte_ldVXY0(SVECTOR*);
 void gte_ldVZ0(s16*);
@@ -53,6 +54,9 @@ s32 gte_stSXY2();
 
 s32 gte_stMAC0();
 s32 gte_stIR0();
+
+void SetDQA(s32);
+void SetDQB(s32);
 
 void read_sz_fifo3(s16*, s16*, s16*);
 
