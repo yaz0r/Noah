@@ -668,13 +668,8 @@ int checkWorldmapPositionSub1_0(VECTOR* position, VECTOR* step, int stepScale, s
     case 1:
         if (!checkWorldmapPositionSub1_0_3(position, step, VECTOR_1f800000, param_4)) {
             checkWorldmapPositionSub0(&VECTOR_1f800000[1]);
-            s32 sVar1 = checkWorldmapPositionSub1_0_0(&VECTOR_1f800000[1]);
-            sVar1 = checkWorldmapPositionSub1_0_1((int)param_4, (int)sVar1);
-            if (sVar1 == 0) {
-                VECTOR_1f800000[0].vx = VECTOR_1f800000[1].vx;
-                VECTOR_1f800000[0].vy = VECTOR_1f800000[1].vy;
-                VECTOR_1f800000[0].vz = VECTOR_1f800000[1].vz;
-                VECTOR_1f800000[0].pad = VECTOR_1f800000[1].pad;
+            if (!checkWorldmapPositionSub1_0_1((int)param_4, checkWorldmapPositionSub1_0_0(&VECTOR_1f800000[1]))) {
+                VECTOR_1f800000[0] = VECTOR_1f800000[1];
                 return 1;
             }
         }
@@ -682,13 +677,8 @@ int checkWorldmapPositionSub1_0(VECTOR* position, VECTOR* step, int stepScale, s
     case 2:
         if (!checkWorldmapPositionSub1_0_4(position, step, VECTOR_1f800000, param_4)) {
             checkWorldmapPositionSub0(&VECTOR_1f800000[1]);
-            s32 sVar1 = checkWorldmapPositionSub1_0_0(&VECTOR_1f800000[1]);
-            sVar1 = checkWorldmapPositionSub1_0_1((int)param_4, (int)sVar1);
-            if (sVar1 == 0) {
-                VECTOR_1f800000[0].vx = VECTOR_1f800000[1].vx;
-                VECTOR_1f800000[0].vy = VECTOR_1f800000[1].vy;
-                VECTOR_1f800000[0].vz = VECTOR_1f800000[1].vz;
-                VECTOR_1f800000[0].pad = VECTOR_1f800000[1].pad;
+            if (!checkWorldmapPositionSub1_0_1((int)param_4, checkWorldmapPositionSub1_0_0(&VECTOR_1f800000[1]))) {
+                VECTOR_1f800000[0] = VECTOR_1f800000[1];
                 return 1;
             }
         }
@@ -696,13 +686,8 @@ int checkWorldmapPositionSub1_0(VECTOR* position, VECTOR* step, int stepScale, s
     case 4:
         if (!checkWorldmapPositionSub1_0_5(position, step, VECTOR_1f800000, param_4)) {
             checkWorldmapPositionSub0(&VECTOR_1f800000[1]);
-            s32 sVar1 = checkWorldmapPositionSub1_0_0(&VECTOR_1f800000[1]);
-            sVar1 = checkWorldmapPositionSub1_0_1((int)param_4, (int)sVar1);
-            if (sVar1 == 0) {
-                VECTOR_1f800000[0].vx = VECTOR_1f800000[1].vx;
-                VECTOR_1f800000[0].vy = VECTOR_1f800000[1].vy;
-                VECTOR_1f800000[0].vz = VECTOR_1f800000[1].vz;
-                VECTOR_1f800000[0].pad = VECTOR_1f800000[1].pad;
+            if (!checkWorldmapPositionSub1_0_1((int)param_4, checkWorldmapPositionSub1_0_0(&VECTOR_1f800000[1]))) {
+                VECTOR_1f800000[0] = VECTOR_1f800000[1];
                 return 1;
             }
         }
@@ -710,13 +695,8 @@ int checkWorldmapPositionSub1_0(VECTOR* position, VECTOR* step, int stepScale, s
     case 8:
         if (!checkWorldmapPositionSub1_0_2(position, step, VECTOR_1f800000, param_4)) {
             checkWorldmapPositionSub0(&VECTOR_1f800000[1]);
-            s32 sVar1 = checkWorldmapPositionSub1_0_0(&VECTOR_1f800000[1]);
-            sVar1 = checkWorldmapPositionSub1_0_1((int)param_4, (int)sVar1);
-            if (sVar1 == 0) {
-                VECTOR_1f800000[0].vx = VECTOR_1f800000[1].vx;
-                VECTOR_1f800000[0].vy = VECTOR_1f800000[1].vy;
-                VECTOR_1f800000[0].vz = VECTOR_1f800000[1].vz;
-                VECTOR_1f800000[0].pad = VECTOR_1f800000[1].pad;
+            if (!checkWorldmapPositionSub1_0_1((int)param_4, checkWorldmapPositionSub1_0_0(&VECTOR_1f800000[1]))) {
+                VECTOR_1f800000[0] = VECTOR_1f800000[1];
                 return 1;
             }
         }
@@ -726,13 +706,8 @@ int checkWorldmapPositionSub1_0(VECTOR* position, VECTOR* step, int stepScale, s
     case 7:
         if (true) {
             checkWorldmapPositionSub0(&VECTOR_1f800000[1]);
-            s32 sVar1 = checkWorldmapPositionSub1_0_0(&VECTOR_1f800000[1]);
-            sVar1 = checkWorldmapPositionSub1_0_1((int)param_4, (int)sVar1);
-            if (sVar1 == 0) {
-                VECTOR_1f800000[0].vx = VECTOR_1f800000[1].vx;
-                VECTOR_1f800000[0].vy = VECTOR_1f800000[1].vy;
-                VECTOR_1f800000[0].vz = VECTOR_1f800000[1].vz;
-                VECTOR_1f800000[0].pad = VECTOR_1f800000[1].pad;
+            if (!checkWorldmapPositionSub1_0_1((int)param_4, checkWorldmapPositionSub1_0_0(&VECTOR_1f800000[1]))) {
+                VECTOR_1f800000[0] = VECTOR_1f800000[1];
                 return 1;
             }
         }
