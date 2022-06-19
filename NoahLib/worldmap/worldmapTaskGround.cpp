@@ -9,6 +9,10 @@
 #include "kernel/gte.h"
 #include "worldmapWorldStreaming.h"
 
+extern s32 objectClippingMask;
+extern s32 fieldPolyCount;
+extern s32 fieldPolyCount2;
+
 void drawWorlmapPolyFT4Array1(void) {
     MissingCode();
 }
@@ -33,13 +37,13 @@ void computeWormapSpritePosition(VECTOR* v) {
 LAB_worldmap__800934d8:
     iVar2 = v->vz;
     if (iVar2 < -0x4000000) {
-        iVar1 = worldmapProjVar1 * 0x800000;
+        iVar1 = worldmapSizeY * 0x800000;
     }
     else {
         if (iVar2 < 0x4000001) {
             return;
         }
-        iVar1 = worldmapProjVar1 * -0x800000;
+        iVar1 = worldmapSizeY * -0x800000;
     }
     v->vz = iVar2 + iVar1;
 }
@@ -144,6 +148,96 @@ void setupWorldmapMatrix1(SVECTOR* param_1) {
     }
 }
 
+void adjustWorldModelLocation(VECTOR* param_1) {
+    int iVar1;
+    int iVar2;
+
+    iVar2 = param_1->vx;
+    if (iVar2 < -0x4000) {
+        iVar1 = worldmapSizeX * 0x800;
+    }
+    else {
+        if (iVar2 < 0x4001) goto LAB_worldmap__80093584;
+        iVar1 = worldmapSizeX * -0x800;
+    }
+    param_1->vx = iVar2 + iVar1;
+LAB_worldmap__80093584:
+    iVar2 = param_1->vz;
+    if (iVar2 < -0x4000) {
+        iVar1 = worldmapSizeY * 0x800;
+    }
+    else {
+        if (iVar2 < 0x4001) {
+            return;
+        }
+        iVar1 = worldmapSizeY * -0x800;
+    }
+    param_1->vz = iVar2 + iVar1;
+}
+
+void renderWorldmapModels() {
+    VECTOR VECTOR_1f800010;
+    VECTOR_1f800010.vz = 0x800;
+    VECTOR_1f800010.vy = 0x800;
+    VECTOR_1f800010.vx = 0x800;
+    objectClippingMask = 3;
+
+    s32 worldX = worldmapRadarPosition3.vx >> 0xc;
+    s32 worldZ = worldmapRadarPosition3.vz >> 0xc;
+    
+    fieldPolyCount2 = 0;
+    fieldPolyCount = 0;
+    SVECTOR SVECTOR_1f8000a0;
+    SVECTOR_1f8000a0.vz = 0;
+    SVECTOR_1f8000a0.vy = 0;
+    SVECTOR_1f8000a0.vx = 0;
+
+    for (int i = 0; i < worldmapNumModels; i++) {
+        sWorldmapModel* pModel = &worldmapModels[i];
+
+        if (pModel->m0_hidden == 0) {
+            MATRIX MATRIX_1f8000f0 = pModel->m20_rotationMatrix;
+
+            MATRIX_1f8000f0.t[0] = pModel->m8.vx;
+            MATRIX_1f8000f0.t[1] = pModel->m8.vy;
+            MATRIX_1f8000f0.t[2] = -pModel->m8.vz;
+
+            if (pModel->m50_parentModel) {
+                assert(0);
+            }
+
+            VECTOR VECTOR_1f800000;
+            VECTOR_1f800000.vx = MATRIX_1f8000f0.t[0] - worldX;
+            VECTOR_1f800000.vz = -MATRIX_1f8000f0.t[2] - worldZ;
+            adjustWorldModelLocation(&VECTOR_1f800000);
+            MATRIX_1f8000f0.t[0] = VECTOR_1f800000.vx;
+            MATRIX_1f8000f0.t[2] = -VECTOR_1f800000.vz;
+
+            ScaleMatrix(&MATRIX_1f8000f0, &VECTOR_1f800010);
+
+            MATRIX MATRIX_1f800110;
+            CompMatrix(&worldmapMainMatrix2, &MATRIX_1f8000f0, &MATRIX_1f800110);
+
+            SetRotMatrix(&MATRIX_1f800110);
+            SetTransMatrix(&MATRIX_1f800110);
+
+            gte_ldv0(&SVECTOR_1f8000a0);
+            gte_rtps();
+            if (!(gte_stFLAG() & 0x80000000)) {
+                s32 depth;
+                gte_stsz(&depth);
+                if (depth < 0xD80) {
+                    static const std::array<short, 10> worldmapModelsRenderModes = { {
+                            4,4,5,5,0,0,2,2,3,3
+                    } };
+
+                    submitModelForRendering(pModel->m40_modelBlock, pModel->m48[worldmapOddOrEven], pCurrentWorldmapRenderingStruct->m70_OT, worldmapModelsRenderModes[pModel->m4_flags]);
+                }
+            }
+        }
+    }
+}
+
 s32 worldmap_taskGround_update(s32 index) {
     if (worldmapMatrixMode == 0) {
         setupWorldmapMatrix1(&worldmapCameraVector.m0);
@@ -157,6 +251,7 @@ s32 worldmap_taskGround_update(s32 index) {
     worldmapDrawSpriteActors();
     MissingCode();
 
+    renderWorldmapModels();
     setWorldmapGridUpdateMask(&worldmapGridInputPosition);
     if (worldmapGridUpdateMask != 0) {
         updateWorldmapGrids(&worldmapRadarPosition3);

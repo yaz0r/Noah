@@ -28,11 +28,14 @@ s32 exitWorldMapMode;
 s32 currentBattleMusicId;
 s16 worldmapVar_8009d52c;
 
+s32 worldmapModelVar0;
+s32 worldmapModelVar1;
+
 MATRIX worldmapMainMatrix2;
 s32 worldmapMatrixMode;
 
 s32 worldmapSizeX;
-s32 worldmapProjVar1;
+s32 worldmapSizeY;
 
 u16 worldmapInput1_0;
 u16 worldmapInput1_1;
@@ -191,7 +194,7 @@ s32 worldmapFile7;
 s32 worldmapFile9;
 s32 worldmapFile10;
 
-std::vector<u8>::iterator worldmapFile1Buffer_8;
+sModel worldmapModelFiles;
 std::vector<u8>::iterator worldmapFile1Buffer_C;
 std::vector<u8>::iterator worldmapFile1Buffer_14;
 std::vector<u8>::iterator worldmapFile1Buffer_18;
@@ -210,7 +213,7 @@ void finalizeWorldMapFileLoading() {
     worldmapFile1Buffer = mallocAndDecompress(worldmapFile1Buffer.begin());
 
     worldmapFile1Buffer_C = worldmapFile1Buffer.begin() + READ_LE_U32(worldmapFile1Buffer.begin() + 0xC);
-    worldmapFile1Buffer_8 = worldmapFile1Buffer.begin() + READ_LE_U32(worldmapFile1Buffer.begin() + 0x8);
+    worldmapModelFiles.init(worldmapFile1Buffer.begin() + READ_LE_U32(worldmapFile1Buffer.begin() + 0x8), READ_LE_U32(worldmapFile1Buffer.begin() + 0xC) - READ_LE_U32(worldmapFile1Buffer.begin() + 0x8));
     worldmapFile1Buffer_14 = worldmapFile1Buffer.begin() + READ_LE_U32(worldmapFile1Buffer.begin() + 0x14);
     pWorldmapModelsConfig = worldmapFile1Buffer.begin() + READ_LE_U32(worldmapFile1Buffer.begin() + 0x10);
     worldmapFile1Buffer_1C = worldmapFile1Buffer.begin() + READ_LE_U32(worldmapFile1Buffer.begin() + 0x1C);
@@ -501,6 +504,61 @@ void loadWorldmapTextureFromFile3(void) {
     }
 }
 
+s32 worldmapFile1Buffer_8_numEntries;
+s32 worldmapNumModels;
+
+std::vector<sWorldmapModel> worldmapModels;
+MATRIX worldmapColorMatrix;
+MATRIX worldmapLightMatrix;
+
+void worldmapInitAllModels() {
+    //worldmapFile1Buffer_8_numEntries = fieldModelRelocation(worldmapModelFiles);
+    MissingCode();
+
+
+    worldmapNumModels = READ_LE_U16(pWorldmapModelsConfig);
+    worldmapModels.resize(worldmapNumModels);
+
+    SetColorMatrix(&worldmapColorMatrix);
+    SetLightMatrix(&worldmapLightMatrix);
+
+    for (int i = 0; i < worldmapNumModels; i++) {
+        sWorldmapModel* pModel = &worldmapModels[i];
+
+        pModel->m0_hidden = 0;
+        pModel->m2_modelBlockIndex = READ_LE_U16(pWorldmapModelsConfig + 2 + 0x10 * i + 0x0);
+        pModel->m4_flags = READ_LE_S16(pWorldmapModelsConfig + 2 + 0x10 * i + 0x2);
+
+        pModel->m8.vx = READ_LE_S16(pWorldmapModelsConfig + 2 + 0x10 * i + 0x4);
+        pModel->m8.vy = READ_LE_S16(pWorldmapModelsConfig + 2 + 0x10 * i + 0x6);
+        pModel->m8.vz = -READ_LE_S16(pWorldmapModelsConfig + 2 + 0x10 * i + 0x8);
+
+        pModel->m18_rotation.vx = READ_LE_S16(pWorldmapModelsConfig + 2 + 0x10 * i + 0xA);
+        pModel->m18_rotation.vy = READ_LE_S16(pWorldmapModelsConfig + 2 + 0x10 * i + 0xC);
+        pModel->m18_rotation.vz = READ_LE_S16(pWorldmapModelsConfig + 2 + 0x10 * i + 0xE);
+
+        RotMatrixYXZ(&pModel->m18_rotation, &pModel->m20_rotationMatrix);
+
+        pModel->m40_modelBlock = &worldmapModelFiles.m10_blocks[pModel->m2_modelBlockIndex];
+
+        initModel1(*pModel->m40_modelBlock, pModel->m48[0], pModel->m48[1]);
+        initModel2(pModel->m40_modelBlock, pModel->m48[0], 1);
+        pModel->m48[1] = pModel->m48[0];
+
+        pModel->m44_collisionMesh = worldmapFile1Buffer_C + READ_LE_U32(worldmapFile1Buffer_C + 4 + pModel->m2_modelBlockIndex * 4);
+
+        MissingCode();
+
+        pModel->m50_parentModel = nullptr;
+    }
+    gDepthDivider = 2;
+
+    worldmapModelVar0 = -1;
+    worldmapModelVar1 = -1;
+
+    worldmapModels[4].m0_hidden = 1;
+}
+
 void worldmapMode0_update(void) {
     initWorldmapGraphics();
 
@@ -547,6 +605,7 @@ void worldmapMode0_update(void) {
     waitReadCompletion(0);
     loadWorldmapTextureFromFile3();
     loadWorldmapTextureFromFile2();
+    worldmapInitAllModels();
 
     MissingCode();
     initWorldmapMinimap();
@@ -722,7 +781,7 @@ void initWorldMap(int param_1, int param_2)
     worldmapFile2 = *psVar1 + 2;
     worldmapFile4 = *psVar1 + 4;
     worldmapSizeX = psVar1[1];
-    worldmapProjVar1 = psVar1[2];
+    worldmapSizeY = psVar1[2];
     worldmapFile1 = *psVar1 + 1;
     worldmapFile6 = *psVar1 + 6;
     worldmapFile5 = *psVar1 + 5;

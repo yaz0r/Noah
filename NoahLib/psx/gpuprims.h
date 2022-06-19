@@ -29,7 +29,7 @@ struct sTag
     virtual void execute() {}
 };
 
-typedef std::array<sTag, 4096> OTTable;
+typedef std::vector<sTag> OTTable;
 
 struct TILE : public sTag
 {

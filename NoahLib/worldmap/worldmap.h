@@ -67,7 +67,7 @@ extern VECTOR worldmapRadarPosition3;
 extern VECTOR worldmapGridInputPosition;
 
 extern s32 worldmapSizeX;
-extern s32 worldmapProjVar1;
+extern s32 worldmapSizeY;
 extern s32 continueWorldmapLoop;
 extern s32 exitWorldMapMode;
 
@@ -83,6 +83,27 @@ extern s32 worldmapFile10;
 
 extern MATRIX worldMapIdentityMatrix;
 extern SVECTOR worldmapGridPosition;
+
+extern s32 worldmapNumModels;
+
+struct sWorldmapModel {
+    u16 m0_hidden;
+    u16 m2_modelBlockIndex;
+    s16 m4_flags;
+    VECTOR m8;
+    SVECTOR m18_rotation;
+    MATRIX m20_rotationMatrix;
+    struct sModelBlock* m40_modelBlock;
+    std::vector<u8>::iterator m44_collisionMesh;
+    std::array<std::vector<sTag*>, 2> m48;
+    sWorldmapModel* m50_parentModel;
+    // size 0x54;
+};
+
+extern s32 worldmapModelVar0;
+extern s32 worldmapModelVar1;
+
+extern std::vector<sWorldmapModel> worldmapModels;
 
 extern std::array<u16, 0x40> USHORT_ARRAY_8009ccb4;
 extern std::array<u16, 8> USHORT_ARRAY_8009cd54;

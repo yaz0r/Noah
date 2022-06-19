@@ -121,9 +121,9 @@ void initWorldmapMinimap()
             worldmapMinimapPOIsPolys[i][j].h = 2;
             worldmapMinimapPOIsPolys[i][j].w = 2;
 
-            worldmapMinimapPOIsPolys[i][j].r0 = 0x10;
+            worldmapMinimapPOIsPolys[i][j].r0 = 0x80;
             worldmapMinimapPOIsPolys[i][j].g0 = 0x80;
-            worldmapMinimapPOIsPolys[i][j].b0 = 0x80;
+            worldmapMinimapPOIsPolys[i][j].b0 = 0x10;
         }
     }
 }

@@ -1208,3 +1208,10 @@ int MoveImage(RECT* rect, int x, int y) {
     MissingCode();
     return 0;
 }
+
+void SetColorMatrix(MATRIX*) {
+    MissingCode();
+}
+void SetLightMatrix(MATRIX*) {
+    MissingCode();
+}

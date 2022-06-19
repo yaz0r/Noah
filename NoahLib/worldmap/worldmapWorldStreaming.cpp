@@ -373,7 +373,7 @@ void streamWorldmap1(void)
                     if ((worldmapSizeX == -1) && (iVar6 == -0x80000000)) {
                         assert(0);
                     }
-                    iVar14 = (iVar6 % worldmapSizeX) * worldmapProjVar1;
+                    iVar14 = (iVar6 % worldmapSizeX) * worldmapSizeY;
                     bVar2 = true;
                     worldmapChunks[iVar6] = pbVar4;
                     setWorldmapCellTriangleValue(iVar10 + iVar14 + iVar13, 0x710, pbVar4);
@@ -407,7 +407,7 @@ void streamWorldmap1(void)
                         assert(0);
                     }
                     pbVar4 = *ppbVar7;
-                    iVar12 = iVar12 + (iVar6 % worldmapSizeX) * worldmapProjVar1 + iVar6 / worldmapSizeX;
+                    iVar12 = iVar12 + (iVar6 % worldmapSizeX) * worldmapSizeY + iVar6 / worldmapSizeX;
                 }
                 setWorldmapCellTriangleValue(iVar12, 0x710, pbVar4);
             }
@@ -456,7 +456,7 @@ void streamWorldmap1(void)
                     if ((worldmapSizeX == -1) && (iVar6 == -0x80000000)) {
                         assert(0);
                     }
-                    iVar14 = (iVar6 % worldmapSizeX) * 0x800 * worldmapProjVar1;
+                    iVar14 = (iVar6 % worldmapSizeX) * 0x800 * worldmapSizeY;
                     bVar2 = true;
                     worldmapChunks[iVar6] = pbVar4;
                     setWorldmapCellQuadValue(iVar10, iVar14 + iVar13 * 0x800, 0x710, pbVar4);
@@ -490,7 +490,7 @@ void streamWorldmap1(void)
                         assert(0);
                     }
                     pbVar4 = *ppbVar7;
-                    iVar10 = (iVar10 % worldmapSizeX) * 0x800 * worldmapProjVar1 + (iVar10 / worldmapSizeX) * 0x800;
+                    iVar10 = (iVar10 % worldmapSizeX) * 0x800 * worldmapSizeY + (iVar10 / worldmapSizeX) * 0x800;
                 }
                 setWorldmapCellQuadValue(iVar12, iVar10, 0x710, pbVar4);
             }
@@ -548,7 +548,7 @@ void setWorldmapGridUpdateMask(VECTOR* param_1)
 }
 
 void updateWorldmapGrids(VECTOR* param_1) {
-    s32 iVar6 = worldmapProjVar1;
+    s32 iVar6 = worldmapSizeY;
     s32 iVar5 = worldmapSizeX;
     s32 posX = param_1->vx >> 0xc;
     if (posX < 0) {
@@ -567,10 +567,10 @@ void updateWorldmapGrids(VECTOR* param_1) {
         posX = posX + worldmapSizeX * -0x100;
     }
     if (posZ < 0) {
-        posZ = posZ + worldmapProjVar1 * 0x100;
+        posZ = posZ + worldmapSizeY * 0x100;
     }
-    else if (worldmapProjVar1 * 0x100 < posZ) {
-        posZ = posZ + worldmapProjVar1 * -0x100;
+    else if (worldmapSizeY * 0x100 < posZ) {
+        posZ = posZ + worldmapSizeY * -0x100;
     }
     posZ = posZ >> 8;
 

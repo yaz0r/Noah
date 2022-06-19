@@ -1514,6 +1514,11 @@ void prim5_0(u8* meshSubBlock, int count)
     genericTrianglePrim_20(meshSubBlock, count, 0x20, 0x7, 0x8);
 }
 
+void prim5_4(u8* meshSubBlock, int count) {
+    MissingCode("Incorrect prim5_4");
+    genericTrianglePrim_20(meshSubBlock, count, 0x20, 0x7, 0x8);
+}
+
 void prim5_2generic(u8* meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
 {
     OTTable& pOT = *currentOTEntry;
@@ -1882,6 +1887,12 @@ void primD_0(u8* meshSubBlock, int count)
     primD_0generic(meshSubBlock, count, 0x28, 0x9, 0x8);
 }
 
+void primD_4(u8* meshSubBlock, int count)
+{
+    MissingCode("primD_4");
+    primD_0generic(meshSubBlock, count, 0x28, 0x9, 0x8);
+}
+
 int primD_init(u8* displayList, u8* meshBlock, int initParam)
 {
     if (primD_isValid(displayList))
@@ -1934,7 +1945,7 @@ const std::array<sPolyTypeRenderDefinition, 17> polyRenderDefs = { {
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	prim2_init,	8,	0x4,	0x1C}, // 0x2
     {	prim3_0,	GT3_FAKE,	nullptr,	nullptr,	prim3_0,	prim3_0,	prim3_init,	8,	0x8,	0x28}, // 0x3 POLY_GT3
     {	prim4_0,	prim4_0,	nullptr,	nullptr,	prim4_0,	prim4_0,	prim4_init,	8,	0x4,	0x14}, // 0x4 POLY_F3
-    {	prim5_0,	nullptr,	prim5_2,	nullptr,	nullptr,	nullptr,	prim5_init,	8,	0x8,	0x20}, // 0x5 POLY_FT3
+    {	prim5_0,	nullptr,	prim5_2,	nullptr,	prim5_4,	nullptr,	prim5_init,	8,	0x8,	0x20}, // 0x5 POLY_FT3
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x4,	0x1C}, // 0x6
     {	prim3_0,	prim3_0,	prim6_2,	prim6_3,	prim3_0,	prim3_0,	prim3_init,	8,	0x8,	0x28}, // 0x7
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	prim8_init,	8,	0x4,	0x18}, // 0x8 POLY_F4
@@ -1942,7 +1953,7 @@ const std::array<sPolyTypeRenderDefinition, 17> polyRenderDefs = { {
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x4,	0x24}, // 0xA
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0xC,	0x34}, // 0xB
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	primC_init,	8,	0x4,	0x18}, // 0xC POLY_F4
-    {	primD_0,	nullptr,	primD_2,	nullptr,	nullptr,	nullptr,	primD_init,	8,	0xC,	0x28}, // 0xD POLY_FT4
+    {	primD_0,	nullptr,	primD_2,	nullptr,	primD_4,	nullptr,	primD_init,	8,	0xC,	0x28}, // 0xD POLY_FT4
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x4,	0x24}, // 0xE
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0xC,	0x34}, // 0xF
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x4,	0x20}, // 0x10
@@ -4056,8 +4067,10 @@ void setupFieldRenderingContext(void)
 void clearFieldOrderingTable()
 {
     setupFieldRenderingContext();
+    pCurrentFieldRenderingContext->mCC_OT.resize(4096);
     ClearOTagR(&pCurrentFieldRenderingContext->mCC_OT[0], 0x1000);
     if (fieldUseGroundOT != 0) {
+        pCurrentFieldRenderingContext->m40D0_secondaryOT.resize(4096);
         ClearOTagR(&pCurrentFieldRenderingContext->m40D0_secondaryOT[0], 0x1000);
     }
 }

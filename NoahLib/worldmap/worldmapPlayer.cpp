@@ -267,16 +267,586 @@ void checkWorldmapPositionSub0(VECTOR* param_1)
     if (param_1->vx < 0) {
         param_1->vx = param_1->vx + worldmapSizeX * 0x800000;
     }
-    if (worldmapProjVar1 * 0x800000 <= param_1->vz) {
-        param_1->vz = param_1->vz + worldmapProjVar1 * -0x800000;
+    if (worldmapSizeY * 0x800000 <= param_1->vz) {
+        param_1->vz = param_1->vz + worldmapSizeY * -0x800000;
     }
     if (param_1->vz < 0) {
-        param_1->vz = param_1->vz + worldmapProjVar1 * 0x800000;
+        param_1->vz = param_1->vz + worldmapSizeY * 0x800000;
     }
     return;
 }
 
-void checkWorldmapPosition(VECTOR* position, VECTOR* step, VECTOR* output, int stepScale, int param_5) {
+int worldmapCheckCollisionsAgainstWorldmapModel(VECTOR* param_1, int param_2) {
+    VECTOR VECTOR_1f800040;
+
+    VECTOR_1f800040.vx = (param_1->vx >> 0xC) - worldmapModels[param_2].m8.vx;
+    VECTOR_1f800040.vz = -(param_1->vz >> 0xC) + worldmapModels[param_2].m8.vz;
+
+    s32 diffX = std::abs(VECTOR_1f800040.vx);
+    s32 diffZ = std::abs(VECTOR_1f800040.vz);
+
+    if (diffX < 0x800 && diffZ < 0x800) {
+        MATRIX MATRIX_1f8000f0 = worldmapModels[param_2].m20_rotationMatrix;
+        MATRIX_1f8000f0.t[0] = 0;
+        MATRIX_1f8000f0.t[1] = worldmapModels[param_2].m8.vy;
+        MATRIX_1f8000f0.t[2] = 0;
+
+        VECTOR scaleVector = { 0x800,0x800, 0x800 };
+        ScaleMatrix(&MATRIX_1f8000f0, &scaleVector);
+        SetRotMatrix(&MATRIX_1f8000f0);
+        SetTransMatrix(&MATRIX_1f8000f0);
+
+        std::vector<u8>::iterator pCollisionMesh = worldmapModels[param_2].m44_collisionMesh;
+        s32 numVertices = READ_LE_S32(pCollisionMesh);
+
+        assert(0); // actually not used yet
+    }
+    else {
+        return 0;
+    }
+}
+
+int worldmapCheckCollisionsAgainstWorldmapModels(VECTOR* param_1, short* param_2) {
+    for (int i = 0; i < worldmapNumModels; i++) {
+        if (worldmapModels[i].m4_flags & 1) {
+            s32 collisionResult = worldmapCheckCollisionsAgainstWorldmapModel(param_1, i);
+
+            if (collisionResult) {
+                *param_2 = i;
+                return collisionResult;
+            }
+        }
+    }
+    return 0;
+}
+
+std::array<VECTOR, 4> VECTOR_1f800000;
+
+short getWorldmapMaterial(VECTOR* param_1)
+{
+    int tileZ;
+    int tileX;
+
+    tileZ = param_1->vz >> 0x14;
+    if (tileZ < 0) {
+        tileZ = tileZ + 7;
+    }
+    tileX = param_1->vx >> 0x14;
+    if (tileX < 0) {
+        tileX = tileX + 7;
+    }
+
+    int tileId = (((tileZ / 8) * worldmapSizeX + (tileX / 8)) * 0x10000 >> 0xe) / 4;
+    return READ_LE_U16(worldmapChunks[tileId] + (((int)(param_1->vz & 0x7ff000U) >> 0x13) << 4 | (int)(param_1->vx & 0x7ff000U) >> 0x13) * 2 + 0x510);
+}
+
+static const std::array<VECTOR, 16> VECTOR_ARRAY_worldmap__8009b464 = { {
+    {{0xFFFF,0x0, 0x0}},
+    {{0x0,0x0, 0x0}},
+    {{0x8000,0x0, 0x0}},
+    {{0x7FFF,0x0, 0x0}},
+
+    {{0xFFFF,0x0, 0x8000}},
+    {{0x0,0x0, 0x8000}},
+    {{0x0,0x0, 0x0}},
+    {{0xFFFF,0x0, 0x0}},
+
+    {{0xFFFF,0x0, 0x0}},
+    {{0x0,0x0, 0x0}},
+    {{0x8000,0x0, 0x0}},
+    {{0x0,0x0, 0x8000}},
+
+    {{0x7FFF,0x0, 0x0}},
+    {{0x8000,0x0, 0x0}},
+    {{0x0,0x0, 0x8000}},
+    {{0xFFFF,0x0, 0x8000}},
+} };
+
+static const std::array<VECTOR, 16> VECTOR_ARRAY_worldmap__8009b364 = { {
+    {{0xE50, 0x0, 0x728}},
+    {{0xFFFFF1B0, 0x0, 0x728}},
+    {{0xE50, 0x0, 0xFFFFF8D8}},
+    {{0xFFFFF1B0, 0x0, 0xFFFFF8D8}},
+
+    {{0x728, 0x0, 0xE50}},
+    {{0xFFFFF8D8, 0x0, 0xE50}},
+    {{0x728, 0x0, 0xFFFFF1B0}},
+    {{0xFFFFF8D8, 0x0, 0xFFFFF1B0}},
+
+    {{0xB50, 0x0, 0xB50}},
+    {{0xFFFFF4B0, 0x0, 0xB50}},
+
+    {{0x1000, 0x0, 0x0}},
+    {{0x0, 0x0, 0xFFFFF000}},
+
+    {{0xFFFFF4B0, 0, 0xFFFFF4B0}},
+    {{0xB50, 0, 0xFFFFF4B0}},
+
+    {{0xFFFFF4B0, 0x0, 0xB50}},
+    {{0xB50, 0x0, 0xB50}},
+} };
+
+ushort checkWorldmapPositionSub1_0_0(VECTOR* param_1)
+{
+    ushort uVar1;
+    ushort uVar2;
+    int iVar3;
+    int iVar4;
+    uint uVar5;
+
+    uVar2 = getWorldmapMaterial(param_1);
+    iVar3 = param_1->vx;
+    uVar5 = uVar2 & 0xf;
+    if (iVar3 < 0) {
+        iVar3 = iVar3 + 7;
+    }
+    iVar4 = param_1->vz;
+    if (iVar4 < 0) {
+        iVar4 = iVar4 + 7;
+    }
+    uVar1 = uVar2 >> 4;
+    if (((int)(((iVar3 >> 3 & 0xffffU) - VECTOR_ARRAY_worldmap__8009b464[uVar5].vx) * VECTOR_ARRAY_worldmap__8009b364[uVar5].vx) >> 0xc) +
+        ((int)(((iVar4 >> 3 & 0xffffU) - VECTOR_ARRAY_worldmap__8009b464[uVar5].vz) * VECTOR_ARRAY_worldmap__8009b364[uVar5].vz) >> 0xc) < 1) {
+        uVar1 = uVar2 >> 7;
+    }
+    return uVar1 & 7;
+}
+
+static const std::array<s16, 64> SHORT_ARRAY_worldmap__8009bac8 = { {
+    0,     0,     0,     0,
+    0,     0,     0,     0,
+    1,     0,     0,     1,
+    1,     0,     0,     0,
+    1,     0,     0,     1,
+    0,     0,     0,     0,
+    1,     0,     0,     1,
+    0,     0,     0,     0,
+    0,     0,     0,     1,
+    0,     0,     0,     0,
+    0,     0,     1,     1,
+    0,     0,     0,     0,
+    1,     1,     1,     1,
+    1,     0,     0,     0,
+    1,     1,     1,     1,
+    1,     0,     0,     0,
+
+} };
+
+int checkWorldmapPositionSub1_0_1(int param_1, int param_2)
+{
+    return SHORT_ARRAY_worldmap__8009bac8[(((param_1 << 0x10) >> 0xc) + ((param_2 << 0x10) >> 0xf))/2];
+}
+
+int checkWorldmapPositionSub1_0_2(VECTOR* position, VECTOR* step, std::array<VECTOR, 4>& output, short param_4)
+{
+    short sVar1;
+    int iVar2;
+    long lVar3;
+    long lVar4;
+    long lVar5;
+    int iVar6;
+    int iVar7;
+
+    iVar2 = step->vz;
+    iVar6 = step->vx << 0xc;
+    iVar7 = iVar6 / iVar2;
+    if (iVar2 == 0) {
+        trap(0x1c00);
+    }
+    if ((iVar2 == -1) && (iVar6 == -0x80000000)) {
+        trap(0x1800);
+    }
+    iVar2 = (position->vz & 0xfff80000U) - position->vz;
+    output[2].vz = iVar2;
+    output[0].vz = iVar2;
+    output[3].vz = output[0].vz + -1;
+    iVar2 = output[3].vz;
+    output[2].vx = (iVar7 * output[2].vz >> 0xc) + position->vx;
+    output[3].vx = (iVar7 * iVar2 >> 0xc) + position->vx;
+    output[2].vz = output[2].vz + position->vz;
+    output[3].vz = output[3].vz + position->vz;
+    checkWorldmapPositionSub0(&output[2]);
+    sVar1 = checkWorldmapPositionSub1_0_0(&output[2]);
+    sVar1 = checkWorldmapPositionSub1_0_1((int)param_4, (int)sVar1);
+    if (sVar1 == 0) {
+        lVar3 = output[2].vy;
+        lVar4 = output[2].vz;
+        lVar5 = output[2].pad;
+        output[0].vx = output[2].vx;
+        output[0].vy = lVar3;
+        output[0].vz = lVar4;
+        output[0].pad = lVar5;
+        iVar2 = 1;
+    }
+    else {
+        checkWorldmapPositionSub0(&output[3]);
+        sVar1 = checkWorldmapPositionSub1_0_0(&output[3]);
+        sVar1 = checkWorldmapPositionSub1_0_1((int)param_4, (int)sVar1);
+        iVar2 = (uint)(sVar1 == 0) << 1;
+    }
+    return iVar2;
+}
+
+int checkWorldmapPositionSub1_0_5(VECTOR* position, VECTOR* step, std::array<VECTOR, 4>& output, short param_4)
+{
+    short sVar1;
+    int iVar2;
+    long lVar3;
+    long lVar4;
+    long lVar5;
+    int iVar6;
+    int iVar7;
+
+    iVar2 = step->vz;
+    iVar6 = step->vx << 0xc;
+    iVar7 = iVar6 / iVar2;
+    if (iVar2 == 0) {
+        trap(0x1c00);
+    }
+    if ((iVar2 == -1) && (iVar6 == -0x80000000)) {
+        trap(0x1800);
+    }
+    iVar2 = (output[1].vz & 0xfff80000U) - position->vz;
+    output[2].vz = iVar2 + -1;
+    output[0].vz = iVar2;
+    output[3].vz = output[0].vz;
+    iVar2 = output[3].vz;
+    output[2].vx = (iVar7 * output[2].vz >> 0xc) + position->vx;
+    output[3].vx = (iVar7 * iVar2 >> 0xc) + position->vx;
+    output[2].vz = output[2].vz + position->vz;
+    output[3].vz = output[3].vz + position->vz;
+    checkWorldmapPositionSub0(&output[2]);
+    sVar1 = checkWorldmapPositionSub1_0_0(&output[2]);
+    sVar1 = checkWorldmapPositionSub1_0_1((int)param_4, (int)sVar1);
+    if (sVar1 == 0) {
+        lVar3 = output[2].vy;
+        lVar4 = output[2].vz;
+        lVar5 = output[2].pad;
+        output[0].vx = output[2].vx;
+        output[0].vy = lVar3;
+        output[0].vz = lVar4;
+        output[0].pad = lVar5;
+        iVar2 = 1;
+    }
+    else {
+        checkWorldmapPositionSub0(&output[3]);
+        sVar1 = checkWorldmapPositionSub1_0_0(&output[3]);
+        sVar1 = checkWorldmapPositionSub1_0_1((int)param_4, (int)sVar1);
+        iVar2 = (uint)(sVar1 == 0) << 1;
+    }
+    return iVar2;
+}
+
+int checkWorldmapPositionSub1_0_4(VECTOR* position, VECTOR* step, std::array<VECTOR, 4>& output, short param_4)
+{
+    short sVar1;
+    int iVar2;
+    uint uVar3;
+    long lVar4;
+    long lVar5;
+    long lVar6;
+    int iVar7;
+    int iVar8;
+
+    iVar2 = step->vx;
+    iVar7 = step->vz << 0xc;
+    iVar8 = iVar7 / iVar2;
+    if (iVar2 == 0) {
+        trap(0x1c00);
+    }
+    if ((iVar2 == -1) && (iVar7 == -0x80000000)) {
+        trap(0x1800);
+    }
+    iVar2 = (position->vx & 0xfff80000U) - position->vx;
+    output[2].vx = iVar2;
+    output[0].vx = iVar2;
+    output[3].vx = output[0].vx + -1;
+    iVar2 = output[3].vx;
+    output[2].vz = (iVar8 * output[2].vx >> 0xc) + position->vz;
+    output[3].vz = (iVar8 * iVar2 >> 0xc) + position->vz;
+    output[2].vx = output[2].vx + position->vx;
+    output[3].vx = output[3].vx + position->vx;
+    checkWorldmapPositionSub0(&output[2]);
+    sVar1 = checkWorldmapPositionSub1_0_0(&output[2]);
+    sVar1 = checkWorldmapPositionSub1_0_1((int)param_4, (int)sVar1);
+    if (sVar1 == 0) {
+        lVar4 = output[2].vy;
+        lVar5 = output[2].vz;
+        lVar6 = output[2].pad;
+        output[0].vx = output[2].vx;
+        output[0].vy = lVar4;
+        output[0].vz = lVar5;
+        output[0].pad = lVar6;
+        uVar3 = 1;
+    }
+    else {
+        checkWorldmapPositionSub0(&output[3]);
+        sVar1 = checkWorldmapPositionSub1_0_0(&output[3]);
+        sVar1 = checkWorldmapPositionSub1_0_1((int)param_4, (int)sVar1);
+        uVar3 = -(uint)(sVar1 == 0) & 3;
+    }
+    return uVar3;
+}
+
+int checkWorldmapPositionSub1_0_3(VECTOR* position, VECTOR* step, std::array<VECTOR, 4>& output, short param_4)
+{
+    byte bVar1;
+    short sVar2;
+    int iVar3;
+    long lVar4;
+    long lVar5;
+    long lVar6;
+    int iVar7;
+    int iVar8;
+
+    iVar3 = step->vx;
+    iVar7 = step->vz << 0xc;
+    iVar8 = iVar7 / iVar3;
+    if (iVar3 == 0) {
+        trap(0x1c00);
+    }
+    if ((iVar3 == -1) && (iVar7 == -0x80000000)) {
+        trap(0x1800);
+    }
+    iVar3 = (output[1].vx & 0xfff80000U) - position->vx;
+    output[2].vx = iVar3 + -1;
+    output[0].vx = iVar3;
+    output[3].vx = output[0].vx;
+    iVar3 = output[3].vx;
+    output[2].vz = (iVar8 * output[2].vx >> 0xc) + position->vz;
+    output[3].vz = (iVar8 * iVar3 >> 0xc) + position->vz;
+    output[2].vx = output[2].vx + position->vx;
+    output[3].vx = output[3].vx + position->vx;
+    checkWorldmapPositionSub0(&output[2]);
+    sVar2 = checkWorldmapPositionSub1_0_0(&output[2]);
+    sVar2 = checkWorldmapPositionSub1_0_1((int)param_4, (int)sVar2);
+    if (sVar2 == 0) {
+        lVar4 = output[2].vy;
+        lVar5 = output[2].vz;
+        lVar6 = output[2].pad;
+        output[0].vx = output[2].vx;
+        output[0].vy = lVar4;
+        output[0].vz = lVar5;
+        output[0].pad = lVar6;
+        bVar1 = 1;
+    }
+    else {
+        checkWorldmapPositionSub0(&output[3]);
+        sVar2 = checkWorldmapPositionSub1_0_0(&output[3]);
+        sVar2 = checkWorldmapPositionSub1_0_1((int)param_4, (int)sVar2);
+        bVar1 = -(sVar2 == 0) & 3;
+    }
+    return bVar1;
+}
+
+int checkWorldmapPositionSub1_0(VECTOR* position, VECTOR* step, int stepScale, short param_4) {
+    VECTOR_1f800000[1].vx = position->vx + (step->vx * stepScale >> 0xc);
+    VECTOR_1f800000[1].vz = position->vz + (step->vz * stepScale >> 0xc);
+
+    SVECTOR SVECTOR_1f8000a0;
+    SVECTOR SVECTOR_1f8000a8;
+    SVECTOR_1f8000a0.vx = (short)(position->vx >> 0x13);
+    SVECTOR_1f8000a8.vx = (short)(VECTOR_1f800000[1].vx >> 0x13);
+    SVECTOR_1f8000a8.vz = (short)(VECTOR_1f800000[1].vz >> 0x13);
+    SVECTOR_1f8000a0.vz = (short)(position->vz >> 0x13);
+
+    u32 flag = 0;
+    if (VECTOR_1f800000[1].vx >> 0x13 < (position->vx >> 0x13)) {
+        flag = 2;
+    }
+    else if ((position->vx >> 0x13) < VECTOR_1f800000[1].vx >> 0x13) {
+        flag = 1;
+    }
+    if (SVECTOR_1f8000a8.vz < SVECTOR_1f8000a0.vz) {
+        flag = flag | 8;
+    }
+    else if (SVECTOR_1f8000a0.vz < SVECTOR_1f8000a8.vz) {
+        flag = flag | 4;
+    }
+
+    switch (flag) {
+    case 1:
+        if (!checkWorldmapPositionSub1_0_3(position, step, VECTOR_1f800000, param_4)) {
+            checkWorldmapPositionSub0(&VECTOR_1f800000[1]);
+            s32 sVar1 = checkWorldmapPositionSub1_0_0(&VECTOR_1f800000[1]);
+            sVar1 = checkWorldmapPositionSub1_0_1((int)param_4, (int)sVar1);
+            if (sVar1 == 0) {
+                VECTOR_1f800000[0].vx = VECTOR_1f800000[1].vx;
+                VECTOR_1f800000[0].vy = VECTOR_1f800000[1].vy;
+                VECTOR_1f800000[0].vz = VECTOR_1f800000[1].vz;
+                VECTOR_1f800000[0].pad = VECTOR_1f800000[1].pad;
+                return 1;
+            }
+        }
+        return 0;
+    case 2:
+        if (!checkWorldmapPositionSub1_0_4(position, step, VECTOR_1f800000, param_4)) {
+            checkWorldmapPositionSub0(&VECTOR_1f800000[1]);
+            s32 sVar1 = checkWorldmapPositionSub1_0_0(&VECTOR_1f800000[1]);
+            sVar1 = checkWorldmapPositionSub1_0_1((int)param_4, (int)sVar1);
+            if (sVar1 == 0) {
+                VECTOR_1f800000[0].vx = VECTOR_1f800000[1].vx;
+                VECTOR_1f800000[0].vy = VECTOR_1f800000[1].vy;
+                VECTOR_1f800000[0].vz = VECTOR_1f800000[1].vz;
+                VECTOR_1f800000[0].pad = VECTOR_1f800000[1].pad;
+                return 1;
+            }
+        }
+        return 0;
+    case 4:
+        if (!checkWorldmapPositionSub1_0_5(position, step, VECTOR_1f800000, param_4)) {
+            checkWorldmapPositionSub0(&VECTOR_1f800000[1]);
+            s32 sVar1 = checkWorldmapPositionSub1_0_0(&VECTOR_1f800000[1]);
+            sVar1 = checkWorldmapPositionSub1_0_1((int)param_4, (int)sVar1);
+            if (sVar1 == 0) {
+                VECTOR_1f800000[0].vx = VECTOR_1f800000[1].vx;
+                VECTOR_1f800000[0].vy = VECTOR_1f800000[1].vy;
+                VECTOR_1f800000[0].vz = VECTOR_1f800000[1].vz;
+                VECTOR_1f800000[0].pad = VECTOR_1f800000[1].pad;
+                return 1;
+            }
+        }
+        return 0;
+    case 8:
+        if (!checkWorldmapPositionSub1_0_2(position, step, VECTOR_1f800000, param_4)) {
+            checkWorldmapPositionSub0(&VECTOR_1f800000[1]);
+            s32 sVar1 = checkWorldmapPositionSub1_0_0(&VECTOR_1f800000[1]);
+            sVar1 = checkWorldmapPositionSub1_0_1((int)param_4, (int)sVar1);
+            if (sVar1 == 0) {
+                VECTOR_1f800000[0].vx = VECTOR_1f800000[1].vx;
+                VECTOR_1f800000[0].vy = VECTOR_1f800000[1].vy;
+                VECTOR_1f800000[0].vz = VECTOR_1f800000[1].vz;
+                VECTOR_1f800000[0].pad = VECTOR_1f800000[1].pad;
+                return 1;
+            }
+        }
+        return 0;
+    case 0:
+    case 3:
+    case 7:
+        if (true) {
+            checkWorldmapPositionSub0(&VECTOR_1f800000[1]);
+            s32 sVar1 = checkWorldmapPositionSub1_0_0(&VECTOR_1f800000[1]);
+            sVar1 = checkWorldmapPositionSub1_0_1((int)param_4, (int)sVar1);
+            if (sVar1 == 0) {
+                VECTOR_1f800000[0].vx = VECTOR_1f800000[1].vx;
+                VECTOR_1f800000[0].vy = VECTOR_1f800000[1].vy;
+                VECTOR_1f800000[0].vz = VECTOR_1f800000[1].vz;
+                VECTOR_1f800000[0].pad = VECTOR_1f800000[1].pad;
+                return 1;
+            }
+        }
+        return 0;
+    default:
+        assert(0);
+    }
+
+    assert(0);
+}
+
+uint getWorldmapMaterial2(VECTOR* param_1)
+{
+    ushort uVar1;
+
+    uVar1 = getWorldmapMaterial(param_1);
+    return uVar1 & 0xf;
+}
+
+static const std::array<VECTOR, 16> VECTOR_ARRAY_worldmap__8009b264 = { {
+    {{0xFFFF8D8, 0, 0xE50}},
+    {{0x728, 0, 0xE50}},
+    {{0x728, 0, 0xE50}},
+    {{0xFFFF8D8, 0, 0xE50}},
+
+    {{0xFFFF1B0, 0, 0x728}},
+    {{0xE50, 0, 0x728}},
+    {{0xE50, 0, 0x728}},
+    {{0xFFFF1B0, 0, 0x728}},
+
+    {{0xFFFFF4B0, 0, 0xB50}},
+    {{0xB50, 0, 0xB50}},
+    {{0x0, 0, 0x1000}},
+    {{0x1000, 0, 0}},
+
+    {{0xFFFFF4B0, 0, 0xB50}},
+    {{0xB50, 0, 0xB50}},
+    {{0xB50, 0, 0xB50}},
+    {{0xFFFFF4B0, 0, 0xB50}},
+} };
+
+int checkWorldmapPositionSub1_1(VECTOR* collision, VECTOR* step, VECTOR* outputStep)
+{
+    uint uVar1;
+    int iVar3;
+    int iVar5;
+
+    uVar1 = getWorldmapMaterial2(collision);
+    iVar5 = (int)(uVar1 << 0x10) >> 0xc;
+
+    iVar3 = step->vx * VECTOR_ARRAY_worldmap__8009b264[iVar5 / 0x10].vx + step->vz * VECTOR_ARRAY_worldmap__8009b264[iVar5 / 0x10].vz;
+
+    if (iVar3 == 0) {
+        outputStep->vx = step->vx;
+        outputStep->vz = step->vz;
+    }
+    else {
+        if (iVar3 < 0) {
+            outputStep->vx = -VECTOR_ARRAY_worldmap__8009b264[iVar5 / 0x10].vx;
+            outputStep->vz = -VECTOR_ARRAY_worldmap__8009b264[iVar5 / 0x10].vz;
+        }
+        else {
+            outputStep->vx = VECTOR_ARRAY_worldmap__8009b264[iVar5 / 0x10].vx;
+            outputStep->vz = VECTOR_ARRAY_worldmap__8009b264[iVar5 / 0x10].vz;
+        }
+        return 1;
+    }
+    return 0;
+}
+
+int checkWorldmapPositionSub1(VECTOR* position, VECTOR* step, VECTOR* output, int stepScale, short param_5) {
+    int iVar1;
+    long lVar2;
+    int resultValue;
+
+    iVar1 = checkWorldmapPositionSub1_0(position, step, stepScale, param_5);
+    if (iVar1 == 1) {
+        iVar1 = checkWorldmapPositionSub1_1(&VECTOR_1f800000[0], step, output);
+        resultValue = 0;
+        if (iVar1 == 0) {
+            output->vz = 0;
+            output->vy = 0;
+            output->vx = 0;
+        }
+    }
+    else if (iVar1 < 2) {
+        if (iVar1 == 0) {
+            resultValue = 1;
+        }
+    }
+    else if (iVar1 == 2) {
+        lVar2 = 0x1000;
+        if (step->vx < 0) {
+            lVar2 = -0x1000;
+        }
+        resultValue = 0;
+        output->vx = lVar2;
+        output->vz = 0;
+        output->vy = 0;
+    }
+    else if (iVar1 == 3) {
+        output->vy = 0;
+        output->vx = 0;
+        lVar2 = 0x1000;
+        if (step->vz < 0) {
+            lVar2 = -0x1000;
+        }
+        output->vz = lVar2;
+        resultValue = 0;
+    }
+    return resultValue;
+}
+
+int checkWorldmapPosition(VECTOR* position, VECTOR* step, VECTOR* output, int stepScale, int param_5) {
     VECTOR VECTOR_1f800060;
 
     VECTOR_1f800060.vx = position->vx + (step->vx * stepScale >> 0xc);
@@ -289,7 +859,43 @@ void checkWorldmapPosition(VECTOR* position, VECTOR* step, VECTOR* output, int s
     checkWorldmapPositionSub0(output);
     output->vy = worldmapGetAltitudeFor2dPoint(output->vx, output->vz) - 0x4000;
 
-    MissingCode();
+    s32 collisionMode = 1;
+    if (worldmapModelVar1 != -1) {
+        collisionMode = 3;
+    }
+
+    s32 resultValue;
+
+    switch (collisionMode) {
+    case 1:
+    {
+        s16 worldModelCollisionId;
+        if (worldmapCheckCollisionsAgainstWorldmapModels(&VECTOR_1f800060, &worldModelCollisionId)) {
+            assert(0);
+        }
+        resultValue = checkWorldmapPositionSub1(position, step, output, stepScale, param_5);
+        worldmapModelVar0 = -1;
+        worldmapModelVar1 = -1;
+        break;
+    }
+    default:
+        assert(0);
+    }
+
+    return resultValue;
+}
+
+u8 adjustLocationAfterCollisionVar0;
+u8 adjustLocationAfterCollisionVar1;
+u16 adjustLocationAfterCollisionVar2;
+
+void adjustLocationAfterCollision(VECTOR* param_1, int param_2, int param_3, u8* param_4, u8* param_5) {
+    *param_4 = 0;
+    *param_5 = 0;
+
+    for (int i = 0; i < adjustLocationAfterCollisionVar2; i++) {
+        assert(0);
+    }
 }
 
 s32 worldmapMode0_taskPlayer_update(int param_1)
@@ -343,20 +949,36 @@ s32 worldmapMode0_taskPlayer_update(int param_1)
                     MissingCode();
                 }
 
-                s32 oldGearMode = worldMapGearMode;
-
                 VECTOR DAT_1f800090;
-                checkWorldmapPosition(&pEntry->m28_position, &pEntry->m38_step, &DAT_1f800090, (int)pEntry->m4A << 0xc, worldMapGearMode);
+                s32 collisionResult2 = checkWorldmapPosition(&pEntry->m28_position, &pEntry->m38_step, &DAT_1f800090, (int)pEntry->m4A << 0xc, worldMapGearMode);
 
-                if ((oldGearMode & 0xffff) == 0) {
+                if ((collisionResult2 & 0xffff) == 0) {
                     pEntry->m38_step = DAT_1f800090;
-                    MissingCode();
+                    collisionResult2 = checkWorldmapPosition(&pEntry->m28_position, &pEntry->m38_step, &DAT_1f800090, (int)pEntry->m4A << 0xc, worldMapGearMode);
+                    if ((collisionResult2 & 0xffff) == 0) {
+                        (pEntry->m38_step).vz = 0;
+                        (pEntry->m38_step).vx = 0;
+                    }
                 }
-                if ((oldGearMode & 0xffff) == 1) {
-                    MissingCode();
-                    pEntry->m28_position = DAT_1f800090;
-                    if (((pEntry->m38_step).vx | (pEntry->m38_step).vz) != 0) {
-                        MissingCode("Update worldamp follow data");
+                if ((collisionResult2 & 0xffff) == 1) {
+                    adjustLocationAfterCollision(&DAT_1f800090, 0x10, 0x20, &adjustLocationAfterCollisionVar0, &adjustLocationAfterCollisionVar1);
+
+                    if (adjustLocationAfterCollisionVar1 == 7) {
+                        collisionResult2 = adjustLocationAfterCollisionVar0 + 3;
+                    }
+                    else {
+                        collisionResult2 = adjustLocationAfterCollisionVar0;
+                    }
+
+                    static const std::array<s16, 6> SHORT_ARRAY_worldmap__8009b180 = { {
+                            1,1,0,1,1,1
+                    } };
+
+                    if (SHORT_ARRAY_worldmap__8009b180[((int)(collisionResult2 << 0x10) >> 0xf) / 2]) {
+                        pEntry->m28_position = DAT_1f800090;
+                        if (((pEntry->m38_step).vx | (pEntry->m38_step).vz) != 0) {
+                            MissingCode("Update worldamp follow data");
+                        }
                     }
                 }
                 else {
@@ -375,7 +997,7 @@ s32 worldmapMode0_taskPlayer_update(int param_1)
                 worldmapVar_8009d52c = pEntry->m48;
                 break;
             }
-            MissingCode();
+            adjustLocationAfterCollisionVar2 = 0;
             pEntry->m24 = 0;
         }
         else {
