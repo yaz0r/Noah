@@ -743,6 +743,12 @@ void gte_rtir_sf0()
     copFunction(2, 0x41E012);
 }
 
+void gte_ldlv0(const VECTOR* pVertices0)
+{
+    setCopReg(2, COP2D_XY0, sVec2_s16::fromValue(pVertices0->vx, pVertices0->vy));
+    setCopReg(2, COP2D_Z0, sVec2_s16::fromValue(pVertices0->vz, 0));
+}
+
 void gte_ldv0(const SFP_VEC4* pVertices0)
 {
 	setCopReg(2, COP2D_XY0, sVec2_s16::fromValue(pVertices0->vx, pVertices0->vy));

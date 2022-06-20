@@ -76,6 +76,8 @@ s32 SquareRoot0(s32 value);
 
 FP_VEC4* ApplyMatrixLV(MATRIX* m, FP_VEC4* v0, FP_VEC4* v1);
 
+void gte_MulMatrix0(const MATRIX* m0, const MATRIX* m1, MATRIX* m2);
+
 void PopMatrix();
 void PushMatrix();
 

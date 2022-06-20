@@ -114,6 +114,20 @@ s32 worldmap_taskWorldCamera_update(int param_1)
             gWorldmapState->m0[param_1].m20 = 0;
         }
         goto LAB_worldmap__8009164c;
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+    case 9:
+    case 10:
+    case 0xb:
+    case 0xc:
+    case 0xd:
+    case 0xe:
+    case 0xf:
+        break;
     default:
         assert(0);
         break;

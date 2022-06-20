@@ -18,9 +18,11 @@ struct sWorldmapStateEntry {
     s32 m54;
     s32 m58;
     s32 m5C;
-    s32 m60;
+    s32 m60;    
     const std::array<s16, 4>* m64;
     const std::array<s16, 4>* m68;
+    VECTOR m6C;
+    s32 m7C;
 };
 
 struct sWorldmapState {
@@ -109,5 +111,11 @@ extern std::array<u16, 0x40> USHORT_ARRAY_8009ccb4;
 extern std::array<u16, 8> USHORT_ARRAY_8009cd54;
 
 extern std::array<struct sSpriteActorAnimationBundle*, 3 > worldmapPartySprites;
+extern s32 worldmapNumFilesPending;
 
+extern s32 currentWorldmapMode;
+
+s32 worldmapGetAltitudeFor2dPoint(s32 x, s32 y);
 void worldmapEntryPoint(void);
+void getGamestate182C(VECTOR* param_1);
+void setGamestate182C(VECTOR* param_1);

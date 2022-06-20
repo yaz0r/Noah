@@ -8,11 +8,14 @@
 #include "worldmapPlayer.h"
 #include "worldmapTaskCamera.h"
 #include "worldmapTaskWorldCamera.h"
+#include "worldmapTaskYggdrasil.h"
 
 const std::vector<sWorldTaskDefinition> worldmapMode0_tasks = { {
     {&worldmap_taskFader_init, &worldmap_taskFader_update},
     {&worldmapMode0_taskPlayer_init, &worldmapMode0_taskPlayer_update},
     // TODO: the rest
+    {&worldmap_taskYggdrasil_init, &worldmap_taskYggdrasil_update},
+    {&worldmap_taskYggdrasilSubModels_init, &worldmap_taskYggdrasilSubModels_update},
 
     {&worldmap_taskWorldCamera_init, &worldmap_taskWorldCamera_update},
     {&worldmap_taskCamera_init, &worldmap_taskCamera_update},

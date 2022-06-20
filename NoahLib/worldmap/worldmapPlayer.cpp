@@ -5,6 +5,10 @@
 #include "kernel/trigo.h"
 #include "worldmapWorldStreaming.h"
 
+u8 adjustLocationAfterCollisionVar0;
+u8 adjustLocationAfterCollisionVar1;
+u16 adjustLocationAfterCollisionVar2;
+
 u8* getWorldChunkForPosition(int x, int y)
 {
     bool bVar1;
@@ -208,6 +212,13 @@ s32 worldmapMode0_taskPlayer_init(int param_1)
             gWorldmapState->m0[param_1].m24 = 1;
         }
         break;
+    case 7:
+        gWorldmapState->m0[param_1].m20 = 2;
+        gWorldmapState->m0[param_1].m24 = 1;
+        if (gameState.m1D34_currentParty[0] != 0xff) {
+            gameState.m22B1_isOnGear[0] = 1;
+        }
+        break;
     default:
         assert(0);
     }
@@ -252,6 +263,16 @@ s32 worldmapUpdatePlayerControls(sWorldmapStateEntry* param_1) {
     if ((worldmapInput1_0 & 0xf000) != 0) {
         param_1->m38_step.vx = getAngleCos((int)param_1->m48);
         param_1->m38_step.vz = -getAngleSin((int)param_1->m48);
+    }
+
+    if ((worldmapInput2_0 & 0x20) == 0) {
+        MissingCode();
+    }
+    else {
+        if (adjustLocationAfterCollisionVar0 != 0) {
+            return 3;
+        }
+        MissingCode();
     }
 
     MissingCode();
@@ -713,10 +734,12 @@ int checkWorldmapPositionSub1_0(VECTOR* position, VECTOR* step, int stepScale, s
         }
         return 0;
     default:
-        assert(0);
+        //assert(0);
+        MissingCode();
     }
 
-    assert(0);
+    MissingCode();
+    return 0;
 }
 
 uint getWorldmapMaterial2(VECTOR* param_1)
@@ -860,10 +883,6 @@ int checkWorldmapPosition(VECTOR* position, VECTOR* step, VECTOR* output, int st
     return resultValue;
 }
 
-u8 adjustLocationAfterCollisionVar0;
-u8 adjustLocationAfterCollisionVar1;
-u16 adjustLocationAfterCollisionVar2;
-
 void adjustLocationAfterCollision(VECTOR* param_1, int param_2, int param_3, u8* param_4, u8* param_5) {
     *param_4 = 0;
     *param_5 = 0;
@@ -898,7 +917,7 @@ s32 worldmapMode0_taskPlayer_update(int param_1)
 
     switch (pEntry->m20) {
     case 0:
-    case 1:
+    case 1: // on foot
         if (gameState.m22B1_isOnGear[0] == 0) {
             switch (worldmapUpdatePlayerControls(pEntry)) {
             case 1:
@@ -978,6 +997,12 @@ s32 worldmapMode0_taskPlayer_update(int param_1)
         else {
             assert(0);
         }
+        break;
+    case 2: // yggdrasil 
+        (pEntry->m28_position).vx = gWorldmapState->m0[7].m28_position.vx;
+        (pEntry->m28_position).vy = gWorldmapState->m0[7].m28_position.vy;
+        (pEntry->m28_position).vz = gWorldmapState->m0[7].m28_position.vz;
+        pEntry->m48 = gWorldmapState->m0[7].m48;
         break;
     default:
         assert(0);

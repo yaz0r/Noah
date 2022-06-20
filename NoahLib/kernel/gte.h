@@ -24,6 +24,7 @@ void gte_rtir_sf0();
 void gte_ldv0(std::vector<u8>::iterator& pVertices);
 void gte_ldv0(u8* pVertices);
 void gte_ldv0(const SFP_VEC4* pVertices0);
+void gte_ldlv0(const VECTOR* pVertices0);
 void gte_ldv2(SVECTOR*);
 void gte_ldv3(std::vector<u8>::iterator& pVertices0, std::vector<u8>::iterator& pVertices1, std::vector<u8>::iterator& pVertices2);
 void gte_ldv3(u8* pVertices0, u8* pVertices1, u8* pVertices2);

@@ -10,6 +10,14 @@ const std::array<s16, 4> SHORT_ARRAY_worldmap__8009b234 = { {
         0xFF00, 0xFE20, 0xFD48, 0xFC58,
 } };
 
+const std::array<s16, 4> SHORT_ARRAY_worldmap__8009b22c = { {
+        0xFF1D, 0xFE39, 0xFE00, 0xFDC8,
+} };
+
+const std::array<s16, 4> SHORT_ARRAY_worldmap__8009b23c = { {
+        0xFF50, 0xFE20, 0xFD48, 0xFC58,
+} };
+
 const std::array<s32, 4> INT_ARRAY_worldmap__8009b214 = { {
         0x280000,      0x370000,      0x460000,      0x550000,
 } };
@@ -34,9 +42,8 @@ s32 worldmap_taskCamera_init(int param_1) {
             gWorldmapState->m0[param_1].m50 = 3;
             worldmapCameraVar0 = 0x280000;
             worldmapRotation.vx = -0x260;
-            assert(0);
-            //psVar1->m0[param_1].m64 = &DAT_worldmap__8009b22c;
-            //psVar1->m0[param_1].m68 = &DAT_worldmap__8009b23c;
+            psVar1->m0[param_1].m64 = &SHORT_ARRAY_worldmap__8009b22c;
+            psVar1->m0[param_1].m68 = &SHORT_ARRAY_worldmap__8009b23c;
         }
     }
     return 1;

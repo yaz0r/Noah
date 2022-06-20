@@ -175,6 +175,14 @@ LAB_worldmap__80093584:
     param_1->vz = iVar2 + iVar1;
 }
 
+void gte_CompMatrix(MATRIX* r1, MATRIX* r2, MATRIX* r3) {
+    gte_MulMatrix0(r1, r2, r3);
+    gte_SetTransMatrix(r1);
+    gte_ldlv0(&r2->t);
+    gte_rt();
+    gte_stlvnl(&r3->t);
+}
+
 void renderWorldmapModels() {
     VECTOR VECTOR_1f800010;
     VECTOR_1f800010.vz = 0x800;
@@ -203,7 +211,18 @@ void renderWorldmapModels() {
             MATRIX_1f8000f0.t[2] = -pModel->m8.vz;
 
             if (pModel->m50_parentModel) {
-                assert(0);
+                sWorldmapModel* pParent = pModel->m50_parentModel;
+                do {
+                    pParent->m20_rotationMatrix.t[0] = pParent->m8.vx;
+                    pParent->m20_rotationMatrix.t[1] = pParent->m8.vy;
+                    pParent->m20_rotationMatrix.t[2] = -pParent->m8.vz;
+
+                    gte_CompMatrix(&pParent->m20_rotationMatrix, &MATRIX_1f8000f0, &MATRIX_1f8000f0);
+
+                    pParent = pParent->m50_parentModel;
+                } while (pParent);
+
+
             }
 
             VECTOR VECTOR_1f800000;

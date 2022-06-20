@@ -344,6 +344,12 @@ void getGamestate182C(VECTOR* param_1)
     return;
 }
 
+void setGamestate182C(VECTOR* param_1) {
+    gameState.m182C.vx = (short)(param_1->vx >> 0xc);
+    gameState.m182C.vy = (short)(param_1->vy >> 0xc);
+    gameState.m182C.vz = (short)(param_1->vz >> 0xc);
+}
+
 void setupWorldmapPositionFromField() {
     gameState.m1836 = 0;
     if (true) {
@@ -864,9 +870,9 @@ void worldmapEntryPoint(void) {
         gameState.m231C_CameraYaw = 0xc00;
         gameState.m231A_fieldID = 0x400;
         gameState.m2320_worldmapMode = 1;
-        Hack("Don't use yggdrazil for worldmap debug mode");
+        
         gameState.m1834 = 0x4003;
-        gameState.m1834 = 0x0000;
+        //gameState.m1834 = 0x0000; Hack("Don't use yggdrazil for worldmap debug mode");
 
         gameState.m182C[0] = 0x6680;
         gameState.m182C[1] = -0x100;
