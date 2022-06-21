@@ -407,7 +407,7 @@ static const std::array<VECTOR, 16> VECTOR_ARRAY_worldmap__8009b364 = { {
     {{0xB50, 0x0, 0xB50}},
 } };
 
-ushort checkWorldmapPositionSub1_0_0(VECTOR* param_1)
+ushort getWorldmapGroundType(VECTOR* param_1)
 {
     ushort uVar1;
     ushort uVar2;
@@ -487,7 +487,7 @@ int checkWorldmapPositionSub1_0_2(VECTOR* position, VECTOR* step, std::array<VEC
     output[2].vz = output[2].vz + position->vz;
     output[3].vz = output[3].vz + position->vz;
     checkWorldmapPositionSub0(&output[2]);
-    sVar1 = checkWorldmapPositionSub1_0_0(&output[2]);
+    sVar1 = getWorldmapGroundType(&output[2]);
     sVar1 = checkWorldmapPositionSub1_0_1((int)param_4, (int)sVar1);
     if (sVar1 == 0) {
         lVar3 = output[2].vy;
@@ -501,7 +501,7 @@ int checkWorldmapPositionSub1_0_2(VECTOR* position, VECTOR* step, std::array<VEC
     }
     else {
         checkWorldmapPositionSub0(&output[3]);
-        sVar1 = checkWorldmapPositionSub1_0_0(&output[3]);
+        sVar1 = getWorldmapGroundType(&output[3]);
         sVar1 = checkWorldmapPositionSub1_0_1((int)param_4, (int)sVar1);
         iVar2 = (uint)(sVar1 == 0) << 1;
     }
@@ -537,7 +537,7 @@ int checkWorldmapPositionSub1_0_5(VECTOR* position, VECTOR* step, std::array<VEC
     output[2].vz = output[2].vz + position->vz;
     output[3].vz = output[3].vz + position->vz;
     checkWorldmapPositionSub0(&output[2]);
-    sVar1 = checkWorldmapPositionSub1_0_0(&output[2]);
+    sVar1 = getWorldmapGroundType(&output[2]);
     sVar1 = checkWorldmapPositionSub1_0_1((int)param_4, (int)sVar1);
     if (sVar1 == 0) {
         lVar3 = output[2].vy;
@@ -551,7 +551,7 @@ int checkWorldmapPositionSub1_0_5(VECTOR* position, VECTOR* step, std::array<VEC
     }
     else {
         checkWorldmapPositionSub0(&output[3]);
-        sVar1 = checkWorldmapPositionSub1_0_0(&output[3]);
+        sVar1 = getWorldmapGroundType(&output[3]);
         sVar1 = checkWorldmapPositionSub1_0_1((int)param_4, (int)sVar1);
         iVar2 = (uint)(sVar1 == 0) << 1;
     }
@@ -588,7 +588,7 @@ int checkWorldmapPositionSub1_0_4(VECTOR* position, VECTOR* step, std::array<VEC
     output[2].vx = output[2].vx + position->vx;
     output[3].vx = output[3].vx + position->vx;
     checkWorldmapPositionSub0(&output[2]);
-    sVar1 = checkWorldmapPositionSub1_0_0(&output[2]);
+    sVar1 = getWorldmapGroundType(&output[2]);
     sVar1 = checkWorldmapPositionSub1_0_1((int)param_4, (int)sVar1);
     if (sVar1 == 0) {
         lVar4 = output[2].vy;
@@ -602,7 +602,7 @@ int checkWorldmapPositionSub1_0_4(VECTOR* position, VECTOR* step, std::array<VEC
     }
     else {
         checkWorldmapPositionSub0(&output[3]);
-        sVar1 = checkWorldmapPositionSub1_0_0(&output[3]);
+        sVar1 = getWorldmapGroundType(&output[3]);
         sVar1 = checkWorldmapPositionSub1_0_1((int)param_4, (int)sVar1);
         uVar3 = -(uint)(sVar1 == 0) & 3;
     }
@@ -639,7 +639,7 @@ int checkWorldmapPositionSub1_0_3(VECTOR* position, VECTOR* step, std::array<VEC
     output[2].vx = output[2].vx + position->vx;
     output[3].vx = output[3].vx + position->vx;
     checkWorldmapPositionSub0(&output[2]);
-    sVar2 = checkWorldmapPositionSub1_0_0(&output[2]);
+    sVar2 = getWorldmapGroundType(&output[2]);
     sVar2 = checkWorldmapPositionSub1_0_1((int)param_4, (int)sVar2);
     if (sVar2 == 0) {
         lVar4 = output[2].vy;
@@ -653,7 +653,7 @@ int checkWorldmapPositionSub1_0_3(VECTOR* position, VECTOR* step, std::array<VEC
     }
     else {
         checkWorldmapPositionSub0(&output[3]);
-        sVar2 = checkWorldmapPositionSub1_0_0(&output[3]);
+        sVar2 = getWorldmapGroundType(&output[3]);
         sVar2 = checkWorldmapPositionSub1_0_1((int)param_4, (int)sVar2);
         bVar1 = -(sVar2 == 0) & 3;
     }
@@ -689,7 +689,7 @@ int checkWorldmapPositionSub1_0(VECTOR* position, VECTOR* step, int stepScale, s
     case 1:
         if (!checkWorldmapPositionSub1_0_3(position, step, VECTOR_1f800000, param_4)) {
             checkWorldmapPositionSub0(&VECTOR_1f800000[1]);
-            if (!checkWorldmapPositionSub1_0_1((int)param_4, checkWorldmapPositionSub1_0_0(&VECTOR_1f800000[1]))) {
+            if (!checkWorldmapPositionSub1_0_1((int)param_4, getWorldmapGroundType(&VECTOR_1f800000[1]))) {
                 VECTOR_1f800000[0] = VECTOR_1f800000[1];
                 return 1;
             }
@@ -698,7 +698,7 @@ int checkWorldmapPositionSub1_0(VECTOR* position, VECTOR* step, int stepScale, s
     case 2:
         if (!checkWorldmapPositionSub1_0_4(position, step, VECTOR_1f800000, param_4)) {
             checkWorldmapPositionSub0(&VECTOR_1f800000[1]);
-            if (!checkWorldmapPositionSub1_0_1((int)param_4, checkWorldmapPositionSub1_0_0(&VECTOR_1f800000[1]))) {
+            if (!checkWorldmapPositionSub1_0_1((int)param_4, getWorldmapGroundType(&VECTOR_1f800000[1]))) {
                 VECTOR_1f800000[0] = VECTOR_1f800000[1];
                 return 1;
             }
@@ -707,7 +707,7 @@ int checkWorldmapPositionSub1_0(VECTOR* position, VECTOR* step, int stepScale, s
     case 4:
         if (!checkWorldmapPositionSub1_0_5(position, step, VECTOR_1f800000, param_4)) {
             checkWorldmapPositionSub0(&VECTOR_1f800000[1]);
-            if (!checkWorldmapPositionSub1_0_1((int)param_4, checkWorldmapPositionSub1_0_0(&VECTOR_1f800000[1]))) {
+            if (!checkWorldmapPositionSub1_0_1((int)param_4, getWorldmapGroundType(&VECTOR_1f800000[1]))) {
                 VECTOR_1f800000[0] = VECTOR_1f800000[1];
                 return 1;
             }
@@ -716,7 +716,7 @@ int checkWorldmapPositionSub1_0(VECTOR* position, VECTOR* step, int stepScale, s
     case 8:
         if (!checkWorldmapPositionSub1_0_2(position, step, VECTOR_1f800000, param_4)) {
             checkWorldmapPositionSub0(&VECTOR_1f800000[1]);
-            if (!checkWorldmapPositionSub1_0_1((int)param_4, checkWorldmapPositionSub1_0_0(&VECTOR_1f800000[1]))) {
+            if (!checkWorldmapPositionSub1_0_1((int)param_4, getWorldmapGroundType(&VECTOR_1f800000[1]))) {
                 VECTOR_1f800000[0] = VECTOR_1f800000[1];
                 return 1;
             }
@@ -727,7 +727,7 @@ int checkWorldmapPositionSub1_0(VECTOR* position, VECTOR* step, int stepScale, s
     case 7:
         if (true) {
             checkWorldmapPositionSub0(&VECTOR_1f800000[1]);
-            if (!checkWorldmapPositionSub1_0_1((int)param_4, checkWorldmapPositionSub1_0_0(&VECTOR_1f800000[1]))) {
+            if (!checkWorldmapPositionSub1_0_1((int)param_4, getWorldmapGroundType(&VECTOR_1f800000[1]))) {
                 VECTOR_1f800000[0] = VECTOR_1f800000[1];
                 return 1;
             }

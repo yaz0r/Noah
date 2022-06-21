@@ -4,6 +4,8 @@
 #include "kernel/gameState.h"
 #include "kernel/trigo.h"
 
+ushort getWorldmapGroundType(VECTOR* param_1);
+
 s32 worldmap_taskYggdrasil_init(int param_1)
 {
     s32 returnState = 1;
@@ -308,6 +310,14 @@ int checkWorldmapPositionYggdrasil(VECTOR* position, VECTOR* step, VECTOR* outpu
     return iVar1;
 }
 
+void spawnWorldmapParticles(s32 type, SVECTOR*, SVECTOR*) {
+    MissingCode();
+}
+
+void FillWorldmapFile1Buffer_18(s32 type) {
+    MissingCode();
+}
+
 s32 worldmap_taskYggdrasil_update(int param_1)
 {
     s32 returnState = 1;
@@ -347,6 +357,38 @@ s32 worldmap_taskYggdrasil_update(int param_1)
             worldmapRadarPosition.pad = (gWorldmapState->m0[param_1].m28_position).pad;
             worldmapVar_8009d52c = gWorldmapState->m0[param_1].m48;
             MissingCode();
+            SVECTOR SVECTOR_1f8000a0;
+            SVECTOR_1f8000a0.vx = -(short)((gWorldmapState->m0[param_1].m6C).vy >> 0xc);
+            SVECTOR_1f8000a0.vy = gWorldmapState->m0[param_1].m48;
+            SVECTOR_1f8000a0.vz = worldmapRotation.vz;
+            RotMatrixYXZ(&SVECTOR_1f8000a0, &worldmapModels[0].m20_rotationMatrix);
+            RotMatrixYXZ(&SVECTOR_1f8000a0, &worldmapModels[1].m20_rotationMatrix);
+
+            // Close enough to the ground to emit particles?
+            if (0x60000 > std::abs(worldmapGetAltitudeFor2dPoint((gWorldmapState->m0[param_1].m28_position).vx, (gWorldmapState->m0[param_1].m28_position).vz) - (gWorldmapState->m0[param_1].m28_position).vy)) {
+                SVECTOR SVECTOR_1f8000a8;
+                SVECTOR_1f8000a8.vx = (short)((gWorldmapState->m0[param_1].m28_position).vx >> 0xc);
+                SVECTOR_1f8000a8.vy = (short)((gWorldmapState->m0[param_1].m28_position).vy >> 0xc);
+                SVECTOR_1f8000a8.vz = (short)((gWorldmapState->m0[param_1].m28_position).vz >> 0xc);
+                s32 groundType = getWorldmapGroundType(&gWorldmapState->m0[param_1].m28_position);
+                switch (groundType) {
+                case 2: //water
+                    spawnWorldmapParticles(0x3f, &SVECTOR_1f8000a8, &SVECTOR_1f8000a0);
+                    FillWorldmapFile1Buffer_18(0x3c);
+                    break;
+                case 3: //sand
+                    spawnWorldmapParticles(0x3C, &SVECTOR_1f8000a8, &SVECTOR_1f8000a0);
+                    FillWorldmapFile1Buffer_18(0x3cF);
+                    break;
+                }
+            } else {
+                FillWorldmapFile1Buffer_18(0x3C);
+                FillWorldmapFile1Buffer_18(0x3F);
+            }
+            (gWorldmapState->m0[param_1].m38_step).vz = 0;
+            (gWorldmapState->m0[param_1].m38_step).vy = 0;
+            (gWorldmapState->m0[param_1].m38_step).vx = 0;
+            adjustLocationAfterCollisionVar2 = 0;
             break;
         default:
             assert(0);
