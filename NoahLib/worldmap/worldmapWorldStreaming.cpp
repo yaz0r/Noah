@@ -715,22 +715,14 @@ void setupInitialGrid(VECTOR* param_1)
     return;
 }
 
-struct sVisibilityEntry {
-    union {
-        std::array<u32, 2> mRawPair;
-        std::array<s16, 4> mTile;
-    };
-};
-
-
-
 std::array<std::array<s16, 5>, 5> megatilesVisibility;
-std::array<std::array<sVisibilityEntry, 5>, 5> tilesVisibility;
+std::array<std::array<std::array<s16, 4>, 5>, 5> tilesVisibility;
 
 std::array<VECTOR, 4> dots;
 
 // -1 means completely clipped
 // 0 means partially visible
+// 1 means fully visible
 s16 computeTileVisibility(SVECTOR* param_1, SVECTOR* param_2, SVECTOR* param_3, SVECTOR* param_4) {
     std::array<VECTOR, 4> projectedPoints;
 
@@ -796,34 +788,38 @@ s16 computeTileVisibility(SVECTOR* param_1, SVECTOR* param_2, SVECTOR* param_3, 
 
 }
 
-std::array<std::array<u32, 50>, 4> mapQuadrantTilesPatch = { {
+std::array<std::array<std::array<std::array<s16, 4>, 5>, 5>, 4> mapQuadrantTilesPatch = { {
     {{
-        0, 0, 0, 0, 0, 0, 0, 0, 0xFFFF0000, 0xFFFF0000,
-        0, 0, 0, 0, 0, 0, 0, 0, 0xFFFF0000, 0xFFFF0000,
-        0, 0, 0, 0, 0, 0, 0, 0, 0xFFFF0000, 0xFFFF0000,
-        0, 0, 0, 0, 0, 0, 0, 0, 0xFFFF0000, 0xFFFF0000,
-        0, 0xFFFFFFFF, 0, 0xFFFFFFFF, 0, 0xFFFFFFFF, 0, 0xFFFFFFFF, 0xFFFF0000, 0xFFFFFFFF,
+        {{{{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0,-1, 0,-1}}}},
+        {{{{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0,-1, 0,-1}}}},
+        {{{{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0,-1, 0,-1}}}},
+        {{{{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0,-1, 0,-1}}}},
+        {{{{ 0, 0,-1,-1}}, {{ 0, 0,-1,-1}}, {{ 0, 0,-1,-1}}, {{ 0, 0,-1,-1}}, {{ 0,-1,-1,-1}}}}
     }},
+
     {{
-        0xFFFF, 0xFFFF, 0, 0, 0, 0, 0, 0, 0, 0,
-        0xFFFF, 0xFFFF, 0, 0, 0, 0, 0, 0, 0, 0,
-        0xFFFF, 0xFFFF, 0, 0, 0, 0, 0, 0, 0, 0,
-        0xFFFF, 0xFFFF, 0, 0, 0, 0, 0, 0, 0, 0,
-        0xFFFF, 0xFFFFFFFF, 0, 0xFFFFFFFF, 0, 0xFFFFFFFF, 0, 0xFFFFFFFF, 0, 0xFFFFFFFF,
+        {{{{-1, 0,-1, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}}},
+        {{{{-1, 0,-1, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}}},
+        {{{{-1, 0,-1, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}}},
+        {{{{-1, 0,-1, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}}},
+        {{{{-1, 0,-1,-1}}, {{ 0, 0,-1,-1}}, {{ 0, 0,-1,-1}}, {{ 0, 0,-1,-1}}, {{ 0, 0,-1,-1}}}},
     }},
+
+
     {{
-        0xFFFFFFFF, 0, 0xFFFFFFFF, 0, 0xFFFFFFFF, 0, 0xFFFFFFFF, 0, 0xFFFFFFFF, 0xFFFF0000,
-        0, 0, 0, 0, 0, 0, 0, 0, 0xFFFF0000, 0xFFFF0000,
-        0, 0, 0, 0, 0, 0, 0, 0, 0xFFFF0000, 0xFFFF0000,
-        0, 0, 0, 0, 0, 0, 0, 0, 0xFFFF0000, 0xFFFF0000,
-        0, 0, 0, 0, 0, 0, 0, 0, 0xFFFF0000, 0xFFFF0000,
+        {{{{-1,-1, 0, 0}}, {{-1,-1, 0, 0}}, {{-1,-1, 0, 0}}, {{-1,-1, 0, 0}}, {{-1,-1, 0,-1}}}},
+        {{{{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0,-1, 0,-1}}}},
+        {{{{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0,-1, 0,-1}}}},
+        {{{{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0,-1, 0,-1}}}},
+        {{{{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0,-1, 0,-1}}}},
     }},
+
     {{
-        0xFFFFFFFF, 0xFFFF, 0xFFFFFFFF, 0, 0xFFFFFFFF, 0, 0xFFFFFFFF, 0, 0xFFFFFFFF, 0,
-        0xFFFF, 0xFFFF, 0, 0, 0, 0, 0, 0, 0, 0,
-        0xFFFF, 0xFFFF, 0, 0, 0, 0, 0, 0, 0, 0,
-        0xFFFF, 0xFFFF, 0, 0, 0, 0, 0, 0, 0, 0,
-        0xFFFF, 0xFFFF, 0, 0, 0, 0, 0, 0, 0, 0,
+        {{{{-1,-1,-1, 0}}, {{-1,-1, 0, 0}}, {{-1,-1, 0, 0}}, {{-1,-1, 0, 0}}, {{-1,-1, 0, 0}}}},
+        {{{{-1, 0,-1, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}}},
+        {{{{-1, 0,-1, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}}},
+        {{{{-1, 0,-1, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}}},
+        {{{{-1, 0,-1, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}, {{ 0, 0, 0, 0}}}},
     }}
 } };
 
@@ -902,32 +898,35 @@ void worldmapGroundPrepareRenderingTable(VECTOR* param_1) {
                 SVECTOR_1f8000d8.vx = SVECTOR_1f8000c0.vx;
                 SVECTOR_1f8000e0.vx = SVECTOR_1f8000c0.vx;
                 SVECTOR_1f8000e0.vz = SVECTOR_1f8000c8.vz;
-                tilesVisibility[x][z].mTile[0] = computeTileVisibility(&SVECTOR_1f8000a0, &SVECTOR_1f8000c0, &SVECTOR_1f8000c8, &SVECTOR_1f8000e0);
-                tilesVisibility[x][z].mTile[1] = computeTileVisibility(&SVECTOR_1f8000c0, &SVECTOR_1f8000a8, &SVECTOR_1f8000e0, &SVECTOR_1f8000d0);
-                tilesVisibility[x][z].mTile[2] = computeTileVisibility(&SVECTOR_1f8000c8, &SVECTOR_1f8000e0, &SVECTOR_1f8000b0, &SVECTOR_1f8000d8);
-                tilesVisibility[x][z].mTile[3] = computeTileVisibility(&SVECTOR_1f8000e0, &SVECTOR_1f8000d0, &SVECTOR_1f8000d8, &SVECTOR_1f8000b8);
+                tilesVisibility[x][z][0] = computeTileVisibility(&SVECTOR_1f8000a0, &SVECTOR_1f8000c0, &SVECTOR_1f8000c8, &SVECTOR_1f8000e0);
+                tilesVisibility[x][z][1] = computeTileVisibility(&SVECTOR_1f8000c0, &SVECTOR_1f8000a8, &SVECTOR_1f8000e0, &SVECTOR_1f8000d0);
+                tilesVisibility[x][z][2] = computeTileVisibility(&SVECTOR_1f8000c8, &SVECTOR_1f8000e0, &SVECTOR_1f8000b0, &SVECTOR_1f8000d8);
+                tilesVisibility[x][z][3] = computeTileVisibility(&SVECTOR_1f8000e0, &SVECTOR_1f8000d0, &SVECTOR_1f8000d8, &SVECTOR_1f8000b8);
             }
             else {
-                tilesVisibility[x][z].mTile[0] = megatileVisibility;
-                tilesVisibility[x][z].mTile[1] = megatileVisibility;
-                tilesVisibility[x][z].mTile[2] = megatileVisibility;
-                tilesVisibility[x][z].mTile[3] = megatileVisibility;
+                tilesVisibility[x][z][0] = megatileVisibility;
+                tilesVisibility[x][z][1] = megatileVisibility;
+                tilesVisibility[x][z][2] = megatileVisibility;
+                tilesVisibility[x][z][3] = megatileVisibility;
             }
             SVECTOR_1f8000a0.vx = SVECTOR_1f8000a0.vx + 0x800;
         }
         SVECTOR_1f8000a0.vz = SVECTOR_1f8000a0.vz + -0x800;
     }
 
-    // This patches the tile visibility, so that edges of the map are visible even if we haven't wrapped yet
+    // This patches the tile visibility, seems to disable some of the tiles at the edge of the map?
     u32 mapQuadrant = (param_1->vx >> 0xc & 0x7ffU) < 0x400 ^ 1;
     if (0x3ff < (param_1->vz >> 0xc & 0x7ffU)) {
         mapQuadrant = mapQuadrant | 2;
     }
-    std::array<u32, 50>::iterator puVar9 = mapQuadrantTilesPatch[mapQuadrant].begin();
-    for (int i = 0; i < 5*5; i++) {
-        tilesVisibility[i/5][i%5].mRawPair[0] |= puVar9[0];
-        tilesVisibility[i/5][i%5].mRawPair[1] |= puVar9[1];
-        puVar9 += 2;
+
+    for (int x = 0; x < 5; x++) {
+        for (int z = 0; z < 5; z++) {
+            tilesVisibility[x][z][0] |= mapQuadrantTilesPatch[mapQuadrant][x][z][0];
+            tilesVisibility[x][z][1] |= mapQuadrantTilesPatch[mapQuadrant][x][z][1];
+            tilesVisibility[x][z][2] |= mapQuadrantTilesPatch[mapQuadrant][x][z][2];
+            tilesVisibility[x][z][3] |= mapQuadrantTilesPatch[mapQuadrant][x][z][3];
+        }
     }
 }
 
@@ -1213,22 +1212,22 @@ void drawWorldmapGround(std::vector<sTag>& param_1, std::vector<POLY_FT3>::itera
                 SVECTOR_1f800340.vx = SVECTOR_1f800330.vx;
                 SVECTOR_1f800340.vz = SVECTOR_1f800338.vz;
                 if ((ushort)(
-                    ((int)tilesVisibility[iVar6][iVar7].mTile[0]) |
-                    ((int)tilesVisibility[iVar6][iVar7].mTile[1]) |
-                    ((int)tilesVisibility[iVar6][iVar7].mTile[2]) |
-                    ((int)tilesVisibility[iVar6][iVar7].mTile[3]
+                    ((int)tilesVisibility[iVar6][iVar7][0]) |
+                    ((int)tilesVisibility[iVar6][iVar7][1]) |
+                    ((int)tilesVisibility[iVar6][iVar7][2]) |
+                    ((int)tilesVisibility[iVar6][iVar7][3]
                         )) == 0xffff) {
                     // at least one of the tile isn't visible
-                    if (tilesVisibility[iVar6][iVar7].mTile[0] != -1) {
+                    if (tilesVisibility[iVar6][iVar7][0] != -1) {
                         drawWorldmapGroundCell(pbVar4, param_1, param_2 + renderWorldmapGroundVar1, &SVECTOR_1f800328);
                     }
-                    if (tilesVisibility[iVar6][iVar7].mTile[1] != -1) {
+                    if (tilesVisibility[iVar6][iVar7][1] != -1) {
                         drawWorldmapGroundCell(pbVar4 + 0x144 / 4, param_1, param_2 + renderWorldmapGroundVar1, &SVECTOR_1f800330);
                     }
-                    if (tilesVisibility[iVar6][iVar7].mTile[2] != -1) {
+                    if (tilesVisibility[iVar6][iVar7][2] != -1) {
                         drawWorldmapGroundCell(pbVar4 + 0x288 / 4, param_1, param_2 + renderWorldmapGroundVar1, &SVECTOR_1f800338);
                     }
-                    if (tilesVisibility[iVar6][iVar7].mTile[3] != -1) {
+                    if (tilesVisibility[iVar6][iVar7][3] != -1) {
                         drawWorldmapGroundCell(pbVar4 + 0x3cc / 4, param_1, param_2 + renderWorldmapGroundVar1, &SVECTOR_1f800340);
                     }
                 }
