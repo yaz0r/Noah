@@ -314,7 +314,7 @@ void spawnWorldmapParticles(s32 type, SVECTOR*, SVECTOR*) {
     MissingCode();
 }
 
-void FillWorldmapFile1Buffer_18(s32 type) {
+void clearWorldmapParticles(s32 type) {
     MissingCode();
 }
 
@@ -374,16 +374,16 @@ s32 worldmap_taskYggdrasil_update(int param_1)
                 switch (groundType) {
                 case 2: //water
                     spawnWorldmapParticles(0x3f, &SVECTOR_1f8000a8, &SVECTOR_1f8000a0);
-                    FillWorldmapFile1Buffer_18(0x3c);
+                    clearWorldmapParticles(0x3c);
                     break;
                 case 3: //sand
                     spawnWorldmapParticles(0x3C, &SVECTOR_1f8000a8, &SVECTOR_1f8000a0);
-                    FillWorldmapFile1Buffer_18(0x3cF);
+                    clearWorldmapParticles(0x3cF);
                     break;
                 }
             } else {
-                FillWorldmapFile1Buffer_18(0x3C);
-                FillWorldmapFile1Buffer_18(0x3F);
+                clearWorldmapParticles(0x3C);
+                clearWorldmapParticles(0x3F);
             }
             (gWorldmapState->m0[param_1].m38_step).vz = 0;
             (gWorldmapState->m0[param_1].m38_step).vy = 0;

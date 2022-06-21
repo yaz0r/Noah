@@ -43,7 +43,7 @@ bgfx::ProgramHandle getSPRTShader()
 	return programHandle;
 }
 
-ImVec2 PSXInternalResolution = { 320,240 };
+ImVec2 PSXInternalResolution = { 320,216 };
 float PSXRenderScaling = 2.f;
 ImVec2 PSXRenderResolution = { PSXInternalResolution.x * PSXRenderScaling, PSXInternalResolution.y * PSXRenderScaling };
 
