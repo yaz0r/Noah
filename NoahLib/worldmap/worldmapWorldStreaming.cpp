@@ -732,22 +732,90 @@ VECTOR VECTOR_8009c844;
 VECTOR VECTOR_8009c874;
 VECTOR VECTOR_8009c7f0;
 
+std::array<VECTOR, 4> dots;
+
 // -1 means completely clipped
 // 0 means partially visible
 // 1 means?
+
 s16 computeTileVisibility(SVECTOR* param_1, SVECTOR* param_2, SVECTOR* param_3, SVECTOR* param_4) {
+    std::array<VECTOR, 4> projectedPoints;
+
+    // project all points
+    gte_ldv0(param_1);
+    gte_rt();
+    gte_stlvnl(&projectedPoints[0]);
+
+    gte_ldv0(param_2);
+    gte_rt();
+    gte_stlvnl(&projectedPoints[1]);
+
+    gte_ldv0(param_3);
+    gte_rt();
+    gte_stlvnl(&projectedPoints[2]);
+
+    gte_ldv0(param_4);
+    gte_rt();
+    gte_stlvnl(&projectedPoints[3]);
+
+    std::array<u32, 4> results;
+
+    for (int i = 0; i < 4; i++) {
+        results[i] = 0;
+        s32 iVar7 = projectedPoints[0].vx * dots[i].vx + projectedPoints[0].vz * dots[i].vz >> 0xc;
+        s32 iVar2 = projectedPoints[1].vx * dots[i].vx + projectedPoints[1].vz * dots[i].vz >> 0xc;
+        s32 iVar5 = projectedPoints[2].vx * dots[i].vx + projectedPoints[2].vz * dots[i].vz >> 0xc;
+        s32 iVar1 = projectedPoints[3].vx * dots[i].vx + projectedPoints[3].vz * dots[i].vz >> 0xc;
+
+        if (iVar7 < 0) {
+            if (iVar2 < 0) {
+                results[i] = 1;
+                goto LAB_worldmap__8009891c;
+            }
+        LAB_worldmap__80098930:
+            if (-1 < iVar1) goto LAB_worldmap__80098944;
+            iVar1 = results[i] << 0x10;
+            if (iVar5 < 0) {
+                results[i] = results[i] + 1;
+                goto LAB_worldmap__80098944;
+            }
+        }
+        else {
+        LAB_worldmap__8009891c:
+            if (-1 < iVar2) goto LAB_worldmap__80098930;
+            if (iVar1 < 0) {
+                results[i] = results[i] + 1;
+                goto LAB_worldmap__80098930;
+            }
+        LAB_worldmap__80098944:
+            iVar1 = results[i] << 0x10;
+            if ((iVar5 < 0) && (iVar7 < 0)) {
+                results[i] = results[i] + 1;
+                iVar1 = results[i] * 0x10000;
+            }
+        }
+        if (iVar1 >> 0x10 == 4) {
+            return -1;
+        }
+    }
+
+    return (uint)((results[0] | results[1] | results[2] | results[3]) == 0);
+
+}
+
+s16 computeTileVisibilityOld(SVECTOR* param_1, SVECTOR* param_2, SVECTOR* param_3, SVECTOR* param_4) {
     int iVar1;
     int iVar2;
-    uint uVar3;
+    uint resultP3;
     VECTOR* pVVar4;
     int iVar5;
     VECTOR* pVVar6;
     int iVar7;
-    uint uVar8;
+    uint resultP2;
     VECTOR* pVVar9;
-    uint uVar10;
+    uint resultP1;
     VECTOR* r0;
-    uint uVar11;
+    uint resultP0;
 
     VECTOR VECTOR_1f800000;
     VECTOR VECTOR_1f800010;
@@ -770,21 +838,21 @@ s16 computeTileVisibility(SVECTOR* param_1, SVECTOR* param_2, SVECTOR* param_3, 
     gte_rt();
     pVVar4 = &VECTOR_1f800030;
     gte_stlvnl(&VECTOR_1f800030);
-    uVar11 = 0;
+    resultP0 = 0;
     iVar7 = r0->vx * VECTOR_8009c828.vx + VECTOR_1f800000.vz * VECTOR_8009c828.vz >> 0xc;
     iVar2 = pVVar9->vx * VECTOR_8009c828.vx + VECTOR_1f800010.vz * VECTOR_8009c828.vz >> 0xc;
     iVar5 = pVVar6->vx * VECTOR_8009c828.vx + VECTOR_1f800020.vz * VECTOR_8009c828.vz >> 0xc;
     iVar1 = pVVar4->vx * VECTOR_8009c828.vx + VECTOR_1f800030.vz * VECTOR_8009c828.vz >> 0xc;
     if (iVar7 < 0) {
         if (iVar2 < 0) {
-            uVar11 = 1;
+            resultP0 = 1;
             goto LAB_worldmap__8009891c;
         }
     LAB_worldmap__80098930:
         if (-1 < iVar1) goto LAB_worldmap__80098944;
-        iVar1 = uVar11 << 0x10;
+        iVar1 = resultP0 << 0x10;
         if (iVar5 < 0) {
-            uVar11 = uVar11 + 1;
+            resultP0 = resultP0 + 1;
             goto LAB_worldmap__80098944;
         }
     }
@@ -792,17 +860,17 @@ s16 computeTileVisibility(SVECTOR* param_1, SVECTOR* param_2, SVECTOR* param_3, 
     LAB_worldmap__8009891c:
         if (-1 < iVar2) goto LAB_worldmap__80098930;
         if (iVar1 < 0) {
-            uVar11 = uVar11 + 1;
+            resultP0 = resultP0 + 1;
             goto LAB_worldmap__80098930;
         }
     LAB_worldmap__80098944:
-        iVar1 = uVar11 << 0x10;
+        iVar1 = resultP0 << 0x10;
         if ((iVar5 < 0) && (iVar7 < 0)) {
-            uVar11 = uVar11 + 1;
-            iVar1 = uVar11 * 0x10000;
+            resultP0 = resultP0 + 1;
+            iVar1 = resultP0 * 0x10000;
         }
     }
-    uVar10 = 0;
+    resultP1 = 0;
     if (iVar1 >> 0x10 == 4) {
         return 0xffffffff;
     }
@@ -812,14 +880,14 @@ s16 computeTileVisibility(SVECTOR* param_1, SVECTOR* param_2, SVECTOR* param_3, 
     iVar1 = r0[3].vx * VECTOR_8009c844.vx + r0[3].vz * VECTOR_8009c844.vz >> 0xc;
     if (iVar7 < 0) {
         if (iVar2 < 0) {
-            uVar10 = 1;
+            resultP1 = 1;
             goto LAB_worldmap__80098a2c;
         }
     LAB_worldmap__80098a40:
         if (-1 < iVar1) goto LAB_worldmap__80098a54;
-        iVar1 = uVar10 << 0x10;
+        iVar1 = resultP1 << 0x10;
         if (iVar5 < 0) {
-            uVar10 = uVar10 + 1;
+            resultP1 = resultP1 + 1;
             goto LAB_worldmap__80098a54;
         }
     }
@@ -827,17 +895,17 @@ s16 computeTileVisibility(SVECTOR* param_1, SVECTOR* param_2, SVECTOR* param_3, 
     LAB_worldmap__80098a2c:
         if (-1 < iVar2) goto LAB_worldmap__80098a40;
         if (iVar1 < 0) {
-            uVar10 = uVar10 + 1;
+            resultP1 = resultP1 + 1;
             goto LAB_worldmap__80098a40;
         }
     LAB_worldmap__80098a54:
-        iVar1 = uVar10 << 0x10;
+        iVar1 = resultP1 << 0x10;
         if ((iVar5 < 0) && (iVar7 < 0)) {
-            uVar10 = uVar10 + 1;
-            iVar1 = uVar10 * 0x10000;
+            resultP1 = resultP1 + 1;
+            iVar1 = resultP1 * 0x10000;
         }
     }
-    uVar8 = 0;
+    resultP2 = 0;
     if (iVar1 >> 0x10 == 4) {
         return 0xffffffff;
     }
@@ -847,14 +915,14 @@ s16 computeTileVisibility(SVECTOR* param_1, SVECTOR* param_2, SVECTOR* param_3, 
     iVar1 = r0[3].vy * VECTOR_8009c874.vy + r0[3].vz * VECTOR_8009c874.vz >> 0xc;
     if (iVar7 < 0) {
         if (iVar2 < 0) {
-            uVar8 = 1;
+            resultP2 = 1;
             goto LAB_worldmap__80098b3c;
         }
     LAB_worldmap__80098b50:
         if (-1 < iVar1) goto LAB_worldmap__80098b64;
-        iVar1 = uVar8 << 0x10;
+        iVar1 = resultP2 << 0x10;
         if (iVar5 < 0) {
-            uVar8 = uVar8 + 1;
+            resultP2 = resultP2 + 1;
             goto LAB_worldmap__80098b64;
         }
     }
@@ -862,54 +930,54 @@ s16 computeTileVisibility(SVECTOR* param_1, SVECTOR* param_2, SVECTOR* param_3, 
     LAB_worldmap__80098b3c:
         if (-1 < iVar2) goto LAB_worldmap__80098b50;
         if (iVar1 < 0) {
-            uVar8 = uVar8 + 1;
+            resultP2 = resultP2 + 1;
             goto LAB_worldmap__80098b50;
         }
     LAB_worldmap__80098b64:
-        iVar1 = uVar8 << 0x10;
+        iVar1 = resultP2 << 0x10;
         if ((iVar5 < 0) && (iVar7 < 0)) {
-            uVar8 = uVar8 + 1;
-            iVar1 = uVar8 * 0x10000;
+            resultP2 = resultP2 + 1;
+            iVar1 = resultP2 * 0x10000;
         }
     }
     if (iVar1 >> 0x10 == 4) {
         return 0xffffffff;
     }
-    uVar3 = 0;
+    resultP3 = 0;
     iVar7 = r0->vy * VECTOR_8009c7f0.vy + r0->vz * VECTOR_8009c7f0.vz >> 0xc;
     iVar2 = r0[1].vy * VECTOR_8009c7f0.vy + r0[1].vz * VECTOR_8009c7f0.vz >> 0xc;
     iVar5 = r0[2].vy * VECTOR_8009c7f0.vy + r0[2].vz * VECTOR_8009c7f0.vz >> 0xc;
     iVar1 = r0[3].vy * VECTOR_8009c7f0.vy + r0[3].vz * VECTOR_8009c7f0.vz >> 0xc;
     if (iVar7 < 0) {
         if (iVar2 < 0) {
-            uVar3 = 1;
+            resultP3 = 1;
             goto LAB_worldmap__80098c50;
         }
     LAB_worldmap__80098c64:
         if (iVar1 < 0) {
-            iVar1 = uVar3 << 0x10;
+            iVar1 = resultP3 << 0x10;
             if (-1 < iVar5) goto LAB_worldmap__80098c94;
-            uVar3 = uVar3 + 1;
+            resultP3 = resultP3 + 1;
         }
     }
     else {
     LAB_worldmap__80098c50:
         if (-1 < iVar2) goto LAB_worldmap__80098c64;
         if (iVar1 < 0) {
-            uVar3 = uVar3 + 1;
+            resultP3 = resultP3 + 1;
             goto LAB_worldmap__80098c64;
         }
     }
-    iVar1 = uVar3 << 0x10;
+    iVar1 = resultP3 << 0x10;
     if ((iVar5 < 0) && (iVar7 < 0)) {
-        uVar3 = uVar3 + 1;
-        iVar1 = uVar3 * 0x10000;
+        resultP3 = resultP3 + 1;
+        iVar1 = resultP3 * 0x10000;
     }
 LAB_worldmap__80098c94:
     if (iVar1 >> 0x10 == 4) {
         return 0xffffffff;
     }
-    return (uint)((uVar3 | uVar8 | uVar10 | uVar11) == 0);
+    return (uint)((resultP3 | resultP2 | resultP1 | resultP0) == 0);
 }
 
 std::array<std::array<u32, 50>, 4> mapQuadrantTilesPatch = { {
@@ -957,6 +1025,12 @@ void worldmapDotInit(void)
     OuterProduct0(&VECTOR_worldmap__8009bb4c, &VECTOR_worldmap__8009bb7c, &VECTOR_8009c844);
     OuterProduct0(&VECTOR_worldmap__8009bb8c, &VECTOR_worldmap__8009bb5c, &VECTOR_8009c874);
     OuterProduct0(&VECTOR_worldmap__8009bb5c, &VECTOR_worldmap__8009bb9c, &VECTOR_8009c7f0);
+
+    OuterProduct0(&VECTOR_worldmap__8009bb6c, &VECTOR_worldmap__8009bb4c, &dots[0]);
+    OuterProduct0(&VECTOR_worldmap__8009bb4c, &VECTOR_worldmap__8009bb7c, &dots[1]);
+    OuterProduct0(&VECTOR_worldmap__8009bb8c, &VECTOR_worldmap__8009bb5c, &dots[2]);
+    OuterProduct0(&VECTOR_worldmap__8009bb5c, &VECTOR_worldmap__8009bb9c, &dots[3]);
+
     return;
 }
 
