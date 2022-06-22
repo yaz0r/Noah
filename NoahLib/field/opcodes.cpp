@@ -2297,23 +2297,12 @@ void OP_1F()
     pCurrentFieldScriptActor->mCC_scriptPC += 2;
 }
 
-void OP_21()
+void OP_SET_TIME_SCALE()
 {
     int sVar2 = getImmediateOrVariableUnsigned(1);
     pCurrentFieldScriptActor->m76 = sVar2;
-    OP_21_sub(actorArray[currentFieldActorId].m4_pVramSpriteSheet, sVar2);
-    pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
-}
-
-void OP_22()
-{
-    sFieldScriptEntity* psVar1;
-
-    psVar1 = pCurrentFieldScriptActor;
-    actorArray[currentFieldActorId].m58_flags = actorArray[currentFieldActorId].m58_flags & 0xffdf;
-    psVar1->mE8_currentAnimationId = 0xff;
-    psVar1->m4_flags.m_rawFlags = psVar1->m4_flags.m_rawFlags & 0xfdffffff;
-    psVar1->mCC_scriptPC = psVar1->mCC_scriptPC + 1;
+    SetTimeScale(actorArray[currentFieldActorId].m4_pVramSpriteSheet, sVar2);
+    pCurrentFieldScriptActor->mCC_scriptPC += 3;
 }
 
 void OP_ROTATE_AWAY_FROM_ACTOR()
@@ -3459,7 +3448,18 @@ void OPX_23() {
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 0x14;
 }
 
-void OP_23(void)
+void OP_MAKE_VISIBLE_ACTIVE()
+{
+    sFieldScriptEntity* psVar1;
+
+    psVar1 = pCurrentFieldScriptActor;
+    actorArray[currentFieldActorId].m58_flags = actorArray[currentFieldActorId].m58_flags & 0xffdf;
+    psVar1->mE8_currentAnimationId = 0xff;
+    psVar1->m4_flags.m_rawFlags = psVar1->m4_flags.m_rawFlags & 0xfdffffff;
+    psVar1->mCC_scriptPC = psVar1->mCC_scriptPC + 1;
+}
+
+void OP_MAKE_INVISIBLE_ACTIVE(void)
 {
     sFieldScriptEntity* psVar1;
 
@@ -3469,7 +3469,7 @@ void OP_23(void)
     return;
 }
 
-void OP_24(void)
+void OP_MAKE_VISIBLE_BY_ID(void)
 {
     int iVar1;
     sFieldEntity* psVar2;
@@ -3487,8 +3487,7 @@ void OP_24(void)
     return;
 }
 
-
-void OP_25()
+void OP_MAKE_INVISIBLE_BY_ID()
 {
     int iVar1;
 

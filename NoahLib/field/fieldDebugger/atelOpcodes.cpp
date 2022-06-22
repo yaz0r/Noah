@@ -115,14 +115,15 @@ void initOpcodeTable()
 		.end();
 
 	m_opcode[0x17]
-		.addArgumentS16OrVar(0x80)
-		.addArgumentS16OrVar(0x40)
-		.addArgumentS16OrVar(0x20)
-		.addArgumentS16OrVar(0x10)
-		.addArgumentS16OrVar(0x08)
-		.addArgumentS16OrVar(0x04)
-		.addArgumentS16OrVar(0x02)
-		.addArgumentS16OrVar(0x01)
+        .setName("SETUP_MOVEMENT_BOUNDING_ZONE")
+		.addArgumentS16OrVar(0x80, "X0")
+		.addArgumentS16OrVar(0x40, "Y0")
+		.addArgumentS16OrVar(0x20, "X1")
+		.addArgumentS16OrVar(0x10, "Y1")
+		.addArgumentS16OrVar(0x08, "X2")
+		.addArgumentS16OrVar(0x04, "Y2")
+		.addArgumentS16OrVar(0x02, "X3")
+		.addArgumentS16OrVar(0x01, "Y3")
 		.addSignControlByte()
 		.end();
 
@@ -169,22 +170,25 @@ void initOpcodeTable()
 		.end();
 
 	m_opcode[0x21]
+        .setName("SET_TIME_SCALE")
 		.addArgumentU16OrVar()
 		.end();
 
 	m_opcode[0x22]
-		.setName("MAKE_VISIBLE")
+		.setName("MAKE_VISIBLE_ACTIVE")
 		.end();
 
 	m_opcode[0x23]
-		.setName("MAKE_INVISIBLE")
+		.setName("MAKE_INVISIBLE_ACTIVE")
 		.end();
 
 	m_opcode[0x24]
+        .setName("MAKE_VISIBLE_BY_ID")
 		.addArgumentCharacter()
 		.end();
 
 	m_opcode[0x25]
+        .setName("MAKE_INVISIBLE_BY_ID")
 		.addArgumentCharacter()
 		.end();
 
