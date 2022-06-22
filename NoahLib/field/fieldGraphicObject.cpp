@@ -16,7 +16,7 @@ sSpriteActorCore* spriteTransfertListHead = nullptr;
 sFieldEntitySub4_110 sFieldEntitySub4_110_8005a474;
 sFieldEntitySub4_110 sFieldEntitySub4_110_8006be10;
 
-void OP_21_sub(sSpriteActor* param_1, int param_2)
+void SetTimeScale(sSpriteActor* param_1, int param_2)
 {
 	param_1->mAC = param_1->mAC & 0xfff8007f | (param_2 & 0xfff) << 7;
 }

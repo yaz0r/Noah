@@ -233,7 +233,7 @@ struct sSavePointMesh2 : public sSavePointMeshAbstract
 extern sSpriteActorCore* spriteTransfertListHead;
 extern sSavePointMesh_1C* spriteCallback2Head;
 
-void OP_21_sub(sSpriteActor* param_1, int param_2);
+void SetTimeScale(sSpriteActor* param_1, int param_2); // 0x80021BCC
 void OP_INIT_ENTITY_SCRIPT_sub0Sub9(sSpriteActorCore* param_1);
 sSpriteActor* initializeSpriteActor(sSpriteActor* param_1, sSpriteActorAnimationBundle* pSetup, int clutX, int clutY, int vramX, int vramY, int param_7);
 void spriteActorSetPlayingAnimation(sSpriteActorCore* param_1, int param_2);

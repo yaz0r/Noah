@@ -33,11 +33,11 @@ void initOpcodes()
     fieldScriptOpcodes[0x1E] = OP_UPDATE_ELEVATION;
     fieldScriptOpcodes[0x1F] = OP_1F;
     fieldScriptOpcodes[0x20] = OP_SET_CURRENT_ACTOR_FLAGS;
-    fieldScriptOpcodes[0x21] = OP_21;
-    fieldScriptOpcodes[0x22] = OP_22;
-    fieldScriptOpcodes[0x23] = OP_23;
-    fieldScriptOpcodes[0x24] = OP_24;
-    fieldScriptOpcodes[0x25] = OP_25;
+    fieldScriptOpcodes[0x21] = OP_SET_TIME_SCALE;
+    fieldScriptOpcodes[0x22] = OP_MAKE_VISIBLE_ACTIVE;
+    fieldScriptOpcodes[0x23] = OP_MAKE_INVISIBLE_ACTIVE;
+    fieldScriptOpcodes[0x24] = OP_MAKE_VISIBLE_BY_ID;
+    fieldScriptOpcodes[0x25] = OP_MAKE_INVISIBLE_BY_ID;
     fieldScriptOpcodes[0x26] = OP_WAIT;
     fieldScriptOpcodes[0x27] = OP_RESET_CHARACTER;
     fieldScriptOpcodes[0x28] = OP_28;
