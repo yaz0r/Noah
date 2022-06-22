@@ -3826,7 +3826,7 @@ void OP_WAIT_CAMERA()
     }
 }
 
-void OP_17()
+void OP_SETUP_MOVEMENT_BOUNDING_ZONE()
 {
     if ((pCurrentFieldScriptActor->m12C_flags & 0x1000) == 0) {
         pCurrentFieldScriptActor->m114_movementBoundingZone.resize(4);
@@ -3839,8 +3839,8 @@ void OP_17()
     pCurrentFieldScriptActor->m114_movementBoundingZone[1].vy = getVar10(7, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 0x11]);
     pCurrentFieldScriptActor->m114_movementBoundingZone[2].vx = getVar08(9, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 0x11]);
     pCurrentFieldScriptActor->m114_movementBoundingZone[2].vy = getVar04(0xB, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 0x11]);
-    pCurrentFieldScriptActor->m114_movementBoundingZone[3].vx = getVar04(0xD, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 0x11]);
-    pCurrentFieldScriptActor->m114_movementBoundingZone[3].vy = getVar04(0xF, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 0x11]);
+    pCurrentFieldScriptActor->m114_movementBoundingZone[3].vx = getVar02(0xD, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 0x11]);
+    pCurrentFieldScriptActor->m114_movementBoundingZone[3].vy = getVar01(0xF, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 0x11]);
     pCurrentFieldScriptActor->mCC_scriptPC += 0x12;
 }
 
