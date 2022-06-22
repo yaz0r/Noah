@@ -22,9 +22,9 @@ void initOpcodes()
     fieldScriptOpcodes[0x10] = OP_10;
     fieldScriptOpcodes[0x12] = OP_CUSTOM_FIELD_TRANSITION;
     fieldScriptOpcodes[0x14] = OP_DISABLE_RANDOM_BATTLES;
-    fieldScriptOpcodes[0x16] = OP_INIT_ENTITY_PC;
     fieldScriptOpcodes[0x15] = OP_15;
-    fieldScriptOpcodes[0x17] = OP_17;
+    fieldScriptOpcodes[0x16] = OP_INIT_ENTITY_PC;
+    fieldScriptOpcodes[0x17] = OP_SETUP_MOVEMENT_BOUNDING_ZONE;
     fieldScriptOpcodes[0x18] = OP_SET_BOUNDING_VOLUME;
     fieldScriptOpcodes[0x19] = OP_SET_ACTOR_POSITION_2D;
     fieldScriptOpcodes[0x1A] = OP_SET_ENTITY_WALKMESH_LAYER;
