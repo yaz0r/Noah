@@ -44,6 +44,12 @@ u16 worldmapInput2_1;
 u16 worldmapInput3_0;
 u16 worldmapInput3_1;
 
+s16 worldmapExitVar0;
+s16 worldmapExitVar1;
+s16 worldmapExitVar2;
+
+std::array<s16, 8>::iterator worldmapExitArrayPtr;
+
 VECTOR worldmapRadarPosition3 = { 0,0,0 };
 VECTOR worldmapGridInputPosition = { 0,0,0 };
 
@@ -589,6 +595,7 @@ void worldmapMode0_update(void) {
 
     worldmapFadePolyAbr = 2;
     worldmapFadePolyStep = 4;
+    worldmapExitVar2 = 0;
     MissingCode();
     worldmapMatrixMode = 0;
     fieldDrawEnvsInitialized = 1;
@@ -796,6 +803,10 @@ void initWorldMap(int param_1, int param_2)
     return;
 }
 
+std::array<s16, 8> worldmapExitArray = { {
+        0,0,0,0,0x122, 3, -1, 0
+} };
+
 void worldmapMainLoop(void) {
     pCurrentWorldmapRenderingStruct = &worldmapRenderingStructs[1];
     worldmapOddOrEven = 1;
@@ -845,6 +856,42 @@ void worldmapMainLoop(void) {
         PutDrawEnv(&pCurrentWorldmapRenderingStruct->m0_DrawEnv);
 
         MissingCode();
+
+        if (worldmapFadeRunning == 0) {
+            MissingCode("worldmap fade prevents inputs");
+        }
+        MissingCode();
+
+        // toggle worlmap on and off
+        if ((worldmapInput2_0 & 0x100) != 0) {
+            gameState.m1842_disableWorldmapMinimap = gameState.m1842_disableWorldmapMinimap ^ 1;
+        }
+
+        if (((worldmapFadeRunning == 0) && (worldmapExitVar2 != 0)) && (continueWorldmapLoop != 0)) {
+            if (0 < worldMapGearMode) {
+                if (worldMapGearMode < 4) {
+                    MissingCode("Menu from worldmap");
+                    /*
+                    worldmapPrepareEnterMenu();
+                    menuToEnter = 0;
+                    useDebugMenuList = 0;
+                    menuOpenArg = 1;
+                    worldmapFlushCacheAndSync();
+                    enterMenu();
+                    worldmapFlushCacheAndSync();
+                    worldmapRestoreAfterMenu(); */
+                }
+                else if (worldMapGearMode < 8) {
+                    continueWorldmapLoop = 0;
+                    exitWorldMapMode = 0;
+                    worldmapExitArrayPtr = worldmapExitArray.begin();
+                    gameState.m1834 = gameState.m1834 | 0x2000;
+                }
+            }
+        }
+        else {
+            worldmapExitVar2 = 0;
+        }
 
         shapeTransfert();
         MissingCode();

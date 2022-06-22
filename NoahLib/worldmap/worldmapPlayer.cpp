@@ -5,6 +5,8 @@
 #include "kernel/trigo.h"
 #include "worldmapWorldStreaming.h"
 
+void clearWorldmapParticles(s32 type);
+
 u8 adjustLocationAfterCollisionVar0;
 u8 adjustLocationAfterCollisionVar1;
 u16 adjustLocationAfterCollisionVar2;
@@ -266,13 +268,20 @@ s32 worldmapUpdatePlayerControls(sWorldmapStateEntry* param_1) {
     }
 
     if ((worldmapInput2_0 & 0x20) == 0) {
-        MissingCode();
+        if ((worldmapExitVar0 != -1) && (worldmapExitArrayPtr[7] == 1)) {
+            return 1;
+        }
     }
     else {
-        if (adjustLocationAfterCollisionVar0 != 0) {
+        if (adjustLocationAfterCollisionVar0 != '\0') {
             return 3;
         }
-        MissingCode();
+        if (worldmapExitVar0 != -1) {
+            return 1;
+        }
+    }
+    if ((((worldmapInput2_0 & 0x10) != 0) && (worldmapExitVar1 == -1)) && (worldmapExitVar0 == -1)) {
+        worldmapExitVar2 = 1;
     }
 
     MissingCode();
@@ -995,7 +1004,12 @@ s32 worldmapMode0_taskPlayer_update(int param_1)
             pEntry->m24 = 0;
         }
         else {
-            assert(0);
+            pEntry->m24 = 1;
+            (pEntry->m28_position).vx = gWorldmapState->m0[4].m28_position.vx;
+            (pEntry->m28_position).vy = gWorldmapState->m0[4].m28_position.vy;
+            (pEntry->m28_position).vz = gWorldmapState->m0[4].m28_position.vz;
+            pEntry->m48 = gWorldmapState->m0[4].m48;
+            clearWorldmapParticles(0x2f);
         }
         break;
     case 2: // yggdrasil 

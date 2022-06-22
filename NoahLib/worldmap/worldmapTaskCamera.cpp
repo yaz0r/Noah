@@ -35,7 +35,7 @@ s32 worldmap_taskCamera_init(int param_1) {
                 worldmapCameraVar0 = 0x460000;
                 worldmapRotation.vx = -0x260;
                 psVar1->m0[param_1].m64 = &SHORT_ARRAY_worldmap__8009b224;
-                psVar1->m0[param_1].m68 = &SHORT_ARRAY_worldmap__8009b234;
+                psVar1->m0[param_1].m68_array = &SHORT_ARRAY_worldmap__8009b234;
             }
         }
         else if (worldMapGearMode == 7) {
@@ -43,7 +43,7 @@ s32 worldmap_taskCamera_init(int param_1) {
             worldmapCameraVar0 = 0x280000;
             worldmapRotation.vx = -0x260;
             psVar1->m0[param_1].m64 = &SHORT_ARRAY_worldmap__8009b22c;
-            psVar1->m0[param_1].m68 = &SHORT_ARRAY_worldmap__8009b23c;
+            psVar1->m0[param_1].m68_array = &SHORT_ARRAY_worldmap__8009b23c;
         }
     }
     return 1;
@@ -106,7 +106,7 @@ s32 worldmap_taskCamera_update(int param_1) {
         psVar3 = &SHORT_ARRAY_worldmap__8009b234;
         psVar2->m0[param_1].m4 = 0;
     LAB_worldmap__80091cf8:
-        psVar2->m0[param_1].m68 = psVar3;
+        psVar2->m0[param_1].m68_array = psVar3;
         if (iVar4 == 0) {
             psVar2->m0[param_1].m50 = 1;
         }
@@ -136,7 +136,7 @@ s32 worldmap_taskCamera_update(int param_1) {
     switch (psVar2->m0[param_1].m20)
     {
     case 0:
-        iVar4 = worldmap_taskCamera_updateSub0(psVar2->m0[param_1].m50, psVar2->m0[param_1].m64, psVar2->m0[param_1].m68);
+        iVar4 = worldmap_taskCamera_updateSub0(psVar2->m0[param_1].m50, psVar2->m0[param_1].m64, psVar2->m0[param_1].m68_array);
         if (psVar2->m0[param_1].m50 != iVar4) {
             psVar2->m0[param_1].m20 = 1;
             psVar2->m0[param_1].m22 = 0;
@@ -150,7 +150,7 @@ s32 worldmap_taskCamera_update(int param_1) {
         break;
     case 1:
         if (4 < psVar2->m0[param_1].m22) {
-            iVar4 = worldmap_taskCamera_updateSub0(psVar2->m0[param_1].m50, psVar2->m0[param_1].m64, psVar2->m0[param_1].m68);
+            iVar4 = worldmap_taskCamera_updateSub0(psVar2->m0[param_1].m50, psVar2->m0[param_1].m64, psVar2->m0[param_1].m68_array);
             if (psVar2->m0[param_1].m50 != iVar4) {
                 psVar2->m0[param_1].m50 = iVar4;
                 iVar5 = psVar2->m0[param_1].m50;

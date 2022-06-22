@@ -10,17 +10,26 @@
 #include "worldmapTaskWorldCamera.h"
 #include "worldmapTaskYggdrasil.h"
 
+s32 dummy(s32) {
+    return 1;
+}
+
+// Order/index is important and used through the code to enable/disable entities, like enabling gears when exiting yggdrasil
 const std::vector<sWorldTaskDefinition> worldmapMode0_tasks = { {
     {&worldmap_taskFader_init, &worldmap_taskFader_update},
     {&worldmapMode0_taskPlayer_init, &worldmapMode0_taskPlayer_update},
-    // TODO: the rest
+    {&dummy, &dummy}, // PC 1
+    {&dummy, &dummy}, // PC 2
+    {&dummy, &dummy}, // Gear Player
+    {&dummy, &dummy}, // Gear 1
+    {&dummy, &dummy}, // Gear 2
     {&worldmap_taskYggdrasil_init, &worldmap_taskYggdrasil_update},
     {&worldmap_taskYggdrasilSubModels_init, &worldmap_taskYggdrasilSubModels_update},
-
     {&worldmap_taskWorldCamera_init, &worldmap_taskWorldCamera_update},
     {&worldmap_taskCamera_init, &worldmap_taskCamera_update},
     {&worldmap_taskMinimapY_init, &worldmap_taskMinimapY_update},
-
+    {&dummy, &dummy},
+    {&dummy, &dummy}, // Dialog window
     {&worldmap_taskGround_init, &worldmap_taskGround_update}
 } };
 

@@ -34,6 +34,7 @@ s32 worldmap_taskWorldCamera_update(int param_1)
 {
     switch (gWorldmapState->m0[param_1].m4 - 9) {
     case -9:
+    case -6:
         break;
 
     case 0:

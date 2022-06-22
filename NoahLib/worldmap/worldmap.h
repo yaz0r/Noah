@@ -19,8 +19,9 @@ struct sWorldmapStateEntry {
     s32 m58;
     s32 m5C;
     s32 m60;    
-    const std::array<s16, 4>* m64;
-    const std::array<s16, 4>* m68;
+    const std::array<s16, 4>* m64;// those two are sometimes aliased to u32
+    const std::array<s16, 4>* m68_array;
+    s32 m68;
     VECTOR m6C;
     s32 m7C;
 };
@@ -80,6 +81,10 @@ extern u16 worldmapInput2_1;
 extern u16 worldmapInput3_0;
 extern u16 worldmapInput3_1;
 
+extern s16 worldmapExitVar0;
+extern s16 worldmapExitVar1;
+extern s16 worldmapExitVar2;
+
 extern s32 worldmapFile9;
 extern s32 worldmapFile10;
 
@@ -87,6 +92,8 @@ extern MATRIX worldMapIdentityMatrix;
 extern SVECTOR worldmapGridPosition;
 
 extern s32 worldmapNumModels;
+
+extern std::array<s16, 8>::iterator worldmapExitArrayPtr;
 
 struct sWorldmapModel {
     u16 m0_hidden;
