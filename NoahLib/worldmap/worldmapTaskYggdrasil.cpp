@@ -282,11 +282,6 @@ int worldmapCheckCollisionsAgainstWorldmapModels(VECTOR* param_1, short* param_2
 int checkWorldmapPositionSub1(VECTOR* position, VECTOR* step, VECTOR* output, int stepScale, short param_5);
 void adjustLocationAfterCollision(VECTOR* param_1, int param_2, int param_3, u8* param_4, u8* param_5);
 
-extern u8 adjustLocationAfterCollisionVar0;
-extern u8 adjustLocationAfterCollisionVar1;
-extern u16 adjustLocationAfterCollisionVar2;
-
-
 int checkWorldmapPositionYggdrasil(VECTOR* position, VECTOR* step, VECTOR* output, int stepScale, s16 param_5) {
     VECTOR VECTOR_1f800060;
 

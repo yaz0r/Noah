@@ -6,6 +6,7 @@
 #include "worldmapTaskFader.h"
 #include "worldmapTaskGround.h"
 #include "worldmapPlayer.h"
+#include "worldmapPlayerGear.h"
 #include "worldmapTaskCamera.h"
 #include "worldmapTaskWorldCamera.h"
 #include "worldmapTaskYggdrasil.h"
@@ -20,7 +21,7 @@ const std::vector<sWorldTaskDefinition> worldmapMode0_tasks = { {
     {&worldmapMode0_taskPlayer_init, &worldmapMode0_taskPlayer_update},
     {&dummy, &dummy}, // PC 1
     {&dummy, &dummy}, // PC 2
-    {&dummy, &dummy}, // Gear Player
+    {&worldmapMode0_taskPlayerGear_init, &worldmapMode0_taskPlayerGear_update},
     {&dummy, &dummy}, // Gear 1
     {&dummy, &dummy}, // Gear 2
     {&worldmap_taskYggdrasil_init, &worldmap_taskYggdrasil_update},

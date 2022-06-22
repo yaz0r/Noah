@@ -31,6 +31,7 @@ struct sGameState
     std::array<s16, 2> m1820_worldmapPosition;
     s16 m1822;
     s16 m1824;
+    s16 m1826;
     SVECTOR m182C;
     u16 m1834;
     u16 m1836;

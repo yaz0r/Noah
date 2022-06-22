@@ -65,7 +65,8 @@ struct sWorldmapModes {
 
 std::array<sSpriteActorAnimationBundle*, 3 > worldmapPartySprites;
 std::array<std::vector<u8>, 3 > worldmapPartySpritesRaw;
-std::array<std::vector<u8>, 3 > worldmapPartyGearSprites;
+std::array<sSpriteActorAnimationBundle*, 3 > worldmapPartyGearSprites;
+std::array<std::vector<u8>, 3 > worldmapPartyGearSpritesRaw;
 s32 worldmapNumFilesPending = 0;
 
 std::array<sLoadingBatchCommands, 16> worldmapLoadingCommands;
@@ -81,15 +82,15 @@ void worldmapMode0_init(void) {
     for (int i = 0; i < 3; i++) {
         if (gameState.m1D34_currentParty[i] == 0xFF) {
             worldmapPartySpritesRaw[i].clear();
-            worldmapPartyGearSprites[i].clear();
+            worldmapPartyGearSpritesRaw[i].clear();
         }
         else {
             worldmapPartySpritesRaw[i].resize(getFileSizeAligned(gameState.m1D34_currentParty[i] + 2));
             if (gameState.m294[i].m78_partyData_gearNum == -1) {
-                worldmapPartyGearSprites[i].clear();
+                worldmapPartyGearSpritesRaw[i].clear();
             }
             else {
-                worldmapPartyGearSprites[i].resize(getFileSizeAligned(gameState.m294[i].m78_partyData_gearNum + 0x19));
+                worldmapPartyGearSpritesRaw[i].resize(getFileSizeAligned(gameState.m294[i].m78_partyData_gearNum + 0x19));
             }
         }
     }
@@ -105,7 +106,7 @@ void worldmapMode0_init(void) {
             worldmapNumFilesPending++;
             if (gameState.m294[i].m78_partyData_gearNum != -1) {
                 it->m0_fileIndex = gameState.m294[i].m78_partyData_gearNum + 0x13;
-                it->m4_loadPtr = &worldmapPartyGearSprites[i];
+                it->m4_loadPtr = &worldmapPartyGearSpritesRaw[i];
                 it++;
                 worldmapNumFilesPending++;
             }
@@ -585,6 +586,8 @@ void worldmapMode0_update(void) {
     //################
     worldmapPartySprites[0] = new sSpriteActorAnimationBundle();
     worldmapPartySprites[0]->init(worldmapPartySpritesRaw[0].begin());
+    worldmapPartyGearSprites[0] = new sSpriteActorAnimationBundle();
+    worldmapPartyGearSprites[0]->init(worldmapPartyGearSpritesRaw[0].begin());
     //################
     worldmapMode8_init();
     do {
