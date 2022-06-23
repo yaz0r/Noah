@@ -203,6 +203,7 @@ void initOpcodeTable()
 		.end();
 
 	m_opcode[0x28]
+        .setName("ENABLE_VM_FOR_CHARACTER")        
 		.addArgumentCharacter()
 		.end();
 
@@ -212,6 +213,7 @@ void initOpcodeTable()
 		.end();
 
 	m_opcode[0x2A]
+        .setName("DISABLE_DIALOG_ACTIVATION")
         .setComment("Toggle flag 0x20000 on current field script entity")
 		.end();
 
@@ -351,6 +353,7 @@ void initOpcodeTable()
 		.end();
 
 	m_opcode[0x53]
+        .setName("FOLLOW_CHARACTER")
 		.addArgumentCharacter()
         .addArgumentU16OrVar()
 		.end();
@@ -434,6 +437,7 @@ void initOpcodeTable()
 		.end();
 
 	m_opcode[0x67]
+        .setName("SET_CURRENT_ACTOR_ROTATION_WORLD_RELATIVE")
 		.addArgumentCharacter()
 		.addArgumentU16OrVar()
 		.end();
@@ -628,6 +632,7 @@ void initOpcodeTable()
         .end();
 
 	m_opcode[0xA2]
+        .setName("WAIT_FOR_CAMERA_ANIMATION_FLAG_CLEAR")
 		.setComment("Wait for mask to clear")
 		.addArgumentByte()
 		.end();
@@ -696,6 +701,7 @@ void initOpcodeTable()
 		.end();
 
 	m_opcode[0xB8]
+        .setName("ENABLE_CAMERA_HEIGHT_CHECK")
 		.end();
 
 	m_opcode[0xB9]
@@ -993,6 +999,11 @@ void initExtendedOpcodeTable()
         .addArgumentU16OrVar()
         .end();
 
+    m_extendedOpcode[0xA]
+        .setName("SET_FLAG_BIT_FIELD")
+        .addArgumentU16()
+        .end();
+
     m_extendedOpcode[0xC]
         .addArgumentU16()
         .addArgumentU16()
@@ -1039,6 +1050,12 @@ void initExtendedOpcodeTable()
 		.setComment("Triggers async loading")
 		.addArgumentByte()
 		.end();
+
+    m_extendedOpcode[0x17]
+        .setName("ROTATE_CHARACTER_TO_CHARACTER")
+        .addArgumentCharacter()
+        .addArgumentCharacter()
+        .end();
 
 	m_extendedOpcode[0x19]
 		.setName("REMOVE_FROM_CURRENT_PARTY")
@@ -1194,6 +1211,7 @@ void initExtendedOpcodeTable()
 		.end();
 
 	m_extendedOpcode[0x54]
+        .setName("START_CINEMATIC")
 		.end();
 
     m_extendedOpcode[0x55]
@@ -1365,6 +1383,7 @@ void initExtendedOpcodeTable()
 		.end();
 
 	m_extendedOpcode[0x8E]
+        .setName("SET_SCREEN_BOUNDS_PADDING")
 		.addArgumentU16OrVar()
 		.addArgumentU16OrVar()
 		.end();

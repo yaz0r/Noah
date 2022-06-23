@@ -40,9 +40,9 @@ void initOpcodes()
     fieldScriptOpcodes[0x25] = OP_MAKE_INVISIBLE_BY_ID;
     fieldScriptOpcodes[0x26] = OP_WAIT;
     fieldScriptOpcodes[0x27] = OP_RESET_CHARACTER;
-    fieldScriptOpcodes[0x28] = OP_28;
+    fieldScriptOpcodes[0x28] = OP_ENABLE_VM_FOR_CHARACTER;
     fieldScriptOpcodes[0x29] = OP_DELETE_ENTITY;
-    fieldScriptOpcodes[0x2A] = OP_2A;
+    fieldScriptOpcodes[0x2A] = DISABLE_DIALOG_ACTIVATION;
     fieldScriptOpcodes[0x2C] = OP_PLAY_ANIMATION;
     fieldScriptOpcodes[0x2D] = OP_GET_ACTOR_POSITION;
     fieldScriptOpcodes[0x2E] = OP_GET_ACTOR_FACING_ANGLE;
@@ -64,7 +64,7 @@ void initOpcodes()
     fieldScriptOpcodes[0x4B] = OP_4B;
     fieldScriptOpcodes[0x4C] = OP_4C;
     fieldScriptOpcodes[0x52] = OP_52;
-    fieldScriptOpcodes[0x53] = OP_53;
+    fieldScriptOpcodes[0x53] = OP_FOLLOW_CHARACTER;
     fieldScriptOpcodes[0x55] = OP_55;
     fieldScriptOpcodes[0x56] = OP_WORLDMAP;
     fieldScriptOpcodes[0x57] = OP_57;
@@ -82,7 +82,7 @@ void initOpcodes()
     fieldScriptOpcodes[0x63] = OP_SET_DESIRED_CAMERA_TARGET;
     fieldScriptOpcodes[0x64] = OP_64;
     fieldScriptOpcodes[0x65] = OP_SET_CAMERA_POSITION_OVERRIDE;
-    fieldScriptOpcodes[0x67] = OP_67;
+    fieldScriptOpcodes[0x67] = OP_SET_CURRENT_ACTOR_ROTATION_WORLD_RELATIVE;
     fieldScriptOpcodes[0x69] = OP_SET_CURRENT_ACTOR_ROTATION;
     fieldScriptOpcodes[0x6A] = OP_SET_ACTOR_ROTATION2;
     fieldScriptOpcodes[0x6B] = OP_ROTATE_ACTOR_CLOCKWISE;
@@ -112,7 +112,7 @@ void initOpcodes()
     fieldScriptOpcodes[0x9D] = OP_9D;
     fieldScriptOpcodes[0xA0] = OP_SET_SCREEN_GEOMETRY;
     fieldScriptOpcodes[0xA1] = OP_SET_DOLLY_STOP;
-    fieldScriptOpcodes[0xA2] = OP_A2;
+    fieldScriptOpcodes[0xA2] = OP_WAIT_FOR_CAMERA_ANIMATION_FLAG_CLEAR;
     fieldScriptOpcodes[0xA3] = OP_SET_DESIRED_CAMERA_POSITION;
     fieldScriptOpcodes[0xA4] = OP_A4;
     fieldScriptOpcodes[0xA7] = OP_UPDATE_CHARACTER;
@@ -125,7 +125,7 @@ void initOpcodes()
     fieldScriptOpcodes[0xB5] = OP_B5;
     fieldScriptOpcodes[0xB6] = OP_B6;
     fieldScriptOpcodes[0xB7] = OP_B7;
-    fieldScriptOpcodes[0xB8] = OP_B8;
+    fieldScriptOpcodes[0xB8] = OP_ENABLE_CAMERA_HEIGHT_CHECK;
     fieldScriptOpcodes[0xB9] = OP_IF_CHARACTER_IN_AVAILABLE_PARTY;
     fieldScriptOpcodes[0xBA] = OP_ADD_FROM_AVAILABLE_PARTY;
     fieldScriptOpcodes[0xBB] = OP_REMOVE_FROM_AVAILABLE_PARTY;
@@ -159,7 +159,7 @@ void initOpcodes()
     fieldScriptOpcodes[0xE5] = OP_SETUP_FOG;
     fieldScriptOpcodes[0xE6] = OP_SET_CAMERA_LIMITS;
     fieldScriptOpcodes[0xE7] = OP_SET_BACKGROUND_CLEAR_COLOR;
-    fieldScriptOpcodes[0xEC] = ORBIT;
+    fieldScriptOpcodes[0xEC] = OP_ORBIT;
     fieldScriptOpcodes[0xEE] = OP_EE;
     fieldScriptOpcodes[0xEF] = OP_WAIT_CAMERA;
     fieldScriptOpcodes[0xF1] = OP_SETUP_SCREEN_EFFECT1;
@@ -182,14 +182,14 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0x07] = OPX_07;
     fieldScriptOpcodes_EX[0x08] = OP_SET_3D_SCALE;
     fieldScriptOpcodes_EX[0x09] = OPX_09;
-    fieldScriptOpcodes_EX[0x0A] = OPX_0A;
+    fieldScriptOpcodes_EX[0x0A] = OPX_SET_FLAG_BIT_FIELD;
     fieldScriptOpcodes_EX[0x0C] = OPX_0C;
     fieldScriptOpcodes_EX[0x0D] = OP_SET_DIALOG_PORTRAIT;
     fieldScriptOpcodes_EX[0x0E] = OP_SET_MUSIC_PARAMS;
-    fieldScriptOpcodes_EX[0x10] = OPX_10;
+    fieldScriptOpcodes_EX[0x10] = OPX_SET_TEMPO;
     fieldScriptOpcodes_EX[0x13] = OPX_13;
     fieldScriptOpcodes_EX[0x15] = OPX_15;
-    fieldScriptOpcodes_EX[0x17] = OPX_17;
+    fieldScriptOpcodes_EX[0x17] = OPX_ROTATE_CHARACTER_TO_CHARACTER;
     fieldScriptOpcodes_EX[0x18] = OP_ADD_TO_CURRENT_PARTY;
     fieldScriptOpcodes_EX[0x19] = OP_REMOVE_FROM_CURRENT_PARTY;
     fieldScriptOpcodes_EX[0x1A] = OP_FINALIZE_PARTY_CHARACTER_LOADING;
@@ -218,7 +218,7 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0x50] = OP_DISABLE_MENU;
     fieldScriptOpcodes_EX[0x52] = OP_DISABLE_COMPASS;
     fieldScriptOpcodes_EX[0x53] = OP_ENABLE_PLAYER_CONTROLS;
-    fieldScriptOpcodes_EX[0x54] = OPX_54;
+    fieldScriptOpcodes_EX[0x54] = OPX_START_CINEMATIC;
     fieldScriptOpcodes_EX[0x57] = OP_OPEN_LOAD_GAME_MENU;
     fieldScriptOpcodes_EX[0x5B] = OPX_5B;
     fieldScriptOpcodes_EX[0x5C] = OP_LOAD_NEW_MECHA;
@@ -243,7 +243,7 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0x87] = OP_WAIT_MENU;
     fieldScriptOpcodes_EX[0x88] = OP_SETUP_MECHA_FIELD_ARGS;
     fieldScriptOpcodes_EX[0x8C] = OPX_8C;
-    fieldScriptOpcodes_EX[0x8E] = OPX_8E;
+    fieldScriptOpcodes_EX[0x8E] = OPX_SET_SCREEN_BOUNDS_PADDING;
     fieldScriptOpcodes_EX[0x8F] = OP_RESET_PARTICLE_CONFIGS;
     fieldScriptOpcodes_EX[0x90] = OP_SETUP_PARTICLE;
     fieldScriptOpcodes_EX[0x91] = OP_SETUP_PARTICLE_POSITION;
