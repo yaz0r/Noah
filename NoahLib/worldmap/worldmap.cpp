@@ -237,21 +237,30 @@ void finalizeWorldMapFileLoading() {
     // init the worldmap exits. Original code was a relocation + cast
     {
         std::vector<u8>::iterator data = worldmapFile1Buffer_4 + READ_LE_U32(worldmapFile1Buffer_4 + 4);
-        int numExits = (READ_LE_U32(data) - READ_LE_U32(worldmapFile1Buffer_4 + 4)) / 4;
+        int numExitGroup = (READ_LE_U32(data) - READ_LE_U32(worldmapFile1Buffer_4 + 4)) / 4;
+        assert(numExitGroup == 4);
 
-        worldmapExitsDefs.resize(numExits);
-
-        for (int i = 0; i < numExits; i++) {
+        for (int i = 0; i < numExitGroup; i++) {
             std::vector<u8>::iterator exitData = worldmapFile1Buffer_4 + READ_LE_U32(data + 4 * i);
 
-            worldmapExitsDefs[i].m0_X = READ_LE_S16(exitData + 0x00);
-            worldmapExitsDefs[i].m2_Y = READ_LE_S16(exitData + 0x02);
-            worldmapExitsDefs[i].m4_width = READ_LE_S16(exitData + 0x04);
-            worldmapExitsDefs[i].m6_height = READ_LE_S16(exitData + 0x06);
-            worldmapExitsDefs[i].m8_destinationField = READ_LE_S16(exitData + 0x08);
-            worldmapExitsDefs[i].mA = READ_LE_S16(exitData + 0x0A);
-            worldmapExitsDefs[i].mC_newWorldmapMode = READ_LE_S16(exitData + 0x0C);
-            worldmapExitsDefs[i].mE_type = READ_LE_S16(exitData + 0x0E);
+            do {
+                sWorldmapExitDef newExit;
+                newExit.m0_X = READ_LE_S16(exitData + 0x00);
+                newExit.m2_Y = READ_LE_S16(exitData + 0x02);
+                newExit.m4_width = READ_LE_S16(exitData + 0x04);
+                newExit.m6_height = READ_LE_S16(exitData + 0x06);
+                newExit.m8_destinationField = READ_LE_S16(exitData + 0x08);
+                newExit.mA = READ_LE_S16(exitData + 0x0A);
+                newExit.mC_newWorldmapMode = READ_LE_S16(exitData + 0x0C);
+                newExit.mE_type = READ_LE_S16(exitData + 0x0E);
+                worldmapExitsDefs[i].push_back(newExit);
+
+                if (newExit.m8_destinationField == -1) {
+                    break;
+                }
+
+                exitData += 0x10;
+            } while (1);
         }
     }
 

@@ -1,7 +1,9 @@
 #include "noahLib.h"
 #include "worldmapExit.h"
+#include "field/dialogWindows.h"
+#include "worldmap.h"
 
-std::vector<sWorldmapExitDef> worldmapExitsDefs;
+std::array<std::vector<sWorldmapExitDef>, 4> worldmapExitsDefs;
 sWorldmapExitDef* worldmapCurrentExit;
 s16 worldmapExitVar0;
 s16 worldmapExitVar1;
@@ -17,7 +19,7 @@ sWorldmapExitDef worldmapExitToField290_yggdrasilDeck = {
 };
 
 int setupWorldmapExits(VECTOR* param_1, int param_2) {
-    worldmapCurrentExit = &worldmapExitsDefs[param_2];
+    worldmapCurrentExit = &worldmapExitsDefs[param_2][0];
 
     if (worldmapCurrentExit->m8_destinationField != -1) {
         uint uVar3 = param_1->vx >> 0xc & 0xffff;
@@ -45,4 +47,46 @@ int setupWorldmapExits(VECTOR* param_1, int param_2) {
     worldmapExitVar1 = -1;
     worldmapCurrentExit = nullptr;
     return 0;
+}
+
+sDialogWindow18 worldmapDialogWindow18;
+
+s32 worldmap_taskExit_init(s32) {
+    worldmapExitVar0 = 0xffff;
+    setupWindowSize2(&worldmapDialogWindow18, 0x3c0, 0x180, 0xa0, 0x78, 0x20, 1);
+    worldmapDialogWindow18.m68 = 8;
+    worldmapDialogWindow18.m10_flags = worldmapDialogWindow18.m10_flags | 2;
+    resetDialogWindow18(&worldmapDialogWindow18);
+    return 1;
+}
+
+s32 worldmap_taskExit_update(s32 param_1) {
+    short sVar1;
+    sWorldmapState* psVar2;
+    int iVar4;
+
+    psVar2 = gWorldmapState;
+    sVar1 = gWorldmapState->m0[param_1].m20;
+    if (sVar1 == 0) {
+        if (worldmapExitVar0 != -1) {
+            resetDialogWindow18(&worldmapDialogWindow18);
+            addDialogWindowsToOTSub2(&worldmapDialogWindow18, getDialogParamPointer(worldmapFile1Buffer_1C, (int)worldmapExitVar0));
+            iVar4 = (int)worldmapExitVar0;
+            psVar2->m0[param_1].m20 = 1;
+            psVar2->m0[param_1].m50 = iVar4;
+        }
+    }
+    else if (sVar1 == 1) {
+        if (worldmapExitVar0 == -1) {
+            resetDialogWindow18(&worldmapDialogWindow18);
+            psVar2->m0[param_1].m20 = 0;
+        }
+        else if ((int)worldmapExitVar0 != gWorldmapState->m0[param_1].m50) {
+            resetDialogWindow18(&worldmapDialogWindow18);
+            addDialogWindowsToOTSub2(&worldmapDialogWindow18, getDialogParamPointer(worldmapFile1Buffer_1C, (int)worldmapExitVar0));
+            psVar2->m0[param_1].m50 = (int)worldmapExitVar0;
+        }
+    }
+    updateAndRenderTextForDialogWindow(&worldmapDialogWindow18, &pCurrentWorldmapRenderingStruct->m70_OT[0], worldmapOddOrEven);
+    return 1;
 }

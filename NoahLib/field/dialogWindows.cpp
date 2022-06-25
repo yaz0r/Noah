@@ -419,9 +419,9 @@ const std::vector<sVec2_s16> windowsDefaultPositions = {
 s16 dialogWindowOpenAnimationNumFrames = 0;
 
 
-std::vector<u8>::iterator getDialogParamPointer(std::vector<u8>& buffer, int param_2)
+std::vector<u8>::iterator getDialogParamPointer(std::vector<u8>::iterator& buffer, int param_2)
 {
-	return buffer.begin() + READ_LE_U16(buffer.begin() + param_2 * 2 + 4);
+	return buffer + READ_LE_U16(buffer + param_2 * 2 + 4);
 }
 
 void createDialogWindow(short x, short y, int dialogIndex, int windowIndex, int width, int height, int fieldActorId, int actorId, int mode, uint param_10, uint param_11)
@@ -503,7 +503,7 @@ void createDialogWindow(short x, short y, int dialogIndex, int windowIndex, int 
 		bVar3 = 1;
 	}
 	gDialogWindows[windowIndex].m18.m68 = bVar3;
-	gDialogWindows[windowIndex].m18.m90_dialogPointer = getDialogParamPointer(rawFieldDialogBundle, dialogIndex);
+	gDialogWindows[windowIndex].m18.m90_dialogPointer = getDialogParamPointer(rawFieldDialogBundle.begin(), dialogIndex);
 	gDialogWindows[windowIndex].m40E = 0;
 	gDialogWindows[windowIndex].m18.m10_flags |= 2;
 	gDialogWindows[windowIndex].m416_fieldActorId = fieldActorId;

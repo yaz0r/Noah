@@ -12,7 +12,7 @@ struct sWorldmapExitDef {
     // size 0x10
 };
 
-extern std::vector<sWorldmapExitDef> worldmapExitsDefs;
+extern std::array<std::vector<sWorldmapExitDef>,4> worldmapExitsDefs;
 extern sWorldmapExitDef* worldmapCurrentExit;
 extern s16 worldmapExitVar0;
 extern s16 worldmapExitVar1;
@@ -21,4 +21,10 @@ extern sWorldmapExitDef worldmapExitToField312;
 extern sWorldmapExitDef worldmapExitToField440;
 extern sWorldmapExitDef worldmapExitToField290_yggdrasilDeck;
 
+extern std::vector<u8>::iterator worldmapFile1Buffer_1C;
+
+
 int setupWorldmapExits(VECTOR* param_1, int param_2);
+
+s32 worldmap_taskExit_init(s32);
+s32 worldmap_taskExit_update(s32);

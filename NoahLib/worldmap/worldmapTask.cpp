@@ -10,6 +10,7 @@
 #include "worldmapTaskCamera.h"
 #include "worldmapTaskWorldCamera.h"
 #include "worldmapTaskYggdrasil.h"
+#include "worldmapExit.h"
 
 s32 dummy(s32) {
     return 1;
@@ -29,7 +30,7 @@ const std::vector<sWorldTaskDefinition> worldmapMode0_tasks = { {
     {&worldmap_taskWorldCamera_init, &worldmap_taskWorldCamera_update},
     {&worldmap_taskCamera_init, &worldmap_taskCamera_update},
     {&worldmap_taskMinimapY_init, &worldmap_taskMinimapY_update},
-    {&dummy, &dummy},
+    {&worldmap_taskExit_init, &worldmap_taskExit_update},
     {&dummy, &dummy}, // Dialog window
     {&worldmap_taskGround_init, &worldmap_taskGround_update}
 } };

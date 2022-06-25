@@ -989,7 +989,7 @@ s32 worldmapMode0_taskPlayer_update(int param_1)
                     MissingCode();
                 }
 
-                MissingCode();
+                setupWorldmapExits(&pEntry->m28_position, 0);
 
                 (pEntry->m38_step).vz = 0;
                 (pEntry->m38_step).vy = 0;

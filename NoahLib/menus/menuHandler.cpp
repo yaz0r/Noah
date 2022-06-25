@@ -400,8 +400,8 @@ void setupMenuContext4E0(sMenuContext_4E0* param_1, const std::vector<std::array
         sMenuContext_4E0* pEntry = &param_1[i];
         sMenuContext_4E0* pEntry2 = &param_1[i+1];
 
-        pEntry->m7E_stringWidth = renderString(getDialogParamPointer(gMenuContext->m2E0_textBundle, (*param_2)[0]), gMenuContext->m4E0[0].m78_imageData, 0x18, 0);
-        pEntry2->m7E_stringWidth = renderString(getDialogParamPointer(gMenuContext->m2E0_textBundle, (*param_2)[1]), gMenuContext->m4E0[0].m78_imageData, 0x18, 1);
+        pEntry->m7E_stringWidth = renderString(getDialogParamPointer(gMenuContext->m2E0_textBundle.begin(), (*param_2)[0]), gMenuContext->m4E0[0].m78_imageData, 0x18, 0);
+        pEntry2->m7E_stringWidth = renderString(getDialogParamPointer(gMenuContext->m2E0_textBundle.begin(), (*param_2)[1]), gMenuContext->m4E0[0].m78_imageData, 0x18, 1);
 
         int rectY = i + startY;
         if (rectY < 0) {
