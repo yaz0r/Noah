@@ -11,6 +11,10 @@ u8 adjustLocationAfterCollisionVar0;
 u8 adjustLocationAfterCollisionVar1;
 u16 adjustLocationAfterCollisionVar2;
 
+std::array<s16, 6> SHORT_ARRAY_worldmap__8009b180 = { {
+        1,1,0,1,1,1
+} };
+
 u8* getWorldChunkForPosition(int x, int y)
 {
     bool bVar1;
@@ -972,10 +976,6 @@ s32 worldmapMode0_taskPlayer_update(int param_1)
                     else {
                         collisionResult2 = adjustLocationAfterCollisionVar0;
                     }
-
-                    static const std::array<s16, 6> SHORT_ARRAY_worldmap__8009b180 = { {
-                            1,1,0,1,1,1
-                    } };
 
                     if (SHORT_ARRAY_worldmap__8009b180[((int)(collisionResult2 << 0x10) >> 0xf) / 2]) {
                         pEntry->m28_position = DAT_1f800090;

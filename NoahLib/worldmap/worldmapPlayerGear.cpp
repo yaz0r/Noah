@@ -4,10 +4,14 @@
 #include "field/fieldGraphicObject.h"
 #include "kernel/trigo.h"
 
+void clearWorldmapParticles(s32 type);
+
 std::array<s16, 4> SHORT_ARRAY_worldmap__8009b18c = { {0x100, 0x100, 0x100, 0} };
 std::array<s16, 4> SHORT_ARRAY_worldmap__8009b194 = { {0x1FD, 0x1FC, 0x1FB, 0} };
 std::array<s16, 4> SHORT_ARRAY_worldmap__8009b19c = { {0x140, 0x160, 0x280, 0} };
 std::array<s16, 4> SHORT_ARRAY_worldmap__8009b1a4 = { {0x140, 0x140, 0x100, 0x3C00} };
+
+extern std::array<s16, 6> SHORT_ARRAY_worldmap__8009b180;
 
 void createGearSpriteActor(sWorldmapStateEntry* param_1, int param_2)
 {
@@ -150,6 +154,61 @@ byte stepGearAwayFromYggdrasil(sWorldmapStateEntry* param_1)
     return bVar3;
 }
 
+int worldmapUpdatePlayerGearsControls(sWorldmapStateEntry* param_1)
+{
+    short sVar1;
+    ushort uVar2;
+    int iVar3;
+
+    switch (worldmapInput1_0 >> 0xc) {
+    case 1:
+        param_1->m48 = worldmapRotation.vy;
+        break;
+    case 2:
+        param_1->m48 = (worldmapRotation.vy + 0x400) & 0xFFF;
+        break;
+    case 3:
+        param_1->m48 = (worldmapRotation.vy + 0x200) & 0xFFF;
+        break;
+    case 4:
+        param_1->m48 = (worldmapRotation.vy + 0x800) & 0xFFF;
+        break;
+    case 6:
+        param_1->m48 = (worldmapRotation.vy + 0x600) & 0xFFF;
+        break;
+    case 8:
+        param_1->m48 = (worldmapRotation.vy - 0x400) & 0xFFF;
+        break;
+    case 9:
+        param_1->m48 = (worldmapRotation.vy - 0x200) & 0xFFF;
+        break;
+    case 0xc:
+        param_1->m48 = (worldmapRotation.vy - 0x600) & 0xFFF;
+        break;
+    }
+    if ((worldmapInput1_0 & 0xf000) != 0) {
+        iVar3 = getAngleCos((int)param_1->m48);
+        sVar1 = param_1->m48;
+        (param_1->m38_step).vx = iVar3;
+        iVar3 = getAngleSin((int)sVar1);
+        (param_1->m38_step).vz = -iVar3;
+    }
+    if (((worldmapInput2_0 & 0x20) == 0) || ((iVar3 = 3, adjustLocationAfterCollisionVar0 == '\0' && (iVar3 = 1, worldmapExitVar0 == -1)))) {
+        if (((worldmapInput2_0 & 0x10) != 0) && ((worldmapExitVar1 == -1 && (worldmapExitVar0 == -1)))) {
+            worldmapExitVar2 = 1;
+        }
+        //FUN_worldmap__80090a18();
+        MissingCode();
+        iVar3 = 0;
+    }
+    return iVar3;
+}
+
+int checkWorldmapPosition(VECTOR* position, VECTOR* step, VECTOR* output, int stepScale, int param_5);
+void adjustLocationAfterCollision(VECTOR* param_1, int param_2, int param_3, u8* param_4, u8* param_5);
+ushort getWorldmapGroundType(VECTOR* param_1);
+int checkWorldmapPositionSub1_0_1(int param_1, int param_2);
+
 s32 worldmapMode0_taskPlayerGear_update(int param_1) {
 
     s32 iVar11 = worldmapNumFilesPending;
@@ -186,7 +245,84 @@ s32 worldmapMode0_taskPlayerGear_update(int param_1) {
 
     switch (pEntry->m20) {
     case 1: // normal mode
-        MissingCode();
+        if (gameState.m22B1_isOnGear[0] != 1) {
+            if ((pEntry->m4C->m0_spriteActorCore.mAC >> 24) != '\x03') {
+                spriteActorSetPlayingAnimation(pEntry->m4C, 3);
+                clearWorldmapParticles(0x2c);
+            }
+            break;
+        }
+        iVar11 = worldmapUpdatePlayerGearsControls(pEntry);
+        if (iVar11 == 3) {
+            pEntry->m20 = 8;
+        }
+        else if (iVar11 < 4) {
+            if (iVar11 == 1) {
+                continueWorldmapLoop = 0;
+                exitWorldMapMode = 0;
+            }
+            else {
+            LAB_worldmap__8008ca04:
+                if (((pEntry->m38_step).vx == 0 && (pEntry->m38_step).vy == 0) && (pEntry->m38_step).vz == 0) {
+                    if (((pEntry->m4C->m0_spriteActorCore).mAC >> 24) != '\0') {
+                        spriteActorSetPlayingAnimation(pEntry->m4C, 0);
+                        clearWorldmapParticles(0x2c);
+                    }
+                }
+                else {
+                    if (((pEntry->m4C->m0_spriteActorCore).mAC >> 24) != '\x01') {
+                        spriteActorSetPlayingAnimation(pEntry->m4C, 1);
+                    }
+                    //FUN_worldmap__8008c1dc(0x2c, pEntry, (short*)&DAT_1f800000);
+                    MissingCode("Spawn particles for gear");
+                }
+                VECTOR DAT_1f800090;
+                iVar11 = checkWorldmapPosition(&pEntry->m28_position, &pEntry->m38_step, &DAT_1f800090, (int)pEntry->m4A << 0xc, worldMapGearMode);
+                if (iVar11 == 0) {
+                    pEntry->m38_step = DAT_1f800090;
+                    iVar11 = checkWorldmapPosition(&pEntry->m28_position, &pEntry->m38_step, &DAT_1f800090, (int)pEntry->m4A << 0xc, worldMapGearMode);
+                    if (iVar11 == 0) {
+                        (pEntry->m38_step).vz = 0;
+                        (pEntry->m38_step).vx = 0;
+                    }
+                }
+                if (iVar11 == 1) {
+                    adjustLocationAfterCollision(&DAT_1f800090, 0x18, 0x30, &adjustLocationAfterCollisionVar0, &adjustLocationAfterCollisionVar1);
+                    iVar11 = (uint)adjustLocationAfterCollisionVar0;
+                    if (adjustLocationAfterCollisionVar1 == 7) {
+                        iVar11 = (adjustLocationAfterCollisionVar0 + 3);
+                    }
+                    if (SHORT_ARRAY_worldmap__8009b180[iVar11] != 0) {
+                        (pEntry->m28_position) = DAT_1f800090;
+                        if (((pEntry->m38_step).vx | (pEntry->m38_step).vz) != 0) {
+                            MissingCode("Follow leader");
+                        }
+                    }
+                }
+                else {
+                    adjustLocationAfterCollision(&pEntry->m28_position, 0x18, 0x30, &adjustLocationAfterCollisionVar0, &adjustLocationAfterCollisionVar1);
+                }
+                //FUN_worldmap__80094238(&pEntry->m28_position, 1);
+                MissingCode("Check exit for gear");
+                (pEntry->m38_step).vz = 0;
+                (pEntry->m38_step).vy = 0;
+                (pEntry->m38_step).vx = 0;
+                worldmapRadarPosition.vx = (pEntry->m28_position).vx;
+                worldmapRadarPosition.vy = (pEntry->m28_position).vy;
+                worldmapRadarPosition.vz = (pEntry->m28_position).vz;
+                worldmapRadarPosition.pad = (pEntry->m28_position).pad;
+                worldmapVar_8009d52c = pEntry->m48;
+            }
+        }
+        else {
+            if (iVar11 != 4) goto LAB_worldmap__8008ca04;
+            sVar7 = getWorldmapGroundType(&pEntry->m28_position);
+            sVar7 = checkWorldmapPositionSub1_0_1(1, (int)sVar7);
+            if (sVar7 != 0) {
+                pEntry->m20 = 0x20;
+            }
+        }
+        adjustLocationAfterCollisionVar2 = 0;
         break;
     case 2: // idle/invisible
         (pEntry->m28_position).vx = gWorldmapState->m0[7].m28_position.vx;
