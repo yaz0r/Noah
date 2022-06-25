@@ -4,6 +4,7 @@
 #include "field/fieldGraphicObject.h"
 #include "kernel/trigo.h"
 #include "worldmapExit.h"
+#include "worldmapDynamicCollisions.h"
 
 void clearWorldmapParticles(s32 type);
 
@@ -218,7 +219,7 @@ int worldmapUpdatePlayerGearsControls(sWorldmapStateEntry* param_1)
 }
 
 int checkWorldmapPosition(VECTOR* position, VECTOR* step, VECTOR* output, int stepScale, int param_5);
-void adjustLocationAfterCollision(VECTOR* param_1, int param_2, int param_3, u8* param_4, u8* param_5);
+void processWorldmapDynamicCollisions(VECTOR* param_1, int param_2, int param_3, u8* param_4, u8* param_5);
 ushort getWorldmapGroundType(VECTOR* param_1);
 int checkWorldmapPositionSub1_0_1(int param_1, int param_2);
 
@@ -248,7 +249,7 @@ s32 worldmapMode0_taskPlayerGear_update(int param_1) {
         if (iVar11 == iVar5) {
             pEntry->m20 = 1;
             worldMapGearMode = 2;
-            adjustLocationAfterCollisionVar2 = 0;
+            currentWorldmapDynamicCollisionSlot = 0;
         }
     }
     else {
@@ -301,7 +302,7 @@ s32 worldmapMode0_taskPlayerGear_update(int param_1) {
                     }
                 }
                 if (iVar11 == 1) {
-                    adjustLocationAfterCollision(&DAT_1f800090, 0x18, 0x30, &adjustLocationAfterCollisionVar0, &adjustLocationAfterCollisionVar1);
+                    processWorldmapDynamicCollisions(&DAT_1f800090, 0x18, 0x30, &adjustLocationAfterCollisionVar0, &adjustLocationAfterCollisionVar1);
                     iVar11 = (uint)adjustLocationAfterCollisionVar0;
                     if (adjustLocationAfterCollisionVar1 == 7) {
                         iVar11 = (adjustLocationAfterCollisionVar0 + 3);
@@ -314,7 +315,7 @@ s32 worldmapMode0_taskPlayerGear_update(int param_1) {
                     }
                 }
                 else {
-                    adjustLocationAfterCollision(&pEntry->m28_position, 0x18, 0x30, &adjustLocationAfterCollisionVar0, &adjustLocationAfterCollisionVar1);
+                    processWorldmapDynamicCollisions(&pEntry->m28_position, 0x18, 0x30, &adjustLocationAfterCollisionVar0, &adjustLocationAfterCollisionVar1);
                 }
                 //FUN_worldmap__80094238(&pEntry->m28_position, 1);
                 MissingCode("Check exit for gear");
@@ -336,12 +337,30 @@ s32 worldmapMode0_taskPlayerGear_update(int param_1) {
                 pEntry->m20 = 0x20;
             }
         }
-        adjustLocationAfterCollisionVar2 = 0;
+        currentWorldmapDynamicCollisionSlot = 0;
         break;
     case 2: // idle/invisible
         (pEntry->m28_position).vx = gWorldmapState->m0[7].m28_position.vx;
         (pEntry->m28_position).vz = gWorldmapState->m0[7].m28_position.vz;
         pEntry->m48 = gWorldmapState->m0[7].m48;
+        break;
+    case 0x8:
+        if (gameState.m1D34_currentParty[1] != 0xff) {
+            if (gameState.m22B1_isOnGear[1] == 1) {
+                iVar11 = changeWorldmapEntityState(5, 1);
+                if (iVar11 != 0) {
+                    sVar7 = pEntry->m20;
+                    pEntry[1].m6 = (ushort)adjustLocationAfterCollisionVar1;
+                    pEntry->m20 = sVar7 + 1;
+                }
+                break;
+            }
+            changeWorldmapEntityState(2, 1);
+            gWorldmapState->m0[2].m6 = (ushort)adjustLocationAfterCollisionVar1;
+            changeWorldmapEntityState(5, 8);
+        }
+        sVar7 = pEntry->m20;
+        pEntry->m20 = sVar7 + 1;
         break;
     case 0x30: // start exit yggdrasil
         getGamestate182C(&pEntry->m28_position);

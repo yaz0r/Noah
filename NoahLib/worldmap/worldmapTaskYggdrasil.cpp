@@ -4,6 +4,7 @@
 #include "kernel/gameState.h"
 #include "kernel/trigo.h"
 #include "worldmapExit.h"
+#include "worldmapDynamicCollisions.h"
 
 ushort getWorldmapGroundType(VECTOR* param_1);
 int checkWorldmapPosition(VECTOR* position, VECTOR* step, VECTOR* output, int stepScale, int param_5);
@@ -281,7 +282,7 @@ LAB_worldmap__8009131c:
 void checkWorldmapPositionSub0(VECTOR* param_1);
 int worldmapCheckCollisionsAgainstWorldmapModels(VECTOR* param_1, short* param_2);
 int checkWorldmapPositionSub1(VECTOR* position, VECTOR* step, VECTOR* output, int stepScale, short param_5);
-void adjustLocationAfterCollision(VECTOR* param_1, int param_2, int param_3, u8* param_4, u8* param_5);
+void processWorldmapDynamicCollisions(VECTOR* param_1, int param_2, int param_3, u8* param_4, u8* param_5);
 
 int checkWorldmapPositionYggdrasil(VECTOR* position, VECTOR* step, VECTOR* output, int stepScale, s16 param_5) {
     VECTOR VECTOR_1f800060;
@@ -522,23 +523,6 @@ int checkYggdrasilLandingPosition(VECTOR* param_1, VECTOR* param_2, int param_3)
     return -1;
 }
 
-bool changeWorldmapEntityState(int param_1, short param_2) {
-    bool bVar1;
-    sWorldmapStateEntry* psVar2;
-
-    psVar2 = &gWorldmapState->m0[param_1];
-    bVar1 = psVar2->m4 == 0;
-    if (bVar1) {
-        psVar2->m0_state = 1;
-        psVar2->m4 = param_2;
-    }
-    return bVar1;
-}
-
-void addWorldmapDynamicCollisions(s16 param_1, VECTOR* param_2, s16 param_3, s16 param_4) {
-    MissingCode();
-}
-
 s16 yggdrasilExit_8009b6d0 = 0xE;
 s16 yggdrasilExit_8009b6e0 = 0x1D;
 
@@ -585,7 +569,7 @@ s32 worldmap_taskYggdrasil_update(int param_1)
                 (gWorldmapState->m0[param_1].m38_step).vx = 0;
                 break;
             case 1:
-                adjustLocationAfterCollision(&DAT_1f800090, 0x40, 0x20, &adjustLocationAfterCollisionVar0, &adjustLocationAfterCollisionVar1);
+                processWorldmapDynamicCollisions(&DAT_1f800090, 0x40, 0x20, &adjustLocationAfterCollisionVar0, &adjustLocationAfterCollisionVar1);
                 if (adjustLocationAfterCollisionVar0 == '\x02') {
                     gWorldmapState->m0[param_1].m60 = 0;
                 }
@@ -634,7 +618,7 @@ s32 worldmap_taskYggdrasil_update(int param_1)
             (gWorldmapState->m0[param_1].m38_step).vz = 0;
             (gWorldmapState->m0[param_1].m38_step).vy = 0;
             (gWorldmapState->m0[param_1].m38_step).vx = 0;
-            adjustLocationAfterCollisionVar2 = 0;
+            currentWorldmapDynamicCollisionSlot = 0;
             break;
         case 1:
             continueWorldmapLoop = 0;
@@ -650,7 +634,7 @@ s32 worldmap_taskYggdrasil_update(int param_1)
                     pCurrentEntity->m20 = 0x10;
                     (pCurrentEntity->m6C).pad = iVar9;
                     pCurrentEntity->m68 = worldmapGetAltitudeFor2dPoint(iVar6, iVar7);
-                    //FUN_worldmap__80097770(0xb, 10);
+                    changeWorldmapEntityState(0xb, 10);
                     //FUN_8003a89c(pMusic, 0, 0xf0);
                     pCurrentEntity->m7C = 1;
                     clearWorldmapParticles(0x3c);
@@ -715,7 +699,7 @@ s32 worldmap_taskYggdrasil_update(int param_1)
             if (iVar7 == 1) {
                 iVar9 = getWorldmapElevationWithWater(DAT_1f800090.vx, DAT_1f800090.vz);
                 DAT_1f800090.vy = iVar9 + 0x18000;
-                adjustLocationAfterCollision(&DAT_1f800090, 0x40, 0x20, (byte*)&adjustLocationAfterCollisionVar0, &adjustLocationAfterCollisionVar1);
+                processWorldmapDynamicCollisions(&DAT_1f800090, 0x40, 0x20, (byte*)&adjustLocationAfterCollisionVar0, &adjustLocationAfterCollisionVar1);
                 if (adjustLocationAfterCollisionVar0 == '\x02') {
                     iVar9 = getWorldmapElevationWithWater((pCurrentEntity->m28_position).vx, (pCurrentEntity->m28_position).vz);
                     (pCurrentEntity->m28_position).vy = DAT_1f800090.vy + 0x18000;
@@ -779,7 +763,7 @@ s32 worldmap_taskYggdrasil_update(int param_1)
                 clearWorldmapParticles(4);
                 pCurrentEntity->m20 = 3;
             }
-            adjustLocationAfterCollisionVar2 = 0;
+            currentWorldmapDynamicCollisionSlot = 0;
         }
         else {
             if (worldmapCurrentExit->mE_type == 2) {

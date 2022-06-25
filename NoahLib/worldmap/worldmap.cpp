@@ -614,8 +614,14 @@ void worldmapMode0_update(void) {
     //################
     worldmapPartySprites[0] = new sSpriteActorAnimationBundle();
     worldmapPartySprites[0]->init(worldmapPartySpritesRaw[0].begin());
-    worldmapPartyGearSprites[0] = new sSpriteActorAnimationBundle();
-    worldmapPartyGearSprites[0]->init(worldmapPartyGearSpritesRaw[0].begin());
+    if (worldmapPartyGearSpritesRaw[0].size())
+    {
+        worldmapPartyGearSprites[0] = new sSpriteActorAnimationBundle();
+        worldmapPartyGearSprites[0]->init(worldmapPartyGearSpritesRaw[0].begin());
+    }
+    else {
+        worldmapPartyGearSprites[0] = nullptr;
+    }
     //################
     worldmapMode8_init();
     do {
@@ -1055,4 +1061,17 @@ void worldmapEntryPoint(void) {
     isWorldMapOverlayLoaded = 0;
     worldmapFlushCacheAndSync();
     bootGame(0);
+}
+
+bool changeWorldmapEntityState(int param_1, short param_2) {
+    bool bVar1;
+    sWorldmapStateEntry* psVar2;
+
+    psVar2 = &gWorldmapState->m0[param_1];
+    bVar1 = psVar2->m4 == 0;
+    if (bVar1) {
+        psVar2->m0_state = 1;
+        psVar2->m4 = param_2;
+    }
+    return bVar1;
 }

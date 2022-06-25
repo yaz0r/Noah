@@ -5,12 +5,12 @@
 #include "kernel/trigo.h"
 #include "worldmapWorldStreaming.h"
 #include "worldmapExit.h"
+#include "worldmapDynamicCollisions.h"
 
 void clearWorldmapParticles(s32 type);
 
 u8 adjustLocationAfterCollisionVar0;
 u8 adjustLocationAfterCollisionVar1;
-u16 adjustLocationAfterCollisionVar2;
 
 std::array<s16, 6> SHORT_ARRAY_worldmap__8009b180 = { {
         1,1,0,1,1,1
@@ -897,15 +897,6 @@ int checkWorldmapPosition(VECTOR* position, VECTOR* step, VECTOR* output, int st
     return resultValue;
 }
 
-void adjustLocationAfterCollision(VECTOR* param_1, int param_2, int param_3, u8* param_4, u8* param_5) {
-    *param_4 = 0;
-    *param_5 = 0;
-
-    for (int i = 0; i < adjustLocationAfterCollisionVar2; i++) {
-        assert(0);
-    }
-}
-
 s32 worldmapMode0_taskPlayer_update(int param_1)
 {
     sWorldmapStateEntry* pEntry = &gWorldmapState->m0[param_1];
@@ -969,7 +960,7 @@ s32 worldmapMode0_taskPlayer_update(int param_1)
                     }
                 }
                 if ((collisionResult2 & 0xffff) == 1) {
-                    adjustLocationAfterCollision(&DAT_1f800090, 0x10, 0x20, &adjustLocationAfterCollisionVar0, &adjustLocationAfterCollisionVar1);
+                    processWorldmapDynamicCollisions(&DAT_1f800090, 0x10, 0x20, &adjustLocationAfterCollisionVar0, &adjustLocationAfterCollisionVar1);
 
                     if (adjustLocationAfterCollisionVar1 == 7) {
                         collisionResult2 = adjustLocationAfterCollisionVar0 + 3;
@@ -1001,7 +992,7 @@ s32 worldmapMode0_taskPlayer_update(int param_1)
                 worldmapVar_8009d52c = pEntry->m48;
                 break;
             }
-            adjustLocationAfterCollisionVar2 = 0;
+            currentWorldmapDynamicCollisionSlot = 0;
             pEntry->m24 = 0;
         }
         else {

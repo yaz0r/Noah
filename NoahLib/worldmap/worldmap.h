@@ -4,6 +4,7 @@ struct sWorldmapStateEntry {
     s16 m0_state;
     s16 m2;
     s16 m4;
+    s16 m6;
     s32(*m18_init)(s32 index);
     s32(*m1C_update)(s32 index);
     s16 m20;
@@ -29,6 +30,8 @@ struct sWorldmapStateEntry {
 struct sWorldmapState {
     std::array<sWorldmapStateEntry, 64> m0;
 };
+
+bool changeWorldmapEntityState(int param_1, short param_2);
 
 extern sWorldmapState* gWorldmapState;
 
@@ -119,7 +122,6 @@ extern std::array<sSpriteActorAnimationBundle*, 3 > worldmapPartyGearSprites;
 extern s32 worldmapNumFilesPending;
 extern u8 adjustLocationAfterCollisionVar0;
 extern u8 adjustLocationAfterCollisionVar1;
-extern u16 adjustLocationAfterCollisionVar2;
 
 extern s32 currentWorldmapMode;
 
