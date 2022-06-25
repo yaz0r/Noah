@@ -81,8 +81,6 @@ extern u16 worldmapInput2_1;
 extern u16 worldmapInput3_0;
 extern u16 worldmapInput3_1;
 
-extern s16 worldmapExitVar0;
-extern s16 worldmapExitVar1;
 extern s16 worldmapExitVar2;
 
 extern s32 worldmapFile9;
@@ -92,8 +90,6 @@ extern MATRIX worldMapIdentityMatrix;
 extern SVECTOR worldmapGridPosition;
 
 extern s32 worldmapNumModels;
-
-extern std::array<s16, 8>::iterator worldmapExitArrayPtr;
 
 struct sWorldmapModel {
     u16 m0_hidden;

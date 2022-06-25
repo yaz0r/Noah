@@ -3,6 +3,7 @@
 #include "worldmap.h"
 #include "kernel/gameState.h"
 #include "kernel/trigo.h"
+#include "worldmapExit.h"
 
 ushort getWorldmapGroundType(VECTOR* param_1);
 int checkWorldmapPosition(VECTOR* position, VECTOR* step, VECTOR* output, int stepScale, int param_5);
@@ -538,6 +539,22 @@ void addWorldmapDynamicCollisions(s16 param_1, VECTOR* param_2, s16 param_3, s16
     MissingCode();
 }
 
+s16 yggdrasilExit_8009b6d0 = 0xE;
+s16 yggdrasilExit_8009b6e0 = 0x1D;
+
+void setupYggdrasilInternalExit() {
+    if (adjustLocationAfterCollisionVar0 != '\0') {
+        if (adjustLocationAfterCollisionVar1 == '\x0f') {
+            worldmapCurrentExit = &worldmapExitToField312;
+            worldmapExitVar0 = yggdrasilExit_8009b6d0;
+        }
+        else if (adjustLocationAfterCollisionVar1 == '\x10') {
+            worldmapCurrentExit = &worldmapExitToField440;
+            worldmapExitVar0 = yggdrasilExit_8009b6e0;
+        }
+    }
+}
+
 s32 worldmap_taskYggdrasil_update(int param_1)
 {
     s32 returnState = 1;
@@ -584,7 +601,8 @@ s32 worldmap_taskYggdrasil_update(int param_1)
             worldmapRadarPosition.vz = (gWorldmapState->m0[param_1].m28_position).vz;
             worldmapRadarPosition.pad = (gWorldmapState->m0[param_1].m28_position).pad;
             worldmapVar_8009d52c = gWorldmapState->m0[param_1].m48;
-            MissingCode();
+            setupWorldmapExits(&pCurrentEntity->m28_position, 2);
+            setupYggdrasilInternalExit();
             SVECTOR SVECTOR_1f8000a0;
             SVECTOR_1f8000a0.vx = -(short)((gWorldmapState->m0[param_1].m6C).vy >> 0xc);
             SVECTOR_1f8000a0.vy = gWorldmapState->m0[param_1].m48;
@@ -618,6 +636,10 @@ s32 worldmap_taskYggdrasil_update(int param_1)
             (gWorldmapState->m0[param_1].m38_step).vx = 0;
             adjustLocationAfterCollisionVar2 = 0;
             break;
+        case 1:
+            continueWorldmapLoop = 0;
+            exitWorldMapMode = 0;
+            break;
         case 4:
         {
             if (checkWorldmapPositionSub1_0_1(2, getWorldmapGroundType(&pCurrentEntity->m28_position)) != 0) {
@@ -634,7 +656,7 @@ s32 worldmap_taskYggdrasil_update(int param_1)
                     clearWorldmapParticles(0x3c);
                     clearWorldmapParticles(0x3f);
                     //worldmapExitArrayPtr = (short*)0xffffffff;
-                    worldmapExitArrayPtr = std::array<s16, 8>::iterator();
+                    worldmapCurrentExit = nullptr;
                     worldmapExitVar0 = 0xffff;
                     worldmapExitVar1 = 0xffff;
                     adjustLocationAfterCollisionVar1 = 0;
@@ -760,7 +782,7 @@ s32 worldmap_taskYggdrasil_update(int param_1)
             adjustLocationAfterCollisionVar2 = 0;
         }
         else {
-            if (worldmapExitArrayPtr[7] == 2) {
+            if (worldmapCurrentExit->mE_type == 2) {
                 pCurrentEntity->m20 = 0x20;
                 s32 iVar9 = (pCurrentEntity->m28_position).vx;
                 pCurrentEntity->m68 = 0x30000;

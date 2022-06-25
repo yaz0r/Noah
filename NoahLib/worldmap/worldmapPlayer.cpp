@@ -4,6 +4,7 @@
 #include "kernel/gameState.h"
 #include "kernel/trigo.h"
 #include "worldmapWorldStreaming.h"
+#include "worldmapExit.h"
 
 void clearWorldmapParticles(s32 type);
 
@@ -272,7 +273,7 @@ s32 worldmapUpdatePlayerControls(sWorldmapStateEntry* param_1) {
     }
 
     if ((worldmapInput2_0 & 0x20) == 0) {
-        if ((worldmapExitVar0 != -1) && (worldmapExitArrayPtr[7] == 1)) {
+        if ((worldmapExitVar0 != -1) && (worldmapCurrentExit->mE_type == 1)) {
             return 1;
         }
     }

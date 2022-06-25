@@ -3,6 +3,7 @@
 #include "kernel/gameState.h"
 #include "field/fieldGraphicObject.h"
 #include "kernel/trigo.h"
+#include "worldmapExit.h"
 
 void clearWorldmapParticles(s32 type);
 

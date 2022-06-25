@@ -13,6 +13,7 @@
 #include "sprite/spriteSetup.h"
 #include "kernel/TIM.h"
 #include "worldmapWorldStreaming.h"
+#include "worldmapExit.h"
 
 VECTOR worldmapPosition;
 u32 worldmapGamestate1824;
@@ -20,6 +21,8 @@ SVECTOR worldmapRotation = { 0,0,0,0 };
 VECTOR worldmapRadarPosition = { 0,0,0,0 };
 s32 worldmapGeometryOffsetY = 0;
 s32 worldmapInitialPositionIndex;
+
+s32 worldmapExitToFieldVar0;
 
 s8 isWorldMapOverlayLoaded = 0;
 s32 currentWorldmapMode = 0;
@@ -44,11 +47,7 @@ u16 worldmapInput2_1;
 u16 worldmapInput3_0;
 u16 worldmapInput3_1;
 
-s16 worldmapExitVar0;
-s16 worldmapExitVar1;
 s16 worldmapExitVar2;
-
-std::array<s16, 8>::iterator worldmapExitArrayPtr;
 
 VECTOR worldmapRadarPosition3 = { 0,0,0 };
 VECTOR worldmapGridInputPosition = { 0,0,0 };
@@ -210,7 +209,6 @@ std::vector<u8>::iterator worldmapFile1Buffer_20;
 std::vector<u8>::iterator worldmapFile1Buffer_24;
 
 std::vector<u8>::iterator worldmapFile1Buffer_4_0;
-std::vector<u8>::iterator worldmapFile1Buffer_4_1;
 
 std::vector<u8>::iterator pWorldmapModelsConfig;
 
@@ -235,6 +233,27 @@ void finalizeWorldMapFileLoading() {
     std::vector<u8>::iterator worldmapFile1Buffer_4 = worldmapFile1Buffer.begin() + READ_LE_U32(worldmapFile1Buffer.begin() + 0x4);
 
     worldmapFile1Buffer_4_0 = worldmapFile1Buffer_4 + READ_LE_U32(worldmapFile1Buffer_4);
+
+    // init the worldmap exits. Original code was a relocation + cast
+    {
+        std::vector<u8>::iterator data = worldmapFile1Buffer_4 + READ_LE_U32(worldmapFile1Buffer_4 + 4);
+        int numExits = (READ_LE_U32(data) - READ_LE_U32(worldmapFile1Buffer_4 + 4)) / 4;
+
+        worldmapExitsDefs.resize(numExits);
+
+        for (int i = 0; i < numExits; i++) {
+            std::vector<u8>::iterator exitData = worldmapFile1Buffer_4 + READ_LE_U32(data + 4 * i);
+
+            worldmapExitsDefs[i].m0_X = READ_LE_S16(exitData + 0x00);
+            worldmapExitsDefs[i].m2_Y = READ_LE_S16(exitData + 0x02);
+            worldmapExitsDefs[i].m4_width = READ_LE_S16(exitData + 0x04);
+            worldmapExitsDefs[i].m6_height = READ_LE_S16(exitData + 0x06);
+            worldmapExitsDefs[i].m8_destinationField = READ_LE_S16(exitData + 0x08);
+            worldmapExitsDefs[i].mA = READ_LE_S16(exitData + 0x0A);
+            worldmapExitsDefs[i].mC_newWorldmapMode = READ_LE_S16(exitData + 0x0C);
+            worldmapExitsDefs[i].mE_type = READ_LE_S16(exitData + 0x0E);
+        }
+    }
 
     MissingCode();
 }
@@ -806,10 +825,6 @@ void initWorldMap(int param_1, int param_2)
     return;
 }
 
-std::array<s16, 8> worldmapExitArray = { {
-        0,0,0,0,0x122, 3, -1, 0
-} };
-
 void worldmapMainLoop(void) {
     pCurrentWorldmapRenderingStruct = &worldmapRenderingStructs[1];
     worldmapOddOrEven = 1;
@@ -887,7 +902,7 @@ void worldmapMainLoop(void) {
                 else if (worldMapGearMode < 8) {
                     continueWorldmapLoop = 0;
                     exitWorldMapMode = 0;
-                    worldmapExitArrayPtr = worldmapExitArray.begin();
+                    worldmapCurrentExit = &worldmapExitToField290_yggdrasilDeck;
                     gameState.m1834 = gameState.m1834 | 0x2000;
                 }
             }
@@ -903,6 +918,10 @@ void worldmapMainLoop(void) {
 
     } while (continueWorldmapLoop != 0);
 
+    MissingCode();
+}
+
+void readGameOverlay(int) {
     MissingCode();
 }
 
@@ -972,9 +991,11 @@ void worldmapEntryPoint(void) {
     setupWorldmapGearMode();
     isWorldmapModeFlagSet = (uint)((gameState.m2320_worldmapMode & 0x8000U) != 0);
     worldmapInitialPositionIndex = gameState.m231E_worldmapInitialPositionIndex;
-    MissingCode();
-
-    currentWorldmapMode = gameState.m2320_worldmapMode & 0x7fff;
+    isWorldmapModeFlagSet = (uint)((gameState.m2320_worldmapMode & 0x8000U) != 0);
+    worldmapInitialPositionIndex = (uint)gameState.m231E_worldmapInitialPositionIndex;
+    worldmapGamestate1824 = (uint)(ushort)gameState.m231C_CameraYaw;
+    worldmapExitToFieldVar0 = 0;
+    currentWorldmapMode = (ushort)gameState.m2320_worldmapMode & 0x7fff;
 
     MissingCode();
 
@@ -1003,8 +1024,23 @@ void worldmapEntryPoint(void) {
     }
 
     switch (exitWorldMapMode) {
-        default:
-            assert(0);
+    case 0: // to field
+        readGameOverlay(1);
+        setGameMode(1);
+        if (worldmapExitToFieldVar0 == 0) {
+            if (worldmapCurrentExit->mE_type == 3) {
+                //FUN_worldmap__80094364(&worldmapRadarPosition, 3, gameState.m1930_fieldVarsBackup[0]);
+                MissingCode();
+            }
+            gameState.m231A_fieldID = worldmapCurrentExit->m8_destinationField;
+            gameState.m231C_CameraYaw = worldmapRotation.vy;
+            gameState.m2320_worldmapMode = worldmapCurrentExit->mC_newWorldmapMode;
+        }
+        //gameState.m1930_fieldVarsBackup[2] = (short)DAT_8009bd0c + 0x400;
+        MissingCode();
+        break;
+    default:
+        assert(0);
     }
 
     isWorldMapOverlayLoaded = 0;
