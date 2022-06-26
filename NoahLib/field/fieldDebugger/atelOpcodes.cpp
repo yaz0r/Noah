@@ -943,6 +943,12 @@ void initOpcodeTable()
 		.addArgumentByte()
 		.end();
 
+    m_opcode[0xF7]
+        .setName("SET_ENCOUNTER_DATA")
+        .addArgumentVarIndex("encounterTime")
+        .addArgumentVarIndex("encounterTimersCount")
+        .end();
+
 	m_opcode[0xF8]
 		.setName("SET_FLAGS_DYNAMIC")
 		.addArgumentByte("mode")
@@ -1308,6 +1314,11 @@ void initExtendedOpcodeTable()
 		.addArgumentU16OrVar()
 		.addArgumentCharacter()
 		.end();
+
+    m_extendedOpcode[0x74]
+        .setName("OPX_DEBUG_PRINT_FLAG_VALUE")
+        .addArgumentVarIndex()
+        .end();
 
     // 0x77 is dynamic
 

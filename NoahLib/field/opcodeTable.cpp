@@ -28,6 +28,7 @@ void initOpcodes()
     fieldScriptOpcodes[0x18] = OP_SET_BOUNDING_VOLUME;
     fieldScriptOpcodes[0x19] = OP_SET_ACTOR_POSITION_2D;
     fieldScriptOpcodes[0x1A] = OP_SET_ENTITY_WALKMESH_LAYER;
+    fieldScriptOpcodes[0x1B] = OP_1B;
     fieldScriptOpcodes[0x1C] = OP_SET_CURRENT_ACTOR_ELEVATION;
     fieldScriptOpcodes[0x1D] = OP_SET_CURRENT_ACTOR_POSITION_3D;
     fieldScriptOpcodes[0x1E] = OP_UPDATE_ELEVATION;
@@ -168,6 +169,7 @@ void initOpcodes()
     fieldScriptOpcodes[0xF4] = OP_CLOSE_CURRENT_ACTOR_DIALOG;
     fieldScriptOpcodes[0xF5] = OP_SHOW_DIALOG_WINDOW_FOR_CURRENT_ACTOR_MODE3;
     fieldScriptOpcodes[0xF6] = OP_F6;
+    fieldScriptOpcodes[0xF7] = OP_SET_ENCOUNTER_DATA;
     fieldScriptOpcodes[0xF8] = OP_SET_FLAGS_DYNAMIC;
     fieldScriptOpcodes[0xF9] = OP_F9;
     fieldScriptOpcodes[0xFB] = OP_FB;
@@ -232,6 +234,7 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0x66] = OPX_66;
     fieldScriptOpcodes_EX[0x6A] = OP_SET_LINK_OT;
     fieldScriptOpcodes_EX[0x6B] = OPX_6B;
+    fieldScriptOpcodes_EX[0x74] = OPX_DEBUG_PRINT_FLAG_VALUE; // 0x800985BC
     fieldScriptOpcodes_EX[0x7F] = OPX_7F;
     fieldScriptOpcodes_EX[0x80] = OPX_80;
     fieldScriptOpcodes_EX[0x81] = OPX_81;
@@ -242,6 +245,7 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0x86] = OPX_86;
     fieldScriptOpcodes_EX[0x87] = OP_WAIT_MENU;
     fieldScriptOpcodes_EX[0x88] = OP_SETUP_MECHA_FIELD_ARGS;
+    fieldScriptOpcodes_EX[0x89] = OPX_89;
     fieldScriptOpcodes_EX[0x8C] = OPX_8C;
     fieldScriptOpcodes_EX[0x8E] = OPX_SET_SCREEN_BOUNDS_PADDING;
     fieldScriptOpcodes_EX[0x8F] = OP_RESET_PARTICLE_CONFIGS;
