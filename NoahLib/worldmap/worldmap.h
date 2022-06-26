@@ -17,13 +17,16 @@ struct sWorldmapStateEntry {
     struct sSpriteActor* m4C;
     s32 m50;
     s32 m54;
-    s32 m58;
+    s32 m58; // for gears this is how far back you go in the follow data
     s32 m5C;
     s32 m60;    
     const std::array<s16, 4>* m64;// those two are sometimes aliased to u32
     const std::array<s16, 4>* m68_array;
     s32 m68;
-    VECTOR m6C;
+    s32 m6C;
+    s32 m70;
+    s32 m74;
+    s32 m78;
     s32 m7C;
 };
 

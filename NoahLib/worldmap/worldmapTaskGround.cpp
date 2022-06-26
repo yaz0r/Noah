@@ -55,9 +55,9 @@ void worldmapDrawSpriteActors() {
             temp.vx = gWorldmapState->m0[i].m28_position.vx - worldmapRadarPosition3.vx;
             temp.vz = gWorldmapState->m0[i].m28_position.vz - worldmapRadarPosition3.vz;
             computeWormapSpritePosition(&temp);
-            gWorldmapState->m0[i].m4C->m0_position.vx = temp.vx;
+            gWorldmapState->m0[i].m4C->m0_position.vx = temp.vx * 0x10;
             gWorldmapState->m0[i].m4C->m0_position.vy = (s32)(gWorldmapState->m0[i].m28_position.vy) << 4;
-            gWorldmapState->m0[i].m4C->m0_position.vz = temp.vz;
+            gWorldmapState->m0[i].m4C->m0_position.vz = temp.vz * -0x10;
         }
     }
 

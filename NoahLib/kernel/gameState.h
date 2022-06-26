@@ -28,10 +28,7 @@ struct sGameState
     std::array<std::vector<u8>, 31> m0_names;
     std::array<sGameStateA4, 11> m294;
     std::array<sGameStateA42, 20> m9A0_gears;
-    std::array<s16, 2> m1820_worldmapPosition;
-    s16 m1822;
-    s16 m1824;
-    s16 m1826;
+    std::array<s16, 6> m1820_worldmapPosition;
     SVECTOR m182C;
     u16 m1834;
     u16 m1836;

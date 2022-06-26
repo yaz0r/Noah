@@ -5,8 +5,8 @@
 #include "kernel/trigo.h"
 #include "worldmapExit.h"
 #include "worldmapDynamicCollisions.h"
-
-void clearWorldmapParticles(s32 type);
+#include "worldmapParticles.h"
+#include "worldmapFollowLeader.h"
 
 std::array<s16, 4> SHORT_ARRAY_worldmap__8009b18c = { {0x100, 0x100, 0x100, 0} };
 std::array<s16, 4> SHORT_ARRAY_worldmap__8009b194 = { {0x1FD, 0x1FC, 0x1FB, 0} };
@@ -80,7 +80,7 @@ s32 worldmapMode0_taskPlayerGear_init(int param_1) {
     (pEntry->m38_step).vz = 0;
     (pEntry->m38_step).vy = 0;
     (pEntry->m38_step).vx = 0;
-    pEntry->m48 = gameState.m1826;
+    pEntry->m48 = gameState.m1820_worldmapPosition[3];
     pEntry->m4A = 0xc;
     s32 iVar3 = worldMapGearMode;
     bool bVar1 = 0 < worldMapGearMode;
@@ -103,7 +103,11 @@ s32 worldmapMode0_taskPlayerGear_init(int param_1) {
                 worldmapRadarPosition.vz = (pEntry->m28_position).vz;
                 worldmapRadarPosition.pad = (pEntry->m28_position).pad;
                 worldmapVar_8009d52c = pEntry->m48;
-                MissingCode("Follow leader");
+                worldmapFollowLeaderDataIndex = 0;
+                for (int i = 0; i < 32; i++) {
+                    worldmapFollowLeaderData[i].m0_position = pEntry->m28_position;
+                    worldmapFollowLeaderData[i].m10 = pEntry->m48;
+                }
             }
         }
         else if (iVar3 < 8) {
@@ -111,7 +115,7 @@ s32 worldmapMode0_taskPlayerGear_init(int param_1) {
             pEntry->m24 = 1;
         }
     }
-    gameState.m1826 = pEntry->m48;
+    gameState.m1820_worldmapPosition[3] = pEntry->m48;
     gameState.m1930_fieldVarsBackup[22] = (ushort)((pEntry->m28_position).vx >> 0xc);
     gameState.m1930_fieldVarsBackup[23] = (ushort)((pEntry->m28_position).vz >> 0xc);
     return returnValue;
@@ -288,8 +292,8 @@ s32 worldmapMode0_taskPlayerGear_update(int param_1) {
                     if (((pEntry->m4C->m0_spriteActorCore).mAC >> 24) != '\x01') {
                         spriteActorSetPlayingAnimation(pEntry->m4C, 1);
                     }
-                    //FUN_worldmap__8008c1dc(0x2c, pEntry, (short*)&DAT_1f800000);
-                    MissingCode("Spawn particles for gear");
+                    std::array<short, 1> temp;
+                    spawnParticlesForTerrainType3(0x2c, pEntry, temp);
                 }
                 VECTOR DAT_1f800090;
                 iVar11 = checkWorldmapPosition(&pEntry->m28_position, &pEntry->m38_step, &DAT_1f800090, (int)pEntry->m4A << 0xc, worldMapGearMode);
@@ -310,15 +314,17 @@ s32 worldmapMode0_taskPlayerGear_update(int param_1) {
                     if (SHORT_ARRAY_worldmap__8009b180[iVar11] != 0) {
                         (pEntry->m28_position) = DAT_1f800090;
                         if (((pEntry->m38_step).vx | (pEntry->m38_step).vz) != 0) {
-                            MissingCode("Follow leader");
+                            worldmapFollowLeaderDataIndex = (worldmapFollowLeaderDataIndex + 1) & 0x1F;
+                            worldmapFollowLeaderData[worldmapFollowLeaderDataIndex].m0_position = pEntry->m28_position;
+                            worldmapFollowLeaderData[worldmapFollowLeaderDataIndex].m10 = pEntry->m48;
+                            followLeaderPostProcess();
                         }
                     }
                 }
                 else {
                     processWorldmapDynamicCollisions(&pEntry->m28_position, 0x18, 0x30, &adjustLocationAfterCollisionVar0, &adjustLocationAfterCollisionVar1);
                 }
-                //FUN_worldmap__80094238(&pEntry->m28_position, 1);
-                MissingCode("Check exit for gear");
+                setupWorldmapExits(&pEntry->m28_position, 1);
                 (pEntry->m38_step).vz = 0;
                 (pEntry->m38_step).vy = 0;
                 (pEntry->m38_step).vx = 0;
@@ -362,10 +368,54 @@ s32 worldmapMode0_taskPlayerGear_update(int param_1) {
         sVar7 = pEntry->m20;
         pEntry->m20 = sVar7 + 1;
         break;
+    case 0x9:
+        if (gameState.m1D34_currentParty[2] != 0xff) {
+            if (gameState.m22B1_isOnGear[2] == 1) {
+                iVar11 = changeWorldmapEntityState(6, 1);
+                if (iVar11 != 0) {
+                    sVar7 = pEntry->m20;
+                    pEntry[2].m6 = (ushort)adjustLocationAfterCollisionVar1;
+                    pEntry->m20 = sVar7 + 1;
+                }
+                break;
+            }
+            changeWorldmapEntityState(3, 1);
+            gWorldmapState->m0[3].m6 = (ushort)adjustLocationAfterCollisionVar1;
+            changeWorldmapEntityState(6, 8);
+        }
+        break;
+    case 0xA:
+        selectYggdrasilExitDirection(&pEntry->m28_position, &gWorldmapState->m0[adjustLocationAfterCollisionVar1].m28_position, &pEntry->m38_step, &pEntry->m48);
+        pEntry->m50 = gWorldmapState->m0[adjustLocationAfterCollisionVar1].m28_position.vx >> 0xc;
+        pEntry->m54 = gWorldmapState->m0[adjustLocationAfterCollisionVar1].m28_position.vz >> 0xc;
+        spriteActorSetPlayingAnimation(pEntry->m4C, 1);
+        pEntry->m20 = pEntry->m20 + 1;
+        break;
+    case 0xB:
+        if (stepGearAwayFromYggdrasil(pEntry) == 3) {
+            pEntry->m20 = pEntry->m20 + 1;
+        }
+        worldmapRadarPosition.vx = (pEntry->m28_position).vx;
+        worldmapRadarPosition.vy = (pEntry->m28_position).vy;
+        worldmapRadarPosition.vz = (pEntry->m28_position).vz;
+        worldmapRadarPosition.pad = (pEntry->m28_position).pad;
+        worldmapVar_8009d52c = pEntry->m48;
+        {
+            std::array<short, 1> temp;
+            spawnParticlesForTerrainType3(0x2c, pEntry, temp);
+        }
+        break;
+    case 0xC:
+        if (changeWorldmapEntityState(adjustLocationAfterCollisionVar1, 4) != 0) {
+            pEntry->m24 = 1;
+            pEntry->m20 = 2;
+            clearWorldmapParticles(0x2c);
+        }
+        break;
     case 0x30: // start exit yggdrasil
         getGamestate182C(&pEntry->m28_position);
         pEntry->m24 = 0;
-        pEntry->m48 = (short)gWorldmapState->m0[7].m6C.pad;
+        pEntry->m48 = (short)gWorldmapState->m0[7].m78;
         {
             VECTOR DAT_1f800000;
             DAT_1f800000.vx = (pEntry->m28_position).vx + getAngleCos(pEntry->m48) * 0x60;
@@ -394,7 +444,11 @@ s32 worldmapMode0_taskPlayerGear_update(int param_1) {
         worldmapVar_8009d52c = pEntry->m48;
         break;
     case 0x32: // finish exit yggdrasil
-        MissingCode("Follow leader");
+        worldmapFollowLeaderDataIndex = 0;
+        for (int i = 0; i < 32; i++) {
+            worldmapFollowLeaderData[i].m0_position = pEntry->m28_position;
+            worldmapFollowLeaderData[i].m10 = pEntry->m48;
+        }
         pEntry->m20 = 1;
         worldMapGearMode = 2;
         break;
@@ -405,7 +459,7 @@ s32 worldmapMode0_taskPlayerGear_update(int param_1) {
     if ((pEntry->m20 != 2) && ((worldMapGearMode == 2 || (gameState.m1D34_currentParty[0] != 7)))) {
         MissingCode();
     }
-    gameState.m1826 = pEntry->m48;
+    gameState.m1820_worldmapPosition[3] = pEntry->m48;
     gameState.m1930_fieldVarsBackup[22] = (ushort)((pEntry->m28_position).vx >> 0xc);
     gameState.m1930_fieldVarsBackup[23] = (ushort)((pEntry->m28_position).vz >> 0xc);
     return 1;

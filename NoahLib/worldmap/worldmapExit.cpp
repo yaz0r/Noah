@@ -3,7 +3,15 @@
 #include "field/dialogWindows.h"
 #include "worldmap.h"
 
+/*
+There is 4 exit tables:
+0 for on foot
+1 for gears
+2 for yggdrasil
+3 for ?????
+*/
 std::array<std::vector<sWorldmapExitDef>, 4> worldmapExitsDefs;
+
 sWorldmapExitDef* worldmapCurrentExit;
 s16 worldmapExitVar0;
 s16 worldmapExitVar1;
@@ -22,13 +30,13 @@ int setupWorldmapExits(VECTOR* param_1, int param_2) {
     worldmapCurrentExit = &worldmapExitsDefs[param_2][0];
 
     if (worldmapCurrentExit->m8_destinationField != -1) {
-        uint uVar3 = param_1->vx >> 0xc & 0xffff;
-        uint uVar2 = param_1->vz >> 0xc & 0xffff;
+        uint X = param_1->vx >> 0xc & 0xffff;
+        uint Y = param_1->vz >> 0xc & 0xffff;
         do {
-            if (worldmapCurrentExit->m0_X <= uVar3 &&
-                uVar3 <= worldmapCurrentExit->m0_X + worldmapCurrentExit->m4_width &&
-                worldmapCurrentExit->m2_Y <= uVar2 &&
-                uVar2 <= worldmapCurrentExit->m2_Y + worldmapCurrentExit->m6_height
+            if ((worldmapCurrentExit->m0_X <= X) &&
+                (X <= (worldmapCurrentExit->m0_X + worldmapCurrentExit->m4_width)) &&
+                (worldmapCurrentExit->m2_Y <= Y) &&
+                (Y <= (worldmapCurrentExit->m2_Y + worldmapCurrentExit->m6_height))
                 ) {
                 if (worldmapCurrentExit->mE_type == 4) {
                     worldmapExitVar0 = -1;

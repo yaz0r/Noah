@@ -6,8 +6,7 @@
 #include "worldmapWorldStreaming.h"
 #include "worldmapExit.h"
 #include "worldmapDynamicCollisions.h"
-
-void clearWorldmapParticles(s32 type);
+#include "worldmapParticles.h"
 
 u8 adjustLocationAfterCollisionVar0;
 u8 adjustLocationAfterCollisionVar1;
@@ -234,7 +233,7 @@ s32 worldmapMode0_taskPlayer_init(int param_1)
 
     gameState.m1820_worldmapPosition[0] = (short)(gWorldmapState->m0[param_1].m28_position.vx >> 0xc);
     gameState.m1820_worldmapPosition[1] = (short)(gWorldmapState->m0[param_1].m28_position.vz >> 0xc);
-    gameState.m1824 = gWorldmapState->m0[param_1].m48;
+    gameState.m1820_worldmapPosition[2] = gWorldmapState->m0[param_1].m48;
 
     return 1;
 }
@@ -1016,7 +1015,7 @@ s32 worldmapMode0_taskPlayer_update(int param_1)
 
     gameState.m1820_worldmapPosition[0] = (short)((pEntry->m28_position).vx >> 0xc);
     gameState.m1820_worldmapPosition[1] = (short)((pEntry->m28_position).vz >> 0xc);
-    gameState.m1824 = pEntry->m48;
+    gameState.m1820_worldmapPosition[2] = pEntry->m48;
     if (pEntry->m24 == 0) {
         MissingCode();
     }

@@ -391,7 +391,7 @@ void setupWorldmapPositionFromField() {
         switch (worldMapGearMode) {
         case 1:
         case 2:
-            worldmapGamestate1824 = (uint)(ushort)gameState.m1824;
+            worldmapGamestate1824 = (uint)(ushort)gameState.m1820_worldmapPosition[2];
             worldmapPosition.vx = (uint)(ushort)gameState.m1820_worldmapPosition[0] << 0xc;
             worldmapPosition.vz = (uint)(ushort)gameState.m1820_worldmapPosition[1] << 0xc;
             break;
@@ -612,15 +612,18 @@ void worldmapMode0_update(void) {
     worldmapFadeIn(0x40, 0, 4, 2);
     waitReadCompletion(0);
     //################
-    worldmapPartySprites[0] = new sSpriteActorAnimationBundle();
-    worldmapPartySprites[0]->init(worldmapPartySpritesRaw[0].begin());
-    if (worldmapPartyGearSpritesRaw[0].size())
-    {
-        worldmapPartyGearSprites[0] = new sSpriteActorAnimationBundle();
-        worldmapPartyGearSprites[0]->init(worldmapPartyGearSpritesRaw[0].begin());
-    }
-    else {
-        worldmapPartyGearSprites[0] = nullptr;
+    for (int i = 0; i < 3; i++) {
+        worldmapPartySprites[i] = new sSpriteActorAnimationBundle();
+        worldmapPartySprites[i]->init(worldmapPartySpritesRaw[i].begin());
+
+        if (worldmapPartyGearSpritesRaw[i].size())
+        {
+            worldmapPartyGearSprites[i] = new sSpriteActorAnimationBundle();
+            worldmapPartyGearSprites[i]->init(worldmapPartyGearSpritesRaw[i].begin());
+        }
+        else {
+            worldmapPartyGearSprites[i] = nullptr;
+        }
     }
     //################
     worldmapMode8_init();
@@ -961,7 +964,7 @@ void worldmapEntryPoint(void) {
         gameState.m182C[0] = 0x6680;
         gameState.m182C[1] = -0x100;
         gameState.m182C[2] = 0x2a00;
-        gameState.m1822 = 0x2c00;
+        gameState.m1820_worldmapPosition[1] = 0x2c00;
         gameState.m1D34_currentParty[1] = 10;
         gameState.m294[0].m78_partyData_gearNum = 0xf;
         gameState.m294[1].m78_partyData_gearNum = 2;
@@ -977,7 +980,7 @@ void worldmapEntryPoint(void) {
         gameState.m182C[3] = 0;
         gameState.m1820_worldmapPosition[0] = 0x7580;
         gameState.m1820_worldmapPosition[1] = 0x2c00;
-        gameState.m1824 = 0;
+        gameState.m1820_worldmapPosition[2] = 0;
         gameState.m1D34_currentParty[0] = 0;
         gameState.m22B1_isOnGear[0] = 0;
         gameState.m22B1_isOnGear[1] = 0;

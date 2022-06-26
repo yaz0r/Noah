@@ -5,6 +5,7 @@
 #include "kernel/trigo.h"
 #include "worldmapExit.h"
 #include "worldmapDynamicCollisions.h"
+#include "worldmapParticles.h"
 
 ushort getWorldmapGroundType(VECTOR* param_1);
 int checkWorldmapPosition(VECTOR* position, VECTOR* step, VECTOR* output, int stepScale, int param_5);
@@ -22,10 +23,10 @@ s32 worldmap_taskYggdrasil_init(int param_1)
     gWorldmapState->m0[param_1].m38_step.vx = 0;
     gWorldmapState->m0[param_1].m64 = nullptr;
     gWorldmapState->m0[param_1].m60 = 0;
-    gWorldmapState->m0[param_1].m6C.vz = 0;
-    //gWorldmapState->m0[param_1].m68 = (short*)0xffd80000;
-    gWorldmapState->m0[param_1].m6C.vy = 0;
-    gWorldmapState->m0[param_1].m6C.vx = 0;
+    gWorldmapState->m0[param_1].m74 = 0;
+    gWorldmapState->m0[param_1].m68 = 0xffd80000;
+    gWorldmapState->m0[param_1].m70 = 0;
+    gWorldmapState->m0[param_1].m6C = 0;
     gWorldmapState->m0[param_1].m48 = gameState.m182C.pad;
 
     switch (gameState.m1834 & 0x1fff) {
@@ -48,7 +49,7 @@ s32 worldmap_taskYggdrasil_init(int param_1)
         gWorldmapState->m0[param_1].m28_position.vx = worldmapPosition.vx;
         gWorldmapState->m0[param_1].m28_position.vz = worldmapPosition.vz;
         gWorldmapState->m0[param_1].m48 = worldmapGamestate1824;
-        gWorldmapState->m0[param_1].m6C.vz = worldmapNumFilesPending;
+        gWorldmapState->m0[param_1].m74 = worldmapNumFilesPending;
         gWorldmapState->m0[param_1].m28_position.vy = worldmapPosition.vy;
         worldmapRadarPosition = gWorldmapState->m0[param_1].m28_position;
         worldmapVar_8009d52c = gWorldmapState->m0[param_1].m48;
@@ -61,7 +62,7 @@ s32 worldmap_taskYggdrasil_init(int param_1)
     worldmapModels[0].m0_hidden = gWorldmapState->m0[param_1].m24;
 
     SVECTOR SVECTOR_1f8000a0;
-    SVECTOR_1f8000a0.vx = -(short)(gWorldmapState->m0[param_1].m6C.vy >> 0xc);
+    SVECTOR_1f8000a0.vx = -(short)(gWorldmapState->m0[param_1].m70 >> 0xc);
     SVECTOR_1f8000a0.vy = gWorldmapState->m0[param_1].m48;
     SVECTOR_1f8000a0.vz = worldmapRotation.vz;
     RotMatrixYXZ(&SVECTOR_1f8000a0, &worldmapModels[0].m20_rotationMatrix);
@@ -177,9 +178,9 @@ int processYggdrasilInputs(sWorldmapStateEntry* param_1) {
     param_1->m58 = iVar7;
     worldmapRotation.vy = (ushort)(iVar7 >> 0xc) & 0xfff;
     param_1->m48 = worldmapRotation.vy;
-    iVar7 = (param_1->m6C).vx;
+    iVar7 = (param_1->m6C);
     if (iVar7 == 1) {
-        iVar7 = (param_1->m6C).vy;
+        iVar7 = (param_1->m70);
         if (iVar7 != 0) {
             if (iVar7 < 0) {
                 iVar7 = iVar7 + 0x2000;
@@ -187,41 +188,41 @@ int processYggdrasilInputs(sWorldmapStateEntry* param_1) {
             else {
                 iVar7 = iVar7 + -0x2000;
             }
-            (param_1->m6C).vy = iVar7;
+            (param_1->m70) = iVar7;
         }
         if ((worldmapInput1_0 & 0x4000) != 0) {
-            (param_1->m6C).vx = 2;
+            (param_1->m6C) = 2;
         }
         if ((worldmapInput1_0 & 0x1000) != 0) {
-            (param_1->m6C).vx = 3;
+            (param_1->m6C) = 3;
         }
     }
     else if (iVar7 < 2) {
         if (iVar7 == 0) {
-            (param_1->m6C).vx = 1;
-            (param_1->m6C).vy = 0;
+            (param_1->m6C) = 1;
+            (param_1->m70) = 0;
         }
     }
     else if (iVar7 == 2) {
         lVar4 = -0x80000;
         if ((worldmapInput1_0 & 0x4000) != 0) {
-            iVar7 = (param_1->m6C).vy + -0x4000;
-            (param_1->m6C).vy = iVar7;
+            iVar7 = (param_1->m70) + -0x4000;
+            (param_1->m70) = iVar7;
             bVar1 = iVar7 < -0x80000;
             goto LAB_worldmap__8009124c;
         }
     LAB_worldmap__8009125c:
-        (param_1->m6C).vx = 1;
+        (param_1->m6C) = 1;
     }
     else if (iVar7 == 3) {
         lVar4 = 0x80000;
         if ((worldmapInput1_0 & 0x1000) == 0) goto LAB_worldmap__8009125c;
-        iVar7 = (param_1->m6C).vy + 0x4000;
-        (param_1->m6C).vy = iVar7;
+        iVar7 = (param_1->m70) + 0x4000;
+        (param_1->m70) = iVar7;
         bVar1 = 0x80000 < iVar7;
     LAB_worldmap__8009124c:
         if (bVar1) {
-            (param_1->m6C).vy = lVar4;
+            (param_1->m70) = lVar4;
         }
     }
     if ((worldmapInput1_0 & 0x80) != 0) {
@@ -256,7 +257,7 @@ int processYggdrasilInputs(sWorldmapStateEntry* param_1) {
     }
 LAB_worldmap__8009131c:
     lVar4 = getAngleCos((int)worldmapRotation.vy);
-    iVar7 = (param_1->m6C).vy;
+    iVar7 = (param_1->m70);
     (param_1->m38_step).vx = lVar4;
     lVar4 = getAngleCos(iVar7 >> 0xc);
     (param_1->m38_step).vy = lVar4;
@@ -317,14 +318,6 @@ int checkWorldmapPositionYggdrasil(VECTOR* position, VECTOR* step, VECTOR* outpu
     }
     iVar1 = checkWorldmapPositionSub1(position, step, output, stepScale, param_5);
     return iVar1;
-}
-
-void spawnWorldmapParticles(s32 type, SVECTOR*, SVECTOR*) {
-    MissingCode();
-}
-
-void clearWorldmapParticles(s32 type) {
-    MissingCode();
 }
 
 int processYggdrasilInputs_mode4(sWorldmapStateEntry* param_1) {
@@ -548,7 +541,11 @@ s32 worldmap_taskYggdrasil_update(int param_1)
     sWorldmapStateEntry* pCurrentEntity = &gWorldmapState->m0[param_1];
 
     if (gWorldmapState->m0[param_1].m4 == 4) {
-        assert(0);
+        pCurrentEntity->m4 = 0;
+        pCurrentEntity->m74++;
+        if (worldmapNumFilesPending == pCurrentEntity->m74) {
+            assert(0);
+        }
     }
 
     VECTOR DAT_1f800090;
@@ -588,7 +585,7 @@ s32 worldmap_taskYggdrasil_update(int param_1)
             setupWorldmapExits(&pCurrentEntity->m28_position, 2);
             setupYggdrasilInternalExit();
             SVECTOR SVECTOR_1f8000a0;
-            SVECTOR_1f8000a0.vx = -(short)((gWorldmapState->m0[param_1].m6C).vy >> 0xc);
+            SVECTOR_1f8000a0.vx = -(short)((gWorldmapState->m0[param_1].m70) >> 0xc);
             SVECTOR_1f8000a0.vy = gWorldmapState->m0[param_1].m48;
             SVECTOR_1f8000a0.vz = worldmapRotation.vz;
             RotMatrixYXZ(&SVECTOR_1f8000a0, &worldmapModels[0].m20_rotationMatrix);
@@ -632,7 +629,7 @@ s32 worldmap_taskYggdrasil_update(int param_1)
                     s32 iVar6 = (pCurrentEntity->m28_position).vx;
                     s32 iVar7 = (pCurrentEntity->m28_position).vz;
                     pCurrentEntity->m20 = 0x10;
-                    (pCurrentEntity->m6C).pad = iVar9;
+                    (pCurrentEntity->m78) = iVar9;
                     pCurrentEntity->m68 = worldmapGetAltitudeFor2dPoint(iVar6, iVar7);
                     changeWorldmapEntityState(0xb, 10);
                     //FUN_8003a89c(pMusic, 0, 0xf0);
@@ -725,7 +722,7 @@ s32 worldmap_taskYggdrasil_update(int param_1)
             //FUN_worldmap__80094238(&pCurrentEntity->m28_position, 2);
             //FUN_worldmap__8008e078();
             MissingCode();
-            SVECTOR_1f8000a0.vx = -(short)((pCurrentEntity->m6C).vy >> 0xc);
+            SVECTOR_1f8000a0.vx = -(short)((pCurrentEntity->m70) >> 0xc);
             SVECTOR_1f8000a0.vy = pCurrentEntity->m48;
             SVECTOR_1f8000a0.vz = worldmapRotation.vz;
             RotMatrixYXZ(&SVECTOR_1f8000a0, &worldmapModels[0].m20_rotationMatrix);
@@ -823,7 +820,7 @@ s32 worldmap_taskYggdrasil_update(int param_1)
             (pCurrentEntity->m38_step).vz = 0;
             (pCurrentEntity->m38_step).vy = 0;
             (pCurrentEntity->m38_step).vx = 0;
-            (pCurrentEntity->m6C).vz = 0;
+            (pCurrentEntity->m70) = 0;
             gameState.m1834 = gameState.m1834 & 0x3fff;
             clearWorldmapParticles(0);
             clearWorldmapParticles(1);

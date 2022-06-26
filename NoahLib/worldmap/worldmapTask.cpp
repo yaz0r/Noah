@@ -11,6 +11,8 @@
 #include "worldmapTaskWorldCamera.h"
 #include "worldmapTaskYggdrasil.h"
 #include "worldmapExit.h"
+#include "worldmapPartyMember.h"
+#include "worldmapPartyGear.h"
 
 s32 dummy(s32) {
     return 1;
@@ -20,11 +22,11 @@ s32 dummy(s32) {
 const std::vector<sWorldTaskDefinition> worldmapMode0_tasks = { {
     {&worldmap_taskFader_init, &worldmap_taskFader_update},
     {&worldmapMode0_taskPlayer_init, &worldmapMode0_taskPlayer_update},
-    {&dummy, &dummy}, // PC 1
-    {&dummy, &dummy}, // PC 2
+    {&worldmapMode0_task_partyMember1_init, &worldmapMode0_task_partyMember_update}, // PC 1
+    {&worldmapMode0_task_partyMember2_init, &worldmapMode0_task_partyMember_update}, // PC 2
     {&worldmapMode0_taskPlayerGear_init, &worldmapMode0_taskPlayerGear_update},
-    {&dummy, &dummy}, // Gear 1
-    {&dummy, &dummy}, // Gear 2
+    {&worldmapMode0_task_partyGear1_init, &worldmapMode0_task_partyGear_update}, // Gear 1
+    {&worldmapMode0_task_partyGear2_init, &worldmapMode0_task_partyGear_update}, // Gear 2
     {&worldmap_taskYggdrasil_init, &worldmap_taskYggdrasil_update},
     {&worldmap_taskYggdrasilSubModels_init, &worldmap_taskYggdrasilSubModels_update},
     {&worldmap_taskWorldCamera_init, &worldmap_taskWorldCamera_update},
