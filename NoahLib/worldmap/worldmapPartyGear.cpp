@@ -176,7 +176,7 @@ s32 worldmapMode0_task_partyGear_update(s32 param_1) {
             spawnParticlesForTerrainType3(param_1 + 0x28, psVar8, temp);
         }
         break;
-    case 10: // finished entering yggdrasil
+    case 10: // signal Yggdrasil that one more gear boarded
         iVar4 = changeWorldmapEntityState((int)(short)psVar8->m6, 4);
         if (iVar4 != 0) {
             psVar8->m24 = 1;

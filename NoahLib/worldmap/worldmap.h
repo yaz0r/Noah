@@ -25,7 +25,7 @@ struct sWorldmapStateEntry {
     s32 m68;
     s32 m6C;
     s32 m70;
-    s32 m74;
+    s32 m74; // for yggdrasil, this is the number of gears onboard
     s32 m78;
     s32 m7C;
 };
@@ -122,9 +122,9 @@ extern std::array<u16, 8> USHORT_ARRAY_8009cd54;
 extern std::array<struct sSpriteActorAnimationBundle*, 3 > worldmapPartySprites;
 extern std::array<sSpriteActorAnimationBundle*, 3 > worldmapPartyGearSprites;
 
-extern s32 worldmapNumFilesPending;
+extern s32 worldmapNumActivePartyMembers;
 extern u8 adjustLocationAfterCollisionVar0;
-extern u8 adjustLocationAfterCollisionVar1;
+extern u8 targetVehicleEntityIndex;
 
 extern s32 currentWorldmapMode;
 

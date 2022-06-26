@@ -66,7 +66,7 @@ std::array<sSpriteActorAnimationBundle*, 3 > worldmapPartySprites;
 std::array<std::vector<u8>, 3 > worldmapPartySpritesRaw;
 std::array<sSpriteActorAnimationBundle*, 3 > worldmapPartyGearSprites;
 std::array<std::vector<u8>, 3 > worldmapPartyGearSpritesRaw;
-s32 worldmapNumFilesPending = 0;
+s32 worldmapNumActivePartyMembers = 0;
 
 std::array<sLoadingBatchCommands, 16> worldmapLoadingCommands;
 
@@ -94,7 +94,7 @@ void worldmapMode0_init(void) {
         }
     }
 
-    worldmapNumFilesPending = 0;
+    worldmapNumActivePartyMembers = 0;
 
     std::array<sLoadingBatchCommands, 16>::iterator it = worldmapLoadingCommands.begin();
     for (int i = 0; i < 3; i++) {
@@ -102,12 +102,11 @@ void worldmapMode0_init(void) {
             it->m0_fileIndex = gameState.m1D34_currentParty[i] + 2;
             it->m4_loadPtr = &worldmapPartySpritesRaw[i];
             it++;
-            worldmapNumFilesPending++;
+            worldmapNumActivePartyMembers++;
             if (gameState.m294[i].m78_partyData_gearNum != -1) {
                 it->m0_fileIndex = gameState.m294[i].m78_partyData_gearNum + 0x13;
                 it->m4_loadPtr = &worldmapPartyGearSpritesRaw[i];
                 it++;
-                worldmapNumFilesPending++;
             }
         }
     }

@@ -229,7 +229,7 @@ int checkWorldmapPositionSub1_0_1(int param_1, int param_2);
 
 s32 worldmapMode0_taskPlayerGear_update(int param_1) {
 
-    s32 iVar11 = worldmapNumFilesPending;
+    s32 iVar11 = worldmapNumActivePartyMembers;
     sWorldmapStateEntry* pEntry = &gWorldmapState->m0[param_1];
     s32 sVar7 = pEntry->m4;
     if (sVar7 == 4) {
@@ -306,9 +306,9 @@ s32 worldmapMode0_taskPlayerGear_update(int param_1) {
                     }
                 }
                 if (iVar11 == 1) {
-                    processWorldmapDynamicCollisions(&DAT_1f800090, 0x18, 0x30, &adjustLocationAfterCollisionVar0, &adjustLocationAfterCollisionVar1);
+                    processWorldmapDynamicCollisions(&DAT_1f800090, 0x18, 0x30, &adjustLocationAfterCollisionVar0, &targetVehicleEntityIndex);
                     iVar11 = (uint)adjustLocationAfterCollisionVar0;
-                    if (adjustLocationAfterCollisionVar1 == 7) {
+                    if (targetVehicleEntityIndex == 7) {
                         iVar11 = (adjustLocationAfterCollisionVar0 + 3);
                     }
                     if (SHORT_ARRAY_worldmap__8009b180[iVar11] != 0) {
@@ -322,7 +322,7 @@ s32 worldmapMode0_taskPlayerGear_update(int param_1) {
                     }
                 }
                 else {
-                    processWorldmapDynamicCollisions(&pEntry->m28_position, 0x18, 0x30, &adjustLocationAfterCollisionVar0, &adjustLocationAfterCollisionVar1);
+                    processWorldmapDynamicCollisions(&pEntry->m28_position, 0x18, 0x30, &adjustLocationAfterCollisionVar0, &targetVehicleEntityIndex);
                 }
                 setupWorldmapExits(&pEntry->m28_position, 1);
                 (pEntry->m38_step).vz = 0;
@@ -356,13 +356,13 @@ s32 worldmapMode0_taskPlayerGear_update(int param_1) {
                 iVar11 = changeWorldmapEntityState(5, 1);
                 if (iVar11 != 0) {
                     sVar7 = pEntry->m20;
-                    pEntry[1].m6 = (ushort)adjustLocationAfterCollisionVar1;
+                    pEntry[1].m6 = (ushort)targetVehicleEntityIndex;
                     pEntry->m20 = sVar7 + 1;
                 }
                 break;
             }
             changeWorldmapEntityState(2, 1);
-            gWorldmapState->m0[2].m6 = (ushort)adjustLocationAfterCollisionVar1;
+            gWorldmapState->m0[2].m6 = (ushort)targetVehicleEntityIndex;
             changeWorldmapEntityState(5, 8);
         }
         sVar7 = pEntry->m20;
@@ -374,20 +374,20 @@ s32 worldmapMode0_taskPlayerGear_update(int param_1) {
                 iVar11 = changeWorldmapEntityState(6, 1);
                 if (iVar11 != 0) {
                     sVar7 = pEntry->m20;
-                    pEntry[2].m6 = (ushort)adjustLocationAfterCollisionVar1;
+                    pEntry[2].m6 = (ushort)targetVehicleEntityIndex;
                     pEntry->m20 = sVar7 + 1;
                 }
                 break;
             }
             changeWorldmapEntityState(3, 1);
-            gWorldmapState->m0[3].m6 = (ushort)adjustLocationAfterCollisionVar1;
+            gWorldmapState->m0[3].m6 = (ushort)targetVehicleEntityIndex;
             changeWorldmapEntityState(6, 8);
         }
         break;
     case 0xA:
-        selectYggdrasilExitDirection(&pEntry->m28_position, &gWorldmapState->m0[adjustLocationAfterCollisionVar1].m28_position, &pEntry->m38_step, &pEntry->m48);
-        pEntry->m50 = gWorldmapState->m0[adjustLocationAfterCollisionVar1].m28_position.vx >> 0xc;
-        pEntry->m54 = gWorldmapState->m0[adjustLocationAfterCollisionVar1].m28_position.vz >> 0xc;
+        selectYggdrasilExitDirection(&pEntry->m28_position, &gWorldmapState->m0[targetVehicleEntityIndex].m28_position, &pEntry->m38_step, &pEntry->m48);
+        pEntry->m50 = gWorldmapState->m0[targetVehicleEntityIndex].m28_position.vx >> 0xc;
+        pEntry->m54 = gWorldmapState->m0[targetVehicleEntityIndex].m28_position.vz >> 0xc;
         spriteActorSetPlayingAnimation(pEntry->m4C, 1);
         pEntry->m20 = pEntry->m20 + 1;
         break;
@@ -405,8 +405,8 @@ s32 worldmapMode0_taskPlayerGear_update(int param_1) {
             spawnParticlesForTerrainType3(0x2c, pEntry, temp);
         }
         break;
-    case 0xC:
-        if (changeWorldmapEntityState(adjustLocationAfterCollisionVar1, 4) != 0) {
+    case 0xC: // signal Yggdrasil that one more gear boarded
+        if (changeWorldmapEntityState(targetVehicleEntityIndex, 4) != 0) {
             pEntry->m24 = 1;
             pEntry->m20 = 2;
             clearWorldmapParticles(0x2c);

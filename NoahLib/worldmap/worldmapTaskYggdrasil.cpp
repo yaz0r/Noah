@@ -49,7 +49,7 @@ s32 worldmap_taskYggdrasil_init(int param_1)
         gWorldmapState->m0[param_1].m28_position.vx = worldmapPosition.vx;
         gWorldmapState->m0[param_1].m28_position.vz = worldmapPosition.vz;
         gWorldmapState->m0[param_1].m48 = worldmapGamestate1824;
-        gWorldmapState->m0[param_1].m74 = worldmapNumFilesPending;
+        gWorldmapState->m0[param_1].m74 = worldmapNumActivePartyMembers;
         gWorldmapState->m0[param_1].m28_position.vy = worldmapPosition.vy;
         worldmapRadarPosition = gWorldmapState->m0[param_1].m28_position;
         worldmapVar_8009d52c = gWorldmapState->m0[param_1].m48;
@@ -521,11 +521,11 @@ s16 yggdrasilExit_8009b6e0 = 0x1D;
 
 void setupYggdrasilInternalExit() {
     if (adjustLocationAfterCollisionVar0 != '\0') {
-        if (adjustLocationAfterCollisionVar1 == '\x0f') {
+        if (targetVehicleEntityIndex == '\x0f') {
             worldmapCurrentExit = &worldmapExitToField312;
             worldmapExitVar0 = yggdrasilExit_8009b6d0;
         }
-        else if (adjustLocationAfterCollisionVar1 == '\x10') {
+        else if (targetVehicleEntityIndex == '\x10') {
             worldmapCurrentExit = &worldmapExitToField440;
             worldmapExitVar0 = yggdrasilExit_8009b6e0;
         }
@@ -543,7 +543,20 @@ s32 worldmap_taskYggdrasil_update(int param_1)
     if (gWorldmapState->m0[param_1].m4 == 4) {
         pCurrentEntity->m4 = 0;
         pCurrentEntity->m74++;
-        if (worldmapNumFilesPending == pCurrentEntity->m74) {
+        if (worldmapNumActivePartyMembers == pCurrentEntity->m74) {
+            changeWorldmapEntityState(8, 9);
+            worldmapRadarPosition.vx = (pCurrentEntity->m28_position).vx;
+            worldmapRadarPosition.vy = (pCurrentEntity->m28_position).vy;
+            worldmapRadarPosition.vz = (pCurrentEntity->m28_position).vz;
+            worldmapRadarPosition.pad = (pCurrentEntity->m28_position).pad;
+            worldmapVar_8009d52c = pCurrentEntity->m48;
+            u16 uVar3 = gameState.m1834 | 0x4000;
+            u16 uVar5 = gameState.m1834 & 0x1fff;
+            gameState.m1834 = uVar3;
+            switch (uVar5) {
+            default:
+                assert(0);
+            }
             assert(0);
         }
     }
@@ -566,7 +579,7 @@ s32 worldmap_taskYggdrasil_update(int param_1)
                 (gWorldmapState->m0[param_1].m38_step).vx = 0;
                 break;
             case 1:
-                processWorldmapDynamicCollisions(&DAT_1f800090, 0x40, 0x20, &adjustLocationAfterCollisionVar0, &adjustLocationAfterCollisionVar1);
+                processWorldmapDynamicCollisions(&DAT_1f800090, 0x40, 0x20, &adjustLocationAfterCollisionVar0, &targetVehicleEntityIndex);
                 if (adjustLocationAfterCollisionVar0 == '\x02') {
                     gWorldmapState->m0[param_1].m60 = 0;
                 }
@@ -640,7 +653,7 @@ s32 worldmap_taskYggdrasil_update(int param_1)
                     worldmapCurrentExit = nullptr;
                     worldmapExitVar0 = 0xffff;
                     worldmapExitVar1 = 0xffff;
-                    adjustLocationAfterCollisionVar1 = 0;
+                    targetVehicleEntityIndex = 0;
                     adjustLocationAfterCollisionVar0 = '\0';
                 }
             }
@@ -696,7 +709,7 @@ s32 worldmap_taskYggdrasil_update(int param_1)
             if (iVar7 == 1) {
                 iVar9 = getWorldmapElevationWithWater(DAT_1f800090.vx, DAT_1f800090.vz);
                 DAT_1f800090.vy = iVar9 + 0x18000;
-                processWorldmapDynamicCollisions(&DAT_1f800090, 0x40, 0x20, (byte*)&adjustLocationAfterCollisionVar0, &adjustLocationAfterCollisionVar1);
+                processWorldmapDynamicCollisions(&DAT_1f800090, 0x40, 0x20, (byte*)&adjustLocationAfterCollisionVar0, &targetVehicleEntityIndex);
                 if (adjustLocationAfterCollisionVar0 == '\x02') {
                     iVar9 = getWorldmapElevationWithWater((pCurrentEntity->m28_position).vx, (pCurrentEntity->m28_position).vz);
                     (pCurrentEntity->m28_position).vy = DAT_1f800090.vy + 0x18000;
@@ -820,7 +833,7 @@ s32 worldmap_taskYggdrasil_update(int param_1)
             (pCurrentEntity->m38_step).vz = 0;
             (pCurrentEntity->m38_step).vy = 0;
             (pCurrentEntity->m38_step).vx = 0;
-            (pCurrentEntity->m70) = 0;
+            pCurrentEntity->m74 = 0;
             gameState.m1834 = gameState.m1834 & 0x3fff;
             clearWorldmapParticles(0);
             clearWorldmapParticles(1);

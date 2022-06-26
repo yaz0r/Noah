@@ -9,7 +9,7 @@
 #include "worldmapParticles.h"
 
 u8 adjustLocationAfterCollisionVar0;
-u8 adjustLocationAfterCollisionVar1;
+u8 targetVehicleEntityIndex;
 
 std::array<s16, 6> SHORT_ARRAY_worldmap__8009b180 = { {
         1,1,0,1,1,1
@@ -959,9 +959,9 @@ s32 worldmapMode0_taskPlayer_update(int param_1)
                     }
                 }
                 if ((collisionResult2 & 0xffff) == 1) {
-                    processWorldmapDynamicCollisions(&DAT_1f800090, 0x10, 0x20, &adjustLocationAfterCollisionVar0, &adjustLocationAfterCollisionVar1);
+                    processWorldmapDynamicCollisions(&DAT_1f800090, 0x10, 0x20, &adjustLocationAfterCollisionVar0, &targetVehicleEntityIndex);
 
-                    if (adjustLocationAfterCollisionVar1 == 7) {
+                    if (targetVehicleEntityIndex == 7) {
                         collisionResult2 = adjustLocationAfterCollisionVar0 + 3;
                     }
                     else {
