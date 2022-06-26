@@ -115,6 +115,39 @@ s32 worldmap_taskWorldCamera_update(int param_1)
             gWorldmapState->m0[param_1].m20 = 0;
         }
         goto LAB_worldmap__8009164c;
+    case 2: // yggdrasil take off
+    {
+        s32 iVar8 = gWorldmapState->m0[param_1].m50 - (int)worldmapRotation.vy;
+        s32 iVar5 = iVar8;
+        if (iVar8 < 0) {
+            iVar5 = -iVar8;
+        }
+        if (0x800 < iVar5) {
+            if (iVar8 < 0) {
+                iVar8 = iVar8 + 0x1000;
+            }
+            else {
+                iVar8 = iVar8 + -0x1000;
+            }
+        }
+        iVar5 = iVar8;
+        if (iVar8 < 0) {
+            iVar5 = -iVar8;
+        }
+        bool bVar1;
+        if ((0x180 < iVar5) && (bVar1 = iVar8 < 0, iVar8 = 0x180, bVar1)) {
+            iVar8 = -0x180;
+        }
+        s32 uVar3 = gWorldmapState->m0[param_1].m58 + ((iVar8 << 0xc) >> 3) & 0xffffff;
+        gWorldmapState->m0[param_1].m58 = uVar3;
+        iVar5 = (int)uVar3 >> 0xc;
+        worldmapRotation.vy = (short)iVar5;
+        if (iVar5 == gWorldmapState->m0[param_1].m50 && gWorldmapState->m0[param_1].m60 == 0) {
+            gWorldmapState->m0[param_1].m20 = 3;
+            changeWorldmapEntityState(7, 0xb);
+        }
+        break;
+    }
     case 3:
     case 4:
     case 5:

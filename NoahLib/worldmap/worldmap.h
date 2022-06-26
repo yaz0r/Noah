@@ -20,7 +20,8 @@ struct sWorldmapStateEntry {
     s32 m58; // for gears this is how far back you go in the follow data
     s32 m5C;
     s32 m60;    
-    const std::array<s16, 4>* m64;// those two are sometimes aliased to u32
+    const std::array<s16, 4>* m64_array;// those two are sometimes aliased to u32
+    s32 m64;
     const std::array<s16, 4>* m68_array;
     s32 m68;
     s32 m6C;

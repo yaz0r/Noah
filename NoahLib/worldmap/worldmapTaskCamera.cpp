@@ -34,7 +34,7 @@ s32 worldmap_taskCamera_init(int param_1) {
                 gWorldmapState->m0[param_1].m50 = 3;
                 worldmapCameraVar0 = 0x460000;
                 worldmapRotation.vx = -0x260;
-                psVar1->m0[param_1].m64 = &SHORT_ARRAY_worldmap__8009b224;
+                psVar1->m0[param_1].m64_array = &SHORT_ARRAY_worldmap__8009b224;
                 psVar1->m0[param_1].m68_array = &SHORT_ARRAY_worldmap__8009b234;
             }
         }
@@ -42,7 +42,7 @@ s32 worldmap_taskCamera_init(int param_1) {
             gWorldmapState->m0[param_1].m50 = 3;
             worldmapCameraVar0 = 0x280000;
             worldmapRotation.vx = -0x260;
-            psVar1->m0[param_1].m64 = &SHORT_ARRAY_worldmap__8009b22c;
+            psVar1->m0[param_1].m64_array = &SHORT_ARRAY_worldmap__8009b22c;
             psVar1->m0[param_1].m68_array = &SHORT_ARRAY_worldmap__8009b23c;
         }
     }
@@ -99,63 +99,57 @@ s32 worldmap_taskCamera_update(int param_1) {
     int iVar6;
 
     psVar2 = gWorldmapState;
-    sVar1 = gWorldmapState->m0[param_1].m4;
-    if (sVar1 == 10) {
-        iVar4 = gWorldmapState->m0[param_1].m50;
-        gWorldmapState->m0[param_1].m64 = &SHORT_ARRAY_worldmap__8009b224;
-        psVar3 = &SHORT_ARRAY_worldmap__8009b234;
+    switch (gWorldmapState->m0[param_1].m4) {
+    case 9: // yggdrasil take off
+        gWorldmapState->m0[param_1].m64_array = &SHORT_ARRAY_worldmap__8009b22c;
         psVar2->m0[param_1].m4 = 0;
-    LAB_worldmap__80091cf8:
-        psVar2->m0[param_1].m68_array = psVar3;
-        if (iVar4 == 0) {
+        psVar2->m0[param_1].m68_array = &SHORT_ARRAY_worldmap__8009b23c;
+        if (gWorldmapState->m0[param_1].m50 == 0) {
             psVar2->m0[param_1].m50 = 1;
         }
-    }
-    else if (sVar1 < 0xb) {
-        if (sVar1 == 9) {
-            iVar4 = gWorldmapState->m0[param_1].m50;
-            assert(0);
-            //gWorldmapState->m0[param_1].m64 = &DAT_worldmap__8009b22c;
-            //psVar3 = &DAT_worldmap__8009b23c;
-            psVar2->m0[param_1].m4 = 0;
-            goto LAB_worldmap__80091cf8;
+        break;
+    case 10: // yggdrasil landing
+        gWorldmapState->m0[param_1].m64_array = &SHORT_ARRAY_worldmap__8009b224;
+        psVar2->m0[param_1].m4 = 0;
+        psVar2->m0[param_1].m68_array = &SHORT_ARRAY_worldmap__8009b234;
+        if (gWorldmapState->m0[param_1].m50 == 0) {
+            psVar2->m0[param_1].m50 = 1;
         }
-    }
-    else if (sVar1 == 0xe) {
+        break;
+    case 14:
         gWorldmapState->m0[param_1].m4 = 0;
         psVar2->m0[param_1].m20 = 0;
         worldmapMatrixMode = 0;
-    }
-    else if (sVar1 == 0x11) {
+        break;
+    case 17:
         worldmapCameraVar0 = 0x400000;
         gWorldmapState->m0[param_1].m20 = 3;
         psVar2->m0[param_1].m4 = 0;
         psVar2->m0[param_1].m58 = -0x100;
+        break;
     }
 
     switch (psVar2->m0[param_1].m20)
     {
     case 0:
-        iVar4 = worldmap_taskCamera_updateSub0(psVar2->m0[param_1].m50, psVar2->m0[param_1].m64, psVar2->m0[param_1].m68_array);
+        iVar4 = worldmap_taskCamera_updateSub0(psVar2->m0[param_1].m50, psVar2->m0[param_1].m64_array, psVar2->m0[param_1].m68_array);
         if (psVar2->m0[param_1].m50 != iVar4) {
             psVar2->m0[param_1].m20 = 1;
             psVar2->m0[param_1].m22 = 0;
             psVar2->m0[param_1].m50 = iVar4;
-            iVar5 = psVar2->m0[param_1].m50;
             psVar2->m0[param_1].m54 = INT_ARRAY_worldmap__8009b214[iVar4];
-            psVar2->m0[param_1].m58 = (*psVar2->m0[param_1].m64)[iVar5];
+            psVar2->m0[param_1].m58 = (*psVar2->m0[param_1].m64_array)[psVar2->m0[param_1].m50];
             psVar2->m0[param_1].m60 = (int)worldmapRotation.vx << 0xc;
         }
         computeCameraVector(&worldmapCameraVector, &worldmapRadarPosition3, worldmapCameraVar0, &worldmapRotation);
         break;
     case 1:
         if (4 < psVar2->m0[param_1].m22) {
-            iVar4 = worldmap_taskCamera_updateSub0(psVar2->m0[param_1].m50, psVar2->m0[param_1].m64, psVar2->m0[param_1].m68_array);
+            iVar4 = worldmap_taskCamera_updateSub0(psVar2->m0[param_1].m50, psVar2->m0[param_1].m64_array, psVar2->m0[param_1].m68_array);
             if (psVar2->m0[param_1].m50 != iVar4) {
                 psVar2->m0[param_1].m50 = iVar4;
-                iVar5 = psVar2->m0[param_1].m50;
                 psVar2->m0[param_1].m54 = INT_ARRAY_worldmap__8009b214[iVar4];
-                psVar2->m0[param_1].m58 = (*psVar2->m0[param_1].m64)[iVar5];
+                psVar2->m0[param_1].m58 = (*psVar2->m0[param_1].m64_array)[psVar2->m0[param_1].m50];
             }
             psVar2->m0[param_1].m22 = 0;
         }

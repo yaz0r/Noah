@@ -21,7 +21,7 @@ s32 worldmap_taskYggdrasil_init(int param_1)
     gWorldmapState->m0[param_1].m38_step.vz = 0;
     gWorldmapState->m0[param_1].m38_step.vy = 0;
     gWorldmapState->m0[param_1].m38_step.vx = 0;
-    gWorldmapState->m0[param_1].m64 = nullptr;
+    gWorldmapState->m0[param_1].m64 = 0;
     gWorldmapState->m0[param_1].m60 = 0;
     gWorldmapState->m0[param_1].m74 = 0;
     gWorldmapState->m0[param_1].m68 = 0xffd80000;
@@ -108,14 +108,14 @@ int processYggdrasilInputs(sWorldmapStateEntry* param_1) {
     int iVar8;
     int iVar9;
 
-    if (param_1->m64 == nullptr) {
-        param_1->m64 = (const std::array<s16, 4>*)0x1;
+    if (param_1->m64 == 0) {
+        param_1->m64 = 0x1;
         param_1->m5C = 0;
         param_1->m58 = (int)param_1->m48 << 0xc;
     }
     else {
         iVar7 = 0;
-        if (param_1->m64 == (const std::array<s16, 4>*)0x1) {
+        if (param_1->m64 == 0x1) {
             iVar5 = 0;
             iVar8 = 8;
             iVar9 = 0x1200;
@@ -543,7 +543,9 @@ s32 worldmap_taskYggdrasil_update(int param_1)
     if (gWorldmapState->m0[param_1].m4 == 4) {
         pCurrentEntity->m4 = 0;
         pCurrentEntity->m74++;
+        // has enough gears boarded the yggdrasil?
         if (worldmapNumActivePartyMembers == pCurrentEntity->m74) {
+            // return to yggdrasil mode
             changeWorldmapEntityState(8, 9);
             worldmapRadarPosition.vx = (pCurrentEntity->m28_position).vx;
             worldmapRadarPosition.vy = (pCurrentEntity->m28_position).vy;
@@ -553,11 +555,46 @@ s32 worldmap_taskYggdrasil_update(int param_1)
             u16 uVar3 = gameState.m1834 | 0x4000;
             u16 uVar5 = gameState.m1834 & 0x1fff;
             gameState.m1834 = uVar3;
+            // what mode is the yggdrasil in?
             switch (uVar5) {
+            case 3: // fly
+                MissingCode("Yggdrasil music switch");
+                SVECTOR_1f8000a0.vx = (short)((pCurrentEntity->m28_position).vx >> 0xc);
+                SVECTOR_1f8000a0.vy = (short)((pCurrentEntity->m28_position).vy >> 0xc);
+                SVECTOR_1f8000a0.vz = (short)((pCurrentEntity->m28_position).vz >> 0xc);
+                switch (getWorldmapGroundType(&pCurrentEntity->m28_position)) {
+                case 3:
+                    spawnWorldmapParticles(0x3E, &SVECTOR_1f8000a0, 0);
+                    break;
+                default:
+                    spawnWorldmapParticles(0x3D, &SVECTOR_1f8000a0, 0);
+                    break;
+                }
+                changeWorldmapEntityState(9, 9);
+                changeWorldmapEntityState(10, 9);
+                changeWorldmapEntityState(0xb, 9);
+                returnState = 2;
+                pCurrentEntity->m20 = 8;
+                pCurrentEntity->m2 = 0x3c;
+                worldMapGearMode = 7;
+                break;
             default:
                 assert(0);
             }
-            assert(0);
+
+            currentWorldmapDynamicCollisionSlot = 0;
+            gameState.m22B1_isOnGear[0] = 1;
+            if (gameState.m1D34_currentParty[1] != 0xff) {
+                gameState.m22B1_isOnGear[1] = 1;
+            }
+            if (gameState.m1D34_currentParty[2] != 0xff) {
+                gameState.m22B1_isOnGear[2] = 1;
+            }
+            //FUN_Worldmap__80075228();
+            MissingCode();
+            worldmapCurrentExit = nullptr;
+            worldmapExitVar0 = 0xffff;
+            worldmapExitVar1 = 0xffff;
         }
     }
 
@@ -789,6 +826,19 @@ s32 worldmap_taskYggdrasil_update(int param_1)
 
             continueWorldmapLoop = 0;
             exitWorldMapMode = 0;
+        }
+        break;
+    case 8:
+        (pCurrentEntity->m28_position).vy = (pCurrentEntity->m28_position).vy + -0x8000;
+        if ((pCurrentEntity->m28_position).vy < -0x1dffff) {
+            (pCurrentEntity->m28_position).vy = -0x1e0000;
+            if (pCurrentEntity->m4 == 0xb) {
+                pCurrentEntity->m64 = 0x0;
+                pCurrentEntity->m20 = 2;
+                pCurrentEntity->m4 = 0;
+                //switchWorldmapMusic(DAT_8009c888, woldmapFile7);
+                MissingCode("Yggdrasil music");
+            }
         }
         break;
     case 0x10: // landing
