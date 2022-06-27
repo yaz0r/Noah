@@ -47,9 +47,25 @@ int createWorldmapGear(sWorldmapStateEntry* param_1, int param_2)
     }
     if (uVar2 < 8) {
         switch (uVar2) {
+        case 0:
+        case 2:
+        case 4:
+        case 6:
+            Hack("check that the party member id is not negative to avoid getting out of bound");
+            if (gameState.m1D34_currentParty[param_2] == 0xFF || gameState.m294[gameState.m1D34_currentParty[param_2]].m78_partyData_gearNum == -1) {
+                return 3;
+            }
+            else {
+                createGearSpriteActor(param_1, param_2);
+            }
+            param_1->m24 = 1;
+            (param_1->m28_position).vy = 0;
+            (param_1->m28_position).vz = 0;
+            (param_1->m28_position).vx = 0;
+            break;
         case 1:
             if (gameState.m294[gameState.m1D34_currentParty[param_2]].m78_partyData_gearNum == -1) {
-                param_2 = 3;
+                return 3;
             }
             else {
                 createGearSpriteActor(param_1, param_2);

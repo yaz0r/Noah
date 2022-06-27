@@ -187,7 +187,7 @@ s32 worldmapMode0_taskPlayer_init(int param_1)
 
     gWorldmapState->m0[param_1].m28_position.vx = gameState.m1930_fieldVarsBackup[0] << 0xc;
     gWorldmapState->m0[param_1].m28_position.vz = gameState.m1930_fieldVarsBackup[1] << 0xc;
-    gWorldmapState->m0[param_1].m28_position.vy = worldmapGetAltitudeFor2dPoint(gameState.m1930_fieldVarsBackup[0], gameState.m1930_fieldVarsBackup[1] << 0xc);
+    gWorldmapState->m0[param_1].m28_position.vy = worldmapGetAltitudeFor2dPoint(gWorldmapState->m0[param_1].m28_position.vx, gWorldmapState->m0[param_1].m28_position.vz);
 
     gWorldmapState->m0[param_1].m38_step.vz = 0;
     gWorldmapState->m0[param_1].m38_step.vy = 0;

@@ -1085,6 +1085,11 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
     case 0xe7:
         setGraphicEntityScale(param_1, param_1->m2C_scale + READ_LE_S16(param_3));
         break;
+    case 0xEA:
+        if (param_1->m20) {
+            param_1->m20->m6_scale[1] += READ_LE_S16(param_3) * 2;
+        }
+        break;
 	case 0xF0:
 		return;
 	case 0xf1:
@@ -1127,6 +1132,9 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
         customVramUploadPtr = param_3 + (READ_LE_U8(param_3) + READ_LE_U8(param_3 + 1) * 0x100 + READ_LE_U8(param_3 + 2) * 0x10000);
         customVramUpload();
 		break;
+    case 0xFF:
+        // BUG?
+        break;
 	default:
 		assert(0);
 

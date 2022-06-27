@@ -23,6 +23,7 @@ s32 worldmapGeometryOffsetY = 0;
 s32 worldmapInitialPositionIndex;
 
 s32 worldmapExitToFieldVar0;
+s32 fieldBootModeFromWorldmap;
 
 s8 isWorldMapOverlayLoaded = 0;
 s32 currentWorldmapMode = 0;
@@ -612,8 +613,14 @@ void worldmapMode0_update(void) {
     waitReadCompletion(0);
     //################
     for (int i = 0; i < 3; i++) {
-        worldmapPartySprites[i] = new sSpriteActorAnimationBundle();
-        worldmapPartySprites[i]->init(worldmapPartySpritesRaw[i].begin());
+        if(worldmapPartySpritesRaw[i].size())
+        {
+            worldmapPartySprites[i] = new sSpriteActorAnimationBundle();
+            worldmapPartySprites[i]->init(worldmapPartySpritesRaw[i].begin());
+        }
+        else {
+            worldmapPartySprites[i] = nullptr;
+        }
 
         if (worldmapPartyGearSpritesRaw[i].size())
         {
@@ -1013,9 +1020,7 @@ void worldmapEntryPoint(void) {
     worldmapGamestate1824 = (uint)(ushort)gameState.m231C_CameraYaw;
     worldmapExitToFieldVar0 = 0;
     currentWorldmapMode = (ushort)gameState.m2320_worldmapMode & 0x7fff;
-
-    MissingCode();
-
+    fieldBootModeFromWorldmap = (gameState.m231A_fieldID & 0x3fff) - 0x400;
     gameState.m2320_worldmapMode = currentWorldmapMode;
 
     initWorldMap(currentWorldmapMode, (uint)gameState.m1930_fieldVarsBackup[0]);
@@ -1051,10 +1056,9 @@ void worldmapEntryPoint(void) {
             }
             gameState.m231A_fieldID = worldmapCurrentExit->m8_destinationField;
             gameState.m231C_CameraYaw = worldmapRotation.vy;
-            gameState.m2320_worldmapMode = worldmapCurrentExit->mC_newWorldmapMode;
+            gameState.m2320_worldmapMode = worldmapCurrentExit->mA;
         }
-        //gameState.m1930_fieldVarsBackup[2] = (short)DAT_8009bd0c + 0x400;
-        MissingCode();
+        gameState.m1930_fieldVarsBackup[2] = fieldBootModeFromWorldmap + 0x400; //setup the map param
         break;
     default:
         assert(0);

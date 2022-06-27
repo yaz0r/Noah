@@ -29,6 +29,8 @@
 #include "SDL_gamecontroller.h"
 #include "SDL_keyboard.h"
 
+MATRIX computeProjectionMatrixTempMatrix2;
+
 u32 playTimeInVsync = 0;
 s32 bootModeReady = 0;
 s32 newBootMode = 0;
@@ -386,14 +388,23 @@ void resetFieldDefault()
 
     MissingCode();
 
+
+    for (int i = 0; i < 0x200; i++) {
+        fieldVars[i] = pKernelGameState->m1930_fieldVarsBackup[i];
+        fieldVars[i + 0x200] = 0;
+    }
+
+    SetGeomScreen(0x200);
+    setIdentityMatrix(&cameraMatrix);
+    setIdentityMatrix(&cameraMatrix2);
+    setIdentityMatrix(&currentProjectionMatrix);
+    setIdentityMatrix(&computeProjectionMatrixTempMatrix2);
     cameraProjectionAngles.vx = 0;
     cameraProjectionAngles.vy = 0;
     cameraProjectionAngles.vz = 0;
-
     cameraRotation.vx = 0;
     cameraRotation.vy = 0;
     cameraRotation.vz = 0;
-
     worldScaleFactor = 0x3000;
 
     createRotationMatrix(&cameraProjectionAngles, &currentProjectionMatrix);
@@ -7188,7 +7199,6 @@ sCurrentCameraVectors* pCurrentCameraVectors = nullptr;
 
 SFP_VEC4 computeProjectionMatrixAngles = { 0,0,0 };
 MATRIX computeProjectionMatrixTempMatrix;
-MATRIX computeProjectionMatrixTempMatrix2;
 
 void computeProjectionMatrix(void)
 {
@@ -9081,6 +9091,10 @@ void fieldEntryPoint()
 
     fieldMapNumber = gameState.m231A_fieldID;
     pKernelGameState = &gameState;
+    pKernelGameState = &gameState;
+    gameState.m1930_fieldVarsBackup[4] = (ushort)gameState.m231C_CameraYaw >> 9;
+    gameState.m1930_fieldVarsBackup[1] = gameState.m2320_worldmapMode;
+    currentlyPlayingMusic = 0xff;
 
     MissingCode();
 

@@ -170,84 +170,82 @@ s32 worldmapMode0_task_partyMember_update(s32 param_1) {
 
 
     sWorldmapState* psVar3 = gWorldmapState;
-    sWorldmapStateEntry* psVar9 = &gWorldmapState->m0[param_1];
-    short sVar1 = psVar9->m4;
+    sWorldmapStateEntry* pEntry = &gWorldmapState->m0[param_1];
+    short sVar1 = pEntry->m4;
     short sVar4;
 
     sWorldmapStateEntry* pParent;
-    if (sVar1 == 2) {
-        sVar4 = 0x28;
-    LAB_Worldmap__8008b6e4:
-        psVar9->m4 = 0;
-        psVar9->m20 = sVar4;
-    }
-    else {
-        if (2 < sVar1) {
-            if (sVar1 == 3) {
-                sVar4 = 1;
-            }
-            else {
-                sVar4 = 0x30;
-                if (sVar1 != 5) goto LAB_Worldmap__8008b6ec;
-            }
-            goto LAB_Worldmap__8008b6e4;
-        }
-        if (sVar1 == 1) {
-            psVar9->m4 = 0;
-            psVar9->m20 = 8;
-            pParent = &psVar3->m0[psVar9->m6];
-        }
+
+    switch (pEntry->m4) {
+    case 0:
+        break;
+    case 1:
+        pEntry->m4 = 0;
+        pEntry->m20 = 8;
+        pParent = &gWorldmapState->m0[pEntry->m6];
+        break;
+    case 2:
+        pEntry->m4 = 0;
+        pEntry->m20 = 0x28;
+        break;
+    case 3:
+        pEntry->m4 = 0;
+        pEntry->m20 = 1;
+        break;
+    default:
+        assert(0);
+        break;
     }
 
-LAB_Worldmap__8008b6ec:
-    switch (psVar9->m20) {
+    switch (pEntry->m20) {
     case 0:
     case 1:
         if (gameState.m22B1_isOnGear[param_1 + -1] == 0) {
-            s32 uVar7 = (int)worldmapFollowLeaderDataIndex - psVar9->m58 & 0x1f;
-            if (((psVar9->m28_position).vx == worldmapFollowLeaderData[uVar7].m0_position.vx && (psVar9->m28_position).vy == worldmapFollowLeaderData[uVar7].m0_position.vy) &&
-                (psVar9->m28_position).vz == worldmapFollowLeaderData[uVar7].m0_position.vz) {
-                if (*(char*)((int)&(psVar9->m4C->m0_spriteActorCore).mAC + 3) != '\0') {
-                    spriteActorSetPlayingAnimation(psVar9->m4C, 0);
+            s32 uVar7 = (int)worldmapFollowLeaderDataIndex - pEntry->m58 & 0x1f;
+            if (((pEntry->m28_position).vx == worldmapFollowLeaderData[uVar7].m0_position.vx && (pEntry->m28_position).vy == worldmapFollowLeaderData[uVar7].m0_position.vy) &&
+                (pEntry->m28_position).vz == worldmapFollowLeaderData[uVar7].m0_position.vz) {
+                if (((pEntry->m4C->m0_spriteActorCore).mAC >> 24) != '\x00') {
+                    spriteActorSetPlayingAnimation(pEntry->m4C, 0);
                     clearWorldmapParticles(param_1 + 0x2e);
                 }
             }
             else {
-                if (*(char*)((int)&(psVar9->m4C->m0_spriteActorCore).mAC + 3) != '\x01') {
-                    spriteActorSetPlayingAnimation(psVar9->m4C, 1);
+                if (((pEntry->m4C->m0_spriteActorCore).mAC >> 24) != '\x01') {
+                    spriteActorSetPlayingAnimation(pEntry->m4C, 1);
                 }
                 std::array<short, 1> temp;
-                spawnParticlesForTerrainType3(param_1 + 0x2e, psVar9, temp);
+                spawnParticlesForTerrainType3(param_1 + 0x2e, pEntry, temp);
             }
-            (psVar9->m28_position).vx = worldmapFollowLeaderData[uVar7].m0_position.vx;
-            (psVar9->m28_position).vy = worldmapFollowLeaderData[uVar7].m0_position.vy;
-            (psVar9->m28_position).vz = worldmapFollowLeaderData[uVar7].m0_position.vz;
+            (pEntry->m28_position).vx = worldmapFollowLeaderData[uVar7].m0_position.vx;
+            (pEntry->m28_position).vy = worldmapFollowLeaderData[uVar7].m0_position.vy;
+            (pEntry->m28_position).vz = worldmapFollowLeaderData[uVar7].m0_position.vz;
             sVar1 = worldmapFollowLeaderData[uVar7].m10;
-            psVar9->m24 = 0;
-            psVar9->m48 = sVar1;
+            pEntry->m24 = 0;
+            pEntry->m48 = sVar1;
         }
         else {
-            (psVar9->m28_position).vx = gWorldmapState->m0[param_1 + 3].m28_position.vx;
-            (psVar9->m28_position).vy = psVar3->m0[param_1 + 3].m28_position.vy;
-            (psVar9->m28_position).vz = psVar3->m0[param_1 + 3].m28_position.vz;
+            (pEntry->m28_position).vx = gWorldmapState->m0[param_1 + 3].m28_position.vx;
+            (pEntry->m28_position).vy = psVar3->m0[param_1 + 3].m28_position.vy;
+            (pEntry->m28_position).vz = psVar3->m0[param_1 + 3].m28_position.vz;
             sVar1 = psVar3->m0[param_1 + 3].m48;
-            psVar9->m24 = 1;
-            psVar9->m48 = sVar1;
+            pEntry->m24 = 1;
+            pEntry->m48 = sVar1;
             clearWorldmapParticles(param_1 + 0x2e);
         }
         break;
     case 2: // in yggdrasil
-        (psVar9->m28_position).vx = gWorldmapState->m0[7].m28_position.vx;
-        (psVar9->m28_position).vy = psVar3->m0[7].m28_position.vy;
-        (psVar9->m28_position).vz = psVar3->m0[7].m28_position.vz;
-        psVar9->m48 = psVar3->m0[7].m48;
+        (pEntry->m28_position).vx = gWorldmapState->m0[7].m28_position.vx;
+        (pEntry->m28_position).vy = psVar3->m0[7].m28_position.vy;
+        (pEntry->m28_position).vz = psVar3->m0[7].m28_position.vz;
+        pEntry->m48 = psVar3->m0[7].m48;
         break;
     default:
         assert(0);
     }
 
-    if (psVar9->m24 == 0) {
-        assert(0);
+    if (pEntry->m24 == 0) {
+        //addShadow(0, &psVar9->m28_position);
+        MissingCode("addShadow for party memeber");
     }
 
     return 1;

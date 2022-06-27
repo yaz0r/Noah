@@ -832,14 +832,12 @@ int readS16FromScriptFile(int param_1)
     return (int)(((uint)pCurrentFieldScriptFile[param_1] + (uint)(pCurrentFieldScriptFile + param_1)[1] * 0x100) * 0x10000) >> 0x10;
 }
 
-void OP_INIT_ENTITY_PC_Sub0(int param_1)
+void setupActorToFieldEntryID(int param_1)
 {
     if (*pCurrentFieldScriptFile == 0xff) {
         param_1 = param_1 * 7;
         pCurrentFieldScriptActor->m10_walkmeshId = (ushort)pCurrentFieldScriptFile[param_1 + 5];
-        int sVar2 = readS16FromScriptFile(param_1 + 1);
-        int sVar3 = readS16FromScriptFile(param_1 + 3);
-        setCurrentActor2DPosition((int)sVar2, (int)sVar3);
+        setCurrentActor2DPosition(readS16FromScriptFile(param_1 + 1), readS16FromScriptFile(param_1 + 3));
         int uVar5 = (uint)pCurrentFieldScriptFile[param_1 + 6];
         if (uVar5 == 0xff) {
             uVar5 = getVariable(8);
@@ -921,8 +919,7 @@ void OP_INIT_ENTITY_PC(void)
         }
         pcInitVar2 = -0xc0;
         actorArray[currentFieldActorId].m58_flags = actorArray[currentFieldActorId].m58_flags & 0xffdf;
-        local_v0_684 = getVariable(2);
-        OP_INIT_ENTITY_PC_Sub0(local_v0_684);
+        setupActorToFieldEntryID(getVariable(2)); // set the player position based on the field param
         OP_INIT_ENTITY_SCRIPT_sub1();
         uVar5 = pCurrentFieldScriptActor->m4_flags.m_rawFlags & 0xfffff7ff;
         psVar7 = pCurrentFieldScriptActor;
