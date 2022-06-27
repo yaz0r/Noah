@@ -797,10 +797,38 @@ static const std::array<s16, 8> SHORT_ARRAY_worldmap__8009af90 = { {
      0x3F48, 0x38D8, 0x3914, 0x4220,
 } };
 
-std::vector<s16> SHORT_ARRAY_worldmap__8009b566 = { {
-    0x18, 0x36, 0x87, 0x95,
-    0xBA, 0xC6, 0xCC, 0xED,
+std::vector<s16> scenarioStateToWorldmapConfigsMapping = { {
+    0x18, // until Lahan attacked and need to head to the forest
+    0x36,
+    0x87,
+    0x95,
+    0xBA,
+    0xC6,
+    0xCC,
+    0xED,
     -1
+} };
+
+struct sWorldmapConfig {
+    s16 m0_baseFileId;
+    s16 m2_sizeX;
+    s16 m4_sizeZ;
+    s16 m6_exitMode;
+};
+
+std::array<sWorldmapConfig, 10> worldmapConfigs = { {
+    {0x2B, 0x10, 0x10, 2},
+    {0x36, 0x10, 0x10, 2},
+    {0x41, 0x10, 0x10, 2},
+    {0x4C, 0x10, 0x10, 2},
+    {0x57, 0x10, 0x10, 2},
+    {0x62, 0x10, 0x10, 2},
+    {0x6D, 0x10, 0x10, 2},
+    {0x78, 0x10, 0x10, 2},
+    {0x83, 0x10, 0x10, 2},
+
+    {0x2B, 0x10, 0x10, 2},
+    // ... to be continued
 } };
 
 std::vector<s16> SHORT_ARRAY_worldmap__8009b57a = { {
@@ -813,39 +841,35 @@ std::vector<s16> SHORT_ARRAY_worldmap__8009b58c = { {
     0x41, 0x10, 0x10, 0x2,
 } };
 
-void initWorldMap(int param_1, int param_2)
+void initWorldMap(int worldmapMode, int scenarioFlag)
 {
-    std::vector<s16>::iterator psVar1;
-    int iVar2;
+    sWorldmapConfig* pConfig;
 
-    if (param_1 < 8) {
-        iVar2 = 1;
-        if ((int)(uint)(ushort)SHORT_ARRAY_worldmap__8009b566[0] <= param_2) {
-            psVar1 = SHORT_ARRAY_worldmap__8009b566.begin();
-            do {
-                psVar1 = psVar1 + 1;
-                iVar2 += 1;
-            } while (*psVar1 <= param_2);
+    if (worldmapMode < 8) {
+        int configId = 0;
+        while (scenarioStateToWorldmapConfigsMapping[configId] <= scenarioFlag) {
+            configId++;
         }
-        psVar1 = SHORT_ARRAY_worldmap__8009b57a.begin() + iVar2 * 4 + 1;
-        initWorldMapVar0 = iVar2 + -1;
+
+        pConfig = &worldmapConfigs[configId];
+        initWorldMapVar0 = configId;
     }
     else {
-        psVar1 = SHORT_ARRAY_worldmap__8009b58c.begin() + param_1 * 4;
+        pConfig = &worldmapConfigs[worldmapMode + 1];
     }
-    currentBattleMusicId = *psVar1 + 8;
-    worldmapFile9 = *psVar1 + 9;
-    worldmapFile10 = *psVar1 + 10;
-    worldmapFile3 = *psVar1 + 3;
-    worldmapFile2 = *psVar1 + 2;
-    worldmapFile4 = *psVar1 + 4;
-    worldmapSizeX = psVar1[1];
-    worldmapSizeY = psVar1[2];
-    worldmapFile1 = *psVar1 + 1;
-    worldmapFile6 = *psVar1 + 6;
-    worldmapFile5 = *psVar1 + 5;
-    exitWorldMapMode = (int)psVar1[3];
-    worldmapFile7 = *psVar1 + 7;
+    currentBattleMusicId = pConfig->m0_baseFileId + 8;
+    worldmapFile9 = pConfig->m0_baseFileId + 9;
+    worldmapFile10 = pConfig->m0_baseFileId + 10;
+    worldmapFile3 = pConfig->m0_baseFileId + 3;
+    worldmapFile2 = pConfig->m0_baseFileId + 2;
+    worldmapFile4 = pConfig->m0_baseFileId + 4;
+    worldmapSizeX = pConfig->m2_sizeX;
+    worldmapSizeY = pConfig->m4_sizeZ;
+    worldmapFile1 = pConfig->m0_baseFileId + 1;
+    worldmapFile6 = pConfig->m0_baseFileId + 6;
+    worldmapFile5 = pConfig->m0_baseFileId + 5;
+    exitWorldMapMode = pConfig->m6_exitMode;
+    worldmapFile7 = pConfig->m0_baseFileId + 7;
     return;
 }
 

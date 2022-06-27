@@ -8945,6 +8945,17 @@ void updateFieldInputs()
     }
 }
 
+void saveStateToKernel(void)
+{
+    MissingCode();
+
+    for (int i = 0; i < 0x200; i++) {
+        pKernelGameState->m1930_fieldVarsBackup[i] = fieldVars[i];
+    }
+
+    return;
+}
+
 void syncKernelAndFieldStates()
 {
     if (kernelAndFieldStatesSynced != 1) {
@@ -8952,6 +8963,8 @@ void syncKernelAndFieldStates()
         for (int i = 0; i < 3; i++) {
             pKernelGameState->m1D34_currentParty[i] = currentParty[i];
         }
+        MissingCode();
+        saveStateToKernel();
         MissingCode();
 
         setVar(0xc, (timeMinutes << 8) | timeSeconds);
@@ -9195,6 +9208,8 @@ void fieldEntryPoint()
                         unflagAllocation(rawFieldBundle);
                         rawFieldBundle.clear();
                     }
+                    MissingCode();
+                    syncKernelAndFieldStates();
                     MissingCode();
                     fieldChangeGameMode(3);
                     return;
