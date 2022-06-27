@@ -7,6 +7,7 @@
 #include "worldmapExit.h"
 #include "worldmapDynamicCollisions.h"
 #include "worldmapParticles.h"
+#include "worldmapFollowLeader.h"
 
 u8 adjustLocationAfterCollisionVar0;
 u8 targetVehicleEntityIndex;
@@ -229,7 +230,11 @@ s32 worldmapMode0_taskPlayer_init(int param_1)
         assert(0);
     }
 
-    MissingCode("Follow leader init");
+    worldmapFollowLeaderDataIndex = 0;
+    for (int i = 0; i < 0x20; i++) {
+        worldmapFollowLeaderData[i].m0_position = gWorldmapState->m0[param_1].m28_position;
+        worldmapFollowLeaderData[i].m10 = gWorldmapState->m0[param_1].m48;
+    }
 
     gameState.m1820_worldmapPosition[0] = (short)(gWorldmapState->m0[param_1].m28_position.vx >> 0xc);
     gameState.m1820_worldmapPosition[1] = (short)(gWorldmapState->m0[param_1].m28_position.vz >> 0xc);
@@ -971,7 +976,10 @@ s32 worldmapMode0_taskPlayer_update(int param_1)
                     if (SHORT_ARRAY_worldmap__8009b180[((int)(collisionResult2 << 0x10) >> 0xf) / 2]) {
                         pEntry->m28_position = DAT_1f800090;
                         if (((pEntry->m38_step).vx | (pEntry->m38_step).vz) != 0) {
-                            MissingCode("Update worldamp follow data");
+                            worldmapFollowLeaderDataIndex = (worldmapFollowLeaderDataIndex + 1) & 0x1F;
+                            worldmapFollowLeaderData[worldmapFollowLeaderDataIndex].m0_position = pEntry->m28_position;
+                            worldmapFollowLeaderData[worldmapFollowLeaderDataIndex].m10 = pEntry->m48;
+                            followLeaderPostProcess();
                         }
                     }
                 }
