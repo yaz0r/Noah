@@ -4,6 +4,7 @@
 #include "menus/menuHandler.h"
 #include "kernel/kernelBootMenu.h"
 #include "worldmap/worldmap.h"
+#include "battle/battle.h"
 
 s32 bootMode = 0;
 s32 oldBootMode = 0;
@@ -24,7 +25,7 @@ void unimplementedGameMode() {
 static const std::array<sBootMode, 7> gameModes = { {
     {&kernelBootMenu, 0, 0, 0}, // kernel menu
     {&fieldEntryPoint, 0, 0, 1}, // field
-    {&unimplementedGameMode, 0, 0, 1}, // battle
+    {&battleEntryPoint, 0, 0, 1}, // battle
     {&worldmapEntryPoint, 0, 0, 1}, // worldmap
     {&unimplementedGameMode, 0, 0, 1}, // battling
     {&enterMenu, 0, 0, 0}, // menu

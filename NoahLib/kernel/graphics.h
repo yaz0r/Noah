@@ -42,3 +42,6 @@ int MoveImage(RECT* rect, int x, int y);
 
 void SetColorMatrix(MATRIX*);
 void SetLightMatrix(MATRIX*);
+
+void SetGeomScreen(s32);
+void SetGeomOffset(s32, s32);

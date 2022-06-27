@@ -435,8 +435,6 @@ void OPX_13Sub(int);
 void updateGearState(int param_1);
 int getCurrentDiscNumber();
 int isLoadCompleted();
-void SetGeomScreen(s32);
-void SetGeomOffset(s32, s32);
 int getCharacter(int param_1);
 int findCharacterInParty(int param_1);
 

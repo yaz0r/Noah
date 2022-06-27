@@ -1215,3 +1215,14 @@ void SetColorMatrix(MATRIX*) {
 void SetLightMatrix(MATRIX*) {
     MissingCode();
 }
+
+void SetGeomScreen(s32 h)
+{
+    setCopControlWord(2, 0xd000, h);
+}
+
+void SetGeomOffset(int ofx, int ofy)
+{
+    setCopControlWord(2, 0xc000, ofx << 0x10);
+    setCopControlWord(2, 0xc800, ofy << 0x10);
+}
