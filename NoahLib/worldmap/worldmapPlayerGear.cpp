@@ -255,26 +255,25 @@ s32 worldmapMode0_taskPlayerGear_update(int param_1) {
         gameState.m22B1_isOnGear[0] = 1;
     }
     else if (sVar7 < 5) {
-        s32 sVar3 = 0x30;
         if (sVar7 == 3) {
-        LAB_worldmap__8008c928:
             pEntry->m4 = 0;
-            pEntry->m20 = sVar3;
+            pEntry->m20 = 0x30;
         }
     }
     else if (sVar7 == 7) {
         pEntry->m4 = 0;
-        s32 iVar5 = pEntry->m58 + 1;
-        pEntry->m58 = iVar5;
-        if (iVar11 == iVar5) {
+        pEntry->m58++;
+        if (iVar11 == pEntry->m58) {
             pEntry->m20 = 1;
             worldMapGearMode = 2;
             currentWorldmapDynamicCollisionSlot = 0;
         }
     }
     else {
-        s32 sVar3 = 0x18;
-        if (sVar7 == 8) goto LAB_worldmap__8008c928;
+        if (sVar7 == 8) {
+            pEntry->m4 = 0;
+            pEntry->m20 = 0x18;
+        }
     }
 
     switch (pEntry->m20) {

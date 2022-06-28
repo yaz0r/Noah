@@ -3,19 +3,19 @@
 #include "worldmap.h"
 
 const std::array<s16, 4> SHORT_ARRAY_worldmap__8009b224 = { {
-        0xFEAB, 0xFE39, 0xFE00, 0xFDC8,
+        (s16)0xFEAB, (s16)0xFE39, (s16)0xFE00, (s16)0xFDC8,
 } };
 
 const std::array<s16, 4> SHORT_ARRAY_worldmap__8009b234 = { {
-        0xFF00, 0xFE20, 0xFD48, 0xFC58,
+        (s16)0xFF00, (s16)0xFE20, (s16)0xFD48, (s16)0xFC58,
 } };
 
 const std::array<s16, 4> SHORT_ARRAY_worldmap__8009b22c = { {
-        0xFF1D, 0xFE39, 0xFE00, 0xFDC8,
+        (s16)0xFF1D, (s16)0xFE39, (s16)0xFE00, (s16)0xFDC8,
 } };
 
 const std::array<s16, 4> SHORT_ARRAY_worldmap__8009b23c = { {
-        0xFF50, 0xFE20, 0xFD48, 0xFC58,
+        (s16)0xFF50, (s16)0xFE20, (s16)0xFD48, (s16)0xFC58,
 } };
 
 const std::array<s32, 4> INT_ARRAY_worldmap__8009b214 = { {

@@ -1140,7 +1140,7 @@ void drawWorldmapGroundCellSub0(uint* param_1, std::vector<sTag>& OT, std::vecto
     renderWorldmapGroundVar1 = currentNumUsedTriangles;
 }
 
-void drawWorldmapGroundCell(uint* param_1, std::vector<sTag>& param_2, std::vector<POLY_FT3>::iterator& param_3, SVECTOR* param_4) {
+void drawWorldmapGroundCell(uint* param_1, std::vector<sTag>& param_2, std::vector<POLY_FT3>::iterator param_3, SVECTOR* param_4) {
     short sVar2;
     int uVar3;
     uint uVar6;
@@ -1180,7 +1180,7 @@ void drawWorldmapGroundCell(uint* param_1, std::vector<sTag>& param_2, std::vect
     return;
 }
 
-void drawWorldmapGround(std::vector<sTag>& param_1, std::vector<POLY_FT3>::iterator& param_2, VECTOR* param_3) {
+void drawWorldmapGround(std::vector<sTag>& param_1, std::vector<POLY_FT3>::iterator param_2, VECTOR* param_3) {
     DAT_1f800288 = USHORT_ARRAY_8009ccb4;
     DAT_1f800308 = USHORT_ARRAY_8009cd54;
     MATRIX DAT_1f800350 = streamingMatrixIdentity;

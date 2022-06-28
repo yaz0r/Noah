@@ -431,7 +431,7 @@ void setupWorldmapPositionFromFileData(int param_1) {
 std::array<u8, 3> DAT_worldmap__800704dc = { { 0xE0, 0xF5, 0xFF } };
 std::array<u16, 16> SHORT_ARRAY_8009bce0;
 
-void tweakWorldmapTexture(std::vector<u16>::iterator& param_1, std::vector<u16>::iterator& param_2, int param_3, const std::array<u8, 3>& param_4) {
+void tweakWorldmapTexture(std::vector<u16>::iterator param_1, std::vector<u16>::iterator param_2, int param_3, const std::array<u8, 3>& param_4) {
     u8 bVar1 = param_4[0];
     u8 bVar2 = param_4[1];
     u8 bVar3 = param_4[2];

@@ -419,7 +419,7 @@ const std::vector<sVec2_s16> windowsDefaultPositions = {
 s16 dialogWindowOpenAnimationNumFrames = 0;
 
 
-std::vector<u8>::iterator getDialogParamPointer(std::vector<u8>::iterator& buffer, int param_2)
+std::vector<u8>::iterator getDialogParamPointer(const std::vector<u8>::iterator& buffer, int param_2)
 {
 	return buffer + READ_LE_U16(buffer + param_2 * 2 + 4);
 }

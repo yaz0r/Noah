@@ -210,8 +210,8 @@ void renderBattleStartEffect(sBattleStartEffect* param_1) {
                     SetRotMatrix(&localMatrix);
                     SetTransMatrix(&localMatrix);
 
-                    static const std::array<SVECTOR, 3> SVECTOR_ARRAY_Battle__800c3594 = { { { 0xFF60, 0xFF60, 0 }, {0x160, 0xFF60, 0}, {0xFF60, 0x160, 0} } };
-                    static const std::array<SVECTOR, 3> SVECTOR_ARRAY_Battle__800c35ac = { { { 0xA0, 0xFEA0, 0 }, {0xA0, 0xA0, 0}, {0xFEA0, 0xA0, 0} } };
+                    static const std::array<SVECTOR, 3> SVECTOR_ARRAY_Battle__800c3594 = { { { -0xA0, -0xA0, 0 }, {0x160, -0xA0, 0}, {-0xA0, 0x160, 0} } };
+                    static const std::array<SVECTOR, 3> SVECTOR_ARRAY_Battle__800c35ac = { { { 0xA0, -0x160, 0 }, {0xA0, 0xA0, 0}, {-0x160, 0xA0, 0} } };
 
                     const std::array<SVECTOR, 3>* pVector;
                     if (i == 0) {

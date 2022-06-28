@@ -21,4 +21,4 @@ void setWorldmapGridUpdateMask(VECTOR* param_1);
 
 void worldmapDotInit(void);
 void worldmapGroundPrepareRenderingTable(VECTOR* param_1);
-void drawWorldmapGround(std::vector<sTag>& param_1, std::vector<POLY_FT3>::iterator& param_2, VECTOR* param_3);
+void drawWorldmapGround(std::vector<sTag>& param_1, std::vector<POLY_FT3>::iterator param_2, VECTOR* param_3);
