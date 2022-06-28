@@ -928,6 +928,15 @@ void gte_stsz4(int* sz0, int* sz1, int* sz2, int* sz3)
 	*sz3 = getCopReg(2, 0x9800);
 }
 
+void gte_stdp(s32* output) {
+    *output = getCopReg(2, 8 * 0x800);
+}
+
+s32 gte_stSZ3() {
+    return getCopReg(2, 0x9800);
+}
+
+
 void gte_SetRotMatrix(const MATRIX* m) {
     setCopControlWord(2, 0, sVec2_s16::fromValue(m->m[0][0], m->m[0][1]));
     setCopControlWord(2, 0x800, sVec2_s16::fromValue(m->m[0][2], m->m[1][0]));

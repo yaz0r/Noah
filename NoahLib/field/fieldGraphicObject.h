@@ -106,7 +106,13 @@ struct sStackElement
 	sPS1Pointer asPs1Pointer;
 };
 
-struct sSpriteActorCore {
+struct sCustomRenderable {
+    virtual struct sSpriteActorCore* getAsSpriteActorCore() { assert(0); return nullptr; }
+};
+
+struct sSpriteActorCore : public sCustomRenderable {
+    virtual struct sSpriteActorCore* getAsSpriteActorCore() override { return this; }
+
     FP_VEC3 m0_position;
     FP_VEC3 mC_step;
     s32 m18_moveSpeed;
@@ -198,21 +204,21 @@ struct sSavePointMesh_data2
 };
 
 
-struct sSavePointMesh_1C
+struct sCustomRenderableEntityHeader
 {
     void* m0_owner;
-    sSpriteActorCore* m4;
-    void (*m8)(sSavePointMesh_1C*);
-    void (*mC)(sSavePointMesh_1C*);
+    sCustomRenderable* m4;
+    void (*m8)(sCustomRenderableEntityHeader*);
+    void (*mC)(sCustomRenderableEntityHeader*);
     u32 m10;
     u32 m14;
-    sSavePointMesh_1C* m18_pNext;
+    sCustomRenderableEntityHeader* m18_pNext;
 };
 
 // base size of one of those is expected to be 0xEC
 struct sSavePointMeshAbstract {
-    sSavePointMesh_1C m0;
-    sSavePointMesh_1C m1C;
+    sCustomRenderableEntityHeader m0;
+    sCustomRenderableEntityHeader m1C;
     sSpriteActorCore m38_spriteActorCore;
 };
 
@@ -231,7 +237,7 @@ struct sSavePointMesh2 : public sSavePointMeshAbstract
 };
 
 extern sSpriteActorCore* spriteTransfertListHead;
-extern sSavePointMesh_1C* spriteCallback2Head;
+extern sCustomRenderableEntityHeader* spriteCallback2Head;
 
 void SetTimeScale(sSpriteActor* param_1, int param_2); // 0x80021BCC
 void OP_INIT_ENTITY_SCRIPT_sub0Sub9(sSpriteActorCore* param_1);
@@ -263,3 +269,5 @@ void setupOverrideClut(uint x, uint y);
 void spriteCallback_render2_updateMatrix(sSpriteActorCore* param_1);
 
 void setGraphicEntityScale(sSpriteActorCore* param_1, int param_2);
+
+void resetSpriteCallbacks(void);

@@ -298,7 +298,7 @@ void RotTrans(SFP_VEC4* rotation, FP_VEC4* output, long* flag)
     }
 }
 
-void Square0(FP_VEC3* v0, FP_VEC3* v1)
+void Square0(VECTOR* v0, VECTOR* v1)
 {
 	/*v1->vx = powl(v0->vx, 2);
 	v1->vy = powl(v0->vy, 2);
@@ -473,8 +473,8 @@ s32 SquareRoot0(s32 value)
 
 s32 length1d(s32 param_1)
 {
-	FP_VEC3 local_28;
-	FP_VEC3 local_18;
+	VECTOR local_28;
+	VECTOR local_18;
 	local_28.vx = param_1;
 
 	Square0(&local_28, &local_18);
@@ -483,8 +483,8 @@ s32 length1d(s32 param_1)
 
 s32 length2d(s32 param_1, s32 param_2)
 {
-	FP_VEC3 local_28;
-	FP_VEC3 local_18;
+	VECTOR local_28;
+	VECTOR local_18;
 	local_28.vx = param_1;
 	local_28.vy = param_2;
 	local_28.vz = 0;

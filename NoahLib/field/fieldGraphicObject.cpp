@@ -237,7 +237,7 @@ u32 getModeForSavePointMesh(u32 param_1)
     }
 }
 
-void allocateSavePointMeshDataSub0_callback(sSavePointMesh_1C* param_1)
+void allocateSavePointMeshDataSub0_callback(sCustomRenderableEntityHeader* param_1)
 {
     assert(0);
 }
@@ -245,7 +245,7 @@ void allocateSavePointMeshDataSub0_callback(sSavePointMesh_1C* param_1)
 u32 registerSpriteCallback2Counter2 = 0;
 u32 allocateSavePointMeshDataSub0_var0 = 0;
 u32 allocateSavePointMeshDataSub0_var1 = 0;
-void allocateSavePointMeshDataSub0(sSavePointMesh1* param_1, sSavePointMesh_1C* param_2)
+void allocateSavePointMeshDataSub0(sSavePointMesh1* param_1, sCustomRenderableEntityHeader* param_2)
 {
     param_2->m0_owner = param_1;
     param_2->mC = allocateSavePointMeshDataSub0_callback;
@@ -266,15 +266,15 @@ void allocateSavePointMeshDataSub0(sSavePointMesh1* param_1, sSavePointMesh_1C* 
     allocateSavePointMeshDataSub0_var1++;
 }
 
-sSavePointMesh_1C* spriteCallback2Head = nullptr;
+sCustomRenderableEntityHeader* spriteCallback2Head = nullptr;
 u32 registerSpriteCallback2Counter = 0;
 
-void registerSpriteCallback2Sub0(sSavePointMesh_1C* param_1) {
+void registerSpriteCallback2Sub0(sCustomRenderableEntityHeader* param_1) {
     MissingCode();
 }
 
 
-void registerSpriteCallback2(sSavePointMeshAbstract* param_1, sSavePointMesh_1C* param_2) {
+void registerSpriteCallback2(sSavePointMeshAbstract* param_1, sCustomRenderableEntityHeader* param_2) {
     param_2->m0_owner = param_1;
     param_2->m10 = param_2->m10 & 0xe0000000 | (registerSpriteCallback2Counter2 & 0x1fffffff);
     registerSpriteCallback2Counter2 = registerSpriteCallback2Counter2 + 1;
@@ -286,12 +286,12 @@ void registerSpriteCallback2(sSavePointMeshAbstract* param_1, sSavePointMesh_1C*
     param_2->m14 = param_1->m0.m10 & 0x1fffffff;
 }
 
-void regCallback8(sSavePointMesh_1C* param_1, void (*param_2)(sSavePointMesh_1C*))
+void regCallback8(sCustomRenderableEntityHeader* param_1, void (*param_2)(sCustomRenderableEntityHeader*))
 {
     param_1->m8 = param_2;
 }
 
-void regCallbackC(sSavePointMesh_1C* param_1, void (*param_2)(sSavePointMesh_1C*))
+void regCallbackC(sCustomRenderableEntityHeader* param_1, void (*param_2)(sCustomRenderableEntityHeader*))
 {
     param_1->mC = param_2;
 }
@@ -443,8 +443,8 @@ void spriteCallback_render2_updateMatrix(sSpriteActorCore* param_1)
     return;
 }
 
-void spriteCallback_render2(sSavePointMesh_1C* param_1) {
-    sSpriteActorCore* pSpriteActor = param_1->m4;
+void spriteCallback_render2(sCustomRenderableEntityHeader* param_1) {
+    sSpriteActorCore* pSpriteActor = param_1->m4->getAsSpriteActorCore();
 
     spriteCallback_render2_updateMatrix(pSpriteActor);
 
@@ -467,25 +467,25 @@ void spriteCallback_render2(sSavePointMesh_1C* param_1) {
     }
 }
 
-void savePointCallback8(sSavePointMesh_1C* param_1) {
-    OP_INIT_ENTITY_SCRIPT_sub0Sub9(param_1->m4);
-    savePointCallback8Sub0(param_1->m4);
+void savePointCallback8(sCustomRenderableEntityHeader* param_1) {
+    OP_INIT_ENTITY_SCRIPT_sub0Sub9(param_1->m4->getAsSpriteActorCore());
+    savePointCallback8Sub0(param_1->m4->getAsSpriteActorCore());
 
-    if (param_1->m4->m64_spriteByteCode.getPointer()) {
-        if (((param_1->m4->mAC >> 6) & 1) == 0) {
+    if (param_1->m4->getAsSpriteActorCore()->m64_spriteByteCode.getPointer()) {
+        if (((param_1->m4->getAsSpriteActorCore()->mAC >> 6) & 1) == 0) {
             return;
         }
 
-        OP_INIT_ENTITY_SCRIPT_sub0Sub9(param_1->m4);
-        savePointCallback8Sub0(param_1->m4);
-        if (param_1->m4->m64_spriteByteCode.getPointer()) {
+        OP_INIT_ENTITY_SCRIPT_sub0Sub9(param_1->m4->getAsSpriteActorCore());
+        savePointCallback8Sub0(param_1->m4->getAsSpriteActorCore());
+        if (param_1->m4->getAsSpriteActorCore()->m64_spriteByteCode.getPointer()) {
             return;
         }
     }
     param_1->mC(param_1);
 }
 
-void savePointCallbackC(sSavePointMesh_1C* param_1) {
+void savePointCallbackC(sCustomRenderableEntityHeader* param_1) {
     MissingCode();
     registerSpriteCallback2Sub0(param_1 + 1);
 }
@@ -623,23 +623,23 @@ sSavePointMeshAbstract* createSavePointMeshData(int mode1, int mode2, sFieldEnti
     return pNewSavePoint;
 }
 
-void spriteBytecode2ExtendedE0_Sub0Sub0Sub0(sSavePointMesh_1C* param_1, void (*param_2)(sSavePointMesh_1C*))
+void spriteBytecode2ExtendedE0_Sub0Sub0Sub0(sCustomRenderableEntityHeader* param_1, void (*param_2)(sCustomRenderableEntityHeader*))
 {
     param_1->m8 = param_2;
     return;
 }
 
-void spriteCallback_render0(sSavePointMesh_1C* param_1) {
+void spriteCallback_render0(sCustomRenderableEntityHeader* param_1) {
     assert(0);
 }
 
-const std::vector<void (*)(sSavePointMesh_1C*)> spriteBytecode2ExtendedE0_Sub0Sub0_callback = { {
+const std::vector<void (*)(sCustomRenderableEntityHeader*)> spriteBytecode2ExtendedE0_Sub0Sub0_callback = { {
         spriteCallback_render0,
         nullptr,
         spriteCallback_render2,
 } };
 
-void spriteBytecode2ExtendedE0_Sub0Sub0(sSavePointMesh_1C* param_1, int param_2)
+void spriteBytecode2ExtendedE0_Sub0Sub0(sCustomRenderableEntityHeader* param_1, int param_2)
 {
     spriteBytecode2ExtendedE0_Sub0Sub0Sub0(param_1, spriteBytecode2ExtendedE0_Sub0Sub0_callback[param_2]);
     return;
@@ -1926,4 +1926,15 @@ void setTransparencyMode(sSpriteActor* sprite, u32 mode)
     else {
         updateAllSubsprites(sprite);
     }
+}
+
+
+void resetSpriteCallbacks(void)
+{
+    allocateSavePointMeshDataSub0_var1 = 0;
+    registerSpriteCallback2Counter = 0;
+    spriteCallback2Var0 = 0;
+    spriteCallback2Var2 = (sCustomRenderableEntityHeader*)0x0;
+    spriteCallback2Head = (sCustomRenderableEntityHeader*)0x0;
+    return;
 }

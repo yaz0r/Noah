@@ -2,6 +2,9 @@
 #include "battleRenderContext.h"
 
 std::array<sBattleRenderStruct, 2> battleRenderStructs;
+sBattleRenderStruct* pCurrentBattleRenderStruct = nullptr;
+std::vector<sTag>* pCurrentBattleOT = nullptr;
+s32 battleOddOrEven = 0;
 
 void initBattleRenderStructs(sBattleRenderStruct* param_1) {
     param_1->m70_OT.resize(4096);

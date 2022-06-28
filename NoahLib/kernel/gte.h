@@ -48,6 +48,9 @@ void gte_ldVZ1(s16*);
 void gte_ldVXY2(SVECTOR*);
 void gte_ldVZ2(s16*);
 
+void gte_stdp(s32* output);
+s32 gte_stSZ3();
+
 s32 gte_stFLAG();
 s32 gte_stSXY0();
 s32 gte_stSXY1();

@@ -71,7 +71,7 @@ void RotTrans(SFP_VEC4* rotation, FP_VEC4* output, long* flag);
 void copyRotationMatrix(MATRIX* param_1, MATRIX* param_2);
 FP_VEC4* ApplyMatrix(MATRIX* m, SFP_VEC4* inputVector, FP_VEC4* outputVector);
 
-void Square0(FP_VEC3* v0, FP_VEC3* v1);
+void Square0(VECTOR* v0, VECTOR* v1);
 s32 SquareRoot0(s32 value);
 
 FP_VEC4* ApplyMatrixLV(MATRIX* m, FP_VEC4* v0, FP_VEC4* v1);

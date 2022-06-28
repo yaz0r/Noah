@@ -762,8 +762,8 @@ LAB_Field__8009ca64:
 
 s32 distance3d(long param_1, long param_2, long param_3)
 {
-	FP_VEC3 local_28;
-    FP_VEC3 local_18;
+	VECTOR local_28;
+    VECTOR local_18;
 
 	local_28.vx = param_1;
 	local_28.vy = param_2;

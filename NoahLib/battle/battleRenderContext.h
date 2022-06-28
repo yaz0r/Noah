@@ -10,4 +10,8 @@ struct sBattleRenderStruct {
 
 extern std::array<sBattleRenderStruct, 2> battleRenderStructs;
 
+extern sBattleRenderStruct* pCurrentBattleRenderStruct;
+extern std::vector<sTag>* pCurrentBattleOT;
+extern s32 battleOddOrEven;
+
 void initBattleRenderStructs(sBattleRenderStruct* param_1);
