@@ -37,9 +37,9 @@ sBattleStartEffect* initBattleStartEffect(sBattleStartEffect* param_1) {
     s32 local_58 = lVar3 << 10;
 
     for (int i = 0; i < 2; i++) {
+        int local_38 = -0xCA0;
+        int local_34 = -0xD60;
         for (int j = 0; j < 14; j++) {
-            int local_38 = -0xCA0;
-            int local_34 = -0xD60;
             for (int k = 0; k < 20; k++) {
                 s32 local_4c = j << 4;
                 sBattleStartEffectSub* pSub = &param_1->m3C_triangleData[i][j][k];
@@ -149,6 +149,8 @@ sBattleStartEffect* initBattleStartEffect(sBattleStartEffect* param_1) {
                     }
                 }
             }
+            local_38 += 0x200;
+            local_34 += 0x200;
         }
     }
 
@@ -198,6 +200,10 @@ void renderBattleStartEffect(sBattleStartEffect* param_1) {
     MissingCode();
     //ReadGeomOffset(&oldScreenOffsetX, &oldScreenOffsetY);
     //oldScreenGeom = ReadGeomScreen();
+
+    SetGeomOffset(0xa0, 0x70);
+    SetGeomScreen(0x200);
+
     for (int i = 0; i < 2; i++) {
         for (int j = 0; j < 14; j++) {
             for (int k = 0; k < 20; k++) {
