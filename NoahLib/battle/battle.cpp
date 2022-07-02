@@ -118,7 +118,8 @@ void loadBattleLoader() {
 MATRIX battleMatrix800CCB94;
 MATRIX battleMatrix800CCBB4;
 
-void* environmentModelConfigs;
+std::vector<sLoadedMecha_sub4>* environmentModelConfigs;
+sMechaInitVar4* environmentModelBlocks;
 
 std::array<struct sBackgroundPoly*, 2> battleEnvBackgroundPolys;
 
@@ -335,6 +336,10 @@ int loadBattleEnvironment(std::vector<u8>::iterator param_1, std::vector<u8>::it
             if (param_3) {
                 Hack("Original code alias the animation bundle and asset bundle");
                 mechaInitEnvironmentMechaMesh(0x1f, 0xc4, nullptr, param_3, 0, 0, 0, 0, 0);
+                MissingCode("processBattleEnvTextures");
+                environmentModelConfigs = battleMechas[0x1F]->m4;
+                environmentModelBlocks = battleMechas[0x1F]->m0;
+                MissingCode("Environment bones init");
             }
         }
     }

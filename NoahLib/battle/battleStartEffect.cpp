@@ -300,7 +300,7 @@ void updateBattleStartEffect(sBattleStartEffect* param_1) {
 
 std::array<sLoadingBatchCommands, 4> battleEnvLoadingCommands;
 
-int loadBattleMechaAndEnvironment(int param_1, int param_2, std::vector<u8>*& param_3, std::vector<u8>::iterator& param_4, std::vector<u8>::iterator& param_5) {
+int loadBattleMechaAndEnvironment(int battleArenaId, int param_2, std::vector<u8>*& param_3, std::vector<u8>::iterator& param_4, std::vector<u8>::iterator& param_5) {
     int local_30;
     int local_2c;
 
@@ -309,8 +309,8 @@ int loadBattleMechaAndEnvironment(int param_1, int param_2, std::vector<u8>*& pa
     setCurrentDirectory(0xc, 3);
     resetMemoryAllocStats(4, 0);
     int iVar1 = getNegativeFileSize(5);
-    int iVar5 = param_1 * 2;
-    if (param_1 < ((iVar1 << 0x10) >> 0x10) - ((iVar1 << 0x10) >> 0x1f) >> 1) {
+    int iVar5 = battleArenaId * 2;
+    if (battleArenaId < ((iVar1 << 0x10) >> 0x10) - ((iVar1 << 0x10) >> 0x1f) >> 1) {
         int sVar2 = getFileSizeAligned(iVar5 + param_2 + 7);
         std::vector<u8>* pvVar3 = new std::vector<u8>(sVar2);
         flagAllocation(*pvVar3);
