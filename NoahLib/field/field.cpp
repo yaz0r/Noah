@@ -447,6 +447,8 @@ void LogMissingOpcode(int actorId, u16 scriptOffset, u16 opcode)
         __debugbreak();
 #endif
     }
+
+    NoadLog("Missing opcode 0x%04X (Actor %d, offset %d)", opcode, actorId, scriptOffset);
 }
 
 void uploadFieldImages(std::vector<u8>::iterator pImageData)

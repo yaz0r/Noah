@@ -13,6 +13,8 @@
 #include "field/fieldDebugger/fieldInspector.h"
 #include "field/fieldDebugger/fieldViewDebug.h"
 
+ImLogger g_logger;
+
 bool noahInit(int argc, char* argv[])
 {
     initBgfxGlue(argc, argv);
@@ -150,6 +152,8 @@ void noahFrame_start()
 
 bool noahFrame_end()
 {
+    g_logger.Draw("Logger");
+
     c_filesystemExplorer::frame();
 
     fieldInspector_frame();
@@ -260,10 +264,22 @@ s32 READ_LE_S32(const std::vector<u8>::const_iterator& inputStream)
     return READ_LE_S32(&inputStream[0]);
 }
 
-void MissingCode(const char* arg) {
-
+void MissingCodeImpl(const char* format, ...) {
+    if (format && strlen(format)) {
+        va_list args;
+        va_start(args, format);
+        g_logger.AddLog(format, args);
+        g_logger.AddLog("\n");
+        va_end(args);
+    }
 }
 
-void Hack(const char* arg) {
-
+void HackImpl(const char* format, ...) {
+    if (format && strlen(format)) {
+        va_list args;
+        va_start(args, format);
+        g_logger.AddLog(format, args);
+        g_logger.AddLog("\n");
+        va_end(args);
+    }
 }

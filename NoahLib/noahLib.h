@@ -211,8 +211,15 @@ struct SFP_VEC4 : public SFP_VEC3
 typedef FP_VEC4 VECTOR;
 typedef SFP_VEC4 SVECTOR;
 
-void MissingCode(const char* arg = "");
-void Hack(const char* arg = "");
+void MissingCodeImpl(const char* fmt = "", ...);
+void HackImpl(const char* fmt = "", ...);
+
+#define Hack(x, ...) {static bool bWarnedAlready = false; if(!bWarnedAlready) {HackImpl(x, __VA_ARGS__); bWarnedAlready = true;}}
+#define MissingCode(x, ...) {static bool bWarnedAlready = false; if(!bWarnedAlready) {MissingCodeImpl(x, __VA_ARGS__); bWarnedAlready = true;}}
+
+#include "kernel/logger.h"
+
+#define NoadLog(x, ...) g_logger.AddLog(x, __VA_ARGS__); g_logger.AddLog("\n")
 
 #define trap(x) assert(0)
 
