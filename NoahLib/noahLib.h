@@ -211,15 +211,29 @@ struct SFP_VEC4 : public SFP_VEC3
 typedef FP_VEC4 VECTOR;
 typedef SFP_VEC4 SVECTOR;
 
-void MissingCodeImpl(const char* fmt = "", ...);
-void HackImpl(const char* fmt = "", ...);
-
-#define Hack(x, ...) {static bool bWarnedAlready = false; if(!bWarnedAlready) {HackImpl(x, __VA_ARGS__); bWarnedAlready = true;}}
-#define MissingCode(x, ...) {static bool bWarnedAlready = false; if(!bWarnedAlready) {MissingCodeImpl(x, __VA_ARGS__); bWarnedAlready = true;}}
-
 #include "kernel/logger.h"
 
-#define NoadLog(x, ...) g_logger.AddLog(x, __VA_ARGS__); g_logger.AddLog("\n")
+enum eLogCategories
+{
+    log_default = 0,
+    log_warning,
+    log_unimlemented,
+    log_hacks,
+
+    log_max
+};
+extern ImLogger Noah_Logger[eLogCategories::log_max];
+
+#define Noah_Log(string, ...) {Noah_Logger[log_default].AddLog(string, __VA_ARGS__);}
+#define Noah_CategorizedLog(logCategory, string, ...) {Noah_Logger[logCategory].AddLog(string, __VA_ARGS__);}
+#define Noah_MissingCode(name) { TracyMessage(name, strlen(name)); static bool printed = false; if(!printed) {printed = true; Noah_Logger[log_unimlemented].AddLog("Unimplemented: %s\n", name);}}
+#define Noah_WarningOnce(name) { static bool printed = false; if(!printed) {printed = true; Noah_Logger[log_warning].AddLog("Warning: %s\n", name);}}
+
+void UnimplementedImpl(const char* functionName);
+void HackImpl(const char* functionName);
+
+#define MissingCode() { static bool printed = false; if(!printed) {printed = true; UnimplementedImpl(__FUNCTION__);}}
+#define Hack(x) { static bool printed = false; if(!printed) {printed = true; HackImpl(__FUNCTION__);}}
 
 #define trap(x) assert(0)
 

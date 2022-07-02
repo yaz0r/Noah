@@ -13,7 +13,7 @@
 #include "field/fieldDebugger/fieldInspector.h"
 #include "field/fieldDebugger/fieldViewDebug.h"
 
-ImLogger g_logger;
+ImLogger Noah_Logger[eLogCategories::log_max];
 
 bool noahInit(int argc, char* argv[])
 {
@@ -152,7 +152,48 @@ void noahFrame_start()
 
 bool noahFrame_end()
 {
-    g_logger.Draw("Logger");
+    if (ImGui::Begin("Loggers")) {
+        if (ImGui::BeginTabBar("tabs")) {
+
+            for (int i = 0; i < eLogCategories::log_max; i++)
+            {
+                switch (i)
+                {
+                case eLogCategories::log_default:
+                    if (ImGui::BeginTabItem("Default")) {
+                        Noah_Logger[i].Draw();
+                        ImGui::EndTabItem();
+                    }
+                    break;
+                case eLogCategories::log_warning:
+                    if (ImGui::BeginTabItem("Warning")) {
+                        Noah_Logger[i].Draw();
+                        ImGui::EndTabItem();
+                    }
+                    break;
+                case eLogCategories::log_unimlemented:
+                    if (ImGui::BeginTabItem("Unimplemented")) {
+                        Noah_Logger[i].Draw();
+                        ImGui::EndTabItem();
+                    }
+                    break;
+                case eLogCategories::log_hacks:
+                    if (ImGui::BeginTabItem("Hacks")) {
+                        Noah_Logger[i].Draw();
+                        ImGui::EndTabItem();
+                    }
+                    break;
+                default:
+                    assert(0);
+                    break;
+                }
+            }
+
+            ImGui::EndTabBar();
+        }
+    }
+    ImGui::End();
+
 
     c_filesystemExplorer::frame();
 
@@ -264,22 +305,10 @@ s32 READ_LE_S32(const std::vector<u8>::const_iterator& inputStream)
     return READ_LE_S32(&inputStream[0]);
 }
 
-void MissingCodeImpl(const char* format, ...) {
-    if (format && strlen(format)) {
-        va_list args;
-        va_start(args, format);
-        g_logger.AddLog(format, args);
-        g_logger.AddLog("\n");
-        va_end(args);
-    }
+void UnimplementedImpl(const char* functionName) {
+    Noah_Logger[eLogCategories::log_unimlemented].AddLog("Unimplemented: %s\n", functionName);
 }
 
-void HackImpl(const char* format, ...) {
-    if (format && strlen(format)) {
-        va_list args;
-        va_start(args, format);
-        g_logger.AddLog(format, args);
-        g_logger.AddLog("\n");
-        va_end(args);
-    }
+void HackImpl(const char* functionName) {
+    Noah_Logger[eLogCategories::log_hacks].AddLog("Hack: %s\n", functionName);
 }

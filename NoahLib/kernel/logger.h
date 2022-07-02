@@ -27,11 +27,11 @@ struct ImLogger
 		LoggerMutex.unlock();
 	}
 
-	void    Draw(const char* title, bool* p_opened = NULL)
+	void    Draw(const char* title=nullptr, bool* p_opened = NULL)
 	{
 		LoggerMutex.lock();
 		ImGui::SetNextWindowSize(ImVec2(500, 400), ImGuiCond_FirstUseEver);
-		ImGui::Begin(title, p_opened);
+        if(title) ImGui::Begin(title, p_opened);
 		if (ImGui::Button("Clear")) Clear();
 		ImGui::SameLine();
 		bool copy = ImGui::Button("Copy");
@@ -64,7 +64,7 @@ struct ImLogger
 		ScrollToBottom = false;
 		ImGui::PopStyleVar();
 		ImGui::EndChild();
-		ImGui::End();
+        if (title) ImGui::End();
 		LoggerMutex.unlock();
 	}
 };
