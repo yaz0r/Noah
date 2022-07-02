@@ -669,10 +669,158 @@ int OP_UPDATE_CHARACTER_Sub0(sFieldScriptEntity* param_1)
     return -(uint)((param_1->m0_fieldScriptFlags.m_rawFlags >> 9 & 3 & (uint)param_1->m14_currentTriangleFlag >> 3) != 0);
 }
 
+// Initialize `encounterCount` timers
+// Every timers is an unique value in range [0, encouterTimer + 1] 
+void setInitialEncounterData()
+{
+    encounterDataCountdown = encounterTimer;
+    if (encounterCount == 0) {
+        encounterTimer = 0;
+        return;
+    }
+
+    for (int i = 0; i < 32; i++)
+    {
+        encounterTriggerTime[i] = -1;
+    }
+
+    if (encounterCount > 0) {
+        // Ensure that encounterTickData contains unique random numbers in range [0, encouterTimer + 1]
+        for (int encounterId = 0; encounterId < encounterCount; encounterId++)
+        {
+        LAB_Field__8008e798:
+
+            int s1 = 0;
+            int r = rand() * (encounterTimer + 1);
+            int r2 = (r >> 0xf) & 0xffff;
+
+            for (int i = 0; i < 32; i++)
+            {
+                if (encounterTriggerTime[i] == r2) goto LAB_Field__8008e798;
+            }
+            encounterTriggerTime[s1] = r2;
+            s1++;
+        }
+    }
+
+    if (encounterCount > 0) {
+        for (int encounterId = 0; encounterId < encounterCount; encounterId++)
+        {
+            encounterTriggerTime[encounterId]++;
+        }
+    }
+}
+
 void checkForRandomEncounter()
 {
-    MissingCode();
+    // BEGIN: Extra debug
+
+    if (debugForcedEncounter != -1) {        
+        //SHORT_Field__800b2290 = SHORT_ARRAY_Field__800b2270[iVar6];
+        //battleInitVar2 = debugForcedEncounter;
+        //battleInitVar1 = 0;
+        //if (mechaOverlayLoadingMode == 0) {
+        //    readGameOverlay(2);
+        // }
+        playMusicAuthorized = 0;
+        bBattleSequenceInitialized = true;
+        if (fieldDebugDisable != 0) {
+            playMusicAuthorized = 0;
+            return;
+        }
+        debugForcedEncounter = -1;
+    }
+
+    if (debugEncounterTriggerDisabled) {
+        // Supressed battle start from the debug menu.
+        return;
+    }
+
+    // END: Extra debug
+
+    if (((((playMusicAuthorized != 0) && (fieldExecuteVar3 != 0)) && (fieldChangePrevented != 0)) &&
+        ((fieldMusicLoadPending != -1 && (encounterTimer != 0)))) &&
+        ((fieldRandomBattleVar != -1 && ((loadCompleted != 1 && (/*fieldTransitionCompleted != 0*/ -1 != 0))))))
+    {
+        encounterDataCountdown--;
+        if (encounterDataCountdown == 0) {
+            setInitialEncounterData();
+        }
+
+        // Decrease every encounter counter by -1 unless already -1
+        if (encounterCount > 0) {
+            for (int s0 = 0; s0 < encounterCount; s0++) {
+                if (encounterTriggerTime[s0] != -1) {
+                    encounterTriggerTime[s0]--;
+                }
+            }
+        }
+        
+        // Exit unless we have at least one encounter entry
+        if (encounterCount <= 0) {
+            return;
+        }
+
+        // Find last entry and set it to -1
+        int encounterId = 0;
+        while (encounterTriggerTime[encounterId] != 0) {
+            encounterId++;            
+            if (encounterId == encounterCount) {
+                // Exit if no entries have any data
+                return;
+            }
+        }
+        encounterTriggerTime[encounterId] = -1;
+
+        // Select random encounter using weighted encounter chance:
+        //   Get total sum of encounter variables
+        //   Find a random value between 0 and total sum
+        //   Build a sequence where every element N is sum of previous ones
+        //   For every element from end if sum value is less than rand, set encounter start flag
+        //   If flag is set - break and activate battle
+
+        int iTotalEncounterSum = 0;
+        for (int v1 = 0; v1 < 16; v1++) {
+            iTotalEncounterSum += encounterProbabilityWeight[v1];
+        }
+
+        std::array<int, 16> encounterProbabilitySum;
+        int iPreviousSum = 0;
+        for (int v1 = 0; v1 < 16; v1++) {
+            encounterProbabilitySum[v1] = iPreviousSum;
+            iPreviousSum += encounterProbabilityWeight[v1];
+        }
+
+        int iVar5 = (rand() * (iTotalEncounterSum + 1)) >> 0xf;
+        bool bShouldTriggerEncounter = false;
+        int selectedEncounter = 0;
+
+        for (int v1 = 15; v1 >= 0; v1--) {
+            if (encounterProbabilityWeight[v1] != 0 && encounterProbabilitySum[v1] < iVar5) {
+                bShouldTriggerEncounter = true;
+                selectedEncounter = v1;
+                break; 
+            }
+        }
+
+        if (bShouldTriggerEncounter) {
+            //SHORT_Field__800b2290 = SHORT_ARRAY_Field__800b2270[iVar6];
+            //battleInitVar2 = selectedEncounter;
+            //battleInitVar1 = 0;
+            //if (mechaOverlayLoadingMode == 0) {
+            //    readGameOverlay(2);
+            // }
+            playMusicAuthorized = 0;
+            bBattleSequenceInitialized = true;
+            if (fieldDebugDisable != 0) {
+                playMusicAuthorized = 0;
+                return;
+            }
+            //recordEncounterDebugData(selectedEncounter);
+        }
+    }
 }
+
 
 void OP_UPDATE_CHARACTER()
 {
@@ -1202,6 +1350,9 @@ void OP_SET_FLAGS_DYNAMIC()
 
 void OP_SET_ENCOUNTER_DATA() 
 {
+    encounterTimer = getImmediateOrVariableUnsigned(1);
+    encounterCount = std::min<uint>(getImmediateOrVariableUnsigned(3), 0x20);
+    setInitialEncounterData();
     ADVANCE_VM(0x5);
 }
 
