@@ -81,6 +81,30 @@ void StartFrame()
     if (ImGui::BeginMainMenuBar())
     {
         ImGui::Text(" %.2f FPS (%.2f ms)", ImGui::GetIO().Framerate, 1000.0f / ImGui::GetIO().Framerate);
+
+        if (ImGui::BeginMenu("Frame limit")) {
+            //gFrameLimit
+            bool bSelected = gFrameLimit == 15;
+            if (ImGui::MenuItem("15 fps", nullptr, &bSelected)) {
+                gFrameLimit = 15;
+            }
+            bSelected = gFrameLimit == 30;
+            if (ImGui::MenuItem("30 fps", nullptr, &bSelected)) {
+                gFrameLimit = 30;
+            }
+            bSelected = gFrameLimit == 60;
+            if (ImGui::MenuItem("60 fps", nullptr, &bSelected)) {
+                gFrameLimit = 60;
+            }
+            bSelected = gFrameLimit == -1;
+            if (ImGui::MenuItem("Uncapped", nullptr, &bSelected)) {
+                gFrameLimit = -1;
+            }
+            if (ImGui::InputInt("Custom", &gFrameLimit)) {
+            }
+            ImGui::EndMenu();
+        }      
+        
         ImGui::EndMainMenuBar();
     }
 
