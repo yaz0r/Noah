@@ -143,11 +143,11 @@ void initMechaInitVar2Sub0(sMechaInitVar2* param_1) {
     }
 }
 
-void initMechaInitVar2(sMechaInitVar2* param_1, int param_2) {
-    if (param_2 > 0) {
-        param_1->m6 = param_2;
+void initMechaInitVar2(sMechaInitVar2* param_1, int count) {
+    if (count > 0) {
+        param_1->m6 = count;
         resetMemoryAllocStats(4, 0);
-        param_1->m0.resize(param_2);
+        param_1->m0.resize(count);
         if (param_1->m0.size()) {
             initMechaInitVar2Sub0(param_1);
         }

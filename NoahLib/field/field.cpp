@@ -25,6 +25,7 @@
 #include "kernel/memory.h"
 #include "kernel/gameMode.h"
 #include "worldmap/worldmap.h"
+#include "battle/battleConfig.h"
 
 #include "SDL_gamecontroller.h"
 #include "SDL_keyboard.h"
@@ -53,6 +54,7 @@ std::array<sFieldVramMapping, 32> fieldVramMapping;
 std::vector<u8> rawFieldBundleForDebug;
 std::vector<u8> rawFieldBundle;
 std::vector<u8> rawFieldModels;
+std::vector<u8> rawFieldBattleConfigs;
 std::vector<u8> rawFieldScriptData;
 std::vector<u8> rawFieldDialogBundle;
 std::vector<sFieldTrigger> fieldTriggerData;
@@ -2401,7 +2403,7 @@ void emptyPartySlot(int param_1)
 
 int getGearForCharacter(int param_1)
 {
-    return pKernelGameState->m294[param_1].m78_partyData_gearNum;
+    return pKernelGameState->m26C[param_1].m78_partyData_gearNum;
 }
 
 void startPartyCharacterASyncLoading(int partyCharacter, int partySlot)
@@ -3617,6 +3619,17 @@ void initFieldData()
             }
             fieldModelRelocation(rawFieldModels.begin() + offset);
             gCurrentFieldModels[i].init(rawFieldModels.begin() + offset, nextOffset - offset);
+        }
+    }
+
+    {
+        int rawFieldSize = READ_LE_U32(&rawFieldBundle[0x124]);
+        rawFieldBattleConfigs.resize(rawFieldSize + 0x10);
+        fieldDecompress(rawFieldSize + 0x10, rawFieldBundle.begin() + READ_LE_U32(&rawFieldBundle[0x148]), rawFieldBattleConfigs);
+        int numEntries = rawFieldSize / 0x20;
+        assert(numEntries == 16);
+        for (int i = 0; i < numEntries; i++) {
+            battleConfigs[i].init(rawFieldBattleConfigs.begin() + 0x20 * i);
         }
     }
 

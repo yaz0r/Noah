@@ -6,6 +6,9 @@
 #include "kernel/trigo.h"
 #include "kernel/gte.h"
 #include "kernel/TIM.h"
+#include "kernel/filesystem.h"
+#include "battleLoader.h"
+#include "battleConfig.h"
 
 void checkSoftReboot();
 
@@ -292,6 +295,24 @@ void updateBattleStartEffect(sBattleStartEffect* param_1) {
     }
 }
 
+void loadBattleMechaAndEnvironment(int param_1, int param_2, std::vector<u8>& param_3, std::vector<u8>& param_4, std::vector<u8>& param_5) {
+    MissingCode();
+        /*
+        int local_30;
+        int local_2c;
+        getCurrentDirectory(&local_30, &local_2c);
+        setCurrentDirectory(0xc, 3);
+        resetMemoryAllocStats(4, 0);*/
+}
+
+std::vector<u8> battleLoadDataVar0;
+std::vector<u8> battleLoadDataVar1;
+std::vector<u8> battleLoadDataVar2;
+
+void startBattleLoadingDuringEffect2() {
+    loadBattleMechaAndEnvironment(currentBattleConfig.m2, 0, battleLoadDataVar0, battleLoadDataVar1, battleLoadDataVar2);
+}
+
 void battleStartEffect() {
     resetSpriteCallbacks();
     
@@ -357,7 +378,7 @@ void battleStartEffect() {
         pBattleStartEffectOT = pCurrentBattleOT;
 
         MissingCode();
-        /*
+
         if (isCDBusy() == 0) {
             switch (s2_tickState) {
             case 1:
@@ -369,11 +390,12 @@ void battleStartEffect() {
                 break;
             case 2:
                 startBattleLoadingDuringEffect2();
+                //assert(0);
                 s2_tickState++;
                 break;
             }
         }
-        */
+
         checkSoftReboot();
         //sCurrentCameraVectors temp;
         //pCurrentCameraVectors = &sCurrentCameraVectors;

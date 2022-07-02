@@ -5,8 +5,10 @@
 #include "battleRenderContext.h"
 #include "kernel/memory.h"
 #include "battleStartEffect.h"
+#include "battleConfig.h"
 
 s8 battleDebugDisplay = 0;
+s8 requestedBattleConfig = 0;
 
 void initGraphicsForBattle(void) {
     ResetGraph(1);
@@ -111,6 +113,7 @@ void battleMain() {
 
     MissingCode();
 
+    currentBattleConfig = battleConfigs[requestedBattleConfig];
     startBattleLoader(battleTransitionEffect);
 
     MissingCode();

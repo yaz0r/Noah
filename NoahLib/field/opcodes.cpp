@@ -2385,7 +2385,7 @@ void OP_RESTORE_HP()
 {
     for (int i = 0; i < 11; i++)
     {
-        pKernelGameState->m294[i].m24_HP = pKernelGameState->m294[i].m26_MaxHP;
+        pKernelGameState->m26C[i].m24_HP = pKernelGameState->m26C[i].m26_MaxHP;
     }
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 1;
 }
@@ -2394,7 +2394,7 @@ void OP_RESTORE_MP()
 {
     for (int i = 0; i < 11; i++)
     {
-        pKernelGameState->m294[i].m28_MP = pKernelGameState->m294[i].m2A_MaxMP;
+        pKernelGameState->m26C[i].m28_MP = pKernelGameState->m26C[i].m2A_MaxMP;
     }
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 1;
 }
@@ -2518,7 +2518,7 @@ void OP_FREE_SPECIAL_2D_ANIMATION()
 
 void OP_ASSIGN_GEAR()
 {
-    pKernelGameState->m294[getImmediateOrVariableUnsigned(1)].m78_partyData_gearNum = getImmediateOrVariableUnsigned(3);
+    pKernelGameState->m26C[getImmediateOrVariableUnsigned(1)].m78_partyData_gearNum = getImmediateOrVariableUnsigned(3);
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 5;
 }
 
@@ -3116,8 +3116,8 @@ void OP_RESTORE_GEAR()
 {
     for (int i = 0; i < 20; i++)
     {
-        pKernelGameState->m9A0_gears[i].m38_HP = pKernelGameState->m9A0_gears[i].m3C_maxHP;
-        pKernelGameState->m9A0_gears[i].m10_ether = pKernelGameState->m9A0_gears[i].m12_maxEther;
+        pKernelGameState->m978_gears[i].m38_HP = pKernelGameState->m978_gears[i].m3C_maxHP;
+        pKernelGameState->m978_gears[i].m10_ether = pKernelGameState->m978_gears[i].m12_maxEther;
     }
     ADVANCE_VM(0x1);
 }

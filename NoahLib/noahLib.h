@@ -23,6 +23,11 @@ typedef u32 uint;
 struct sPS1Pointer
 {
 public:
+
+    sPS1Pointer(u8* p=nullptr) {
+        setPointer(p);
+    }
+
     void setPointer(u8* pointer)
     {
         m_pointer = pointer;
