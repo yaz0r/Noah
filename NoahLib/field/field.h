@@ -377,6 +377,20 @@ extern u8 kernelAndFieldStatesSynced;
 
 extern s32 fieldTransitionMode;
 extern s32 fieldTransitionFadeInLength;
+
+// Encounter timers and data
+extern s32 encounterTimer;
+extern s32 fieldTransitionCompleted;
+extern s32 encounterDataCountdown;
+extern int encounterCount;
+extern std::array<s32, 32> encounterTriggerTime;
+extern std::array<u8, 16> encounterProbabilityWeight;
+extern bool bBattleSequenceInitialized;
+
+// Encounter debug
+extern bool debugEncounterTriggerDisabled;
+extern int debugForcedEncounter;
+
 extern u32 playTimeInVsync;
 
 extern u32 fullScreenTransitionEffectRenderParam;
