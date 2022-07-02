@@ -161,6 +161,16 @@ s32 fieldChangePrevented = -1;
 s32 fieldMusicLoadPending = -1;
 s32 fieldTransitionMode = 0;
 s32 fieldTransitionFadeInLength = 0;
+s32 encounterTimer = 0;
+s32 fieldTransitionCompleted = 0;
+int encounterDataCountdown = 0;
+int encounterCount = 0;
+std::array<s32, 32> encounterTriggerTime;
+std::array<u8, 16> encounterProbabilityWeight;
+bool bBattleSequenceInitialized = false;
+
+bool debugEncounterTriggerDisabled = false;
+int debugForcedEncounter = -1;
 
 u16 inputAllowedMask = 0xFFFF;
 u16 padButtonForField;
@@ -3623,13 +3633,18 @@ void initFieldData()
     }
 
     {
+        std::vector<u8> rawEncounterData;
         int rawFieldSize = READ_LE_U32(&rawFieldBundle[0x124]);
-        rawFieldBattleConfigs.resize(rawFieldSize + 0x10);
-        fieldDecompress(rawFieldSize + 0x10, rawFieldBundle.begin() + READ_LE_U32(&rawFieldBundle[0x148]), rawFieldBattleConfigs);
+        rawEncounterData.resize(rawFieldSize + 0x10);
+        fieldDecompress(rawFieldSize + 0x10, rawFieldBundle.begin() + READ_LE_U32(&rawFieldBundle[0x148]), rawEncounterData);
         int numEntries = rawFieldSize / 0x20;
         assert(numEntries == 16);
-        for (int i = 0; i < numEntries; i++) {
+
+        // 16 entries of 32 bytes (battleConfigs) for every encounter at 0x800658DC
+        // then 16 entries of 1 byte
+        for (int i = 0; i < 0x10; i++) {            
             battleConfigs[i].init(rawFieldBattleConfigs.begin() + 0x20 * i);
+            encounterProbabilityWeight[i] = READ_LE_U8(rawEncounterData.begin() + i + 0x200);
         }
     }
 
