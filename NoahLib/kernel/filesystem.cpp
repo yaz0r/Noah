@@ -44,7 +44,6 @@ int getNumFilesInDirectory(int directory)
     return fatDirectoryTableBuffer[directory].mNumFilesInDirectory;
 }
 
-
 struct sfilesysttemDebugInfo
 {
     std::vector<std::string> mDirectories;
@@ -254,6 +253,43 @@ int setCurrentDirectory(int directory, int offset)
 
     return startOfDirectoryFileIndex;
 }
+
+int getNegativeFileSize(int param_1) {
+    s_fileTableEntry& entry = fatFileTableBuffer[(param_1 + startOfDirectoryFileIndex + -1)];
+    int iVar1 = entry.m3_size;
+    if (iVar1 < 0) {
+        iVar1 = (int)(short)-(short)iVar1;
+    }
+    else {
+        iVar1 = 0;
+    }
+    return iVar1;
+}
+
+int getCurrentDirectory(int* param_1, int* param_2) {
+    int iVar1;
+    int iVar2;
+
+    iVar2 = 0;
+    do {
+        if (fatDirectoryTableBuffer[iVar2].m0_firstFileIndex == startOfDirectoryFileIndex + 1U) {
+            iVar1 = iVar2;
+            if (iVar2 < 0) {
+                iVar1 = iVar2 + 3;
+            }
+            *param_1 = (iVar1 >> 2) * 4;
+            *param_2 = iVar2 + (iVar1 >> 2) * -4;
+            break;
+        }
+        iVar2 = iVar2 + 1;
+    } while (iVar2 < 0x40);
+    if (iVar2 == 0x40) {
+        *param_1 = 0;
+        *param_2 = 0;
+    }
+    return startOfDirectoryFileIndex;
+}
+
 
 int getFileSize(int fileIndex)
 {

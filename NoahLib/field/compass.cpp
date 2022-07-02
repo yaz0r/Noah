@@ -169,7 +169,7 @@ void renderCompass()
 	};
 
 	MATRIX MStack200;
-	computeMatrix(&MStack200, &local_40, &local_30, &cameraUp);
+	lookAtDivided(&MStack200, &local_40, &local_30, &cameraUp);
 
 	MATRIX MStack232;
 	setIdentityMatrix(&MStack232);

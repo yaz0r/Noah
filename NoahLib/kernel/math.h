@@ -93,7 +93,7 @@ enum eCOP2D
 
 s32 length2d(s32 param_1, s32 param_2);
 s32 length1d(s32 param_1);
-void computeMatrix(MATRIX* pOutputMatrix, FP_VEC4* param_2, FP_VEC4* param_3, FP_VEC4* param_4);
+void lookAtDivided(MATRIX* pOutputMatrix, FP_VEC4* param_2, FP_VEC4* param_3, FP_VEC4* param_4);
 long RotAverage4(SFP_VEC4* v0, SFP_VEC4* v1, SFP_VEC4* v2, SFP_VEC4* v3, sVec2_s16* sxy0, sVec2_s16* sxy1, sVec2_s16* sxy2, sVec2_s16* sxy3, long* p, long* flag);
 void setIdentityMatrix(MATRIX* param_1);
 int VectorNormal(FP_VEC4* input, FP_VEC4* output);

@@ -9,6 +9,9 @@
 #include "kernel/filesystem.h"
 #include "battleLoader.h"
 #include "battleConfig.h"
+#include "field/field.h"
+#include "kernel/memory.h"
+#include "battle.h"
 
 void checkSoftReboot();
 
@@ -295,22 +298,50 @@ void updateBattleStartEffect(sBattleStartEffect* param_1) {
     }
 }
 
-void loadBattleMechaAndEnvironment(int param_1, int param_2, std::vector<u8>& param_3, std::vector<u8>& param_4, std::vector<u8>& param_5) {
-    MissingCode();
-        /*
-        int local_30;
-        int local_2c;
-        getCurrentDirectory(&local_30, &local_2c);
-        setCurrentDirectory(0xc, 3);
-        resetMemoryAllocStats(4, 0);*/
+std::array<sLoadingBatchCommands, 4> battleEnvLoadingCommands;
+
+int loadBattleMechaAndEnvironment(int param_1, int param_2, std::vector<u8>*& param_3, std::vector<u8>::iterator& param_4, std::vector<u8>::iterator& param_5) {
+    int local_30;
+    int local_2c;
+
+    int result = 0;
+    getCurrentDirectory(&local_30, &local_2c);
+    setCurrentDirectory(0xc, 3);
+    resetMemoryAllocStats(4, 0);
+    int iVar1 = getNegativeFileSize(5);
+    int iVar5 = param_1 * 2;
+    if (param_1 < ((iVar1 << 0x10) >> 0x10) - ((iVar1 << 0x10) >> 0x1f) >> 1) {
+        int sVar2 = getFileSizeAligned(iVar5 + param_2 + 7);
+        std::vector<u8>* pvVar3 = new std::vector<u8>(sVar2);
+        flagAllocation(*pvVar3);
+        sVar2 = getFileSizeAligned(iVar5 + 6);
+        std::vector<u8>* pvVar4 = new std::vector<u8>(sVar2);
+        flagAllocation(*pvVar4);
+        battleEnvLoadingCommands[1].m0_fileIndex = (short)iVar5 + 7 + (short)param_2;
+        battleEnvLoadingCommands[0].m0_fileIndex = (ushort)(iVar5 + 6);
+        battleEnvLoadingCommands[2].m0_fileIndex = 0;
+        battleEnvLoadingCommands[2].m4_loadPtr = nullptr;
+        battleEnvLoadingCommands[0].m4_loadPtr = pvVar4;
+        battleEnvLoadingCommands[1].m4_loadPtr = pvVar3;
+        batchStartLoadingFiles(&battleEnvLoadingCommands[0], 0);
+        Hack("This should be done after waiting for load to complete");
+        param_3 = pvVar4;
+        param_4 = std::vector<u8>::iterator();
+        param_5 = battleEnvLoadingCommands[1].m4_loadPtr->begin() + 4;
+        battleMechaInitData = battleEnvLoadingCommands[1].m4_loadPtr->begin() + 4;
+    }
+    else {
+        result = -1;
+        param_3 = nullptr;
+        param_4 = std::vector<u8>::iterator();
+        param_5 = std::vector<u8>::iterator();
+    }
+    setCurrentDirectory(local_30, local_2c);
+    return result;
 }
 
-std::vector<u8> battleLoadDataVar0;
-std::vector<u8> battleLoadDataVar1;
-std::vector<u8> battleLoadDataVar2;
-
 void startBattleLoadingDuringEffect2() {
-    loadBattleMechaAndEnvironment(currentBattleConfig.m2, 0, battleLoadDataVar0, battleLoadDataVar1, battleLoadDataVar2);
+    loadBattleMechaAndEnvironment(currentBattleConfig.m2, 0, battleLoadDataVar0_raw, battleLoadDataVar1, battleLoadDataVar2);
 }
 
 void battleStartEffect() {
@@ -403,6 +434,8 @@ void battleStartEffect() {
 
         updateBattleStartEffect(pBattleStartEffect);
         renderBattleStartEffect(pBattleStartEffect);
+
+        MissingCode();
 
         DrawSync(0);
         VSync(2);

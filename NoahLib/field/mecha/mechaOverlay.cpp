@@ -102,24 +102,7 @@ struct sMechaInitVar5
 
 std::array<sMechaInitVar5, 2> mechaInitVar5;
 
-struct sMechaInitVar2 {
-    std::vector<sMechaInitVar2Sub> m0;
-    s16 m4;
-    s16 m6;
-}mechaInitVar2;
-
-struct sMechaInitVar3Sub {
-    s16 m16;
-    s16 m1E;
-    std::array<POLY_FT4, 2> m2C_polys;
-    // size 0x7C
-};
-
-struct sMechaInitVar3 {
-    std::vector<sMechaInitVar3Sub> m0;
-    s16 m4;
-    s16 m6;
-}mechaInitVar3;
+sMechaInitVar3 mechaInitVar3;
 
 std::array<sLoadedMechas*, 10> loadedMechas;
 std::array<int, 10> mechaList3;
@@ -142,6 +125,8 @@ void initMechaInitVar2Sub0(sMechaInitVar2* param_1) {
         }
     }
 }
+
+sMechaInitVar2 mechaInitVar2;
 
 void initMechaInitVar2(sMechaInitVar2* param_1, int count) {
     if (count > 0) {
@@ -715,9 +700,9 @@ void mechaInitNewMecha(int entryId, ushort flags, sMechaDataTable2* pData2, sMec
     pLoadedMecha->m63 = 0;
     if ((flags & 4) == 0) {
 /*
-        doPointerRelocation((uint*)param_3);
-        doPointerRelocation(*(uint**)(param_3 + 8));
-        puVar12 = *(uint**)(param_3 + 4);
+        doPointerRelocation((uint*)pData2);
+        doPointerRelocation(*(uint**)(pData2 + 8));
+        puVar12 = *(uint**)(pData2 + 4);
         doPointerRelocation(puVar12);
         doPointerRelocation((uint*)puVar12[1]);
         */

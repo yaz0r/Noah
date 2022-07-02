@@ -54,7 +54,6 @@ std::array<sFieldVramMapping, 32> fieldVramMapping;
 std::vector<u8> rawFieldBundleForDebug;
 std::vector<u8> rawFieldBundle;
 std::vector<u8> rawFieldModels;
-std::vector<u8> rawFieldBattleConfigs;
 std::vector<u8> rawFieldScriptData;
 std::vector<u8> rawFieldDialogBundle;
 std::vector<sFieldTrigger> fieldTriggerData;
@@ -493,7 +492,7 @@ void uploadNpcSpriteSheet(std::vector<u8>::iterator pImageData, int x, int y)
 
 void setupField3d(std::vector<u8>::iterator input)
 {
-    computeMatrix(&cameraMatrix, &cameraEye, &cameraAt, &cameraUp);
+    lookAtDivided(&cameraMatrix, &cameraEye, &cameraAt, &cameraUp);
     createRotationMatrix(&cameraProjectionAngles, &currentProjectionMatrix);
     MulRotationMatrix(&cameraMatrix, &currentProjectionMatrix);
 
@@ -3643,7 +3642,7 @@ void initFieldData()
         // 16 entries of 32 bytes (battleConfigs) for every encounter at 0x800658DC
         // then 16 entries of 1 byte
         for (int i = 0; i < 0x10; i++) {            
-            battleConfigs[i].init(rawFieldBattleConfigs.begin() + 0x20 * i);
+            battleConfigs[i].init(rawEncounterData.begin() + 0x20 * i);
             encounterProbabilityWeight[i] = READ_LE_U8(rawEncounterData.begin() + i + 0x200);
         }
     }
@@ -7294,10 +7293,10 @@ void updateAllEntities()
     (pCurrentCameraVectors->m20_at).vz = iVar4 + lVar6;
     if (updateAllEntitiesSub2Var0 == 0) {
         cameraMatrix = cameraMatrix2;
-        computeMatrix(&cameraMatrix2, &pCurrentCameraVectors->m10_eye, &pCurrentCameraVectors->m20_at, &cameraUp);
+        lookAtDivided(&cameraMatrix2, &pCurrentCameraVectors->m10_eye, &pCurrentCameraVectors->m20_at, &cameraUp);
     }
     else {
-        computeMatrix(&cameraMatrix, &pCurrentCameraVectors->m10_eye, &pCurrentCameraVectors->m20_at, &cameraUp);
+        lookAtDivided(&cameraMatrix, &pCurrentCameraVectors->m10_eye, &pCurrentCameraVectors->m20_at, &cameraUp);
         cameraMatrix2 = cameraMatrix;
     }
 

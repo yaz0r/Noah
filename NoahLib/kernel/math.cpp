@@ -512,17 +512,17 @@ FP_VEC4* ApplyMatrix(MATRIX* m, SFP_VEC4* inputVector, FP_VEC4* outputVector)
 	return outputVector;
 }
 
-void computeMatrix(MATRIX* pOutputMatrix, FP_VEC4* param_2, FP_VEC4* param_3, FP_VEC4* param_4)
+void lookAtDivided(MATRIX* pOutputMatrix, FP_VEC4* vEye, FP_VEC4* vAt, FP_VEC4* vUp)
 {
 	FP_VEC4 local_60 = {
-		(param_3->vx - param_2->vx) >> 16,
-		(param_3->vy - param_2->vy) >> 16,
-		(param_3->vz - param_2->vz) >> 16,
+		(vAt->vx - vEye->vx) >> 16,
+		(vAt->vy - vEye->vy) >> 16,
+		(vAt->vz - vEye->vz) >> 16,
 	};
 	FP_VEC4 local_30 = {
-		(param_4->vx) >> 16,
-		(param_4->vy) >> 16,
-		(param_4->vz) >> 16,
+		(vUp->vx) >> 16,
+		(vUp->vy) >> 16,
+		(vUp->vz) >> 16,
 	};
 
 	FP_VEC4 local_50;
@@ -548,9 +548,9 @@ void computeMatrix(MATRIX* pOutputMatrix, FP_VEC4* param_2, FP_VEC4* param_3, FP
 	pOutputMatrix->m[2][2] = local_50.vz;
 
     SFP_VEC4 local_20 = {
-        (s16)((param_2->vx >> 16) * 3),
-        (s16)((param_2->vy >> 16) * 3),
-        (s16)((param_2->vz >> 16) * 3),
+        (s16)((vEye->vx >> 16) * 3),
+        (s16)((vEye->vy >> 16) * 3),
+        (s16)((vEye->vz >> 16) * 3),
     };
 
 	ApplyMatrix(pOutputMatrix, &local_20, &local_60);

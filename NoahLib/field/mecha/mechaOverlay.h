@@ -86,8 +86,8 @@ struct sMechaDataTable2 {
         m_raw = input;
         std::vector<std::vector<u8>> relocatedData = doPointerRelocationAndSplit(input);
 
-        m4.init(relocatedData[0]);
-        m8.init(relocatedData[1]);
+        m4.init(relocatedData[relocatedData.size() - 2]);
+        m8.init(relocatedData[relocatedData.size() - 1]);
     }
 
     sMechaDataTable2_4 m4;
@@ -329,3 +329,26 @@ extern s16 numMaxMechaOverlayEntries;
 extern std::array<u8, 3> mechaBackColor;
 extern std::array<MATRIX, 2> mechaFieldArgs2;
 extern bool disableMechaRendering;
+
+struct sMechaInitVar2 {
+    std::vector<sMechaInitVar2Sub> m0;
+    s16 m4;
+    s16 m6;
+};
+
+void initMechaInitVar2(sMechaInitVar2* param_1, int count);
+
+struct sMechaInitVar3Sub {
+    s16 m16;
+    s16 m1E;
+    std::array<POLY_FT4, 2> m2C_polys;
+    // size 0x7C
+};
+
+struct sMechaInitVar3 {
+    std::vector<sMechaInitVar3Sub> m0;
+    s16 m4;
+    s16 m6;
+};
+
+void initMechaInitVar3(sMechaInitVar3* param_1, int param_2);

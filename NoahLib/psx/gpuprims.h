@@ -138,6 +138,12 @@ struct DR_TPAGE : public sTag
     virtual void execute() override;
 };
 
+struct sColor {
+    u8 r0;
+    u8 g0;
+    u8 b0;
+};
+
 struct DRAWENV
 {
     RECT clip;
@@ -147,9 +153,15 @@ struct DRAWENV
     u8 dtd;
     u8 dfe;
     u8 isbg;
-    u8 r0;
-    u8 g0;
-    u8 b0;
+    union {
+        sColor color;
+        struct {
+            u8 r0;
+            u8 g0;
+            u8 b0;
+        };
+    };
+
     DR_ENV dr_env;
 };
 

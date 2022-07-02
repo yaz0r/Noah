@@ -32,9 +32,11 @@ struct sLoadingBatchCommands
 };
 void batchStartLoadingFiles(sLoadingBatchCommands* pCommands, int param_2);
 
+int getCurrentDirectory(int* param_1, int* param_2);
 
 void initCDAndFileSystem(std::vector<s_fileTableEntry>* fileTable, std::vector<s_directoryEntry>* directoryTable, int);
 
+int getNegativeFileSize(int param_1);
 int getFileSize(int fileIndex);
 int getFileSizeAligned(int fileIndex);
 int getFileStartSector(int fileIndex);
