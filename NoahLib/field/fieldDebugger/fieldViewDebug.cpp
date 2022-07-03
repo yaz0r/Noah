@@ -193,6 +193,45 @@ void drawCube(int viewIndex, float* modelMatrix)
 
 void fieldViewDebug_step()
 {
+    // TODO: Move to a separate file
+    if (ImGui::Begin("Field encounter data"))
+    {
+        ImGui::Checkbox("Disable encounters", &debugEncounterTriggerDisabled);
+        ImGui::Text("Timer: %d\nCount: %d", encounterTimer, encounterCount);
+        
+        ImGui::Text("playMusicAuthorized: %d\nfieldExecuteVar3: %d\nfieldChangePrevented: %d", playMusicAuthorized, fieldExecuteVar3, fieldChangePrevented);
+        ImGui::Text("fieldMusicLoadPending: %d\nfieldRandomBattleVar: %d\nloadCompleted: %d", fieldMusicLoadPending, fieldRandomBattleVar, loadCompleted);
+                
+        ImGui::Text("Encounter timers:");
+
+        for (int encounterId = 0; encounterId < encounterCount; encounterId++)
+        {
+            ImGui::Text("%d", encounterTriggerTime[encounterId]);
+            ImGui::SameLine();
+            if (ImGui::Button("Trigger")){
+                encounterTriggerTime[encounterId] = 0;
+            }
+        }
+
+        ImGui::Text("Encounter probabilities:");
+
+        float total = 0;
+        for (int i = 0; i < 0x10; i++) {
+            total += encounterProbabilityWeight[i];
+        }
+
+        if (total > 0) {
+            for (int i = 0; i < 0x10; i++) {
+                ImGui::Text("%d | %d%%", encounterProbabilityWeight[i], (int)round(encounterProbabilityWeight[i] / total * 100));
+                ImGui::SameLine();
+                if (ImGui::Button("Trigger")) {
+                    debugForcedEncounter = i;
+                }
+            }
+        }
+    }
+    ImGui::End();
+
     if (ImGui::Begin("Field 3d view"))
     {
         ImVec2 currentWindowSize = ImGui::GetContentRegionAvail();
