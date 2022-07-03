@@ -437,7 +437,6 @@ void mechaOp_62(sLoadedMechas* param_1, sLoadedMecha_sub4* param_2, byte param_3
 
 {
     short sVar1;
-    sLoadedMecha_sub4* psVar2;
     int iVar3;
 
     if ((param_3 & 7) == 0) {
@@ -478,17 +477,15 @@ void mechaOp_62(sLoadedMechas* param_1, sLoadedMecha_sub4* param_2, byte param_3
     param_2->m4 = 1;
     param_2->m5 = 1;
     iVar3 = 1;
-    /* HELP: 0x801e71e4
-    if (((param_3 & 0x80) != 0) && (psVar2 = (*param_1->m4)[0], 1 < (ushort)psVar2->mA_numBones)) {
-        do {
-            psVar2 = psVar2 + 1;
-            iVar3 = iVar3 + 1;
-            if (psVar2->m0_parentBone == param_2) {
-                mechaOp_62(param_1, psVar2, param_3, param_4, param_5, param_6);
+    if (param_3 & 0x80) {
+        // skip the root bone
+        for (int i = 1; i < (*param_1->m4)[0].mA_numBones; i++) {
+            if ((*param_1->m4)[i].m0_parentBone == param_2) {
+                mechaOp_62(param_1, &(*param_1->m4)[i], param_3, param_4, param_5, param_6);
             }
-        } while (iVar3 < (int)(uint)(ushort)((*param_1->m4)[0],mA_numBones));
+        }
+
     }
-    */
     return;
 }
 
@@ -511,7 +508,7 @@ void mechaAnimOp23(sLoadedMechas* param_1, sLoadedMecha_sub4* param_2, u32 param
 }
 
 void mechaOP_13(sMechaInitVar2* param_1, std::vector<sLoadedMecha_sub4>& param_2, sMechaDataTable2_4_4* param_3, int param_4, byte param_5, byte param_6, char param_7) {
-    //assert(0);
+    MissingCode();
 }
 
 void mechaOP_19(sLoadedMechas* param_1)
@@ -560,11 +557,14 @@ void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int pa
 
     bool continueBytecodeExecution = true;
     sMechaDataTable2_4_8* pNextBytecode = pMecha->m10_bytecode0;
-
+    bool local_78 = 0;
     while (1) {
         sMechaDataTable2_4_8* pCurrentByteCodePtr = pNextBytecode;
         if (!continueBytecodeExecution) {
             pMecha->m10_bytecode0 = pCurrentByteCodePtr;
+            if (local_78 == 0) {
+                return;
+            }
             MissingCode();
             return;
         }
@@ -594,6 +594,10 @@ void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int pa
                 }
             }
             continueBytecodeExecution = 0;
+            break;
+        case 2:
+            continueBytecodeExecution = 0;
+            local_78 = 1;
             break;
         case 0x8:
             mechaOP_8(param_2, pMecha->m4);
@@ -641,6 +645,7 @@ void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int pa
                     }
                     pMecha->m8E = (short)iVar6;
                     //FUN_Mecha__801e5c74(pMecha, pbVar8, bytecodeHigher);
+                    MissingCode();
                 }
             }
             break;
@@ -663,7 +668,7 @@ void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int pa
             }
             break;
         case 0x1D:
-            assert(0);
+            MissingCode();
             pNextBytecode = pCurrentByteCodePtr + 10;
             break;
         case 0x1e:
@@ -1107,6 +1112,60 @@ void updateMechAnimSub0(sLoadedMechas* param_1)
     return;
 }
 
+void updateMechAnimSub2(std::vector<sLoadedMecha_sub4>& param_1, int param_2) {
+    param_1[0].m2C.t[0] = param_1[0].m5C_translation[0];
+    param_1[0].m2C.t[1] = param_1[0].m5C_translation[1];
+    param_1[0].m2C.t[2] = param_1[0].m5C_translation[2];
+
+    if (param_1[0].m6 == 0) {
+        createRotationMatrix(&param_1[0].m54_rotationAngles, &param_1[0].m2C);
+    }
+    else {
+        RotMatrixYXZ(&param_1[0].m54_rotationAngles, &param_1[0].m2C);
+    }
+
+    MATRIX MATRIX_1f800000;
+    MATRIX_1f800000.m[0][1] = 0;
+    MATRIX_1f800000.m[0][2] = 0;
+    MATRIX_1f800000.m[1][0] = 0;
+    MATRIX_1f800000.m[0][0] = (short)(param_2 * param_1[0].m4C[0] >> 0xc);
+    MATRIX_1f800000.m[1][2] = 0;
+    MATRIX_1f800000.m[2][0] = 0;
+    MATRIX_1f800000.m[2][1] = 0;
+    MATRIX_1f800000.m[1][1] = (short)(param_2 * param_1[0].m4C[1] >> 0xc);
+    MATRIX_1f800000.m[2][2] = (short)(param_2 * param_1[0].m4C[2] >> 0xc);
+
+    MulMatrix0(&param_1[0].m2C, &MATRIX_1f800000, &param_1[0].mC);
+
+    param_1[0].mC.t = param_1[0].m2C.t;
+
+    for (int i = 1; i < param_1[0].mA_numBones; i++) {
+        sLoadedMecha_sub4* pBone = &param_1[i];
+        Noah_MissingCode("bone update code missing in updateMechAnimSub2");
+
+        if (pBone->m4) {
+            // TODO: recheck all of this!
+            pBone->mC.t[0] = pBone->m5C_translation[0];
+            pBone->mC.t[1] = pBone->m5C_translation[1];
+            pBone->mC.t[2] = pBone->m5C_translation[2];
+
+            if (pBone->m0_parentBone == nullptr) {
+                pBone->m2C = pBone->mC;
+            }
+            else
+            {
+                CompMatrix(&pBone->m0_parentBone->m2C, &pBone->mC, &pBone->m2C);
+            }
+        }
+    }
+
+    for (int i = 1; i < param_1[0].mA_numBones; i++) {
+        param_1[i].m4 = 0;
+        param_1[i].m5 = 0;
+    }
+}
+
+
 void updateMechAnimSub1(std::vector<sLoadedMecha_sub4>& param_1, int param_2) {
     param_1[0].m2C.t[0] = param_1[0].m5C_translation[0];
     param_1[0].m2C.t[1] = param_1[0].m5C_translation[1];
@@ -1215,8 +1274,7 @@ void updateMechAnim(sLoadedMechas* param_1, sMechaInitVar2* param_2, int iterati
                 updateMechAnimSub1(*param_1->m4, (int)param_1->m1C_moveSpeed);
             }
             else {
-                assert(0);
-                //FUN_Mecha__801dc848(param_1->m4, (int)param_1->m1C_moveSpeed);
+                updateMechAnimSub2(*param_1->m4, (int)param_1->m1C_moveSpeed);
             }
             for(int i=0; i<iterations; i++) {
                 updateFlag |= updateMechAnimSub3(param_2, *param_1->m4, param_1->m3C, (int)param_1->m1C_moveSpeed);
