@@ -31,6 +31,7 @@ struct sMechaDataTable2_4_4 {
 
     u16 m4_flags;
     u16 m6;
+    s16 m10;
     u16 mC_count0;
     u16 mE_count1;
     std::vector<std::array<s16, 3>> m18;

@@ -494,3 +494,5 @@ void doPCCollisionCheckAfterLoading();
 void runInitScriptForNewlyLoadedPC(uint param_1);
 
 extern std::array<sGameController, 2> newPadButtonForScripts;
+
+extern SFP_VEC4 computeProjectionMatrixAngles;

@@ -120,6 +120,7 @@ void initOpcodes()
     fieldScriptOpcodes[0xA9] = OP_SETUP_MULTICHOICE;
     fieldScriptOpcodes[0xA8] = OP_A8;
     fieldScriptOpcodes[0xAA] = OP_ROTATE_CAMERA_RELATIVE;
+    fieldScriptOpcodes[0xAB] = OP_AB;
     fieldScriptOpcodes[0xAC] = OP_SETUP_CAMERA_INTERPOLATION_STEPS;
     fieldScriptOpcodes[0xB3] = OP_START_FADE_IN;
     fieldScriptOpcodes[0xB4] = OP_START_FADE_TO_BLACK;
@@ -160,9 +161,11 @@ void initOpcodes()
     fieldScriptOpcodes[0xE5] = OP_SETUP_FOG;
     fieldScriptOpcodes[0xE6] = OP_SET_CAMERA_LIMITS;
     fieldScriptOpcodes[0xE7] = OP_SET_BACKGROUND_CLEAR_COLOR;
+    fieldScriptOpcodes[0xEB] = OP_EB;
     fieldScriptOpcodes[0xEC] = OP_ORBIT;
     fieldScriptOpcodes[0xEE] = OP_EE;
     fieldScriptOpcodes[0xEF] = OP_WAIT_CAMERA;
+    fieldScriptOpcodes[0xF0] = OP_F0;
     fieldScriptOpcodes[0xF1] = OP_SETUP_SCREEN_EFFECT1;
     fieldScriptOpcodes[0xF2] = OP_SETUP_CAMERA_SHAKE;
     fieldScriptOpcodes[0xF3] = OP_F3;
@@ -212,6 +215,7 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0x42] = OP_SET_OFF_GEAR;
     fieldScriptOpcodes_EX[0x45] = OPX_45;
     fieldScriptOpcodes_EX[0x47] = OPX_47;
+    fieldScriptOpcodes_EX[0x48] = OPX_SET_CAMERA_ANGLE;
     fieldScriptOpcodes_EX[0x4A] = OP_LOAD_SPECIAL_2D_ANIMATION;
     fieldScriptOpcodes_EX[0x4B] = OP_WAIT_LOADING_SPECIAL_2D_ANIMATION;
     fieldScriptOpcodes_EX[0x4D] = OPX_4D;
