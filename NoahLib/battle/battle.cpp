@@ -18,7 +18,7 @@ std::vector<u8>::iterator battleLoadDataVar2;
 
 void initGraphicsForBattle(void) {
     ResetGraph(1);
-    MissingCode("Some dummy function calls");
+    Noah_MissingCode("Some dummy function calls");
     InitGeom();
     SetGeomOffset(0xa0, 0xb4);
     SetGeomScreen(0x200);
@@ -95,7 +95,7 @@ void loadBattleLoader() {
     resetMemoryAllocStats(2, 0);
     setCurrentDirectory(0xc, 0);
 
-    MissingCode("Code to get the amount of free memory before battle loader");
+    Noah_MissingCode("Code to get the amount of free memory before battle loader");
 
     battleStartSeq.resize(getFileSizeAligned(2));
     battleCharacterConfigFile.resize(getFileSizeAligned(3));
@@ -112,14 +112,14 @@ void loadBattleLoader() {
 
     while (isCDBusy() == 3) {};
 
-    MissingCode("Start battle transition seq");
+    Noah_MissingCode("Start battle transition seq");
 }
 
 MATRIX battleMatrix800CCB94;
 MATRIX battleMatrix800CCBB4;
 
 std::vector<sLoadedMecha_sub4>* environmentModelConfigs;
-sMechaInitVar4* environmentModelBlocks;
+sMechaInitVar4* environmentModelBlocks = nullptr;
 
 std::array<struct sBackgroundPoly*, 2> battleEnvBackgroundPolys;
 
@@ -320,7 +320,7 @@ void mechaInitEnvironmentMechaMesh(int entryId, ushort flags, sMechaDataTable2* 
 
 int loadBattleEnvironment(std::vector<u8>::iterator param_1, std::vector<u8>::iterator param_2, sMechaDataTable1* param_3, MATRIX* param_4, MATRIX* param_5, sColor* param_6) {
     if (param_3) {
-        MissingCode("Check that param_1 is not a singular iterator");
+        Noah_MissingCode("Check that param_1 is not a singular iterator");
         if (READ_LE_U32(param_1)) {
             resetMemoryAllocStats(4, 0);
 
@@ -330,16 +330,16 @@ int loadBattleEnvironment(std::vector<u8>::iterator param_1, std::vector<u8>::it
                 battleEnvBackgroundPolys[i] = nullptr;
             }
 
-            MissingCode("battle move image commands");
-            MissingCode("800d361a");
+            Noah_MissingCode("battle move image commands");
+            Noah_MissingCode("800d361a");
 
             if (param_3) {
                 Hack("Original code alias the animation bundle and asset bundle");
                 mechaInitEnvironmentMechaMesh(0x1f, 0xc4, nullptr, param_3, 0, 0, 0, 0, 0);
-                MissingCode("processBattleEnvTextures");
+                Noah_MissingCode("processBattleEnvTextures");
                 environmentModelConfigs = battleMechas[0x1F]->m4;
                 environmentModelBlocks = battleMechas[0x1F]->m0;
-                MissingCode("Environment bones init");
+                Noah_MissingCode("Environment bones init");
             }
         }
     }
@@ -393,9 +393,9 @@ void battleEntryPoint(void) {
     battleDebugDisplay = 1;
     waitReadCompletion(0);
     setCurrentDirectory(0xc, 0);
-    MissingCode("DTL codepath init");
+    Noah_MissingCode("DTL codepath init");
     initGraphicsForBattle();
     battleMain();
 
-    MissingCode("Battle epilog");
+    Noah_MissingCode("Battle epilog");
 }

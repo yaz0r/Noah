@@ -10,3 +10,5 @@ extern std::vector<u8>::iterator battleLoadDataVar1;
 extern std::vector<u8>::iterator battleLoadDataVar2;
 
 void battleEntryPoint(void);
+
+extern sMechaInitVar4* environmentModelBlocks;

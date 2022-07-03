@@ -112,29 +112,29 @@ void loadPartyMembers() {
 
             battleEntities[i].mA4_gear = gameState.m978_gears[gearId];
 
-            MissingCode("battle800CDD40");
-            MissingCode("battle800CEF10");
+            Noah_MissingCode("battle800CDD40");
+            Noah_MissingCode("battle800CEF10");
         }
     }
 
-    MissingCode("battle800D02C0");
-    MissingCode("battle800D2200");
+    Noah_MissingCode("battle800D02C0");
+    Noah_MissingCode("battle800D2200");
 
     // battle UI graphic elements
     uploadTextureToVram(sPS1Pointer(& mallocAndDecompress(relocatedPointer[1])[0]), 0,0,0,0,0,0);
     battleFont = mallocAndDecompress(relocatedPointer[0]);
     initFontPalettes(0, 0x1f0);
 
-    MissingCode("battle800d329c");
+    Noah_MissingCode("battle800d329c");
 
     loadBattleCharacterPortraits(mallocAndDecompress(relocatedPointer[35]), 0x61);
 
-    MissingCode("battle800D2500");
+    Noah_MissingCode("battle800D2500");
 
     setCurrentDirectory(0xc, 1);
 
-    MissingCode("battle800c3dd0");
-    MissingCode("battle800c3dec");
+    Noah_MissingCode("battle800c3dd0");
+    Noah_MissingCode("battle800c3dec");
 }
 
 void battleLoaderTick(s8 param_1) {

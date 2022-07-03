@@ -245,7 +245,7 @@ s32 worldmapMode0_task_partyMember_update(s32 param_1) {
 
     if (pEntry->m24 == 0) {
         //addShadow(0, &psVar9->m28_position);
-        MissingCode("addShadow for party memeber");
+        Noah_MissingCode("addShadow for party memeber");
     }
 
     return 1;

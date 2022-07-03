@@ -12,6 +12,7 @@
 #include "field/field.h"
 #include "field/fieldDebugger/fieldInspector.h"
 #include "field/fieldDebugger/fieldViewDebug.h"
+#include "battle/battleDebug.h"
 
 ImLogger Noah_Logger[eLogCategories::log_max];
 
@@ -201,6 +202,8 @@ bool noahFrame_end()
 
     fieldViewDebug_step();
 
+    battleDebugView_frame();
+
     vramDebug_frame();
 
     drawPSXFB();
@@ -306,9 +309,9 @@ s32 READ_LE_S32(const std::vector<u8>::const_iterator& inputStream)
 }
 
 void UnimplementedImpl(const char* functionName) {
-    Noah_Logger[eLogCategories::log_unimlemented].AddLog("Unimplemented: %s\n", functionName);
+    Noah_Logger[eLogCategories::log_unimlemented].AddLog("Unimplemented code in %s\n", functionName);
 }
 
 void HackImpl(const char* functionName) {
-    Noah_Logger[eLogCategories::log_hacks].AddLog("Hack: %s\n", functionName);
+    Noah_Logger[eLogCategories::log_hacks].AddLog("Hack in %s\n", functionName);
 }

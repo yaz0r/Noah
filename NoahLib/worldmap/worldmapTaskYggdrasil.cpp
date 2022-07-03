@@ -558,7 +558,7 @@ s32 worldmap_taskYggdrasil_update(int param_1)
             // what mode is the yggdrasil in?
             switch (uVar5) {
             case 3: // fly
-                MissingCode("Yggdrasil music switch");
+                Noah_MissingCode("Yggdrasil music switch");
                 SVECTOR_1f8000a0.vx = (short)((pCurrentEntity->m28_position).vx >> 0xc);
                 SVECTOR_1f8000a0.vy = (short)((pCurrentEntity->m28_position).vy >> 0xc);
                 SVECTOR_1f8000a0.vz = (short)((pCurrentEntity->m28_position).vz >> 0xc);
@@ -837,7 +837,7 @@ s32 worldmap_taskYggdrasil_update(int param_1)
                 pCurrentEntity->m20 = 2;
                 pCurrentEntity->m4 = 0;
                 //switchWorldmapMusic(DAT_8009c888, woldmapFile7);
-                MissingCode("Yggdrasil music");
+                Noah_MissingCode("Yggdrasil music");
             }
         }
         break;
@@ -863,7 +863,7 @@ s32 worldmap_taskYggdrasil_update(int param_1)
             (pCurrentEntity->m28_position).vy = pCurrentEntity->m68;
             pCurrentEntity->m20 = 1; //go into idle mode
             //switchWorldmapMusic(uVar11, uVar2);
-            MissingCode("Switch worldmap music");
+            Noah_MissingCode("Switch worldmap music");
             changeWorldmapEntityState(8, 10);
             changeWorldmapEntityState(9, 10);
             changeWorldmapEntityState(10, 10);

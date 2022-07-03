@@ -1539,7 +1539,7 @@ void prim5_0(u8* meshSubBlock, int count)
 }
 
 void prim5_4(u8* meshSubBlock, int count) {
-    MissingCode("Incorrect prim5_4");
+    Noah_MissingCode("Incorrect prim5_4");
     genericTrianglePrim_20(meshSubBlock, count, 0x20, 0x7, 0x8);
 }
 
@@ -1913,7 +1913,7 @@ void primD_0(u8* meshSubBlock, int count)
 
 void primD_4(u8* meshSubBlock, int count)
 {
-    MissingCode("primD_4");
+    Noah_MissingCode("primD_4");
     primD_0generic(meshSubBlock, count, 0x28, 0x9, 0x8);
 }
 
@@ -9025,8 +9025,8 @@ void fieldChangeGameMode(int mode) {
 
     switch (mode) {
     case 1: // worldmap
-        MissingCode("Clear music when going to worldmap");
-        MissingCode("MechaOverlayLoading check");
+        Noah_MissingCode("Clear music when going to worldmap");
+        Noah_MissingCode("MechaOverlayLoading check");
         setGameMode(3);
         bootGame(0);
         break;

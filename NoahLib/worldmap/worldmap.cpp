@@ -673,7 +673,7 @@ void worldmapMode0_update(void) {
     MissingCode();
 
     if (isWorldmapModeFlagSet == 0) {
-        MissingCode("Start worldmap music");
+        Noah_MissingCode("Start worldmap music");
     }
     else {
         assert(0);
@@ -924,7 +924,7 @@ void worldmapMainLoop(void) {
         MissingCode();
 
         if (worldmapFadeRunning == 0) {
-            MissingCode("worldmap fade prevents inputs");
+            Noah_MissingCode("worldmap fade prevents inputs");
         }
         MissingCode();
 
@@ -936,7 +936,7 @@ void worldmapMainLoop(void) {
         if (((worldmapFadeRunning == 0) && (worldmapExitVar2 != 0)) && (continueWorldmapLoop != 0)) {
             if (0 < worldMapGearMode) {
                 if (worldMapGearMode < 4) {
-                    MissingCode("Menu from worldmap");
+                    Noah_MissingCode("Menu from worldmap");
                     /*
                     worldmapPrepareEnterMenu();
                     menuToEnter = 0;

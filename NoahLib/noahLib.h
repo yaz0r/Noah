@@ -226,7 +226,7 @@ extern ImLogger Noah_Logger[eLogCategories::log_max];
 
 #define Noah_Log(string, ...) {Noah_Logger[log_default].AddLog(string, __VA_ARGS__);}
 #define Noah_CategorizedLog(logCategory, string, ...) {Noah_Logger[logCategory].AddLog(string, __VA_ARGS__);}
-#define Noah_MissingCode(name) { TracyMessage(name, strlen(name)); static bool printed = false; if(!printed) {printed = true; Noah_Logger[log_unimlemented].AddLog("Unimplemented: %s\n", name);}}
+#define Noah_MissingCode(name) { static bool printed = false; if(!printed) {printed = true; Noah_Logger[log_unimlemented].AddLog("Unimplemented: %s\n", name);}}
 #define Noah_WarningOnce(name) { static bool printed = false; if(!printed) {printed = true; Noah_Logger[log_warning].AddLog("Warning: %s\n", name);}}
 
 void UnimplementedImpl(const char* functionName);

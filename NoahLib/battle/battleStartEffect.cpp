@@ -349,7 +349,7 @@ void battleStartEffect() {
     
     {
         std::array<u16, 0x30000> buffer;
-        MissingCode("make the back buffer transparent");
+        Noah_MissingCode("make the back buffer transparent");
         buffer.fill(0x8757);
 
         RECT local_28;
