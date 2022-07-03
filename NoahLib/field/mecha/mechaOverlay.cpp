@@ -427,6 +427,72 @@ sMechaDataTable2_4_4* mechaOP_10_a(sLoadedMechas* param_1, uint param_2, u32* pa
     }
 }
 
+void mechaOP_11(sMechaInitVar2* param_1, std::vector<sLoadedMecha_sub4>& param_2, sMechaDataTable2_4_4* param_3, uint param_4, u16 param_5)
+{
+    MissingCode();
+}
+
+void mechaOp_62(sLoadedMechas* param_1, sLoadedMecha_sub4* param_2, byte param_3, short param_4,
+    short param_5, short param_6)
+
+{
+    short sVar1;
+    sLoadedMecha_sub4* psVar2;
+    int iVar3;
+
+    if ((param_3 & 7) == 0) {
+        if ((param_3 & 0x20) == 0) {
+            (param_2->m54_rotationAngles).vx = param_4;
+            (param_2->m54_rotationAngles).vy = param_5;
+            (param_2->m54_rotationAngles).vz = param_6;
+        }
+        else {
+            (param_2->m54_rotationAngles).vx = param_4 + (param_2->m54_rotationAngles).vx;
+            (param_2->m54_rotationAngles).vz = param_6 + (param_2->m54_rotationAngles).vz;
+            (param_2->m54_rotationAngles).vy = param_5 + (param_2->m54_rotationAngles).vy;
+        }
+    }
+    else if ((param_3 & 7) == 1) {
+        if ((param_3 & 0x20) == 0) {
+            param_2->m5C_translation[0] = (int)param_4;
+            param_2->m5C_translation[1] = (int)param_5;
+            param_2->m5C_translation[2] = (int)param_6;
+        }
+        else {
+            param_2->m5C_translation[0] = (int)param_4 + param_2->m5C_translation[0];
+            param_2->m5C_translation[1] = (int)param_5 + param_2->m5C_translation[1];
+            param_2->m5C_translation[2] = (int)param_6 + param_2->m5C_translation[2];
+        }
+    }
+    else if ((param_3 & 0x20) == 0) {
+        param_2->m4C[0] = param_4;
+        param_2->m4C[1] = param_5;
+        param_2->m4C[2] = param_6;
+    }
+    else {
+        sVar1 = param_2->m4C[2];
+        param_2->m4C[0] = param_4 + param_2->m4C[0];
+        param_2->m4C[2] = param_6 + sVar1;
+        param_2->m4C[1] = param_5 + param_2->m4C[1];
+    }
+    param_2->m4 = 1;
+    param_2->m5 = 1;
+    iVar3 = 1;
+    /* HELP: 0x801e71e4
+    if (((param_3 & 0x80) != 0) && (psVar2 = (*param_1->m4)[0], 1 < (ushort)psVar2->mA_numBones)) {
+        do {
+            psVar2 = psVar2 + 1;
+            iVar3 = iVar3 + 1;
+            if (psVar2->m0_parentBone == param_2) {
+                mechaOp_62(param_1, psVar2, param_3, param_4, param_5, param_6);
+            }
+        } while (iVar3 < (int)(uint)(ushort)((*param_1->m4)[0],mA_numBones));
+    }
+    */
+    return;
+}
+
+
 void mechaAnimOp23(sLoadedMechas* param_1, sLoadedMecha_sub4* param_2, u32 param_3) {
     param_2->m7 = param_3 & 1;
     if ((param_3 & 0x80) != 0) {
@@ -445,7 +511,7 @@ void mechaAnimOp23(sLoadedMechas* param_1, sLoadedMecha_sub4* param_2, u32 param
 }
 
 void mechaOP_13(sMechaInitVar2* param_1, std::vector<sLoadedMecha_sub4>& param_2, sMechaDataTable2_4_4* param_3, int param_4, byte param_5, byte param_6, char param_7) {
-    MissingCode();
+    //assert(0);
 }
 
 void mechaOP_19(sLoadedMechas* param_1)
@@ -532,6 +598,9 @@ void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int pa
         case 0x8:
             mechaOP_8(param_2, pMecha->m4);
             break;
+        case 0x19:
+            mechaOP_19(pMecha);
+            break;
         case 0xA:
             mechaOP_A(param_2, &(*pMecha->m4)[0], bytecodeHigher, 7);
             break;
@@ -550,6 +619,7 @@ void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int pa
             pMecha->m82[2] = 0;
             break;
         case 0xF:
+            assert(0);
             break; // TODO: really?
         case 0x10:
             mechaOP_10_b(*pMecha->m4, mechaOP_10_a(pMecha, bytecodeHigher, &local_100));
@@ -557,11 +627,20 @@ void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int pa
         case 0x11:
             {
                 u32 local_100;
-                sMechaDataTable2_4_4* pbVar8 = mechaOP_10_a(pMecha, bytecodeHigher, &local_100);
+                sMechaDataTable2_4_4* psVar7 = mechaOP_10_a(pMecha, bytecodeHigher, &local_100);
                 _currentByteCode = *pNextBytecode;
                 pNextBytecode = pCurrentByteCodePtr + 2;
                 if (local_100 == 0) {
-                    MissingCode();
+                    bytecodeHigher = _currentByteCode >> 8;
+                    mechaOP_11(param_2, *pMecha->m4, psVar7, bytecodeHigher, _currentByteCode);
+                    param_3 = -1;
+                    int iVar6 = (int)*(short*)&psVar7->m10 *
+                        ((int)pMecha->m1C_moveSpeed * (int)(*pMecha->m4)[0].m4C[2] >> 0xc) >> 0xc;
+                    if (iVar6 < 0) {
+                        iVar6 = -iVar6;
+                    }
+                    pMecha->m8E = (short)iVar6;
+                    //FUN_Mecha__801e5c74(pMecha, pbVar8, bytecodeHigher);
                 }
             }
             break;
@@ -579,13 +658,16 @@ void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int pa
                 else {
                     mechaOP_10_b(*pMecha->m4, psVar7);
                 }
-                param_3 = 0xffffffff;
+                param_3 = -1;
                 mechaOP_19(pMecha);
             }
             break;
         case 0x1D:
-            MissingCode();
+            assert(0);
             pNextBytecode = pCurrentByteCodePtr + 10;
+            break;
+        case 0x1e:
+            pMecha->m37 = bytecodeHigher;
             break;
         case 0x21:
             pMecha->m3C = bytecodeHigher;
@@ -600,11 +682,17 @@ void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int pa
             mechaAnimOp23(pMecha, &(*pMecha->m4)[*pNextBytecode], bytecodeHigher);
             pNextBytecode = pCurrentByteCodePtr + 2;
             break;
+        case 0x32:
+            _currentByteCode = *pNextBytecode;
+            pNextBytecode = pCurrentByteCodePtr + _currentByteCode;
+            break;
         case 0x48:
             pMecha->m36 = bytecodeHigher;
             break;
         case 0x62:
-            MissingCode();
+            mechaOp_62(pMecha, &(*pMecha->m4)[*pNextBytecode], bytecodeHigher,
+                (int)(short)pCurrentByteCodePtr[2], (int)(short)pCurrentByteCodePtr[3],
+                (int)(short)pCurrentByteCodePtr[4]);
             pNextBytecode = pCurrentByteCodePtr + 5;
             break;
         default:

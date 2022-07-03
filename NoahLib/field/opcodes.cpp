@@ -2201,6 +2201,24 @@ void OP_ROTATE_CAMERA_RELATIVE(void)
         psVar2->m108_rotation3 = uVar3;
     }
     ADVANCE_VM(0x2);
+}
+
+void OP_AB(void)
+{
+    cameraTargetOverride[2] = cameraAt2.vz;
+    desiredCameraTarget[2] = cameraAt2.vz;
+    cameraTargetOverride[0] = cameraAt2.vx;
+    desiredCameraTarget[0] = cameraAt2.vx;
+    cameraTargetOverride[1] = cameraAt2.vy;
+    desiredCameraTarget[1] = cameraAt2.vy;
+    cameraPositionOverride[0] = cameraEye2.vx;
+    cameraPositionOverride[1] = cameraEye2.vy;
+    cameraPositionOverride[2] = cameraEye2.vz;
+    desiredCameraPosition[0] = cameraEye2.vx;
+    desiredCameraPosition[1] = cameraEye2.vy;
+    desiredCameraPosition[2] = cameraEye2.vz;
+    fieldExectuteMaxCycles++;
+    ADVANCE_VM(0x1);
     return;
 }
 
@@ -2574,7 +2592,17 @@ void OP_JUMP(void)
 
     uVar1 = readU16FromScript(1);
     pCurrentFieldScriptActor->mCC_scriptPC = uVar1;
-    return;
+}
+
+void OPX_SET_CAMERA_ANGLE()
+{
+    computeProjectionMatrixAngles.vx =
+        getVar80(1, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 7]);
+    computeProjectionMatrixAngles.vz =
+        getVar40(3, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 7]);
+    computeProjectionMatrixAngles.vy =
+        getVar20(5, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 7]);
+    ADVANCE_VM(0x8);
 }
 
 void OP_LOAD_SPECIAL_2D_ANIMATION()
@@ -3938,6 +3966,43 @@ const std::array<FP_VEC3*, 4> cameraMapping = {
     }
 };
 
+void OP_EB()
+{
+    ushort uVar1;
+    int iVar2;
+    int iVar3;
+    uint uVar5;
+    FP_VEC3 local_38;
+    FP_VEC3 local_28;
+    int uVar4;
+
+    iVar2 = getVar80(1, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 0xd]);
+    local_38.vx = iVar2 << 0x10;
+    iVar2 = getVar40(3, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 0xd]);
+    local_38.vz = iVar2 << 0x10;
+    iVar2 = getVar20(5, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 0xd]);
+    local_38.vy = iVar2 << 0x10;
+    uVar4 = getVar10(7, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 0xd]);
+    iVar2 = getVar08(9, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 0xd]);
+    iVar3 = getVar04(0xb, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 0xd]);
+    uVar5 = (iVar2 * 0xb60 >> 8) + 0xc00;
+    iVar2 = getAngleSin(uVar5);
+    local_28.vy = (iVar2 * iVar3 * -0x20 >> 0x10) * (int)op99Var4 * 0x10 + local_38.vy;
+    iVar2 = getAngleCos(uVar5);
+    local_28.vx = local_38.vx;
+    local_28.vz = (iVar2 * iVar3 * 0x20 >> 0x10) * (int)op99Var4 * 0x10 + local_38.vz;
+    computeOrbit(&local_28, &local_38, uVar4);
+    uVar1 = readU16FromScript(0xe);
+    setVar((uint)uVar1, local_28.vx);
+    uVar1 = readU16FromScript(0x10);
+    setVar((uint)uVar1, local_28.vz);
+    uVar1 = readU16FromScript(0x12);
+    setVar((uint)uVar1, local_28.vy);
+
+    fieldExectuteMaxCycles++;
+    ADVANCE_VM(0x14);
+}
+
 void OP_ORBIT(void)
 {
     FP_VEC3 vec = *cameraMapping[pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1]];
@@ -4743,6 +4808,19 @@ void OP_ROTATE_TO_ACTOR()
         psVar1->m106_currentRotation = uVar2;
     }
     ADVANCE_VM(0x2);
+}
+
+void OP_F0()
+{
+    ushort uVar1;
+    uVar1 = readU16FromScript(1);
+    setVar((uint)uVar1, op99Var3);
+    uVar1 = readU16FromScript(3);
+    setVar((uint)uVar1, op99Var2);
+    uVar1 = readU16FromScript(5);
+    setVar((uint)uVar1, (short)op99Var1);
+    fieldExectuteMaxCycles++;
+    ADVANCE_VM(0x7);
 }
 
 void OP_SETUP_SCREEN_EFFECT1()
