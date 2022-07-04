@@ -8394,16 +8394,16 @@ void renderFieldCharacterSprites(OTTable& OT, int oddOrEven)
                     }
 
                     if ((pScriptEntity->m4_flags.m_rawFlags & 0x20000) == 0) {
-                        (*pMecha->m4)[0].m54_rotationAngles.vy = pScriptEntity->m108_rotation3 + 0xc00;
+                        (*pMecha->m4_bones)[0].m54_rotationAngles.vy = pScriptEntity->m108_rotation3 + 0xc00;
                     }
                     else {
-                        pScriptEntity->m106_currentRotation = pScriptEntity->m108_rotation3 = (*pMecha->m4)[0].m54_rotationAngles.vy - 0xc00;
+                        pScriptEntity->m106_currentRotation = pScriptEntity->m108_rotation3 = (*pMecha->m4_bones)[0].m54_rotationAngles.vy - 0xc00;
                     }
 
-                    pMecha->m1C_moveSpeed = (short)((int)pScriptEntity->mF4_scale3d[0] * *mechaList3It >> 0xc);
+                    pMecha->m1C_scale = (short)((int)pScriptEntity->mF4_scale3d[0] * *mechaList3It >> 0xc);
                     pMecha->m60 = pScriptEntity->m20_position.vy.getIntegerPart();
-                    (*pMecha->m4)[0].m5C_translation[0] = pScriptEntity->m20_position.vx.getIntegerPart();
-                    (*pMecha->m4)[0].m5C_translation[2] = pScriptEntity->m20_position.vz.getIntegerPart();
+                    (*pMecha->m4_bones)[0].m5C_translation[0] = pScriptEntity->m20_position.vx.getIntegerPart();
+                    (*pMecha->m4_bones)[0].m5C_translation[2] = pScriptEntity->m20_position.vz.getIntegerPart();
                     pScriptEntity->m4_flags.m_rawFlags &= ~0x200;
 
                     mechaIt++;

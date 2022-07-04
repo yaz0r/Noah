@@ -14,8 +14,8 @@ struct sMechaDataTable2_4_4 {
 
         m4_flags = READ_LE_U16(input.begin() + 4);
         m6 = READ_LE_U16(input.begin() + 6);
-        mC_count0 = READ_LE_U16(input.begin() + 0xC);
-        mE_count1 = READ_LE_U16(input.begin() + 0xE);
+        mC_numRotations = READ_LE_U16(input.begin() + 0xC);
+        mE_numTranslations = READ_LE_U16(input.begin() + 0xE);
 
         int remainingSize = input.size() - 0x18;
         int remainingVectors = (remainingSize / 2) / 3;
@@ -32,8 +32,8 @@ struct sMechaDataTable2_4_4 {
     u16 m4_flags;
     u16 m6;
     s16 m10;
-    u16 mC_count0;
-    u16 mE_count1;
+    u16 mC_numRotations;
+    u16 mE_numTranslations;
     std::vector<std::array<s16, 3>> m18;
 
     std::vector<u8> m_raw;
@@ -186,17 +186,17 @@ struct sMechaInitVar2Sub {
     // size 0x14
 };
 
-struct sLoadedMecha_sub4 {
-    sLoadedMecha_sub4* m0_parentBone;
-    u8 m4;
-    u8 m5;
+struct sMechaBone {
+    sMechaBone* m0_parentBone;
+    u8 m4_needTranslationUpdate;
+    u8 m5_needRotationUpdate;
     u8 m6;
     u8 m7;
     s16 m8;
     s16 mA_numBones;
-    MATRIX mC;
-    MATRIX m2C;
-    std::array<s16, 3> m4C;
+    MATRIX mC_localMatrix;
+    MATRIX m2C_boneFinalMatrix;
+    std::array<s16, 3> m4C_scale;
     s16 m52;
     SFP_VEC4 m54_rotationAngles;
     std::array<s32, 3> m5C_translation;
@@ -213,13 +213,13 @@ struct sMechaInitVar4
 
 struct sLoadedMechas {
     sMechaInitVar4* m0;
-    std::vector<sLoadedMecha_sub4>* m4;
+    std::vector<sMechaBone>* m4_bones;
     std::vector<std::vector<sMechaDataTable2_4_8>>* m8_bytecodeTable;
     u32 mC;
     sMechaDataTable2_4_8* m10_bytecode0;
     sMechaDataTable2_4::sMechaDataTable2_4_4_array* m14;
     std::vector<u8>* m18;
-    s16 m1C_moveSpeed;
+    s16 m1C_scale;
     s16 m1E;
     u8 m20_mechaEntryId;
     u8 m22;

@@ -215,7 +215,7 @@ void initMechSub110(sLoadedMechas* param_1)
     }
 }
 
-std::vector<sLoadedMecha_sub4>* processMechaMesh(sMechaInitVar4* param_1, std::vector<sMechaDataTable1_C>& param_2, u32 param_3, int useTpageAndClut, short tpageX, short tpageY, short clutX, short clutY)
+std::vector<sMechaBone>* processMechaMesh(sMechaInitVar4* param_1, std::vector<sMechaDataTable1_C>& param_2, u32 param_3, int useTpageAndClut, short tpageX, short tpageY, short clutX, short clutY)
 {
     int numBones = 0;
     std::vector<sMechaDataTable1_C>::iterator bonesIt = param_2.begin();
@@ -228,17 +228,17 @@ std::vector<sLoadedMecha_sub4>* processMechaMesh(sMechaInitVar4* param_1, std::v
         return nullptr;
     }
 
-    std::vector<sLoadedMecha_sub4>* outputVector = new std::vector<sLoadedMecha_sub4>;
+    std::vector<sMechaBone>* outputVector = new std::vector<sMechaBone>;
     outputVector->resize(numBones + 1);
 
-    std::vector<sLoadedMecha_sub4>::iterator it = outputVector->begin();
+    std::vector<sMechaBone>::iterator it = outputVector->begin();
 
-    it->m4 = 1;
-    it->m5 = 1;
+    it->m4_needTranslationUpdate = 1;
+    it->m5_needRotationUpdate = 1;
     it->m6 = 1;
-    it->m4C[0] = 0x1000;
-    it->m4C[1] = 0x1000;
-    it->m4C[2] = 0x1000;
+    it->m4C_scale[0] = 0x1000;
+    it->m4C_scale[1] = 0x1000;
+    it->m4C_scale[2] = 0x1000;
     it->m0_parentBone = nullptr;
     it->m7 = 0;
     it->m8 = -1;
@@ -273,12 +273,12 @@ std::vector<sLoadedMecha_sub4>* processMechaMesh(sMechaInitVar4* param_1, std::v
         }
 
         it->mA_numBones = boneCounter++;
-        it->m4 = 1;
-        it->m5 = 1;
+        it->m4_needTranslationUpdate = 1;
+        it->m5_needRotationUpdate = 1;
         it->m7 = 1;
-        it->m4C[0] = 0x1000;
-        it->m4C[1] = 0x1000;
-        it->m4C[2] = 0x1000;
+        it->m4C_scale[0] = 0x1000;
+        it->m4C_scale[1] = 0x1000;
+        it->m4C_scale[2] = 0x1000;
         it->m6 = 0;
         it->m52 = 0;
         it->m8 = it2->m0;
@@ -329,9 +329,9 @@ int mechaOP_A_sub0(sMechaInitVar2* param_1, sMechaInitVar2Sub* param_2)
     return uVar1;
 }
 
-void mechaOP_8(sMechaInitVar2* param_1, std::vector<sLoadedMecha_sub4>* param_2) {
+void mechaOP_8(sMechaInitVar2* param_1, std::vector<sMechaBone>* param_2) {
     for (int i = 0; i < (*param_2)[0].mA_numBones; i++) {
-        sLoadedMecha_sub4* pEntry = &(*param_2)[i];
+        sMechaBone* pEntry = &(*param_2)[i];
         if (pEntry->m70_animTracks[0] && (pEntry->m70_animTracks[0]->m3 != -1)) {
             mechaOP_A_sub0(param_1, pEntry->m70_animTracks[0]);
         }
@@ -344,7 +344,7 @@ void mechaOP_8(sMechaInitVar2* param_1, std::vector<sLoadedMecha_sub4>* param_2)
     }
 }
 
-void mechaOP_A(sMechaInitVar2* param_1, sLoadedMecha_sub4* param_2, int param_3, uint param_4) {
+void mechaOP_A(sMechaInitVar2* param_1, sMechaBone* param_2, int param_3, uint param_4) {
     if (param_3 < (int)(uint)(ushort)param_2->mA_numBones) {
         if ((param_2[param_3].m70_animTracks[0] != 0) && ((param_4 & 1) != 0)) {
             mechaOP_A_sub0(param_1, param_2[param_3].m70_animTracks[0]);
@@ -361,40 +361,40 @@ void mechaOP_A(sMechaInitVar2* param_1, sLoadedMecha_sub4* param_2, int param_3,
     }
 }
 
-void mechaOP_10_b(std::vector<sLoadedMecha_sub4>& param_1, sMechaDataTable2_4_4* param_2)
+void mechaSetPoseFromKeyframe(std::vector<sMechaBone>& param_1, sMechaDataTable2_4_4* param_2)
 {
     std::vector<std::array<s16, 3>>::iterator pShortData = param_2->m18.begin();
     if (param_2->m6 == 0) {
-        pShortData += param_2->mC_count0 + 1;
+        pShortData += param_2->mC_numRotations + 1;
     }
 
-    int counter0 = 0;
-    int counter1 = 0;
+    int rotationCount = 0;
+    int translationCount = 0;
 
     for (int i = 1; i < param_1[0].mA_numBones; i++) {
-        sLoadedMecha_sub4* pBone = &param_1[i];
+        sMechaBone* pBone = &param_1[i];
 
-        if (((param_2->m4_flags & 1) == 0) && (counter0 < param_2->mC_count0)) {
+        if (((param_2->m4_flags & 1) == 0) && (rotationCount < param_2->mC_numRotations)) {
             std::array<s16, 3> sVar1 = *pShortData;
             pShortData++;
-            counter0++;
+            rotationCount++;
 
-            if ((pBone->m4C[0] != sVar1[0]) || (pBone->m4C[1] != sVar1[1]) || (pBone->m4C[2] != sVar1[2])) {
+            if ((pBone->m4C_scale[0] != sVar1[0]) || (pBone->m4C_scale[1] != sVar1[1]) || (pBone->m4C_scale[2] != sVar1[2])) {
                 if ((pBone->m68[0].size() == 0) || (pBone->m68[0][0]->m3_size != -1))
                 {
                     pBone->m54_rotationAngles[0] = sVar1[0];
                     pBone->m54_rotationAngles[1] = sVar1[1];
                     pBone->m54_rotationAngles[2] = sVar1[2];
-                    pBone->m4 = 1;
-                    pBone->m5 = 1;
+                    pBone->m4_needTranslationUpdate = 1;
+                    pBone->m5_needRotationUpdate = 1;
                 }
             }
         }
 
-        if (((param_2->m4_flags & 2) == 0) && (counter0 < param_2->mE_count1)) {
+        if (((param_2->m4_flags & 2) == 0) && (translationCount < param_2->mE_numTranslations)) {
             std::array<s16, 3> sVar1 = *pShortData;
             pShortData++;
-            counter1++;
+            translationCount++;
 
             if ((pBone->m5C_translation[0] != sVar1[0]) || (pBone->m5C_translation[1] != sVar1[1]) || (pBone->m5C_translation[2] != sVar1[2])) {
                 if ((pBone->m68[1].size() == 0) || (pBone->m68[1][0]->m3_size != -1))
@@ -402,14 +402,14 @@ void mechaOP_10_b(std::vector<sLoadedMecha_sub4>& param_1, sMechaDataTable2_4_4*
                     pBone->m5C_translation[0] = sVar1[0];
                     pBone->m5C_translation[1] = sVar1[1];
                     pBone->m5C_translation[2] = sVar1[2];
-                    pBone->m4 = 1;
+                    pBone->m4_needTranslationUpdate = 1;
                 }
             }
         }
     }
 }
 
-sMechaDataTable2_4_4* mechaOP_10_a(sLoadedMechas* param_1, uint param_2, u32* param_3)
+sMechaDataTable2_4_4* mechaGetKeyframe(sLoadedMechas* param_1, uint param_2, u32* param_3)
 {
     *param_3 = 0;
     if (0xfd < (param_2 & 0xff)) {
@@ -427,12 +427,12 @@ sMechaDataTable2_4_4* mechaOP_10_a(sLoadedMechas* param_1, uint param_2, u32* pa
     }
 }
 
-void mechaOP_11(sMechaInitVar2* param_1, std::vector<sLoadedMecha_sub4>& param_2, sMechaDataTable2_4_4* param_3, uint param_4, u16 param_5)
+void mechaOP_11(sMechaInitVar2* param_1, std::vector<sMechaBone>& param_2, sMechaDataTable2_4_4* param_3, uint param_4, u16 param_5)
 {
     MissingCode();
 }
 
-void mechaOp_62(sLoadedMechas* param_1, sLoadedMecha_sub4* param_2, byte param_3, short param_4,
+void mechaOp_62(sLoadedMechas* param_1, sMechaBone* param_2, byte param_3, short param_4,
     short param_5, short param_6)
 
 {
@@ -464,24 +464,24 @@ void mechaOp_62(sLoadedMechas* param_1, sLoadedMecha_sub4* param_2, byte param_3
         }
     }
     else if ((param_3 & 0x20) == 0) {
-        param_2->m4C[0] = param_4;
-        param_2->m4C[1] = param_5;
-        param_2->m4C[2] = param_6;
+        param_2->m4C_scale[0] = param_4;
+        param_2->m4C_scale[1] = param_5;
+        param_2->m4C_scale[2] = param_6;
     }
     else {
-        sVar1 = param_2->m4C[2];
-        param_2->m4C[0] = param_4 + param_2->m4C[0];
-        param_2->m4C[2] = param_6 + sVar1;
-        param_2->m4C[1] = param_5 + param_2->m4C[1];
+        sVar1 = param_2->m4C_scale[2];
+        param_2->m4C_scale[0] = param_4 + param_2->m4C_scale[0];
+        param_2->m4C_scale[2] = param_6 + sVar1;
+        param_2->m4C_scale[1] = param_5 + param_2->m4C_scale[1];
     }
-    param_2->m4 = 1;
-    param_2->m5 = 1;
+    param_2->m4_needTranslationUpdate = 1;
+    param_2->m5_needRotationUpdate = 1;
     iVar3 = 1;
     if (param_3 & 0x80) {
         // skip the root bone
-        for (int i = 1; i < (*param_1->m4)[0].mA_numBones; i++) {
-            if ((*param_1->m4)[i].m0_parentBone == param_2) {
-                mechaOp_62(param_1, &(*param_1->m4)[i], param_3, param_4, param_5, param_6);
+        for (int i = 1; i < (*param_1->m4_bones)[0].mA_numBones; i++) {
+            if ((*param_1->m4_bones)[i].m0_parentBone == param_2) {
+                mechaOp_62(param_1, &(*param_1->m4_bones)[i], param_3, param_4, param_5, param_6);
             }
         }
 
@@ -490,10 +490,10 @@ void mechaOp_62(sLoadedMechas* param_1, sLoadedMecha_sub4* param_2, byte param_3
 }
 
 
-void mechaAnimOp23(sLoadedMechas* param_1, sLoadedMecha_sub4* param_2, u32 param_3) {
+void mechaAnimOp23(sLoadedMechas* param_1, sMechaBone* param_2, u32 param_3) {
     param_2->m7 = param_3 & 1;
     if ((param_3 & 0x80) != 0) {
-        std::vector<sLoadedMecha_sub4>::iterator psVar1 = (*param_1->m4).begin();
+        std::vector<sMechaBone>::iterator psVar1 = (*param_1->m4_bones).begin();
         int iVar2 = 1;
         if (1 < psVar1->mA_numBones) {
             do {
@@ -502,12 +502,12 @@ void mechaAnimOp23(sLoadedMechas* param_1, sLoadedMecha_sub4* param_2, u32 param
                 if (psVar1->m0_parentBone == param_2) {
                     mechaAnimOp23(param_1, &(*psVar1), param_3);
                 }
-            } while (iVar2 < (*param_1->m4)[0].mA_numBones);
+            } while (iVar2 < (*param_1->m4_bones)[0].mA_numBones);
         }
     }
 }
 
-void mechaOP_13(sMechaInitVar2* param_1, std::vector<sLoadedMecha_sub4>& param_2, sMechaDataTable2_4_4* param_3, int param_4, byte param_5, byte param_6, char param_7) {
+void mechaOP_13(sMechaInitVar2* param_1, std::vector<sMechaBone>& param_2, sMechaDataTable2_4_4* param_3, int param_4, byte param_5, byte param_6, char param_7) {
     MissingCode();
 }
 
@@ -538,21 +538,21 @@ void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int pa
         pMecha->m7C[1] += pMecha->m82[1];
         pMecha->m7C[2] += pMecha->m82[2];
 
-        (*pMecha->m4)[0].m54_rotationAngles[0] += pMecha->m70[0] >> 3;
-        (*pMecha->m4)[0].m54_rotationAngles[1] += pMecha->m70[1] >> 3;
-        (*pMecha->m4)[0].m54_rotationAngles[2] += pMecha->m70[2] >> 3;
+        (*pMecha->m4_bones)[0].m54_rotationAngles[0] += pMecha->m70[0] >> 3;
+        (*pMecha->m4_bones)[0].m54_rotationAngles[1] += pMecha->m70[1] >> 3;
+        (*pMecha->m4_bones)[0].m54_rotationAngles[2] += pMecha->m70[2] >> 3;
 
         SFP_VEC4 local_120;
-        local_120.vx = ((int)pMecha->m7C[0] * (int)(*pMecha->m4)[0].m4C[0] >> 0xc);
-        local_120.vy = ((int)pMecha->m7C[1] * (int)(*pMecha->m4)[0].m4C[1] >> 0xc);
-        local_120.vz = ((int)pMecha->m7C[2] * (int)(*pMecha->m4)[0].m4C[2] >> 0xc);
+        local_120.vx = ((int)pMecha->m7C[0] * (int)(*pMecha->m4_bones)[0].m4C_scale[0] >> 0xc);
+        local_120.vy = ((int)pMecha->m7C[1] * (int)(*pMecha->m4_bones)[0].m4C_scale[1] >> 0xc);
+        local_120.vz = ((int)pMecha->m7C[2] * (int)(*pMecha->m4_bones)[0].m4C_scale[2] >> 0xc);
 
         FP_VEC4 local_130;
-        ApplyMatrix(&(*pMecha->m4)[0].m2C, &local_120, &local_130);
+        ApplyMatrix(&(*pMecha->m4_bones)[0].m2C_boneFinalMatrix, &local_120, &local_130);
 
-        (*pMecha->m4)[0].m5C_translation[0] += (pMecha->m1C_moveSpeed * local_130.vx >> 0xc);
-        (*pMecha->m4)[0].m5C_translation[1] += (pMecha->m1C_moveSpeed * local_130.vy >> 0xc);
-        (*pMecha->m4)[0].m5C_translation[2] += (pMecha->m1C_moveSpeed * local_130.vz >> 0xc);
+        (*pMecha->m4_bones)[0].m5C_translation[0] += (pMecha->m1C_scale * local_130.vx >> 0xc);
+        (*pMecha->m4_bones)[0].m5C_translation[1] += (pMecha->m1C_scale * local_130.vy >> 0xc);
+        (*pMecha->m4_bones)[0].m5C_translation[2] += (pMecha->m1C_scale * local_130.vz >> 0xc);
     }
 
     bool continueBytecodeExecution = true;
@@ -600,13 +600,10 @@ void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int pa
             local_78 = 1;
             break;
         case 0x8:
-            mechaOP_8(param_2, pMecha->m4);
-            break;
-        case 0x19:
-            mechaOP_19(pMecha);
+            mechaOP_8(param_2, pMecha->m4_bones);
             break;
         case 0xA:
-            mechaOP_A(param_2, &(*pMecha->m4)[0], bytecodeHigher, 7);
+            mechaOP_A(param_2, &(*pMecha->m4_bones)[0], bytecodeHigher, 7);
             break;
         case 0xC:
             pMecha->m70[0] = 0;
@@ -623,23 +620,22 @@ void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int pa
             pMecha->m82[2] = 0;
             break;
         case 0xF:
-            assert(0);
-            break; // TODO: really?
-        case 0x10:
-            mechaOP_10_b(*pMecha->m4, mechaOP_10_a(pMecha, bytecodeHigher, &local_100));
+            break;
+        case 0x10: // set mecha at keyframe
+            mechaSetPoseFromKeyframe(*pMecha->m4_bones, mechaGetKeyframe(pMecha, bytecodeHigher, &local_100));
             break;
         case 0x11:
             {
                 u32 local_100;
-                sMechaDataTable2_4_4* psVar7 = mechaOP_10_a(pMecha, bytecodeHigher, &local_100);
+                sMechaDataTable2_4_4* psVar7 = mechaGetKeyframe(pMecha, bytecodeHigher, &local_100);
                 _currentByteCode = *pNextBytecode;
                 pNextBytecode = pCurrentByteCodePtr + 2;
                 if (local_100 == 0) {
                     bytecodeHigher = _currentByteCode >> 8;
-                    mechaOP_11(param_2, *pMecha->m4, psVar7, bytecodeHigher, _currentByteCode);
+                    mechaOP_11(param_2, *pMecha->m4_bones, psVar7, bytecodeHigher, _currentByteCode);
                     param_3 = -1;
                     int iVar6 = (int)*(short*)&psVar7->m10 *
-                        ((int)pMecha->m1C_moveSpeed * (int)(*pMecha->m4)[0].m4C[2] >> 0xc) >> 0xc;
+                        ((int)pMecha->m1C_scale * (int)(*pMecha->m4_bones)[0].m4C_scale[2] >> 0xc) >> 0xc;
                     if (iVar6 < 0) {
                         iVar6 = -iVar6;
                     }
@@ -656,16 +652,19 @@ void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int pa
                 bytecodeHigher = *pNextBytecode;
                 _currentByteCode = pCurrentByteCodePtr[2];
                 pNextBytecode = pCurrentByteCodePtr + 3;
-                sMechaDataTable2_4_4* psVar7 = mechaOP_10_a(pMecha, bytecodeHigher, &local_100);
+                sMechaDataTable2_4_4* psVar7 = mechaGetKeyframe(pMecha, bytecodeHigher, &local_100);
                 if (mechaBytecodeToggle == 0) {
-                    mechaOP_13(param_2, *pMecha->m4, psVar7, _currentByteCode >> 8, preBytecodeHigher, previousByteCode, bytecodeHigher >> 8);
+                    mechaOP_13(param_2, *pMecha->m4_bones, psVar7, _currentByteCode >> 8, preBytecodeHigher, previousByteCode, bytecodeHigher >> 8);
                 }
                 else {
-                    mechaOP_10_b(*pMecha->m4, psVar7);
+                    mechaSetPoseFromKeyframe(*pMecha->m4_bones, psVar7);
                 }
                 param_3 = -1;
                 mechaOP_19(pMecha);
             }
+            break;
+        case 0x19:
+            mechaOP_19(pMecha);
             break;
         case 0x1D:
             MissingCode();
@@ -684,7 +683,7 @@ void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int pa
             pNextBytecode = pCurrentByteCodePtr;
             break;
         case 0x23:
-            mechaAnimOp23(pMecha, &(*pMecha->m4)[*pNextBytecode], bytecodeHigher);
+            mechaAnimOp23(pMecha, &(*pMecha->m4_bones)[*pNextBytecode], bytecodeHigher);
             pNextBytecode = pCurrentByteCodePtr + 2;
             break;
         case 0x32:
@@ -695,7 +694,7 @@ void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int pa
             pMecha->m36 = bytecodeHigher;
             break;
         case 0x62:
-            mechaOp_62(pMecha, &(*pMecha->m4)[*pNextBytecode], bytecodeHigher,
+            mechaOp_62(pMecha, &(*pMecha->m4_bones)[*pNextBytecode], bytecodeHigher,
                 (int)(short)pCurrentByteCodePtr[2], (int)(short)pCurrentByteCodePtr[3],
                 (int)(short)pCurrentByteCodePtr[4]);
             pNextBytecode = pCurrentByteCodePtr + 5;
@@ -854,23 +853,23 @@ void mechaInitNewMecha(int entryId, ushort flags, sMechaDataTable2* pData2, sMec
 
     if ((flags & 0x40) == 0) {
         if ((pLoadedMecha->m4A & 4) == 0) {
-            pLoadedMecha->m4 = processMechaMesh(pLoadedMecha->m0, pData1->mC, 2, 1, tpageX, tpageY, clutX, clutY);
+            pLoadedMecha->m4_bones = processMechaMesh(pLoadedMecha->m0, pData1->mC, 2, 1, tpageX, tpageY, clutX, clutY);
 
         }
         else
         {
-            pLoadedMecha->m4 = processMechaMesh(pLoadedMecha->m0, pData1->mC, 2, 0, 0, 0, 0, 0);
+            pLoadedMecha->m4_bones = processMechaMesh(pLoadedMecha->m0, pData1->mC, 2, 0, 0, 0, 0, 0);
         }
     }
     else
     {
-        pLoadedMecha->m4 = processMechaMesh(pLoadedMecha->m0, pData1->mC, 0, 0, 0, 0, 0, 0);
+        pLoadedMecha->m4_bones = processMechaMesh(pLoadedMecha->m0, pData1->mC, 0, 0, 0, 0, 0, 0);
     }
 
     if (param_9 != nullptr) {
-        (*pLoadedMecha->m4)[0].m5C_translation[0] = param_9->vx;
-        (*pLoadedMecha->m4)[0].m5C_translation[1] = param_9->vy;
-        (*pLoadedMecha->m4)[0].m5C_translation[2] = param_9->vz;
+        (*pLoadedMecha->m4_bones)[0].m5C_translation[0] = param_9->vx;
+        (*pLoadedMecha->m4_bones)[0].m5C_translation[1] = param_9->vy;
+        (*pLoadedMecha->m4_bones)[0].m5C_translation[2] = param_9->vz;
     }
 
     if ((flags & 1) == 0) {
@@ -910,7 +909,7 @@ void mechaInitNewMecha(int entryId, ushort flags, sMechaDataTable2* pData2, sMec
         p->v1 = 0xEF;
     }
 
-    pLoadedMecha->m1C_moveSpeed = pData1->m10->m4->m8;
+    pLoadedMecha->m1C_scale = pData1->m10->m4->m8;
     pLoadedMecha->m10C = pData1->m10->m4->mE;
     initMechSub110(pLoadedMecha);
     pLoadedMecha->m10E = pData1->m10->m4->m10;
@@ -982,7 +981,7 @@ void loadMechaOverlay_finalize(void)
         delete mechaDataTable1[i];
         mechaDataTable1[i] = nullptr;
         mechaDataTable1_raw[i].clear();
-        mechaList3[i] = loadedMechas[i]->m1C_moveSpeed;
+        mechaList3[i] = loadedMechas[i]->m1C_scale;
     }
 
     resetMemoryAllocStats(8, 0);
@@ -1024,20 +1023,20 @@ MATRIX matrixSP_1f800000;
 void submitMechaForRendering(sLoadedMechas* pMecha, MATRIX* pMatrix, MATRIX* param_3, int param_4, int param_5, OTTable& OT, int oddOrEven)
 {
     if (pMecha->m34 != 0) {
-        std::vector<sLoadedMecha_sub4>::iterator m4It = (*pMecha->m4).begin();
+        std::vector<sMechaBone>::iterator m4It = (*pMecha->m4_bones).begin();
 
-        CompMatrix(pMatrix, &m4It->mC, &matrixSP_1f800040);
+        CompMatrix(pMatrix, &m4It->mC_localMatrix, &matrixSP_1f800040);
         if ((pMecha->m4A & 1) == 0) {
             MissingCode();
         }
-        MulMatrix0(param_3, &m4It->m2C, &matrixSP_1f800020);
+        MulMatrix0(param_3, &m4It->m2C_boneFinalMatrix, &matrixSP_1f800020);
         int numBones = m4It->mA_numBones;
         m4It++;
         for (int i = 1; i < numBones; i++) {
             if ((m4It->m8 != -1) && (m4It->m7)) {
-                MulMatrix0(&matrixSP_1f800020, &m4It->m2C, &matrixSP_1f800000);
+                MulMatrix0(&matrixSP_1f800020, &m4It->m2C_boneFinalMatrix, &matrixSP_1f800000);
                 //SetLightMatrix(&matrixSP_1f800000);
-                CompMatrix(&matrixSP_1f800040, &m4It->m2C, &matrixSP_1f800000);
+                CompMatrix(&matrixSP_1f800040, &m4It->m2C_boneFinalMatrix, &matrixSP_1f800000);
                 MissingCode();
                 SetTransMatrix(&matrixSP_1f800000);
                 SetRotMatrix(&matrixSP_1f800000);
@@ -1076,19 +1075,19 @@ void updateMechasBaseMatrixIsAttached(sLoadedMechas* param_1)
         if (param_1->m34) {
             if (param_1->m5D) {
                 if (param_1->m5E == 0) {
-                    m0 = &(*loadedMechas[param_1->m5C]->m4)[0].m2C;
+                    m0 = &(*loadedMechas[param_1->m5C]->m4_bones)[0].m2C_boneFinalMatrix;
                 }
                 else {
-                    MulMatrix0(&(*loadedMechas[param_1->m5C]->m4)[0].m2C, &(*loadedMechas[param_1->m5C]->m4)[param_1->m5E].m2C, &scratchPadMatrix);
+                    MulMatrix0(&(*loadedMechas[param_1->m5C]->m4_bones)[0].m2C_boneFinalMatrix, &(*loadedMechas[param_1->m5C]->m4_bones)[param_1->m5E].m2C_boneFinalMatrix, &scratchPadMatrix);
                 }
-                MulRotationMatrix(m0, &(*param_1->m4)[0].mC);
-                MulRotationMatrix(m0, &(*param_1->m4)[0].m2C);
+                MulRotationMatrix(m0, &(*param_1->m4_bones)[0].mC_localMatrix);
+                MulRotationMatrix(m0, &(*param_1->m4_bones)[0].m2C_boneFinalMatrix);
             }
             if (param_1->m5E == 0) {
-                m0 = &(*loadedMechas[param_1->m5C]->m4)[0].mC;
+                m0 = &(*loadedMechas[param_1->m5C]->m4_bones)[0].mC_localMatrix;
             }
             else {
-                CompMatrix(&(*loadedMechas[param_1->m5C]->m4)[0].mC, &(*loadedMechas[param_1->m5C]->m4)[param_1->m5E].m2C, m0);
+                CompMatrix(&(*loadedMechas[param_1->m5C]->m4_bones)[0].mC_localMatrix, &(*loadedMechas[param_1->m5C]->m4_bones)[param_1->m5E].m2C_boneFinalMatrix, m0);
             }
 
             MissingCode();
@@ -1104,132 +1103,132 @@ void updateMechasBaseMatrixIsAttached(sLoadedMechas* param_1)
     }
 }
 
-void updateMechAnimSub0(sLoadedMechas* param_1)
+void updateMechAnimSetupRootAltitude(sLoadedMechas* param_1)
 {
     if (param_1->m36 == 0) {
-        (*param_1->m4)[0].m5C_translation[1] = param_1->m60;
+        (*param_1->m4_bones)[0].m5C_translation[1] = param_1->m60;
     }
     return;
 }
 
-void updateMechAnimSub2(std::vector<sLoadedMecha_sub4>& param_1, int param_2) {
-    param_1[0].m2C.t[0] = param_1[0].m5C_translation[0];
-    param_1[0].m2C.t[1] = param_1[0].m5C_translation[1];
-    param_1[0].m2C.t[2] = param_1[0].m5C_translation[2];
+void updateMechAnimSub2(std::vector<sMechaBone>& param_1, int param_2) {
+    param_1[0].m2C_boneFinalMatrix.t[0] = param_1[0].m5C_translation[0];
+    param_1[0].m2C_boneFinalMatrix.t[1] = param_1[0].m5C_translation[1];
+    param_1[0].m2C_boneFinalMatrix.t[2] = param_1[0].m5C_translation[2];
 
     if (param_1[0].m6 == 0) {
-        createRotationMatrix(&param_1[0].m54_rotationAngles, &param_1[0].m2C);
+        createRotationMatrix(&param_1[0].m54_rotationAngles, &param_1[0].m2C_boneFinalMatrix);
     }
     else {
-        RotMatrixYXZ(&param_1[0].m54_rotationAngles, &param_1[0].m2C);
+        RotMatrixYXZ(&param_1[0].m54_rotationAngles, &param_1[0].m2C_boneFinalMatrix);
     }
 
     MATRIX MATRIX_1f800000;
     MATRIX_1f800000.m[0][1] = 0;
     MATRIX_1f800000.m[0][2] = 0;
     MATRIX_1f800000.m[1][0] = 0;
-    MATRIX_1f800000.m[0][0] = (short)(param_2 * param_1[0].m4C[0] >> 0xc);
+    MATRIX_1f800000.m[0][0] = (short)(param_2 * param_1[0].m4C_scale[0] >> 0xc);
     MATRIX_1f800000.m[1][2] = 0;
     MATRIX_1f800000.m[2][0] = 0;
     MATRIX_1f800000.m[2][1] = 0;
-    MATRIX_1f800000.m[1][1] = (short)(param_2 * param_1[0].m4C[1] >> 0xc);
-    MATRIX_1f800000.m[2][2] = (short)(param_2 * param_1[0].m4C[2] >> 0xc);
+    MATRIX_1f800000.m[1][1] = (short)(param_2 * param_1[0].m4C_scale[1] >> 0xc);
+    MATRIX_1f800000.m[2][2] = (short)(param_2 * param_1[0].m4C_scale[2] >> 0xc);
 
-    MulMatrix0(&param_1[0].m2C, &MATRIX_1f800000, &param_1[0].mC);
+    MulMatrix0(&param_1[0].m2C_boneFinalMatrix, &MATRIX_1f800000, &param_1[0].mC_localMatrix);
 
-    param_1[0].mC.t = param_1[0].m2C.t;
+    param_1[0].mC_localMatrix.t = param_1[0].m2C_boneFinalMatrix.t;
 
     for (int i = 1; i < param_1[0].mA_numBones; i++) {
-        sLoadedMecha_sub4* pBone = &param_1[i];
+        sMechaBone* pBone = &param_1[i];
         Noah_MissingCode("bone update code missing in updateMechAnimSub2");
 
-        if (pBone->m4) {
+        if (pBone->m4_needTranslationUpdate) {
             // TODO: recheck all of this!
-            pBone->mC.t[0] = pBone->m5C_translation[0];
-            pBone->mC.t[1] = pBone->m5C_translation[1];
-            pBone->mC.t[2] = pBone->m5C_translation[2];
+            pBone->mC_localMatrix.t[0] = pBone->m5C_translation[0];
+            pBone->mC_localMatrix.t[1] = pBone->m5C_translation[1];
+            pBone->mC_localMatrix.t[2] = pBone->m5C_translation[2];
 
             if (pBone->m0_parentBone == nullptr) {
-                pBone->m2C = pBone->mC;
+                pBone->m2C_boneFinalMatrix = pBone->mC_localMatrix;
             }
             else
             {
-                CompMatrix(&pBone->m0_parentBone->m2C, &pBone->mC, &pBone->m2C);
+                CompMatrix(&pBone->m0_parentBone->m2C_boneFinalMatrix, &pBone->mC_localMatrix, &pBone->m2C_boneFinalMatrix);
             }
         }
     }
 
     for (int i = 1; i < param_1[0].mA_numBones; i++) {
-        param_1[i].m4 = 0;
-        param_1[i].m5 = 0;
+        param_1[i].m4_needTranslationUpdate = 0;
+        param_1[i].m5_needRotationUpdate = 0;
     }
 }
 
 
-void updateMechAnimSub1(std::vector<sLoadedMecha_sub4>& param_1, int param_2) {
-    param_1[0].m2C.t[0] = param_1[0].m5C_translation[0];
-    param_1[0].m2C.t[1] = param_1[0].m5C_translation[1];
-    param_1[0].m2C.t[2] = param_1[0].m5C_translation[2];
+void updateMechAnimSub1(std::vector<sMechaBone>& param_1, int scale) {
+    param_1[0].m2C_boneFinalMatrix.t[0] = param_1[0].m5C_translation[0];
+    param_1[0].m2C_boneFinalMatrix.t[1] = param_1[0].m5C_translation[1];
+    param_1[0].m2C_boneFinalMatrix.t[2] = param_1[0].m5C_translation[2];
 
     if (param_1[0].m6 == 0) {
-        createRotationMatrix(&param_1[0].m54_rotationAngles, &param_1[0].m2C);
+        createRotationMatrix(&param_1[0].m54_rotationAngles, &param_1[0].m2C_boneFinalMatrix);
     }
     else {
-        RotMatrixYXZ(&param_1[0].m54_rotationAngles, &param_1[0].m2C);
+        RotMatrixYXZ(&param_1[0].m54_rotationAngles, &param_1[0].m2C_boneFinalMatrix);
     }
 
-    MATRIX MATRIX_1f800000;
-    MATRIX_1f800000.m[0][1] = 0;
-    MATRIX_1f800000.m[0][2] = 0;
-    MATRIX_1f800000.m[1][0] = 0;
-    MATRIX_1f800000.m[0][0] = (short)(param_2 * param_1[0].m4C[0] >> 0xc);
-    MATRIX_1f800000.m[1][2] = 0;
-    MATRIX_1f800000.m[2][0] = 0;
-    MATRIX_1f800000.m[2][1] = 0;
-    MATRIX_1f800000.m[1][1] = (short)(param_2 * param_1[0].m4C[1] >> 0xc);
-    MATRIX_1f800000.m[2][2] = (short)(param_2 * param_1[0].m4C[2] >> 0xc);
+    MATRIX scaleMatrix;
+    scaleMatrix.m[0][1] = 0;
+    scaleMatrix.m[0][2] = 0;
+    scaleMatrix.m[1][0] = 0;
+    scaleMatrix.m[1][2] = 0;
+    scaleMatrix.m[2][0] = 0;
+    scaleMatrix.m[2][1] = 0;
+    scaleMatrix.m[0][0] = (short)(scale * param_1[0].m4C_scale[0] >> 0xc);
+    scaleMatrix.m[1][1] = (short)(scale * param_1[0].m4C_scale[1] >> 0xc);
+    scaleMatrix.m[2][2] = (short)(scale * param_1[0].m4C_scale[2] >> 0xc);
 
-    MulMatrix0(&param_1[0].m2C, &MATRIX_1f800000, &param_1[0].mC);
+    MulMatrix0(&param_1[0].m2C_boneFinalMatrix, &scaleMatrix, &param_1[0].mC_localMatrix);
 
-    param_1[0].mC.t = param_1[0].m2C.t;
+    param_1[0].mC_localMatrix.t = param_1[0].m2C_boneFinalMatrix.t;
 
     for (int i = 1; i < param_1[0].mA_numBones; i++) {
-        sLoadedMecha_sub4* pBone = &param_1[i];
-        if (pBone->m5) {
+        sMechaBone* pBone = &param_1[i];
+        if (pBone->m5_needRotationUpdate) {
             if (pBone->m6 == 0) {
-                createRotationMatrix(&pBone->m54_rotationAngles, &pBone->mC);
+                createRotationMatrix(&pBone->m54_rotationAngles, &pBone->mC_localMatrix);
             }
             else {
-                RotMatrixYXZ(&pBone->m54_rotationAngles, &pBone->mC);
+                RotMatrixYXZ(&pBone->m54_rotationAngles, &pBone->mC_localMatrix);
             }
-            pBone->m5 = 0;
+            pBone->m5_needRotationUpdate = 0;
         }
-        if ((pBone->m0_parentBone != nullptr) && (pBone->m0_parentBone->m4 == 1)) {
-            pBone->m4 = 1;
+        if ((pBone->m0_parentBone != nullptr) && (pBone->m0_parentBone->m4_needTranslationUpdate == 1)) {
+            pBone->m4_needTranslationUpdate = 1;
         }
 
-        if (pBone->m4) {
+        if (pBone->m4_needTranslationUpdate) {
             // TODO: recheck all of this!
-            pBone->mC.t[0] = pBone->m5C_translation[0];
-            pBone->mC.t[1] = pBone->m5C_translation[1];
-            pBone->mC.t[2] = pBone->m5C_translation[2];
+            pBone->mC_localMatrix.t[0] = pBone->m5C_translation[0];
+            pBone->mC_localMatrix.t[1] = pBone->m5C_translation[1];
+            pBone->mC_localMatrix.t[2] = pBone->m5C_translation[2];
 
             if (pBone->m0_parentBone == nullptr) {
-                pBone->m2C = pBone->mC;
+                pBone->m2C_boneFinalMatrix = pBone->mC_localMatrix;
             }
             else
             {
-                CompMatrix(&pBone->m0_parentBone->m2C, &pBone->mC, &pBone->m2C);
+                CompMatrix(&pBone->m0_parentBone->m2C_boneFinalMatrix, &pBone->mC_localMatrix, &pBone->m2C_boneFinalMatrix);
             }
         }
     }
 
     for (int i = 1; i < param_1[0].mA_numBones; i++) {
-        param_1[i].m4 = 0;
+        param_1[i].m4_needTranslationUpdate = 0;
     }
 }
 
-u32 updateMechAnimSub3(sMechaInitVar2* param_1, std::vector<sLoadedMecha_sub4>& param_2, uint param_3, int speed) {
+u32 updateMechAnimSub3(sMechaInitVar2* param_1, std::vector<sMechaBone>& param_2, uint param_3, int speed) {
     u32 returnFlag = 0;
     for (int i = 0; i < param_2[0].mA_numBones; i++) {
         if (param_2[i].m70_animTracks[0]) {
@@ -1269,15 +1268,15 @@ void updateMechAnim(sLoadedMechas* param_1, sMechaInitVar2* param_2, int iterati
     if (param_1->m0 != nullptr) {
         int updateFlag = 0;
         if (param_1->m34 != 0) {
-            updateMechAnimSub0(param_1);
+            updateMechAnimSetupRootAltitude(param_1);
             if (param_1->m37 == 0) {
-                updateMechAnimSub1(*param_1->m4, (int)param_1->m1C_moveSpeed);
+                updateMechAnimSub1(*param_1->m4_bones, (int)param_1->m1C_scale);
             }
             else {
-                updateMechAnimSub2(*param_1->m4, (int)param_1->m1C_moveSpeed);
+                updateMechAnimSub2(*param_1->m4_bones, (int)param_1->m1C_scale);
             }
             for(int i=0; i<iterations; i++) {
-                updateFlag |= updateMechAnimSub3(param_2, *param_1->m4, param_1->m3C, (int)param_1->m1C_moveSpeed);
+                updateFlag |= updateMechAnimSub3(param_2, *param_1->m4_bones, param_1->m3C, (int)param_1->m1C_scale);
                 updateMechAnimSub4(param_1, param_2, oddOrEven);
             }
         }
@@ -1307,7 +1306,7 @@ void renderMechas(MATRIX* pMatrix, MATRIX* param_2, OTTable& OT, int oddOrEven, 
 
     for (int i = 0; i < 10; i++) {
         if (loadedMechas[i]) {
-            loadedMechas[i]->m11C_previousTranslation = (*loadedMechas[i]->m4)[0].m5C_translation;
+            loadedMechas[i]->m11C_previousTranslation = (*loadedMechas[i]->m4_bones)[0].m5C_translation;
             updateMechAnim(loadedMechas[i], &mechaInitVar2, mechaIterationCount, oddOrEven);
         }
     }
@@ -1326,9 +1325,9 @@ void renderMechas(MATRIX* pMatrix, MATRIX* param_2, OTTable& OT, int oddOrEven, 
 
     for (int i = 0; i < 10; i++) {
         if (loadedMechas[i]) {
-            loadedMechas[i]->m128_deltaTranslation[0] = loadedMechas[i]->m11C_previousTranslation[0] - (*loadedMechas[i]->m4)[0].m5C_translation[0];
-            loadedMechas[i]->m128_deltaTranslation[1] = loadedMechas[i]->m11C_previousTranslation[1] - (*loadedMechas[i]->m4)[0].m5C_translation[1];
-            loadedMechas[i]->m128_deltaTranslation[2] = loadedMechas[i]->m11C_previousTranslation[2] - (*loadedMechas[i]->m4)[0].m5C_translation[2];
+            loadedMechas[i]->m128_deltaTranslation[0] = loadedMechas[i]->m11C_previousTranslation[0] - (*loadedMechas[i]->m4_bones)[0].m5C_translation[0];
+            loadedMechas[i]->m128_deltaTranslation[1] = loadedMechas[i]->m11C_previousTranslation[1] - (*loadedMechas[i]->m4_bones)[0].m5C_translation[1];
+            loadedMechas[i]->m128_deltaTranslation[2] = loadedMechas[i]->m11C_previousTranslation[2] - (*loadedMechas[i]->m4_bones)[0].m5C_translation[2];
             submitMechaForRendering(loadedMechas[i], pMatrix, param_2, 1, 1, OT, oddOrEven);
         }
     }
@@ -1386,13 +1385,13 @@ void renderMechasForDebugFieldRenderer(int viewId)
         if (loadedMechas[i]) {
             sLoadedMechas* pMecha = loadedMechas[i];
 
-            std::vector<sLoadedMecha_sub4>::iterator m4It = (*pMecha->m4).begin();
+            std::vector<sMechaBone>::iterator m4It = (*pMecha->m4_bones).begin();
             int numBones = m4It->mA_numBones;
             m4It++;
             for (int i = 1; i < numBones; i++) {
                 if ((m4It->m8 != -1) && (m4It->m7)) {
                     float finalMatrix[16];
-                    convertMatrixToBgfx(&m4It->m2C, finalMatrix);
+                    convertMatrixToBgfx(&m4It->m2C_boneFinalMatrix, finalMatrix);
                     pMecha->m0->m0[m4It->m8]->bgfxRender(viewId, finalMatrix);
                 }
                 m4It++;
@@ -1405,10 +1404,10 @@ void getMechaBoneMatrix(MATRIX* param_1, void* param_2, int mechaIndex, int bone
     sLoadedMechas* pMecha = loadedMechas[mechaIndex];
     if (pMecha != (sLoadedMechas*)0x0) {
         if (boneIndex == 0) {
-            *param_1 = (*pMecha->m4)[0].mC;
+            *param_1 = (*pMecha->m4_bones)[0].mC_localMatrix;
         }
         else {
-            CompMatrix(&(*pMecha->m4)[0].mC, &(*pMecha->m4)[boneIndex].m2C, param_1);
+            CompMatrix(&(*pMecha->m4_bones)[0].mC_localMatrix, &(*pMecha->m4_bones)[boneIndex].m2C_boneFinalMatrix, param_1);
         }
     }
 }

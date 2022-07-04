@@ -2823,7 +2823,7 @@ void OP_LOAD_NEW_MECHA(void)
             mechaInitNewMecha(mechaIndex, 0, mechaDataTable2[mechaIndex], mechaDataTable1[mechaIndex], (ushort)(((mechaIndex + mechaList2[mechaIndex]) * -0x40 + 0x240) * 0x10000 >> 0x10), 0x100, 0,
                 (short)((mechaIndex + 0xfc) * 0x10000 >> 0x10), &initMechaTempVar[mechaIndex]);
 
-            mechaList3[mechaIndex] = loadedMechas[mechaIndex]->m1C_moveSpeed;
+            mechaList3[mechaIndex] = loadedMechas[mechaIndex]->m1C_scale;
 
             delete mechaDataTable1[mechaIndex];
             mechaDataTable1[mechaIndex] = nullptr;
@@ -2833,12 +2833,12 @@ void OP_LOAD_NEW_MECHA(void)
 
             pCurrentFieldScriptActor->m4_flags.m_rawFlags |= 0x2000;
 
-            loadedMechas[mechaIndex]->m1C_moveSpeed = pCurrentFieldScriptActor->mF4_scale3d[0] * 5 >> 6;
+            loadedMechas[mechaIndex]->m1C_scale = pCurrentFieldScriptActor->mF4_scale3d[0] * 5 >> 6;
 
             loadedMechas[mechaIndex]->m60 = pCurrentFieldScriptActor->m20_position[1].getIntegerPart();
 
-            (*loadedMechas[mechaIndex]->m4)[0].m5C_translation[0] = pCurrentFieldScriptActor->m20_position[0].getIntegerPart();
-            (*loadedMechas[mechaIndex]->m4)[0].m5C_translation[2] = pCurrentFieldScriptActor->m20_position[2].getIntegerPart();
+            (*loadedMechas[mechaIndex]->m4_bones)[0].m5C_translation[0] = pCurrentFieldScriptActor->m20_position[0].getIntegerPart();
+            (*loadedMechas[mechaIndex]->m4_bones)[0].m5C_translation[2] = pCurrentFieldScriptActor->m20_position[2].getIntegerPart();
         }
         else {
             ADVANCE_VM(-0x1);

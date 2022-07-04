@@ -118,7 +118,7 @@ void loadBattleLoader() {
 MATRIX battleMatrix800CCB94;
 MATRIX battleMatrix800CCBB4;
 
-std::vector<sLoadedMecha_sub4>* environmentModelConfigs;
+std::vector<sMechaBone>* environmentModelConfigs;
 sMechaInitVar4* environmentModelBlocks = nullptr;
 
 std::array<struct sBackgroundPoly*, 2> battleEnvBackgroundPolys;
@@ -129,7 +129,7 @@ void uploadTextureToVram(sPS1Pointer param_1, short param_2, short tpageX, short
 
 std::array<sMechaInitVar4, 0x14> battleMechaInitVar4;
 void sMechaModel_init(sModel& modelBlock, sMechaInitVar4* param_2);
-std::vector<sLoadedMecha_sub4>* processMechaMesh(sMechaInitVar4* param_1, std::vector<sMechaDataTable1_C>& param_2, u32 param_3, int useTpageAndClut, short tpageX, short tpageY, short clutX, short clutY);
+std::vector<sMechaBone>* processMechaMesh(sMechaInitVar4* param_1, std::vector<sMechaDataTable1_C>& param_2, u32 param_3, int useTpageAndClut, short tpageX, short tpageY, short clutX, short clutY);
 void initMechSub110(sLoadedMechas* param_1);
 
 void mechaInitEnvironmentMechaMesh(int entryId, ushort flags, sMechaDataTable2* pData2, sMechaDataTable1* pData1, ushort tpageX, ushort tpageY, ushort clutX, short clutY, SFP_VEC3* param_9)
@@ -214,23 +214,23 @@ void mechaInitEnvironmentMechaMesh(int entryId, ushort flags, sMechaDataTable2* 
 
     if ((flags & 0x40) == 0) {
         if ((pLoadedMecha->m4A & 4) == 0) {
-            pLoadedMecha->m4 = processMechaMesh(pLoadedMecha->m0, pData1->mC, 2, 1, tpageX, tpageY, clutX, clutY);
+            pLoadedMecha->m4_bones = processMechaMesh(pLoadedMecha->m0, pData1->mC, 2, 1, tpageX, tpageY, clutX, clutY);
 
         }
         else
         {
-            pLoadedMecha->m4 = processMechaMesh(pLoadedMecha->m0, pData1->mC, 2, 0, 0, 0, 0, 0);
+            pLoadedMecha->m4_bones = processMechaMesh(pLoadedMecha->m0, pData1->mC, 2, 0, 0, 0, 0, 0);
         }
     }
     else
     {
-        pLoadedMecha->m4 = processMechaMesh(pLoadedMecha->m0, pData1->mC, 0, 0, 0, 0, 0, 0);
+        pLoadedMecha->m4_bones = processMechaMesh(pLoadedMecha->m0, pData1->mC, 0, 0, 0, 0, 0, 0);
     }
 
     if (param_9 != nullptr) {
-        (*pLoadedMecha->m4)[0].m5C_translation[0] = param_9->vx;
-        (*pLoadedMecha->m4)[0].m5C_translation[1] = param_9->vy;
-        (*pLoadedMecha->m4)[0].m5C_translation[2] = param_9->vz;
+        (*pLoadedMecha->m4_bones)[0].m5C_translation[0] = param_9->vx;
+        (*pLoadedMecha->m4_bones)[0].m5C_translation[1] = param_9->vy;
+        (*pLoadedMecha->m4_bones)[0].m5C_translation[2] = param_9->vz;
     }
 
     if ((flags & 1) == 0) {
@@ -270,7 +270,7 @@ void mechaInitEnvironmentMechaMesh(int entryId, ushort flags, sMechaDataTable2* 
         p->v1 = 0xEF;
     }
 
-    pLoadedMecha->m1C_moveSpeed = pData1->m10->m4->m8;
+    pLoadedMecha->m1C_scale = pData1->m10->m4->m8;
     pLoadedMecha->m10C = pData1->m10->m4->mE;
     initMechSub110(pLoadedMecha);
     pLoadedMecha->m10E = pData1->m10->m4->m10;
@@ -337,7 +337,7 @@ int loadBattleEnvironment(std::vector<u8>::iterator param_1, std::vector<u8>::it
                 Hack("Original code alias the animation bundle and asset bundle");
                 mechaInitEnvironmentMechaMesh(0x1f, 0xc4, nullptr, param_3, 0, 0, 0, 0, 0);
                 Noah_MissingCode("processBattleEnvTextures");
-                environmentModelConfigs = battleMechas[0x1F]->m4;
+                environmentModelConfigs = battleMechas[0x1F]->m4_bones;
                 environmentModelBlocks = battleMechas[0x1F]->m0;
                 Noah_MissingCode("Environment bones init");
             }
