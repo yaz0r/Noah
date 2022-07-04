@@ -109,8 +109,9 @@ std::array<int, 10> mechaList3;
 s16 numMaxMechaOverlayEntries;
 
 
-void freeMechaInitVar2(sMechaInitVar2*) {
-    MissingCode();
+void freeMechaInitVar2(sMechaInitVar2* param_1) {
+    param_1->m4 = 0;
+    param_1->m0.clear();
 }
 
 void freeMechaInitVar3(sMechaInitVar3*) {
@@ -129,6 +130,8 @@ void initMechaInitVar2Sub0(sMechaInitVar2* param_1) {
 sMechaInitVar2 mechaInitVar2;
 
 void initMechaInitVar2(sMechaInitVar2* param_1, int count) {
+    count = 0x7FFF;
+    Hack("Num bone buffer");
     if (count > 0) {
         param_1->m6 = count;
         resetMemoryAllocStats(4, 0);
@@ -240,8 +243,8 @@ std::vector<sMechaBone>* processMechaMesh(sMechaInitVar4* param_1, std::vector<s
     it->m4C_scale[1] = 0x1000;
     it->m4C_scale[2] = 0x1000;
     it->m0_parentBone = nullptr;
-    it->m7 = 0;
-    it->m8 = -1;
+    it->m7_isEnabled = 0;
+    it->m8_geometryId = -1;
     it->mA_numBones = numBones + 1;
     it->m68[0].clear();
     it->m68[1].clear();
@@ -275,13 +278,13 @@ std::vector<sMechaBone>* processMechaMesh(sMechaInitVar4* param_1, std::vector<s
         it->mA_numBones = boneCounter++;
         it->m4_needTranslationUpdate = 1;
         it->m5_needRotationUpdate = 1;
-        it->m7 = 1;
+        it->m7_isEnabled = 1;
         it->m4C_scale[0] = 0x1000;
         it->m4C_scale[1] = 0x1000;
         it->m4C_scale[2] = 0x1000;
         it->m6 = 0;
         it->m52 = 0;
-        it->m8 = it2->m0;
+        it->m8_geometryId = it2->m0;
         if (it2->m0 == -1) {
             it->m68[0].clear();
             it->m68[1].clear();
@@ -312,7 +315,7 @@ std::vector<sMechaBone>* processMechaMesh(sMechaInitVar4* param_1, std::vector<s
     return outputVector;
 }
 
-int mechaOP_A_sub0(sMechaInitVar2* param_1, sMechaInitVar2Sub* param_2)
+int releaseMechaAnimTrack(sMechaInitVar2* param_1, sMechaInitVar2Sub* param_2)
 {
     int uVar1;
 
@@ -329,17 +332,62 @@ int mechaOP_A_sub0(sMechaInitVar2* param_1, sMechaInitVar2Sub* param_2)
     return uVar1;
 }
 
+sMechaInitVar2Sub* allocateAnimTrack(sMechaInitVar2* param_1) {
+    sMechaInitVar2Sub* psVar1;
+    uint uVar2;
+    sMechaInitVar2Sub* psVar3;
+
+    if ((uint)(ushort)param_1->m4 < (uint)(ushort)param_1->m6) {
+        psVar3 = &param_1->m0[param_1->m4];
+        psVar1 = (sMechaInitVar2Sub*)0x0;
+        if (psVar3->m0 == 0) {
+            param_1->m4 = param_1->m4 + 1;
+            uVar2 = (uint)(ushort)param_1->m4;
+            psVar1 = psVar3;
+            if (uVar2 < (ushort)param_1->m6) {
+                do {
+                    if (param_1->m0[uVar2].m0 == 0) {
+                        psVar3->m3 = 0; // hack
+                        return psVar3;
+                    }
+                    param_1->m4 = param_1->m4 + 1;
+                    uVar2 = (uint)(ushort)param_1->m4;
+                } while (uVar2 < (ushort)param_1->m6);
+            }
+        }
+    }
+    else {
+        psVar1 = (sMechaInitVar2Sub*)0x0;
+    }
+    return psVar1;
+}
+
 void mechaOP_8(sMechaInitVar2* param_1, std::vector<sMechaBone>* param_2) {
     for (int i = 0; i < (*param_2)[0].mA_numBones; i++) {
         sMechaBone* pEntry = &(*param_2)[i];
         if (pEntry->m70_animTracks[0] && (pEntry->m70_animTracks[0]->m3 != -1)) {
-            mechaOP_A_sub0(param_1, pEntry->m70_animTracks[0]);
+            releaseMechaAnimTrack(param_1, pEntry->m70_animTracks[0]);
         }
         if (pEntry->m70_animTracks[1] && (pEntry->m70_animTracks[1]->m3 != -1)) {
-            mechaOP_A_sub0(param_1, pEntry->m70_animTracks[1]);
+            releaseMechaAnimTrack(param_1, pEntry->m70_animTracks[1]);
         }
         if (pEntry->m70_animTracks[1] && (pEntry->m70_animTracks[1]->m3 != -1)) {
-            mechaOP_A_sub0(param_1, pEntry->m70_animTracks[1]);
+            releaseMechaAnimTrack(param_1, pEntry->m70_animTracks[1]);
+        }
+    }
+}
+
+void freeAnimTracks2(sMechaInitVar2* param_1, std::vector<sMechaBone>* param_2, s8 value) {
+    for (int i = 0; i < (*param_2)[0].mA_numBones; i++) {
+        sMechaBone* pEntry = &(*param_2)[i];
+        if (pEntry->m70_animTracks[0] && (pEntry->m70_animTracks[0]->m3 != value)) {
+            releaseMechaAnimTrack(param_1, pEntry->m70_animTracks[0]);
+        }
+        if (pEntry->m70_animTracks[1] && (pEntry->m70_animTracks[1]->m3 != value)) {
+            releaseMechaAnimTrack(param_1, pEntry->m70_animTracks[1]);
+        }
+        if (pEntry->m70_animTracks[1] && (pEntry->m70_animTracks[1]->m3 != value)) {
+            releaseMechaAnimTrack(param_1, pEntry->m70_animTracks[1]);
         }
     }
 }
@@ -347,15 +395,15 @@ void mechaOP_8(sMechaInitVar2* param_1, std::vector<sMechaBone>* param_2) {
 void mechaOP_A(sMechaInitVar2* param_1, sMechaBone* param_2, int param_3, uint param_4) {
     if (param_3 < (int)(uint)(ushort)param_2->mA_numBones) {
         if ((param_2[param_3].m70_animTracks[0] != 0) && ((param_4 & 1) != 0)) {
-            mechaOP_A_sub0(param_1, param_2[param_3].m70_animTracks[0]);
+            releaseMechaAnimTrack(param_1, param_2[param_3].m70_animTracks[0]);
             param_2[param_3].m70_animTracks[0] = 0;
         }
         if ((param_2[param_3].m70_animTracks[1] != 0) && ((param_4 & 2) != 0)) {
-            mechaOP_A_sub0(param_1, param_2[param_3].m70_animTracks[1]);
+            releaseMechaAnimTrack(param_1, param_2[param_3].m70_animTracks[1]);
             param_2[param_3].m70_animTracks[1] = 0;
         }
         if ((param_2[param_3].m70_animTracks[2] != 0) && ((param_4 & 4) != 0)) {
-            mechaOP_A_sub0(param_1, param_2[param_3].m70_animTracks[2]);
+            releaseMechaAnimTrack(param_1, param_2[param_3].m70_animTracks[2]);
             param_2[param_3].m70_animTracks[2] = 0;
         }
     }
@@ -363,9 +411,9 @@ void mechaOP_A(sMechaInitVar2* param_1, sMechaBone* param_2, int param_3, uint p
 
 void mechaSetPoseFromKeyframe(std::vector<sMechaBone>& param_1, sMechaDataTable2_4_4* param_2)
 {
-    std::vector<std::array<s16, 3>>::iterator pShortData = param_2->m18.begin();
+    std::vector<u8>::iterator pShortData = param_2->m18.begin();
     if (param_2->m6 == 0) {
-        pShortData += param_2->mC_numRotations + 1;
+        pShortData += (param_2->mC_numRotations + 1) * 3 * 2;
     }
 
     int rotationCount = 0;
@@ -375,16 +423,16 @@ void mechaSetPoseFromKeyframe(std::vector<sMechaBone>& param_1, sMechaDataTable2
         sMechaBone* pBone = &param_1[i];
 
         if (((param_2->m4_flags & 1) == 0) && (rotationCount < param_2->mC_numRotations)) {
-            std::array<s16, 3> sVar1 = *pShortData;
-            pShortData++;
+            std::vector<u8>::iterator sVar1 = pShortData;
+            pShortData+=3*2;
             rotationCount++;
 
-            if ((pBone->m4C_scale[0] != sVar1[0]) || (pBone->m4C_scale[1] != sVar1[1]) || (pBone->m4C_scale[2] != sVar1[2])) {
-                if ((pBone->m68[0].size() == 0) || (pBone->m68[0][0]->m3_size != -1))
+            if ((pBone->m54_rotationAngles[0] != READ_LE_S16(sVar1 + 0)) || (pBone->m54_rotationAngles[1] != READ_LE_S16(sVar1 + 2)) || (pBone->m54_rotationAngles[2] != READ_LE_S16(sVar1 + 4))) {
+                if ((pBone->m70_animTracks[0] == nullptr) || (pBone->m70_animTracks[0]->m3 != -1))
                 {
-                    pBone->m54_rotationAngles[0] = sVar1[0];
-                    pBone->m54_rotationAngles[1] = sVar1[1];
-                    pBone->m54_rotationAngles[2] = sVar1[2];
+                    pBone->m54_rotationAngles[0] = READ_LE_S16(sVar1 + 0);
+                    pBone->m54_rotationAngles[1] = READ_LE_S16(sVar1 + 2);
+                    pBone->m54_rotationAngles[2] = READ_LE_S16(sVar1 + 4);
                     pBone->m4_needTranslationUpdate = 1;
                     pBone->m5_needRotationUpdate = 1;
                 }
@@ -392,16 +440,16 @@ void mechaSetPoseFromKeyframe(std::vector<sMechaBone>& param_1, sMechaDataTable2
         }
 
         if (((param_2->m4_flags & 2) == 0) && (translationCount < param_2->mE_numTranslations)) {
-            std::array<s16, 3> sVar1 = *pShortData;
-            pShortData++;
+            std::vector<u8>::iterator sVar1 = pShortData;
+            pShortData += 3 * 2;
             translationCount++;
 
-            if ((pBone->m5C_translation[0] != sVar1[0]) || (pBone->m5C_translation[1] != sVar1[1]) || (pBone->m5C_translation[2] != sVar1[2])) {
-                if ((pBone->m68[1].size() == 0) || (pBone->m68[1][0]->m3_size != -1))
+            if ((pBone->m5C_translation[0] != READ_LE_S16(sVar1 + 0)) || (pBone->m5C_translation[1] != READ_LE_S16(sVar1 + 2)) || (pBone->m5C_translation[2] != READ_LE_S16(sVar1 + 4))) {
+                if ((pBone->m70_animTracks[1] == nullptr) || (pBone->m70_animTracks[1]->m3 != -1))
                 {
-                    pBone->m5C_translation[0] = sVar1[0];
-                    pBone->m5C_translation[1] = sVar1[1];
-                    pBone->m5C_translation[2] = sVar1[2];
+                    pBone->m5C_translation[0] = READ_LE_S16(sVar1 + 0);
+                    pBone->m5C_translation[1] = READ_LE_S16(sVar1 + 2);
+                    pBone->m5C_translation[2] = READ_LE_S16(sVar1 + 4);
                     pBone->m4_needTranslationUpdate = 1;
                 }
             }
@@ -427,9 +475,187 @@ sMechaDataTable2_4_4* mechaGetKeyframe(sLoadedMechas* param_1, uint param_2, u32
     }
 }
 
-void mechaOP_11(sMechaInitVar2* param_1, std::vector<sMechaBone>& param_2, sMechaDataTable2_4_4* param_3, uint param_4, u16 param_5)
+void mechaOP_13(sMechaInitVar2* param_1, std::vector<sMechaBone>& param_2, sMechaDataTable2_4_4* param_3, int transitionLength, byte interpolationType, byte isLooping, char param_7) {
+    s32 local_68 = transitionLength;
+    if (local_68 == 0) {
+        local_68 = 1;
+    }
+
+    std::vector<u8>::iterator trackHeader = param_3->m18.begin();
+    if (param_3->m6 == 0) {
+        trackHeader = trackHeader + (param_3->mC_numRotations + 1) * 6;
+    }
+
+    s32 rotationCount = 0;
+    s32 translationCount = 0;
+
+    for (int i = 1; i < param_2[0].mA_numBones; i++) {
+        sMechaBone* pBone = &param_2[i];
+
+        if (((param_3->m4_flags & 1) == 0) && (rotationCount < param_3->mC_numRotations)) {
+            SVECTOR values;
+            values[0] = READ_LE_S16(trackHeader + 0);
+            values[1] = READ_LE_S16(trackHeader + 2);
+            values[2] = READ_LE_S16(trackHeader + 4);
+            trackHeader += 3 * 2;
+            rotationCount++;
+            if ((pBone->m54_rotationAngles[0] == values[0]) && (pBone->m54_rotationAngles[1] == values[1]) && (pBone->m54_rotationAngles[2] == values[2])) {
+                if ((pBone->m70_animTracks[0] != nullptr && pBone->m70_animTracks[0]->m3 != -1)) {
+                    releaseMechaAnimTrack(param_1, pBone->m70_animTracks[0]);
+                    pBone->m70_animTracks[0] = nullptr;
+                }
+            }
+            else {
+                if (pBone->m70_animTracks[0] == nullptr) {
+                    pBone->m70_animTracks[0] = allocateAnimTrack(param_1);
+                }
+                if (pBone->m70_animTracks[0] && pBone->m70_animTracks[0]->m3 != -1) {
+                    sMechaInitVar2Sub* pTrack = pBone->m70_animTracks[0];
+                    pTrack->m0 = 1;
+                    pTrack->m2 = (interpolationType & 1) + 3;
+                    pTrack->m1_isLooping = isLooping;
+                    pTrack->m3 = param_7;
+                    pTrack->m4_s16 = pBone->m54_rotationAngles[0];
+                    pTrack->m6_s16 = pBone->m54_rotationAngles[1];
+                    pTrack->m8_s16 = pBone->m54_rotationAngles[2];
+
+                    {
+                        s32 delta = values[0] - pBone->m54_rotationAngles[0] & 0xFFF;
+                        if (delta > 0x7FF) {
+                            delta -= 0x1000;
+                        }
+                        pTrack->mA_s16 = delta;
+                    }
+                    {
+                        s32 delta = values[1] - pBone->m54_rotationAngles[1] & 0xFFF;
+                        if (delta > 0x7FF) {
+                            delta -= 0x1000;
+                        }
+                        pTrack->mC = delta;
+                    }
+                    {
+                        s32 delta = values[2] - pBone->m54_rotationAngles[2] & 0xFFF;
+                        if (delta > 0x7FF) {
+                            delta -= 0x1000;
+                        }
+                        pTrack->mE = delta;
+                    }
+                    pTrack->m10_currentTime = 0;
+                    pTrack->m12_maxTime = local_68;
+                    pBone->m70_animTracks[0] = pTrack;
+                }
+            }
+        }
+        else {
+            if ((pBone->m70_animTracks[0] != nullptr && pBone->m70_animTracks[0]->m3 != -1)) {
+                releaseMechaAnimTrack(param_1, pBone->m70_animTracks[0]);
+                pBone->m70_animTracks[0] = nullptr;
+            }
+        }
+
+        if (((param_3->m4_flags & 2) == 0) && (translationCount < param_3->mE_numTranslations)) {
+            SVECTOR values;
+            values[0] = READ_LE_S16(trackHeader + 0);
+            values[1] = READ_LE_S16(trackHeader + 2);
+            values[2] = READ_LE_S16(trackHeader + 4);
+            trackHeader += 3 * 2;
+            translationCount++;
+            MissingCode();
+        }
+    }
+}
+
+
+int mechaOP_11(sMechaInitVar2* param_1, std::vector<sMechaBone>& param_2, sMechaDataTable2_4_4* param_3, uint isLooping, u16 param_5)
 {
-    MissingCode();
+    if (param_3->m6 == 0) {
+        s32 numRotations = param_3->mC_numRotations;
+        s32 numBones = param_2[0].mA_numBones;
+        s32 numRotation2 = numRotations + 1;
+        isLooping = isLooping & 1;
+        if (numRotation2 < numBones) {
+            numBones = numRotations + 1;
+        }
+        s32 animationDuration = param_3->m2_keyDuration;
+        if (isLooping == 0) {
+            animationDuration = animationDuration + -1;
+        }
+        std::vector<u8>::iterator trackHeader = param_3->m18.begin();
+        std::vector<u8>::iterator psVar8 = trackHeader + numRotation2 * 3 * 2;
+        if ((param_3->m4_flags & 1) == 0) {
+            psVar8 = psVar8 + (uint)numRotations * 3 * 2;
+        }
+        if ((param_3->m4_flags & 2) == 0) {
+            psVar8 = psVar8 + (uint)(ushort)param_3->mE_numTranslations * 3 * 2;
+        }
+        for (int i = 0; i < numBones; i++) {
+            std::array<sMechaInitVar2Sub*, 3>& tracks = param_2[i].m70_animTracks;
+            {
+                // translations
+                sMechaInitVar2Sub*& track = tracks[0];
+                if (READ_LE_S16(trackHeader + 0)== -1) { // if there is no track for this bone and the bone had a track allocated already, release it
+                    if (track && i && track->m3 != -1) {
+                        releaseMechaAnimTrack(param_1, track);
+                        track = nullptr;
+                    }
+                }
+                else {
+                    if (track == nullptr) {
+                        track = allocateAnimTrack(param_1);
+                    }
+                    if (track && track->m3 != -1) {
+                        // init track
+                        track->m0 = 1;
+                        track->m1_isLooping = isLooping;
+                        track->m3 = param_5;
+                        track->m2 = READ_LE_U8(trackHeader + 4);
+                        track->m10_currentTime = 0;
+                        track->m12_maxTime = animationDuration;
+                        int offsetToData = READ_LE_U16(trackHeader + 0);
+                        track->m4 = psVar8 + offsetToData;
+                        track->m8 = psVar8 + offsetToData;
+                    }
+                }
+            }
+            {
+                // rotations
+                sMechaInitVar2Sub*& track = tracks[1];
+                if (READ_LE_S16(trackHeader + 2) == -1) { // if there is no track for this bone and the bone had a track allocated already, release it
+                    if (track && i && track->m3 != -1) {
+                        releaseMechaAnimTrack(param_1, tracks[1]);
+                        track = nullptr;
+                    }
+                }
+                else {
+                    if (track == nullptr) {
+                        track = allocateAnimTrack(param_1);
+                    }
+                    if (track && track->m3 != -1) {
+                        // init track
+                        track->m0 = 1;
+                        track->m1_isLooping = isLooping;
+                        track->m3 = param_5;
+                        track->m2 = READ_LE_U8(trackHeader + 5);
+                        track->m10_currentTime = 0;
+                        track->m12_maxTime = animationDuration;
+                        int offsetToData = READ_LE_U16(trackHeader + 2);
+                        track->m4 = psVar8 + offsetToData;
+                        track->m8 = psVar8 + offsetToData;
+                    }
+
+                }
+            }
+            LAB_Mecha__801dfa74:
+            trackHeader+=3*2;
+        }
+        return 0;
+    }
+    else
+    {
+        mechaOP_8(param_1, &param_2);
+        mechaSetPoseFromKeyframe(param_2, param_3);
+        return 1;
+    }
 }
 
 void mechaOp_62(sLoadedMechas* param_1, sMechaBone* param_2, byte param_3, short param_4,
@@ -477,8 +703,9 @@ void mechaOp_62(sLoadedMechas* param_1, sMechaBone* param_2, byte param_3, short
     param_2->m4_needTranslationUpdate = 1;
     param_2->m5_needRotationUpdate = 1;
     iVar3 = 1;
+
+    // if 0x80 is set, apply recursively to sub bones
     if (param_3 & 0x80) {
-        // skip the root bone
         for (int i = 1; i < (*param_1->m4_bones)[0].mA_numBones; i++) {
             if ((*param_1->m4_bones)[i].m0_parentBone == param_2) {
                 mechaOp_62(param_1, &(*param_1->m4_bones)[i], param_3, param_4, param_5, param_6);
@@ -490,25 +717,17 @@ void mechaOp_62(sLoadedMechas* param_1, sMechaBone* param_2, byte param_3, short
 }
 
 
-void mechaAnimOp23(sLoadedMechas* param_1, sMechaBone* param_2, u32 param_3) {
-    param_2->m7 = param_3 & 1;
+void setBoneVisibility(sLoadedMechas* param_1, sMechaBone* param_2, u32 param_3) {
+    param_2->m7_isEnabled = param_3 & 1;
+
+    // if 0x80 is set, apply recursively to sub bones
     if ((param_3 & 0x80) != 0) {
-        std::vector<sMechaBone>::iterator psVar1 = (*param_1->m4_bones).begin();
-        int iVar2 = 1;
-        if (1 < psVar1->mA_numBones) {
-            do {
-                psVar1 = psVar1 + 1;
-                iVar2 = iVar2 + 1;
-                if (psVar1->m0_parentBone == param_2) {
-                    mechaAnimOp23(param_1, &(*psVar1), param_3);
-                }
-            } while (iVar2 < (*param_1->m4_bones)[0].mA_numBones);
+        for (int i = 1; i < (*param_1->m4_bones)[0].mA_numBones; i++) {
+            if ((*param_1->m4_bones)[i].m0_parentBone == param_2) {
+                setBoneVisibility(param_1, &(*param_1->m4_bones)[i], param_3);
+            }
         }
     }
-}
-
-void mechaOP_13(sMechaInitVar2* param_1, std::vector<sMechaBone>& param_2, sMechaDataTable2_4_4* param_3, int param_4, byte param_5, byte param_6, char param_7) {
-    MissingCode();
 }
 
 void mechaOP_19(sLoadedMechas* param_1)
@@ -516,6 +735,32 @@ void mechaOP_19(sLoadedMechas* param_1)
     param_1->m98 = -1;
     return;
 }
+
+void mechaOP_11_b(sLoadedMechas* param_1, sMechaDataTable2_4_4* param_2, int param_3)
+{
+    int iVar1;
+
+    if (param_2->m12 == 0) {
+        param_1->m98 = -1;
+    }
+    else {
+        param_1->m98 = 0;
+        if (param_3 == 0) {
+            param_1->m9A = -1;
+        }
+        else {
+            param_1->m9A = param_2->m2_keyDuration;
+        }
+        param_1->m9C = 0;
+        param_1->m9E = param_2->m12;
+        //iVar1 = *(int*)&param_2->field_0x14;
+       // param_1->mA0 = (int)(&param_2->field_0x0 + iVar1);
+       // param_1->mA4 = (int)(&param_2->field_0x0 + iVar1);
+        assert(0);
+    }
+    return;
+}
+
 
 void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int param_3, int param_4)
 {
@@ -624,41 +869,43 @@ void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int pa
         case 0x10: // set mecha at keyframe
             mechaSetPoseFromKeyframe(*pMecha->m4_bones, mechaGetKeyframe(pMecha, bytecodeHigher, &local_100));
             break;
-        case 0x11:
+        case 0x11: // interpolate to keyframe
             {
                 u32 local_100;
-                sMechaDataTable2_4_4* psVar7 = mechaGetKeyframe(pMecha, bytecodeHigher, &local_100);
+                sMechaDataTable2_4_4* pKeyframe = mechaGetKeyframe(pMecha, bytecodeHigher, &local_100);
                 _currentByteCode = *pNextBytecode;
                 pNextBytecode = pCurrentByteCodePtr + 2;
                 if (local_100 == 0) {
                     bytecodeHigher = _currentByteCode >> 8;
-                    mechaOP_11(param_2, *pMecha->m4_bones, psVar7, bytecodeHigher, _currentByteCode);
+                    mechaOP_11(param_2, *pMecha->m4_bones, pKeyframe, bytecodeHigher, _currentByteCode);
                     param_3 = -1;
-                    int iVar6 = (int)*(short*)&psVar7->m10 *
+                    int iVar6 = (int)*(short*)&pKeyframe->m10 *
                         ((int)pMecha->m1C_scale * (int)(*pMecha->m4_bones)[0].m4C_scale[2] >> 0xc) >> 0xc;
                     if (iVar6 < 0) {
                         iVar6 = -iVar6;
                     }
                     pMecha->m8E = (short)iVar6;
-                    //FUN_Mecha__801e5c74(pMecha, pbVar8, bytecodeHigher);
-                    MissingCode();
+                    mechaOP_11_b(pMecha, pKeyframe, bytecodeHigher);
                 }
             }
             break;
         case 0x13:
             {
-                u8 previousByteCode = _currentByteCode;
-                u8 preBytecodeHigher = bytecodeHigher;
-                bytecodeHigher = *pNextBytecode;
-                _currentByteCode = pCurrentByteCodePtr[2];
+                u8 interpolationType = pCurrentByteCodePtr[0] >> 8;
+                u8 frameId = pCurrentByteCodePtr[1] & 0xFF;
+                u8 unk = pCurrentByteCodePtr[1] >> 8;
+                u8 loop = pCurrentByteCodePtr[2] & 0xFF;
+                u8 interpolationLength = pCurrentByteCodePtr[2] >> 8;
                 pNextBytecode = pCurrentByteCodePtr + 3;
-                sMechaDataTable2_4_4* psVar7 = mechaGetKeyframe(pMecha, bytecodeHigher, &local_100);
+
+                sMechaDataTable2_4_4* pKeyframe = mechaGetKeyframe(pMecha, frameId, &local_100);
                 if (mechaBytecodeToggle == 0) {
-                    mechaOP_13(param_2, *pMecha->m4_bones, psVar7, _currentByteCode >> 8, preBytecodeHigher, previousByteCode, bytecodeHigher >> 8);
+                    mechaOP_13(param_2, *pMecha->m4_bones, pKeyframe, interpolationLength, interpolationType, loop, unk);
                 }
                 else {
-                    mechaSetPoseFromKeyframe(*pMecha->m4_bones, psVar7);
+                    mechaSetPoseFromKeyframe(*pMecha->m4_bones, pKeyframe);
                 }
+                
                 param_3 = -1;
                 mechaOP_19(pMecha);
             }
@@ -683,7 +930,7 @@ void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int pa
             pNextBytecode = pCurrentByteCodePtr;
             break;
         case 0x23:
-            mechaAnimOp23(pMecha, &(*pMecha->m4_bones)[*pNextBytecode], bytecodeHigher);
+            setBoneVisibility(pMecha, &(*pMecha->m4_bones)[*pNextBytecode], bytecodeHigher);
             pNextBytecode = pCurrentByteCodePtr + 2;
             break;
         case 0x32:
@@ -994,7 +1241,12 @@ void loadMechaOVerlayAndRegisterMechas(void)
 }
 
 void freeMecha(int index) {
-    loadedMechas[index] = nullptr;
+    if(loadedMechas[index])
+    {
+        mechaOP_8(&mechaInitVar2, loadedMechas[index]->m4_bones); // hack!
+        freeAnimTracks2(&mechaInitVar2, loadedMechas[index]->m4_bones, -1); // hack!
+        loadedMechas[index] = nullptr;
+    }
     MissingCode(); // don't forget to also clear mechaDataTable1 mechaDataTable2 (raw versions)
 }
 
@@ -1033,14 +1285,14 @@ void submitMechaForRendering(sLoadedMechas* pMecha, MATRIX* pMatrix, MATRIX* par
         int numBones = m4It->mA_numBones;
         m4It++;
         for (int i = 1; i < numBones; i++) {
-            if ((m4It->m8 != -1) && (m4It->m7)) {
+            if ((m4It->m8_geometryId != -1) && (m4It->m7_isEnabled)) {
                 MulMatrix0(&matrixSP_1f800020, &m4It->m2C_boneFinalMatrix, &matrixSP_1f800000);
                 //SetLightMatrix(&matrixSP_1f800000);
                 CompMatrix(&matrixSP_1f800040, &m4It->m2C_boneFinalMatrix, &matrixSP_1f800000);
                 MissingCode();
                 SetTransMatrix(&matrixSP_1f800000);
                 SetRotMatrix(&matrixSP_1f800000);
-                submitModelForRendering(pMecha->m0->m0[m4It->m8], m4It->m68[oddOrEven], OT, param_4);
+                submitModelForRendering(pMecha->m0->m0[m4It->m8_geometryId], m4It->m68[oddOrEven], OT, param_4);
             }
             m4It++;
         }
@@ -1232,10 +1484,193 @@ u32 updateMechAnimSub3(sMechaInitVar2* param_1, std::vector<sMechaBone>& param_2
     u32 returnFlag = 0;
     for (int i = 0; i < param_2[0].mA_numBones; i++) {
         if (param_2[i].m70_animTracks[0]) {
-            assert(0);
+            sMechaInitVar2Sub* pTrack = param_2[i].m70_animTracks[0];
+            switch (pTrack->m2 & 0xF) {
+            case 0: // s16
+                if ((pTrack->m2 & 0x10) == 0) {
+                    param_2[i].m54_rotationAngles[0] += READ_LE_S16(pTrack->m8);
+                    pTrack->m8 += 2;
+                }
+                if ((pTrack->m2 & 0x20) == 0) {
+                    param_2[i].m54_rotationAngles[1] += READ_LE_S16(pTrack->m8);
+                    pTrack->m8 += 2;
+                }
+                if ((pTrack->m2 & 0x40) == 0) {
+                    param_2[i].m54_rotationAngles[2] += READ_LE_S16(pTrack->m8);
+                    pTrack->m8 += 2;
+                }
+                break;
+            case 1: // s8 (unless it's a 0x80)
+                if ((pTrack->m2 & 0x10) == 0) {
+                    s8 psVar9 = READ_LE_S8(pTrack->m8);
+                    pTrack->m8++;
+                    if (psVar9 == 0x80) {
+                        assert(0);
+                    }
+                    else {
+                        param_2[i].m54_rotationAngles[0] += psVar9;
+                    }
+                }
+                if ((pTrack->m2 & 0x20) == 0) {
+                    s8 psVar9 = READ_LE_S8(pTrack->m8);
+                    pTrack->m8++;
+                    if (psVar9 == 0x80) {
+                        assert(0);
+                    }
+                    else {
+                        param_2[i].m54_rotationAngles[1] += psVar9;
+                    }
+                }
+                if ((pTrack->m2 & 0x40) == 0) {
+                    s8 psVar9 = READ_LE_S8(pTrack->m8);
+                    pTrack->m8++;
+                    if (psVar9 == 0x80) {
+                        assert(0);
+                    }
+                    else {
+                        param_2[i].m54_rotationAngles[2] += psVar9;
+                    }
+                }
+                break;
+            case 3:
+            {
+                s32 ratio = ((((s32)pTrack->m10_currentTime + 1) * 0x10000) >> 0x10);
+                param_2[i].m54_rotationAngles[0] = pTrack->m4_s16 + (ratio * pTrack->mA_s16) / pTrack->m12_maxTime;
+                param_2[i].m54_rotationAngles[1] = pTrack->m6_s16 + (ratio * pTrack->mC) / pTrack->m12_maxTime;
+                param_2[i].m54_rotationAngles[2] = pTrack->m8_s16 + (ratio * pTrack->mE) / pTrack->m12_maxTime;
+                break;
+            }
+            break;
+            default:
+                assert(0);
+            }
+
+            s32 currentTime = pTrack->m10_currentTime;
+            pTrack->m10_currentTime++;
+            if (currentTime < pTrack->m12_maxTime) {
+                if (pTrack->m3 == param_3) {
+                    returnFlag |= 0x1;
+                }
+                returnFlag |= 0x100;
+            }
+            else if (pTrack->m1_isLooping == '\0') {
+                if (pTrack->m3 == param_3) {
+                    returnFlag = returnFlag | 2;
+                }
+                returnFlag = returnFlag | 0x200;
+                releaseMechaAnimTrack(param_1, pTrack);
+                param_2[i].m70_animTracks[0] = nullptr;
+            }
+            else {
+                //looping
+                if (pTrack->m3 == param_3) {
+                    returnFlag = returnFlag | 4;
+                }
+                returnFlag = returnFlag | 0x400;
+                if ((pTrack->m2 & 0xf) < 3) {
+                    pTrack->m10_currentTime = 0;
+                    pTrack->m8 = pTrack->m4;
+                }
+                else {
+                    pTrack->m10_currentTime = -1;
+                    if ((pTrack->m2 & 0xf) == 5) {
+                        pTrack->mA_s16 = 0;
+                        pTrack->mC = 0;
+                        pTrack->mE = 0;
+                    }
+                }
+            }
+
+            param_2[i].m4_needTranslationUpdate = 1;
+            param_2[i].m5_needRotationUpdate = 1;
         }
         if (param_2[i].m70_animTracks[1]) {
-            assert(0);
+            sMechaInitVar2Sub* pTrack = param_2[i].m70_animTracks[1];
+            switch (pTrack->m2 & 0xF) {
+            case 0: // s16
+                if ((pTrack->m2 & 0x10) == 0) {
+                    param_2[i].m5C_translation[0] += READ_LE_S16(pTrack->m8);
+                    pTrack->m8 += 2;
+                }
+                if ((pTrack->m2 & 0x20) == 0) {
+                    param_2[i].m5C_translation[1] += READ_LE_S16(pTrack->m8);
+                    pTrack->m8 += 2;
+                }
+                if ((pTrack->m2 & 0x40) == 0) {
+                    param_2[i].m5C_translation[2] += READ_LE_S16(pTrack->m8);
+                    pTrack->m8 += 2;
+                }
+                break;
+            case 1: // s8 (unless it's a 0x80)
+                if ((pTrack->m2 & 0x10) == 0) {
+                    s8 psVar9 = READ_LE_S8(pTrack->m8);
+                    pTrack->m8++;
+                    if (psVar9 == 0x80) {
+                        assert(0);
+                    }
+                    else {
+                        param_2[i].m5C_translation[0] += psVar9;
+                    }
+                }
+                if ((pTrack->m2 & 0x20) == 0) {
+                    s8 psVar9 = READ_LE_S8(pTrack->m8);
+                    pTrack->m8++;
+                    if (psVar9 == 0x80) {
+                        assert(0);
+                    }
+                    else {
+                        param_2[i].m5C_translation[1] += psVar9;
+                    }
+                }
+                if ((pTrack->m2 & 0x40) == 0) {
+                    s8 psVar9 = READ_LE_S8(pTrack->m8);
+                    pTrack->m8++;
+                    if (psVar9 == 0x80) {
+                        assert(0);
+                    }
+                    else {
+                        param_2[i].m5C_translation[2] += psVar9;
+                    }
+                }
+                break;
+
+            default:
+                assert(0);
+            }
+
+            s32 currentTime = pTrack->m10_currentTime;
+            pTrack->m10_currentTime++;
+            if (currentTime < pTrack->m12_maxTime) {
+                if (pTrack->m3 == param_3) {
+                    returnFlag |= 0x1;
+                }
+                returnFlag |= 0x100;
+            }
+            else if (pTrack->m1_isLooping == '\0') {
+                // no loop, stop the track
+                if (pTrack->m3 == param_3) {
+                    returnFlag = returnFlag | 2;
+                }
+                returnFlag = returnFlag | 0x200;
+                releaseMechaAnimTrack(param_1, pTrack);
+                param_2[i].m70_animTracks[1] = nullptr;
+            }
+            else {
+                //looping
+                if (pTrack->m3 == param_3) {
+                    returnFlag = returnFlag | 4;
+                }
+                returnFlag = returnFlag | 0x400;
+                if ((pTrack->m2 & 0xf) < 3) {
+                    pTrack->m10_currentTime = 0;
+                    pTrack->m8 = pTrack->m4;
+                }
+                else {
+                    assert(0);
+                }
+            }
+
+            param_2[i].m4_needTranslationUpdate = 1;
         }
         if (param_2[i].m70_animTracks[2]) {
             assert(0);
@@ -1389,10 +1824,10 @@ void renderMechasForDebugFieldRenderer(int viewId)
             int numBones = m4It->mA_numBones;
             m4It++;
             for (int i = 1; i < numBones; i++) {
-                if ((m4It->m8 != -1) && (m4It->m7)) {
+                if ((m4It->m8_geometryId != -1) && (m4It->m7_isEnabled)) {
                     float finalMatrix[16];
                     convertMatrixToBgfx(&m4It->m2C_boneFinalMatrix, finalMatrix);
-                    pMecha->m0->m0[m4It->m8]->bgfxRender(viewId, finalMatrix);
+                    pMecha->m0->m0[m4It->m8_geometryId]->bgfxRender(viewId, finalMatrix);
                 }
                 m4It++;
             }

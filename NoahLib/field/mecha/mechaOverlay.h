@@ -12,29 +12,30 @@ struct sMechaDataTable2_4_4 {
         if (input.size() == 0)
             return;
 
+        m2_keyDuration = READ_LE_U16(input.begin() + 2);
         m4_flags = READ_LE_U16(input.begin() + 4);
         m6 = READ_LE_U16(input.begin() + 6);
         mC_numRotations = READ_LE_U16(input.begin() + 0xC);
         mE_numTranslations = READ_LE_U16(input.begin() + 0xE);
-
+        m12 = READ_LE_S16(input.begin() + 0x12);
+        m14 = READ_LE_U32(input.begin() + 0x14);
         int remainingSize = input.size() - 0x18;
-        int remainingVectors = (remainingSize / 2) / 3;
-        //assert(remainingVectors == mC_count0 + mE_count1);
 
-        m18.resize(remainingVectors);
-        for (int i = 0; i < remainingVectors; i++) {
-            m18[i][0] = READ_LE_S16(input.begin() + 0x18 + 2 * 3 * i + 0);
-            m18[i][1] = READ_LE_S16(input.begin() + 0x18 + 2 * 3 * i + 2);
-            m18[i][2] = READ_LE_S16(input.begin() + 0x18 + 2 * 3 * i + 4);
+        m18.resize(remainingSize);
+        for (int i = 0; i < remainingSize; i++) {
+            m18[i] = READ_LE_U8(input.begin() + 0x18 + i);
         }
     }
 
+    u16 m2_keyDuration;
     u16 m4_flags;
     u16 m6;
     s16 m10;
     u16 mC_numRotations;
     u16 mE_numTranslations;
-    std::vector<std::array<s16, 3>> m18;
+    s16 m12;
+    u32 m14;
+    std::vector<u8> m18;
 
     std::vector<u8> m_raw;
 };
@@ -182,7 +183,19 @@ struct sMechaDataTable1 {
 
 struct sMechaInitVar2Sub {
     u8 m0;
+    u8 m1_isLooping;
+    s8 m2;
     s8 m3;
+    std::vector<u8>::iterator m4;
+    std::vector<u8>::iterator m8;
+    s16 m4_s16;
+    s16 m6_s16;
+    s16 m8_s16;
+    s16 mA_s16;
+    s16 mC;
+    s16 mE;
+    s16 m10_currentTime;
+    s16 m12_maxTime;
     // size 0x14
 };
 
@@ -191,8 +204,8 @@ struct sMechaBone {
     u8 m4_needTranslationUpdate;
     u8 m5_needRotationUpdate;
     u8 m6;
-    u8 m7;
-    s16 m8;
+    u8 m7_isEnabled;
+    s16 m8_geometryId;
     s16 mA_numBones;
     MATRIX mC_localMatrix;
     MATRIX m2C_boneFinalMatrix;
