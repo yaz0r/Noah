@@ -45,7 +45,7 @@ std::array<sBattleEntity, 11> battleEntities;
 std::vector<u8> battleFont;
 void computeMenuBorder(std::vector<u8>& param_1, int param_2, int* param_3, int* param_4, int* param_5, int* param_6, int* param_7, int* param_8);
 
-void loadBattleCharacterPortraits(std::vector<u8>& input, s8 param_2) {
+void loadBattleCharacterPortraits(const std::vector<u8>& input, s8 param_2) {
 
     int menuBorderData[3][6];
 

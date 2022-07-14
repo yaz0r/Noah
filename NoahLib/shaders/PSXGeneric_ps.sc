@@ -157,7 +157,7 @@ void main()
 
         if(!textureBlendingDisabled) {
             //color.xyz *= v_color0.xyz / (float)0x80;
-            color.xyz = (((color.xyz * 255.f) * v_color0.xyz) / 128.f) / 255.f;
+            //color.xyz = (((color.xyz * 255.f) * v_color0.xyz) / 128.f) / 255.f;
         }
     }
     else {
