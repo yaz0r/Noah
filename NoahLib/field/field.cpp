@@ -1911,6 +1911,13 @@ void primD_0(u8* meshSubBlock, int count)
     primD_0generic(meshSubBlock, count, 0x28, 0x9, 0x8);
 }
 
+void primD_1(u8* meshSubBlock, int count)
+{
+    Hack("hacked primD_1");
+    primD_0generic(meshSubBlock, count, 0x28, 0x9, 0x8);
+}
+
+
 void primD_4(u8* meshSubBlock, int count)
 {
     Noah_MissingCode("primD_4");
@@ -1973,7 +1980,7 @@ const std::array<sPolyTypeRenderDefinition, 17> polyRenderDefs = { {
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x4,	0x1C}, // 0x6
     {	prim3_0,	prim3_0,	prim6_2,	prim6_3,	prim3_0,	prim3_0,	prim3_init,	8,	0x8,	0x28}, // 0x7
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	prim8_init,	8,	0x4,	0x18}, // 0x8 POLY_F4
-    {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	prim9_init,	8,	0xC,	0x28}, // 0x9 POLY_FT4
+    {	nullptr,	primD_1,	nullptr,	nullptr,	nullptr,	nullptr,	prim9_init,	8,	0xC,	0x28}, // 0x9 POLY_FT4
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x4,	0x24}, // 0xA
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0xC,	0x34}, // 0xB
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	primC_init,	8,	0x4,	0x18}, // 0xC POLY_F4

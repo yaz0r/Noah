@@ -560,7 +560,48 @@ void mechaOP_13(sMechaInitVar2* param_1, std::vector<sMechaBone>& param_2, sMech
             values[2] = READ_LE_S16(trackHeader + 4);
             trackHeader += 3 * 2;
             translationCount++;
-            MissingCode();
+            if ((pBone->m5C_translation[0] == values[0]) && (pBone->m5C_translation[1] == values[1]) && (pBone->m5C_translation[2] == values[2])) {
+                if ((pBone->m70_animTracks[1] != nullptr && pBone->m70_animTracks[1]->m3 != -1)) {
+                    releaseMechaAnimTrack(param_1, pBone->m70_animTracks[1]);
+                    pBone->m70_animTracks[1] = nullptr;
+                }
+            }
+            else {
+                if (pBone->m70_animTracks[1] == nullptr) {
+                    pBone->m70_animTracks[1] = allocateAnimTrack(param_1);
+                }
+                if (pBone->m70_animTracks[1] && pBone->m70_animTracks[1]->m3 != -1) {
+                    sMechaInitVar2Sub* pTrack = pBone->m70_animTracks[1];
+                    pTrack->m0 = 1;
+                    pTrack->m2 = (interpolationType & 1) + 3;
+                    pTrack->m1_isLooping = isLooping;
+                    pTrack->m3 = param_7;
+                    pTrack->m4_s16 = pBone->m5C_translation[0];
+                    pTrack->m6_s16 = pBone->m5C_translation[1];
+                    pTrack->m8_s16 = pBone->m5C_translation[2];
+
+                    if ((interpolationType & 1) == 0) {
+                        pTrack->mA_s16 = values[0] - pBone->m5C_translation[0];
+                        pTrack->mC = values[1] - pBone->m5C_translation[1];
+                        pTrack->mE = values[2] - pBone->m5C_translation[2];
+                    }
+                    else {
+                        pTrack->mA_s16 = values[0];
+                        pTrack->mC = values[1];
+                        pTrack->mE = values[2];
+                    }
+
+                    pTrack->m10_currentTime = 0;
+                    pTrack->m12_maxTime = local_68;
+                    pBone->m70_animTracks[1] = pTrack;
+                }
+            }
+        }
+        else {
+            if ((pBone->m70_animTracks[1] != nullptr && pBone->m70_animTracks[1]->m3 != -1)) {
+                releaseMechaAnimTrack(param_1, pBone->m70_animTracks[1]);
+                pBone->m70_animTracks[1] = nullptr;
+            }
         }
     }
 }
@@ -591,9 +632,9 @@ int mechaOP_11(sMechaInitVar2* param_1, std::vector<sMechaBone>& param_2, sMecha
         for (int i = 0; i < numBones; i++) {
             std::array<sMechaInitVar2Sub*, 3>& tracks = param_2[i].m70_animTracks;
             {
-                // translations
+                // rotations
                 sMechaInitVar2Sub*& track = tracks[0];
-                if (READ_LE_S16(trackHeader + 0)== -1) { // if there is no track for this bone and the bone had a track allocated already, release it
+                if (READ_LE_S16(trackHeader + 0) == -1) { // if there is no track for this bone and the bone had a track allocated already, release it
                     if (track && i && track->m3 != -1) {
                         releaseMechaAnimTrack(param_1, track);
                         track = nullptr;
@@ -618,11 +659,11 @@ int mechaOP_11(sMechaInitVar2* param_1, std::vector<sMechaBone>& param_2, sMecha
                 }
             }
             {
-                // rotations
+                // translations
                 sMechaInitVar2Sub*& track = tracks[1];
                 if (READ_LE_S16(trackHeader + 2) == -1) { // if there is no track for this bone and the bone had a track allocated already, release it
                     if (track && i && track->m3 != -1) {
-                        releaseMechaAnimTrack(param_1, tracks[1]);
+                        releaseMechaAnimTrack(param_1, track);
                         track = nullptr;
                     }
                 }
@@ -845,10 +886,10 @@ void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int pa
             local_78 = 1;
             break;
         case 0x8:
-            mechaOP_8(param_2, pMecha->m4_bones);
+            mechaOP_8(param_2, pMecha->m4_bones); // release all tracks disabled
             break;
         case 0xA:
-            mechaOP_A(param_2, &(*pMecha->m4_bones)[0], bytecodeHigher, 7);
+            mechaOP_A(param_2, &(*pMecha->m4_bones)[0], bytecodeHigher, 7); // release tracks on a specific mask
             break;
         case 0xC:
             pMecha->m70[0] = 0;
@@ -914,6 +955,7 @@ void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int pa
             mechaOP_19(pMecha);
             break;
         case 0x1D:
+            param_3 = -1;
             MissingCode();
             pNextBytecode = pCurrentByteCodePtr + 10;
             break;
@@ -923,7 +965,7 @@ void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int pa
         case 0x21:
             pMecha->m3C = bytecodeHigher;
             if (param_3 != -1) {
-                if (bytecodeHigher == 0)
+                if ((param_3 & 1) == 0)
                     break;
             }
             continueBytecodeExecution = 0;
@@ -1504,8 +1546,9 @@ u32 updateMechAnimSub3(sMechaInitVar2* param_1, std::vector<sMechaBone>& param_2
                 if ((pTrack->m2 & 0x10) == 0) {
                     s8 psVar9 = READ_LE_S8(pTrack->m8);
                     pTrack->m8++;
-                    if (psVar9 == 0x80) {
-                        assert(0);
+                    if (psVar9 == (s8)0x80) {
+                        param_2[i].m54_rotationAngles[0] = READ_LE_S16(pTrack->m8);
+                        pTrack->m8 += 2;
                     }
                     else {
                         param_2[i].m54_rotationAngles[0] += psVar9;
@@ -1514,8 +1557,9 @@ u32 updateMechAnimSub3(sMechaInitVar2* param_1, std::vector<sMechaBone>& param_2
                 if ((pTrack->m2 & 0x20) == 0) {
                     s8 psVar9 = READ_LE_S8(pTrack->m8);
                     pTrack->m8++;
-                    if (psVar9 == 0x80) {
-                        assert(0);
+                    if (psVar9 == (s8)0x80) {
+                        param_2[i].m54_rotationAngles[1] = READ_LE_S16(pTrack->m8);
+                        pTrack->m8 += 2;
                     }
                     else {
                         param_2[i].m54_rotationAngles[1] += psVar9;
@@ -1524,8 +1568,9 @@ u32 updateMechAnimSub3(sMechaInitVar2* param_1, std::vector<sMechaBone>& param_2
                 if ((pTrack->m2 & 0x40) == 0) {
                     s8 psVar9 = READ_LE_S8(pTrack->m8);
                     pTrack->m8++;
-                    if (psVar9 == 0x80) {
-                        assert(0);
+                    if (psVar9 == (s8)0x80) {
+                        param_2[i].m54_rotationAngles[2] = READ_LE_S16(pTrack->m8);
+                        pTrack->m8 += 2;
                     }
                     else {
                         param_2[i].m54_rotationAngles[2] += psVar9;
@@ -1545,9 +1590,8 @@ u32 updateMechAnimSub3(sMechaInitVar2* param_1, std::vector<sMechaBone>& param_2
                 assert(0);
             }
 
-            s32 currentTime = pTrack->m10_currentTime;
             pTrack->m10_currentTime++;
-            if (currentTime < pTrack->m12_maxTime) {
+            if (pTrack->m10_currentTime < pTrack->m12_maxTime) {
                 if (pTrack->m3 == param_3) {
                     returnFlag |= 0x1;
                 }
@@ -1605,8 +1649,9 @@ u32 updateMechAnimSub3(sMechaInitVar2* param_1, std::vector<sMechaBone>& param_2
                 if ((pTrack->m2 & 0x10) == 0) {
                     s8 psVar9 = READ_LE_S8(pTrack->m8);
                     pTrack->m8++;
-                    if (psVar9 == 0x80) {
-                        assert(0);
+                    if (psVar9 == (s8)0x80) {
+                        param_2[i].m5C_translation[0] = READ_LE_S16(pTrack->m8);
+                        pTrack->m8 += 2;
                     }
                     else {
                         param_2[i].m5C_translation[0] += psVar9;
@@ -1615,8 +1660,9 @@ u32 updateMechAnimSub3(sMechaInitVar2* param_1, std::vector<sMechaBone>& param_2
                 if ((pTrack->m2 & 0x20) == 0) {
                     s8 psVar9 = READ_LE_S8(pTrack->m8);
                     pTrack->m8++;
-                    if (psVar9 == 0x80) {
-                        assert(0);
+                    if (psVar9 == (s8)0x80) {
+                        param_2[i].m5C_translation[1] = READ_LE_S16(pTrack->m8);
+                        pTrack->m8 += 2;
                     }
                     else {
                         param_2[i].m5C_translation[1] += psVar9;
@@ -1625,22 +1671,29 @@ u32 updateMechAnimSub3(sMechaInitVar2* param_1, std::vector<sMechaBone>& param_2
                 if ((pTrack->m2 & 0x40) == 0) {
                     s8 psVar9 = READ_LE_S8(pTrack->m8);
                     pTrack->m8++;
-                    if (psVar9 == 0x80) {
-                        assert(0);
+                    if (psVar9 == (s8)0x80) {
+                        param_2[i].m5C_translation[2] = READ_LE_S16(pTrack->m8);
+                        pTrack->m8 += 2;
                     }
                     else {
                         param_2[i].m5C_translation[2] += psVar9;
                     }
                 }
                 break;
-
+            case 3:
+            {
+                s32 ratio = ((((s32)pTrack->m10_currentTime + 1) * 0x10000) >> 0x10);
+                param_2[i].m5C_translation[0] = pTrack->m4_s16 + (ratio * pTrack->mA_s16) / pTrack->m12_maxTime;
+                param_2[i].m5C_translation[1] = pTrack->m6_s16 + (ratio * pTrack->mC) / pTrack->m12_maxTime;
+                param_2[i].m5C_translation[2] = pTrack->m8_s16 + (ratio * pTrack->mE) / pTrack->m12_maxTime;
+                break;
+            }
             default:
                 assert(0);
             }
 
-            s32 currentTime = pTrack->m10_currentTime;
             pTrack->m10_currentTime++;
-            if (currentTime < pTrack->m12_maxTime) {
+            if (pTrack->m10_currentTime < pTrack->m12_maxTime) {
                 if (pTrack->m3 == param_3) {
                     returnFlag |= 0x1;
                 }
