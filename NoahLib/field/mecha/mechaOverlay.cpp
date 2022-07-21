@@ -1434,10 +1434,51 @@ void updateMechAnimSub2(std::vector<sMechaBone>& param_1, int param_2) {
 
     for (int i = 1; i < param_1[0].mA_numBones; i++) {
         sMechaBone* pBone = &param_1[i];
-        Noah_MissingCode("bone update code missing in updateMechAnimSub2");
+
+        if (pBone->m0_parentBone) {
+            if (pBone->m0_parentBone->m5_needRotationUpdate) {
+                pBone->m5_needRotationUpdate = 1;
+            }
+            if (pBone->m0_parentBone->m4_needTranslationUpdate) {
+                pBone->m4_needTranslationUpdate = 1;
+            }
+        }
+
+        if (pBone->m5_needRotationUpdate) {
+            if (pBone->m6 == 0) {
+                createRotationMatrix(&pBone->m54_rotationAngles, &pBone->mC_localMatrix);
+            }
+            else {
+                RotMatrixYXZ(&pBone->m54_rotationAngles, &pBone->mC_localMatrix);
+            }
+
+            MATRIX scaleMatrix;
+            scaleMatrix.m[0][0] = pBone->m4C_scale[0];
+            scaleMatrix.m[0][1] = 0;
+            scaleMatrix.m[0][2] = 0;
+            scaleMatrix.m[1][0] = 0;
+            scaleMatrix.m[1][1] = pBone->m4C_scale[1];
+            scaleMatrix.m[1][2] = 0;
+            scaleMatrix.m[2][0] = 0;
+            scaleMatrix.m[2][1] = 0;
+            scaleMatrix.m[2][2] = pBone->m4C_scale[2];
+            MulMatrix0(&pBone->mC_localMatrix, &scaleMatrix, &pBone->mC_localMatrix);
+            if (pBone->m0_parentBone) {
+                MATRIX parentScaleMatrix;
+                parentScaleMatrix.m[0][0] = 0x1000000 / pBone->m0_parentBone->m4C_scale[0];
+                parentScaleMatrix.m[0][1] = 0;
+                parentScaleMatrix.m[0][2] = 0;
+                parentScaleMatrix.m[1][0] = 0;
+                parentScaleMatrix.m[1][1] = 0x1000000 / pBone->m0_parentBone->m4C_scale[1];
+                parentScaleMatrix.m[1][2] = 0;
+                parentScaleMatrix.m[2][0] = 0;
+                parentScaleMatrix.m[2][1] = 0;
+                parentScaleMatrix.m[2][2] = 0x1000000 / pBone->m0_parentBone->m4C_scale[2];
+                MulMatrix0(&parentScaleMatrix, &pBone->mC_localMatrix, &pBone->mC_localMatrix);
+            }
+        }
 
         if (pBone->m4_needTranslationUpdate) {
-            // TODO: recheck all of this!
             pBone->mC_localMatrix.t[0] = pBone->m5C_translation[0];
             pBone->mC_localMatrix.t[1] = pBone->m5C_translation[1];
             pBone->mC_localMatrix.t[2] = pBone->m5C_translation[2];
