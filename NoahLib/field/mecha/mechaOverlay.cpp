@@ -1590,9 +1590,8 @@ u32 updateMechAnimSub3(sMechaInitVar2* param_1, std::vector<sMechaBone>& param_2
                 assert(0);
             }
 
-            s32 currentTime = pTrack->m10_currentTime;
             pTrack->m10_currentTime++;
-            if (currentTime < pTrack->m12_maxTime) {
+            if (pTrack->m10_currentTime < pTrack->m12_maxTime) {
                 if (pTrack->m3 == param_3) {
                     returnFlag |= 0x1;
                 }
@@ -1693,9 +1692,8 @@ u32 updateMechAnimSub3(sMechaInitVar2* param_1, std::vector<sMechaBone>& param_2
                 assert(0);
             }
 
-            s32 currentTime = pTrack->m10_currentTime;
             pTrack->m10_currentTime++;
-            if (currentTime < pTrack->m12_maxTime) {
+            if (pTrack->m10_currentTime < pTrack->m12_maxTime) {
                 if (pTrack->m3 == param_3) {
                     returnFlag |= 0x1;
                 }
