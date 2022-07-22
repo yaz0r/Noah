@@ -1133,7 +1133,19 @@
     <fieldInfo ID="624" Name="Ignas Soylent System - still further into 621 cutscene"/>
     <fieldInfo ID="625" Name="Ignas Soylent System - Sufal Mass, near end of 621 cutscene"/>
     <fieldInfo ID="626" Name="Ignas Soylent System - cutscene AGAIN, starts somewhere between 624and 625"/>
-    <fieldInfo ID="627" Name="Anima Relic 1 - Elements combine and attack"/>
+    <fieldInfo ID="627" Name="Anima Relic 1 - Elements combine and attack">
+        <scriptEntity ID="0" Name=""/>
+        <scriptEntity ID="1" Name=""/>
+        <scriptEntity ID="2" Name="Grandgrowl (lion)"/>
+        <scriptEntity ID="3" Name="Bladegash (humanoid)"/>
+        <scriptEntity ID="4" Name=""/>
+        <scriptEntity ID="5" Name=""/>
+        <scriptEntity ID="6" Name=""/>
+        <scriptEntity ID="7" Name=""/>
+        <scriptEntity ID="8" Name=""/>
+        <scriptEntity ID="9" Name=""/>
+        <scriptEntity ID="10" Name=""/>
+    </fieldInfo>
     <fieldInfo ID="628" Name="Anima Relic 1 entrance"/>
     <fieldInfo ID="629" Name="Anima Relic 1 - fuse room"/>
     <fieldInfo ID="630" Name="Anima Relic 1 - door lock B control room"/>
