@@ -85,13 +85,7 @@ void initOpcodeTable()
 		.setComment("Doesn't do anything")
 		.end();
 
-    m_opcode[0x10]
-        .addArgumentByte()
-        .addArgumentS16OrVar(0x80)
-        .addArgumentS16OrVar(0x40)
-        .addArgumentS16OrVar(0x20)
-        .addSignControlByte()
-        .end();
+    // 0x10 is dynamic
 
 	m_opcode[0x12]
         .setName("CUSTOM_FIELD_TRANSITION")
