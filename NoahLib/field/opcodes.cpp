@@ -14,6 +14,7 @@
 #include "mecha/mechaOverlay.h"
 #include "menus/menuHandler.h"
 #include "field/particles/particles.h"
+#include "battle/battle.h"
 
 s32 particleCreationSlot = 0;
 
@@ -3005,6 +3006,9 @@ void OP_SET_BOOTMODE()
     ADVANCE_VM(0x3);
 }
 
+s8 fieldBattleTransitionEffect = 0;
+s32 battleStartSaveWritePending = 0;
+
 void OPX_84()
 {
     if ((((playMusicAuthorized == 0) || (fieldExecuteVar3 == 0)) || (fieldChangePrevented == 0)) || (((loadCompleted != 0 || (fieldMusicLoadPending == -1)) || (load2dAnimVar != 0)))) {
@@ -3012,16 +3016,20 @@ void OPX_84()
         pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC - 1;
     }
     else {
+        battleTransitionEffect = fieldBattleTransitionEffect;
+        requestedBattleConfig = getImmediateOrVariableUnsigned(1);
+        //battleInitVar1 = 0;
         MissingCode();
-        //playMusicAuthorized = 0;
-        //fieldExecuteVar2 = 0;
-        if (getImmediateOrVariableUnsigned(5) != 0x7FFF)
+        playMusicAuthorized = 0;
+        fieldExecuteVar2 = 0;
+        MissingCode();
+        s16 nextField = getImmediateOrVariableUnsigned(5);
+        if (nextField != 0x7FFF)
         {
             SaveFieldAndDirections();
             setVar(2, getImmediateOrVariableUnsigned(7));
-            fieldMapNumber = getImmediateOrVariableUnsigned(5);
-
-            fieldChangePrevented = 0; // HACK! since we don't have battles
+            battleStartSaveWritePending = 1;
+            fieldMapNumber = nextField;
         }
         breakCurrentScript = 1;
         ADVANCE_VM(0x9);

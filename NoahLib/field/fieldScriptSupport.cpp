@@ -297,7 +297,7 @@ struct sPortraitLoadingStatus {
 };
 
 std::array<sPortraitLoadingStatus, 3> portraitLoadingStatus;
-std::array<std::vector<u8>, 3> partyPortraitPointers;
+std::array<std::vector<u8>, 2> partyPortraitPointers;
 int currentPortraitLoadingSlot = 0;
 
 void resetPortraitLoadingStatus() {

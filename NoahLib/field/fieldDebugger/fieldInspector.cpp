@@ -116,8 +116,13 @@ public:
     {
         ImGui::Text("Num image bundle 1 entries: %d", READ_LE_U32(rawFieldImageBundle.begin()));
         ImGui::Text("Num image bundle 2 entries: %d", READ_LE_U32(rawFieldImageBundle2.begin()));
-        ImGui::Text("Num bundle3 entries: %d", READ_LE_U32(rawFieldModels.begin()));
-        ImGui::Text("Num fieldScript num entities: %d", READ_LE_U32(rawFieldScriptData.begin() + 0x80));
+        if (rawFieldModels.size()) {
+            ImGui::Text("Num bundle3 entries: %d", READ_LE_U32(rawFieldModels.begin()));
+        }
+        if(rawFieldScriptData.size()) {
+            ImGui::Text("Num fieldScript num entities: %d", READ_LE_U32(rawFieldScriptData.begin() + 0x80));
+        }
+        
         ImGui::Text("Num triggers: %lu", fieldTriggerData.size());
         ImGui::Text("Dialog bundle size: %lu", rawFieldDialogBundle.size());
         ImGui::Text("Walkmesh entries: %d", walkMesh.m0_count);
@@ -1271,8 +1276,30 @@ public:
                     u16 scriptStart = READ_LE_U16(rawFieldScriptData.begin() + 0x84 + entityId * 0x40 + scriptId * 2);
                     if (scriptStart || !scriptId) // script 0 can refer to offset 0
                     {
+                        std::string scriptType = "";
+                        switch (scriptId) {
+                        case 0:
+                            scriptType = "Init";
+                            break;
+                        case 1:
+                            scriptType = "Update";
+                            break;
+                        case 2:
+                            scriptType = "OnAction";
+                            break;
+                        case 3:
+                            scriptType = "OnCollision";
+                            break;
+                        }
+
+                        if (scriptType.length() == 0) {
+                            char buffer[256];
+                            sprintf(buffer, "Function_%d", scriptId);
+                            scriptType = buffer;
+                        }
+
                         char buffer[256];
-                        sprintf(buffer, "Entity %d Function 0x%02X", entityId, scriptId);
+                        sprintf(buffer, "Entity_%d::%s", entityId, scriptType.c_str());
                         markFunctionStart(scriptStart, std::string(buffer));
                     }
                 }
@@ -1283,18 +1310,13 @@ public:
 
         for (int i = 0; i < m_byteTypeTable.size();)
         {
+            ImGui::PushID(i);
             if (m_byteTypeTable[i].mType == 1)
             {
                 if (m_byteTypeTable[i].mLabel.length())
                 {
                     ImGui::Separator();
                     ImGui::Text("%s:", m_byteTypeTable[i].mLabel.c_str());
-                    ImGui::SameLine();
-
-                    if (ImGui::Button("Rename"))
-                    {
-                        assert(0);
-                    }
                 }
 
                 u16 startPC = i;
@@ -1315,6 +1337,7 @@ public:
             {
                 i++;
             }
+            ImGui::PopID();
         }
 
         for (int i = 0; i < mToExplore.size(); i++)

@@ -8971,6 +8971,8 @@ void updateFieldInputs()
 
 void saveStateToKernel(void)
 {
+    pKernelGameState->m231A_fieldID = fieldMapNumber;
+
     MissingCode();
 
     for (int i = 0; i < 0x200; i++) {
@@ -9031,6 +9033,20 @@ void fieldChangeGameMode(int mode) {
     MissingCode();
 
     switch (mode) {
+    case 0: // battle
+        saveStateToKernel();
+        MissingCode();
+        /*
+        currentlyPlayingMusic = currentlyPlayingMusic2;
+        pKernelGameState->previouslyPlayingMusic = (short)currentlyPlayingMusic2;*/
+        pKernelGameState->m2320_worldmapMode = pKernelGameState->m1930_fieldVarsBackup[1];
+        MissingCode();
+        /*if (mechaOverlayLoadingMode != 0) {
+            return;
+        }*/
+        setGameMode(2);
+        bootGame(0);
+        break;
     case 1: // worldmap
         Noah_MissingCode("Clear music when going to worldmap");
         Noah_MissingCode("MechaOverlayLoading check");
@@ -9100,6 +9116,17 @@ void startFieldTransition(void) {
     }
 
     MissingCode();
+}
+
+int isFieldBattlePrevented(void)
+{
+    int iVar1;
+
+    iVar1 = 0;
+    if ((bBattleSequenceInitialized == 1) && (updateEntityEventCode4Var0 == 0)) {
+        iVar1 = -(uint)(((actorArray[playerControlledActor].m4C_scriptEntity)->m0_fieldScriptFlags.mx800_isJumping) != 0);
+    }
+    return iVar1;
 }
 
 void fieldEntryPoint()
@@ -9188,6 +9215,21 @@ void fieldEntryPoint()
         updateAndRenderField();
         renderFullScreenTransitionEffect();
 
+        if ((g_frameOddOrEven == 1) && (playMusicAuthorized == 0) && (isFieldTransitionPermittedByLoading() == 0) && (isFieldBattlePrevented() == 0)) {
+            MissingCode();
+            syncKernelAndFieldStates();
+            MissingCode();
+            releaseAllDialogWindows();
+            DrawSync(0);
+            VSync(0);
+            freeFieldData();
+            MissingCode();
+            typeOfPlayableCharacterLoaded = 0;
+            MissingCode();
+            fieldChangeGameMode(0);//enter battle
+            return;
+        }
+
         MissingCode();
         ////
         if ((fieldChangePrevented == 0) && (fieldMusicLoadPending == 0))
@@ -9219,6 +9261,15 @@ void fieldEntryPoint()
                     unflagAllocation(rawFieldBundle);
                     rawFieldBundle.clear();
                 }
+                MissingCode();
+                syncKernelAndFieldStates();
+                MissingCode();
+                releaseAllDialogWindows();
+                DrawSync(0);
+                VSync(0);
+                freeFieldData();
+                MissingCode();
+                typeOfPlayableCharacterLoaded = 0;
                 MissingCode();
                 fieldChangeGameMode(1);
                 return;

@@ -1277,6 +1277,11 @@ void initExtendedOpcodeTable()
 	m_extendedOpcode[0x61]
 		.end();
 
+    m_extendedOpcode[0x62]
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .end();
+
 	m_extendedOpcode[0x64]
 		.addArgumentU16OrVar()
 		.end();

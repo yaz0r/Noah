@@ -7,6 +7,7 @@
 #include "battleStartEffect.h"
 #include "battleConfig.h"
 #include "field/mecha/mechaOverlay.h"
+#include "kernel/gameMode.h"
 
 s8 battleDebugDisplay = 0;
 s8 requestedBattleConfig = 0;
@@ -398,4 +399,13 @@ void battleEntryPoint(void) {
     battleMain();
 
     Noah_MissingCode("Battle epilog");
+
+    Hack("Go back to field from battle");
+    setGameMode(1);
+    MissingCode();
+    /*
+    if (battleInitVar0 == '\0') {
+        battleInitVar1 = 1;
+    }*/
+    bootGame(0);
 }
