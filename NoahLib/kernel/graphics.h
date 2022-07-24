@@ -21,6 +21,7 @@ DRAWENV* SetDefDrawEnv(DRAWENV* env, int x, int y, int w, int h);
 
 
 sTag* ClearOTagR(sTag* ot, int n);
+sTag* ClearOTagR(std::vector<sTag>& ot, int n);
 void DrawOTag(sTag* ot);
 
 DISPENV* PutDispEnv(DISPENV* env);

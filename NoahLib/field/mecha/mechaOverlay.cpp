@@ -1334,7 +1334,7 @@ void submitMechaForRendering(sLoadedMechas* pMecha, MATRIX* pMatrix, MATRIX* par
                 MissingCode();
                 SetTransMatrix(&matrixSP_1f800000);
                 SetRotMatrix(&matrixSP_1f800000);
-                submitModelForRendering(pMecha->m0->m0[m4It->m8_geometryId], m4It->m68[oddOrEven], OT, param_4);
+                submitModelForRendering(pMecha->m0->m0[m4It->m8_geometryId], m4It->m68[oddOrEven], OT.begin(), param_4);
             }
             m4It++;
         }

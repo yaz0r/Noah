@@ -271,3 +271,6 @@ void spriteCallback_render2_updateMatrix(sSpriteActorCore* param_1);
 void setGraphicEntityScale(sSpriteActorCore* param_1, int param_2);
 
 void resetSpriteCallbacks(void);
+
+extern u32 allocateSavePointMeshDataSub0_var0;
+extern u8 spriteBytecode2ExtendedE0_Var0;

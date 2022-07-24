@@ -512,6 +512,48 @@ FP_VEC4* ApplyMatrix(MATRIX* m, SFP_VEC4* inputVector, FP_VEC4* outputVector)
 	return outputVector;
 }
 
+void setupVector(VECTOR* param_1, long param_2, long param_3, long param_4)
+{
+    param_1->vx = param_2;
+    param_1->vy = param_3;
+    param_1->vz = param_4;
+    return;
+}
+
+void lookAtNoDivide(MATRIX* param_1, SVECTOR* param_2, SVECTOR* param_3, SVECTOR* param_4)
+{
+    VECTOR local_58;
+    VECTOR local_48;
+    VECTOR local_38;
+    VECTOR local_28;
+
+    setupVector(&local_58, (int)param_3->vx - (int)param_2->vx, (int)param_3->vy - (int)param_2->vy, (int)param_3->vz - (int)param_2->vz);
+    local_28.vx = (long)param_4->vx;
+    local_28.vy = (long)param_4->vy;
+    local_28.vz = (long)param_4->vz;
+    VectorNormal(&local_58, &local_48);
+    OuterProduct12(&local_28, &local_48, &local_58);
+    VectorNormal(&local_58, &local_38);
+    OuterProduct12(&local_48, &local_38, &local_58);
+    VectorNormal(&local_58, &local_28);
+    param_1->m[0][0] = (short)local_38.vx;
+    param_1->m[0][1] = (short)local_38.vy;
+    param_1->m[0][2] = (short)local_38.vz;
+    param_1->m[1][0] = (short)local_28.vx;
+    param_1->m[1][1] = (short)local_28.vy;
+    param_1->m[1][2] = (short)local_28.vz;
+    param_1->m[2][0] = (short)local_48.vx;
+    param_1->m[2][1] = (short)local_48.vy;
+    param_1->m[2][2] = (short)local_48.vz;
+    PushMatrix();
+    ApplyMatrix(param_1, param_2, &local_58);
+    param_1->t[0] = -local_58.vx;
+    param_1->t[1] = -local_58.vy;
+    param_1->t[2] = -local_58.vz;
+    PopMatrix();
+    return;
+}
+
 void lookAtDivided(MATRIX* pOutputMatrix, FP_VEC4* vEye, FP_VEC4* vAt, FP_VEC4* vUp)
 {
 	FP_VEC4 local_60 = {

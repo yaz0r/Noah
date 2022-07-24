@@ -409,6 +409,7 @@ void allocateShapeTransfert(int param_1);
 void resetInputs();
 void checkSoftReboot();
 
+void setCharacterRenderingOT(OTTable& OT);
 void clearShapeTransfertTableEntry(int param_1);
 void uploadCharacterSprites();
 void shapeTransfert();
@@ -488,7 +489,7 @@ int fieldModelRelocation(std::vector<u8>::iterator pModelData);
 void initModel1(sModelBlock& pModelBlock, std::vector<sTag*>& outputBuffer1, std::vector<sTag*>& outputBuffer2);
 void initModel2(sModelBlock* pModelBlock, std::vector<sTag*>& outputBuffer, int param_3);
 
-bool submitModelForRendering(sModelBlock* param_1, std::vector<sTag*>& param_2, OTTable& OT, int renderMode);
+bool submitModelForRendering(sModelBlock* param_1, std::vector<sTag*>& param_2, OTTable::iterator OT, int renderMode);
 
 void doPCCollisionCheckAfterLoading();
 void runInitScriptForNewlyLoadedPC(uint param_1);
@@ -496,3 +497,4 @@ void runInitScriptForNewlyLoadedPC(uint param_1);
 extern std::array<sGameController, 2> newPadButtonForScripts;
 
 extern SFP_VEC4 computeProjectionMatrixAngles;
+extern s32 objectClippingMask;

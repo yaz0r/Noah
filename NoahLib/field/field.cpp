@@ -1157,11 +1157,11 @@ s32 screenClippingY = 238 << 0x10;
 
 s32 gDepthDivider = 2;
 
-OTTable* currentOTEntry = nullptr;
+OTTable::iterator currentOTEntry;
 
 void genericTrianglePrim_14(u8* meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
 {
-    OTTable& pOT = *currentOTEntry;
+    OTTable::iterator pOT = currentOTEntry;
     int depthGranularity = gDepthDivider + 2;
 
     for (int i = 0; i < count; i++)
@@ -1237,7 +1237,7 @@ void genericTrianglePrim_14(u8* meshSubBlock, int count, int outputPrimSize, uin
 
 void genericTrianglePrim_28(u8* meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
 {
-    OTTable& pOT = *currentOTEntry;
+    OTTable::iterator pOT = currentOTEntry;
     int depthGranularity = gDepthDivider + 2;
 
     for (int i = 0; i < count; i++)
@@ -1314,7 +1314,7 @@ void F4_FAKE(u8* meshSubBlock, int count) {
     MissingCode();
     Hack("TODO: this is not correct and implemented as a shortcut");
 
-    OTTable& pOT = *currentOTEntry;
+    OTTable::iterator pOT = currentOTEntry;
     int depthGranularity = gDepthDivider + 2;
 
     for (int i = 0; i < count; i++)
@@ -1388,7 +1388,7 @@ void FT3_FAKE(u8* meshSubBlock, int count) {
     MissingCode();
     Hack("TODO: this is not correct and implemented as a shortcut");
 
-    OTTable& pOT = *currentOTEntry;
+    OTTable::iterator pOT = currentOTEntry;
     int depthGranularity = gDepthDivider + 2;
 
     for (int i = 0; i < count; i++)
@@ -1460,7 +1460,7 @@ void FT3_FAKE(u8* meshSubBlock, int count) {
 
 void genericTrianglePrim_20(u8* meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
 {
-    OTTable& pOT = *currentOTEntry;
+    OTTable::iterator pOT = currentOTEntry;
     int depthGranularity = gDepthDivider + 2;
 
     for (int i = 0; i < count; i++)
@@ -1545,7 +1545,7 @@ void prim5_4(u8* meshSubBlock, int count) {
 
 void prim5_2generic(u8* meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
 {
-    OTTable& pOT = *currentOTEntry;
+    OTTable::iterator pOT = currentOTEntry;
     int depthGranularity = gDepthDivider + 2;
 
     for (int i = 0; i < count; i++)
@@ -1627,7 +1627,7 @@ void GT3_FAKE(u8* meshSubBlock, int count)
 {
     Hack("Not how it's supposed to work");
 
-    OTTable& pOT = *currentOTEntry;
+    OTTable::iterator pOT = currentOTEntry;
     int depthGranularity = gDepthDivider + 2;
 
     for (int i = 0; i < count; i++)
@@ -1719,7 +1719,7 @@ void prim6_3(u8* meshSubBlock, int count)
 
 void primD_2generic(u8* meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
 {
-    OTTable& pOT = *currentOTEntry;
+    OTTable::iterator pOT = currentOTEntry;
     int depthGranularity = gDepthDivider + 2;
 
     for (int i = 0; i < count; i++)
@@ -1816,7 +1816,7 @@ void primD_2(u8* meshSubBlock, int count)
 
 void primD_0generic(u8* meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
 {
-    OTTable& pOT = *currentOTEntry;
+    OTTable::iterator pOT = currentOTEntry;
     int depthGranularity = gDepthDivider + 2;
 
     for (int i = 0; i < count; i++)
@@ -3841,9 +3841,8 @@ void initFieldData()
     resetMemoryAllocStats(5, 0);
 
     allocateShapeTransfert(0x3c00);
-
-    MissingCode();
-
+    resetSpriteCallbacks();
+    resetMemoryAllocStats(8, 0);
     initMechaFieldArgs2(mechaFieldArgs2[1], 0x800, 0, 0, 0x800, 0, 0, 0x800, 0, 0);
     initMechaFieldArgs2(mechaFieldArgs2[0], 0x1f8, -0xfc1, -0x1f8, 0, 0, 0, 0, 0, 0);
     mechaBackColor[2] = 0x1e;
@@ -7446,7 +7445,7 @@ int isObjectClipped(sModelBlock* param_1, uint param_2)
     return 0;
 }
 
-bool submitModelForRendering(sModelBlock* param_1, std::vector<sTag*>& param_2, OTTable& OT, int renderMode)
+bool submitModelForRendering(sModelBlock* param_1, std::vector<sTag*>& param_2, OTTable::iterator OT, int renderMode)
 {
     if ((objectClippingMask != 0) && (isObjectClipped(param_1, objectClippingMask))) {
         return 0;
@@ -7458,7 +7457,7 @@ bool submitModelForRendering(sModelBlock* param_1, std::vector<sTag*>& param_2, 
     currentModelBlockVertices = param_1->m_baseItForRelocation + param_1->m8_offsetVertices;
     fieldPolyCount2 += param_1->m4_numPrims;
     currentModelInstanceDrawPrims = param_2.begin();
-    currentOTEntry = &OT;
+    currentOTEntry = OT;
 
     int numMeshBlockLeft = param_1->m6_numMeshBlock;
     u8* currentModelBlockSubBlocks = param_1->m_baseItForRelocation + param_1->m10_offsetMeshBlocks;
@@ -7647,10 +7646,10 @@ void renderObjects()
                     SetTransMatrix(&projectedMatrix);
 
                     if ((pFieldEntity->m58_flags & 0x8000) == 0) {
-                        submitModelForRendering(&pFieldEntity->m0->m4_pModelBlock[0], pFieldEntity->m0->m8[g_frameOddOrEven], pCurrentFieldRenderingContext->mCC_OT, pFieldEntity->m0->m12_renderMode);
+                        submitModelForRendering(&pFieldEntity->m0->m4_pModelBlock[0], pFieldEntity->m0->m8[g_frameOddOrEven], pCurrentFieldRenderingContext->mCC_OT.begin(), pFieldEntity->m0->m12_renderMode);
                     }
                     else {
-                        submitModelForRendering(&pFieldEntity->m0->m4_pModelBlock[0], pFieldEntity->m0->m8[g_frameOddOrEven], pCurrentFieldRenderingContext->m40D0_secondaryOT, pFieldEntity->m0->m12_renderMode);
+                        submitModelForRendering(&pFieldEntity->m0->m4_pModelBlock[0], pFieldEntity->m0->m8[g_frameOddOrEven], pCurrentFieldRenderingContext->m40D0_secondaryOT.begin(), pFieldEntity->m0->m12_renderMode);
                     }
                 }
             }

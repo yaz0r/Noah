@@ -463,7 +463,7 @@ void spriteCallback_render2(sCustomRenderableEntityHeader* param_1) {
 
         SetRotMatrix(&MStack56);
         SetTransMatrix(&MStack56);
-        submitModelForRendering(pSpriteActor->m20->getAsObject()->m34_pModelBlock, pSpriteActor->m20->getAsObject()->m2C[shapeTransfertDoubleBufferIndex], *characterRenderingOT, (pSpriteActor->m40 >> 16) & 4);
+        submitModelForRendering(pSpriteActor->m20->getAsObject()->m34_pModelBlock, pSpriteActor->m20->getAsObject()->m2C[shapeTransfertDoubleBufferIndex], characterRenderingOT->begin(), (pSpriteActor->m40 >> 16) & 4);
     }
 }
 
@@ -1229,10 +1229,13 @@ int spriteCallback2Var0 = 0;
 
 void executeSpriteBytecode2(sSpriteActorCore* param_1)
 {
+    Hack("This normally would call in the same function but inside the battle overlay, not sure if there is any difference");
+    /*
 	if (isBattleOverlayLoaded != '\0') {
 		assert(0);
 		return;
 	}
+    */
 
 	do
 	{

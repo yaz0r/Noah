@@ -250,7 +250,7 @@ void renderWorldmapModels() {
                             4,4,5,5,0,0,2,2,3,3
                     } };
 
-                    submitModelForRendering(pModel->m40_modelBlock, pModel->m48[worldmapOddOrEven], pCurrentWorldmapRenderingStruct->m70_OT, worldmapModelsRenderModes[pModel->m4_flags]);
+                    submitModelForRendering(pModel->m40_modelBlock, pModel->m48[worldmapOddOrEven], pCurrentWorldmapRenderingStruct->m70_OT.begin(), worldmapModelsRenderModes[pModel->m4_flags]);
                 }
             }
         }

@@ -7,7 +7,9 @@
 #include "battleStartEffect.h"
 #include "battleConfig.h"
 #include "field/mecha/mechaOverlay.h"
+#include "field/field.h"
 #include "kernel/gameMode.h"
+#include "field/fieldGraphicObject.h"
 
 s8 battleDebugDisplay = 0;
 s8 requestedBattleConfig = 0;
@@ -373,6 +375,253 @@ void startBattleLoader(int param_1)
     MissingCode();
 }
 
+s32 battleRenderCount = 0;
+s32 startOfBattleTime;
+MATRIX battleRenderingMatrix;
+
+SVECTOR battleCameraEye;
+SVECTOR battleCameraEye2;
+SVECTOR battleCameraAt;
+SVECTOR battleCameraAt2;
+SVECTOR battleCameraUp = { 0x0, 0x1000, 0x0 };
+SVECTOR battleSceneRenderingMatrixOffset = { 0,0,0 };
+s8 renderBattleSceneDisabled = 0;
+
+void renderBattleScenePolys(sMechaInitVar4* envBlocks, std::vector<sMechaBone>* envHierarchy, MATRIX* matrix, MATRIX* lightMatrix, s32 param_5, std::vector<sTag>* inOT, int param_7, int param_8)
+{
+    s32 backupDepthDivider = gDepthDivider;
+
+    for (int i = 1; i < (*envHierarchy)[0].mA_numBones; i++) {
+        sMechaBone* pBone = &(*envHierarchy)[i];
+
+        if ((pBone->m8_geometryId != -1) && pBone->m7_isEnabled) {
+            MATRIX m1F800040;
+            CompMatrix(matrix, &pBone->m2C_boneFinalMatrix, &m1F800040);
+
+            // billboard
+            if ((pBone->m52 - 1) < 2) {
+                MissingCode();
+            }
+            SetRotMatrix(&m1F800040);
+            SetTransMatrix(&m1F800040);
+
+            s32 renderMode;
+
+            switch (pBone->m52) {
+            case 4:
+                renderMode = 2;
+                break;
+            case 5:
+                renderMode = 3;
+                break;
+            case 6:
+                renderMode = 4;
+                break;
+            case 7:
+                renderMode = 5;
+                break;
+            default:
+                renderMode = 0;
+                break;
+            }
+
+            std::vector<sTag*>* psVar4;
+            std::vector<sTag>::iterator OT;
+            sModelBlock* psVar3;
+
+            if (pBone->m52 == 0) {
+                psVar4 = &pBone->m68[param_7];
+                psVar3 = envBlocks->m0[pBone->m8_geometryId];
+                gDepthDivider = 0x10;
+                OT = inOT->begin() + (param_8 - 1);
+            }
+            else {
+                psVar4 = &pBone->m68[param_7];
+                psVar3 = envBlocks->m0[pBone->m8_geometryId];
+                gDepthDivider = backupDepthDivider;
+                OT = inOT->begin();
+            }
+
+            submitModelForRendering(psVar3, *psVar4, OT, renderMode);
+        }
+    }
+
+    gDepthDivider = backupDepthDivider;
+}
+
+void battleDrawEnv(MATRIX* param_1, MATRIX* lightMatrix, s32 param_3, std::vector<sTag>* OT, s32 oddOrEven, SVECTOR* param_6, SVECTOR* param_7, int param_8)
+{
+    if (lightMatrix != nullptr) {
+        SetLightMatrix(lightMatrix);
+    }
+    MissingCode();
+    if (environmentModelConfigs) {
+        // hack param 5 is not 0, but it's probably garbage (uninitialized) and not user anyway
+        renderBattleScenePolys(environmentModelBlocks, environmentModelConfigs, param_1, lightMatrix, 0, OT, oddOrEven, param_8);
+    }
+    MissingCode();
+}
+
+void renderBattleScene() {
+    lookAtNoDivide(&battleRenderingMatrix, &battleCameraEye, &battleCameraAt, &battleCameraUp);
+    battleRenderingMatrix.t[0] = battleRenderingMatrix.t[0] + battleSceneRenderingMatrixOffset.vx;
+    battleRenderingMatrix.t[1] = battleRenderingMatrix.t[1] + battleSceneRenderingMatrixOffset.vy;
+    battleRenderingMatrix.t[2] = battleRenderingMatrix.t[2] + battleSceneRenderingMatrixOffset.vz;
+    if (renderBattleSceneDisabled == '\0') {
+        battleDrawEnv(&battleRenderingMatrix, 0, 0, pCurrentBattleOT, battleOddOrEven, &battleCameraEye, &battleCameraAt, 0x1000);
+    }
+}
+
+s16 gMechaAngleBattle;
+void submitMechaForRendering(sLoadedMechas* pMecha, MATRIX* pMatrix, MATRIX* param_3, int param_4, int param_5, OTTable& OT, int oddOrEven);
+void updateMechAnim(sLoadedMechas* param_1, sMechaInitVar2* param_2, int iterations, int oddOrEven);
+
+void renderMechasBattle(MATRIX* pMatrix, MATRIX* param_2, OTTable& OT, int oddOrEven)
+{
+    MissingCode();
+    //battleMechaVar0 += 1 + DAT_Battle__800ccc5c;
+    if (battleMechaVar0 > 6) {
+        battleMechaVar0 = 6;
+    }
+    int mechaIterationCount = 0;
+    int mechaIterationCount2 = 0;
+    if (battleMechaVar0 > 1) {
+        do {
+            battleMechaVar0 = battleMechaVar0 + -2;
+            mechaIterationCount = mechaIterationCount + 1;
+        } while (1 < battleMechaVar0);
+        mechaIterationCount2 = mechaIterationCount * 8;
+    }
+    mechaIterationCount2 = (uint)battleMechaVar1 + (mechaIterationCount2 - mechaIterationCount) * 8;
+    battleMechaVar1 = (ushort)mechaIterationCount2;
+    battleMechaVar4 = battleMechaVar4 + 0x80; // TODO: this doesn't exists in field version?
+    int angleForMecha = getAngleSin(mechaIterationCount2 * 0x10000 >> 0x10);
+    gMechaAngleBattle = ((short)(((angleForMecha + 0x1000) * 0x51eb851f) >> 0x28) - (short)(angleForMecha + 0x1000 >> 0x1f)) + 4;
+
+    MissingCode();
+
+    for (int i = 0; i < 32; i++) {
+        if (battleMechas[i]) {
+            battleMechas[i]->m11C_previousTranslation = (*battleMechas[i]->m4_bones)[0].m5C_translation;
+            Hack("Using field codepath for battle mecha!");
+            updateMechAnim(battleMechas[i], &battleMechaInitVar2, mechaIterationCount, oddOrEven);
+        }
+    }
+
+    MissingCode();
+
+    for (int i = 0; i < 32; i++) {
+        if (battleMechas[i] && battleMechas[i]->m5C != -1) {
+            //updateMechasBaseMatrixIsAttached(battleMechas[i]);
+        }
+    }
+
+    MissingCode();
+
+    //SetColorMatrix(mechaFinalizeVar0);
+
+    // draw everything but the last (the environment that is drawn separatly)
+    for (int i = 0; i < 31; i++) {
+        if (battleMechas[i]) {
+            battleMechas[i]->m128_deltaTranslation[0] = battleMechas[i]->m11C_previousTranslation[0] - (*battleMechas[i]->m4_bones)[0].m5C_translation[0];
+            battleMechas[i]->m128_deltaTranslation[1] = battleMechas[i]->m11C_previousTranslation[1] - (*battleMechas[i]->m4_bones)[0].m5C_translation[1];
+            battleMechas[i]->m128_deltaTranslation[2] = battleMechas[i]->m11C_previousTranslation[2] - (*battleMechas[i]->m4_bones)[0].m5C_translation[2];
+            Hack("Using field codepath for battle mecha!");
+            submitMechaForRendering(battleMechas[i], pMatrix, param_2, 1, 1, OT, oddOrEven);
+        }
+    }
+    MissingCode();
+}
+
+void battleRender() {
+    battleRenderCount++;
+    checkSoftReboot();
+    startOfBattleTime = VSync(-1);
+
+    // double buffer the ordering table
+    if (pCurrentBattleRenderStruct == &battleRenderStructs[0]) {
+        pCurrentBattleOT = &battleRenderStructs[1].m70_OT;
+        pCurrentBattleRenderStruct = &battleRenderStructs[1];
+    }
+    else {
+        pCurrentBattleOT = &battleRenderStructs[0].m70_OT;
+        pCurrentBattleRenderStruct = &battleRenderStructs[0];
+    }
+
+    ClearOTagR(*pCurrentBattleOT, 0x1000);
+    battleOddOrEven = 1 - battleOddOrEven;
+    MissingCode("DTL stuff");
+
+    clearShapeTransfertTableEntry(battleOddOrEven);
+    renderBattleScene();
+    setCurrentRenderingMatrix(&battleRenderingMatrix);
+    setCharacterRenderingOT(*pCurrentBattleOT);
+
+    MissingCode();
+    renderMechasBattle(&battleRenderingMatrix, &battleMatrix800CCB94, *characterRenderingOT, battleOddOrEven);
+    MissingCode();
+
+    PutDispEnv(&pCurrentBattleRenderStruct->m5C_dispEnv);
+    PutDrawEnv(&pCurrentBattleRenderStruct->m0_drawEnv);
+    shapeTransfert();
+    DrawOTag(&pCurrentBattleRenderStruct->m70_OT[0xfff]);
+
+    MissingCode();
+
+    battleRenderCount = battleRenderCount + -1;
+}
+
+s8 battleTimeEnabled = 0;
+
+int battleRenderDebugAndMain(void) {
+    MissingCode("battle debug update");
+    battleRender();
+    return 0;
+}
+
+void checkWinConditions() {
+    MissingCode();
+}
+
+s8 currentBattleMode = 0;
+
+sSpriteActorCore* battleConfigFile3 = nullptr;
+
+void initBattle3dRendering(void) {
+    MissingCode();
+}
+
+void initBattleSpriteSystem() {
+    isBattleOverlayLoaded = 1;
+    allocateSavePointMeshDataSub0_var0 = 0;
+    spriteBytecode2ExtendedE0_Var0 = 0;
+    MissingCode();
+    resetSpriteCallbacks();
+    MissingCode();
+    allocateShapeTransfert(0x5000);
+    MissingCode();
+    objectClippingMask = 0;
+}
+
+void setupSVector(SVECTOR* param_1, short param_2, short param_3, short param_4)
+{
+    param_1->vx = param_2;
+    param_1->vy = param_3;
+    param_1->vz = param_4;
+    return;
+}
+
+void initBattleGraphics(sSpriteActorCore* param_1) {
+    initBattle3dRendering();
+    initBattleSpriteSystem();
+    MissingCode();
+    setupSVector(&battleCameraEye2, READ_LE_S16(battleMechaInitData + 0x482), READ_LE_S16(battleMechaInitData + 0x484), READ_LE_S16(battleMechaInitData + 0x486));
+    setupSVector(&battleCameraEye, READ_LE_S16(battleMechaInitData + 0x482), READ_LE_S16(battleMechaInitData + 0x484), READ_LE_S16(battleMechaInitData + 0x486));
+    setupSVector(&battleCameraAt2, READ_LE_S16(battleMechaInitData + 0x47C), READ_LE_S16(battleMechaInitData + 0x47E), READ_LE_S16(battleMechaInitData + 0x480));
+    setupSVector(&battleCameraAt, READ_LE_S16(battleMechaInitData + 0x47C), READ_LE_S16(battleMechaInitData + 0x47E), READ_LE_S16(battleMechaInitData + 0x480));
+    SetDispMask(1);
+}
+
 void battleMain() {
     battleVar0 = new sBattleVar0;
     battleVar1 = new sBattleVar1;
@@ -386,6 +635,14 @@ void battleMain() {
 
     currentBattleConfig = battleConfigs[requestedBattleConfig];
     startBattleLoader(battleTransitionEffect);
+    checkWinConditions();
+    currentBattleMode = 2;
+    initBattleGraphics(battleConfigFile3);
+
+    MissingCode();
+    while (battleTimeEnabled == '\0') {
+        battleRenderDebugAndMain();
+    }
 
     MissingCode();
 }

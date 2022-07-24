@@ -165,6 +165,20 @@ void SetDispMask(int mask)
     MissingCode();
 }
 
+sTag* ClearOTagR(std::vector<sTag>& ot, int n) {
+    std::vector<sTag>::iterator pCurrent = ot.begin();
+    for (int i = 0; i < n - 1; i++)
+    {
+        pCurrent++;
+        pCurrent->m0_pNext = &(pCurrent[-1]);
+        pCurrent->m3_size = 0;
+    }
+
+    TermPrim(&ot[0]);
+
+    return &ot[0];
+}
+
 sTag* ClearOTagR(sTag* ot, int n)
 {
 	sTag* pCurrent = ot;
