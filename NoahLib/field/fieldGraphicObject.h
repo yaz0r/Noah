@@ -204,21 +204,21 @@ struct sSavePointMesh_data2
 };
 
 
-struct sCustomRenderableEntityHeader
+struct sTaskHeader
 {
     void* m0_owner;
     sCustomRenderable* m4;
-    void (*m8)(sCustomRenderableEntityHeader*);
-    void (*mC)(sCustomRenderableEntityHeader*);
+    void (*m8)(sTaskHeader*);
+    void (*mC)(sTaskHeader*);
     u32 m10;
     u32 m14;
-    sCustomRenderableEntityHeader* m18_pNext;
+    sTaskHeader* m18_pNext;
 };
 
 // base size of one of those is expected to be 0xEC
 struct sSavePointMeshAbstract {
-    sCustomRenderableEntityHeader m0;
-    sCustomRenderableEntityHeader m1C;
+    sTaskHeader m0;
+    sTaskHeader m1C;
     sSpriteActorCore m38_spriteActorCore;
 };
 
@@ -237,7 +237,7 @@ struct sSavePointMesh2 : public sSavePointMeshAbstract
 };
 
 extern sSpriteActorCore* spriteTransfertListHead;
-extern sCustomRenderableEntityHeader* spriteCallback2Head;
+extern sTaskHeader* spriteCallback2Head;
 
 void SetTimeScale(sSpriteActor* param_1, int param_2); // 0x80021BCC
 void OP_INIT_ENTITY_SCRIPT_sub0Sub9(sSpriteActorCore* param_1);
@@ -271,6 +271,10 @@ void spriteCallback_render2_updateMatrix(sSpriteActorCore* param_1);
 void setGraphicEntityScale(sSpriteActorCore* param_1, int param_2);
 
 void resetSpriteCallbacks(void);
+
+void regCallback8(sTaskHeader* param_1, void (*param_2)(sTaskHeader*));
+void regCallbackC(sTaskHeader* param_1, void (*param_2)(sTaskHeader*));
+void allocateSavePointMeshDataSub0(sSavePointMesh1* param_1, sTaskHeader* param_2);
 
 extern u32 allocateSavePointMeshDataSub0_var0;
 extern u8 spriteBytecode2ExtendedE0_Var0;

@@ -7,6 +7,8 @@
 #include "field/fieldGraphicObject.h"
 #include "field/field.h"
 #include "kernel/TIM.h"
+#include "battleConfig.h"
+#include "battleSpriteLoader.h"
 
 void dummpyLoaderEnd() {
     // empty, probably an old logging code
@@ -72,10 +74,13 @@ void loadBattleCharacterPortraits(const std::vector<u8>& input, s8 param_2) {
 }
 
 std::array<sLoadingBatchCommands, 3> playerLoadingCommands;
+std::vector<u8> battleConfigFile2;
 
 void loadPartyMembers() {
     battleVar800D3294 = (battleVar8006f9dd & 0x10) != 0;
     u16 partyMembersBitmask = gameState.m1D30_partyMemberBitField & gameState.m1D32_partyFrameMask;
+    Hack("force battle team");
+    partyMembersBitmask = 0x7FF;
     if (battleVar800D3294) {
         battleCharacters[1] = 10;
         battleCharacters[2] = 10;
@@ -112,7 +117,10 @@ void loadPartyMembers() {
 
             battleEntities[i].mA4_gear = gameState.m978_gears[gearId];
 
+            mallocAndDecompress(relocatedPointer[5 + battleCharacters[i]]);
             Noah_MissingCode("battle800CDD40");
+
+            mallocAndDecompress(relocatedPointer[17 + gearId]);
             Noah_MissingCode("battle800CEF10");
         }
     }
@@ -133,8 +141,20 @@ void loadPartyMembers() {
 
     setCurrentDirectory(0xc, 1);
 
-    Noah_MissingCode("battle800c3dd0");
-    Noah_MissingCode("battle800c3dec");
+    battleConfigFile2.resize(getFileSizeAligned(currentBattleConfig.m0 * 2 + 2));
+    playerLoadingCommands[0].m0_fileIndex = currentBattleConfig.m0 * 2 + 2;
+    playerLoadingCommands[0].m4_loadPtr = &battleConfigFile2;
+
+    battleConfigFile3.resize(getFileSizeAligned(currentBattleConfig.m0 * 2 + 3));
+    playerLoadingCommands[1].m0_fileIndex = currentBattleConfig.m0 * 2 + 3;
+    playerLoadingCommands[1].m4_loadPtr = &battleConfigFile3;
+
+    playerLoadingCommands[2].m0_fileIndex = 0;
+    playerLoadingCommands[2].m4_loadPtr = nullptr;
+
+    batchStartLoadingFiles(&playerLoadingCommands[0], 0);
+
+
 }
 
 void battleLoaderTick(s8 param_1) {

@@ -26,8 +26,8 @@ struct sBattleStartEffectSub {
 };
 
 struct sBattleStartEffect : public sCustomRenderable {
-    sCustomRenderableEntityHeader m0;
-    sCustomRenderableEntityHeader m1C;
+    sTaskHeader m0;
+    sTaskHeader m1C;
     s32 m38_frameCounter;
     sBattleStartEffectSub m3C_triangleData[2][14][20];
 };

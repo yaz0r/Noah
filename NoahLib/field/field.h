@@ -356,7 +356,7 @@ extern s16 OP_B6SubVar0;
 extern s16 OP_B6Var1;
 extern s16 OP_B6Var2;
 
-extern struct sCustomRenderableEntityHeader* spriteCallback2Var2;
+extern struct sTaskHeader* spriteCallback2Var2;
 
 extern int overrideTPageMode;
 extern s32 overrideTPageValue;

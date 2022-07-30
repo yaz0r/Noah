@@ -2126,27 +2126,27 @@ void sprintf_screen(const char* format, ...)
     MissingCode();
 }
 
-sCustomRenderableEntityHeader* spriteCallback2Var1 = nullptr;
-sCustomRenderableEntityHeader* spriteCallback2Var2 = nullptr;
-sCustomRenderableEntityHeader* spriteCallback2Var3 = nullptr;
+sTaskHeader* spriteCallback2Var1 = nullptr;
+sTaskHeader* spriteCallback2Var2 = nullptr;
+sTaskHeader* spriteCallback2Var3 = nullptr;
 int spriteCallback2Var4 = 0;
 
 void execSpritesCallback(void)
 {
-    sCustomRenderableEntityHeader** ppsVar1;
+    sTaskHeader** ppsVar1;
 
     spriteCallback2Var1 = spriteCallback2Head;
-    if (spriteCallback2Head != (sCustomRenderableEntityHeader*)0x0) {
+    if (spriteCallback2Head != (sTaskHeader*)0x0) {
         do {
             ppsVar1 = &spriteCallback2Var1->m18_pNext;
             auto previous = spriteCallback2Var1;
-            void (*puVar2)(sCustomRenderableEntityHeader*) = spriteCallback2Var1->m8;
+            void (*puVar2)(sTaskHeader*) = spriteCallback2Var1->m8;
             spriteCallback2Var3 = spriteCallback2Var1;
             spriteCallback2Var1 = *ppsVar1;
             if (puVar2 != nullptr) {
                 puVar2(previous);
             }
-        } while (spriteCallback2Var1 != (sCustomRenderableEntityHeader*)0x0);
+        } while (spriteCallback2Var1 != (sTaskHeader*)0x0);
     }
     return;
 }

@@ -2,9 +2,11 @@
 
 struct sBattleConfig {
     void init(std::vector<u8>::iterator input) {
+        m0 = READ_LE_S8(input + 0);
         m2 = READ_LE_S8(input + 2);
     }
 
+    s8 m0;
     s8 m2;
     //size 0x20
 };

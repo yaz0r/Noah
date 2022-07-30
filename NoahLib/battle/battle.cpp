@@ -10,6 +10,7 @@
 #include "field/field.h"
 #include "kernel/gameMode.h"
 #include "field/fieldGraphicObject.h"
+#include "battleSpriteLoader.h"
 
 s8 battleDebugDisplay = 0;
 s8 requestedBattleConfig = 0;
@@ -520,7 +521,7 @@ void renderMechasBattle(MATRIX* pMatrix, MATRIX* param_2, OTTable& OT, int oddOr
 
     //SetColorMatrix(mechaFinalizeVar0);
 
-    // draw everything but the last (the environment that is drawn separatly)
+    // draw everything but the last (the environment that is drawn separately)
     for (int i = 0; i < 31; i++) {
         if (battleMechas[i]) {
             battleMechas[i]->m128_deltaTranslation[0] = battleMechas[i]->m11C_previousTranslation[0] - (*battleMechas[i]->m4_bones)[0].m5C_translation[0];
@@ -532,6 +533,29 @@ void renderMechasBattle(MATRIX* pMatrix, MATRIX* param_2, OTTable& OT, int oddOr
     }
     MissingCode();
 }
+
+// Compute camera to fit all characters from bitmask in view
+void computeBattleCameraParams(uint bitmask) {
+    MissingCode();
+}
+
+s32 battleCameraMode = 0;
+u32 allEntitiesToFitInView = 0xFFFFFFFF;
+
+void updateBattleCamera() {
+    switch (battleCameraMode) {
+    case 1:
+        computeBattleCameraParams(allEntitiesToFitInView);
+        break;
+    default:
+        assert(0);
+    }
+
+    MissingCode();
+}
+
+void execSpritesCallback(void);
+void execSpritesCallbacks2(void);
 
 void battleRender() {
     battleRenderCount++;
@@ -553,12 +577,16 @@ void battleRender() {
     MissingCode("DTL stuff");
 
     clearShapeTransfertTableEntry(battleOddOrEven);
+    updateBattleCamera();
     renderBattleScene();
     setCurrentRenderingMatrix(&battleRenderingMatrix);
     setCharacterRenderingOT(*pCurrentBattleOT);
 
     MissingCode();
     renderMechasBattle(&battleRenderingMatrix, &battleMatrix800CCB94, *characterRenderingOT, battleOddOrEven);
+    uploadCharacterSprites();
+    execSpritesCallback();
+    execSpritesCallbacks2();
     MissingCode();
 
     PutDispEnv(&pCurrentBattleRenderStruct->m5C_dispEnv);
@@ -585,8 +613,6 @@ void checkWinConditions() {
 
 s8 currentBattleMode = 0;
 
-sSpriteActorCore* battleConfigFile3 = nullptr;
-
 void initBattle3dRendering(void) {
     MissingCode();
 }
@@ -611,16 +637,41 @@ void setupSVector(SVECTOR* param_1, short param_2, short param_3, short param_4)
     return;
 }
 
-void initBattleGraphics(sSpriteActorCore* param_1) {
+void initBattleGraphics(sBattleSpriteConfigs* param_1) {
     initBattle3dRendering();
     initBattleSpriteSystem();
-    MissingCode();
+    createBattleSpriteLoadingTask(param_1);
     setupSVector(&battleCameraEye2, READ_LE_S16(battleMechaInitData + 0x482), READ_LE_S16(battleMechaInitData + 0x484), READ_LE_S16(battleMechaInitData + 0x486));
     setupSVector(&battleCameraEye, READ_LE_S16(battleMechaInitData + 0x482), READ_LE_S16(battleMechaInitData + 0x484), READ_LE_S16(battleMechaInitData + 0x486));
     setupSVector(&battleCameraAt2, READ_LE_S16(battleMechaInitData + 0x47C), READ_LE_S16(battleMechaInitData + 0x47E), READ_LE_S16(battleMechaInitData + 0x480));
     setupSVector(&battleCameraAt, READ_LE_S16(battleMechaInitData + 0x47C), READ_LE_S16(battleMechaInitData + 0x47E), READ_LE_S16(battleMechaInitData + 0x480));
     SetDispMask(1);
 }
+
+s32 battleCameraModeSet = 0;
+void setBattleCameraMode(int param_1) {
+    battleCameraModeSet = 1;
+    battleCameraMode = param_1;
+
+    switch (param_1)
+    {
+    case 2:
+    case 4:
+        assert(0);
+    default:
+        MissingCode();
+        break;
+    }
+}
+
+void setCameraVisibleEntities(uint playerBitmask) {
+    MissingCode();
+    setBattleCameraMode(1);
+    computeBattleCameraParams(playerBitmask);
+    MissingCode();
+}
+
+u16 allPlayerCharacterBitmask = 0;
 
 void battleMain() {
     battleVar0 = new sBattleVar0;
@@ -637,7 +688,10 @@ void battleMain() {
     startBattleLoader(battleTransitionEffect);
     checkWinConditions();
     currentBattleMode = 2;
-    initBattleGraphics(battleConfigFile3);
+    initBattleGraphics(&battleConfigFile3);
+
+    setCameraVisibleEntities(allPlayerCharacterBitmask);
+    battleRenderDebugAndMain();
 
     MissingCode();
     while (battleTimeEnabled == '\0') {
