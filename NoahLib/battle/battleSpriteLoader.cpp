@@ -2,6 +2,9 @@
 #include "battleSpriteLoader.h"
 #include "field/fieldGraphicObject.h"
 #include "kernel/filesystem.h"
+#include "kernel/graphics.h"
+#include "battle/battle.h"
+#include "field/field.h"
 
 bool battleScriptLoaderTaskCreationInProgress = 0;
 
@@ -10,6 +13,7 @@ sBattleSpriteConfigs battleConfigFile3;
 struct sBattleSpriteLoaderTask {
     sTaskHeader m0;
     sBattleSpriteConfigs* m20;
+    std::array<sLoadingBatchCommands, 4> m30_loadingCommands;
 };
 
 void defaultBattleSpriteDeleteCallback(sTaskHeader* param_1) {
@@ -32,12 +36,186 @@ void loadBattleSpriteVram(sBattleSpriteConfigs* param_1) {
     MissingCode();
 }
 
+void createEnemiesBattleSprites(sBattleSpriteConfigs* param_1) {
+    MissingCode();
+}
+
+short battleSpriteX = 0;
+
+std::array<u8, 12> battleSpriteWidthPerCharacter = { {
+        0x10, 0x10, 0x10, 0x10, 0x10, 0x18, 0x10, 0x10, 0x10, 0x18, 0x10, 0x10
+} };
+
+struct sBattleSpriteActor {
+    sTaskHeader m0;
+    sTaskHeader m1C;
+    sSpriteActor m38_spriteActor;
+};
+
+std::array<sBattleSpriteActor*, 11> battleSpriteActors;
+
+template <typename T>
+T* createCustomRenderableEntity(size_t param_1, sSavePointMesh1* param_2, void(*updateCallback)(sTaskHeader*), void(*drawCallback)(sTaskHeader*), void(*deleteCallback)(sTaskHeader*)) {
+    T* pNewEntity = new T;
+    allocateSavePointMeshDataSub0(param_2, &pNewEntity->m0);
+    registerSpriteCallback2(&pNewEntity->m0, &pNewEntity->m1C);
+    regCallback8(&pNewEntity->m0, updateCallback);
+    spriteBytecode2ExtendedE0_Sub0Sub0Sub0(&pNewEntity->m1C, drawCallback);
+    if (deleteCallback == nullptr) {
+        assert(0);
+    }
+    else {
+        regCallbackC(&pNewEntity->m0, deleteCallback);
+    }
+
+    // TODO: Gross!
+    pNewEntity->m0.m4 = (sSpriteActorCore*)pNewEntity;
+    pNewEntity->m1C.m4 = (sSpriteActorCore*)pNewEntity;
+
+    return pNewEntity;
+}
+
+bool battleSpritesDisabled = false;
+
+void battleSpriteUpdate(sTaskHeader* param_1) {
+    sSpriteActorCore* pSprite = param_1->m4->getAsSpriteActorCore();
+
+    if (battleSpritesDisabled == '\0') {
+        OP_INIT_ENTITY_SCRIPT_sub0Sub9(pSprite);
+        savePointCallback8Sub0(pSprite);
+        if ((pSprite->mAC >> 6 & 1) != 0) {
+            OP_INIT_ENTITY_SCRIPT_sub0Sub9(pSprite);
+            savePointCallback8Sub0(pSprite);
+        }
+    }
+}
+
+void battleSpriteRender(sTaskHeader* param_1) {
+    sSpriteActorCore* pSprite = param_1->m4->getAsSpriteActorCore();
+
+    if (battleSpritesDisabled == '\0') {
+        SetRotMatrix(&battleRenderingMatrix);
+        SetTransMatrix(&battleRenderingMatrix);
+
+        SVECTOR local_30;
+        local_30.vx = pSprite->m0_position.vx.getIntegerPart();
+        local_30.vy = pSprite->m0_position.vy.getIntegerPart();
+        local_30.vz = pSprite->m0_position.vz.getIntegerPart();
+
+        sVec2_s16 dummy;
+        long dummy2;
+        long flag;
+        s32 lVar1 = RotTransPers(&local_30, &dummy, &dummy2, &flag);
+
+        s32 iVar2 = (lVar1 >> (gDepthDivider & 0x1f)) + pSprite->m30;
+        if ((flag & 0x8000) != 0) {
+            iVar2 = 0;
+        }
+        pSprite->m2E = iVar2;
+        if (iVar2 - 1U < 0xfff) {
+            renderSpriteActor(pSprite, &(*characterRenderingOT)[iVar2]);
+        }
+    }
+}
+
+void battleSpriteDelete(sTaskHeader*) {
+    assert(0);
+}
+
+extern int loadVramSpriteParam;
+void initBattleSpriteActorVram(sSpriteActor* param_1, sSpriteActorAnimationBundle* param_2, short clutX, short clutY, short vramX, short vramY, s32 param_7, s32 param_8) {
+    loadVramSpriteParam = param_8;
+    initializeSpriteActor(param_1, param_2, clutX, clutY, vramX, vramY, param_7);
+    loadVramSpriteParam = 0;
+}
+
+void allocateBattleSpriteActor(sSpriteActorAnimationBundle* param_1, short param_2, short param_3, short param_4, short param_5, short param_6, int X, int Y, int Z, short animationId, short param_11, int param_12_00, int param_13, u32 param_14) {
+    sBattleSpriteActor* pSprite = createCustomRenderableEntity<sBattleSpriteActor>(0x19c, nullptr, battleSpriteUpdate, battleSpriteRender, battleSpriteDelete);
+
+    pSprite->m0.m4 = &pSprite->m38_spriteActor;
+    pSprite->m1C.m4 = &pSprite->m38_spriteActor;
+    pSprite->m1C.m0_owner = nullptr;
+    initBattleSpriteActorVram(&pSprite->m38_spriteActor, param_1, (int)param_2, (int)param_3, (int)param_4, (int)param_5, (int)param_6, param_14);
+    pSprite->m38_spriteActor.m0_spriteActorCore.m6C_pointerToOwnerStructure = pSprite;
+    pSprite->m38_spriteActor.m0_spriteActorCore.m0_position.vx = X << 0x10;
+    pSprite->m38_spriteActor.m0_spriteActorCore.m0_position.vy = Y << 0x10;
+    pSprite->m38_spriteActor.m0_spriteActorCore.m0_position.vz = Z << 0x10;
+    *(char*)&pSprite->m38_spriteActor.m0_spriteActorCore.mB0 = animationId;
+    pSprite->m38_spriteActor.m0_spriteActorCore.m3C |= 4;
+    pSprite->m38_spriteActor.m0_spriteActorCore.m32 = param_11;
+    setGraphicEntityScale(&pSprite->m38_spriteActor, 0x2000);
+    pSprite->m38_spriteActor.m0_spriteActorCore.m82 = 0x2000;
+    pSprite->m38_spriteActor.m0_spriteActorCore.m78 = 0;
+    spriteActorSetPlayingAnimation(&pSprite->m38_spriteActor, animationId);
+}
+
+void createBattleSpriteActor(uint param_1, int param_2, short param_3) {
+    battleVisualBuffers[param_2].bundle.init(battleVisualBuffers[param_2].m0_spriteData->begin());
+    allocateBattleSpriteActor(&battleVisualBuffers[param_2].bundle, 0, param_1 + 0x1C0, battleVisualBuffers[param_2].m4, battleVisualBuffers[param_2].m6, 0x20, 0, 0, 0, param_3, 0, 0, 0, battleVisualBuffers[param_2].m8);
+    MissingCode();
+}
+
+void createBattlePlayerSpriteActors() {
+    for (int i = 0; i < 3; i++) {
+        if ((battleVisualEntities[i].m2 < 0x11) && battleVisualEntities[i].m4 == 0) {
+            battleVisualBuffers[i].m6 = 0x1C0;
+            battleVisualBuffers[i].m4 = battleSpriteX + 0x100;
+            battleSpriteX += battleSpriteWidthPerCharacter[battleVisualEntities[i].m2];
+            createBattleSpriteActor(i, i, 1);
+            MissingCode();
+        }
+    }
+}
+
+void mainBattleSpriteCallback_phase2(sTaskHeader* param_1) {
+
+    setCurrentDirectory(0x2c, 0);
+    if (!isCDBusy()) {
+        createBattlePlayerSpriteActors();
+        MissingCode();
+    }
+}
+
+
+// actual size is 14, to be filled up later
+std::array<std::array<int, 2>, 3> battlePartyFileMapping = { {
+    {0x1, 0x12},
+    {0x2, 0x13},
+    {0x4, 0x15},
+} };
+
+void setupPlayerSpriteLoadingCommands(std::array<sLoadingBatchCommands, 4>::iterator& param_1) {
+    std::array<sLoadingBatchCommands, 4>::iterator start = param_1;
+    setCurrentDirectory(0x2c, 1);
+    for (int i = 0; i < 3; i++) {
+        if ((battleVisualEntities[i].m2 < 0x11) && battleVisualEntities[i].m4 == 0) {
+            param_1->m0_fileIndex = battlePartyFileMapping[battleVisualEntities[i].m2][0];
+            param_1->m4_loadPtr = new std::vector<u8>(getFileSizeAligned(param_1->m0_fileIndex));
+
+            battleVisualBuffers[i].m0_spriteData = param_1->m4_loadPtr;
+            battleVisualBuffers[i].m8 = 0;
+
+            param_1++;
+        }
+    }
+
+    param_1->m0_fileIndex = 0;
+    param_1->m4_loadPtr = nullptr;
+
+    batchStartLoadingFiles(&(*start), 0);
+}
+
 void mainBattleSpriteCallback_phase1(sTaskHeader* param_1) {
     sBattleSpriteLoaderTask* pTask = (sBattleSpriteLoaderTask*)param_1;
 
     if (isCDBusy() == 0) {
         loadBattleSpriteVram(pTask->m20);
-        MissingCode();
+        createEnemiesBattleSprites(pTask->m20);
+        DrawSync(0);
+        //delete pTask->m20; // hack: this is currently a static
+        pTask->m20 = nullptr; // not in original
+        regCallback8(&pTask->m0, mainBattleSpriteCallback_phase2);
+        setupPlayerSpriteLoadingCommands(pTask->m30_loadingCommands.begin());
     }
 }
 

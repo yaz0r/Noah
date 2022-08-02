@@ -402,7 +402,7 @@ extern int linkOTIndex;
 extern int runningOnDTL;
 
 void setCurrentRenderingMatrix(MATRIX* pMatrix);
-void renderSpriteActor(sSpriteActor* pSpriteSheet, sTag* pTag);
+void renderSpriteActor(struct sSpriteActorCore* pSpriteSheet, sTag* pTag);
 
 void allocateShapeTransfert(int param_1);
 

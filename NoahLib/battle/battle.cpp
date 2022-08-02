@@ -20,6 +20,10 @@ std::vector<u8>* battleLoadDataVar0_raw;
 std::vector<u8>::iterator battleLoadDataVar1;
 std::vector<u8>::iterator battleLoadDataVar2;
 
+std::array<sBattleVisualBuffer, 0x11> battleVisualBuffers;
+std::array<sBattleVisualEntity, 0x11> battleVisualEntities;
+
+
 void initGraphicsForBattle(void) {
     ResetGraph(1);
     Noah_MissingCode("Some dummy function calls");

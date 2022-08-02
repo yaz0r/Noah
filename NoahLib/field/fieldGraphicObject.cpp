@@ -275,7 +275,7 @@ void registerSpriteCallback2Sub0(sTaskHeader* param_1) {
 }
 
 
-void registerSpriteCallback2(sSavePointMeshAbstract* param_1, sTaskHeader* param_2) {
+void registerSpriteCallback2(sTaskHeader* param_1, sTaskHeader* param_2) {
     param_2->m0_owner = param_1;
     param_2->m10 = param_2->m10 & 0xe0000000 | (registerSpriteCallback2Counter2 & 0x1fffffff);
     registerSpriteCallback2Counter2 = registerSpriteCallback2Counter2 + 1;
@@ -284,7 +284,7 @@ void registerSpriteCallback2(sSavePointMeshAbstract* param_1, sTaskHeader* param
     param_2->m8 = nullptr;
     param_2->mC = registerSpriteCallback2Sub0;
     registerSpriteCallback2Counter = registerSpriteCallback2Counter + 1;
-    param_2->m14 = param_1->m0.m10 & 0x1fffffff;
+    param_2->m14 = param_1->m10 & 0x1fffffff;
 }
 
 void regCallback8(sTaskHeader* param_1, void (*param_2)(sTaskHeader*))
@@ -312,7 +312,8 @@ int modulateSpeed(sSpriteActorCore* param_1, int param_2)
 }
 
 void savePointCallback8Sub0Sub0_battle(sSpriteActorCore* param_1) {
-    assert(0); // this expects the battle overlay to be loaded
+    //assert(0); // this expects the battle overlay to be loaded
+    MissingCode();
 }
 
 void savePointCallback8Sub0Sub0(sSpriteActorCore* param_1)
@@ -527,7 +528,7 @@ sSavePointMeshAbstract* allocateSavePointMeshData(sSavePointMeshAbstract* pThis,
 {
     sSavePointMeshAbstract* pvVar1 = pThis;
     allocateSavePointMeshDataSub0(param_1, &pvVar1->m0);
-    registerSpriteCallback2(pvVar1, &pvVar1->m1C);
+    registerSpriteCallback2(&pvVar1->m0, &pvVar1->m1C);
 
     initFieldEntitySub4Sub1(&pvVar1->m38_spriteActorCore);
 
@@ -1314,12 +1315,50 @@ void executeSpriteBytecode2(sSpriteActorCore* param_1)
 		case 0x85:
 		case 0x8E:
 		case 0x98:
-		case 0xBE:
 		case 0xC8:
 		case 0xD4:
 		case 0xFA:
 			assert(0);
 			break;
+        case 0xBE:
+        {
+            bytecode = READ_LE_U8(pEndOfOpcode);
+            int iVar15 = (((int)bytecode >> 0xb & 0xfU) + 1) * (param_1->mAC >> 7 & 0xfff);
+            int _uVar13 = bytecode & 0x1ff;
+            if (false) {
+                iVar15 = iVar15 + 0xff;
+            }
+            int sVar12 = (short)((uint)iVar15 >> 8);
+            if (iVar15 >> 8 == 0) {
+                sVar12 = 1;
+            }
+            if ((param_1->m3C & 3) == 1) {
+                if (((int)bytecode < 0) && (_uVar13 != 0)) {
+                    //_uVar13 = (uint) * (byte*)((int)param_1->m60 + (_uVar13 - 1));
+                    assert(0);
+                }
+                int uVar5 = (int)bytecode >> 6 & 8;
+                int uVar10 = param_1->m3C;
+                int uVar6 = (uVar5 >> 3 ^ (param_1->mAC & 4) >> 2) << 3;
+                int uVar14 = uVar10 & 0xfffffff7 | uVar6;
+                param_1->mAC = param_1->mAC & 0xfffffff7 | uVar5;
+                param_1->m3C = uVar14;
+                if (((int)bytecode >> 10 & 1U) == 0) {
+                    uVar14 = uVar10 & 0xffffffe7 | uVar6;
+                }
+                else {
+                    uVar14 = uVar14 | 0x10;
+                }
+                param_1->m3C = uVar14;
+                addToSpriteTransferList(param_1, (short)_uVar13);
+            }
+            else {
+                param_1->m34_currentSpriteFrame = (short)_uVar13;
+            }
+            param_1->m9E_wait += sVar12;
+            param_1->m64_spriteByteCode += 3;
+            return;
+        }
 		case 0x81:
 			if (((param_1->mAC >> 24) & 0xFF) == 0x3F)
 			{

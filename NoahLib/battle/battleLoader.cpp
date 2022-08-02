@@ -14,7 +14,7 @@ void dummpyLoaderEnd() {
     // empty, probably an old logging code
 }
 
-s8 battleVar800D3294;
+s8 battleForceOnGear;
 s8 battleCharacters[3];
 s8 battleVar8006f9dd;
 
@@ -54,7 +54,7 @@ void loadBattleCharacterPortraits(const std::vector<u8>& input, s8 param_2) {
     for (int i = 0; i < 3; i++) {
         int characterId = battleCharacters[i];
         if (characterId != 0x7F) {
-            if ((battleVar800D3294) && (i < 1)) {
+            if ((battleForceOnGear) && (i < 1)) {
                 characterId = 11;
             }
 
@@ -77,11 +77,11 @@ std::array<sLoadingBatchCommands, 3> playerLoadingCommands;
 std::vector<u8> battleConfigFile2;
 
 void loadPartyMembers() {
-    battleVar800D3294 = (battleVar8006f9dd & 0x10) != 0;
+    battleForceOnGear = (battleVar8006f9dd & 0x10) != 0;
     u16 partyMembersBitmask = gameState.m1D30_partyMemberBitField & gameState.m1D32_partyFrameMask;
     Hack("force battle team");
     partyMembersBitmask = 0x7FF;
-    if (battleVar800D3294) {
+    if (battleForceOnGear) {
         battleCharacters[1] = 10;
         battleCharacters[2] = 10;
         battleCharacters[0] = gameState.m1D34_currentParty[0] & 0x7F;
@@ -106,7 +106,7 @@ void loadPartyMembers() {
         if (battleCharacters[i] != 0x7F) {
             battleEntities[i].m0_base = gameState.m26C[battleCharacters[i]];
 
-            if (battleVar800D3294 && (i - 1U < 2)) {
+            if (battleForceOnGear && (i - 1U < 2)) {
                 battleEntities[i].m0_base.m78_partyData_gearNum = 0x11;
             }
 
@@ -153,8 +153,28 @@ void loadPartyMembers() {
     playerLoadingCommands[2].m4_loadPtr = nullptr;
 
     batchStartLoadingFiles(&playerLoadingCommands[0], 0);
+}
 
+u8 bBattleTickMode1 = 0;
 
+void batteLoaderPhase1_0() {
+    MissingCode();
+    for (int i = 0; i < 3; i++) {
+        MissingCode();
+        battleVisualEntities[i].m2 = battleCharacters[i];
+    }
+    for (int i = 0; i < 11; i++) {
+        battleVisualEntities[i].m3 = 0;
+        if (battleForceOnGear == 0) {
+            battleVisualEntities[i].m4 = gameState.m22B1_isOnGear[i];
+        }
+        else {
+            battleVisualEntities[i].m4 = 1;
+        }
+        battleVisualEntities[i].m5 = 0;
+    }
+    MissingCode();
+    bBattleTickMode1 = 0;
 }
 
 void battleLoaderTick(s8 param_1) {
@@ -164,6 +184,7 @@ void battleLoaderTick(s8 param_1) {
         dummpyLoaderEnd();
         break;
     case 1:
+        batteLoaderPhase1_0();
         MissingCode();
         break;
     case 2:

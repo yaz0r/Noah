@@ -8037,7 +8037,7 @@ bool disableCharacterShadowsRendering = 0;
 
 
 
-void setupSpriteActorTransform(sSpriteActor* pSpriteSheet)
+void setupSpriteActorTransform(sSpriteActorCore* pSpriteSheet)
 {
     if ((isBattleOverlayLoaded != '\0') || (isWorldMapOverlayLoaded != '\0')) {
         spriteCallback_render2_updateMatrix(pSpriteSheet);
@@ -8081,7 +8081,7 @@ std::array<s16, 8> spriteMatrixTable = {
     1,2,4,8,0x10,0x20,0x40,0x80,
 };
 
-void submitSpriteActorToRendering(sSpriteActor* pSpriteSheet, sTag* pTag)
+void submitSpriteActorToRendering(sSpriteActorCore* pSpriteSheet, sTag* pTag)
 {
     sFieldEntitySub4_B4* psVar7 = pSpriteSheet->m20->getAsSprite();
     u32 uVar9 = pSpriteSheet->m40 >> 8 & 0x1f;
@@ -8244,12 +8244,12 @@ void submitSpriteActorToRendering(sSpriteActor* pSpriteSheet, sTag* pTag)
     }
 }
 
-void renderFieldCharacterSpritesSub0Sub2(sSpriteActor* pSpriteSheet, sTag* pTag)
+void renderFieldCharacterSpritesSub0Sub2(sSpriteActorCore* pSpriteSheet, sTag* pTag)
 {
     MissingCode();
 }
 
-void renderSpriteActor(sSpriteActor* pSpriteSheet, sTag* pTag)
+void renderSpriteActor(sSpriteActorCore* pSpriteSheet, sTag* pTag)
 {
     setupSpriteActorTransform(pSpriteSheet);
     submitSpriteActorToRendering(pSpriteSheet, pTag);

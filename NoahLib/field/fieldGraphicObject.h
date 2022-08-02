@@ -121,6 +121,7 @@ struct sSpriteActorCore : public sCustomRenderable {
     sFieldEntitySub4_110* m24_vramData;
     sColorAndCode m28_colorAndCode;
     s16 m2C_scale;
+    s16 m2E;
     s16 m30;
     s16 m32;
     s16 m34_currentSpriteFrame;
@@ -238,6 +239,10 @@ struct sSavePointMesh2 : public sSavePointMeshAbstract
 
 extern sSpriteActorCore* spriteTransfertListHead;
 extern sTaskHeader* spriteCallback2Head;
+
+void savePointCallback8Sub0(sSpriteActorCore* param_1);
+void registerSpriteCallback2(sTaskHeader* param_1, sTaskHeader* param_2);
+void spriteBytecode2ExtendedE0_Sub0Sub0Sub0(sTaskHeader* param_1, void (*param_2)(sTaskHeader*));
 
 void SetTimeScale(sSpriteActor* param_1, int param_2); // 0x80021BCC
 void OP_INIT_ENTITY_SCRIPT_sub0Sub9(sSpriteActorCore* param_1);
