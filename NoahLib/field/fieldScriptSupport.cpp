@@ -297,7 +297,7 @@ struct sPortraitLoadingStatus {
 };
 
 std::array<sPortraitLoadingStatus, 3> portraitLoadingStatus;
-std::array<std::vector<u8>, 2> partyPortraitPointers;
+std::array<sLoadableDataRaw, 2> partyPortraitPointers;
 int currentPortraitLoadingSlot = 0;
 
 void resetPortraitLoadingStatus() {
@@ -431,14 +431,14 @@ int isDialogAvatarLoaded(int portraitId)
         case 1: // wait loading
             if(waitReadCompletion(1) == 0) {
                 portraitLoadingStatus[i].m2_status = 2;
-                loadTimToVram(partyPortraitPointers[0].begin(), partyPortraitsRects[i][0].x, partyPortraitsRects[i][0].y, partyPortraitsRects[i][0].w, partyPortraitsRects[i][0].h, 0x100, 1);
+                loadTimToVram(partyPortraitPointers[0].mData.begin(), partyPortraitsRects[i][0].x, partyPortraitsRects[i][0].y, partyPortraitsRects[i][0].w, partyPortraitsRects[i][0].h, 0x100, 1);
 
                 // handle portrait asymmetry
                 if (portraitLoadingStatus[i].m4_isAsymmetric == 0) {
-                    loadTimToVram(partyPortraitPointers[0].begin(), partyPortraitsRects[i][1].x, partyPortraitsRects[i][1].y, partyPortraitsRects[i][1].w, partyPortraitsRects[i][1].h, 0x100, 1);
+                    loadTimToVram(partyPortraitPointers[0].mData.begin(), partyPortraitsRects[i][1].x, partyPortraitsRects[i][1].y, partyPortraitsRects[i][1].w, partyPortraitsRects[i][1].h, 0x100, 1);
                 }
                 else {
-                    loadTimToVram(partyPortraitPointers[1].begin(), partyPortraitsRects[i][1].x, partyPortraitsRects[i][1].y, partyPortraitsRects[i][1].w, partyPortraitsRects[i][1].h, 0x100, 1);
+                    loadTimToVram(partyPortraitPointers[1].mData.begin(), partyPortraitsRects[i][1].x, partyPortraitsRects[i][1].y, partyPortraitsRects[i][1].w, partyPortraitsRects[i][1].h, 0x100, 1);
                 }
             }
             return -1;

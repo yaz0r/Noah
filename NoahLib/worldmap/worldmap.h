@@ -1,5 +1,7 @@
 #pragma once
 
+#include "kernel/filesystem.h"
+
 struct sWorldmapStateEntry {
     s16 m0_state;
     s16 m2;
@@ -129,7 +131,7 @@ extern u8 targetVehicleEntityIndex;
 
 extern s32 currentWorldmapMode;
 
-extern std::array<std::vector<u8>, 3 > worldmapPartyGearSpritesRaw;
+extern std::array<sLoadableDataRaw, 3 > worldmapPartyGearSpritesRaw;
 
 s32 worldmapGetAltitudeFor2dPoint(s32 x, s32 y);
 void worldmapEntryPoint(void);

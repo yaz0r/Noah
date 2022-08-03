@@ -22,8 +22,8 @@ s32 menuOpenCount;
 u8 useDebugMenuList = 1;
 u8 menuToEnter = 0;
 
-std::vector<u8> menuSharedResources;
-std::vector<u8> menuOverlay;
+sLoadableDataRaw menuSharedResources;
+sLoadableDataRaw menuOverlay;
 
 void setupMenuContext1D4(sMenuContext_1D4* param_1)
 {
@@ -223,7 +223,7 @@ void computeMenuBorder(std::vector<u8>& param_1, int param_2, int* param_3, int*
 
 void loadMenuSharedResources() {
 
-    std::vector<std::vector<u8>::iterator> relocatedPtr = doPointerRelocation(menuSharedResources);
+    std::vector<std::vector<u8>::iterator> relocatedPtr = doPointerRelocation(menuSharedResources.mData);
 
     MissingCode();
 
@@ -2268,15 +2268,6 @@ void loadAndOpenMenu(void)
         MissingCode(); // fade out and stuff
 
         waitReadCompletion(0);
-
-        if(0)
-        {
-            FILE* fHandle = fopen((std::string("menuSharedResources") + std::string(".bin")).c_str(), "wb+");
-            if (fHandle) {
-                fwrite(&menuSharedResources[0], 1, menuSharedResources.size(), fHandle);
-                fclose(fHandle);
-            }
-        }
 
         MissingCode();
 

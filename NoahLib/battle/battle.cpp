@@ -16,7 +16,7 @@ s8 battleDebugDisplay = 0;
 s8 requestedBattleConfig = 0;
 
 sMechaDataTable1* battleLoadDataVar0;
-std::vector<u8>* battleLoadDataVar0_raw;
+sLoadableDataRaw* battleLoadDataVar0_raw;
 std::vector<u8>::iterator battleLoadDataVar1;
 std::vector<u8>::iterator battleLoadDataVar2;
 std::vector<u8>::iterator battleLoadDataVar2Bis;
@@ -72,9 +72,9 @@ void initBattleDefDrawContext() {
 
 sLoadingBatchCommands battleLoadingCommands[4];
 
-std::vector<u8> battleStartSeq;
-std::vector<u8> battleCharacterConfigFile;
-std::vector<u8> battleLoaderBinary;
+sLoadableDataRaw battleStartSeq;
+sLoadableDataRaw battleCharacterConfigFile;
+sLoadableDataRaw battleLoaderBinary;
 
 s32 battleMechaVar0;
 s16 battleMechaVar1;
@@ -374,7 +374,7 @@ void startBattleLoader(int param_1)
     mechaInitForBattle();
 
     Hack("Deserialize mecha data for battle env");
-    battleLoadDataVar0 = new sMechaDataTable1(*battleLoadDataVar0_raw);
+    battleLoadDataVar0 = new sMechaDataTable1(battleLoadDataVar0_raw->mData);
 
     battleRenderStructs[0].m0_drawEnv.isbg = loadBattleEnvironment(battleLoadDataVar2, battleLoadDataVar1, battleLoadDataVar0, &battleMatrix800CCB94, &battleMatrix800CCBB4, &battleRenderStructs[0].m0_drawEnv.color);
 

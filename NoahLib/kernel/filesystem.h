@@ -25,10 +25,39 @@ extern std::vector<s_directoryEntry> fatDirectoryTableBuffer;
 
 s32 getCdromFnd();
 
+struct sLoadableData {
+    virtual void init(std::vector<u8>& data) = 0;
+};
+
+struct sLoadableDataRaw : public sLoadableData {
+    virtual void init(std::vector<u8>& data) override {
+        mData = data;
+    }
+    sLoadableDataRaw() {
+
+    }
+    sLoadableDataRaw(size_t size) {
+        resize(size);
+    }
+    void resize(size_t newSize) {
+        mData.resize(newSize);
+    }
+    void clear() {
+        mData.clear();
+    }
+    std::vector<u8>::iterator begin() {
+        return mData.begin();
+    }
+    size_t size() {
+        return mData.size();
+    }
+    std::vector<u8> mData;
+};
+
 struct sLoadingBatchCommands
 {
     u16 m0_fileIndex;
-    std::vector<u8>* m4_loadPtr;
+    sLoadableData* m4_loadPtr;
 };
 void batchStartLoadingFiles(sLoadingBatchCommands* pCommands, int param_2);
 

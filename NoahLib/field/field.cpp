@@ -96,8 +96,8 @@ s16 entityMoveSpeedFactor = 0;
 
 int g_frameOddOrEven = 0;
 
-std::array<std::vector<u8>, 3> partyCharacterBuffersRaw;
-std::array<std::vector<u8>, 3> partyCharacterBuffersCompressed;
+std::array<sLoadableDataRaw, 3> partyCharacterBuffersRaw;
+std::array<sLoadableDataRaw, 3> partyCharacterBuffersCompressed;
 std::array<sSpriteActorAnimationBundle, 3> partyCharacterBuffers;
 s16 actorCameraTracked = 0;
 s32 pcInitVar1 = 0;
@@ -3130,6 +3130,14 @@ void resetAllRGBFadersToBlack()
     resetRGBFaderToBlack(1);
 }
 
+void flagAllocation(struct sLoadableData&) {
+    MissingCode();
+}
+
+void unflagAllocation(struct sLoadableData&) {
+    MissingCode();
+}
+
 void flagAllocation(std::vector<u8>&)
 {
     MissingCode();
@@ -4237,10 +4245,10 @@ void finalizeLoadPlayableCharacters()
             if (currentParty[i] != 0xFF)
             {
                 unflagAllocation(partyCharacterBuffersCompressed[i]);
-                decompress(partyCharacterBuffersCompressed[i].begin(), partyCharacterBuffersRaw[i]);
-                partyCharacterBuffersCompressed[i].clear();
+                decompress(partyCharacterBuffersCompressed[i].mData.begin(), partyCharacterBuffersRaw[i].mData);
+                partyCharacterBuffersCompressed[i].mData.clear();
 
-                partyCharacterBuffers[i].init(partyCharacterBuffersRaw[i].begin());
+                partyCharacterBuffers[i].init(partyCharacterBuffersRaw[i].mData.begin());
             }
         }
 

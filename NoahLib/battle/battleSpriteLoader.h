@@ -1,6 +1,10 @@
 #pragma once
 
-typedef std::vector<u8> sBattleSpriteConfigs;
+#include "kernel/filesystem.h"
+
+struct sBattleSpriteConfigs : public sLoadableDataRaw {
+
+};
 extern sBattleSpriteConfigs battleConfigFile3;
 
-void createBattleSpriteLoadingTask(std::vector<u8>* param_1);
+void createBattleSpriteLoadingTask(sBattleSpriteConfigs* param_1);

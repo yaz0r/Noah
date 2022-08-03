@@ -487,7 +487,10 @@ void batchStartLoadingFiles(sLoadingBatchCommands* pCommands, int param_2)
     // TODO: this is a quick and dirty implementation, not how the original code worked
     while (pCommands->m4_loadPtr)
     {
-        readFile(pCommands->m0_fileIndex, *pCommands->m4_loadPtr, 0, 0);
+        std::vector<u8> tempBuffer;
+        readFile(pCommands->m0_fileIndex, tempBuffer, 0, 0);
+
+        pCommands->m4_loadPtr->init(tempBuffer);
 
         pCommands++;
     }

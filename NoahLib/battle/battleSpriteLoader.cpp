@@ -239,9 +239,10 @@ void setupPlayerSpriteLoadingCommands(std::array<sLoadingBatchCommands, 4>::iter
     for (int i = 0; i < 3; i++) {
         if ((battleVisualEntities[i].m2 < 0x11) && battleVisualEntities[i].m4 == 0) {
             param_1->m0_fileIndex = battlePartyFileMapping[battleVisualEntities[i].m2][0];
-            param_1->m4_loadPtr = new std::vector<u8>(getFileSizeAligned(param_1->m0_fileIndex));
+            sLoadableDataRaw* pNewLoadable = new sLoadableDataRaw(getFileSizeAligned(param_1->m0_fileIndex));
+            param_1->m4_loadPtr = pNewLoadable;
 
-            battleVisualBuffers[i].m0_spriteData = param_1->m4_loadPtr;
+            battleVisualBuffers[i].m0_spriteData = &pNewLoadable->mData;
             battleVisualBuffers[i].m8 = 0;
 
             param_1++;

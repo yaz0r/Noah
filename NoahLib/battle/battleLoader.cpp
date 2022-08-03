@@ -74,7 +74,7 @@ void loadBattleCharacterPortraits(const std::vector<u8>& input, s8 param_2) {
 }
 
 std::array<sLoadingBatchCommands, 3> playerLoadingCommands;
-std::vector<u8> battleConfigFile2;
+sLoadableDataRaw battleConfigFile2;
 
 void loadPartyMembers() {
     battleForceOnGear = (battleVar8006f9dd & 0x10) != 0;
@@ -100,7 +100,7 @@ void loadPartyMembers() {
         }
     }
 
-    std::vector<std::vector<u8>::iterator> relocatedPointer = doPointerRelocation(battleCharacterConfigFile);
+    std::vector<std::vector<u8>::iterator> relocatedPointer = doPointerRelocation(battleCharacterConfigFile.mData);
 
     for (int i = 0; i < 3; i++) {
         if (battleCharacters[i] != 0x7F) {

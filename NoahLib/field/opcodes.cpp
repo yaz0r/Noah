@@ -488,9 +488,9 @@ void OP_FINALIZE_PARTY_CHARACTER_LOADING()
     }
     else {
         waitReadCompletion(0);
-        decompress(asyncPartyCharacterLoadingBuffer.begin(), partyCharacterBuffersRaw[asyncPartyCharacterLoadingIndex]);
+        decompress(asyncPartyCharacterLoadingBuffer.begin(), partyCharacterBuffersRaw[asyncPartyCharacterLoadingIndex].mData);
         asyncPartyCharacterLoadingBuffer.clear();
-        partyCharacterBuffers[asyncPartyCharacterLoadingIndex].init(partyCharacterBuffersRaw[asyncPartyCharacterLoadingIndex].begin());
+        partyCharacterBuffers[asyncPartyCharacterLoadingIndex].init(partyCharacterBuffersRaw[asyncPartyCharacterLoadingIndex].mData.begin());
         runInitScriptForNewlyLoadedPC(asyncPartyCharacterLoadingCharacterIndex);
         asyncLoadingVar1 = 0xff;
         breakCurrentScript = 1;
@@ -2819,8 +2819,8 @@ void OP_LOAD_NEW_MECHA(void)
         break;
     case 2:
         if (waitReadCompletion(1) == 0) {
-            mechaDataTable2[mechaIndex] = new sMechaDataTable2(mechaDataTable2_raw[mechaIndex]);
-            mechaDataTable1[mechaIndex] = new sMechaDataTable1(mechaDataTable1_raw[mechaIndex]);
+            mechaDataTable2[mechaIndex] = new sMechaDataTable2(mechaDataTable2_raw[mechaIndex].mData);
+            mechaDataTable1[mechaIndex] = new sMechaDataTable1(mechaDataTable1_raw[mechaIndex].mData);
             mechaInitNewMecha(mechaIndex, 0, mechaDataTable2[mechaIndex], mechaDataTable1[mechaIndex], (ushort)(((mechaIndex + mechaList2[mechaIndex]) * -0x40 + 0x240) * 0x10000 >> 0x10), 0x100, 0,
                 (short)((mechaIndex + 0xfc) * 0x10000 >> 0x10), &initMechaTempVar[mechaIndex]);
 
@@ -2828,7 +2828,7 @@ void OP_LOAD_NEW_MECHA(void)
 
             delete mechaDataTable1[mechaIndex];
             mechaDataTable1[mechaIndex] = nullptr;
-            mechaDataTable1_raw[mechaIndex].clear();
+            mechaDataTable1_raw[mechaIndex].mData.clear();
 
             pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 4;
 

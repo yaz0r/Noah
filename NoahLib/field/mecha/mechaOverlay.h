@@ -326,16 +326,16 @@ void freeMecha(int index);
 void mechaInitNewMecha(int entryId, ushort flags, sMechaDataTable2* pData2, sMechaDataTable1* pData1, ushort tpageX, ushort tpageY, ushort clutX, short clutY, SFP_VEC3* param_9);
 
 extern std::array<sMechaDataTable1*, 9> mechaDataTable1;
-extern std::array<std::vector<u8>, 9> mechaDataTable1_raw;
+extern std::array<sLoadableDataRaw, 9> mechaDataTable1_raw;
 
 extern std::array<sMechaDataTable2*, 9> mechaDataTable2;
-extern std::array<std::vector<u8>, 9> mechaDataTable2_raw;
+extern std::array<sLoadableDataRaw, 9> mechaDataTable2_raw;
 
 extern std::array<SFP_VEC4, 4> initMechaTempVar;
 
 extern std::array<sLoadingBatchCommands, 16> mechaOverlayBatchLoadingTable;
 
-extern std::vector<u8> mechaOverlayBuffer;
+extern sLoadableDataRaw mechaOverlayBuffer;
 extern u32 NumMechas;
 extern std::array<s16, 4> mechaList;
 extern std::array<u8, 4> mechaList2;

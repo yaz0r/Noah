@@ -38,15 +38,15 @@ void reallocBackBufferRamCopy(void)
     return;
 }
 
-std::vector<u8> mechaOverlayBuffer;
+sLoadableDataRaw mechaOverlayBuffer;
 
 std::array<sLoadingBatchCommands, 16> mechaOverlayBatchLoadingTable;
 
 std::array<sMechaDataTable1*, 9> mechaDataTable1;
-std::array<std::vector<u8>, 9> mechaDataTable1_raw;
+std::array<sLoadableDataRaw, 9> mechaDataTable1_raw;
 
 std::array<sMechaDataTable2*, 9> mechaDataTable2;
-std::array<std::vector<u8>, 9> mechaDataTable2_raw;
+std::array<sLoadableDataRaw, 9> mechaDataTable2_raw;
 
 
 void loadMechaOverlay_start(void)
@@ -1263,13 +1263,13 @@ void loadMechaOverlay_finalize(void)
         initMechaTempVar[i].vy = 0;
         initMechaTempVar[i].vz = 0;
 
-        mechaDataTable2[i] = new sMechaDataTable2(mechaDataTable2_raw[i]);
-        mechaDataTable1[i] = new sMechaDataTable1(mechaDataTable1_raw[i]);
+        mechaDataTable2[i] = new sMechaDataTable2(mechaDataTable2_raw[i].mData);
+        mechaDataTable1[i] = new sMechaDataTable1(mechaDataTable1_raw[i].mData);
 
         mechaInitNewMecha(i, 0, mechaDataTable2[i], mechaDataTable1[i], ((i + mechaList2[i]) * -0x40 + 0x240), 0x100, 0, i + 0xFC, &initMechaTempVar[i]);
         delete mechaDataTable1[i];
         mechaDataTable1[i] = nullptr;
-        mechaDataTable1_raw[i].clear();
+        mechaDataTable1_raw[i].mData.clear();
         mechaList3[i] = loadedMechas[i]->m1C_scale;
     }
 

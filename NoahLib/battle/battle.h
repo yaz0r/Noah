@@ -1,13 +1,14 @@
 #pragma once
 
 #include "sprite/spriteSetup.h"
+#include "kernel/filesystem.h"
 
-extern std::vector<u8> battleCharacterConfigFile;
+extern sLoadableDataRaw battleCharacterConfigFile;
 extern std::vector<u8>::iterator battleMechaInitData;
 
 #include "field/mecha/mechaOverlay.h"
 
-extern std::vector<u8>* battleLoadDataVar0_raw;
+extern sLoadableDataRaw* battleLoadDataVar0_raw;
 extern std::vector<u8>::iterator battleLoadDataVar1;
 extern std::vector<u8>::iterator battleLoadDataVar2;
 extern std::vector<u8>::iterator battleLoadDataVar2Bis;

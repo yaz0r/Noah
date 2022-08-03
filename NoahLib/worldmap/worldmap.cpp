@@ -64,9 +64,9 @@ struct sWorldmapModes {
 };
 
 std::array<sSpriteActorAnimationBundle*, 3 > worldmapPartySprites;
-std::array<std::vector<u8>, 3 > worldmapPartySpritesRaw;
+std::array<sLoadableDataRaw, 3 > worldmapPartySpritesRaw;
 std::array<sSpriteActorAnimationBundle*, 3 > worldmapPartyGearSprites;
-std::array<std::vector<u8>, 3 > worldmapPartyGearSpritesRaw;
+std::array<sLoadableDataRaw, 3 > worldmapPartyGearSpritesRaw;
 s32 worldmapNumActivePartyMembers = 0;
 
 std::array<sLoadingBatchCommands, 16> worldmapLoadingCommands;
@@ -185,9 +185,9 @@ void allocAndInitWorldmapState(void)
     return;
 }
 
-std::vector<u8> worldmapFile1Buffer;
-std::vector<u8> worldmapFile2Buffer;
-std::vector<u8> worldmapFile3Buffer;
+sLoadableDataRaw worldmapFile1Buffer;
+sLoadableDataRaw worldmapFile2Buffer;
+sLoadableDataRaw worldmapFile3Buffer;
 
 s32 initWorldMapVar0;
 s32 worldmapFile1;
@@ -215,7 +215,7 @@ std::vector<u8>::iterator pWorldmapModelsConfig;
 std::array<std::vector<u8>::iterator, 16> worldmapFile1Buffer_2C_data;
 
 void finalizeWorldMapFileLoading() {
-    worldmapFile1Buffer = mallocAndDecompress(worldmapFile1Buffer.begin());
+    worldmapFile1Buffer.mData = mallocAndDecompress(worldmapFile1Buffer.begin());
 
     worldmapFile1Buffer_C = worldmapFile1Buffer.begin() + READ_LE_U32(worldmapFile1Buffer.begin() + 0xC);
     worldmapModelFiles.init(worldmapFile1Buffer.begin() + READ_LE_U32(worldmapFile1Buffer.begin() + 0x8), READ_LE_U32(worldmapFile1Buffer.begin() + 0xC) - READ_LE_U32(worldmapFile1Buffer.begin() + 0x8));

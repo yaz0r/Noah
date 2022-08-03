@@ -3,6 +3,7 @@
 #include "fieldModel.h"
 #include "kernel/math.h"
 #include "kernel/graphics.h"
+#include "kernel/filesystem.h"
 
 enum controllerButtons {
     L1 = 1 << 2, // 0x4
@@ -315,7 +316,7 @@ extern std::vector<sFieldTrigger> fieldTriggerData;
 
 extern MATRIX currentProjectionMatrix;
 
-extern std::array<std::vector<u8>, 3> partyCharacterBuffersRaw;
+extern std::array<sLoadableDataRaw, 3> partyCharacterBuffersRaw;
 extern std::array<int, 3> asyncPartyCharacterLoadingTable;
 
 extern SFP_VEC4 cameraProjectionAngles;
@@ -422,6 +423,9 @@ void initFontPalettes(short param_1, short param_2);
 void initFontSystem();
 
 int loadInputFromVSyncBuffer();
+
+void flagAllocation(struct sLoadableData&);
+void unflagAllocation(struct sLoadableData&);
 
 void flagAllocation(std::vector<u8>&);
 void unflagAllocation(std::vector<u8>&);

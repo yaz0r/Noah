@@ -300,7 +300,7 @@ void updateBattleStartEffect(sBattleStartEffect* param_1) {
 
 std::array<sLoadingBatchCommands, 4> battleEnvLoadingCommands;
 
-int loadBattleMechaAndEnvironment(int battleArenaId, int param_2, std::vector<u8>*& param_3, std::vector<u8>::iterator& param_4, std::vector<u8>::iterator& param_5) {
+int loadBattleMechaAndEnvironment(int battleArenaId, int param_2, sLoadableDataRaw*& param_3, std::vector<u8>::iterator& param_4, std::vector<u8>::iterator& param_5) {
     int local_30;
     int local_2c;
 
@@ -312,10 +312,10 @@ int loadBattleMechaAndEnvironment(int battleArenaId, int param_2, std::vector<u8
     int iVar5 = battleArenaId * 2;
     if (battleArenaId < ((iVar1 << 0x10) >> 0x10) - ((iVar1 << 0x10) >> 0x1f) >> 1) {
         int sVar2 = getFileSizeAligned(iVar5 + param_2 + 7);
-        std::vector<u8>* pvVar3 = new std::vector<u8>(sVar2);
+        sLoadableDataRaw* pvVar3 = new sLoadableDataRaw(sVar2);
         flagAllocation(*pvVar3);
         sVar2 = getFileSizeAligned(iVar5 + 6);
-        std::vector<u8>* pvVar4 = new std::vector<u8>(sVar2);
+        sLoadableDataRaw* pvVar4 = new sLoadableDataRaw(sVar2);
         flagAllocation(*pvVar4);
         battleEnvLoadingCommands[1].m0_fileIndex = (short)iVar5 + 7 + (short)param_2;
         battleEnvLoadingCommands[0].m0_fileIndex = (ushort)(iVar5 + 6);
@@ -327,8 +327,8 @@ int loadBattleMechaAndEnvironment(int battleArenaId, int param_2, std::vector<u8
         Hack("This should be done after waiting for load to complete");
         param_3 = pvVar4;
         param_4 = std::vector<u8>::iterator();
-        param_5 = battleEnvLoadingCommands[1].m4_loadPtr->begin() + 4;
-        battleMechaInitData = battleEnvLoadingCommands[1].m4_loadPtr->begin() + 4;
+        param_5 = pvVar3->mData.begin() + 4;
+        battleMechaInitData = pvVar3->mData.begin() + 4;
     }
     else {
         result = -1;
