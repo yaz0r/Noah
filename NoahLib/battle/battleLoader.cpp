@@ -180,6 +180,13 @@ void batteLoaderPhase1_0() {
 std::array<s8, 3> isBattlePartySlotFilled = { 0,0,0 };
 s8 battleNumPartyMembers = 0;
 
+std::array<std::array<u8, 4>, 32> battleSlotLayout;
+
+short characterIdToTargetBitmask(uint param_1)
+{
+    return bitmaskCharacter[param_1 & 0xff];
+}
+
 void batteLoaderPhase1_1() {
     MissingCode();
     battleLoadDataVar2Bis = battleLoadDataVar2;
@@ -201,7 +208,27 @@ void batteLoaderPhase1_1() {
             battleVisualEntities[i].m0 = i;
         }
     }
+    MissingCode();
 
+    for (int i = 0; i < 32; i++) {
+        battleSlotLayout[i][0] = 0;
+        battleSlotLayout[i][1] = 0;
+    }
+
+    for (int i = 0; i < 3; i++) {
+        if (battleVisualEntities[i].m2 != 0x7F) {
+            if (battleVisualEntities[i].m4 == 0) {
+                battleVisualEntities[i].m1 = battleSlotLayout[battleVisualEntities[i].m0][0];
+                battleSlotLayout[battleVisualEntities[i].m0][1] |= characterIdToTargetBitmask(battleVisualEntities[i].m1);
+                battleSlotLayout[battleVisualEntities[i].m0][0]++;
+            }
+            else {
+                battleVisualEntities[i].m1 = 0;
+                battleSlotLayout[battleVisualEntities[i].m0 + 0x10][1] = 1;
+                battleSlotLayout[battleVisualEntities[i].m0 + 0x10][0] = 1;
+            }
+        }
+    }
 
     MissingCode();
     for (int i = 0; i < 3; i++) {
