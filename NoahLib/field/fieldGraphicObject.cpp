@@ -887,7 +887,16 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
 {
 	switch (bytecode & 0xff) {
 	case 0x84:
+    case 0x89:
 		break;
+    case 0x8A:
+        (param_1->mC_step).vx = 0;
+        (param_1->mC_step).vz = 0;
+        param_1->m18_moveSpeed = 0;
+        break;
+    case 0xB0:
+        MissingCode(); // play sound effect?
+        break;
     case 0x8D:
         setupOverrideTPage(param_1->m24_vramData->m4_vramLocation.vx, param_1->m24_vramData->m4_vramLocation.vy);
         break;
@@ -905,6 +914,42 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
 	case 0x96:
         registerSpriteCallback2_2(param_1->m6C_pointerToOwnerStructure);
 		break;
+    case 0xA9:
+    {
+        s32 magnitude = READ_LE_U8(param_3) * param_1->m2C_scale;
+        if (magnitude < 0) {
+            magnitude += 0xFFF;
+        }
+        s32 offset;
+        if ((param_1->mAC >> 2) & 1) {
+            offset = modulateSpeed(param_1, magnitude >> 0xC) * -0x10000;
+        }
+        else {
+            offset = modulateSpeed(param_1, magnitude >> 0xC) * 0x10000;
+        }
+        param_1->m0_position.vx += offset;
+        break;
+    }
+    case 0xAA:
+    {
+        s32 magnitude = READ_LE_U8(param_3) * param_1->m2C_scale;
+        if (magnitude < 0) {
+            magnitude += 0xFFF;
+        }
+        s32 offset = modulateSpeed(param_1, magnitude >> 0xC) * 0x10000;
+        param_1->m0_position.vy += offset;
+        break;
+    }
+    case 0xAB:
+    {
+        s32 magnitude = READ_LE_U8(param_3) * param_1->m2C_scale;
+        if (magnitude < 0) {
+            magnitude += 0xFFF;
+        }
+        s32 offset = modulateSpeed(param_1, magnitude >> 0xC) * 0x10000;
+        param_1->m0_position.vz += offset;
+        break;
+    }
 	case 0xB3:
 		param_1->mA8.mxB= READ_LE_U8(param_3) & 0x3F;
 		break;
@@ -916,7 +961,7 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
             if ((READ_LE_U8(param_3) & 0x80) == 0) {
                 MissingCode();
             }
-            bool bVar24 = (param_1->m3C >> 24) & 1;
+            bool applyToMatrix = (param_1->m3C >> 24) & 1;
             SFP_VEC4 local_70;
             switch (READ_LE_U8(param_3) & 0x3F)
             {
@@ -924,7 +969,13 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
                 local_70.vx = param_1->m70->m0_position.vx.getIntegerPart();
                 local_70.vy = param_1->m70->m0_position.vy.getIntegerPart();
                 local_70.vz = param_1->m70->m0_position.vz.getIntegerPart();
-                bVar24 = 0;
+                applyToMatrix = 0;
+                break;
+            case 0x18:
+                local_70.vx = param_1->m0_position.vx.getIntegerPart();
+                local_70.vy = param_1->m0_position.vy.getIntegerPart();
+                local_70.vz = param_1->m0_position.vz.getIntegerPart();
+                applyToMatrix = 0;
                 break;
             case 0x24:
                 // TODO: type-check that
@@ -932,7 +983,7 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
                 local_70.vx = param_1->m70->m0_position.vx.getIntegerPart();
                 local_70.vy = param_1->m70->m0_position.vy.getIntegerPart();
                 local_70.vz = param_1->m70->m0_position.vz.getIntegerPart();
-                bVar24 = 0;
+                applyToMatrix = 0;
                 break;
             case 0x25:
                 // TODO: type-check that
@@ -940,13 +991,13 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
                 local_70.vx = param_1->m70->m0_position.vx.getIntegerPart();
                 local_70.vy = param_1->m70->m0_position.vy.getIntegerPart();
                 local_70.vz = param_1->m70->m0_position.vz.getIntegerPart();
-                bVar24 = 0;
+                applyToMatrix = 0;
                 break;
             default:
                 assert(0);
             }
 
-            if (bVar24 != 0) {
+            if (applyToMatrix != 0) {
                 assert(0);
                 //ApplyMatrixSV(&currentRenderingMatrix, &local_70, &local_70);
                 local_70.vx = local_70.vx + (short)currentRenderingMatrix.t[0];
@@ -955,12 +1006,7 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
             }
 
             if ((READ_LE_U8(param_3) & 0x40) != 0) {
-                assert(0);
-                /*
-                *(short*)&param_1->field_0xa0 = local_70.vx;
-                *(short*)&param_1->field_0xa2 = local_70.vy;
-                *(short*)&param_1->field_0xa4 = local_70.vz;
-                * */
+                param_1->mA0 = local_70;
                 return;
             }
             (param_1->m0_position).vx = (int)local_70.vx << 0x10;
@@ -1227,6 +1273,11 @@ void pushBytecodePointerOnAnimationStack(sSpriteActorCore* param_1, sPS1Pointer 
 	param_1->m8E_stack[--param_1->m8C_stackPosition].asPs1Pointer = param_2;
 }
 
+sPS1Pointer popPointerFromAnimationStack(sSpriteActorCore* param_1)
+{
+    return param_1->m8E_stack[param_1->m8C_stackPosition++].asPs1Pointer;
+}
+
 int spriteCallback2Var0 = 0;
 
 void executeSpriteBytecode2(sSpriteActorCore* param_1)
@@ -1312,7 +1363,6 @@ void executeSpriteBytecode2(sSpriteActorCore* param_1)
 			}
 			param_1->mA8.mx1C = 0;
 			return;
-		case 0x85:
 		case 0x8E:
 		case 0x98:
 		case 0xC8:
@@ -1320,6 +1370,9 @@ void executeSpriteBytecode2(sSpriteActorCore* param_1)
 		case 0xFA:
 			assert(0);
 			break;
+        case 0x85:
+            param_1->m64_spriteByteCode = popPointerFromAnimationStack(param_1);
+            break;
         case 0xBE:
         {
             bytecode = READ_LE_U8(pEndOfOpcode);
@@ -1905,7 +1958,7 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub5(sSpriteActor* param1, int param2)
 	param1->m40 = param1->m40 & 0xffffe0ff | (param2 & 0x1f) << 8;
 }
 
-void OP_INIT_ENTITY_SCRIPT_sub0Sub7(sSpriteActor* param1, int param2)
+void OP_INIT_ENTITY_SCRIPT_sub0Sub7(sSpriteActorCore* param1, int param2)
 {
 	param1->m32 = param2;
 	computeStepFromMoveSpeed(param1);

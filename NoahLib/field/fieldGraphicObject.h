@@ -159,6 +159,7 @@ struct sSpriteActorCore : public sCustomRenderable {
     s8 m8D;
     std::array<sStackElement, 16> m8E_stack;
     u16 m9E_wait;
+    SVECTOR mA0;
     struct {
         u32 mx0 : 1;
         u32 mx1 : 10;
@@ -248,7 +249,7 @@ void SetTimeScale(sSpriteActor* param_1, int param_2); // 0x80021BCC
 void OP_INIT_ENTITY_SCRIPT_sub0Sub9(sSpriteActorCore* param_1);
 sSpriteActor* initializeSpriteActor(sSpriteActor* param_1, sSpriteActorAnimationBundle* pSetup, int clutX, int clutY, int vramX, int vramY, int param_7);
 void spriteActorSetPlayingAnimation(sSpriteActorCore* param_1, int param_2);
-void OP_INIT_ENTITY_SCRIPT_sub0Sub7(sSpriteActor* param1, int param2);
+void OP_INIT_ENTITY_SCRIPT_sub0Sub7(sSpriteActorCore* param1, int param2);
 
 void deleteFieldEntitySub4(sSpriteActor* param_1);
 sSpriteActor* createSpriteActor(sSpriteActorAnimationBundle* pSetup, int param_2, int param_3, int vramX, int vramY, int param_6);

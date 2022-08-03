@@ -19,6 +19,7 @@ sMechaDataTable1* battleLoadDataVar0;
 std::vector<u8>* battleLoadDataVar0_raw;
 std::vector<u8>::iterator battleLoadDataVar1;
 std::vector<u8>::iterator battleLoadDataVar2;
+std::vector<u8>::iterator battleLoadDataVar2Bis;
 
 std::array<sBattleVisualBuffer, 0x11> battleVisualBuffers;
 std::array<sBattleVisualEntity, 0x11> battleVisualEntities;
@@ -693,6 +694,10 @@ void battleMain() {
     checkWinConditions();
     currentBattleMode = 2;
     initBattleGraphics(&battleConfigFile3);
+
+    MissingCode();
+    battleLoadDataVar2Bis = battleLoadDataVar2;
+    MissingCode();
 
     setCameraVisibleEntities(allPlayerCharacterBitmask);
     battleRenderDebugAndMain();

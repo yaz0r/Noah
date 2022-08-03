@@ -177,6 +177,48 @@ void batteLoaderPhase1_0() {
     bBattleTickMode1 = 0;
 }
 
+std::array<s8, 3> isBattlePartySlotFilled = { 0,0,0 };
+s8 battleNumPartyMembers = 0;
+
+void batteLoaderPhase1_1() {
+    MissingCode();
+    battleLoadDataVar2Bis = battleLoadDataVar2;
+    MissingCode();
+
+    for (int i = 0; i < 3; i++) {
+        if (battleVisualEntities[i].m2 != 0x7F) {
+            isBattlePartySlotFilled[i] = 1;
+            battleNumPartyMembers++;
+        }
+        else {
+            isBattlePartySlotFilled[i] = 0;
+        }
+
+        if (battleVisualEntities[i].m4 == 0) {
+            battleVisualEntities[i].m0 = currentBattleConfig.m4[i] & 0x7F;
+        }
+        else {
+            battleVisualEntities[i].m0 = i;
+        }
+    }
+
+
+    MissingCode();
+    for (int i = 0; i < 3; i++) {
+        if (battleVisualEntities[i].m2 != 0x7F) {
+            if (battleVisualEntities[i].m4 == 0) {
+                battleVisualEntities[i].mA_X = READ_LE_S16(battleLoadDataVar2Bis + battleVisualEntities[i].m1 * 4 + battleVisualEntities[i].m0 * 0x20 + 4);
+                battleVisualEntities[i].mC_Z = READ_LE_S16(battleLoadDataVar2Bis + battleVisualEntities[i].m1 * 4 + battleVisualEntities[i].m0 * 0x20 + 6);
+            }
+            else {
+                battleVisualEntities[i].mA_X = READ_LE_S16(battleLoadDataVar2Bis + battleVisualEntities[i].m0 * 8 + 0x100);
+                battleVisualEntities[i].mC_Z = READ_LE_S16(battleLoadDataVar2Bis + battleVisualEntities[i].m0 * 8 + 0x102);
+            }
+        }
+    }
+    MissingCode();
+}
+
 void battleLoaderTick(s8 param_1) {
     switch (param_1) {
     case 0:
@@ -185,6 +227,7 @@ void battleLoaderTick(s8 param_1) {
         break;
     case 1:
         batteLoaderPhase1_0();
+        batteLoaderPhase1_1();
         MissingCode();
         break;
     case 2:
