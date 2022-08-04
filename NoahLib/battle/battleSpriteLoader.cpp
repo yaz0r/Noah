@@ -36,8 +36,16 @@ void loadBattleSpriteVram(sBattleSpriteConfigs* param_1) {
     MissingCode();
 }
 
+void createBattleSpriteActor(uint param_1, int param_2, short animationId);
+
 void createEnemiesBattleSprites(sBattleSpriteConfigs* param_1) {
-    MissingCode();
+    for (int i = 3; i < 11; i++) {
+        int monsterIndex = battleVisualEntities[i].m2;
+        int visualBufferIndex = battleVisualEntities[i].m2 + 3;
+        if ((monsterIndex < 8) && (battleVisualBuffers[visualBufferIndex].m0_spriteData)) {
+            createBattleSpriteActor(i, visualBufferIndex, 1);
+        }
+    }
 }
 
 short battleSpriteX = 0;
@@ -131,7 +139,7 @@ void initBattleSpriteActorVram(sSpriteActor* param_1, sSpriteActorAnimationBundl
     loadVramSpriteParam = 0;
 }
 
-sBattleSpriteActor* allocateBattleSpriteActor(sSpriteActorAnimationBundle* param_1, short param_2, short param_3, short param_4, short param_5, short param_6, int X, int Y, int Z, short animationId, short param_11, int param_12_00, int param_13, u32 param_14) {
+sBattleSpriteActor* allocateBattleSpriteActor(sSpriteActorAnimationBundle* param_1, short param_2, short param_3, short param_4, short param_5, short param_6, int X, int Y, int Z, short animationId, short direction, int param_12_00, int param_13, u32 param_14) {
     sBattleSpriteActor* pSprite = createCustomRenderableEntity<sBattleSpriteActor>(0x19c, nullptr, battleSpriteUpdate, battleSpriteRender, battleSpriteDelete);
 
     pSprite->m0.m4 = &pSprite->m38_spriteActor;
@@ -144,7 +152,7 @@ sBattleSpriteActor* allocateBattleSpriteActor(sSpriteActorAnimationBundle* param
     pSprite->m38_spriteActor.m0_spriteActorCore.m0_position.vz = Z << 0x10;
     *(char*)&pSprite->m38_spriteActor.m0_spriteActorCore.mB0 = animationId;
     pSprite->m38_spriteActor.m0_spriteActorCore.m3C |= 4;
-    pSprite->m38_spriteActor.m0_spriteActorCore.m32 = param_11;
+    pSprite->m38_spriteActor.m0_spriteActorCore.m32_direction = direction;
     setGraphicEntityScale(&pSprite->m38_spriteActor, 0x2000);
     pSprite->m38_spriteActor.m0_spriteActorCore.m82 = 0x2000;
     pSprite->m38_spriteActor.m0_spriteActorCore.m78 = 0;
@@ -157,9 +165,9 @@ void setSpriteActorCoreXZ(sSpriteActorCore* param_1, int X, int Z) {
     (param_1->m0_position).vx = X << 0x10;
 }
 
-void createBattleSpriteActor(uint param_1, int param_2, short param_3) {
+void createBattleSpriteActor(uint param_1, int param_2, short animationId) {
     battleVisualBuffers[param_2].bundle.init(battleVisualBuffers[param_2].m0_spriteData->begin());
-    sBattleSpriteActor* pSprite = allocateBattleSpriteActor(&battleVisualBuffers[param_2].bundle, 0, param_1 + 0x1C0, battleVisualBuffers[param_2].m4_vramX, battleVisualBuffers[param_2].m6_vramY, 0x20, 0, 0, 0, param_3, 0, 0, 0, battleVisualBuffers[param_2].m8);
+    sBattleSpriteActor* pSprite = allocateBattleSpriteActor(&battleVisualBuffers[param_2].bundle, 0, param_1 + 0x1C0, battleVisualBuffers[param_2].m4_vramX, battleVisualBuffers[param_2].m6_vramY, 0x20, 0, 0, 0, animationId, 0, 0, 0, battleVisualBuffers[param_2].m8);
 
     sSpriteActorCore* pSpriteCore = pSprite->m0.m4->getAsSpriteActorCore();
     pSpriteCore->m24_vramData->m4_vramLocation.vx = battleVisualBuffers[param_2].m4_vramX;
@@ -186,6 +194,13 @@ void createBattleSpriteActor(uint param_1, int param_2, short param_3) {
 
 void savePointCallback8Sub0Sub0_battle(sSpriteActorCore* param_1);
 
+// actual size is 14, to be filled up later
+std::array<std::array<int, 2>, 3> battlePartyFileMapping = { {
+    {0x1, 0x12},
+    {0x2, 0x13},
+    {0x4, 0x15},
+} };
+
 void createBattlePlayerSpriteActors() {
     for (int i = 0; i < 3; i++) {
         if ((battleVisualEntities[i].m2 < 0x11) && battleVisualEntities[i].m4 == 0) {
@@ -193,7 +208,10 @@ void createBattlePlayerSpriteActors() {
             battleVisualBuffers[i].m4_vramX = battleSpriteX + 0x100;
             battleSpriteX += battleSpriteWidthPerCharacter[battleVisualEntities[i].m2];
             createBattleSpriteActor(i, i, 1);
-            MissingCode();
+            sSpriteActorCore* pSprite = battleSpriteActorCores[i];
+            pSprite->m7C->m0 = battlePartyFileMapping[battleVisualEntities[i].m2][1];
+            pSprite->m20->getAsSprite()->m2C->clear();
+            pSprite->m20->getAsSprite()->m2C->resize(32);
         }
     }
 
@@ -224,14 +242,6 @@ void mainBattleSpriteCallback_phase2(sTaskHeader* param_1) {
         regCallback8(param_1, mainBattleSpriteCallback_phase3);
     }
 }
-
-
-// actual size is 14, to be filled up later
-std::array<std::array<int, 2>, 3> battlePartyFileMapping = { {
-    {0x1, 0x12},
-    {0x2, 0x13},
-    {0x4, 0x15},
-} };
 
 void setupPlayerSpriteLoadingCommands(std::array<sLoadingBatchCommands, 4>::iterator& param_1) {
     std::array<sLoadingBatchCommands, 4>::iterator start = param_1;

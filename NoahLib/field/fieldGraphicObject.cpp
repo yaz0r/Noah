@@ -499,7 +499,7 @@ void initFieldEntitySub4Sub1(sSpriteActorCore* param_1)
     param_1->m40 = 0;
     param_1->m3A = 0;
     param_1->m30 = 0;
-    param_1->m32 = 0;
+    param_1->m32_direction = 0;
     param_1->m34_currentSpriteFrame = 0;
     param_1->mA8.clear();
     param_1->m3C = param_1->m3C & 0xfe00ffe3;
@@ -693,7 +693,7 @@ void spriteBytecode2ExtendedE0(sSpriteActorCore* param_1, sPS1Pointer param_2, s
 
     pSavePointMesh->m38_spriteActorCore.m3C = pSavePointMesh->m38_spriteActorCore.m3C & 0xfffffffb | 0x4000000;
     pSavePointMesh->m38_spriteActorCore.m18_moveSpeed = param_1->m18_moveSpeed;
-    pSavePointMesh->m38_spriteActorCore.m32 = param_1->m32;
+    pSavePointMesh->m38_spriteActorCore.m32_direction = param_1->m32_direction;
     pSavePointMesh->m38_spriteActorCore.m2C_scale = param_1->m2C_scale;
     pSavePointMesh->m38_spriteActorCore.m34_currentSpriteFrame = param_1->m34_currentSpriteFrame;
     savePointCreationMode1 = (uint)param_1->mB0 >> 9 & 1;
@@ -774,8 +774,8 @@ void computeStepFromMoveSpeed(sSpriteActorCore* param1)
 	int iVar2;
 
 	iVar2 = ((param1->m18_moveSpeed >> 4) << 8) / (int)(param1->mAC >> 7 & 0xfff);
-	param1->mC_step.vx = (getAngleSin((int)param1->m32) >> 2) * iVar2 >> 6;
-	param1->mC_step.vz = -((getAngleCos((int)param1->m32) >> 2) * iVar2) >> 6;
+	param1->mC_step.vx = (getAngleSin((int)param1->m32_direction) >> 2) * iVar2 >> 6;
+	param1->mC_step.vz = -((getAngleCos((int)param1->m32_direction) >> 2) * iVar2) >> 6;
 }
 
 sStackElement* executeSpriteBytecode2Sub3(sSpriteActor* param_1, sPS1Pointer param_2)
@@ -908,7 +908,7 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
         if ((param_1->m3C & 3) != 2) {
             return;
         }
-        param_1->m20->m0_rotation[1] = param_1->m70->m32;
+        param_1->m20->m0_rotation[1] = param_1->m70->m32_direction;
         param_1->m3C = param_1->m3C | 0x10000000;
         break;
 	case 0x96:
@@ -1960,7 +1960,7 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub5(sSpriteActor* param1, int param2)
 
 void OP_INIT_ENTITY_SCRIPT_sub0Sub7(sSpriteActorCore* param1, int param2)
 {
-	param1->m32 = param2;
+	param1->m32_direction = param2;
 	computeStepFromMoveSpeed(param1);
 }
 

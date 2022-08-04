@@ -123,7 +123,7 @@ struct sSpriteActorCore : public sCustomRenderable {
     s16 m2C_scale;
     s16 m2E;
     s16 m30;
-    s16 m32;
+    s16 m32_direction;
     s16 m34_currentSpriteFrame;
     s16 m36;
     s16 m38;

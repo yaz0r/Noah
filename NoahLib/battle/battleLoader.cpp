@@ -177,7 +177,7 @@ void batteLoaderPhase1_0() {
     bBattleTickMode1 = 0;
 }
 
-std::array<s8, 3> isBattlePartySlotFilled = { 0,0,0 };
+std::array<s8, 11> isBattleSlotFilled;
 s8 battleNumPartyMembers = 0;
 
 std::array<std::array<u8, 4>, 32> battleSlotLayout;
@@ -187,18 +187,21 @@ short characterIdToTargetBitmask(uint param_1)
     return bitmaskCharacter[param_1 & 0xff];
 }
 
+std::array<s8, 11> battleMonsterMapping;
+
 void batteLoaderPhase1_1() {
     MissingCode();
     battleLoadDataVar2Bis = battleLoadDataVar2;
     MissingCode();
 
+    //party
     for (int i = 0; i < 3; i++) {
         if (battleVisualEntities[i].m2 != 0x7F) {
-            isBattlePartySlotFilled[i] = 1;
+            isBattleSlotFilled[i] = 1;
             battleNumPartyMembers++;
         }
         else {
-            isBattlePartySlotFilled[i] = 0;
+            isBattleSlotFilled[i] = 0;
         }
 
         if (battleVisualEntities[i].m4 == 0) {
@@ -208,41 +211,101 @@ void batteLoaderPhase1_1() {
             battleVisualEntities[i].m0 = i;
         }
     }
-    MissingCode();
 
-    for (int i = 0; i < 32; i++) {
-        battleSlotLayout[i][0] = 0;
-        battleSlotLayout[i][1] = 0;
+    battleNumPartyMembers--; // why?
+
+    // monsters slots
+    for (int i = 3; i < 11; i++) {
+        battleVisualEntities[i].m2 = currentBattleConfig.m4[i + 1] & 0x7F;
+        if (battleVisualEntities[i].m2 == 0x7F) {
+            battleEntities[i].m0_base.m26_MaxHP = 0;
+            battleEntities[i].m0_base.m24_HP = 0;
+            battleVisualEntities[i].m3 = 0;
+            battleVisualEntities[i].m4 = 0;
+            isBattleSlotFilled[i] = 0;
+        }
+        else {
+            battleVisualEntities[i].m3 = currentBattleConfig.m10[i - 3] & 0x80;
+            battleVisualEntities[i].m4 = currentBattleConfig.m4[i + 1] & 0x80;
+            battleVisualEntities[i].m5 = currentBattleConfig.m10[i - 3] & 0x1;
+            isBattleSlotFilled[i] = 1;
+            battleVisualEntities[i].m0 = currentBattleConfig.m18[i - 3] & 0x7F;
+        }
+        battleMonsterMapping[i] = battleVisualEntities[i].m2 + 1;
     }
 
-    for (int i = 0; i < 3; i++) {
-        if (battleVisualEntities[i].m2 != 0x7F) {
-            if (battleVisualEntities[i].m4 == 0) {
-                battleVisualEntities[i].m1 = battleSlotLayout[battleVisualEntities[i].m0][0];
-                battleSlotLayout[battleVisualEntities[i].m0][1] |= characterIdToTargetBitmask(battleVisualEntities[i].m1);
-                battleSlotLayout[battleVisualEntities[i].m0][0]++;
+    // init the battleSlotLayout
+    {
+        // reset
+        for (int i = 0; i < 32; i++) {
+            battleSlotLayout[i][0] = 0;
+            battleSlotLayout[i][1] = 0;
+        }
+
+        // party members
+        for (int i = 0; i < 3; i++) {
+            if (battleVisualEntities[i].m2 != 0x7F) {
+                if (battleVisualEntities[i].m4 == 0) {
+                    battleVisualEntities[i].m1 = battleSlotLayout[battleVisualEntities[i].m0][0];
+                    battleSlotLayout[battleVisualEntities[i].m0][1] |= characterIdToTargetBitmask(battleVisualEntities[i].m1);
+                    battleSlotLayout[battleVisualEntities[i].m0][0]++;
+                }
+                else {
+                    battleVisualEntities[i].m1 = 0;
+                    battleSlotLayout[battleVisualEntities[i].m0 + 0x10][1] = 1;
+                    battleSlotLayout[battleVisualEntities[i].m0 + 0x10][0] = 1;
+                }
             }
-            else {
-                battleVisualEntities[i].m1 = 0;
-                battleSlotLayout[battleVisualEntities[i].m0 + 0x10][1] = 1;
-                battleSlotLayout[battleVisualEntities[i].m0 + 0x10][0] = 1;
+        }
+
+        // monsters
+        for (int i = 3; i < 11; i++) {
+            if (battleVisualEntities[i].m2 != 0x7F) {
+                if (battleVisualEntities[i].m4 == 0) {
+                    battleVisualEntities[i].m1 = battleSlotLayout[battleVisualEntities[i].m0 + 8][0];
+                    battleSlotLayout[battleVisualEntities[i].m0][1] |= characterIdToTargetBitmask(battleVisualEntities[i].m1);
+                    battleSlotLayout[battleVisualEntities[i].m0][0]++;
+                }
+                else {
+                    battleVisualEntities[i].m1 = 0;
+                    battleSlotLayout[battleVisualEntities[i].m0 + 0x18][1] = 1;
+                    battleSlotLayout[battleVisualEntities[i].m0 + 0x18][0] = 1;
+                }
             }
         }
     }
 
-    MissingCode();
-    for (int i = 0; i < 3; i++) {
-        if (battleVisualEntities[i].m2 != 0x7F) {
-            if (battleVisualEntities[i].m4 == 0) {
-                battleVisualEntities[i].mA_X = READ_LE_S16(battleLoadDataVar2Bis + battleVisualEntities[i].m1 * 4 + battleVisualEntities[i].m0 * 0x20 + 4);
-                battleVisualEntities[i].mC_Z = READ_LE_S16(battleLoadDataVar2Bis + battleVisualEntities[i].m1 * 4 + battleVisualEntities[i].m0 * 0x20 + 6);
+    // setup locations on field
+    {
+        // party
+        for (int i = 0; i < 3; i++) {
+            if (battleVisualEntities[i].m2 != 0x7F) {
+                if (battleVisualEntities[i].m4 == 0) {
+                    battleVisualEntities[i].mA_X = READ_LE_S16(battleLoadDataVar2Bis + battleVisualEntities[i].m1 * 4 + battleVisualEntities[i].m0 * 0x20 + 4);
+                    battleVisualEntities[i].mC_Z = READ_LE_S16(battleLoadDataVar2Bis + battleVisualEntities[i].m1 * 4 + battleVisualEntities[i].m0 * 0x20 + 6);
+                }
+                else {
+                    battleVisualEntities[i].mA_X = READ_LE_S16(battleLoadDataVar2Bis + battleVisualEntities[i].m0 * 8 + 0x100);
+                    battleVisualEntities[i].mC_Z = READ_LE_S16(battleLoadDataVar2Bis + battleVisualEntities[i].m0 * 8 + 0x102);
+                }
             }
-            else {
-                battleVisualEntities[i].mA_X = READ_LE_S16(battleLoadDataVar2Bis + battleVisualEntities[i].m0 * 8 + 0x100);
-                battleVisualEntities[i].mC_Z = READ_LE_S16(battleLoadDataVar2Bis + battleVisualEntities[i].m0 * 8 + 0x102);
+        }
+
+        // monsters
+        for (int i = 3; i < 11; i++) {
+            if (battleVisualEntities[i].m2 != 0x7F) {
+                if (battleVisualEntities[i].m4 == 0) {
+                    battleVisualEntities[i].mA_X = READ_LE_S16(battleLoadDataVar2Bis + battleVisualEntities[i].m1 * 4 + battleVisualEntities[i].m0 * 0x20 + 0x10);
+                    battleVisualEntities[i].mC_Z = READ_LE_S16(battleLoadDataVar2Bis + battleVisualEntities[i].m1 * 4 + battleVisualEntities[i].m0 * 0x20 + 0x12);
+                }
+                else {
+                    battleVisualEntities[i].mA_X = READ_LE_S16(battleLoadDataVar2Bis + battleVisualEntities[i].m0 * 8 + 0x104);
+                    battleVisualEntities[i].mC_Z = READ_LE_S16(battleLoadDataVar2Bis + battleVisualEntities[i].m0 * 8 + 0x106);
+                }
             }
         }
     }
+
     MissingCode();
 }
 
