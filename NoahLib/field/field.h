@@ -415,6 +415,8 @@ void clearShapeTransfertTableEntry(int param_1);
 void uploadCharacterSprites();
 void shapeTransfert();
 
+void uploadNpcSpriteSheet(std::vector<u8>::iterator pImageData, int x, int y);
+
 void setFieldDrawEnvClip(short x, short y, short w, short h);
 
 void syncKernelAndFieldStates();

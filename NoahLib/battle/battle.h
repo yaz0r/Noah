@@ -1,5 +1,7 @@
 #pragma once
 
+#include <optional>
+
 #include "sprite/spriteSetup.h"
 #include "kernel/filesystem.h"
 
@@ -21,7 +23,7 @@ extern s8 battleTransitionEffect;
 extern s8 currentBattleLoaderTransitionEffect;
 
 struct sBattleVisualBuffer {
-    std::vector<u8>* m0_spriteData;
+    std::optional<std::vector<u8>::iterator> m0_spriteData;
     s16 m4_vramX;
     s16 m6_vramY;
     u32 m8 = 0;
@@ -40,6 +42,8 @@ struct sBattleVisualEntity {
     s8 m6_direction;
     s16 mA_X;
     s16 mC_Z;
+
+    // size 0x1C
 };
 extern std::array<sBattleVisualEntity, 0x11> battleVisualEntities;
 

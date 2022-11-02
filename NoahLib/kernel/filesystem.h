@@ -31,6 +31,12 @@ struct sLoadableData {
 
 struct sLoadableDataRaw : public sLoadableData {
     virtual void init(std::vector<u8>& data) override {
+        if (mData.size() == data.size()) { // TODO: to prevent reallocation that would break iterators
+            for (int i = 0; i < data.size(); i++) {
+                mData[i] = data[i];
+            }
+            return;
+        }
         mData = data;
     }
     sLoadableDataRaw() {

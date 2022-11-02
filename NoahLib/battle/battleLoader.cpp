@@ -305,8 +305,6 @@ void batteLoaderPhase1_1() {
             }
         }
     }
-
-    MissingCode();
 }
 
 void battleLoaderTick(s8 param_1) {

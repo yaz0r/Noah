@@ -304,7 +304,9 @@ int getFileSizeAligned(int fileIndex)
     {
         size2 = size + 6;
     }
-    return size2 & ~3;
+    int finalSize = size2 & ~3;
+    finalSize += 0x10; // TODO: 0x10 because reading past the end of the buffer in field files
+    return finalSize;
 }
 
 int getFileStartSector(int fileIndex)

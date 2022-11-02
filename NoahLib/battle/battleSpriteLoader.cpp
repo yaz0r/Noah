@@ -32,8 +32,55 @@ T* battleLoaderAllocateMainBattleSprite(sSavePointMesh1* param_1, int param_2)
     return psVar1;
 }
 
+std::vector<u8> battleSpriteLoadTempBuffer;
+
+struct sBattleUploadSprite {
+    std::array<u16, 11> m0;
+    std::array<s32, 11> m20;
+};
+
+int getSpriteNumVerticalStrides(std::vector<u8>::iterator data) {
+    return READ_LE_U32(data);
+}
+
 void loadBattleSpriteVram(sBattleSpriteConfigs* param_1) {
-    MissingCode();
+    sBattleUploadSprite spriteIndicies;
+
+    for (int i = 0; i < 11; i++) {
+        spriteIndicies.m20[i] = battleVisualEntities[i].m2;
+    }
+
+    int numCurrentEntity = 0;
+    int numMaxEntity = param_1->m0_numEntities;
+    int currentSpriteX = param_1->m1 * 0x40 + 0x140;
+    int currentSpriteSlot = 0;
+    int currentSpriteEntityId = 0;
+
+    battleSpriteLoadTempBuffer = param_1->m_spriteData;
+
+    for (int numCurrentEntity = 0; numCurrentEntity < numMaxEntity; numCurrentEntity++) {
+        if (param_1->m8[numCurrentEntity].m8_isMecha == 0) {
+            int spriteSlot = param_1->m8[numCurrentEntity].m4_spriteDataOffset;
+            if (spriteSlot > 7) {
+                std::vector<u8>::iterator pSpriteData = param_1->begin() + param_1->m8[numCurrentEntity].m4_spriteDataOffset;
+                uploadNpcSpriteSheet(pSpriteData, currentSpriteX, 0x100);
+                spriteIndicies.m0[currentSpriteSlot] = currentSpriteX;
+                currentSpriteX += getSpriteNumVerticalStrides(pSpriteData) * 0x40;
+                spriteSlot = currentSpriteSlot++;
+                if (currentSpriteX > 0x2C0) {
+                    currentSpriteX = 0;
+                }
+            }
+
+            battleVisualBuffers[3 + spriteSlot].m6_vramY = 0x100;
+            battleVisualBuffers[3 + spriteSlot].m0_spriteData = param_1->begin() + param_1->m8[currentSpriteEntityId++].m0_spriteControlOffset;
+            battleVisualBuffers[3 + spriteSlot].m4_vramX = spriteIndicies.m0[spriteSlot];
+            battleVisualBuffers[3 + spriteSlot].m8 = param_1->m8[numCurrentEntity].mB;
+        }
+        else {
+            assert(0);
+        }
+    }
 }
 
 void createBattleSpriteActor(uint param_1, int param_2, short animationId);
@@ -139,13 +186,13 @@ void initBattleSpriteActorVram(sSpriteActor* param_1, sSpriteActorAnimationBundl
     loadVramSpriteParam = 0;
 }
 
-sBattleSpriteActor* allocateBattleSpriteActor(sSpriteActorAnimationBundle* param_1, short param_2, short param_3, short param_4, short param_5, short param_6, int X, int Y, int Z, short animationId, short direction, int param_12_00, int param_13, u32 param_14) {
+sBattleSpriteActor* allocateBattleSpriteActor(sSpriteActorAnimationBundle* param_1, short clutX, short clutY, short vramX, short vramY, short param_6, int X, int Y, int Z, short animationId, short direction, int param_12_00, int param_13, u32 param_14) {
     sBattleSpriteActor* pSprite = createCustomRenderableEntity<sBattleSpriteActor>(0x19c, nullptr, battleSpriteUpdate, battleSpriteRender, battleSpriteDelete);
 
     pSprite->m0.m4 = &pSprite->m38_spriteActor;
     pSprite->m1C.m4 = &pSprite->m38_spriteActor;
     pSprite->m1C.m0_owner = nullptr;
-    initBattleSpriteActorVram(&pSprite->m38_spriteActor, param_1, (int)param_2, (int)param_3, (int)param_4, (int)param_5, (int)param_6, param_14);
+    initBattleSpriteActorVram(&pSprite->m38_spriteActor, param_1, clutX, clutY, vramX, vramY, (int)param_6, param_14);
     pSprite->m38_spriteActor.m0_spriteActorCore.m6C_pointerToOwnerStructure = pSprite;
     pSprite->m38_spriteActor.m0_spriteActorCore.m0_position.vx = X << 0x10;
     pSprite->m38_spriteActor.m0_spriteActorCore.m0_position.vy = Y << 0x10;
@@ -165,29 +212,29 @@ void setSpriteActorCoreXZ(sSpriteActorCore* param_1, int X, int Z) {
     (param_1->m0_position).vx = X << 0x10;
 }
 
-void createBattleSpriteActor(uint param_1, int param_2, short animationId) {
-    battleVisualBuffers[param_2].bundle.init(battleVisualBuffers[param_2].m0_spriteData->begin());
-    sBattleSpriteActor* pSprite = allocateBattleSpriteActor(&battleVisualBuffers[param_2].bundle, 0, param_1 + 0x1C0, battleVisualBuffers[param_2].m4_vramX, battleVisualBuffers[param_2].m6_vramY, 0x20, 0, 0, 0, animationId, 0, 0, 0, battleVisualBuffers[param_2].m8);
+void createBattleSpriteActor(uint entityIndex, int visualBufferIndex, short animationId) {
+    battleVisualBuffers[visualBufferIndex].bundle.init(*battleVisualBuffers[visualBufferIndex].m0_spriteData);
+    sBattleSpriteActor* pSprite = allocateBattleSpriteActor(&battleVisualBuffers[visualBufferIndex].bundle, 0, entityIndex + 0x1C0, battleVisualBuffers[visualBufferIndex].m4_vramX, battleVisualBuffers[visualBufferIndex].m6_vramY, 0x20, 0, 0, 0, animationId, 0, 0, 0, battleVisualBuffers[visualBufferIndex].m8);
 
     sSpriteActorCore* pSpriteCore = pSprite->m0.m4->getAsSpriteActorCore();
-    pSpriteCore->m24_vramData->m4_vramLocation.vx = battleVisualBuffers[param_2].m4_vramX;
-    pSpriteCore->m24_vramData->m4_vramLocation.vy = battleVisualBuffers[param_2].m6_vramY;
+    pSpriteCore->m24_vramData->m4_vramLocation.vx = battleVisualBuffers[visualBufferIndex].m4_vramX;
+    pSpriteCore->m24_vramData->m4_vramLocation.vy = battleVisualBuffers[visualBufferIndex].m6_vramY;
     MissingCode(); // very confusing code here
     pSpriteCore->m7C->mE_vramLocation = pSpriteCore->m24_vramData->m4_vramLocation;
 
-    battleSpriteActorCores[param_1] = pSprite->m0.m4->getAsSpriteActorCore();
-    battleSpriteActors[param_1] = pSprite;
+    battleSpriteActorCores[entityIndex] = pSprite->m0.m4->getAsSpriteActorCore();
+    battleSpriteActors[entityIndex] = pSprite;
 
-    pSpriteCore->mA8.mx1E = param_1;
-    pSpriteCore->mAC = (pSpriteCore->mAC & ~3) | ((param_1 >> 2) & 3);
+    pSpriteCore->mA8.mx1E = entityIndex;
+    pSpriteCore->mAC = (pSpriteCore->mAC & ~3) | ((entityIndex >> 2) & 3);
 
-    setSpriteActorCoreXZ(pSpriteCore, battleVisualEntities[param_1].mA_X, battleVisualEntities[param_1].mC_Z);
+    setSpriteActorCoreXZ(pSpriteCore, battleVisualEntities[entityIndex].mA_X, battleVisualEntities[entityIndex].mC_Z);
 
-    s32 direction = (battleVisualEntities[param_1].m6_direction != 0) << 0xB;
+    s32 direction = (battleVisualEntities[entityIndex].m6_direction != 0) << 0xB;
 
     setSpriteActorAngle(pSpriteCore, direction);
     OP_INIT_ENTITY_SCRIPT_sub0Sub7(pSpriteCore, direction);
-    if (battleVisualEntities[param_1].m3) {
+    if (battleVisualEntities[entityIndex].m3) {
         pSpriteCore->m9E_wait = 0;
     }
 }
@@ -238,7 +285,7 @@ void mainBattleSpriteCallback_phase2(sTaskHeader* param_1) {
     setCurrentDirectory(0x2c, 0);
     if (!isCDBusy()) {
         createBattlePlayerSpriteActors();
-        MissingCode();
+        MissingCode(); // load battle music stuff
         regCallback8(param_1, mainBattleSpriteCallback_phase3);
     }
 }
@@ -252,7 +299,7 @@ void setupPlayerSpriteLoadingCommands(std::array<sLoadingBatchCommands, 4>::iter
             sLoadableDataRaw* pNewLoadable = new sLoadableDataRaw(getFileSizeAligned(param_1->m0_fileIndex));
             param_1->m4_loadPtr = pNewLoadable;
 
-            battleVisualBuffers[i].m0_spriteData = &pNewLoadable->mData;
+            battleVisualBuffers[i].m0_spriteData = pNewLoadable->mData.begin();
             battleVisualBuffers[i].m8 = 0;
 
             param_1++;
