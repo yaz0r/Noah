@@ -401,6 +401,7 @@ extern s16 updateCharacterVar1;
 
 extern int linkOTIndex;
 extern int runningOnDTL;
+extern int* pRunningOnDTL;
 
 void setCurrentRenderingMatrix(MATRIX* pMatrix);
 void renderSpriteActor(struct sSpriteActorCore* pSpriteSheet, sTag* pTag);
@@ -499,6 +500,12 @@ bool submitModelForRendering(sModelBlock* param_1, std::vector<sTag*>& param_2, 
 
 void doPCCollisionCheckAfterLoading();
 void runInitScriptForNewlyLoadedPC(uint param_1);
+
+bool isControllerConnected(int port);
+void decompressPauseSignToVram(short param_1, short param_2);
+void pauseMusic();
+void resumeMusic();
+int getInputOverflowed();
 
 extern std::array<sGameController, 2> newPadButtonForScripts;
 

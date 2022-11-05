@@ -26,7 +26,7 @@ struct sGameStateA42
 struct sGameState
 {
     std::array<std::vector<u8>, 31> m0_names;
-    std::array<sGameStateA4, 11> m26C;
+    std::array<sGameStateA4, 11> m26C_party;
     std::array<sGameStateA42, 20> m978_gears;
     std::array<s16, 6> m1820_worldmapPosition;
     SVECTOR m182C;

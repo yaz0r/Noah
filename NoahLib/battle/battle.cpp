@@ -3,6 +3,7 @@
 #include "kernel/filesystem.h"
 #include "kernel/graphics.h"
 #include "battleRenderContext.h"
+#include "battleDebugSelector.h"
 #include "kernel/memory.h"
 #include "battleStartEffect.h"
 #include "battleConfig.h"
@@ -14,6 +15,8 @@
 
 s8 battleDebugDisplay = 0;
 s8 requestedBattleConfig = 0;
+bool battleIsPaused = false;
+u8 battleInputButton = 0;
 
 sMechaDataTable1* battleLoadDataVar0;
 sLoadableDataRaw* battleLoadDataVar0_raw;
@@ -367,7 +370,9 @@ void startBattleLoader(int param_1)
         battleStartEffect();
         break;
     default:
-        assert(0);
+        Hack("Unimplemented battle start effect, using default");
+        battleStartEffect();
+        break;
     }
 
     waitReadCompletion(0);
@@ -677,6 +682,8 @@ void setCameraVisibleEntities(uint playerBitmask) {
 }
 
 u16 allPlayerCharacterBitmask = 0;
+u8 battleInitVar0 = 0;
+u8 battleInitVar1 = 0;
 
 void battleMain() {
     battleVar0 = new sBattleVar0;
@@ -686,6 +693,18 @@ void battleMain() {
     memset(battleVar0, 0, sizeof(sBattleVar0));
     memset(battleVar1, 0, sizeof(sBattleVar1));
     memset(battleVar2, 0, sizeof(sBattleVar2));
+
+    // TODO: more logic here
+    {
+        int battleSelected = battleInitVar0 - 1;
+        if (battleInitVar0 == '\0') {
+            battleDebugSelector();
+        }
+        else {
+            battleInitVar0 = '\0';
+            requestedBattleConfig = battleSelected;
+        }
+    }
 
     MissingCode();
 
@@ -728,4 +747,143 @@ void battleEntryPoint(void) {
         battleInitVar1 = 1;
     }*/
     bootGame(0);
+}
+
+void playBattleSound(int) {
+    MissingCode();
+}
+
+s8 newBattleInputButton2;
+s8 previousNewBattleInputButton;
+
+void battleHandleInput(void) {
+    u32 savedPlayTime;
+    bool isPaused = true;
+    bool pauseSignDisplayed = false;
+    do {
+        if (isControllerConnected(0) == 0) {
+            if (!pauseSignDisplayed) {
+                decompressPauseSignToVram(0x88, 100);
+                decompressPauseSignToVram(0x88, 0x144);
+                pauseSignDisplayed = true;
+                pauseMusic();
+                savedPlayTime = playTimeInVsync;
+            }
+        }
+        else {
+            isPaused = false;
+            if (pauseSignDisplayed) {
+                resumeMusic();
+                playTimeInVsync = savedPlayTime;
+            }
+        }
+    } while (isPaused);
+
+    int newBattleInputButton = 8;
+
+    do {
+        if (!getInputOverflowed()) {
+            while (loadInputFromVSyncBuffer()) {
+                MissingCode();
+                if (battleIsPaused == false) {
+                    if (newPadButtonForField & controllerButtons::RIGHT) {
+                        playBattleSound(0x4C);
+                        newBattleInputButton = 0;
+                        previousNewBattleInputButton = newBattleInputButton2;
+                        newBattleInputButton2 = newBattleInputButton;
+                        break;
+                    }
+                    else if (newPadButtonForField & controllerButtons::DOWN) {
+                        playBattleSound(0x4C);
+                        newBattleInputButton = 1;
+                        previousNewBattleInputButton = newBattleInputButton2;
+                        newBattleInputButton2 = newBattleInputButton;
+                        break;
+                    }
+                    else if (newPadButtonForField & controllerButtons::LEFT) {
+                        playBattleSound(0x4C);
+                        newBattleInputButton = 2;
+                        previousNewBattleInputButton = newBattleInputButton2;
+                        newBattleInputButton2 = newBattleInputButton;
+                        break;
+                    }
+                    else if (newPadButtonForField & controllerButtons::UP) {
+                        playBattleSound(0x4C);
+                        newBattleInputButton = 3;
+                        previousNewBattleInputButton = newBattleInputButton2;
+                        newBattleInputButton2 = newBattleInputButton;
+                        break;
+                    }
+                    else if (newPadButtonForField & controllerButtons::INTERACT) {
+                        newBattleInputButton = 4;
+                        playBattleSound(0x4d);
+                        break;
+                    }
+                    else if (newPadButtonForDialogs & controllerButtons::CROSS) {
+                        newBattleInputButton = 5;
+                        playBattleSound(0x4e);
+                        break;
+                    }
+                    else if (newPadButtonForDialogs & controllerButtons::JUMP) {
+                        newBattleInputButton = 6;
+                        playBattleSound(0x4d);
+                    }
+                    else if (newPadButtonForDialogs & controllerButtons::TRIANGLE) {
+                        newBattleInputButton = 7;
+                        playBattleSound(0x4d);
+                        break;
+                    }
+                    else if (newPadButtonForDialogs & 1) {
+                        newBattleInputButton = 0xc;
+                        if (*pRunningOnDTL != -1) {
+                            assert(0);
+                        }
+                        break;
+                    }
+                    else if (newPadButtonForDialogs & controllerButtons::R1) {
+                        if (*pRunningOnDTL != -1) {
+                            assert(0);
+                        }
+                        break;
+                    }
+                    else if (newPadButtonForDialogs & controllerButtons::SELECT) {
+                        newBattleInputButton = 0xd;
+                        playBattleSound(0x4d);
+                        break;
+                    }
+                    else if ((*pRunningOnDTL != -1) && (newPadButtonForField & controllerButtons::R1) && (newPadButtonForField & controllerButtons::L1)) { // debug command
+                        assert(0);
+                    }
+                    else if (newPadButtonForDialogs & controllerButtons::START) {
+                        newBattleInputButton = 0xe;
+                        if (battleTimeEnabled != '\0') {
+                            if (battleIsPaused == false) {
+                                decompressPauseSignToVram(0x88, 100);
+                                decompressPauseSignToVram(0x88, 0x144);
+                                pauseMusic();
+                                battleIsPaused = true;
+                                savedPlayTime = playTimeInVsync;
+                            }
+                            else {
+                                resumeMusic();
+                                battleIsPaused = false;
+                                playTimeInVsync = savedPlayTime;
+                            }
+                        }
+                        break;
+                    }
+                }
+
+            }
+        }
+        else {
+            resetInputs();
+        }
+
+        if (!battleIsPaused) {
+            battleInputButton = newBattleInputButton;
+            return;
+        }
+
+    } while (true);
 }

@@ -352,3 +352,7 @@ void printDebugTextOnScreen(sTag* param_1) {
         }
     }
 }
+
+void deinitDebugFont() {
+    MissingCode();
+}

@@ -242,10 +242,21 @@ void createBattleSpriteActor(uint entityIndex, int visualBufferIndex, short anim
 void savePointCallback8Sub0Sub0_battle(sSpriteActorCore* param_1);
 
 // actual size is 14, to be filled up later
-std::array<std::array<int, 2>, 3> battlePartyFileMapping = { {
+std::array<std::array<int, 2>, 14> battlePartyFileMapping = { {
     {0x1, 0x12},
     {0x2, 0x13},
     {0x4, 0x15},
+    {0x3, 0x14},
+    {0x5, 0x16},
+    {0x6, 0x17},
+    {0x7, 0x18},
+    {0x8, 0x19},
+    {0x9, 0x1A},
+    {0xA, 0x1B},
+    {0xB, 0x1C},
+    {0x1, 0x12},
+    {0x1, 0x12},
+    {0x1, 0x12},
 } };
 
 void createBattlePlayerSpriteActors() {

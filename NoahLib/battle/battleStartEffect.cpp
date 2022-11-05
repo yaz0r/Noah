@@ -341,7 +341,7 @@ int loadBattleMechaAndEnvironment(int battleArenaId, int param_2, sLoadableDataR
 }
 
 void startBattleLoadingDuringEffect2() {
-    loadBattleMechaAndEnvironment(currentBattleConfig.m2, 0, battleLoadDataVar0_raw, battleLoadDataVar1, battleLoadDataVar2);
+    loadBattleMechaAndEnvironment(currentBattleConfig.m2_arenaId, 0, battleLoadDataVar0_raw, battleLoadDataVar1, battleLoadDataVar2);
 }
 
 void battleStartEffect() {

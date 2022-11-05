@@ -33,5 +33,6 @@ struct sDebugText {
 };
 
 sDebugText* initDebugFont(uint x, ushort y, uint w, ushort h, int bufferSize, ushort flags, uint param_7, int param_8, uint param_9, int param_10, void* font);
+void deinitDebugFont();
 void logToScreen(const char* fmt, ...);
 void printDebugTextOnScreen(sTag* param_1);

@@ -104,7 +104,7 @@ void loadPartyMembers() {
 
     for (int i = 0; i < 3; i++) {
         if (battleCharacters[i] != 0x7F) {
-            battleEntities[i].m0_base = gameState.m26C[battleCharacters[i]];
+            battleEntities[i].m0_base = gameState.m26C_party[battleCharacters[i]];
 
             if (battleForceOnGear && (i - 1U < 2)) {
                 battleEntities[i].m0_base.m78_partyData_gearNum = 0x11;

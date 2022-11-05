@@ -286,7 +286,7 @@ void initMenuGlobals() {
         else {
             gMenuContext->m33C->m30[i] = partyMemberIndex;
             gMenuContext->m32B++;
-            if (gameState.m26C[gMenuContext->m33C->m30[i]].m78_partyData_gearNum != -1) {
+            if (gameState.m26C_party[gMenuContext->m33C->m30[i]].m78_partyData_gearNum != -1) {
                 gMenuContext->m33C->m60[i] = 1;
                 gMenuContext->m33B++;
             }
@@ -1791,7 +1791,7 @@ void updateCharacterHP(uint slot, uint characterId, short X, short Y) {
     int characterInfocardHPPositionY = 0x20;
 
     sMenuContext_39C* pSlot = gMenuContext->m39C[slot];
-    fillStringDisplayBuffer(gameState.m26C[characterId].m24_HP);
+    fillStringDisplayBuffer(gameState.m26C_party[characterId].m24_HP);
     pSlot->m1273_HPLength = 0;
     for (int i = 0; i < 3; i++) {
         if (gMenuContext->m31C_stringDisplayBuffer[i + 6] != 0xff) {
@@ -1802,7 +1802,7 @@ void updateCharacterHP(uint slot, uint characterId, short X, short Y) {
     int characterInfocardMaxHPPositionX = 0x60;
     int characterInfocardMaxHPPositionY = 0x20;
 
-    fillStringDisplayBuffer(gameState.m26C[characterId].m26_MaxHP);
+    fillStringDisplayBuffer(gameState.m26C_party[characterId].m26_MaxHP);
     pSlot->m1274_MaxHPLength = 0;
     for (int i = 0; i < 3; i++) {
         if (gMenuContext->m31C_stringDisplayBuffer[i + 6] != 0xff) {
@@ -1816,7 +1816,7 @@ void updateCharacterMP(uint slot, uint characterId, short X, short Y) {
     int characterInfocardMPPositionY = 0x28;
 
     sMenuContext_39C* pSlot = gMenuContext->m39C[slot];
-    fillStringDisplayBuffer(gameState.m26C[characterId].m28_MP);
+    fillStringDisplayBuffer(gameState.m26C_party[characterId].m28_MP);
     pSlot->m1275_MPLength = 0;
     for (int i = 0; i < 2; i++) {
         if (gMenuContext->m31C_stringDisplayBuffer[i + 7] != 0xff) {
@@ -1827,7 +1827,7 @@ void updateCharacterMP(uint slot, uint characterId, short X, short Y) {
     int characterInfocardMaxMPPositionX = 0x60;
     int characterInfocardMaxMPPositionY = 0x28;
 
-    fillStringDisplayBuffer(gameState.m26C[characterId].m28_MP);
+    fillStringDisplayBuffer(gameState.m26C_party[characterId].m28_MP);
     pSlot->m1276_MaxMPLength = 0;
     for (int i = 0; i < 2; i++) {
         if (gMenuContext->m31C_stringDisplayBuffer[i + 7] != 0xff) {
@@ -1838,7 +1838,7 @@ void updateCharacterMP(uint slot, uint characterId, short X, short Y) {
 
 void updateCharacterXP(uint slot, uint characterId, short X, short Y) {
     sMenuContext_39C* pSlot = gMenuContext->m39C[slot];
-    fillStringDisplayBuffer(gameState.m26C[characterId].m1C);
+    fillStringDisplayBuffer(gameState.m26C_party[characterId].m1C);
     pSlot->m1277_E10Length = 0;
     for (int i = 0; i < 7; i++) {
         if (gMenuContext->m31C_stringDisplayBuffer[i + 2] != 0xff) {
@@ -1846,7 +1846,7 @@ void updateCharacterXP(uint slot, uint characterId, short X, short Y) {
         }
     }
 
-    fillStringDisplayBuffer(gameState.m26C[characterId].m20);
+    fillStringDisplayBuffer(gameState.m26C_party[characterId].m20);
     pSlot->m1278_E10Length2 = 0;
     for (int i = 0; i < 7; i++) {
         if (gMenuContext->m31C_stringDisplayBuffer[i + 2] != 0xff) {
@@ -1857,7 +1857,7 @@ void updateCharacterXP(uint slot, uint characterId, short X, short Y) {
 
 void updateCharacterLevel(uint slot, uint characterId, short X, short Y) {
     sMenuContext_39C* pSlot = gMenuContext->m39C[slot];
-    fillStringDisplayBuffer(gameState.m26C[characterId].m3A_Level);
+    fillStringDisplayBuffer(gameState.m26C_party[characterId].m3A_Level);
     pSlot->m1271_LevelLength = 0;
     for (int i = 0; i < 3; i++) {
         if (gMenuContext->m31C_stringDisplayBuffer[i + 6] != 0xff) {
@@ -1865,7 +1865,7 @@ void updateCharacterLevel(uint slot, uint characterId, short X, short Y) {
         }
     }
 
-    fillStringDisplayBuffer(gameState.m26C[characterId].m3B_Level2);
+    fillStringDisplayBuffer(gameState.m26C_party[characterId].m3B_Level2);
     pSlot->m1272_Level2Length = 0;
     for (int i = 0; i < 3; i++) {
         if (gMenuContext->m31C_stringDisplayBuffer[i + 6] != 0xff) {
@@ -2132,7 +2132,7 @@ void setupMenu0()
     for (int i = 0; i < 3; i++) {
         if (gMenuContext->m33C->m30[i] != -1) {
             renderCharacterNameInVram(gMenuContext->m33C->m30[i], i * 2);
-            s8 gearIndex = gameState.m26C[(byte)gMenuContext->m33C->m30[i]].m78_partyData_gearNum;
+            s8 gearIndex = gameState.m26C_party[(byte)gMenuContext->m33C->m30[i]].m78_partyData_gearNum;
             if (gearIndex == -1)
             {
                 renderCharacterNameInVram(-1, 6 + 2 * i);

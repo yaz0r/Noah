@@ -956,6 +956,11 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
 	case 0xB4:
 		pushByteOnAnimationStack(param_1, READ_LE_U8(param_3));
 		break;
+    case 0xb5:
+        if ((param_1->m3C & 3) != 0) {
+            setGraphicEntityScale(param_1, (short)((READ_LE_U8(param_3) << 0x18) >> 0x10));
+        }
+        break;
     case 0xBC: // VERY Complicated, used by save points
         {
             if ((READ_LE_U8(param_3) & 0x80) == 0) {
@@ -1067,6 +1072,9 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
 			param_1->m7C->mC = READ_LE_U8(param_3);
 		}
 		break;
+    case 0xCC:
+        MissingCode();
+        break;
     case 0xCE: // save point spinning
         {
             sFieldEntitySub4_B4_alt* psVar22 = param_1->m20->getAsObject();

@@ -10,12 +10,18 @@ extern std::vector<u8>::iterator battleMechaInitData;
 
 #include "field/mecha/mechaOverlay.h"
 
+extern u8 battleInputButton;
+
 extern sLoadableDataRaw* battleLoadDataVar0_raw;
 extern std::vector<u8>::iterator battleLoadDataVar1;
 extern std::vector<u8>::iterator battleLoadDataVar2;
 extern std::vector<u8>::iterator battleLoadDataVar2Bis;
 
 void battleEntryPoint(void);
+void battleHandleInput(void);
+void playBattleSound(int);
+
+extern u8 battleInitVar0;
 
 extern sMechaInitVar4* environmentModelBlocks;
 extern s8 requestedBattleConfig;

@@ -2555,7 +2555,7 @@ void OP_RESTORE_HP()
 {
     for (int i = 0; i < 11; i++)
     {
-        pKernelGameState->m26C[i].m24_HP = pKernelGameState->m26C[i].m26_MaxHP;
+        pKernelGameState->m26C_party[i].m24_HP = pKernelGameState->m26C_party[i].m26_MaxHP;
     }
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 1;
 }
@@ -2564,7 +2564,7 @@ void OP_RESTORE_MP()
 {
     for (int i = 0; i < 11; i++)
     {
-        pKernelGameState->m26C[i].m28_MP = pKernelGameState->m26C[i].m2A_MaxMP;
+        pKernelGameState->m26C_party[i].m28_MP = pKernelGameState->m26C_party[i].m2A_MaxMP;
     }
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 1;
 }
@@ -2698,7 +2698,7 @@ void OP_FREE_SPECIAL_2D_ANIMATION()
 
 void OP_ASSIGN_GEAR()
 {
-    pKernelGameState->m26C[getImmediateOrVariableUnsigned(1)].m78_partyData_gearNum = getImmediateOrVariableUnsigned(3);
+    pKernelGameState->m26C_party[getImmediateOrVariableUnsigned(1)].m78_partyData_gearNum = getImmediateOrVariableUnsigned(3);
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 5;
 }
 

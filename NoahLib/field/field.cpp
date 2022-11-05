@@ -2421,7 +2421,7 @@ void emptyPartySlot(int param_1)
 
 int getGearForCharacter(int param_1)
 {
-    return pKernelGameState->m26C[param_1].m78_partyData_gearNum;
+    return pKernelGameState->m26C_party[param_1].m78_partyData_gearNum;
 }
 
 void startPartyCharacterASyncLoading(int partyCharacter, int partySlot)
@@ -8697,6 +8697,7 @@ void updateAndRenderField()
 }
 
 int runningOnDTL = -1;
+int* pRunningOnDTL = &runningOnDTL;
 int startOfUpdateFieldTime = 0;
 
 void logFieldRenderingEvent(const char* param_1)
@@ -8841,6 +8842,9 @@ void getInputDuringVsync(void)
                 case SDL_SCANCODE_LEFT:
                     buttonMask |= controllerButtons::LEFT;
                     break;
+                case SDL_SCANCODE_RETURN:
+                    buttonMask |= controllerButtons::START;
+                    break;
                 default:
                     break;
                 }
@@ -8873,6 +8877,10 @@ void getInputDuringVsync(void)
 
     previousDownButtons = newPadButtonForScripts[0].m0_buttons;
 
+}
+
+int getInputOverflowed() {
+    return inputOverflowed;
 }
 
 void saveInputs()
