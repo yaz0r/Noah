@@ -1,6 +1,7 @@
 #pragma once
 
 #include "kernel/filesystem.h"
+#include "field/mecha/mechaOverlay.h"
 
 struct sBattleSpriteConfigsSub {
     void init(std::vector<u8>::iterator data) {
@@ -16,6 +17,9 @@ struct sBattleSpriteConfigsSub {
     u8 mB;
 
     // size 0xC
+
+    sMechaDataTable2 m_mechaData2;
+    sMechaDataTable1 m_mechaData1;
 };
 
 struct sBattleSpriteConfigs : public sLoadableDataRaw {
@@ -31,6 +35,15 @@ struct sBattleSpriteConfigs : public sLoadableDataRaw {
         m8.resize(m0_numEntities);
         for (int i = 0; i < m0_numEntities; i++) {
             m8[i].init(begin() + 8 + i * 0xC);
+        }
+
+        for (int i = 0; i < m0_numEntities; i++) {
+            if (m8[i].m8_isMecha) {
+                if (m8[i].m0_spriteControlOffset && m8[i].m4_spriteDataOffset) {
+                    m8[i].m_mechaData2.init(begin() + m8[i].m0_spriteControlOffset);
+                    m8[i].m_mechaData1.init(begin() + m8[i].m4_spriteDataOffset);
+                }
+            }
         }
 
         m_spriteData.insert(m_spriteData.begin(), begin() + headerSize, begin() + m4_bufferSize - headerSize);

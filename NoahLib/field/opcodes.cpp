@@ -2819,8 +2819,11 @@ void OP_LOAD_NEW_MECHA(void)
         break;
     case 2:
         if (waitReadCompletion(1) == 0) {
-            mechaDataTable2[mechaIndex] = new sMechaDataTable2(mechaDataTable2_raw[mechaIndex].mData);
-            mechaDataTable1[mechaIndex] = new sMechaDataTable1(mechaDataTable1_raw[mechaIndex].mData);
+            mechaDataTable2[mechaIndex] = new sMechaDataTable2;
+            mechaDataTable2[mechaIndex]->init(mechaDataTable2_raw[mechaIndex].mData.begin());
+            mechaDataTable1[mechaIndex] = new sMechaDataTable1;
+            mechaDataTable1[mechaIndex]->init(mechaDataTable1_raw[mechaIndex].mData.begin());
+
             mechaInitNewMecha(mechaIndex, 0, mechaDataTable2[mechaIndex], mechaDataTable1[mechaIndex], (ushort)(((mechaIndex + mechaList2[mechaIndex]) * -0x40 + 0x240) * 0x10000 >> 0x10), 0x100, 0,
                 (short)((mechaIndex + 0xfc) * 0x10000 >> 0x10), &initMechaTempVar[mechaIndex]);
 

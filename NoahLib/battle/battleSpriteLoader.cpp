@@ -53,8 +53,10 @@ void loadBattleSpriteVram(sBattleSpriteConfigs* param_1) {
     int numCurrentEntity = 0;
     int numMaxEntity = param_1->m0_numEntities;
     int currentSpriteX = param_1->m1 * 0x40 + 0x140;
+    int headerSize = numMaxEntity * 0xC + 8;
     int currentSpriteSlot = 0;
     int currentSpriteEntityId = 0;
+    int local_3c = 3;
 
     battleSpriteLoadTempBuffer = param_1->m_spriteData;
 
@@ -76,9 +78,51 @@ void loadBattleSpriteVram(sBattleSpriteConfigs* param_1) {
             battleVisualBuffers[3 + spriteSlot].m0_spriteData = param_1->begin() + param_1->m8[currentSpriteEntityId++].m0_spriteControlOffset;
             battleVisualBuffers[3 + spriteSlot].m4_vramX = spriteIndicies.m0[spriteSlot];
             battleVisualBuffers[3 + spriteSlot].m8 = param_1->m8[numCurrentEntity].mB;
+            local_3c++;
         }
         else {
-            assert(0);
+            int iDest = 0;
+            int spriteSlot = param_1->m8[numCurrentEntity].m4_spriteDataOffset;
+            if (spriteSlot > 7) {
+                currentSpriteX += 0x40;
+                int numUsedEntries = 0;
+                int iVar8 = local_3c - 3;
+                for (int iVar3 = 3; iVar3 != 0xB; iVar3++) {
+                    if (spriteIndicies.m0[iVar3] == iVar8) {
+                        numUsedEntries++;
+                    }
+                }
+                for (int slot = numCurrentEntity + 1; slot != numMaxEntity; slot++) {
+                    std::vector<u8>::iterator pSpriteData = param_1->begin() + param_1->m8[numCurrentEntity + 1].m4_spriteDataOffset;
+                    if (READ_LE_U8(pSpriteData + 1) && (READ_LE_U8(pSpriteData + 0) == numCurrentEntity)) {
+                        for (int i = 3; i < 0xB; i++) {
+                            if (spriteIndicies.m20[6] == slot) {
+                                spriteIndicies.m20[6] = iVar8;
+                                numUsedEntries++;
+                            }
+                        }
+                    }
+                }
+                for (int entryId = 3; entryId != 0xB; entryId++) {
+                    int slotValue = spriteIndicies.m20[entryId];
+                    if ((slotValue > 8) && (slotValue == iVar8) && entryId) {
+                        spriteSlot = -(numUsedEntries < 2 ^ 1) & 2;
+                        if (iDest) {
+                            spriteSlot = 7;
+                            if (numUsedEntries == iDest + 1) {
+                                spriteSlot = 5;
+                            }
+                        }
+
+                        int iVar3 = iDest - 0x1C0;
+                        iDest++;
+
+                        mechaInitEnvironmentMechaMesh(entryId, spriteSlot | 0x80, &param_1->m8[currentSpriteEntityId].m_mechaData2, &param_1->m8[currentSpriteEntityId].m_mechaData1, currentSpriteX, 0x100, 0, ((entryId - iVar3) * 0x10000) >> 0x10, 0);
+                        assert(0);
+                        //initMechaForBattle(entryId);
+                    }
+                }
+            }
         }
     }
 }

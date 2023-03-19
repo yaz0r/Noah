@@ -1263,8 +1263,10 @@ void loadMechaOverlay_finalize(void)
         initMechaTempVar[i].vy = 0;
         initMechaTempVar[i].vz = 0;
 
-        mechaDataTable2[i] = new sMechaDataTable2(mechaDataTable2_raw[i].mData);
-        mechaDataTable1[i] = new sMechaDataTable1(mechaDataTable1_raw[i].mData);
+        mechaDataTable2[i] = new sMechaDataTable2;
+        mechaDataTable2[i]->init(mechaDataTable2_raw[i].mData.begin());
+        mechaDataTable1[i] = new sMechaDataTable1;
+        mechaDataTable1[i]->init(mechaDataTable1_raw[i].mData.begin());
 
         mechaInitNewMecha(i, 0, mechaDataTable2[i], mechaDataTable1[i], ((i + mechaList2[i]) * -0x40 + 0x240), 0x100, 0, i + 0xFC, &initMechaTempVar[i]);
         delete mechaDataTable1[i];

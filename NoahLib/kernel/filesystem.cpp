@@ -498,11 +498,11 @@ void batchStartLoadingFiles(sLoadingBatchCommands* pCommands, int param_2)
     }
 }
 
-std::vector<std::vector<u8>> doPointerRelocationAndSplit(std::vector<u8>& inputData)
+std::vector<std::vector<u8>> doPointerRelocationAndSplit(std::vector<u8>::iterator& it)
 {
     std::vector<std::vector<u8>> splitBuffers;
 
-    std::vector<u8>::iterator it = inputData.begin();
+    std::vector<u8>::iterator inputStart = it;
     u32 uVar1 = READ_LE_U32(it);
     if (uVar1)
     {
@@ -524,7 +524,7 @@ std::vector<std::vector<u8>> doPointerRelocationAndSplit(std::vector<u8>& inputD
             outputBuffer.reserve(size);
 
             for (int i = 0; i < size; i++) {
-                outputBuffer.push_back(READ_LE_U8(inputData.begin() + startPos + i));
+                outputBuffer.push_back(READ_LE_U8(inputStart + startPos + i));
             }
 
             splitBuffers.push_back(outputBuffer);

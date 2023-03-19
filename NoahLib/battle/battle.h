@@ -54,3 +54,5 @@ struct sBattleVisualEntity {
 extern std::array<sBattleVisualEntity, 0x11> battleVisualEntities;
 
 extern MATRIX battleRenderingMatrix;
+
+void mechaInitEnvironmentMechaMesh(int entryId, ushort flags, sMechaDataTable2* pData2, sMechaDataTable1* pData1, ushort tpageX, ushort tpageY, ushort clutX, short clutY, SFP_VEC3* param_9);

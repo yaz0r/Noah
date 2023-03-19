@@ -379,7 +379,8 @@ void startBattleLoader(int param_1)
     mechaInitForBattle();
 
     Hack("Deserialize mecha data for battle env");
-    battleLoadDataVar0 = new sMechaDataTable1(battleLoadDataVar0_raw->mData);
+    battleLoadDataVar0 = new sMechaDataTable1;
+    battleLoadDataVar0->init(battleLoadDataVar0_raw->mData.begin());
 
     battleRenderStructs[0].m0_drawEnv.isbg = loadBattleEnvironment(battleLoadDataVar2, battleLoadDataVar1, battleLoadDataVar0, &battleMatrix800CCB94, &battleMatrix800CCBB4, &battleRenderStructs[0].m0_drawEnv.color);
 

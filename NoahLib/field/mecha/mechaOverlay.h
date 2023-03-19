@@ -43,12 +43,12 @@ struct sMechaDataTable2_4_4 {
 struct sMechaDataTable2_4 {
     void init(std::vector<u8>& input) {
         m_raw = input;
-        std::vector<std::vector<u8>> relocatedData = doPointerRelocationAndSplit(input);
+        std::vector<std::vector<u8>> relocatedData = doPointerRelocationAndSplit(input.begin());
         //assert(relocatedData.size() == 4);
 
         {
             std::vector<u8> tempM4 = relocatedData[0];
-            std::vector<std::vector<u8>> relocatedDataM4 = doPointerRelocationAndSplit(tempM4);
+            std::vector<std::vector<u8>> relocatedDataM4 = doPointerRelocationAndSplit(tempM4.begin());
             m4.m4.resize(relocatedDataM4.size());
             for (int i = 0; i < relocatedDataM4.size(); i++) {
                 m4.m4[i].init(relocatedDataM4[i]);
@@ -78,14 +78,14 @@ struct sMechaDataTable2_4 {
 struct sMechaDataTable2_8 {
     void init(std::vector<u8>& input) {
         m_raw = input;
-        std::vector<std::vector<u8>> relocatedData = doPointerRelocationAndSplit(input);
+        std::vector<std::vector<u8>> relocatedData = doPointerRelocationAndSplit(input.begin());
     }
     std::vector<u8> m_raw;
 };
 
 struct sMechaDataTable2 {
-    sMechaDataTable2(std::vector<u8>& input) {
-        m_raw = input;
+    void init(std::vector<u8>::iterator& input) {
+        //m_raw = input;
         std::vector<std::vector<u8>> relocatedData = doPointerRelocationAndSplit(input);
 
         m4.init(relocatedData[relocatedData.size() - 2]);
@@ -95,7 +95,7 @@ struct sMechaDataTable2 {
     sMechaDataTable2_4 m4;
     sMechaDataTable2_8 m8;
 
-    std::vector<u8> m_raw;
+    //std::vector<u8> m_raw;
 };
 
 struct sMechaDataTable1_C {
@@ -145,7 +145,7 @@ struct sMechaDataTable1_10_4 {
 struct sMechaDataTable1_10 {
     sMechaDataTable1_10(std::vector<u8>& input) {
         m_raw = input;
-        std::vector<std::vector<u8>> relocatedData = doPointerRelocationAndSplit(input);
+        std::vector<std::vector<u8>> relocatedData = doPointerRelocationAndSplit(input.begin());
 
         assert(input.size() == 0x20);
         m4 = new sMechaDataTable1_10_4(relocatedData[0]);
@@ -156,8 +156,8 @@ struct sMechaDataTable1_10 {
 };
 
 struct sMechaDataTable1 {
-    sMechaDataTable1(std::vector<u8>& input) {
-        m_raw = input;
+    void init(std::vector<u8>::iterator& input) {
+        //m_raw = input;
         std::vector<std::vector<u8>> relocatedData = doPointerRelocationAndSplit(input);
 
         m4_textures.init(relocatedData[0]);
@@ -178,7 +178,7 @@ struct sMechaDataTable1 {
     std::vector<sMechaDataTable1_C> mC;
     sMechaDataTable1_10* m10;
 
-    std::vector<u8> m_raw;
+    //std::vector<u8> m_raw;
 };
 
 struct sMechaInitVar2Sub {
