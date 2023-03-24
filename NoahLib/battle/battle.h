@@ -4,6 +4,7 @@
 
 #include "sprite/spriteSetup.h"
 #include "kernel/filesystem.h"
+#include "kernel/gameState.h"
 
 extern sLoadableDataRaw battleCharacterConfigFile;
 extern std::vector<u8>::iterator battleMechaInitData;
@@ -54,5 +55,20 @@ struct sBattleVisualEntity {
 extern std::array<sBattleVisualEntity, 0x11> battleVisualEntities;
 
 extern MATRIX battleRenderingMatrix;
-
+extern s8 battleTimeEnabled;
+extern s8 battleCharacters[3];
+extern u8 bBattleTickMode1;
+extern std::array<s8, 0xB> battleEntityTurnIndex3;
+extern std::array<s8, 0xB> battleEntityTurnIndex2;
+extern s8 battleEntityTurnIndex;
+extern std::array<s8, 11> isBattleSlotFilled;
 void mechaInitEnvironmentMechaMesh(int entryId, ushort flags, sMechaDataTable2* pData2, sMechaDataTable1* pData1, ushort tpageX, ushort tpageY, ushort clutX, short clutY, SFP_VEC3* param_9);
+u16 characterIdToTargetBitmask(uint param_1);
+
+struct sBattleEntity {
+    sGameStateA4 m0_base;
+    sGameStateA42 mA4_gear;
+    u8 m15A_flags;
+};
+
+extern std::array<sBattleEntity, 11> battleEntities;

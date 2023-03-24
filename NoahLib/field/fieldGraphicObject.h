@@ -281,6 +281,7 @@ void resetSpriteCallbacks(void);
 void regCallback8(sTaskHeader* param_1, void (*param_2)(sTaskHeader*));
 void regCallbackC(sTaskHeader* param_1, void (*param_2)(sTaskHeader*));
 void allocateSavePointMeshDataSub0(sSavePointMesh1* param_1, sTaskHeader* param_2);
+void allocateSavePointMeshDataSub0_callback(sTaskHeader* param_1);
 
 extern u32 allocateSavePointMeshDataSub0_var0;
 extern u8 spriteBytecode2ExtendedE0_Var0;

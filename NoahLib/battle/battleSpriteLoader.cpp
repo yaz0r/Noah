@@ -14,10 +14,12 @@ struct sBattleSpriteLoaderTask {
     sTaskHeader m0;
     sBattleSpriteConfigs* m20;
     std::array<sLoadingBatchCommands, 4> m30_loadingCommands;
+    s32 m90_frameToDeleteCount;
 };
 
 void defaultBattleSpriteDeleteCallback(sTaskHeader* param_1) {
-    assert(0);
+    allocateSavePointMeshDataSub0_callback(param_1);
+    delete param_1;
 }
 
 template <typename T>
@@ -331,8 +333,39 @@ void createBattlePlayerSpriteActors() {
     }
 }
 
-void mainBattleSpriteCallback_phase3(sTaskHeader* param_1) {
+void mainBattleSpriteCallback_phase6(sTaskHeader* param_1) {
+    if (((sBattleSpriteLoaderTask*)param_1)->m90_frameToDeleteCount == 0) {
+        MissingCode();
+        battleTimeEnabled = 1;
+        defaultBattleSpriteDeleteCallback(param_1);
+    }
+    else {
+        ((sBattleSpriteLoaderTask*)param_1)->m90_frameToDeleteCount--;
+    }
+}
+
+int mainBattleSpriteCallback_phase5Var = 0;
+void mainBattleSpriteCallback_phase5(sTaskHeader* param_1) {
+    if (mainBattleSpriteCallback_phase5Var == 0) {
+        ((sBattleSpriteLoaderTask*)param_1)->m90_frameToDeleteCount = 0x10;
+        regCallback8(param_1, &mainBattleSpriteCallback_phase6);
+    }
+}
+
+void mainBattleSpriteCallback_phase4(sTaskHeader* param_1) {
     MissingCode();
+    /*if (waitForMusic(0) == 0)*/ {
+        MissingCode();
+        regCallback8(param_1, &mainBattleSpriteCallback_phase5);
+    }
+}
+
+void mainBattleSpriteCallback_phase3(sTaskHeader* param_1) {
+    if (isCDBusy() == 0) {
+        MissingCode();
+        regCallback8(param_1, &mainBattleSpriteCallback_phase4);
+        MissingCode();
+    }
 }
 
 void mainBattleSpriteCallback_phase2(sTaskHeader* param_1) {

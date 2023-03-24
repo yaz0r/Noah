@@ -237,14 +237,41 @@ u32 getModeForSavePointMesh(u32 param_1)
     }
 }
 
+u32 allocateSavePointMeshDataSub0_var0 = 0;
+u32 allocateSavePointMeshDataSub0_var1 = 0;
+
 void allocateSavePointMeshDataSub0_callback(sTaskHeader* param_1)
 {
-    assert(0);
+    sTaskHeader* pCurrentHead = spriteCallback2Var2;
+    sTaskHeader* pPrevious = nullptr;
+    sTaskHeader* pEntry;
+    if (pCurrentHead) {
+        do {
+            pEntry = pCurrentHead;
+            if (pEntry == param_1) {
+                if (pPrevious == nullptr) {
+                    spriteCallback2Var2 = param_1->m18_pNext;
+                }
+                else {
+                    pPrevious->m18_pNext = param_1->m18_pNext;
+                }
+                if (spriteCallback2Var1 == param_1) {
+                    spriteCallback2Var1 = param_1->m18_pNext;
+                }
+                break;
+            }
+            pCurrentHead = pEntry->m18_pNext;
+            pPrevious = pEntry;
+        } while (pEntry->m18_pNext);
+    }
+
+    if (param_1->m14 < 0) {
+        allocateSavePointMeshDataSub0_var0--;
+    }
+    allocateSavePointMeshDataSub0_var1--;
 }
 
 u32 registerSpriteCallback2Counter2 = 0;
-u32 allocateSavePointMeshDataSub0_var0 = 0;
-u32 allocateSavePointMeshDataSub0_var1 = 0;
 void allocateSavePointMeshDataSub0(sSavePointMesh1* param_1, sTaskHeader* param_2)
 {
     param_2->m0_owner = param_1;

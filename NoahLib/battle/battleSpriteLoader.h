@@ -39,7 +39,7 @@ struct sBattleSpriteConfigs : public sLoadableDataRaw {
 
         for (int i = 0; i < m0_numEntities; i++) {
             if (m8[i].m8_isMecha) {
-                if (m8[i].m0_spriteControlOffset && m8[i].m4_spriteDataOffset) {
+                if(m8[i].m4_spriteDataOffset > 7) {
                     m8[i].m_mechaData2.init(begin() + m8[i].m0_spriteControlOffset);
                     m8[i].m_mechaData1.init(begin() + m8[i].m4_spriteDataOffset);
                 }

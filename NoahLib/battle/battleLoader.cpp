@@ -15,7 +15,6 @@ void dummpyLoaderEnd() {
 }
 
 s8 battleForceOnGear;
-s8 battleCharacters[3];
 s8 battleVar8006f9dd;
 
 std::array<u16, 16> bitmaskCharacter = { {
@@ -38,12 +37,6 @@ ushort bitmaskCharacterCheck(ushort bitmask, uint characterId)
     return result;
 }
 
-struct sBattleEntity {
-    sGameStateA4 m0_base;
-    sGameStateA42 mA4_gear;
-};
-
-std::array<sBattleEntity, 11> battleEntities;
 std::vector<u8> battleFont;
 void computeMenuBorder(std::vector<u8>& param_1, int param_2, int* param_3, int* param_4, int* param_5, int* param_6, int* param_7, int* param_8);
 
@@ -155,8 +148,6 @@ void loadPartyMembers() {
     batchStartLoadingFiles(&playerLoadingCommands[0], 0);
 }
 
-u8 bBattleTickMode1 = 0;
-
 void batteLoaderPhase1_0() {
     MissingCode();
     for (int i = 0; i < 3; i++) {
@@ -177,12 +168,11 @@ void batteLoaderPhase1_0() {
     bBattleTickMode1 = 0;
 }
 
-std::array<s8, 11> isBattleSlotFilled;
 s8 battleNumPartyMembers = 0;
 
 std::array<std::array<u8, 4>, 32> battleSlotLayout;
 
-short characterIdToTargetBitmask(uint param_1)
+u16 characterIdToTargetBitmask(uint param_1)
 {
     return bitmaskCharacter[param_1 & 0xff];
 }
@@ -307,6 +297,148 @@ void batteLoaderPhase1_1() {
     }
 }
 
+void initBattleInventory(void) {
+    MissingCode();
+}
+
+void batteLoaderPhase2_2(void) {
+    MissingCode();
+}
+
+u32 getRandomValueInRange(u32 param_1, u32 param_2)
+{
+    u32 uVar1;
+    u32 uVar2;
+
+    uVar2 = param_1 & 0xff;
+    uVar1 = 0xff;
+    if (uVar2 != 0xff) {
+        param_2 = param_2 & 0xff;
+        if (param_2 == 0) {
+            uVar1 = 0;
+        }
+        else {
+            uVar1 = uVar2;
+            if (uVar2 != param_2) {
+                if ((int)(param_2 - uVar2) < 0xff) {
+                    uVar1 = rand();
+                    uVar1 = param_1 + (int)(uVar1 & 0xff) % (int)((param_2 - uVar2) + 1) & 0xff;
+                }
+                else {
+                    uVar1 = rand();
+                    uVar1 = uVar1 & 0xff;
+                }
+            }
+        }
+    }
+    return uVar1;
+}
+
+std::array<s16, 0xB> battleSlotStatusVar0;
+std::array<s16, 0xB> battleSlotStatusVar1;
+std::array<s16, 0xB> battleSlotStatusVar2;
+
+sBattleEntity* battleGetSlotStatusSub_currentBattleEntity;
+sGameStateA42* battleGetSlotStatusSub_currentBattleEntityGear;
+
+void updatePlayerWithStatusC000And2() {
+    MissingCode();
+}
+
+struct sBattle800CDD40Sub {
+    s8 m27;
+    //size 0x28
+};
+
+sBattle800CDD40Sub* battleGetSlotStatusSub_current28Entry;
+u8 battleGetSlotStatusSub_current28Index = 0;
+
+struct sBattle800cdd40 {
+    std::array<sBattle800CDD40Sub, 1> m0;
+
+    // size 0x5f0 ?
+};
+std::array<sBattle800cdd40, 3> battle800CDD40;
+
+u32 battleGetSlotStatusSub(u32 param_1) {
+    u32 entityIndex = param_1 & 0xFF;
+    battleGetSlotStatusSub_currentBattleEntity = &battleEntities[entityIndex];
+    battleGetSlotStatusSub_currentBattleEntityGear = &battleEntities[entityIndex].mA4_gear;
+
+    u32 result2;
+
+    if (entityIndex < 3) {
+        if ((battleEntities[entityIndex].m15A_flags & 0x80) == 0) {
+            battleGetSlotStatusSub_current28Entry = &battle800CDD40[entityIndex].m0[battleGetSlotStatusSub_current28Index];
+            s32 index2 = battleEntities[entityIndex].m0_base.m5A;
+            s32 result = index2 - battleGetSlotStatusSub_current28Entry->m27;
+            if ((int)(char)battleGetSlotStatusSub_current28Entry->m27 < (int)index2) {
+                s32 randVar2 = result * 8;
+                result2 = randVar2 + result;
+            }
+            else {
+                result2 = 9;
+            }
+        }
+        else {
+            assert(0);
+        }
+        
+    }
+    else {
+        s32 result = (uint)(byte)battleEntities[entityIndex].m0_base.m5A;
+        s32 randVar2 = result << 3;
+        result2 = randVar2 + result;
+    }
+
+    if (0xa5 < (result2 & 0xffff)) {
+        result2 = 0xa0;
+    }
+    result2 = 0xa5 - result2;
+    u32 randVar1 = rand();
+    u32 randVar2 = randVar1;
+    if (randVar1 < 0) {
+        randVar2 = randVar1 + 7;
+    }
+    updatePlayerWithStatusC000And2();
+    return result2 - (randVar1 + (randVar2 >> 3) * -8 + -4) & 0xff;
+}
+
+void battleGetSlotStatus(std::array<u8, 0xB>& param1) {
+    for (int i = 0; i < 0xB; i++) {
+        if (isBattleSlotFilled[i] == 0) {
+            battleSlotStatusVar2[i] = 0xFF;
+            battleSlotStatusVar0[i] = 0xFF;
+        }
+        else {
+            battleSlotStatusVar2[i] = battleSlotStatusVar0[i] = battleGetSlotStatusSub(i);
+        }
+        battleEntityTurnIndex3[i] = 0;
+        battleSlotStatusVar1[i] = 0;
+        param1[i] = 0;
+    }
+}
+
+void batteLoaderPhase2_1(void) {
+    MissingCode();
+
+    std::array<u8, 0xB> slotStatus;
+    battleGetSlotStatus(slotStatus);
+
+    for (int i = 0; i < 0xB;) {
+        s32 randomValue = getRandomValueInRange(0, 10);
+        if (slotStatus[randomValue] == 0) {
+            slotStatus[randomValue] = 1;
+            battleEntityTurnIndex2[i] = randomValue;
+            i++;
+        }
+    }
+
+    battleEntityTurnIndex = 0;
+
+    MissingCode();
+}
+
 void battleLoaderTick(s8 param_1) {
     switch (param_1) {
     case 0:
@@ -319,6 +451,9 @@ void battleLoaderTick(s8 param_1) {
         MissingCode();
         break;
     case 2:
+        initBattleInventory();
+        batteLoaderPhase2_1();
+        batteLoaderPhase2_2();
         MissingCode();
         break;
     case 3:

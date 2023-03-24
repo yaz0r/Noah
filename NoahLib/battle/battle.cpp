@@ -13,10 +13,24 @@
 #include "field/fieldGraphicObject.h"
 #include "battleSpriteLoader.h"
 
+u16 allPlayerCharacterBitmask = 0;
+u8 battleInitVar0 = 0;
+u8 battleInitVar1 = 0;
+s32 battleRunningVar0 = 0;
+s8 battleRunningVar1 = 0;
+s8 isBattleAnEvent = 0;
+
+std::array<std::array<s16, 2>, 3> battleCharactersCopyGameState;
+s16 bBattleTickMode0 = 0;
+u8 bBattleTickMode1 = 0;
+
+
 s8 battleDebugDisplay = 0;
 s8 requestedBattleConfig = 0;
 bool battleIsPaused = false;
 u8 battleInputButton = 0;
+s8 battleCharacters[3];
+std::array<s8, 11> isBattleSlotFilled;
 
 sMechaDataTable1* battleLoadDataVar0;
 sLoadableDataRaw* battleLoadDataVar0_raw;
@@ -24,9 +38,13 @@ std::vector<u8>::iterator battleLoadDataVar1;
 std::vector<u8>::iterator battleLoadDataVar2;
 std::vector<u8>::iterator battleLoadDataVar2Bis;
 
+std::array<s8, 0xB> battleEntityTurnIndex3;
+std::array<s8, 0xB> battleEntityTurnIndex2;
+s8 battleEntityTurnIndex;
+
 std::array<sBattleVisualBuffer, 0x11> battleVisualBuffers;
 std::array<sBattleVisualEntity, 0x11> battleVisualEntities;
-
+std::array<sBattleEntity, 11> battleEntities;
 
 void initGraphicsForBattle(void) {
     ResetGraph(1);
@@ -51,6 +69,7 @@ struct sBattleVar1 {
 }*battleVar1 = nullptr;
 
 struct sBattleVar2 {
+    u8 m2D3_currentEntityTurn;
     // size 0x2F8
 }*battleVar2 = nullptr;
 
@@ -619,6 +638,23 @@ int battleRenderDebugAndMain(void) {
 }
 
 void checkWinConditions() {
+    allPlayerCharacterBitmask = 0;
+    for (int i = 0; i < 3; i++) {
+        if (isBattleSlotFilled[i]) {
+            if ((battleEntities[i].m0_base.m7C & 0xC000) == 0) {
+                if (battleVisualEntities[i].m3 == 0) {
+                    allPlayerCharacterBitmask |= characterIdToTargetBitmask(i & 0xff);
+                }
+            }
+            else {
+                if ((battleEntities[i].m0_base.m7C & 0x8000) == 0) {
+                    battleEntities[i].m0_base.m24_HP = 0;
+                }
+                battleEntityTurnIndex3[i] = 0xFF;
+            }
+        }
+    }
+
     MissingCode();
 }
 
@@ -682,9 +718,53 @@ void setCameraVisibleEntities(uint playerBitmask) {
     MissingCode();
 }
 
-u16 allPlayerCharacterBitmask = 0;
-u8 battleInitVar0 = 0;
-u8 battleInitVar1 = 0;
+void battleTickMain(s8 param_1) {
+    MissingCode();
+
+    if (battleVar2->m2D3_currentEntityTurn == 0)
+        return;
+
+    assert(0);
+}
+
+void battleTickGameplay() {
+
+    if (bBattleTickMode0 == 0) {
+        if (bBattleTickMode1 == 0) {
+            battleVar2->m2D3_currentEntityTurn = 0;
+            s32 uVar3 = (uint)battleEntityTurnIndex;
+            s32 uVar2 = (uint)battleEntityTurnIndex2[uVar3];
+            s32 bVar1 = battleEntityTurnIndex3[uVar2];
+            do {
+                if (bVar1 == 1) {
+                    battleVar2->m2D3_currentEntityTurn = (char)uVar2 + 1;
+                    battleEntityTurnIndex = (byte)(uVar3 + 1);
+                    if ((uVar3 + 1 & 0xff) == 0xb) {
+                        battleEntityTurnIndex = 0;
+                        battleTickMain(0);
+                        return;
+                    }
+                }
+                uVar3 = uVar3 + 1;
+                if (uVar3 == 0xb) {
+                    uVar3 = 0;
+                }
+                if (uVar3 == battleEntityTurnIndex) {
+                    battleTickMain(0);
+                    return;
+                }
+                uVar2 = (uint)battleEntityTurnIndex2[uVar3];
+                bVar1 = battleEntityTurnIndex3[uVar2];
+            } while (true);
+        }
+        battleVar2->m2D3_currentEntityTurn = bBattleTickMode1;
+        MissingCode();
+        battleTickMain(0);
+    }
+    else {
+        assert(0);
+    }
+}
 
 void battleMain() {
     battleVar0 = new sBattleVar0;
@@ -728,6 +808,24 @@ void battleMain() {
     }
 
     MissingCode();
+
+    for (int i = 0; i < 3; i++) {
+        if (battleCharacters[i] != 0x7F) {
+            MissingCode();
+        }
+    }
+
+    int battleRunningVar0Temp = battleRunningVar0;
+
+    while (!battleRunningVar1 && !isBattleAnEvent) {
+        if (battleTimeEnabled != '\0') {
+            battleTickGameplay();
+        }
+        battleRenderDebugAndMain();
+    }
+
+    MissingCode();
+
 }
 
 void battleEntryPoint(void) {
