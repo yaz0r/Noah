@@ -208,6 +208,8 @@ struct sSavePointMesh_data2
 
 struct sTaskHeader
 {
+    virtual ~sTaskHeader() {}
+
     void* m0_owner;
     sCustomRenderable* m4;
     void (*m8)(sTaskHeader*);

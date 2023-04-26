@@ -10,8 +10,7 @@ bool battleScriptLoaderTaskCreationInProgress = 0;
 
 sBattleSpriteConfigs battleConfigFile3;
 
-struct sBattleSpriteLoaderTask {
-    sTaskHeader m0;
+struct sBattleSpriteLoaderTask : public sTaskHeader{
     sBattleSpriteConfigs* m20;
     std::array<sLoadingBatchCommands, 4> m30_loadingCommands;
     s32 m90_frameToDeleteCount;
@@ -28,9 +27,9 @@ T* battleLoaderAllocateMainBattleSprite(sSavePointMesh1* param_1, int param_2)
     T* psVar1;
 
     psVar1 = new T;
-    allocateSavePointMeshDataSub0(param_1, &psVar1->m0);
-    psVar1->m0.mC = defaultBattleSpriteDeleteCallback;
-    psVar1->m0.m4 = nullptr;
+    allocateSavePointMeshDataSub0(param_1, psVar1);
+    psVar1->mC = defaultBattleSpriteDeleteCallback;
+    psVar1->m4 = nullptr;
     return psVar1;
 }
 
@@ -409,7 +408,7 @@ void mainBattleSpriteCallback_phase1(sTaskHeader* param_1) {
         DrawSync(0);
         //delete pTask->m20; // hack: this is currently a static
         pTask->m20 = nullptr; // not in original
-        regCallback8(&pTask->m0, mainBattleSpriteCallback_phase2);
+        regCallback8(pTask, mainBattleSpriteCallback_phase2);
         setupPlayerSpriteLoadingCommands(pTask->m30_loadingCommands.begin());
     }
 }
@@ -419,7 +418,7 @@ void createBattleSpriteLoadingTaskSub(sBattleSpriteConfigs* param_1)
     sBattleSpriteLoaderTask* psVar1;
 
     psVar1 = battleLoaderAllocateMainBattleSprite<sBattleSpriteLoaderTask>(0, 0x78);
-    regCallback8(&psVar1->m0, mainBattleSpriteCallback_phase1);
+    regCallback8(psVar1, mainBattleSpriteCallback_phase1);
     psVar1->m20 = param_1;
     return;
 }
