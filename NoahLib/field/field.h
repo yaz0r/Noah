@@ -4,6 +4,7 @@
 #include "kernel/math.h"
 #include "kernel/graphics.h"
 #include "kernel/filesystem.h"
+#include "kernel/color.h"
 
 enum controllerButtons {
     L1 = 1 << 2, // 0x4
@@ -257,7 +258,7 @@ extern u8 menuDisabled;
 extern u8 compassDisabled;
 extern u16 OPX_80Params[8];
 extern s32 OPX_81Params[3];
-extern s8 OPX_82Param0[4][3];
+extern std::array<sColor, 3> OPX_82Param0;
 extern s16 OPX_82Param3[3];
 extern s16 OPX_82Param4;
 extern s32 OPX_86Param;

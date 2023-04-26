@@ -1,6 +1,7 @@
 #pragma once
 
 #include "kernel/math.h"
+#include "kernel/color.h"
 
 struct sColorAndCode
 {
@@ -136,12 +137,6 @@ struct DR_TPAGE : public sTag
     u32 code[1];
 
     virtual void execute() override;
-};
-
-struct sColor {
-    u8 r0;
-    u8 g0;
-    u8 b0;
 };
 
 struct DRAWENV
