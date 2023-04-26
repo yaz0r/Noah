@@ -253,8 +253,8 @@ void batteLoaderPhase1_1() {
             if (battleVisualEntities[i].m2 != 0x7F) {
                 if (battleVisualEntities[i].m4 == 0) {
                     battleVisualEntities[i].m1 = battleSlotLayout[battleVisualEntities[i].m0 + 8][0];
-                    battleSlotLayout[battleVisualEntities[i].m0][1] |= characterIdToTargetBitmask(battleVisualEntities[i].m1);
-                    battleSlotLayout[battleVisualEntities[i].m0][0]++;
+                    battleSlotLayout[battleVisualEntities[i].m0 + 8][1] |= characterIdToTargetBitmask(battleVisualEntities[i].m1);
+                    battleSlotLayout[battleVisualEntities[i].m0 + 8][0]++;
                 }
                 else {
                     battleVisualEntities[i].m1 = 0;
