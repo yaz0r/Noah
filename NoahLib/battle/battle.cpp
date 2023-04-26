@@ -35,8 +35,8 @@ std::array<s8, 11> isBattleSlotFilled;
 sMechaDataTable1* battleLoadDataVar0;
 sLoadableDataRaw* battleLoadDataVar0_raw;
 std::vector<u8>::iterator battleLoadDataVar1;
-std::vector<u8>::iterator battleLoadDataVar2;
-std::vector<u8>::iterator battleLoadDataVar2Bis;
+sBattleMechaInitData* battleLoadDataVar2;
+sBattleMechaInitData* battleLoadDataVar2Bis;
 
 std::array<s8, 0xB> battleEntityTurnIndex3;
 std::array<s8, 0xB> battleEntityTurnIndex2;
@@ -107,7 +107,7 @@ s8 battleMechaVar5;
 
 sMechaInitVar2 battleMechaInitVar2;
 sMechaInitVar3 battleMechaInitVar3;
-std::vector<u8>::iterator battleMechaInitData;
+sBattleMechaInitData* battleMechaInitData = nullptr;
 
 void mechaInitForBattle() {
     battleMechaVar0 = 0;
@@ -116,8 +116,8 @@ void mechaInitForBattle() {
     battleMechaVar3 = 0;
     battleMechaVar4 = 0;
     battleMechaVar5 = 1;
-    initMechaInitVar2(&battleMechaInitVar2, READ_LE_S16(battleMechaInitData + 0x348));
-    initMechaInitVar3(&battleMechaInitVar3, READ_LE_S16(battleMechaInitData + 0x34A));
+    initMechaInitVar2(&battleMechaInitVar2, battleMechaInitData->m348);
+    initMechaInitVar3(&battleMechaInitVar3, battleMechaInitData->m34A);
 
     MissingCode();
 }
@@ -401,7 +401,7 @@ void startBattleLoader(int param_1)
     battleLoadDataVar0 = new sMechaDataTable1;
     battleLoadDataVar0->init(battleLoadDataVar0_raw->mData.begin());
 
-    battleRenderStructs[0].m0_drawEnv.isbg = loadBattleEnvironment(battleLoadDataVar2, battleLoadDataVar1, battleLoadDataVar0, &battleMatrix800CCB94, &battleMatrix800CCBB4, &battleRenderStructs[0].m0_drawEnv.color);
+    battleRenderStructs[0].m0_drawEnv.isbg = loadBattleEnvironment(battleLoadDataVar2->mData.begin(), battleLoadDataVar1, battleLoadDataVar0, &battleMatrix800CCB94, &battleMatrix800CCBB4, &battleRenderStructs[0].m0_drawEnv.color);
 
     MissingCode();
 }
@@ -688,10 +688,10 @@ void initBattleGraphics(sBattleSpriteConfigs* param_1) {
     initBattle3dRendering();
     initBattleSpriteSystem();
     createBattleSpriteLoadingTask(param_1);
-    setupSVector(&battleCameraEye2, READ_LE_S16(battleMechaInitData + 0x482), READ_LE_S16(battleMechaInitData + 0x484), READ_LE_S16(battleMechaInitData + 0x486));
-    setupSVector(&battleCameraEye, READ_LE_S16(battleMechaInitData + 0x482), READ_LE_S16(battleMechaInitData + 0x484), READ_LE_S16(battleMechaInitData + 0x486));
-    setupSVector(&battleCameraAt2, READ_LE_S16(battleMechaInitData + 0x47C), READ_LE_S16(battleMechaInitData + 0x47E), READ_LE_S16(battleMechaInitData + 0x480));
-    setupSVector(&battleCameraAt, READ_LE_S16(battleMechaInitData + 0x47C), READ_LE_S16(battleMechaInitData + 0x47E), READ_LE_S16(battleMechaInitData + 0x480));
+    setupSVector(&battleCameraEye2, battleMechaInitData->m482_eye.vx, battleMechaInitData->m482_eye.vy, battleMechaInitData->m482_eye.vz);
+    setupSVector(&battleCameraEye, battleMechaInitData->m482_eye.vx, battleMechaInitData->m482_eye.vy, battleMechaInitData->m482_eye.vz);
+    setupSVector(&battleCameraAt2, battleMechaInitData->m47C_at.vx, battleMechaInitData->m47C_at.vy, battleMechaInitData->m47C_at.vz);
+    setupSVector(&battleCameraAt, battleMechaInitData->m47C_at.vx, battleMechaInitData->m47C_at.vy, battleMechaInitData->m47C_at.vz);
     SetDispMask(1);
 }
 

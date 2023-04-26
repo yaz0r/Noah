@@ -7,7 +7,38 @@
 #include "kernel/gameState.h"
 
 extern sLoadableDataRaw battleCharacterConfigFile;
-extern std::vector<u8>::iterator battleMechaInitData;
+
+struct sBattleMechaInitData {
+    void init(std::vector<u8>::iterator it, u32 size) {
+        mData.insert(mData.begin(), it, it+size);
+
+        m348 = READ_LE_S16(it + 0x348);
+        m34A = READ_LE_S16(it + 0x34A);
+        m47C_at.vx = READ_LE_S16(it + 0x47C + 0);
+        m47C_at.vy = READ_LE_S16(it + 0x47C + 2);
+        m47C_at.vz = READ_LE_S16(it + 0x47C + 4);
+        m482_eye.vx = READ_LE_S16(it + 0x482 + 0);
+        m482_eye.vy = READ_LE_S16(it + 0x482 + 2);
+        m482_eye.vz = READ_LE_S16(it + 0x482 + 4);
+    }
+    s16 m348;
+    s16 m34A;
+    SFP_VEC3 m47C_at;
+    SFP_VEC3 m482_eye;
+
+    std::vector<u8> mData;
+};
+extern sBattleMechaInitData* battleMechaInitData;
+
+struct sBattleMechaInitDataFile : public sLoadableData {
+    sBattleMechaInitDataFile(size_t size) {
+    }
+    virtual void init(std::vector<u8>& data) override {
+        m4.init(data.begin() + 4, data.size() - 4);
+    }
+
+    sBattleMechaInitData m4;
+};
 
 #include "field/mecha/mechaOverlay.h"
 
@@ -15,8 +46,8 @@ extern u8 battleInputButton;
 
 extern sLoadableDataRaw* battleLoadDataVar0_raw;
 extern std::vector<u8>::iterator battleLoadDataVar1;
-extern std::vector<u8>::iterator battleLoadDataVar2;
-extern std::vector<u8>::iterator battleLoadDataVar2Bis;
+extern sBattleMechaInitData* battleLoadDataVar2;
+extern sBattleMechaInitData* battleLoadDataVar2Bis;
 
 void battleEntryPoint(void);
 void battleHandleInput(void);

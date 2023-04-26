@@ -27,6 +27,7 @@ s32 getCdromFnd();
 
 struct sLoadableData {
     virtual void init(std::vector<u8>& data) = 0;
+    virtual ~sLoadableData() {}
 };
 
 struct sLoadableDataRaw : public sLoadableData {
