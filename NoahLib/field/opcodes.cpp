@@ -2983,18 +2983,18 @@ void OPX_81(void)
 
 void OPX_82(void)
 {
-    OPX_82Param0[0] = getImmediateOrVariableUnsigned(1);
-    OPX_82Param0[1] = getImmediateOrVariableUnsigned(3);
-    OPX_82Param0[2] = getImmediateOrVariableUnsigned(5);
-    OPX_82Param1[0] = getImmediateOrVariableUnsigned(7);
-    OPX_82Param1[1] = getImmediateOrVariableUnsigned(9);
-    OPX_82Param1[2] = getImmediateOrVariableUnsigned(0xb);
-    OPX_82Param2[0] = getImmediateOrVariableUnsigned(0xd);
-    OPX_82Param2[1] = getImmediateOrVariableUnsigned(0xf);
-    OPX_82Param2[2] = getImmediateOrVariableUnsigned(0x11);
-    OPX_82Param3[0] = getImmediateOrVariableUnsigned(0x13);
-    OPX_82Param3[1] = getImmediateOrVariableUnsigned(0x15);
-    OPX_82Param3[2] = getImmediateOrVariableUnsigned(0x17);
+    OPX_82Param0[0][0] = getImmediateOrVariableUnsigned(1);
+    OPX_82Param0[0][1] = getImmediateOrVariableUnsigned(3);
+    OPX_82Param0[0][2] = getImmediateOrVariableUnsigned(5);
+    OPX_82Param0[1][0] = getImmediateOrVariableUnsigned(7);
+    OPX_82Param0[1][1] = getImmediateOrVariableUnsigned(9);
+    OPX_82Param0[1][2] = getImmediateOrVariableUnsigned(0xb);
+    OPX_82Param0[2][0] = getImmediateOrVariableUnsigned(0xd);
+    OPX_82Param0[2][1] = getImmediateOrVariableUnsigned(0xf);
+    OPX_82Param0[2][2] = getImmediateOrVariableUnsigned(0x11);
+    OPX_82Param0[3][0] = getImmediateOrVariableUnsigned(0x13);
+    OPX_82Param0[3][1] = getImmediateOrVariableUnsigned(0x15);
+    OPX_82Param0[3][2] = getImmediateOrVariableUnsigned(0x17);
     ADVANCE_VM(0x19);
     OPX_82Param4 = 1;
 }

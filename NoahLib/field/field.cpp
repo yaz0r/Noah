@@ -2860,9 +2860,7 @@ u8 menuDisabled = 0;
 u8 compassDisabled = 0;
 u16 OPX_80Params[8] = { 0,0,0,0,0,0,0,0 };
 s32 OPX_81Params[3] = { 0,0,0 };
-s8 OPX_82Param0[4] = { 0,0,0,0 };
-s8 OPX_82Param1[4] = { 0,0,0,0 };
-s8 OPX_82Param2[4] = { 0,0,0,0 };
+s8 OPX_82Param0[4][3] = {{0,0,0},{0,0,0},{0,0,0},{0,0,0} };
 s16 OPX_82Param3[3] = { 0,0,0 };
 s16 OPX_82Param4 = 0;
 s32 OPX_86Param = 0;
@@ -3859,14 +3857,14 @@ void initFieldData()
 
     OPX_80Params[2] = 0x140;
     OPX_80Params[7] = 0;
-    OPX_82Param2[1] = 0;
-    OPX_82Param2[0] = 0;
-    OPX_82Param1[2] = 0;
-    OPX_82Param1[1] = 0;
-    OPX_82Param1[0] = 0;
-    OPX_82Param0[2] = 0;
-    OPX_82Param0[1] = 0;
-    OPX_82Param0[0] = 0;
+    OPX_82Param0[3][0] = 0;
+    OPX_82Param0[2][2] = 0;
+    OPX_82Param0[2][0] = 0;
+    OPX_82Param0[1][2] = 0;
+    OPX_82Param0[1][1] = 0;
+    OPX_82Param0[0][2] = 0;
+    OPX_82Param0[0][1] = 0;
+    OPX_82Param0[0][0] = 0;
     OPX_81Params[0] = 0;
     OPX_81Params[2] = 0x1000;
     OPX_82Param3[2] = 0;
@@ -3880,7 +3878,7 @@ void initFieldData()
     OPX_80Params[0] = 0;
     OPX_82Param4 = 0;
     OPX_81Params[1] = 0;
-    OPX_82Param2[2] = 0x20;
+    OPX_82Param0[3][1] = 0x20;
     fieldExecuteVar1 = 0;
     startAllEntityScripts();
     fieldExecuteVar1 = 1;
@@ -3893,7 +3891,7 @@ void initFieldData()
     {
         backgroundPoly = createBackgroundPoly
         ((int)(short)OPX_80Params[0], (int)(short)OPX_80Params[1], (int)(short)OPX_80Params[2], (int)(short)OPX_80Params[3], (int)(short)OPX_80Params[4], (int)(short)OPX_80Params[5],
-            (int)(short)OPX_80Params[6], (int)(short)OPX_80Params[7], OPX_81Params, OPX_82Param0, (int)OPX_82Param3[0], (int)OPX_82Param3[1], (int)OPX_82Param3[2]);
+            (int)(short)OPX_80Params[6], (int)(short)OPX_80Params[7], OPX_81Params, &OPX_82Param0[0][0], (int)OPX_82Param3[0], (int)OPX_82Param3[1], (int)OPX_82Param3[2]);
     }
     resetMemoryAllocStats(8, 0);
 
