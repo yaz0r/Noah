@@ -271,12 +271,12 @@ void batteLoaderPhase1_1() {
         for (int i = 0; i < 3; i++) {
             if (battleVisualEntities[i].m2 != 0x7F) {
                 if (battleVisualEntities[i].m4 == 0) {
-                    battleVisualEntities[i].mA_X = READ_LE_S16(battleLoadDataVar2Bis->mData.begin() + battleVisualEntities[i].m1 * 4 + battleVisualEntities[i].m0 * 0x20 + 4);
-                    battleVisualEntities[i].mC_Z = READ_LE_S16(battleLoadDataVar2Bis->mData.begin() + battleVisualEntities[i].m1 * 4 + battleVisualEntities[i].m0 * 0x20 + 6);
+                    battleVisualEntities[i].mA_X = battleLoadDataVar2Bis->m4[battleVisualEntities[i].m0][battleVisualEntities[i].m1].vx;
+                    battleVisualEntities[i].mC_Z = battleLoadDataVar2Bis->m4[battleVisualEntities[i].m0][battleVisualEntities[i].m1].vy;
                 }
                 else {
-                    battleVisualEntities[i].mA_X = READ_LE_S16(battleLoadDataVar2Bis->mData.begin() + battleVisualEntities[i].m0 * 8 + 0x100);
-                    battleVisualEntities[i].mC_Z = READ_LE_S16(battleLoadDataVar2Bis->mData.begin() + battleVisualEntities[i].m0 * 8 + 0x102);
+                    battleVisualEntities[i].mA_X = battleLoadDataVar2Bis->m100[battleVisualEntities[i].m0][0].vx;
+                    battleVisualEntities[i].mC_Z = battleLoadDataVar2Bis->m100[battleVisualEntities[i].m0][0].vy;
                 }
             }
         }
@@ -285,12 +285,12 @@ void batteLoaderPhase1_1() {
         for (int i = 3; i < 11; i++) {
             if (battleVisualEntities[i].m2 != 0x7F) {
                 if (battleVisualEntities[i].m4 == 0) {
-                    battleVisualEntities[i].mA_X = READ_LE_S16(battleLoadDataVar2Bis->mData.begin() + battleVisualEntities[i].m1 * 4 + battleVisualEntities[i].m0 * 0x20 + 0x10);
-                    battleVisualEntities[i].mC_Z = READ_LE_S16(battleLoadDataVar2Bis->mData.begin() + battleVisualEntities[i].m1 * 4 + battleVisualEntities[i].m0 * 0x20 + 0x12);
+                    battleVisualEntities[i].mA_X = battleLoadDataVar2Bis->m4[battleVisualEntities[i].m0][battleVisualEntities[i].m1 + 3].vx;
+                    battleVisualEntities[i].mC_Z = battleLoadDataVar2Bis->m4[battleVisualEntities[i].m0][battleVisualEntities[i].m1 + 3].vy;
                 }
                 else {
-                    battleVisualEntities[i].mA_X = READ_LE_S16(battleLoadDataVar2Bis->mData.begin() + battleVisualEntities[i].m0 * 8 + 0x104);
-                    battleVisualEntities[i].mC_Z = READ_LE_S16(battleLoadDataVar2Bis->mData.begin() + battleVisualEntities[i].m0 * 8 + 0x106);
+                    battleVisualEntities[i].mA_X = battleLoadDataVar2Bis->m100[battleVisualEntities[i].m0][1].vx;
+                    battleVisualEntities[i].mC_Z = battleLoadDataVar2Bis->m100[battleVisualEntities[i].m0][1].vy;
                 }
             }
         }

@@ -1,16 +1,37 @@
 #pragma once
 
 #include <optional>
+#include <array>
 
 #include "sprite/spriteSetup.h"
 #include "kernel/filesystem.h"
 #include "kernel/gameState.h"
+#include "kernel/math.h"
 
 extern sLoadableDataRaw battleCharacterConfigFile;
 
 struct sBattleMechaInitData {
     void init(std::vector<u8>::iterator it, u32 size) {
         mData.insert(mData.begin(), it, it+size);
+
+        {
+            auto it2 = it + 4;
+            for (int i = 0; i < m4.size(); i++) {
+                for (int j = 0; j < m4[i].size(); j++) {
+                    m4[i][j].vx = READ_LE_S16(it2); it2 += 2;
+                    m4[i][j].vy = READ_LE_S16(it2); it2 += 2;
+                }
+            }
+        }
+        {
+            auto it2 = it + 0x100;
+            for (int i = 0; i < m100.size(); i++) {
+                for (int j = 0; j < m100[i].size(); j++) {
+                    m100[i][j].vx = READ_LE_S16(it2); it2 += 2;
+                    m100[i][j].vy = READ_LE_S16(it2); it2 += 2;
+                }
+            }
+        }
 
         m348 = READ_LE_S16(it + 0x348);
         m34A = READ_LE_S16(it + 0x34A);
@@ -21,6 +42,8 @@ struct sBattleMechaInitData {
         m482_eye.vy = READ_LE_S16(it + 0x482 + 2);
         m482_eye.vz = READ_LE_S16(it + 0x482 + 4);
     }
+    std::array<std::array<sVec2_s16, 8>, 4> m4;
+    std::array<std::array<sVec2_s16, 2>, 2> m100;
     s16 m348;
     s16 m34A;
     SFP_VEC3 m47C_at;
