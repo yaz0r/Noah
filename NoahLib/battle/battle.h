@@ -8,6 +8,12 @@
 #include "kernel/gameState.h"
 #include "kernel/math.h"
 
+extern std::array<s16, 0xB> battleSlotStatusVar0;
+extern std::array<s16, 0xB> battleSlotStatusVar1;
+extern std::array<s16, 0xB> numTicksBeforeReady;
+
+extern s8 currentBattleMode;
+extern s8 makeBattleTimeProgress;
 extern sLoadableDataRaw battleCharacterConfigFile;
 
 struct sBattleMechaInitData {
@@ -112,9 +118,9 @@ extern MATRIX battleRenderingMatrix;
 extern s8 battleTimeEnabled;
 extern s8 battleCharacters[3];
 extern u8 bBattleTickMode1;
-extern std::array<s8, 0xB> battleEntityTurnIndex3;
-extern std::array<s8, 0xB> battleEntityTurnIndex2;
-extern s8 battleEntityTurnIndex;
+extern std::array<s8, 0xB> isEntityReadyForBattle;
+extern std::array<s8, 0xB> randomTurnOrder;
+extern s8 currentEntryInRandomTurnOrder;
 extern std::array<s8, 11> isBattleSlotFilled;
 void mechaInitEnvironmentMechaMesh(int entryId, ushort flags, sMechaDataTable2* pData2, sMechaDataTable1* pData1, ushort tpageX, ushort tpageY, ushort clutX, short clutY, SFP_VEC3* param_9);
 u16 characterIdToTargetBitmask(uint param_1);

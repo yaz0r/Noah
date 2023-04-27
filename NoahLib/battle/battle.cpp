@@ -19,6 +19,12 @@ u8 battleInitVar1 = 0;
 s32 battleRunningVar0 = 0;
 s8 battleRunningVar1 = 0;
 s8 isBattleAnEvent = 0;
+s8 currentBattleMode = 0;
+s8 makeBattleTimeProgress = 0;
+
+std::array<s16, 0xB> battleSlotStatusVar0;
+std::array<s16, 0xB> battleSlotStatusVar1;
+std::array<s16, 0xB> numTicksBeforeReady;
 
 std::array<std::array<s16, 2>, 3> battleCharactersCopyGameState;
 s16 bBattleTickMode0 = 0;
@@ -38,9 +44,9 @@ std::vector<u8>::iterator battleLoadDataVar1;
 sBattleMechaInitData* battleLoadDataVar2;
 sBattleMechaInitData* battleLoadDataVar2Bis;
 
-std::array<s8, 0xB> battleEntityTurnIndex3;
-std::array<s8, 0xB> battleEntityTurnIndex2;
-s8 battleEntityTurnIndex;
+std::array<s8, 0xB> isEntityReadyForBattle;
+std::array<s8, 0xB> randomTurnOrder;
+s8 currentEntryInRandomTurnOrder;
 
 std::array<sBattleVisualBuffer, 0x11> battleVisualBuffers;
 std::array<sBattleVisualEntity, 0x11> battleVisualEntities;
@@ -587,6 +593,52 @@ void updateBattleCamera() {
 void execSpritesCallback(void);
 void execSpritesCallbacks2(void);
 
+void battleTimeProgress() {
+    if (makeBattleTimeProgress) {
+        for (int i = 0; i < 11; i++) {
+            if (isBattleSlotFilled[i] && !isEntityReadyForBattle[i]) {
+                s8 iVar5 = 1;
+                MissingCode();
+                if (((battleEntities[i].m0_base.m7C & 0x1000) == 0) || ((battleSlotStatusVar1[i] ^= 1) == 0)) {
+                    if ((battleEntities[i].m0_base.m7C & 0x2000) == 0) {
+                        if (((battleEntities[i].m0_base.m7C & 0x80) == 0) && ((battleEntities[i].m0_base.m80 & 0x1000) == 0)) {
+                            numTicksBeforeReady[i] -= iVar5;
+                            if ((numTicksBeforeReady[i] * 0x10000) < 1) {
+                                isEntityReadyForBattle[i] = 1;
+                                numTicksBeforeReady[i] = 0;
+                            }
+                        }
+                    }
+                    else {
+                        assert(0);
+                    }
+                }
+            }
+        }
+    }
+}
+
+void battleUpdateInputs_mode1(int mode) {
+    if (battleTimeEnabled != '\0') {
+        battleTimeProgress();
+    }
+
+    MissingCode();
+}
+
+void battleUpdateInputs(int mode) {
+    switch (currentBattleMode) {
+    case 1:
+        battleUpdateInputs_mode1(mode);
+        break;
+    case 2: // cutscene
+        MissingCode();
+        break;
+    default:
+        assert(0);
+    }
+}
+
 void battleRender() {
     battleRenderCount++;
     checkSoftReboot();
@@ -617,6 +669,9 @@ void battleRender() {
     uploadCharacterSprites();
     execSpritesCallback();
     execSpritesCallbacks2();
+    MissingCode();
+
+    battleUpdateInputs(0);
     MissingCode();
 
     PutDispEnv(&pCurrentBattleRenderStruct->m5C_dispEnv);
@@ -650,15 +705,13 @@ void checkWinConditions() {
                 if ((battleEntities[i].m0_base.m7C & 0x8000) == 0) {
                     battleEntities[i].m0_base.m24_HP = 0;
                 }
-                battleEntityTurnIndex3[i] = 0xFF;
+                isEntityReadyForBattle[i] = 0xFF;
             }
         }
     }
 
     MissingCode();
 }
-
-s8 currentBattleMode = 0;
 
 void initBattle3dRendering(void) {
     MissingCode();
@@ -732,29 +785,29 @@ void battleTickGameplay() {
     if (bBattleTickMode0 == 0) {
         if (bBattleTickMode1 == 0) {
             battleVar2->m2D3_currentEntityTurn = 0;
-            s32 uVar3 = (uint)battleEntityTurnIndex;
-            s32 uVar2 = (uint)battleEntityTurnIndex2[uVar3];
-            s32 bVar1 = battleEntityTurnIndex3[uVar2];
+            s32 uVar3 = (uint)currentEntryInRandomTurnOrder;
+            s32 uVar2 = (uint)randomTurnOrder[uVar3];
+            s32 bVar1 = isEntityReadyForBattle[uVar2];
             do {
                 if (bVar1 == 1) {
                     battleVar2->m2D3_currentEntityTurn = (char)uVar2 + 1;
-                    battleEntityTurnIndex = (byte)(uVar3 + 1);
+                    currentEntryInRandomTurnOrder = (byte)(uVar3 + 1);
                     if ((uVar3 + 1 & 0xff) == 0xb) {
-                        battleEntityTurnIndex = 0;
+                        currentEntryInRandomTurnOrder = 0;
                         battleTickMain(0);
                         return;
                     }
                 }
                 uVar3 = uVar3 + 1;
-                if (uVar3 == 0xb) {
+                if (uVar3 == 11) {
                     uVar3 = 0;
                 }
-                if (uVar3 == battleEntityTurnIndex) {
+                if (uVar3 == currentEntryInRandomTurnOrder) {
                     battleTickMain(0);
                     return;
                 }
-                uVar2 = (uint)battleEntityTurnIndex2[uVar3];
-                bVar1 = battleEntityTurnIndex3[uVar2];
+                uVar2 = (uint)randomTurnOrder[uVar3];
+                bVar1 = isEntityReadyForBattle[uVar2];
             } while (true);
         }
         battleVar2->m2D3_currentEntityTurn = bBattleTickMode1;
@@ -799,12 +852,21 @@ void battleMain() {
     battleLoadDataVar2Bis = battleLoadDataVar2;
     MissingCode();
 
+    makeBattleTimeProgress = 1;
     setCameraVisibleEntities(allPlayerCharacterBitmask);
     battleRenderDebugAndMain();
 
     MissingCode();
+    
+    // Wait for battle intro to finish and battle time to start
     while (battleTimeEnabled == '\0') {
         battleRenderDebugAndMain();
+    }
+
+    MissingCode();
+
+    if (isBattleAnEvent == '\0') {
+        currentBattleMode = 1;
     }
 
     MissingCode();

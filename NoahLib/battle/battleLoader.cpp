@@ -301,8 +301,18 @@ void initBattleInventory(void) {
     MissingCode();
 }
 
-void batteLoaderPhase2_2(void) {
-    MissingCode();
+void batteLoaderPhase2_2() {
+    if (currentBattleConfig.m1_flags & 0x20) {
+        assert(0);
+    }
+
+    for (int i = 0; i < 3; i++) {
+        MissingCode();
+    }
+
+    for (int i = 3; i < 11; i++) {
+        MissingCode(); // TODO: here figure out who each enemy is facing
+    }
 }
 
 u32 getRandomValueInRange(u32 param_1, u32 param_2)
@@ -334,9 +344,6 @@ u32 getRandomValueInRange(u32 param_1, u32 param_2)
     return uVar1;
 }
 
-std::array<s16, 0xB> battleSlotStatusVar0;
-std::array<s16, 0xB> battleSlotStatusVar1;
-std::array<s16, 0xB> battleSlotStatusVar2;
 
 sBattleEntity* battleGetSlotStatusSub_currentBattleEntity;
 sGameStateA42* battleGetSlotStatusSub_currentBattleEntityGear;
@@ -407,36 +414,57 @@ u32 battleGetSlotStatusSub(u32 param_1) {
 void battleGetSlotStatus(std::array<u8, 0xB>& param1) {
     for (int i = 0; i < 0xB; i++) {
         if (isBattleSlotFilled[i] == 0) {
-            battleSlotStatusVar2[i] = 0xFF;
+            numTicksBeforeReady[i] = 0xFF;
             battleSlotStatusVar0[i] = 0xFF;
         }
         else {
-            battleSlotStatusVar2[i] = battleSlotStatusVar0[i] = battleGetSlotStatusSub(i);
+            numTicksBeforeReady[i] = battleSlotStatusVar0[i] = battleGetSlotStatusSub(i);
         }
-        battleEntityTurnIndex3[i] = 0;
+        isEntityReadyForBattle[i] = 0;
         battleSlotStatusVar1[i] = 0;
         param1[i] = 0;
     }
 }
 
 void batteLoaderPhase2_1(void) {
-    MissingCode();
+    battleGetSlotStatusSub_current28Index = 0;
 
     std::array<u8, 0xB> slotStatus;
     battleGetSlotStatus(slotStatus);
 
-    for (int i = 0; i < 0xB;) {
+    for (int i = 0; i < 11;) {
         s32 randomValue = getRandomValueInRange(0, 10);
         if (slotStatus[randomValue] == 0) {
             slotStatus[randomValue] = 1;
-            battleEntityTurnIndex2[i] = randomValue;
+            randomTurnOrder[i] = randomValue;
             i++;
         }
     }
 
-    battleEntityTurnIndex = 0;
+    currentEntryInRandomTurnOrder = 0;
 
-    MissingCode();
+    for (int i = 3; i < 11; i++) {
+        if (slotStatus[i] && (battleEntities[i].m0_base.m34 & 0x200)) {
+            numTicksBeforeReady[i] = 1;
+            battleSlotStatusVar0[i] = 1;
+        }
+    }
+
+    // Figure out smallest value, so we can remove that from each initiative and start turn immediately
+    u16 iVar5 = 0xFFFF;
+    for (int i = 0; i < 11; i++) {
+        if (isBattleSlotFilled[i]) {
+            if (numTicksBeforeReady[i] < iVar5) {
+                iVar5 = numTicksBeforeReady[i];
+            }
+        }
+    }
+
+    for (int i = 0; i < 11; i++) {
+        if (isBattleSlotFilled[i]) {
+            numTicksBeforeReady[i] -= iVar5;
+        }
+    }
 }
 
 void battleLoaderTick(s8 param_1) {

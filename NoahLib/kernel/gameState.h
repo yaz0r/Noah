@@ -8,11 +8,13 @@ struct sGameStateA4
     s16 m26_MaxHP;
     s16 m28_MP;
     s16 m2A_MaxMP;
+    s16 m34;
     s8 m3A_Level;
     s8 m3B_Level2;
     s8 m5A;
     s8 m78_partyData_gearNum;
     u16 m7C;
+    u16 m80;
     //size 0xA4
 };
 
