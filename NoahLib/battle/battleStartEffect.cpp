@@ -450,8 +450,7 @@ void battleStartEffect() {
     MissingCode();
 /*    freeBattleStartEffect(pBattleStartEffect);
     SetDispMask(0);
-    waitReadCompletion(0);
+    waitReadCompletion(0);*/
     battleLoaderTick(3);
-    */
     return;
 }

@@ -21,6 +21,8 @@ s8 battleRunningVar1 = 0;
 s8 isBattleAnEvent = 0;
 s8 currentBattleMode = 0;
 s8 makeBattleTimeProgress = 0;
+s8 battleNumPartyMembers = 0;
+s8 drawBattleMode1Disabled = 0;
 
 std::array<s16, 0xB> battleSlotStatusVar0;
 std::array<s16, 0xB> battleSlotStatusVar1;
@@ -66,16 +68,14 @@ void initGraphicsForBattle(void) {
     initBattleRenderStructs(&battleRenderStructs[1]);
 }
 
-struct sBattleVar0 {
-    // size 0xA2B4
-}*battleVar0 = nullptr;
-
-struct sBattleVar1 {
-    // size 0x10C
-}*battleVar1 = nullptr;
+sBattleVar0* battleVar0 = nullptr;
+sBattleVar1* battleVar1 = nullptr;
 
 struct sBattleVar2 {
     u8 m2D3_currentEntityTurn;
+    u8 m2DA_indexInBattleVar48;
+    u8 m2DB;
+    std::array<u8, 3> m2EB;
     // size 0x2F8
 }*battleVar2 = nullptr;
 
@@ -639,6 +639,108 @@ void battleUpdateInputs(int mode) {
     }
 }
 
+void drawBattleMode2() {
+    MissingCode();
+}
+
+void battleRender63C8() {
+    if (battleVar0->m6415) {
+        battleVar0->m63C8[battleVar0->m6414].r0 = battleVar0->m6410;
+        battleVar0->m63C8[battleVar0->m6414].g0 = battleVar0->m6410;
+        battleVar0->m63C8[battleVar0->m6414].b0 = battleVar0->m6410;
+        AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->m63C8[battleVar0->m6414]);
+        AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->m63F8[battleVar0->m6414]);
+    }
+}
+
+void battleRenderPolyArray(std::array<POLY_FT4, 2>* p, int param2, int param3) {
+    for (int i = 0; i < param2; i++) {
+        AddPrim(&(*pCurrentBattleOT)[1], &p[i][param3]);
+    }
+}
+
+void battleRenderPlayerPortraits() {
+    if (battleVar1->m97) {
+        assert(0);
+    }
+
+    for (int i = 0; i < 4; i++) {
+        //battleRenderPolyArray(battleVar0->m2E08)
+        MissingCode();
+    }
+
+    for (int i = 0; i < 3; i++) {
+        if (battleVar1->mCC[i]) {
+            switch (battleVar0->m835C[i].m1E1) {
+            case 1:
+                battleRenderPolyArray(&battleVar0->m835C[i].m0[0], battleVar0->m835C[i].m1E2, battleVar0->m835C[i].m1E0);
+                break;
+            case 2:
+                battleRenderPolyArray(&battleVar0->m835C[i].mA0[0], battleVar0->m835C[i].m1E3, battleVar0->m835C[i].m1E0);
+                break;
+            default:
+                assert(0);
+            }
+            MissingCode();
+        }
+    }
+
+    MissingCode();
+}
+
+void updatePortraits() {
+    battleVar1->m77 = 0;
+
+    for (int i = 0; i < 3; i++) {
+        if (battleVisualEntities[i].m2 != 0x7F) {
+            switch (battleVar1->m90[i]) {
+            case 0:
+                battleVar1->m74[i] = 0;
+                battleVar1->m74[i] += battleSetupStringInPolyFT4Large(0x8F, &battleVar0->m2E08[battleVar1->m74[i]], ((i * 0x60 + partyMemberSpritesOffset[battleNumPartyMembers][i] + 0x44) * 0x10000) >> 16, 0x1F);
+                battleVar1->m74[i] += battleSetupStringInPolyFT4Large(0x52, &battleVar0->m2E08[battleVar1->m74[i]], ((i * 0x60 + partyMemberSpritesOffset[battleNumPartyMembers][i] + 0x48) * 0x10000) >> 16, 0x1C);
+                {
+                    int length = battleVar1->m74[i];
+                    battleVar1->m74[i] += battleSetupStringInPolyFT4Large(0x53, &battleVar0->m2E08[battleVar1->m74[i]], ((i * 0x60 + partyMemberSpritesOffset[battleNumPartyMembers][i] + 0x48) * 0x10000) >> 16, 0x1C);
+                    while (length < battleVar1->m74[i]) {
+                        battleSetupTextPoly(&battleVar0->m2E08[length][battleOddOrEven]);
+                        length++;
+                    }
+                }
+                battleVar1->m84[i] = battleOddOrEven;
+                battleVar1->mCC[i] = 1;
+                break;
+            default:
+                assert(0);
+            }
+        }
+    }
+}
+
+void drawBattleMode1() {
+    if (!drawBattleMode1Disabled) {
+        MissingCode();
+        updatePortraits();
+        battleRender63C8();
+        battleRenderPlayerPortraits();
+        MissingCode();
+    }
+}
+
+void drawBattleFromModes() {
+    switch (currentBattleMode)
+    {
+    case 1:
+        drawBattleMode1();
+        break;
+    case 2:
+        drawBattleMode2();
+        break;
+    default:
+        assert(0);
+        break;
+    }
+}
+
 void battleRender() {
     battleRenderCount++;
     checkSoftReboot();
@@ -671,6 +773,7 @@ void battleRender() {
     execSpritesCallbacks2();
     MissingCode();
 
+    drawBattleFromModes();
     battleUpdateInputs(0);
     MissingCode();
 
@@ -771,13 +874,100 @@ void setCameraVisibleEntities(uint playerBitmask) {
     MissingCode();
 }
 
-void battleTickMain(s8 param_1) {
+s8 battleTickMain_var0 = 1;
+s8 battleTickMain_var1 = 0;
+s8 battleTickMain_var2;
+
+std::array<s8, 5> battleTickMain_var3;
+std::array<s8, 11> battleTickMainSub0Var1;
+std::array<s16, 11> battleTickMainSub0Var0;
+
+void battleTickMainSub0() {
+    for (int i = 0; i < 11; i++) {
+        battleTickMainSub0Var1[i] = -1;
+        battleTickMainSub0Var0[i] = 0;
+    }
+}
+
+void resetBattleVar2_m2EB() {
+    for (int i = 0; i < 3; i++) {
+        battleVar2->m2EB[i] = 0;
+    }
+}
+
+s16 battleTickMain_var4;
+
+void updateBattleEntityStatus(int index) {
     MissingCode();
+}
+
+struct sUnkMonsterStatus {
+    s8 m2;
+    // size 4
+};
+
+std::array<sUnkMonsterStatus, 8> unknownMonsterStatus0;
+
+std::array<std::array<s16, 3>, 3> partyMemberSpritesOffset = { {
+    {0x60, 0x0, 0x0},
+    {0x20, 0x40, 0x0},
+    {0x0, 0x0, 0x0}
+} };
+
+void battleTickMain(s8 param_1) {
+    battleTickMain_var0 = 1;
+    battleTickMain_var1 = 0;
 
     if (battleVar2->m2D3_currentEntityTurn == 0)
         return;
 
-    assert(0);
+    battleTickMainSub0();
+    resetBattleVar2_m2EB();
+    makeBattleTimeProgress = 0;
+    battleVar2->m2D3_currentEntityTurn = battleVar2->m2D3_currentEntityTurn - 1;
+    battleTickMain_var2 = battleVar2->m2D3_currentEntityTurn;
+    battleVar2->m2DA_indexInBattleVar48 = 0;
+    battleVar2->m2DB = 0;
+
+    for (int i = 4; i > -1; i--) {
+        battleTickMain_var3[i] = 0;
+    }
+
+    battleTickMain_var4 = 0;
+    updateBattleEntityStatus(battleVar2->m2D3_currentEntityTurn);
+
+    int currentEntityTurn = battleVar2->m2D3_currentEntityTurn;
+
+    if (currentEntityTurn < 3) {
+        for (int i = 7; i > -1; i--) {
+            unknownMonsterStatus0[i].m2 = 0;
+        }
+
+        int offsetPerPartyMember = partyMemberSpritesOffset[battleNumPartyMembers][battleVar2->m2D3_currentEntityTurn];
+        battleVar0->m63C8[battleOddOrEven].x0y0.vx = battleVar2->m2D3_currentEntityTurn * 0x60 + 0x10 + offsetPerPartyMember;
+        battleVar0->m63C8[battleOddOrEven].x0y0.vy = 8;
+        battleVar0->m63C8[battleOddOrEven].x1y1.vx = battleVar2->m2D3_currentEntityTurn * 0x60 + 0x28 + offsetPerPartyMember;
+        battleVar0->m63C8[battleOddOrEven].x1y1.vy = 8;
+        battleVar0->m63C8[battleOddOrEven].x2y2.vx = battleVar2->m2D3_currentEntityTurn * 0x60 + 0x10 + offsetPerPartyMember;
+        battleVar0->m63C8[battleOddOrEven].x2y2.vy = 0x20;
+        battleVar0->m63C8[battleOddOrEven].x3y3.vx = battleVar2->m2D3_currentEntityTurn * 0x60 + 0x28 + offsetPerPartyMember;
+        battleVar0->m63C8[battleOddOrEven].x3y3.vy = 0x20;
+        battleVar0->m6414 = battleOddOrEven;
+        battleVar0->m6415 = 1;
+
+        MissingCode();
+    }
+    else {
+        MissingCode();
+    }
+
+    MissingCode();
+
+    checkWinConditions();
+
+    MissingCode();
+
+    makeBattleTimeProgress = 1;
 }
 
 void battleTickGameplay() {
@@ -824,7 +1014,7 @@ void battleMain() {
     battleVar1 = new sBattleVar1;
     battleVar2 = new sBattleVar2;
 
-    memset(battleVar0, 0, sizeof(sBattleVar0));
+    //memset(battleVar0, 0, sizeof(sBattleVar0));
     memset(battleVar1, 0, sizeof(sBattleVar1));
     memset(battleVar2, 0, sizeof(sBattleVar2));
 

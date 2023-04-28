@@ -7,6 +7,7 @@
 #include "kernel/filesystem.h"
 #include "kernel/gameState.h"
 #include "kernel/math.h"
+#include "psx/gpuprims.h"
 
 extern std::array<s16, 0xB> battleSlotStatusVar0;
 extern std::array<s16, 0xB> battleSlotStatusVar1;
@@ -15,6 +16,59 @@ extern std::array<s16, 0xB> numTicksBeforeReady;
 extern s8 currentBattleMode;
 extern s8 makeBattleTimeProgress;
 extern sLoadableDataRaw battleCharacterConfigFile;
+extern s8 battleNumPartyMembers;
+extern s8 drawBattleMode1Disabled;
+extern std::array<std::array<s16, 3>, 3> partyMemberSpritesOffset;
+
+struct sBattleVar0Sub {
+    std::array<std::array<POLY_FT4, 2>, 2> m0;
+    std::array<std::array<POLY_FT4, 2>, 2> mA0;
+    std::array<std::array<POLY_FT4, 2>, 2> m140;
+    u8 m1E0;
+    u8 m1E1;
+    u8 m1E2;
+    u8 m1E3;
+};
+
+struct sBattleVar0 {
+    std::array<std::array<POLY_FT4, 2>, 6> m0;
+    std::array<std::array<POLY_FT4, 2>, 4> m1E0; // unsure size
+    std::array<std::array<POLY_FT4, 2>, 3> m818; // unsure size
+    std::array<std::array<POLY_FT4, 2>, 10> m2E08;
+    std::array<POLY_F4, 2> m63C8;
+    std::array<DR_MODE, 2> m63F8;
+    u32 m6410;
+    u8 m6414 = 0;
+    u8 m6415;
+    u8 m6416;
+    std::array<sBattleVar0Sub, 3> m835C;
+    s32 mA234;
+    s32 mA238;
+    s32 mA23C;
+    s32 mA240;
+    s32 mA244_X;
+    s32 mA248_Y;
+    u16 mA2AE;
+    // size 0xA2B4
+};
+extern sBattleVar0* battleVar0;
+
+struct sBattleVar1 {
+    u8 m77;
+    std::array<u8, 3> m74;
+    std::array<u8, 3> m78;
+    u8 m7C;
+    u8 m7D;
+    u8 m7E;
+    u8 m83;
+    std::array<u8, 3> m84;
+    std::array<u8, 3> m90;
+    u8 m97;
+    u8 mA2;
+    std::array<u8, 3> mCC;
+    // size 0x10C
+};
+extern sBattleVar1* battleVar1;
 
 struct sBattleMechaInitData {
     void init(std::vector<u8>::iterator it, u32 size) {
@@ -132,3 +186,7 @@ struct sBattleEntity {
 };
 
 extern std::array<sBattleEntity, 11> battleEntities;
+
+int battleSetupStringInPolyFT4Small(int character, std::array<POLY_FT4, 2>* polyArray, short x, short y);
+int battleSetupStringInPolyFT4Large(int character, std::array<POLY_FT4, 2>* polyArray, short x, short y);
+void battleSetupTextPoly(POLY_FT4* param_1);

@@ -9,6 +9,8 @@
 #include "kernel/TIM.h"
 #include "battleConfig.h"
 #include "battleSpriteLoader.h"
+#include "battleRenderContext.h"
+#include "menus/menuHandler.h"
 
 void dummpyLoaderEnd() {
     // empty, probably an old logging code
@@ -150,6 +152,8 @@ void loadPartyMembers() {
 
 void batteLoaderPhase1_0() {
     MissingCode();
+    drawBattleMode1Disabled = 0;
+    MissingCode();
     for (int i = 0; i < 3; i++) {
         MissingCode();
         battleVisualEntities[i].m2 = battleCharacters[i];
@@ -167,8 +171,6 @@ void batteLoaderPhase1_0() {
     MissingCode();
     bBattleTickMode1 = 0;
 }
-
-s8 battleNumPartyMembers = 0;
 
 std::array<std::array<u8, 4>, 32> battleSlotLayout;
 
@@ -467,6 +469,127 @@ void batteLoaderPhase2_1(void) {
     }
 }
 
+void batteLoaderPhase3_0_sub0() {
+    battleVar1->m7C = 1;
+    battleVar1->m7D = 1;
+    battleVar1->m7E = 1;
+
+    computeMenuBorder(battleFont, 0x5C, &battleVar0->mA234, &battleVar0->mA238, &battleVar0->mA23C, &battleVar0->mA240, &battleVar0->mA244_X, &battleVar0->mA248_Y);
+    battleVar0->mA2AE = GetClut(battleVar0->mA23C, battleVar0->mA240);
+
+    MissingCode();
+}
+
+int battleSetupStringInPolyFT4Small(int character, std::array<POLY_FT4, 2>* polyArray, short x, short y) {
+    return setupStringInPolyFT4(battleFont, character, polyArray, battleOddOrEven, x, y, 0x800);
+}
+
+int battleSetupStringInPolyFT4Large(int character, std::array<POLY_FT4, 2>* polyArray, short x, short y) {
+    return setupStringInPolyFT4(battleFont, character, polyArray, battleOddOrEven, x, y, 0x1000);
+}
+
+void battleSetupTextPolySub(POLY_FT4* param_1)
+{
+    SetSemiTrans(param_1, 1);
+    SetShadeTex(param_1, 0);
+}
+
+void battleSetupTextPoly(POLY_FT4* param_1) {
+    battleSetupTextPolySub(param_1);
+    param_1->r0 = '@';
+    param_1->g0 = '@';
+    param_1->b0 = '@';
+    param_1->tpage = param_1->tpage | 0x40;
+}
+
+void batteLoaderPhase3_0_sub1() {
+    for (int i = 0; i < 3; i++) {
+        if (battleVisualEntities[i].m2 != 0x7F) {
+            battleVar1->m78[i] += battleSetupStringInPolyFT4Small(0x52, &battleVar0->m0[battleVar1->m78[i]], ((i * 0x60 + partyMemberSpritesOffset[battleNumPartyMembers][i] + 0x44) * 0x10000) >> 16, 0x24);
+            int length = battleVar1->m78[i];
+            battleVar1->m78[i] += battleSetupStringInPolyFT4Small(0x53, &battleVar0->m0[battleVar1->m78[i]], ((i * 0x60 + partyMemberSpritesOffset[battleNumPartyMembers][i] + 0x44) * 0x10000) >> 16, 0x24);
+
+            for (int j = length; j < battleVar1->m78[i]; j++) {
+                battleSetupTextPoly(&battleVar0->m1E0[j][battleOddOrEven]);
+            }
+
+            battleSetupStringInPolyFT4Large(i + 0x61, &battleVar0->m818[i], ((i * 0x60 + partyMemberSpritesOffset[battleNumPartyMembers][i] + 0x1C) * 0x10000) >> 16, 0x14);
+            battleVar0->m835C[i].m1E2 = battleSetupStringInPolyFT4Large(0x90, &battleVar0->m835C[i].m0[0], ((i * 0x60 + partyMemberSpritesOffset[battleNumPartyMembers][i] + 0x38) * 0x10000) >> 16, 0x27);
+            battleVar0->m835C[i].m1E3 = battleSetupStringInPolyFT4Large(0x91, &battleVar0->m835C[i].mA0[0], ((i * 0x60 + partyMemberSpritesOffset[battleNumPartyMembers][i] + 0x3C) * 0x10000) >> 16, 0x27);
+            battleVar0->m835C[i].m1E0 = battleOddOrEven;
+        }
+    }
+
+    battleVar1->mA2 = battleOddOrEven;
+    battleVar1->m83 = battleOddOrEven;
+}
+
+void batteLoaderPhase3_0() {
+    batteLoaderPhase3_0_sub0();
+    batteLoaderPhase3_0_sub1();
+}
+
+void renderItemTargetsLabels() {
+    MissingCode();
+}
+
+void setupBattleVar0Polys() {
+
+    RECT localRect;
+    localRect.x = 0;
+    localRect.y = 0;
+    localRect.h = 0x100;
+    localRect.w = 0x100;
+
+    for (int i = 0; i < 2; i++) {
+        SetPolyF4(&battleVar0->m63C8[i]);
+        battleVar0->m63C8[i].r0 = 0xFF;
+        battleVar0->m63C8[i].g0 = 0xFF;
+        battleVar0->m63C8[i].b0 = 0xFF;
+        SetSemiTrans(&battleVar0->m63C8[i], 1);
+        SetDrawMode(&battleVar0->m63F8[i], 0, 0, GetTPage(0, 2, battleVar0->mA244_X, battleVar0->mA248_Y), &localRect);
+    }
+
+    battleVar0->m6415 = 0;
+    battleVar0->m6410 = 0xFF;
+    battleVar0->m6416 = 0;
+}
+
+void batteLoaderPhase3_1() {
+    setupBattleVar0Polys();
+    renderItemTargetsLabels();
+}
+
+std::array<u8, 3> batteLoaderPhase1_3_Var0;
+
+void batteLoaderPhase1_3() {
+    MissingCode();
+
+    for (int i = 0; i < 3; i++) {
+        if (battleVisualEntities[i].m2 == 0x7F) {
+            batteLoaderPhase1_3_Var0[i] = 0;
+            battleEntities[i].m15A_flags &= 0x7F;
+            battleVar0->m835C[i].m1E1 = 0;
+        }
+        else {
+            battleVar0->m835C[i].m1E1 = 1; // display AP
+            if (battleVisualEntities[i].m4 == 0) {
+                batteLoaderPhase1_3_Var0[i] = 0;
+                battleEntities[i].m15A_flags &= 0x7F;
+            }
+            else {
+                batteLoaderPhase1_3_Var0[i] = 0;
+                battleEntities[i].m15A_flags |= 0x80;
+                if (battleVisualEntities[i].m2 != 0xA) { // chuchu?
+                    battleVar0->m835C[i].m1E1 = 2; // display Fuel
+                }
+            }
+        }
+    }
+
+    MissingCode();
+}
+
 void battleLoaderTick(s8 param_1) {
     switch (param_1) {
     case 0:
@@ -477,6 +600,7 @@ void battleLoaderTick(s8 param_1) {
         batteLoaderPhase1_0();
         batteLoaderPhase1_1();
         MissingCode();
+        batteLoaderPhase1_3();
         break;
     case 2:
         initBattleInventory();
@@ -485,7 +609,8 @@ void battleLoaderTick(s8 param_1) {
         MissingCode();
         break;
     case 3:
-        MissingCode();
+        batteLoaderPhase3_0();
+        batteLoaderPhase3_1();
         break;
     default:
         assert(0);
