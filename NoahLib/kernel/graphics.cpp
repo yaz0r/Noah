@@ -920,6 +920,104 @@ void POLY_FT3::execute()
 	}
 }
 
+void POLY_GT4::execute() {
+    float matrix[16];
+    bx::mtxIdentity(matrix);
+
+    bgfx::setTransform(matrix);
+    {
+        bgfx::TransientVertexBuffer vertexBuffer;
+        bgfx::TransientIndexBuffer indexBuffer;
+        bgfx::allocTransientBuffers(&vertexBuffer, GetLayout(), 4, &indexBuffer, 4);
+
+        sVertice* pVertices = (sVertice*)vertexBuffer.data;
+        u16* pIndices = (u16*)indexBuffer.data;
+
+        for (int i = 0; i < 3; i++)
+        {
+            pVertices[i].CLUT[0] = clut & 0x3F;
+            pVertices[i].CLUT[1] = (clut >> 6) & 0x1FF;
+
+            u32 code = tpage;
+            pVertices[i].Texpage[0] = code & 0xFF;
+            pVertices[i].Texpage[1] = (code >> 8) & 0xFF;
+            pVertices[i].Texpage[2] = (code >> 16) & 0xFF;
+            pVertices[i].Texpage[3] = 0xE1;
+
+            RECT fullTextureWindow = { 0,0,255,255 };
+            u32 textureWindow = get_tw(&fullTextureWindow);
+            pVertices[i].TextureWindow[0] = textureWindow & 0xFF;
+            pVertices[i].TextureWindow[1] = (textureWindow >> 8) & 0xFF;
+            pVertices[i].TextureWindow[2] = (textureWindow >> 16) & 0xFF;
+            pVertices[i].TextureWindow[3] = 0xE2;
+        }
+
+        pVertices[0].color[0] = r0;
+        pVertices[0].color[1] = g0;
+        pVertices[0].color[2] = b0;
+        pVertices[0].gpuCode = code;
+
+        pVertices[1].color[0] = r1;
+        pVertices[1].color[1] = g1;
+        pVertices[1].color[2] = b2;
+        pVertices[1].gpuCode = code;
+
+        pVertices[2].color[0] = r2;
+        pVertices[2].color[1] = g2;
+        pVertices[2].color[2] = b2;
+        pVertices[2].gpuCode = code;
+
+        pVertices[0].v[0] = x0y0.vx;
+        pVertices[0].v[1] = x0y0.vy;
+        pVertices[0].v[2] = 0;
+        pVertices[0].texcoord[0] = u0;
+        pVertices[0].texcoord[1] = v0;
+
+        pVertices[1].v[0] = x1y1.vx;
+        pVertices[1].v[1] = x1y1.vy;
+        pVertices[1].v[2] = 0;
+        pVertices[1].texcoord[0] = u1;
+        pVertices[1].texcoord[1] = v1;
+
+        pVertices[2].v[0] = x2y2.vx;
+        pVertices[2].v[1] = x2y2.vy;
+        pVertices[2].v[2] = 0;
+        pVertices[2].texcoord[0] = u2;
+        pVertices[2].texcoord[1] = v2;
+
+        pVertices[3].v[0] = x3y3.vx;
+        pVertices[3].v[1] = x3y3.vy;
+        pVertices[3].v[2] = 0;
+        pVertices[3].texcoord[0] = u3;
+        pVertices[3].texcoord[1] = v3;
+
+        pIndices[0] = 0;
+        pIndices[1] = 1;
+        pIndices[2] = 2;
+        pIndices[3] = 3;
+
+        u64 State = BGFX_STATE_WRITE_RGB
+            | BGFX_STATE_DEPTH_TEST_ALWAYS
+            | BGFX_STATE_MSAA
+            | BGFX_STATE_PT_TRISTRIP;
+
+        u32 blendRGBA = getBlending(code, tpage, State);
+
+        bgfx::setState(State, blendRGBA);
+
+        bgfx::setVertexBuffer(0, &vertexBuffer);
+        bgfx::setIndexBuffer(&indexBuffer);
+
+        static bgfx::UniformHandle s_PSXVramUniformHandle = BGFX_INVALID_HANDLE;
+        if (!bgfx::isValid(s_PSXVramUniformHandle))
+        {
+            s_PSXVramUniformHandle = bgfx::createUniform("s_PSXVram", bgfx::UniformType::Sampler);
+        }
+        bgfx::setTexture(0, s_PSXVramUniformHandle, m_vramTextureHandle);
+        bgfx::submit(PSXOutput_bgfxView, getSPRTShader());
+    }
+}
+
 void POLY_GT3::execute()
 {
     float matrix[16];

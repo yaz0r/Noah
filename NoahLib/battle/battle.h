@@ -20,6 +20,14 @@ extern s8 battleNumPartyMembers;
 extern s8 drawBattleMode1Disabled;
 extern std::array<std::array<s16, 3>, 3> partyMemberSpritesOffset;
 
+struct sApStruct {
+    u8 m0;
+    u8 m1;
+    // size 8
+};
+
+extern std::array<sApStruct, 3> apConfigArray;
+
 struct sBattleVar0Sub {
     std::array<std::array<POLY_FT4, 2>, 2> m0;
     std::array<std::array<POLY_FT4, 2>, 2> mA0;
@@ -31,10 +39,12 @@ struct sBattleVar0Sub {
 };
 
 struct sBattleVar0 {
-    std::array<std::array<POLY_FT4, 2>, 6> m0;
-    std::array<std::array<POLY_FT4, 2>, 4> m1E0; // unsure size
+    std::array<std::array<std::array<POLY_FT4, 2>, 6>, 3> m0;
+    std::array<std::array<POLY_GT4, 2>, 4> m5A0;
+    std::array<std::array<POLY_G4, 2>, 3> m740_APOrFuelPoly;
     std::array<std::array<POLY_FT4, 2>, 3> m818; // unsure size
     std::array<std::array<POLY_FT4, 2>, 10> m2E08;
+    std::array<std::array<std::array<POLY_FT4, 2>, 40>, 3> m3A88;
     std::array<POLY_F4, 2> m63C8;
     std::array<DR_MODE, 2> m63F8;
     u32 m6410;
@@ -48,7 +58,10 @@ struct sBattleVar0 {
     s32 mA240;
     s32 mA244_X;
     s32 mA248_Y;
+    u16 mA2AC;
     u16 mA2AE;
+    u16 mA2B0;
+    u16 mA2B2;
     // size 0xA2B4
 };
 extern sBattleVar0* battleVar0;
@@ -63,9 +76,12 @@ struct sBattleVar1 {
     u8 m83;
     std::array<u8, 3> m84;
     std::array<u8, 3> m90;
+    std::array<u8, 3> m93_oddOrEven;
     u8 m97;
     u8 mA2;
+    u8 mAF;
     std::array<u8, 3> mCC;
+    std::array<u8, 3> mE0;
     // size 0x10C
 };
 extern sBattleVar1* battleVar1;

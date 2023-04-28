@@ -476,6 +476,31 @@ void batteLoaderPhase3_0_sub0() {
 
     computeMenuBorder(battleFont, 0x5C, &battleVar0->mA234, &battleVar0->mA238, &battleVar0->mA23C, &battleVar0->mA240, &battleVar0->mA244_X, &battleVar0->mA248_Y);
     battleVar0->mA2AE = GetClut(battleVar0->mA23C, battleVar0->mA240);
+    battleVar0->mA2AC = GetClut(battleVar0->mA23C, battleVar0->mA240 - 1);
+    battleVar0->mA2B2 = GetClut(battleVar0->mA23C, battleVar0->mA240 - 2);
+    battleVar0->mA2B0 = GetClut(battleVar0->mA23C, battleVar0->mA240 - 3);
+
+    // Original code might overflow m740_APOrFuelPoly by initializing 8 entries (while there is only 6)
+    // Split in 2 loops to initialize at proper size
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 2; j++) {
+            POLY_GT4& pGT4 = battleVar0->m5A0[i][j];
+            MissingCode();
+        }
+    }
+
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 2; j++) {
+            POLY_G4& pG4 = battleVar0->m740_APOrFuelPoly[i][j];
+            SetPolyG4(&pG4);
+            pG4.r2 = 0x4F;
+            pG4.g2 = 0x4F;
+            pG4.b2 = 0x4F;
+            pG4.r3 = 0x4F;
+            pG4.g3 = 0x4F;
+            pG4.b3 = 0x4F;
+        }
+    }
 
     MissingCode();
 }
@@ -505,12 +530,12 @@ void battleSetupTextPoly(POLY_FT4* param_1) {
 void batteLoaderPhase3_0_sub1() {
     for (int i = 0; i < 3; i++) {
         if (battleVisualEntities[i].m2 != 0x7F) {
-            battleVar1->m78[i] += battleSetupStringInPolyFT4Small(0x52, &battleVar0->m0[battleVar1->m78[i]], ((i * 0x60 + partyMemberSpritesOffset[battleNumPartyMembers][i] + 0x44) * 0x10000) >> 16, 0x24);
+            battleVar1->m78[i] += battleSetupStringInPolyFT4Small(0x52, &battleVar0->m0[i][battleVar1->m78[i]], ((i * 0x60 + partyMemberSpritesOffset[battleNumPartyMembers][i] + 0x44) * 0x10000) >> 16, 0x24);
             int length = battleVar1->m78[i];
-            battleVar1->m78[i] += battleSetupStringInPolyFT4Small(0x53, &battleVar0->m0[battleVar1->m78[i]], ((i * 0x60 + partyMemberSpritesOffset[battleNumPartyMembers][i] + 0x44) * 0x10000) >> 16, 0x24);
+            battleVar1->m78[i] += battleSetupStringInPolyFT4Small(0x53, &battleVar0->m0[i][battleVar1->m78[i]], ((i * 0x60 + partyMemberSpritesOffset[battleNumPartyMembers][i] + 0x44) * 0x10000) >> 16, 0x24);
 
             for (int j = length; j < battleVar1->m78[i]; j++) {
-                battleSetupTextPoly(&battleVar0->m1E0[j][battleOddOrEven]);
+                battleSetupTextPoly(&battleVar0->m0[i][j][battleOddOrEven]);
             }
 
             battleSetupStringInPolyFT4Large(i + 0x61, &battleVar0->m818[i], ((i * 0x60 + partyMemberSpritesOffset[battleNumPartyMembers][i] + 0x1C) * 0x10000) >> 16, 0x14);
@@ -560,25 +585,25 @@ void batteLoaderPhase3_1() {
     renderItemTargetsLabels();
 }
 
-std::array<u8, 3> batteLoaderPhase1_3_Var0;
+std::array<sApStruct, 3> apConfigArray;
 
 void batteLoaderPhase1_3() {
     MissingCode();
 
     for (int i = 0; i < 3; i++) {
         if (battleVisualEntities[i].m2 == 0x7F) {
-            batteLoaderPhase1_3_Var0[i] = 0;
+            apConfigArray[i].m1 = 0;
             battleEntities[i].m15A_flags &= 0x7F;
             battleVar0->m835C[i].m1E1 = 0;
         }
         else {
             battleVar0->m835C[i].m1E1 = 1; // display AP
             if (battleVisualEntities[i].m4 == 0) {
-                batteLoaderPhase1_3_Var0[i] = 0;
+                apConfigArray[i].m1 = 0;
                 battleEntities[i].m15A_flags &= 0x7F;
             }
             else {
-                batteLoaderPhase1_3_Var0[i] = 0;
+                apConfigArray[i].m1 = 0;
                 battleEntities[i].m15A_flags |= 0x80;
                 if (battleVisualEntities[i].m2 != 0xA) { // chuchu?
                     battleVar0->m835C[i].m1E1 = 2; // display Fuel

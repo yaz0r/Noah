@@ -672,20 +672,36 @@ void battleRenderPlayerPortraits() {
     for (int i = 0; i < 3; i++) {
         if (battleVar1->mCC[i]) {
             switch (battleVar0->m835C[i].m1E1) {
-            case 1:
+            case 0: // nothing
+                break;
+            case 1: // AP
                 battleRenderPolyArray(&battleVar0->m835C[i].m0[0], battleVar0->m835C[i].m1E2, battleVar0->m835C[i].m1E0);
                 break;
-            case 2:
+            case 2: // Fuel
                 battleRenderPolyArray(&battleVar0->m835C[i].mA0[0], battleVar0->m835C[i].m1E3, battleVar0->m835C[i].m1E0);
                 break;
             default:
                 assert(0);
             }
-            MissingCode();
         }
     }
 
-    MissingCode();
+    if (battleVar1->mAF) {
+        assert(0);
+    }
+    for (int j = 0; j < 3; j++) {
+        MissingCode();
+        //battleRenderPolyArray(&battleVar0->m3A88[j][0], battleVar1->mE0[j], battleVar1->m93_oddOrEven[j]);
+    }
+    for (int j = 0; j < 3; j++) {
+        if (battleVisualEntities[j].m2 != 0x7F) {
+            battleRenderPolyArray(&battleVar0->m818[j], 1, battleVar1->m83); // render the portrait
+            if (battleVar1->mCC[j]) {
+                battleRenderPolyArray(&battleVar0->m0[j][0], battleVar1->m78[j], battleVar1->mA2); // display the AP bar
+                AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->m740_APOrFuelPoly[j][battleOddOrEven]);
+            }
+        }
+    }
 }
 
 void updatePortraits() {
@@ -716,9 +732,42 @@ void updatePortraits() {
     }
 }
 
+void updateApFuelPolyBar() {
+    for (int i = 0; i < 3; i++) {
+        switch (battleVar0->m835C[i].m1E1) {
+        case 0: // nothing
+            break;
+        case 1: // AP
+            battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].x0 = i * 0x60 + partyMemberSpritesOffset[battleNumPartyMembers][i] + 0x28;
+            battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].y0 = 0x22;
+            battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].x1 = i * 0x60 + partyMemberSpritesOffset[battleNumPartyMembers][i] + 0x28 + apConfigArray[i].m0 * 2;
+            battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].y1 = 0x22;
+            battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].x2 = i * 0x60 + partyMemberSpritesOffset[battleNumPartyMembers][i] + 0x28;
+            battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].y2 = 0x26;
+            battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].x3 = i * 0x60 + partyMemberSpritesOffset[battleNumPartyMembers][i] + 0x28 + apConfigArray[i].m0 * 2;
+            battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].y3 = 0x26;
+            battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].r0 = 0;
+            battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].g0 = 0xFF;
+            battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].b0 = 0;
+            battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].r1 = 0;
+            battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].g1 = 0xFF;
+            battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].b1 = 0;
+            break;
+        default:
+            assert(0);
+        }
+    }
+}
+
+void renderGearHP() {
+    updateApFuelPolyBar();
+    MissingCode();
+}
+
 void drawBattleMode1() {
     if (!drawBattleMode1Disabled) {
         MissingCode();
+        renderGearHP();
         updatePortraits();
         battleRender63C8();
         battleRenderPlayerPortraits();
