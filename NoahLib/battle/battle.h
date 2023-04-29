@@ -16,13 +16,14 @@ extern std::array<s16, 0xB> numTicksBeforeReady;
 extern s8 currentBattleMode;
 extern s8 makeBattleTimeProgress;
 extern sLoadableDataRaw battleCharacterConfigFile;
-extern s8 battleNumPartyMembers;
+extern s8 battlePartyLayoutType;
 extern s8 drawBattleMode1Disabled;
 extern std::array<std::array<s16, 3>, 3> partyMemberSpritesOffset;
 
 struct sApStruct {
     u8 m0;
     u8 m1;
+    u8 m4_currentAP;
     // size 8
 };
 
@@ -44,6 +45,7 @@ struct sBattleVar0 {
     std::array<std::array<POLY_G4, 2>, 3> m740_APOrFuelPoly;
     std::array<std::array<POLY_FT4, 2>, 3> m818; // unsure size
     std::array<std::array<POLY_FT4, 2>, 10> m2E08;
+    std::array<std::array<POLY_FT4, 2>, 10> m3768; // unsure size
     std::array<std::array<std::array<POLY_FT4, 2>, 40>, 3> m3A88;
     std::array<POLY_F4, 2> m63C8;
     std::array<DR_MODE, 2> m63F8;
@@ -51,6 +53,9 @@ struct sBattleVar0 {
     u8 m6414 = 0;
     u8 m6415;
     u8 m6416;
+    std::array<std::array<std::array<POLY_FT4, 2>, 50>, 2> m641C;
+    std::array<DR_MODE, 2> m8908_drMode;
+    std::array<DR_MODE, 2> m8920;
     std::array<sBattleVar0Sub, 3> m835C;
     s32 mA234;
     s32 mA238;
@@ -67,21 +72,38 @@ struct sBattleVar0 {
 extern sBattleVar0* battleVar0;
 
 struct sBattleVar1 {
+    RECT m0;
+    RECT m8;
+    s32 m34;
+    s32 m3C;
+    s32 m44;
+    s32 m4C;
+    s32 m54;
+    s32 m5C;
+    s32 m64;
+    s32 m6C;
     u8 m77;
     std::array<u8, 3> m74;
     std::array<u8, 3> m78;
-    u8 m7C;
-    u8 m7D;
-    u8 m7E;
+    std::array<u8, 3> m7C;
+    std::array<u8, 4> m7F;
     u8 m83;
-    std::array<u8, 3> m84;
+    std::array<u8, 4> m84;
     std::array<u8, 3> m90;
     std::array<u8, 3> m93_oddOrEven;
     u8 m97;
     u8 mA2;
+    u8 mA3;
+    u8 mA9;
+    u8 mAB;
     u8 mAF;
+    std::array<u8, 7> mB0_isDialogWindowInitialized;
+    u8 mCB;
     std::array<u8, 3> mCC;
+    std::array<u8, 2> mD0;
     std::array<u8, 3> mE0;
+    s16 m104;
+    s16 m106;
     // size 0x10C
 };
 extern sBattleVar1* battleVar1;
@@ -202,6 +224,7 @@ struct sBattleEntity {
 };
 
 extern std::array<sBattleEntity, 11> battleEntities;
+extern std::vector<u8> battleFont;
 
 int battleSetupStringInPolyFT4Small(int character, std::array<POLY_FT4, 2>* polyArray, short x, short y);
 int battleSetupStringInPolyFT4Large(int character, std::array<POLY_FT4, 2>* polyArray, short x, short y);

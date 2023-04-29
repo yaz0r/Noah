@@ -885,7 +885,7 @@ int setupStringInPolyFT4(std::vector<u8>& fontData, int character, std::array<PO
             s32 u0Tmp = v0Tmp - 1;
             s32 x1 = (short)(x1Tmp >> 0xc);
             s32 x0 = (short)(x0Tmp >> 0xc);
-            if (READ_LE_U16(characterData2 + 0xD * 2) == '\0') {
+            if (READ_LE_U8(characterData2 + 0x1A) == '\0') {
                 x0 = x + x0;
                 x1 = x1 + x0;
                 p->x0y0.vx = x0;
@@ -909,7 +909,7 @@ int setupStringInPolyFT4(std::vector<u8>& fontData, int character, std::array<PO
             v0Tmp = uVar1 - 1;
             s32 y1 = (short)(y1Tmp >> 0xc);
             s32 y0 = (short)(y0Tmp >> 0xc);
-            if (READ_LE_U16(characterData2 + 0xD * 2) == '\0') {
+            if (READ_LE_U8(characterData2 + 0x1B) == '\0') {
                 s32 yTemp = y + y0;
                 p->x0y0.vy = yTemp;
                 p->x1y1.vy = yTemp;

@@ -1498,9 +1498,12 @@ void fieldInspector_frame()
         ImGui::Checkbox("Execute update scripts", &g_executeUpdateScripts);
 
         if (ImGui::BeginMenu("Field debug")) {
-            int gameProgress = getVariable(0);
-            if (ImGui::InputInt("GameProgress", &gameProgress)) {
-                setVar(0, gameProgress);
+            if (rawFieldScriptData.size())
+            {
+                int gameProgress = getVariable(0);
+                if (ImGui::InputInt("GameProgress", &gameProgress)) {
+                    setVar(0, gameProgress);
+                }
             }
             ImGui::EndMenu();
         }

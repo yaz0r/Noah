@@ -46,3 +46,6 @@ void SetLightMatrix(MATRIX*);
 
 void SetGeomScreen(s32);
 void SetGeomOffset(s32, s32);
+
+s32 ReadGeomScreen();
+void ReadGeomOffset(s32*, s32*);

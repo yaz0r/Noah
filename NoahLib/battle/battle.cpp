@@ -21,8 +21,10 @@ s8 battleRunningVar1 = 0;
 s8 isBattleAnEvent = 0;
 s8 currentBattleMode = 0;
 s8 makeBattleTimeProgress = 0;
-s8 battleNumPartyMembers = 0;
+s8 battlePartyLayoutType = 0;
 s8 drawBattleMode1Disabled = 0;
+
+std::vector<u8> battleFont;
 
 std::array<s16, 0xB> battleSlotStatusVar0;
 std::array<s16, 0xB> battleSlotStatusVar1;
@@ -71,16 +73,32 @@ void initGraphicsForBattle(void) {
 sBattleVar0* battleVar0 = nullptr;
 sBattleVar1* battleVar1 = nullptr;
 
+struct sBattleVar2Sub {
+    std::array<s16, 14> m0;
+    std::array<s16, 16> m1C;
+    // size 0x40
+};
+
 struct sBattleVar2 {
+    std::array<sBattleVar2Sub, 3> m0;
+    std::array<u8, 4> m2C0;
     u8 m2D3_currentEntityTurn;
+    u8 m2D4_remainingAP;
+    u8 m2D5_maxAP;
     u8 m2DA_indexInBattleVar48;
     u8 m2DB;
+    u8 m2DD_currentActiveBattleMenu;
+    u8 m2DE;
+    u8 m2E0;
+    u8 m2E2_previousActiveBattleMenu;
     std::array<u8, 3> m2EB;
+    u8 m2F6;
     // size 0x2F8
 }*battleVar2 = nullptr;
 
 s8 battleTransitionEffect = 0;
 s8 currentBattleLoaderTransitionEffect;
+s8 setupTurnRenderLoop_menuVar;
 
 void initBattleDefDrawContext() {
     SetGeomOffset(0xa0, 0xa4);
@@ -624,6 +642,11 @@ void battleUpdateInputs_mode1(int mode) {
     }
 
     MissingCode();
+
+    battleVar1->mA9 = battleVar1->mA9 + '\x06';
+    battleVar1->mAB = battleVar1->mAB + 1;
+
+    MissingCode();
 }
 
 void battleUpdateInputs(int mode) {
@@ -704,6 +727,170 @@ void battleRenderPlayerPortraits() {
     }
 }
 
+MATRIX identityMatrix = {
+    {{
+        {0x1000, 0, 0},
+        {0, 0x1000, 0},
+        {0, 0, 0x1000}
+    }},
+    {0,0,0}
+};
+
+int battleSetupStringInPolyFTRot(std::vector<u8>& param_1, int param_2, std::array<POLY_FT4,2>* param_3, int param_4, short param_5, short param_6, short param_7, short param_8, ushort param_9)
+{
+    MATRIX localMatrix = identityMatrix;
+    VECTOR scale = { 0x1000, param_7, param_8 };
+
+    PushMatrix();
+    ScaleMatrixL(&localMatrix, &scale);
+    RotMatrixZ(param_9, &localMatrix);
+
+    // Save
+    s32 geoX;
+    s32 geoY;  
+    ReadGeomOffset(&geoX, &geoY);
+    s32 geoScreen = ReadGeomScreen();
+
+    SetGeomOffset(param_5, param_6);
+    SetGeomScreen(0x1000);
+    SetRotMatrix(&localMatrix);
+    SetTransMatrix(&localMatrix);
+
+    std::vector<u8>::iterator fontData = param_1.begin() + READ_LE_U16(param_1.begin() + 4 + param_2 * 2);
+    int count = READ_LE_U16(fontData);
+    for (int i = 0; i < count; i++) {
+        POLY_FT4* p = &param_3[i][param_4];
+        SetPolyFT4(p);
+        SetSemiTrans(p, 0);
+        SetShadeTex(p, 1);
+
+        std::vector<u8>::iterator characterData = fontData + 4 + 0x1C * i;
+        p->tpage = GetTPage(READ_LE_U16(characterData + 0x10), 0, READ_LE_U16(characterData + 0x16), READ_LE_U16(characterData + 0x18));
+        p->clut = GetClut(READ_LE_U16(characterData + 0x12), READ_LE_U16(characterData + 0x14));
+
+        std::array<SVECTOR, 4> tempVectorArray;
+        tempVectorArray[3].vy = READ_LE_U16(characterData + 10);
+        tempVectorArray[3].vx = READ_LE_U16(characterData + 8) + READ_LE_U16(characterData + 4);
+        tempVectorArray[2].vx = READ_LE_U16(characterData + 8);
+        if (READ_LE_U8(characterData + 0x1A) == 0) {
+            tempVectorArray[2].vx = tempVectorArray[3].vx;
+            tempVectorArray[3].vx = READ_LE_U16(characterData + 8);
+        }
+        tempVectorArray[1].vy = tempVectorArray[3].vy + READ_LE_U16(characterData + 6);
+        if (READ_LE_U8(characterData + 0x1B) == 0) {
+            tempVectorArray[1].vy = tempVectorArray[3].vy;
+            tempVectorArray[3].vy = tempVectorArray[3].vy + READ_LE_U16(characterData + 6);
+        }
+        tempVectorArray[0].vx = tempVectorArray[3].vx;
+        tempVectorArray[0].vy = tempVectorArray[1].vy;
+        tempVectorArray[1].vx = tempVectorArray[2].vx;
+        tempVectorArray[2].vy = tempVectorArray[3].vy;
+
+        long lStack_40;
+        long lStack_3c;
+        RotTransPers4(&tempVectorArray[0], &tempVectorArray[1], &tempVectorArray[2], &tempVectorArray[3],
+            &p->x0y0, &p->x1y1, &p->x3y3, &p->x2y2,
+            &lStack_40, &lStack_3c);
+
+        u16 uVar6 = READ_LE_U16(characterData + 0);
+        u16 uVar7 = READ_LE_U16(characterData + 2);
+        u16 cVar8 = READ_LE_U16(characterData + 4);
+        u16 cVar9 = READ_LE_U16(characterData + 6);
+        if ((param_9 & 0xfff) == 0xc00) {
+            uVar6 = uVar6 - 1;
+        }
+        if ((param_9 & 0xfff) == 0) {
+            int uVar5 = uVar6 - 1;
+            if ((p->x3 < p->x0) && (uVar6 = uVar5, (int)((uint)uVar5 << 0x10) < 0)) {
+                uVar6 = 0;
+                cVar8 = cVar8 + -1;
+            }
+            if ((p->y3 < p->y0) && (uVar7 = uVar7 - 1, (int)((uint)(ushort)(uVar7 - 1) << 0x10) < 0)) {
+                uVar7 = 0;
+                cVar9 = cVar9 + -1;
+            }
+        }
+        u8 uVar2 = (u8)uVar6;
+        u8 uVar3 = (u8)uVar7;
+        p->u0 = uVar2;
+        p->v0 = uVar3;
+        p->u1 = uVar2 + cVar8;
+        p->v1 = uVar3;
+        p->u2 = uVar2;
+        p->v2 = uVar3 + cVar9;
+        p->u3 = uVar2 + cVar8;
+        p->v3 = uVar3 + cVar9;
+    }
+
+    SetGeomOffset(geoX, geoY);
+    SetGeomScreen(geoScreen);
+    PopMatrix();
+    return count;
+}
+
+void updatePortraits_mode2Sub(int param_1) {
+    short local_30 = 0; // was un-intialized
+    short local_28 = 0; // was un-intialized
+
+    assert(battleVar1->mA9);
+    int iVar6 = 0;
+    for (int i = 0; i < battleVar1->mA9; i++) {
+        battleVar1->m64 -= battleVar1->m54;
+        battleVar1->m6C += battleVar1->m5C;
+        local_30 = (battleVar1->m64 >> 8) + (s16)battleVar1->m34;
+        local_28 = (battleVar1->m6C >> 8) + (s16)battleVar1->m44;
+        iVar6++;
+    }
+
+    battleVar1->mA9 = 0;
+    battleVar1->m77 = 0;
+    battleVar1->m77 = battleSetupStringInPolyFTRot(battleFont, 0x52, &battleVar0->m3768[0], battleOddOrEven, local_30, local_28, battleVar1->m104, battleVar1->m104, battleVar1->m106);
+    battleVar1->m77 += battleSetupStringInPolyFTRot(battleFont, 0x53, &battleVar0->m3768[battleVar1->m77], battleOddOrEven, local_30, local_28, battleVar1->m104, battleVar1->m104, battleVar1->m106);
+
+    for (int i = iVar6; i < battleVar1->m77; i++) {
+        SetSemiTrans(&battleVar0->m3768[i][battleOddOrEven], 1);
+    }
+
+    battleVar1->m84[3] = battleOddOrEven;
+
+    iVar6 = 0;
+    for (int i = 0; i < battleVar1->mAB; i++) {
+        battleVar1->m104 += 0x66;
+        battleVar1->m106 += 0x80;
+        iVar6++;
+    }
+
+    battleVar1->mAB = 0;
+    if (local_30 <= battleVar1->m3C) {
+        battleVar1->m90[param_1] = 1;
+    }
+    if (battleVar1->m4C <= local_28) {
+        battleVar1->m90[param_1] = 1;
+    }
+}
+
+void updatePortraits_mode3Sub(int param_1) {
+    battleVar1->m44 = 0x1c;
+    battleVar1->m34 = param_1 * 0x60 + partyMemberSpritesOffset[battlePartyLayoutType][param_1] + 0x48;
+    if ((apConfigArray[param_1].m1 != 0) && (battleCharacters[param_1] != 7)) {
+        battleVar1->m44 = 0x24;
+        battleVar1->m34 = param_1 * 0x60 + partyMemberSpritesOffset[battlePartyLayoutType][param_1] + 0x44;
+    }
+    battleVar1->m3C = 0x10;
+    battleVar1->m4C = 0x98;
+    battleVar1->m54 = (battleVar1->m34 + -5) - battleVar1->m3C;
+    battleVar1->m104 = 0x800;
+    battleVar1->mA9 = 6;
+    battleVar1->m5C = battleVar1->m4C - (battleVar1->m44 + 5);
+    battleVar1->m5C = 0x100;
+    battleVar1->m64 = 0;
+    battleVar1->m6C = 0;
+    battleVar1->m106 = 0;
+    battleVar1->m54 = (battleVar1->m54 << 8) / battleVar1->m5C;
+    battleVar1->mAB = 1;
+    battleVar1->m90[param_1] = battleVar1->m90[param_1] - 1;
+}
+
 void updatePortraits() {
     battleVar1->m77 = 0;
 
@@ -712,11 +899,11 @@ void updatePortraits() {
             switch (battleVar1->m90[i]) {
             case 0:
                 battleVar1->m74[i] = 0;
-                battleVar1->m74[i] += battleSetupStringInPolyFT4Large(0x8F, &battleVar0->m2E08[battleVar1->m74[i]], ((i * 0x60 + partyMemberSpritesOffset[battleNumPartyMembers][i] + 0x44) * 0x10000) >> 16, 0x1F);
-                battleVar1->m74[i] += battleSetupStringInPolyFT4Large(0x52, &battleVar0->m2E08[battleVar1->m74[i]], ((i * 0x60 + partyMemberSpritesOffset[battleNumPartyMembers][i] + 0x48) * 0x10000) >> 16, 0x1C);
+                battleVar1->m74[i] += battleSetupStringInPolyFT4Large(0x8F, &battleVar0->m2E08[battleVar1->m74[i]], ((i * 0x60 + partyMemberSpritesOffset[battlePartyLayoutType][i] + 0x44) * 0x10000) >> 16, 0x1F);
+                battleVar1->m74[i] += battleSetupStringInPolyFT4Large(0x52, &battleVar0->m2E08[battleVar1->m74[i]], ((i * 0x60 + partyMemberSpritesOffset[battlePartyLayoutType][i] + 0x48) * 0x10000) >> 16, 0x1C);
                 {
                     int length = battleVar1->m74[i];
-                    battleVar1->m74[i] += battleSetupStringInPolyFT4Large(0x53, &battleVar0->m2E08[battleVar1->m74[i]], ((i * 0x60 + partyMemberSpritesOffset[battleNumPartyMembers][i] + 0x48) * 0x10000) >> 16, 0x1C);
+                    battleVar1->m74[i] += battleSetupStringInPolyFT4Large(0x53, &battleVar0->m2E08[battleVar1->m74[i]], ((i * 0x60 + partyMemberSpritesOffset[battlePartyLayoutType][i] + 0x48) * 0x10000) >> 16, 0x1C);
                     while (length < battleVar1->m74[i]) {
                         battleSetupTextPoly(&battleVar0->m2E08[length][battleOddOrEven]);
                         length++;
@@ -724,6 +911,24 @@ void updatePortraits() {
                 }
                 battleVar1->m84[i] = battleOddOrEven;
                 battleVar1->mCC[i] = 1;
+                break;
+            case 1:
+                MissingCode();
+                break;
+            case 3:
+                if((apConfigArray[i].m1 == 0) || (battleCharacters[i] == 7)) {
+                    battleVar1->m74[i] = 0;
+                }
+                else {
+                    battleVar1->mCC[i] = 0;
+                }
+                updatePortraits_mode3Sub(i);
+                [[fallthrough]];
+            case 2:
+                updatePortraits_mode2Sub(i);
+                if ((apConfigArray[i].m1 == 0) || (battleCharacters[i] == 7)) {
+                    battleVar1->m7F[i] = 0;
+                }
                 break;
             default:
                 assert(0);
@@ -738,13 +943,13 @@ void updateApFuelPolyBar() {
         case 0: // nothing
             break;
         case 1: // AP
-            battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].x0 = i * 0x60 + partyMemberSpritesOffset[battleNumPartyMembers][i] + 0x28;
+            battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].x0 = i * 0x60 + partyMemberSpritesOffset[battlePartyLayoutType][i] + 0x28;
             battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].y0 = 0x22;
-            battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].x1 = i * 0x60 + partyMemberSpritesOffset[battleNumPartyMembers][i] + 0x28 + apConfigArray[i].m0 * 2;
+            battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].x1 = i * 0x60 + partyMemberSpritesOffset[battlePartyLayoutType][i] + 0x28 + apConfigArray[i].m0 * 2;
             battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].y1 = 0x22;
-            battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].x2 = i * 0x60 + partyMemberSpritesOffset[battleNumPartyMembers][i] + 0x28;
+            battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].x2 = i * 0x60 + partyMemberSpritesOffset[battlePartyLayoutType][i] + 0x28;
             battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].y2 = 0x26;
-            battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].x3 = i * 0x60 + partyMemberSpritesOffset[battleNumPartyMembers][i] + 0x28 + apConfigArray[i].m0 * 2;
+            battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].x3 = i * 0x60 + partyMemberSpritesOffset[battlePartyLayoutType][i] + 0x28 + apConfigArray[i].m0 * 2;
             battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].y3 = 0x26;
             battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].r0 = 0;
             battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].g0 = 0xFF;
@@ -764,6 +969,30 @@ void renderGearHP() {
     MissingCode();
 }
 
+void battleDrawAPBar() {
+    AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->m8920[battleOddOrEven]);
+    for (int i = 0; i < 4; i++) {
+        if ((battleVar1->m7F[i]) && (currentBattleMode == 1)) {
+            AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->m5A0[i][battleVar1->m84[i]]);
+        }
+    }
+    AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->m8908_drMode[battleOddOrEven]);
+
+    for (int i = 0; i < 7; i++) {
+        if (battleVar1->mB0_isDialogWindowInitialized[i]) {
+            assert(0);
+        }
+    }
+}
+
+void battleRenderCommandRing() {
+    if (battleVar1->mCB) {
+        for (int i = 0; i < 2; i++) {
+            battleRenderPolyArray(&battleVar0->m641C[i][0], battleVar1->mD0[i], battleVar1->mA3);
+        }
+    }
+}
+
 void drawBattleMode1() {
     if (!drawBattleMode1Disabled) {
         MissingCode();
@@ -771,6 +1000,9 @@ void drawBattleMode1() {
         updatePortraits();
         battleRender63C8();
         battleRenderPlayerPortraits();
+        battleRenderCommandRing();
+        MissingCode();
+        battleDrawAPBar();
         MissingCode();
     }
 }
@@ -958,10 +1190,280 @@ struct sUnkMonsterStatus {
 std::array<sUnkMonsterStatus, 8> unknownMonsterStatus0;
 
 std::array<std::array<s16, 3>, 3> partyMemberSpritesOffset = { {
-    {0x60, 0x0, 0x0},
-    {0x20, 0x40, 0x0},
-    {0x0, 0x0, 0x0}
+    {0x60, 0x0, 0x0}, // 1 PC
+    {0x20, 0x40, 0x0}, // 2 PC
+    {0x0, 0x0, 0x0} // 3 PC
 } };
+
+s8 currentBattleMenuInput = -1;
+
+void drawCircleMenuAttackActive(int param_1) {
+    switch (currentBattleMenuInput) {
+    case -1:
+        return;
+    case 0:
+        if (battleVar2->m0[param_1 & 0xff].m1C[5] == 0) {
+            battleVar2->m2DD_currentActiveBattleMenu = 7;
+            return;
+        }
+        break;
+    default:
+        assert(0);
+    }
+    MissingCode();
+}
+
+void drawBattleMenu7(int param_1) {
+    switch (currentBattleMenuInput) {
+    case -1:
+        return;
+    case 0:
+        if (battleVar2->m0[param_1 & 0xff].m1C[9] == 0) {
+            battleVar2->m2DD_currentActiveBattleMenu = 1;
+            return;
+        }
+        break;
+    default:
+        assert(0);
+    }
+    MissingCode();
+}
+
+const std::array<const std::array<u8, 4>, 26> battleMenuGraphicConfig = { {
+    { {0x00, 0xFF, 0x00, 0xFF} }, //0
+    { {0x00, 0xFF, 0x00, 0xFF} }, //1
+    { {0x00, 0xFF, 0x01, 0xFF} }, //2
+    { {0x00, 0xFF, 0x02, 0xFF} }, //3
+    { {0x00, 0xFF, 0x03, 0xFF} }, //4
+    { {0x01, 0x00, 0x00, 0x04} }, //5
+    { {0x00, 0xFF, 0x05, 0xFF} }, //6
+    { {0x00, 0xFF, 0x05, 0xFF} }, //7
+    { {0x00, 0xFF, 0x06, 0xFF} }, //8
+    { {0x00, 0xFF, 0x07, 0xFF} }, //9
+    { {0x00, 0xFF, 0x08, 0xFF} }, //10
+    { {0x00, 0x01, 0x01, 0x08} }, //11
+    { {0x00, 0x01, 0x01, 0x08} }, //12
+    { {0x00, 0x01, 0x01, 0x08} }, //13
+    { {0x00, 0xFF, 0x09, 0xFF} }, //14
+    { {0x00, 0xFF, 0x0A, 0xFF} }, //15
+    { {0x00, 0xFF, 0x0A, 0xFF} }, //16
+    { {0x00, 0xFF, 0x0B, 0xFF} }, //17
+    { {0x00, 0xFF, 0x0C, 0xFF} }, //18
+    { {0x00, 0xFF, 0x0D, 0xFF} }, //19
+    { {0x00, 0xFF, 0x0E, 0xFF} }, //20
+    { {0x00, 0xFF, 0x0E, 0xFF} }, //21
+    { {0x00, 0xFF, 0x0F, 0xFF} }, //22
+    { {0x00, 0xFF, 0x10, 0xFF} }, //23
+    { {0x00, 0xFF, 0x11, 0xFF} }, //24
+    { {0x01, 0x00, 0x0A, 0x12} }, //25
+} };
+
+struct sBattleMenuGraphicConfigs2 {
+    s16 m0;
+    s16 m2;
+    s16 m4;
+    s16 m6;
+    // size 0x8
+};
+
+const std::array<const std::vector<sBattleMenuGraphicConfigs2>, 6> battleMenuGraphicConfigs2 = { {
+    { // 0
+        {0x4000, 0x80, 0x48, 0x2009},
+        {0x4001, 0x60, 0x60, 0x208B},
+        {0x4002, 0x40, 0x48, 0x0080},
+        {0x4003, 0x60, 0x30, 0x208A},
+        {0x56, 0x60, 0x40, 0x80},
+        {0x54, 0x68, 0x48, 0x0},
+        {0x54, 0x68, 0x48, 0x0},
+        {-1}
+    },
+    { // 1
+        {0x4000, 0x80, 0x48, 0x2089},
+        {0x4001, 0x60, 0x60, 0x200B},
+        {0x4002, 0x40, 0x48, 0x0080},
+        {0x4003, 0x60, 0x30, 0x208A},
+        {0x4003, 0x60, 0x30, 0x208A},
+        {0x56, 0x60, 0x40, 0x80},
+        {0x54, 0x68, 0x48, 0x0},
+        {0x57, 0x60, 0x50, 0x0},
+        {-1}
+    },
+    { // 2
+        {0x4000, 0x80, 0x48, 0x2089},
+        {0x4001, 0x60, 0x60, 0x208B},
+        {0x4002, 0x40, 0x48, 0x0000},
+        {0x4003, 0x60, 0x30, 0x208A},
+        {0x56, 0x60, 0x40, 0x80},
+        {0x54, 0x68, 0x48, 0x0},
+        {0x57, 0x60, 0x50, 0x0},
+        {-1}
+    },
+    { // 3
+        {0x4000, 0x80, 0x48, 0x2089},
+        {0x4001, 0x60, 0x60, 0x208B},
+        {0x4002, 0x40, 0x48, 0x0080},
+        {0x4003, 0x60, 0x30, 0x200A},
+        {0x56, 0x60, 0x40, 0x80},
+        {0x54, 0x68, 0x48, 0x0},
+        {0x57, 0x60, 0x50, 0x0},
+        {-1}
+    },
+    { // 4
+        {0x0003, 0xD6, 0x6E, 0x0000},
+        {0x0000, 0xB0, 0x90, 0x2002},
+        {0x0001, 0x8C, 0x70, 0x2001},
+        {0x0002, 0xB0, 0x48, 0x2000},
+        {0x000B, 0xC0, 0x70, 0x0000},
+        {0x000C, 0xB0, 0x80, 0x2002},
+        {0x000D, 0xA0, 0x70, 0x2001},
+        {0x000E, 0xB0, 0x60, 0x2000},
+        {-1}
+    },
+    { // 5
+        {0x4004, 0x80, 0x48, 0x2005},
+        {0x4005, 0x60, 0x60, 0x0080},
+        {0x4006, 0x40, 0x48, 0x2088},
+        {0x4007, 0x60, 0x30, 0x2087},
+        {0x56, 0x60, 0x40, 0x80},
+        {0x54, 0x68, 0x48, 0x0},
+        {0x57, 0x60, 0x50, 0x0},
+        {-1}
+    },
+} };
+
+uint updateBattleMenuSpriteForMenu(uint param_1, uint menuId, char param_3) {
+    if (param_3 == 0) {
+        std::array<u8, 2> menuConfig1;
+        std::array<u8, 2> menuConfig2;
+        for (int i = 0; i < 2; i++) {
+            menuConfig1[i] = battleMenuGraphicConfig[menuId & 0xFF][i];
+            menuConfig2[i] = battleMenuGraphicConfig[menuId & 0xFF][i + 2];
+            battleVar1->mD0[i] = 0;
+        }
+
+        for (int i = 0; i < 2; i++) {
+            if (menuConfig1[i] == 0xFF)
+                return battleOddOrEven;
+
+            for (auto it = battleMenuGraphicConfigs2[menuConfig2[i]].begin(); it->m0 != -1; it++) {
+                s16 value = it->m0;
+                if (value >= 0x4000) {
+                    value = battleVar2->m2C0[it->m0 & 3] = battleVar2->m0[param_1].m0[it->m0 & 0xFF];
+                    if (value == 0xFF) {
+                        continue;
+                    }
+                }
+                int iVar10 = battleVar1->mD0[menuConfig1[i]];
+                battleVar1->mD0[menuConfig1[i]] += battleSetupStringInPolyFT4Large(value, &battleVar0->m641C[menuConfig1[i]][battleVar1->mD0[menuConfig1[i]]], it->m2, it->m4);
+
+                int uVar2 = it->m6;
+                int uVar4 = uVar2 / 2;
+                if (it->m6 > 0x1FFF) {
+                    uVar4 = 0x10;
+                    if (battleVar2->m0[param_1].m1C[uVar2 & 0xF] == 0) {
+                        uVar4 = (uVar2 & 0xF0) / 2;
+                    }
+                }
+                if (uVar4 == 0) {
+                    for (int j = iVar10; j < battleVar1->mD0[menuConfig1[i]]; j++) {
+                        battleVar0->m641C[menuConfig1[i]][j][battleOddOrEven].r0 = 0x80;
+                        battleVar0->m641C[menuConfig1[i]][j][battleOddOrEven].g0 = 0x80;
+                        battleVar0->m641C[menuConfig1[i]][j][battleOddOrEven].b0 = 0x80;
+                    }
+                }
+                else if (iVar10 < battleVar1->mD0[menuConfig1[i]]) {
+                    for (int j = iVar10; j < battleVar1->mD0[menuConfig1[i]]; j++) {
+                        SetSemiTrans(&battleVar0->m641C[menuConfig1[i]][j][battleOddOrEven], 1);
+                        SetShadeTex(&battleVar0->m641C[menuConfig1[i]][j][battleOddOrEven], 0);
+                        battleVar0->m641C[menuConfig1[i]][j][battleOddOrEven].r0 = uVar4;
+                        battleVar0->m641C[menuConfig1[i]][j][battleOddOrEven].g0 = uVar4;
+                        battleVar0->m641C[menuConfig1[i]][j][battleOddOrEven].b0 = uVar4;
+                        battleVar0->m641C[menuConfig1[i]][j][battleOddOrEven].tpage |= 0x20;
+                    }
+                }
+            }
+        }
+        return battleOddOrEven;
+    }
+    else {
+        assert(0);
+        return battleVar1->mA3;
+    }
+}
+
+void setupTurnRenderLoop(int param_1) {
+    MissingCode();
+    battleVar2->m2DE = 0;
+    battleVar2->m2E0 = 0;
+    MissingCode();
+    battleVar2->m2E2_previousActiveBattleMenu = 0xff;
+    MissingCode();
+
+    battleVar2->m2D5_maxAP = apConfigArray[param_1].m4_currentAP;
+    battleVar2->m2D4_remainingAP = apConfigArray[param_1].m4_currentAP;
+
+    battleVar1->m90[param_1] = 3;
+    MissingCode();
+    while (battleVar1->m90[param_1] != 1) {
+        battleRenderDebugAndMain();
+    }
+    MissingCode();
+
+    if (apConfigArray[param_1].m1 == 0) {
+        if (battleVar2->m0[param_1].m1C[9] == 0) {
+            battleVar2->m2DD_currentActiveBattleMenu = 1;
+            setupTurnRenderLoop_menuVar = 0;
+        }
+        else {
+            battleVar2->m2DD_currentActiveBattleMenu = 4;
+            setupTurnRenderLoop_menuVar = 3;
+        }
+        if ((battleEntities[param_1].m0_base.m7C & 2) != 0) {
+            battleVar2->m2DD_currentActiveBattleMenu = 2;
+            setupTurnRenderLoop_menuVar = 1;
+        }
+        //initBattleRenderStruct2();
+        MissingCode();
+    }
+    else {
+        MissingCode();
+    }
+
+    MissingCode();
+
+    if (((battleVar2->m2DE == '\0') && (battleRunningVar1 == '\0')) && (battleVar2->m2DB == '\0')) {
+        while (1) {
+            if (apConfigArray[param_1].m1 == 0) {
+                //setAPMarksPositions(battleVar2->m2D5_maxAP, battleVar2->m2D4_remainingAP);
+                MissingCode();
+            }
+            if (battleVar2->m2E2_previousActiveBattleMenu != battleVar2->m2DD_currentActiveBattleMenu) {
+                battleVar2->m2F6 = 0;
+                battleVar2->m2E2_previousActiveBattleMenu = battleVar2->m2DD_currentActiveBattleMenu;
+                battleVar1->mCB = 0;
+                battleVar1->mA3 = updateBattleMenuSpriteForMenu(param_1, battleVar2->m2DD_currentActiveBattleMenu, battleVar2->m2E0);
+                battleVar1->mCB = 1;
+            }
+            if ((currentBattleMenuInput == -1) || (battleRenderDebugAndMain(), battleVar2->m2DB != '\0'))
+                break;
+            MissingCode();
+            switch (battleVar2->m2DD_currentActiveBattleMenu) {
+            case 1:
+                drawCircleMenuAttackActive(param_1);
+                break;
+            case 7:
+                drawBattleMenu7(param_1);
+                break;
+            default:
+                assert(0);
+            }
+            if (((battleVar2->m2DE != '\0') || (battleRunningVar1 != '\0')) || (battleVar2->m2DB != '\0'))
+                break;
+        }
+    }
+
+    MissingCode();
+}
 
 void battleTickMain(s8 param_1) {
     battleTickMain_var0 = 1;
@@ -992,7 +1494,7 @@ void battleTickMain(s8 param_1) {
             unknownMonsterStatus0[i].m2 = 0;
         }
 
-        int offsetPerPartyMember = partyMemberSpritesOffset[battleNumPartyMembers][battleVar2->m2D3_currentEntityTurn];
+        int offsetPerPartyMember = partyMemberSpritesOffset[battlePartyLayoutType][battleVar2->m2D3_currentEntityTurn];
         battleVar0->m63C8[battleOddOrEven].x0y0.vx = battleVar2->m2D3_currentEntityTurn * 0x60 + 0x10 + offsetPerPartyMember;
         battleVar0->m63C8[battleOddOrEven].x0y0.vy = 8;
         battleVar0->m63C8[battleOddOrEven].x1y1.vx = battleVar2->m2D3_currentEntityTurn * 0x60 + 0x28 + offsetPerPartyMember;
@@ -1003,6 +1505,18 @@ void battleTickMain(s8 param_1) {
         battleVar0->m63C8[battleOddOrEven].x3y3.vy = 0x20;
         battleVar0->m6414 = battleOddOrEven;
         battleVar0->m6415 = 1;
+
+        if ((battleEntities[battleVar2->m2D3_currentEntityTurn].m0_base.m7C & 0x2080) == 0) {
+            if ((battleEntities[battleVar2->m2D3_currentEntityTurn].m0_base.m80 & 0x1000) == 0) {
+                if ((battleEntities[battleVar2->m2D3_currentEntityTurn].m0_base.m80 & 0x2000) == 0) {
+                    setupTurnRenderLoop(battleVar2->m2D3_currentEntityTurn);
+                }
+                else {
+                    assert(0);
+                }
+                MissingCode();
+            }
+        }
 
         MissingCode();
     }
@@ -1058,6 +1572,29 @@ void battleTickGameplay() {
     }
 }
 
+void init8920() {
+    MissingCode();
+
+    (battleVar1->m0).y = 0;
+    (battleVar1->m0).x = 0;
+    (battleVar1->m0).h = 0x100;
+    (battleVar1->m0).w = 0x100;
+
+    MissingCode();
+
+    (battleVar1->m8).x = ((battleVar0->mA244_X & 0x3f) << 1);
+    (battleVar1->m8).w = 0x100;
+    (battleVar1->m8).h = 0x100;
+    (battleVar1->m8).y = battleVar0->mA248_Y;
+
+    MissingCode();
+
+    SetDrawMode(&battleVar0->m8908_drMode[0], 0, 0, GetTPage(battleVar0->mA238, 0, battleVar0->mA244_X, battleVar0->mA248_Y), &battleVar1->m8);
+    SetDrawMode(&battleVar0->m8908_drMode[1], 0, 0, GetTPage(battleVar0->mA238, 0, battleVar0->mA244_X, battleVar0->mA248_Y), &battleVar1->m8);
+    SetDrawMode(&battleVar0->m8920[0], 0, 0, GetTPage(battleVar0->mA238, 0, battleVar0->mA244_X, battleVar0->mA248_Y), &battleVar1->m0);
+    SetDrawMode(&battleVar0->m8920[1], 0, 0, GetTPage(battleVar0->mA238, 0, battleVar0->mA244_X, battleVar0->mA248_Y), &battleVar1->m0);
+}
+
 void battleMain() {
     battleVar0 = new sBattleVar0;
     battleVar1 = new sBattleVar1;
@@ -1091,6 +1628,7 @@ void battleMain() {
     battleLoadDataVar2Bis = battleLoadDataVar2;
     MissingCode();
 
+    init8920();
     makeBattleTimeProgress = 1;
     setCameraVisibleEntities(allPlayerCharacterBitmask);
     battleRenderDebugAndMain();

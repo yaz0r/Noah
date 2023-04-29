@@ -39,7 +39,6 @@ ushort bitmaskCharacterCheck(ushort bitmask, uint characterId)
     return result;
 }
 
-std::vector<u8> battleFont;
 void computeMenuBorder(std::vector<u8>& param_1, int param_2, int* param_3, int* param_4, int* param_5, int* param_6, int* param_7, int* param_8);
 
 void loadBattleCharacterPortraits(const std::vector<u8>& input, s8 param_2) {
@@ -182,6 +181,7 @@ u16 characterIdToTargetBitmask(uint param_1)
 std::array<s8, 11> battleMonsterMapping;
 
 void batteLoaderPhase1_1() {
+    battlePartyLayoutType = 0;
     MissingCode();
     battleLoadDataVar2Bis = battleLoadDataVar2;
     MissingCode();
@@ -190,7 +190,7 @@ void batteLoaderPhase1_1() {
     for (int i = 0; i < 3; i++) {
         if (battleVisualEntities[i].m2 != 0x7F) {
             isBattleSlotFilled[i] = 1;
-            battleNumPartyMembers++;
+            battlePartyLayoutType++;
         }
         else {
             isBattleSlotFilled[i] = 0;
@@ -204,7 +204,7 @@ void batteLoaderPhase1_1() {
         }
     }
 
-    battleNumPartyMembers--; // why?
+    battlePartyLayoutType--; // 1 PC->layout 0, 2 PC->layout1, 3PC->layout2
 
     // monsters slots
     for (int i = 3; i < 11; i++) {
@@ -470,9 +470,9 @@ void batteLoaderPhase2_1(void) {
 }
 
 void batteLoaderPhase3_0_sub0() {
-    battleVar1->m7C = 1;
-    battleVar1->m7D = 1;
-    battleVar1->m7E = 1;
+    battleVar1->m7C[0] = 1;
+    battleVar1->m7C[1] = 1;
+    battleVar1->m7C[2] = 1;
 
     computeMenuBorder(battleFont, 0x5C, &battleVar0->mA234, &battleVar0->mA238, &battleVar0->mA23C, &battleVar0->mA240, &battleVar0->mA244_X, &battleVar0->mA248_Y);
     battleVar0->mA2AE = GetClut(battleVar0->mA23C, battleVar0->mA240);
@@ -530,17 +530,17 @@ void battleSetupTextPoly(POLY_FT4* param_1) {
 void batteLoaderPhase3_0_sub1() {
     for (int i = 0; i < 3; i++) {
         if (battleVisualEntities[i].m2 != 0x7F) {
-            battleVar1->m78[i] += battleSetupStringInPolyFT4Small(0x52, &battleVar0->m0[i][battleVar1->m78[i]], ((i * 0x60 + partyMemberSpritesOffset[battleNumPartyMembers][i] + 0x44) * 0x10000) >> 16, 0x24);
+            battleVar1->m78[i] += battleSetupStringInPolyFT4Small(0x52, &battleVar0->m0[i][battleVar1->m78[i]], ((i * 0x60 + partyMemberSpritesOffset[battlePartyLayoutType][i] + 0x44) * 0x10000) >> 16, 0x24);
             int length = battleVar1->m78[i];
-            battleVar1->m78[i] += battleSetupStringInPolyFT4Small(0x53, &battleVar0->m0[i][battleVar1->m78[i]], ((i * 0x60 + partyMemberSpritesOffset[battleNumPartyMembers][i] + 0x44) * 0x10000) >> 16, 0x24);
+            battleVar1->m78[i] += battleSetupStringInPolyFT4Small(0x53, &battleVar0->m0[i][battleVar1->m78[i]], ((i * 0x60 + partyMemberSpritesOffset[battlePartyLayoutType][i] + 0x44) * 0x10000) >> 16, 0x24);
 
             for (int j = length; j < battleVar1->m78[i]; j++) {
                 battleSetupTextPoly(&battleVar0->m0[i][j][battleOddOrEven]);
             }
 
-            battleSetupStringInPolyFT4Large(i + 0x61, &battleVar0->m818[i], ((i * 0x60 + partyMemberSpritesOffset[battleNumPartyMembers][i] + 0x1C) * 0x10000) >> 16, 0x14);
-            battleVar0->m835C[i].m1E2 = battleSetupStringInPolyFT4Large(0x90, &battleVar0->m835C[i].m0[0], ((i * 0x60 + partyMemberSpritesOffset[battleNumPartyMembers][i] + 0x38) * 0x10000) >> 16, 0x27);
-            battleVar0->m835C[i].m1E3 = battleSetupStringInPolyFT4Large(0x91, &battleVar0->m835C[i].mA0[0], ((i * 0x60 + partyMemberSpritesOffset[battleNumPartyMembers][i] + 0x3C) * 0x10000) >> 16, 0x27);
+            battleSetupStringInPolyFT4Large(i + 0x61, &battleVar0->m818[i], ((i * 0x60 + partyMemberSpritesOffset[battlePartyLayoutType][i] + 0x1C) * 0x10000) >> 16, 0x14);
+            battleVar0->m835C[i].m1E2 = battleSetupStringInPolyFT4Large(0x90, &battleVar0->m835C[i].m0[0], ((i * 0x60 + partyMemberSpritesOffset[battlePartyLayoutType][i] + 0x38) * 0x10000) >> 16, 0x27);
+            battleVar0->m835C[i].m1E3 = battleSetupStringInPolyFT4Large(0x91, &battleVar0->m835C[i].mA0[0], ((i * 0x60 + partyMemberSpritesOffset[battlePartyLayoutType][i] + 0x3C) * 0x10000) >> 16, 0x27);
             battleVar0->m835C[i].m1E0 = battleOddOrEven;
         }
     }

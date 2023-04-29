@@ -966,3 +966,14 @@ void SetDQA(s32 value) {
 void SetDQB(s32 value) {
     gte_ldDQB(value);
 }
+
+s32 gte_stH() {
+    return getCopControlWord(2, 0xd000);
+}
+
+s32 gte_stOFX() {
+    return getCopControlWord(2, 0xc000);
+}
+s32 gte_stOFY() {
+    return getCopControlWord(2, 0xc800);
+}

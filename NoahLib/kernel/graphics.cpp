@@ -1338,3 +1338,12 @@ void SetGeomOffset(int ofx, int ofy)
     setCopControlWord(2, 0xc000, ofx << 0x10);
     setCopControlWord(2, 0xc800, ofy << 0x10);
 }
+
+s32 ReadGeomScreen() {
+    return gte_stH();
+}
+
+void ReadGeomOffset(s32* ofx, s32* ofy) {
+    *ofx = gte_stOFX() >> 16;
+    *ofy = gte_stOFY() >> 16;
+}
