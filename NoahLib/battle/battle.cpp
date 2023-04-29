@@ -736,14 +736,14 @@ MATRIX identityMatrix = {
     {0,0,0}
 };
 
-int battleSetupStringInPolyFTRot(std::vector<u8>& param_1, int param_2, std::array<POLY_FT4,2>* param_3, int param_4, short param_5, short param_6, short param_7, short param_8, ushort param_9)
+int battleSetupStringInPolyFTRot(std::vector<u8>& param_1, int param_2, std::array<POLY_FT4,2>* param_3, int param_4, short posX, short posY, short scaleY, short scaleZ, ushort rotZ)
 {
     MATRIX localMatrix = identityMatrix;
-    VECTOR scale = { 0x1000, param_7, param_8 };
+    VECTOR scale = { 0x1000, scaleY, scaleZ };
 
     PushMatrix();
     ScaleMatrixL(&localMatrix, &scale);
-    RotMatrixZ(param_9, &localMatrix);
+    RotMatrixZ(rotZ, &localMatrix);
 
     // Save
     s32 geoX;
@@ -751,7 +751,7 @@ int battleSetupStringInPolyFTRot(std::vector<u8>& param_1, int param_2, std::arr
     ReadGeomOffset(&geoX, &geoY);
     s32 geoScreen = ReadGeomScreen();
 
-    SetGeomOffset(param_5, param_6);
+    SetGeomOffset(posX, posY);
     SetGeomScreen(0x1000);
     SetRotMatrix(&localMatrix);
     SetTransMatrix(&localMatrix);
@@ -796,10 +796,10 @@ int battleSetupStringInPolyFTRot(std::vector<u8>& param_1, int param_2, std::arr
         u16 uVar7 = READ_LE_U16(characterData + 2);
         u16 cVar8 = READ_LE_U16(characterData + 4);
         u16 cVar9 = READ_LE_U16(characterData + 6);
-        if ((param_9 & 0xfff) == 0xc00) {
+        if ((rotZ & 0xfff) == 0xc00) {
             uVar6 = uVar6 - 1;
         }
-        if ((param_9 & 0xfff) == 0) {
+        if ((rotZ & 0xfff) == 0) {
             int uVar5 = uVar6 - 1;
             if ((p->x3 < p->x0) && (uVar6 = uVar5, (int)((uint)uVar5 << 0x10) < 0)) {
                 uVar6 = 0;
@@ -1260,8 +1260,8 @@ const std::array<const std::array<u8, 4>, 26> battleMenuGraphicConfig = { {
 
 struct sBattleMenuGraphicConfigs2 {
     s16 m0;
-    s16 m2;
-    s16 m4;
+    s16 m2_X;
+    s16 m4_Y;
     s16 m6;
     // size 0x8
 };
@@ -1281,7 +1281,6 @@ const std::array<const std::vector<sBattleMenuGraphicConfigs2>, 6> battleMenuGra
         {0x4000, 0x80, 0x48, 0x2089},
         {0x4001, 0x60, 0x60, 0x200B},
         {0x4002, 0x40, 0x48, 0x0080},
-        {0x4003, 0x60, 0x30, 0x208A},
         {0x4003, 0x60, 0x30, 0x208A},
         {0x56, 0x60, 0x40, 0x80},
         {0x54, 0x68, 0x48, 0x0},
@@ -1354,10 +1353,10 @@ uint updateBattleMenuSpriteForMenu(uint param_1, uint menuId, char param_3) {
                     }
                 }
                 int iVar10 = battleVar1->mD0[menuConfig1[i]];
-                battleVar1->mD0[menuConfig1[i]] += battleSetupStringInPolyFT4Large(value, &battleVar0->m641C[menuConfig1[i]][battleVar1->mD0[menuConfig1[i]]], it->m2, it->m4);
+                battleVar1->mD0[menuConfig1[i]] += battleSetupStringInPolyFT4Large(value, &battleVar0->m641C[menuConfig1[i]][battleVar1->mD0[menuConfig1[i]]], it->m2_X, it->m4_Y);
 
                 int uVar2 = it->m6;
-                int uVar4 = uVar2 / 2;
+                int uVar4 = (uVar2 & 0xFF) / 2;
                 if (it->m6 > 0x1FFF) {
                     uVar4 = 0x10;
                     if (battleVar2->m0[param_1].m1C[uVar2 & 0xF] == 0) {
