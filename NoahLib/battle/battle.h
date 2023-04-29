@@ -44,8 +44,7 @@ struct sBattleVar0 {
     std::array<std::array<POLY_GT4, 2>, 4> m5A0;
     std::array<std::array<POLY_G4, 2>, 3> m740_APOrFuelPoly;
     std::array<std::array<POLY_FT4, 2>, 3> m818; // unsure size
-    std::array<std::array<POLY_FT4, 2>, 10> m2E08;
-    std::array<std::array<POLY_FT4, 2>, 10> m3768; // unsure size
+    std::array<std::array<std::array<POLY_FT4, 2>, 10>, 4> m2E08;
     std::array<std::array<std::array<POLY_FT4, 2>, 40>, 3> m3A88;
     std::array<POLY_F4, 2> m63C8;
     std::array<DR_MODE, 2> m63F8;
@@ -82,8 +81,7 @@ struct sBattleVar1 {
     s32 m5C;
     s32 m64;
     s32 m6C;
-    u8 m77;
-    std::array<u8, 3> m74;
+    std::array<u8, 4> m74;
     std::array<u8, 3> m78;
     std::array<u8, 3> m7C;
     std::array<u8, 4> m7F;
@@ -102,8 +100,8 @@ struct sBattleVar1 {
     std::array<u8, 3> mCC;
     std::array<u8, 2> mD0;
     std::array<u8, 3> mE0;
-    s16 m104;
-    s16 m106;
+    s16 m104_apBarAnimationScale;
+    s16 m106_apBarAnimationRotation;
     // size 0x10C
 };
 extern sBattleVar1* battleVar1;

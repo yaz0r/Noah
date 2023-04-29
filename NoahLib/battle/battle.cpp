@@ -688,8 +688,7 @@ void battleRenderPlayerPortraits() {
     }
 
     for (int i = 0; i < 4; i++) {
-        //battleRenderPolyArray(battleVar0->m2E08)
-        MissingCode();
+        battleRenderPolyArray(&battleVar0->m2E08[i][0], battleVar1->m74[i], battleVar1->m84[i]);
     }
 
     for (int i = 0; i < 3; i++) {
@@ -736,10 +735,10 @@ MATRIX identityMatrix = {
     {0,0,0}
 };
 
-int battleSetupStringInPolyFTRot(std::vector<u8>& param_1, int param_2, std::array<POLY_FT4,2>* param_3, int param_4, short posX, short posY, short scaleY, short scaleZ, ushort rotZ)
+int battleSetupStringInPolyFTRot(std::vector<u8>& param_1, int param_2, std::array<POLY_FT4,2>* param_3, int param_4, short posX, short posY, short scaleX, short scaleY, ushort rotZ)
 {
     MATRIX localMatrix = identityMatrix;
-    VECTOR scale = { 0x1000, scaleY, scaleZ };
+    VECTOR scale = { scaleX, scaleY, 0x1000 };
 
     PushMatrix();
     ScaleMatrixL(&localMatrix, &scale);
@@ -769,17 +768,17 @@ int battleSetupStringInPolyFTRot(std::vector<u8>& param_1, int param_2, std::arr
         p->clut = GetClut(READ_LE_U16(characterData + 0x12), READ_LE_U16(characterData + 0x14));
 
         std::array<SVECTOR, 4> tempVectorArray;
-        tempVectorArray[3].vy = READ_LE_U16(characterData + 10);
-        tempVectorArray[3].vx = READ_LE_U16(characterData + 8) + READ_LE_U16(characterData + 4);
-        tempVectorArray[2].vx = READ_LE_U16(characterData + 8);
+        tempVectorArray[3].vy = READ_LE_S16(characterData + 10);
+        tempVectorArray[3].vx = READ_LE_S16(characterData + 8) + READ_LE_S16(characterData + 4);
+        tempVectorArray[2].vx = READ_LE_S16(characterData + 8);
         if (READ_LE_U8(characterData + 0x1A) == 0) {
             tempVectorArray[2].vx = tempVectorArray[3].vx;
-            tempVectorArray[3].vx = READ_LE_U16(characterData + 8);
+            tempVectorArray[3].vx = READ_LE_S16(characterData + 8);
         }
-        tempVectorArray[1].vy = tempVectorArray[3].vy + READ_LE_U16(characterData + 6);
+        tempVectorArray[1].vy = tempVectorArray[3].vy + READ_LE_S16(characterData + 6);
         if (READ_LE_U8(characterData + 0x1B) == 0) {
             tempVectorArray[1].vy = tempVectorArray[3].vy;
-            tempVectorArray[3].vy = tempVectorArray[3].vy + READ_LE_U16(characterData + 6);
+            tempVectorArray[3].vy = tempVectorArray[3].vy + READ_LE_S16(characterData + 6);
         }
         tempVectorArray[0].vx = tempVectorArray[3].vx;
         tempVectorArray[0].vy = tempVectorArray[1].vy;
@@ -792,10 +791,10 @@ int battleSetupStringInPolyFTRot(std::vector<u8>& param_1, int param_2, std::arr
             &p->x0y0, &p->x1y1, &p->x3y3, &p->x2y2,
             &lStack_40, &lStack_3c);
 
-        u16 uVar6 = READ_LE_U16(characterData + 0);
-        u16 uVar7 = READ_LE_U16(characterData + 2);
-        u16 cVar8 = READ_LE_U16(characterData + 4);
-        u16 cVar9 = READ_LE_U16(characterData + 6);
+        s16 uVar6 = READ_LE_S16(characterData + 0);
+        s16 uVar7 = READ_LE_S16(characterData + 2);
+        s16 cVar8 = READ_LE_S16(characterData + 4);
+        s16 cVar9 = READ_LE_S16(characterData + 6);
         if ((rotZ & 0xfff) == 0xc00) {
             uVar6 = uVar6 - 1;
         }
@@ -843,20 +842,20 @@ void updatePortraits_mode2Sub(int param_1) {
     }
 
     battleVar1->mA9 = 0;
-    battleVar1->m77 = 0;
-    battleVar1->m77 = battleSetupStringInPolyFTRot(battleFont, 0x52, &battleVar0->m3768[0], battleOddOrEven, local_30, local_28, battleVar1->m104, battleVar1->m104, battleVar1->m106);
-    battleVar1->m77 += battleSetupStringInPolyFTRot(battleFont, 0x53, &battleVar0->m3768[battleVar1->m77], battleOddOrEven, local_30, local_28, battleVar1->m104, battleVar1->m104, battleVar1->m106);
+    battleVar1->m74[3] = 0;
+    battleVar1->m74[3] = battleSetupStringInPolyFTRot(battleFont, 0x52, &battleVar0->m2E08[3][0], battleOddOrEven, local_30, local_28, battleVar1->m104_apBarAnimationScale, battleVar1->m104_apBarAnimationScale, battleVar1->m106_apBarAnimationRotation);
+    battleVar1->m74[3] += battleSetupStringInPolyFTRot(battleFont, 0x53, &battleVar0->m2E08[3][battleVar1->m74[3]], battleOddOrEven, local_30, local_28, battleVar1->m104_apBarAnimationScale, battleVar1->m104_apBarAnimationScale, battleVar1->m106_apBarAnimationRotation);
 
-    for (int i = iVar6; i < battleVar1->m77; i++) {
-        SetSemiTrans(&battleVar0->m3768[i][battleOddOrEven], 1);
+    for (int i = iVar6; i < battleVar1->m74[3]; i++) {
+        SetSemiTrans(&battleVar0->m2E08[3][i][battleOddOrEven], 1);
     }
 
     battleVar1->m84[3] = battleOddOrEven;
 
     iVar6 = 0;
     for (int i = 0; i < battleVar1->mAB; i++) {
-        battleVar1->m104 += 0x66;
-        battleVar1->m106 += 0x80;
+        battleVar1->m104_apBarAnimationScale += 0x66;
+        battleVar1->m106_apBarAnimationRotation += 0x80;
         iVar6++;
     }
 
@@ -879,33 +878,33 @@ void updatePortraits_mode3Sub(int param_1) {
     battleVar1->m3C = 0x10;
     battleVar1->m4C = 0x98;
     battleVar1->m54 = (battleVar1->m34 + -5) - battleVar1->m3C;
-    battleVar1->m104 = 0x800;
+    battleVar1->m104_apBarAnimationScale = 0x800;
     battleVar1->mA9 = 6;
     battleVar1->m5C = battleVar1->m4C - (battleVar1->m44 + 5);
     battleVar1->m5C = 0x100;
     battleVar1->m64 = 0;
     battleVar1->m6C = 0;
-    battleVar1->m106 = 0;
+    battleVar1->m106_apBarAnimationRotation = 0;
     battleVar1->m54 = (battleVar1->m54 << 8) / battleVar1->m5C;
     battleVar1->mAB = 1;
     battleVar1->m90[param_1] = battleVar1->m90[param_1] - 1;
 }
 
 void updatePortraits() {
-    battleVar1->m77 = 0;
+    battleVar1->m74[3] = 0;
 
     for (int i = 0; i < 3; i++) {
         if (battleVisualEntities[i].m2 != 0x7F) {
             switch (battleVar1->m90[i]) {
             case 0:
                 battleVar1->m74[i] = 0;
-                battleVar1->m74[i] += battleSetupStringInPolyFT4Large(0x8F, &battleVar0->m2E08[battleVar1->m74[i]], ((i * 0x60 + partyMemberSpritesOffset[battlePartyLayoutType][i] + 0x44) * 0x10000) >> 16, 0x1F);
-                battleVar1->m74[i] += battleSetupStringInPolyFT4Large(0x52, &battleVar0->m2E08[battleVar1->m74[i]], ((i * 0x60 + partyMemberSpritesOffset[battlePartyLayoutType][i] + 0x48) * 0x10000) >> 16, 0x1C);
+                battleVar1->m74[i] += battleSetupStringInPolyFT4Large(0x8F, &battleVar0->m2E08[i][battleVar1->m74[i]], ((i * 0x60 + partyMemberSpritesOffset[battlePartyLayoutType][i] + 0x44) * 0x10000) >> 16, 0x1F);
+                battleVar1->m74[i] += battleSetupStringInPolyFT4Large(0x52, &battleVar0->m2E08[i][battleVar1->m74[i]], ((i * 0x60 + partyMemberSpritesOffset[battlePartyLayoutType][i] + 0x48) * 0x10000) >> 16, 0x1C);
                 {
                     int length = battleVar1->m74[i];
-                    battleVar1->m74[i] += battleSetupStringInPolyFT4Large(0x53, &battleVar0->m2E08[battleVar1->m74[i]], ((i * 0x60 + partyMemberSpritesOffset[battlePartyLayoutType][i] + 0x48) * 0x10000) >> 16, 0x1C);
+                    battleVar1->m74[i] += battleSetupStringInPolyFT4Large(0x53, &battleVar0->m2E08[i][battleVar1->m74[i]], ((i * 0x60 + partyMemberSpritesOffset[battlePartyLayoutType][i] + 0x48) * 0x10000) >> 16, 0x1C);
                     while (length < battleVar1->m74[i]) {
-                        battleSetupTextPoly(&battleVar0->m2E08[length][battleOddOrEven]);
+                        battleSetupTextPoly(&battleVar0->m2E08[i][length][battleOddOrEven]);
                         length++;
                     }
                 }
