@@ -74,7 +74,8 @@ void sWalkMesh::init(const std::vector<u8>& input)
 bgfx::ShaderHandle loadBgfxShader(const std::string& filename)
 {
     std::vector<u8> memBlob;
-    FILE* fHandle = fopen(filename.c_str(), "rb");
+    FILE* fHandle = nullptr;
+    fopen_s(&fHandle, filename.c_str(), "rb");
     if (fHandle == nullptr)
         return BGFX_INVALID_HANDLE;
     fseek(fHandle, 0, SEEK_END);

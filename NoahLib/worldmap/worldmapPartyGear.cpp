@@ -104,7 +104,7 @@ s32 worldmapMode0_task_partyGear_update(s32 param_1) {
     int iVar4;
     short sVar5;
     sSpriteActor* psVar7;
-    sWorldmapStateEntry* unaff_s0;
+    sWorldmapStateEntry* unaff_s0 = nullptr;
     sWorldmapStateEntry* psVar8;
 
     psVar8 = &gWorldmapState->m0[param_1];

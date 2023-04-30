@@ -376,7 +376,7 @@ void streamWorldmap1(void)
                     if (worldmapSizeX == 0) {
                         assert(0);
                     }
-                    if ((worldmapSizeX == -1) && (iVar6 == -0x80000000)) {
+                    if ((worldmapSizeX == -1) && (iVar6 == -(s32)0x80000000)) {
                         assert(0);
                     }
                     iVar14 = (iVar6 % worldmapSizeX) * worldmapSizeY;
@@ -409,7 +409,7 @@ void streamWorldmap1(void)
                     if (worldmapSizeX == 0) {
                         assert(0);
                     }
-                    if ((worldmapSizeX == -1) && (iVar6 == -0x80000000)) {
+                    if ((worldmapSizeX == -1) && (iVar6 == -(s32)0x80000000)) {
                         assert(0);
                     }
                     pbVar4 = *ppbVar7;
@@ -459,7 +459,7 @@ void streamWorldmap1(void)
                     if (worldmapSizeX == 0) {
                         assert(0);
                     }
-                    if ((worldmapSizeX == -1) && (iVar6 == -0x80000000)) {
+                    if ((worldmapSizeX == -1) && (iVar6 == -(s32)0x80000000)) {
                         assert(0);
                     }
                     iVar14 = (iVar6 % worldmapSizeX) * 0x800 * worldmapSizeY;
@@ -492,7 +492,7 @@ void streamWorldmap1(void)
                     if (worldmapSizeX == 0) {
                         assert(0);
                     }
-                    if ((worldmapSizeX == -1) && (iVar10 == -0x80000000)) {
+                    if ((worldmapSizeX == -1) && (iVar10 == -(s32)0x80000000)) {
                         assert(0);
                     }
                     pbVar4 = *ppbVar7;

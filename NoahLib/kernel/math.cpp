@@ -393,24 +393,24 @@ FP_VEC4* ApplyMatrixLV(MATRIX* m, FP_VEC4* v0, FP_VEC4* v1)
 	uVar5 = v0->vz;
 	iVar7 = (int)uVar1 >> 0xf;
 	if ((int)uVar1 < 0) {
-		iVar7 = -((int)-uVar1 >> 0xf);
-		uVar1 = -(-uVar1 & 0x7fff);
+		iVar7 = -((int)-(s32)uVar1 >> 0xf);
+		uVar1 = -(-(s32)uVar1 & 0x7fff);
 	}
 	else {
 		uVar1 = uVar1 & 0x7fff;
 	}
 	iVar8 = (int)uVar3 >> 0xf;
 	if ((int)uVar3 < 0) {
-		iVar8 = -((int)-uVar3 >> 0xf);
-		uVar3 = -(-uVar3 & 0x7fff);
+		iVar8 = -((int)-(s32)uVar3 >> 0xf);
+		uVar3 = -(-(s32)uVar3 & 0x7fff);
 	}
 	else {
 		uVar3 = uVar3 & 0x7fff;
 	}
 	iVar9 = (int)uVar5 >> 0xf;
 	if ((int)uVar5 < 0) {
-		iVar9 = -((int)-uVar5 >> 0xf);
-		uVar5 = -(-uVar5 & 0x7fff);
+		iVar9 = -((int)-(s32)uVar5 >> 0xf);
+		uVar5 = -(-(s32)uVar5 & 0x7fff);
 	}
 	else {
 		uVar5 = uVar5 & 0x7fff;

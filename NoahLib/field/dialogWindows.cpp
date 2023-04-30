@@ -1293,7 +1293,7 @@ void dialogSpecialCase9AndA_2(sDialogWindow18* param_1, std::vector<u8>::iterato
     param_1->m10_flags |= 0x80;
 }
 
-void dialogSpecialCase9AndA(uint param_1, int param_2, int param_3) {
+void dialogSpecialCase9AndA(s32 param_1, int param_2, int param_3) {
     
     uint uVar3;
     uint uVar4;

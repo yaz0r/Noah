@@ -76,6 +76,7 @@ sBattleVar1* battleVar1 = nullptr;
 struct sBattleVar2Sub {
     std::array<s16, 14> m0;
     std::array<s16, 16> m1C;
+    u8 m3C;
     // size 0x40
 };
 
@@ -89,8 +90,11 @@ struct sBattleVar2 {
     u8 m2DB;
     u8 m2DD_currentActiveBattleMenu;
     u8 m2DE;
+    u8 m2DF;
     u8 m2E0;
     u8 m2E2_previousActiveBattleMenu;
+    u8 m2E4;
+    u8 m2E9;
     std::array<u8, 3> m2EB;
     u8 m2F6;
     // size 0x2F8
@@ -641,10 +645,31 @@ void battleUpdateInputs_mode1(int mode) {
         battleTimeProgress();
     }
 
+    if (mode == 0) {
+        battleHandleInput();
+    }
+
     MissingCode();
 
-    battleVar1->mA9 = battleVar1->mA9 + '\x06';
-    battleVar1->mAB = battleVar1->mAB + 1;
+    battleVar1->mA9_timeBarNumMoveSteps = battleVar1->mA9_timeBarNumMoveSteps + '\x06';
+    battleVar1->mAB_timeBarNumAnimationSteps = battleVar1->mAB_timeBarNumAnimationSteps + 1;
+
+    if (battleVar0->m6415 != 0) {
+        if (battleVar0->m6416 == 0) {
+            battleVar0->m6410 = battleVar0->m6410 + 4;
+            if (0x80 < battleVar0->m6410) {
+                battleVar0->m6410 = 0x7c;
+                battleVar0->m6416 = 1;
+            }
+        }
+        else {
+            battleVar0->m6410 = battleVar0->m6410 + -4;
+            if (battleVar0->m6410 < 0) {
+                battleVar0->m6410 = 4;
+                battleVar0->m6416 = 0;
+            }
+        }
+    }
 
     MissingCode();
 }
@@ -666,7 +691,7 @@ void drawBattleMode2() {
     MissingCode();
 }
 
-void battleRender63C8() {
+void battleRenderPortraitSelection() {
     if (battleVar0->m6415) {
         battleVar0->m63C8[battleVar0->m6414].r0 = battleVar0->m6410;
         battleVar0->m63C8[battleVar0->m6414].g0 = battleVar0->m6410;
@@ -688,7 +713,7 @@ void battleRenderPlayerPortraits() {
     }
 
     for (int i = 0; i < 4; i++) {
-        battleRenderPolyArray(&battleVar0->m2E08[i][0], battleVar1->m74[i], battleVar1->m84[i]);
+        battleRenderPolyArray(&battleVar0->m2E08_timeBars[i][0], battleVar1->m74_timeBarsLengths[i], battleVar1->m84_timeBarsOddOrEven[i]);
     }
 
     for (int i = 0; i < 3; i++) {
@@ -709,7 +734,7 @@ void battleRenderPlayerPortraits() {
     }
 
     if (battleVar1->mAF) {
-        assert(0);
+        MissingCode();
     }
     for (int j = 0; j < 3; j++) {
         MissingCode();
@@ -768,6 +793,8 @@ int battleSetupStringInPolyFTRot(std::vector<u8>& param_1, int param_2, std::arr
         p->clut = GetClut(READ_LE_U16(characterData + 0x12), READ_LE_U16(characterData + 0x14));
 
         std::array<SVECTOR, 4> tempVectorArray;
+        tempVectorArray.fill({ 0,0,0x1000,0x0 });
+
         tempVectorArray[3].vy = READ_LE_S16(characterData + 10);
         tempVectorArray[3].vx = READ_LE_S16(characterData + 8) + READ_LE_S16(characterData + 4);
         tempVectorArray[2].vx = READ_LE_S16(characterData + 8);
@@ -827,104 +854,114 @@ int battleSetupStringInPolyFTRot(std::vector<u8>& param_1, int param_2, std::arr
     return count;
 }
 
-void updatePortraits_mode2Sub(int param_1) {
-    short local_30 = 0; // was un-intialized
-    short local_28 = 0; // was un-intialized
+void timerBarUpdateStartOfTurnAnimation(int param_1) {
+    short barX = 0; // was un-intialized
+    short barY = 0; // was un-intialized
 
-    assert(battleVar1->mA9);
-    int iVar6 = 0;
-    for (int i = 0; i < battleVar1->mA9; i++) {
-        battleVar1->m64 -= battleVar1->m54;
-        battleVar1->m6C += battleVar1->m5C;
-        local_30 = (battleVar1->m64 >> 8) + (s16)battleVar1->m34;
-        local_28 = (battleVar1->m6C >> 8) + (s16)battleVar1->m44;
-        iVar6++;
+    assert(battleVar1->mA9_timeBarNumMoveSteps);
+    for (int i = 0; i < battleVar1->mA9_timeBarNumMoveSteps; i++) {
+        battleVar1->m64_timeBarAnimationX -= battleVar1->m54_timeBarAnimationXStep;
+        battleVar1->m6C_timeBarAnimationY += battleVar1->m5C_timeBarAnimationYStep;
+        barX = (battleVar1->m64_timeBarAnimationX >> 8) + (s16)battleVar1->m34_timeBarScreenPositionX;
+        barY = (battleVar1->m6C_timeBarAnimationY >> 8) + (s16)battleVar1->m44_timeBarScreenPositionY;
     }
 
-    battleVar1->mA9 = 0;
-    battleVar1->m74[3] = 0;
-    battleVar1->m74[3] = battleSetupStringInPolyFTRot(battleFont, 0x52, &battleVar0->m2E08[3][0], battleOddOrEven, local_30, local_28, battleVar1->m104_apBarAnimationScale, battleVar1->m104_apBarAnimationScale, battleVar1->m106_apBarAnimationRotation);
-    battleVar1->m74[3] += battleSetupStringInPolyFTRot(battleFont, 0x53, &battleVar0->m2E08[3][battleVar1->m74[3]], battleOddOrEven, local_30, local_28, battleVar1->m104_apBarAnimationScale, battleVar1->m104_apBarAnimationScale, battleVar1->m106_apBarAnimationRotation);
+    battleVar1->mA9_timeBarNumMoveSteps = 0;
+    battleVar1->m74_timeBarsLengths[3] = 0;
+    battleVar1->m74_timeBarsLengths[3] += battleSetupStringInPolyFTRot(battleFont, 0x52, &battleVar0->m2E08_timeBars[3][battleVar1->m74_timeBarsLengths[3]], battleOddOrEven, barX, barY, battleVar1->m104_timeBarAnimationScale, battleVar1->m104_timeBarAnimationScale, battleVar1->m106_timeBarAnimationRotation);
+    int startOfShadowSprite = battleVar1->m74_timeBarsLengths[3];
+    battleVar1->m74_timeBarsLengths[3] += battleSetupStringInPolyFTRot(battleFont, 0x53, &battleVar0->m2E08_timeBars[3][battleVar1->m74_timeBarsLengths[3]], battleOddOrEven, barX, barY, battleVar1->m104_timeBarAnimationScale, battleVar1->m104_timeBarAnimationScale, battleVar1->m106_timeBarAnimationRotation);
 
-    for (int i = iVar6; i < battleVar1->m74[3]; i++) {
-        SetSemiTrans(&battleVar0->m2E08[3][i][battleOddOrEven], 1);
+    for (int i = startOfShadowSprite; i < battleVar1->m74_timeBarsLengths[3]; i++) {
+        SetSemiTrans(&battleVar0->m2E08_timeBars[3][i][battleOddOrEven], 1);
     }
 
-    battleVar1->m84[3] = battleOddOrEven;
+    battleVar1->m84_timeBarsOddOrEven[3] = battleOddOrEven;
 
-    iVar6 = 0;
-    for (int i = 0; i < battleVar1->mAB; i++) {
-        battleVar1->m104_apBarAnimationScale += 0x66;
-        battleVar1->m106_apBarAnimationRotation += 0x80;
-        iVar6++;
+    for (int i = 0; i < battleVar1->mAB_timeBarNumAnimationSteps; i++) {
+        battleVar1->m104_timeBarAnimationScale += 0x66;
+        battleVar1->m106_timeBarAnimationRotation += 0x80;
     }
 
-    battleVar1->mAB = 0;
-    if (local_30 <= battleVar1->m3C) {
-        battleVar1->m90[param_1] = 1;
+    battleVar1->mAB_timeBarNumAnimationSteps = 0;
+    if (barX <= battleVar1->m3C_timeBarAnimationTargetPositionX) {
+        battleVar1->m90_perPCTimeBarStatus[param_1] = 1;
     }
-    if (battleVar1->m4C <= local_28) {
-        battleVar1->m90[param_1] = 1;
+    if (battleVar1->m4C_timeBarAnimationTargetPositionY <= barY) {
+        battleVar1->m90_perPCTimeBarStatus[param_1] = 1;
     }
 }
 
-void updatePortraits_mode3Sub(int param_1) {
-    battleVar1->m44 = 0x1c;
-    battleVar1->m34 = param_1 * 0x60 + partyMemberSpritesOffset[battlePartyLayoutType][param_1] + 0x48;
+void timerBarInitStartOfTurnAnimation(int param_1) {
+    battleVar1->m44_timeBarScreenPositionY = 0x1c;
+    battleVar1->m34_timeBarScreenPositionX = param_1 * 0x60 + partyMemberSpritesOffset[battlePartyLayoutType][param_1] + 0x48;
     if ((apConfigArray[param_1].m1 != 0) && (battleCharacters[param_1] != 7)) {
-        battleVar1->m44 = 0x24;
-        battleVar1->m34 = param_1 * 0x60 + partyMemberSpritesOffset[battlePartyLayoutType][param_1] + 0x44;
+        battleVar1->m44_timeBarScreenPositionY = 0x24;
+        battleVar1->m34_timeBarScreenPositionX = param_1 * 0x60 + partyMemberSpritesOffset[battlePartyLayoutType][param_1] + 0x44;
     }
-    battleVar1->m3C = 0x10;
-    battleVar1->m4C = 0x98;
-    battleVar1->m54 = (battleVar1->m34 + -5) - battleVar1->m3C;
-    battleVar1->m104_apBarAnimationScale = 0x800;
-    battleVar1->mA9 = 6;
-    battleVar1->m5C = battleVar1->m4C - (battleVar1->m44 + 5);
-    battleVar1->m5C = 0x100;
-    battleVar1->m64 = 0;
-    battleVar1->m6C = 0;
-    battleVar1->m106_apBarAnimationRotation = 0;
-    battleVar1->m54 = (battleVar1->m54 << 8) / battleVar1->m5C;
-    battleVar1->mAB = 1;
-    battleVar1->m90[param_1] = battleVar1->m90[param_1] - 1;
+    battleVar1->m3C_timeBarAnimationTargetPositionX = 0x10;
+    battleVar1->m4C_timeBarAnimationTargetPositionY = 0x98;
+    battleVar1->m54_timeBarAnimationXStep = (battleVar1->m34_timeBarScreenPositionX + -5) - battleVar1->m3C_timeBarAnimationTargetPositionX;
+    battleVar1->m104_timeBarAnimationScale = 0x800;
+    battleVar1->mA9_timeBarNumMoveSteps = 6;
+    battleVar1->m5C_timeBarAnimationYStep = battleVar1->m4C_timeBarAnimationTargetPositionY - (battleVar1->m44_timeBarScreenPositionY + 5);
+    battleVar1->m5C_timeBarAnimationYStep = 0x100;
+    battleVar1->m64_timeBarAnimationX = 0;
+    battleVar1->m6C_timeBarAnimationY = 0;
+    battleVar1->m106_timeBarAnimationRotation = 0;
+    battleVar1->m54_timeBarAnimationXStep = (battleVar1->m54_timeBarAnimationXStep << 8) / battleVar1->m5C_timeBarAnimationYStep;
+    battleVar1->mAB_timeBarNumAnimationSteps = 1;
+    battleVar1->m90_perPCTimeBarStatus[param_1]--; // Go into animation mode
 }
 
 void updatePortraits() {
-    battleVar1->m74[3] = 0;
+    battleVar1->m74_timeBarsLengths[3] = 0;
 
     for (int i = 0; i < 3; i++) {
         if (battleVisualEntities[i].m2 != 0x7F) {
-            switch (battleVar1->m90[i]) {
-            case 0:
-                battleVar1->m74[i] = 0;
-                battleVar1->m74[i] += battleSetupStringInPolyFT4Large(0x8F, &battleVar0->m2E08[i][battleVar1->m74[i]], ((i * 0x60 + partyMemberSpritesOffset[battlePartyLayoutType][i] + 0x44) * 0x10000) >> 16, 0x1F);
-                battleVar1->m74[i] += battleSetupStringInPolyFT4Large(0x52, &battleVar0->m2E08[i][battleVar1->m74[i]], ((i * 0x60 + partyMemberSpritesOffset[battlePartyLayoutType][i] + 0x48) * 0x10000) >> 16, 0x1C);
+            switch (battleVar1->m90_perPCTimeBarStatus[i]) {
+            case 0: // draw the time bar normally
+                battleVar1->m74_timeBarsLengths[i] = 0;
+                //"Time"
+                battleVar1->m74_timeBarsLengths[i] += battleSetupStringInPolyFT4Large(0x8F, &battleVar0->m2E08_timeBars[i][battleVar1->m74_timeBarsLengths[i]], ((i * 0x60 + partyMemberSpritesOffset[battlePartyLayoutType][i] + 0x44) * 0x10000) >> 16, 0x1F);
+                //Bar itself
+                battleVar1->m74_timeBarsLengths[i] += battleSetupStringInPolyFT4Small(0x52, &battleVar0->m2E08_timeBars[i][battleVar1->m74_timeBarsLengths[i]], ((i * 0x60 + partyMemberSpritesOffset[battlePartyLayoutType][i] + 0x48) * 0x10000) >> 16, 0x1C);
                 {
-                    int length = battleVar1->m74[i];
-                    battleVar1->m74[i] += battleSetupStringInPolyFT4Large(0x53, &battleVar0->m2E08[i][battleVar1->m74[i]], ((i * 0x60 + partyMemberSpritesOffset[battlePartyLayoutType][i] + 0x48) * 0x10000) >> 16, 0x1C);
-                    while (length < battleVar1->m74[i]) {
-                        battleSetupTextPoly(&battleVar0->m2E08[i][length][battleOddOrEven]);
+                    int length = battleVar1->m74_timeBarsLengths[i];
+                    //Bar shadow
+                    battleVar1->m74_timeBarsLengths[i] += battleSetupStringInPolyFT4Small(0x53, &battleVar0->m2E08_timeBars[i][battleVar1->m74_timeBarsLengths[i]], ((i * 0x60 + partyMemberSpritesOffset[battlePartyLayoutType][i] + 0x48) * 0x10000) >> 16, 0x1C);
+                    while (length < battleVar1->m74_timeBarsLengths[i]) {
+                        battleSetupTextPoly(&battleVar0->m2E08_timeBars[i][length][battleOddOrEven]);
                         length++;
                     }
                 }
-                battleVar1->m84[i] = battleOddOrEven;
+                battleVar1->m84_timeBarsOddOrEven[i] = battleOddOrEven;
                 battleVar1->mCC[i] = 1;
                 break;
-            case 1:
-                MissingCode();
+            case 1: // Time bar visible on left screen
+                battleVar1->m74_timeBarsLengths[3] = 0;
+                battleVar1->m74_timeBarsLengths[3] += battleSetupStringInPolyFTRot(battleFont, 0x52, &battleVar0->m2E08_timeBars[3][battleVar1->m74_timeBarsLengths[3]], battleOddOrEven, 0x10, 0x98, 0x1000, 0x1000, 0xc00);
+                {
+                    int length = battleVar1->m74_timeBarsLengths[3];
+                    battleVar1->m74_timeBarsLengths[3] += battleSetupStringInPolyFTRot(battleFont, 0x53, &battleVar0->m2E08_timeBars[3][battleVar1->m74_timeBarsLengths[3]], battleOddOrEven, 0x10, 0x98, 0x1000, 0x1000, 0xc00);
+                    while (length < battleVar1->m74_timeBarsLengths[3]) {
+                        battleSetupTextPoly(&battleVar0->m2E08_timeBars[3][length][battleOddOrEven]);
+                        length++;
+                    }
+                }
+                battleVar1->m84_timeBarsOddOrEven[3] = battleOddOrEven;
                 break;
-            case 3:
+            case 3: // Time bar start of turn animation init
                 if((apConfigArray[i].m1 == 0) || (battleCharacters[i] == 7)) {
-                    battleVar1->m74[i] = 0;
+                    battleVar1->m74_timeBarsLengths[i] = 0;
                 }
                 else {
                     battleVar1->mCC[i] = 0;
                 }
-                updatePortraits_mode3Sub(i);
+                timerBarInitStartOfTurnAnimation(i);
                 [[fallthrough]];
-            case 2:
-                updatePortraits_mode2Sub(i);
+            case 2: // Time bar start of turn animation update
+                timerBarUpdateStartOfTurnAnimation(i);
                 if ((apConfigArray[i].m1 == 0) || (battleCharacters[i] == 7)) {
                     battleVar1->m7F[i] = 0;
                 }
@@ -972,7 +1009,7 @@ void battleDrawAPBar() {
     AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->m8920[battleOddOrEven]);
     for (int i = 0; i < 4; i++) {
         if ((battleVar1->m7F[i]) && (currentBattleMode == 1)) {
-            AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->m5A0[i][battleVar1->m84[i]]);
+            AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->m5A0[i][battleVar1->m84_timeBarsOddOrEven[i]]);
         }
     }
     AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->m8908_drMode[battleOddOrEven]);
@@ -997,7 +1034,7 @@ void drawBattleMode1() {
         MissingCode();
         renderGearHP();
         updatePortraits();
-        battleRender63C8();
+        battleRenderPortraitSelection();
         battleRenderPlayerPortraits();
         battleRenderCommandRing();
         MissingCode();
@@ -1194,18 +1231,29 @@ std::array<std::array<s16, 3>, 3> partyMemberSpritesOffset = { {
     {0x0, 0x0, 0x0} // 3 PC
 } };
 
-s8 currentBattleMenuInput = -1;
-
 void drawCircleMenuAttackActive(int param_1) {
-    switch (currentBattleMenuInput) {
-    case -1:
-        return;
+    switch (battleInputButton) {
     case 0:
         if (battleVar2->m0[param_1 & 0xff].m1C[5] == 0) {
             battleVar2->m2DD_currentActiveBattleMenu = 7;
             return;
         }
         break;
+    case 4:
+    case 6:
+    case 7:
+        param_1 &= 0xFF;
+        if (battleVar2->m0[param_1].m3C != 0xFF) {
+            MissingCode();
+            battleVar2->m2DD_currentActiveBattleMenu = 5;
+            return;
+        }
+        break;
+    case 5:
+        return;
+    case 8:
+    case 0xE:
+        return;
     default:
         assert(0);
     }
@@ -1213,22 +1261,23 @@ void drawCircleMenuAttackActive(int param_1) {
 }
 
 void drawBattleMenu7(int param_1) {
-    switch (currentBattleMenuInput) {
-    case -1:
-        return;
+    switch (battleInputButton) {
     case 0:
         if (battleVar2->m0[param_1 & 0xff].m1C[9] == 0) {
             battleVar2->m2DD_currentActiveBattleMenu = 1;
             return;
         }
         break;
+    case 8:
+    case 0xE:
+        return;
     default:
         assert(0);
     }
     MissingCode();
 }
 
-const std::array<const std::array<u8, 4>, 26> battleMenuGraphicConfig = { {
+const std::array<const std::array<u8, 4>, 26> battleMenuGraphicConfigs = { {
     { {0x00, 0xFF, 0x00, 0xFF} }, //0
     { {0x00, 0xFF, 0x00, 0xFF} }, //1
     { {0x00, 0xFF, 0x01, 0xFF} }, //2
@@ -1334,8 +1383,8 @@ uint updateBattleMenuSpriteForMenu(uint param_1, uint menuId, char param_3) {
         std::array<u8, 2> menuConfig1;
         std::array<u8, 2> menuConfig2;
         for (int i = 0; i < 2; i++) {
-            menuConfig1[i] = battleMenuGraphicConfig[menuId & 0xFF][i];
-            menuConfig2[i] = battleMenuGraphicConfig[menuId & 0xFF][i + 2];
+            menuConfig1[i] = battleMenuGraphicConfigs[menuId & 0xFF][i];
+            menuConfig2[i] = battleMenuGraphicConfigs[menuId & 0xFF][i + 2];
             battleVar1->mD0[i] = 0;
         }
 
@@ -1389,6 +1438,80 @@ uint updateBattleMenuSpriteForMenu(uint param_1, uint menuId, char param_3) {
     }
 }
 
+void battleSoundEffect(u32) {
+    MissingCode();
+}
+
+u32 handleMenuSelectEnemySub(u32, u32) {
+    MissingCode();
+    return 0;
+}
+
+void handleMenuSelectEnemy(u8 param_1) {
+    MissingCode();
+    switch (battleInputButton) {
+    case 5:
+        if (battleVar2->m2D4_remainingAP == battleVar2->m2D5_maxAP) {
+            MissingCode();
+            battleVar1->m7B = 0;
+            battleVar1->mAF = 0;
+            battleVar2->m2DD_currentActiveBattleMenu = 1;
+            MissingCode();
+        }
+        else {
+            MissingCode();
+        }
+        break;
+    case 4:
+        if (battleVar2->m0[param_1].m1C[2]) {
+            battleInputButton = 5;
+            battleSoundEffect(0x4F);
+        }
+        break;
+    case 6:
+        if (battleVar2->m0[param_1].m1C[0]) {
+            battleInputButton = 5;
+            battleSoundEffect(0x4F);
+        }
+        break;
+    case 7:
+        if (battleVar2->m0[param_1].m1C[1]) {
+            battleInputButton = 5;
+            battleSoundEffect(0x4F);
+        }
+        break;
+    case 8:
+        break;
+    default:
+        assert(0);
+    }
+    if (battleVar2->m2E9) {
+        MissingCode();
+    }
+    battleVar1->mAF = 1;
+    if (battleInputButton == 5) {
+        return;
+    }
+    if (battleInputButton < 6) {
+        if (battleInputButton != 4) {
+            return;
+        }
+        if ((handleMenuSelectEnemySub(4, param_1) != '\0') && (-1 < (int)((byte)battleVar2->m2D4_remainingAP - 3))) {
+            battleVar2->m2E4 = battleVar2->m2E4 + '\x01';
+        }
+        battleVar2->m2DF = battleVar2->m2DF + '\x01';
+    }
+    else {
+        if (battleInputButton == 6) goto LAB_Battle__80081e90;
+        if (battleInputButton != 7) {
+            return;
+        }
+    }
+    battleVar2->m2DF = battleVar2->m2DF + '\x01';
+LAB_Battle__80081e90:
+    MissingCode();
+}
+
 void setupTurnRenderLoop(int param_1) {
     MissingCode();
     battleVar2->m2DE = 0;
@@ -1400,9 +1523,9 @@ void setupTurnRenderLoop(int param_1) {
     battleVar2->m2D5_maxAP = apConfigArray[param_1].m4_currentAP;
     battleVar2->m2D4_remainingAP = apConfigArray[param_1].m4_currentAP;
 
-    battleVar1->m90[param_1] = 3;
+    battleVar1->m90_perPCTimeBarStatus[param_1] = 3;
     MissingCode();
-    while (battleVar1->m90[param_1] != 1) {
+    while (battleVar1->m90_perPCTimeBarStatus[param_1] != 1) {
         battleRenderDebugAndMain();
     }
     MissingCode();
@@ -1442,7 +1565,7 @@ void setupTurnRenderLoop(int param_1) {
                 battleVar1->mA3 = updateBattleMenuSpriteForMenu(param_1, battleVar2->m2DD_currentActiveBattleMenu, battleVar2->m2E0);
                 battleVar1->mCB = 1;
             }
-            if ((currentBattleMenuInput == -1) || (battleRenderDebugAndMain(), battleVar2->m2DB != '\0'))
+            if ((battleInputButton == -1) || (battleRenderDebugAndMain(), battleVar2->m2DB != '\0'))
                 break;
             MissingCode();
             switch (battleVar2->m2DD_currentActiveBattleMenu) {
@@ -1452,6 +1575,9 @@ void setupTurnRenderLoop(int param_1) {
             case 7:
                 drawBattleMenu7(param_1);
                 break;
+            case 5:
+                handleMenuSelectEnemy(param_1);
+                break;
             default:
                 assert(0);
             }
@@ -1459,6 +1585,11 @@ void setupTurnRenderLoop(int param_1) {
                 break;
         }
     }
+
+    battleVar1->mCB = 0;
+    battleVar1->mAF = 0;
+    battleVar1->m90_perPCTimeBarStatus[param_1] = 0;
+    battleVar1->m7F[param_1] = 0;
 
     MissingCode();
 }

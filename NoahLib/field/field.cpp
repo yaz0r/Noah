@@ -3346,7 +3346,7 @@ void computeBackgroundPoly(sBackgroundPoly* pBackgroundPoly, int param_2, int pa
     if (iVar17 == 0) {
         assert(0);
     }
-    if ((iVar17 == -1) && (iVar15 << 8 == -0x80000000)) {
+    if ((iVar17 == -1) && (iVar15 << 8 == -(s32)0x80000000)) {
         assert(0);
     }
     s32 iVar10 = (0x140 - (iVar15 << 8) / iVar17) / 2;
@@ -3359,7 +3359,7 @@ void computeBackgroundPoly(sBackgroundPoly* pBackgroundPoly, int param_2, int pa
     if (iVar15 == 0) {
         assert(0);
     }
-    if ((iVar15 == -1) && (iVar23 == -0x80000000)) {
+    if ((iVar15 == -1) && (iVar23 == -(s32)0x80000000)) {
         assert(0);
     }
     if (iVar10 << 0x10 < 0) {
@@ -3371,7 +3371,7 @@ void computeBackgroundPoly(sBackgroundPoly* pBackgroundPoly, int param_2, int pa
         if (iVar17 == 0) {
             assert(0);
         }
-        if ((iVar17 == -1) && (iVar23 == -0x80000000)) {
+        if ((iVar17 == -1) && (iVar23 == -(s32)0x80000000)) {
             assert(0);
         }
     }
@@ -3407,7 +3407,7 @@ void computeBackgroundPoly(sBackgroundPoly* pBackgroundPoly, int param_2, int pa
             if (iVar20 == 0) {
                 assert(0);
             }
-            if ((iVar20 == -1) && (iVar10 == -0x80000000)) {
+            if ((iVar20 == -1) && (iVar10 == -(s32)0x80000000)) {
                 assert(0);
             }
             s32 uVar9 = currentX;
@@ -3424,7 +3424,7 @@ void computeBackgroundPoly(sBackgroundPoly* pBackgroundPoly, int param_2, int pa
             if (iVar13 == 0) {
                 assert(0);
             }
-            if ((iVar13 == -1) && ((short)(sVar16 + sVar7) == -0x80000000)) {
+            if ((iVar13 == -1) && ((short)(sVar16 + sVar7) == -(s32)0x80000000)) {
                 assert(0);
             }
             currentX = currentX + iVar8;
@@ -4696,7 +4696,7 @@ int updateEntityEventCode3Sub0(sFieldScriptEntity* param_1)
         if (((param_1->m4_flags.m_rawFlags & 2) == 0) || (param_1->m10_walkmeshId != 1)) {
             iVar1 = 0;
             if ((param_1->m4_flags.m_rawFlags & 4) != 0) {
-                iVar1 = -(uint)(param_1->m10_walkmeshId == 2);
+                iVar1 = -(s32)(param_1->m10_walkmeshId == 2);
             }
         }
         else {
@@ -4798,7 +4798,7 @@ int updateEntityEventCode3Sub3Sub1(FP_VEC3* param_1, FP_VEC4* param_2, sFieldScr
 
         u32 mask = 0;
         if ((pFieldScriptEntity->m4_flags.m_rawFlags >> ((int)pFieldScriptEntity->m10_walkmeshId + 3U & 0x1f) & 1) == 0) {
-            mask = -(uint)(noUpdatesToPartyMemebers == '\0');
+            mask = -(s32)(noUpdatesToPartyMemebers == '\0');
         }
 
         int local_38;
@@ -5026,7 +5026,7 @@ int updateEntityEventCode3Sub4Sub1(FP_VEC3* deltaStep, FP_VEC4* position, sField
         u32 mask = 0;
 
         if ((pFieldScriptEntity->m4_flags.m_rawFlags >> ((int)pFieldScriptEntity->m10_walkmeshId + 3U & 0x1f) & 1) == 0) {
-            mask = -(uint)(noUpdatesToPartyMemebers == '\0');
+            mask = -(s32)(noUpdatesToPartyMemebers == '\0');
         }
 
         int tempTriangleId;
@@ -5987,7 +5987,7 @@ s32 EntityMoveCheck1Sub1(sFieldScriptEntity* pFieldScriptEntity, int walkmeshId,
 
     int mask = 0;
     if ((pFieldScriptEntity->m4_flags.m_rawFlags >> (walkmeshId + 3U & 0x1f) & 1) == 0) {
-        mask = -(uint)(noUpdatesToPartyMemebers == '\0');
+        mask = -(s32)(noUpdatesToPartyMemebers == '\0');
     }
 
     int oldWalkmeshId = walkmeshId;
@@ -9137,7 +9137,7 @@ int isFieldBattlePrevented(void)
 
     iVar1 = 0;
     if ((bBattleSequenceInitialized == 1) && (updateEntityEventCode4Var0 == 0)) {
-        iVar1 = -(uint)(((actorArray[playerControlledActor].m4C_scriptEntity)->m0_fieldScriptFlags.mx800_isJumping) != 0);
+        iVar1 = -(s32)(((actorArray[playerControlledActor].m4C_scriptEntity)->m0_fieldScriptFlags.mx800_isJumping) != 0);
     }
     return iVar1;
 }

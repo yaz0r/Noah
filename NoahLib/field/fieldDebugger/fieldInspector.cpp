@@ -103,7 +103,8 @@ public:
 
     void dump(const std::vector<u8>& buffer, const char* outputName)
     {
-        FILE* fHandle = fopen(outputName, "wb+");
+        FILE* fHandle = nullptr;
+        fopen_s(&fHandle, outputName, "wb+");
         if (fHandle)
         {
             fwrite(&buffer[0], 1, buffer.size(), fHandle);

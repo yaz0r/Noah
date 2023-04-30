@@ -129,3 +129,5 @@ add_library (NoahLib ${SOURCES})
 #		target_compile_definitions( NoahLib PUBLIC "BX_CONFIG_DEBUG=0" )
 #endif()
 target_compile_definitions( NoahLib PUBLIC "BX_CONFIG_DEBUG=0" )
+target_compile_definitions( NoahLib PUBLIC "_CRT_SECURE_NO_WARNINGS" )
+
