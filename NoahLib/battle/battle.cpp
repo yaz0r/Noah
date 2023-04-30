@@ -74,7 +74,7 @@ sBattleVar0* battleVar0 = nullptr;
 sBattleVar1* battleVar1 = nullptr;
 
 struct sBattleVar2Sub {
-    std::array<s16, 14> m0;
+    std::array<u8, 8> m0_circleMenuBattleCommandsMapping;
     std::array<s16, 16> m1C;
     u8 m3C;
     // size 0x40
@@ -82,19 +82,23 @@ struct sBattleVar2Sub {
 
 struct sBattleVar2 {
     std::array<sBattleVar2Sub, 3> m0;
-    std::array<u8, 4> m2C0;
+    std::array<u8, 4> m2C0_circleMenuCommandsNames;
     u8 m2D3_currentEntityTurn;
     u8 m2D4_remainingAP;
     u8 m2D5_maxAP;
     u8 m2DA_indexInBattleVar48;
     u8 m2DB;
+    u8 m2DC;
     u8 m2DD_currentActiveBattleMenu;
     u8 m2DE;
     u8 m2DF;
     u8 m2E0;
+    u8 m2E1;
     u8 m2E2_previousActiveBattleMenu;
+    u8 m2E3;
     u8 m2E4;
     u8 m2E9;
+    u8 m2EA;
     std::array<u8, 3> m2EB;
     u8 m2F6;
     // size 0x2F8
@@ -1231,6 +1235,24 @@ std::array<std::array<s16, 3>, 3> partyMemberSpritesOffset = { {
     {0x0, 0x0, 0x0} // 3 PC
 } };
 
+void drawCircleMenuChi(int param_1) {
+    switch (battleInputButton) {
+    case 8:
+        break;
+    default:
+        assert(0);
+    }
+}
+
+void drawCircleMenuDefend(int param_1) {
+    switch (battleInputButton) {
+    case 8:
+        break;
+    default:
+        assert(0);
+    }
+}
+
 void drawCircleMenuAttackActive(int param_1) {
     switch (battleInputButton) {
     case 0:
@@ -1239,6 +1261,9 @@ void drawCircleMenuAttackActive(int param_1) {
             return;
         }
         break;
+    case 2: // left
+        battleVar2->m2DD_currentActiveBattleMenu = 3;
+        return;
     case 4:
     case 6:
     case 7:
@@ -1395,7 +1420,7 @@ uint updateBattleMenuSpriteForMenu(uint param_1, uint menuId, char param_3) {
             for (auto it = battleMenuGraphicConfigs2[menuConfig2[i]].begin(); it->m0 != -1; it++) {
                 s16 value = it->m0;
                 if (value >= 0x4000) {
-                    value = battleVar2->m2C0[it->m0 & 3] = battleVar2->m0[param_1].m0[it->m0 & 0xFF];
+                    value = battleVar2->m2C0_circleMenuCommandsNames[it->m0 & 3] = battleVar2->m0[param_1].m0_circleMenuBattleCommandsMapping[it->m0 & 0xFF];
                     if (value == 0xFF) {
                         continue;
                     }
@@ -1512,13 +1537,23 @@ LAB_Battle__80081e90:
     MissingCode();
 }
 
+const std::array<u16, 16> party1C_InitialValues = { {
+        0x8000, 0x4000, 0x2000, 0x1000,
+        0x800, 0x400, 0x200, 0x100,
+        0x80, 0x40, 0x20, 0x10,
+        0x8, 0x4, 0x2, 0x1
+} };
+
 void setupTurnRenderLoop(int param_1) {
-    MissingCode();
+    battleVar2->m2EA = 0;
+    battleVar2->m2E9 = 0;
     battleVar2->m2DE = 0;
     battleVar2->m2E0 = 0;
-    MissingCode();
+    battleVar2->m2E1 = 0;
     battleVar2->m2E2_previousActiveBattleMenu = 0xff;
-    MissingCode();
+    battleVar2->m2E3 = 0;
+    battleVar2->m2E4 = 0;
+    battleVar2->m2DC = 0;
 
     battleVar2->m2D5_maxAP = apConfigArray[param_1].m4_currentAP;
     battleVar2->m2D4_remainingAP = apConfigArray[param_1].m4_currentAP;
@@ -1528,6 +1563,12 @@ void setupTurnRenderLoop(int param_1) {
     while (battleVar1->m90_perPCTimeBarStatus[param_1] != 1) {
         battleRenderDebugAndMain();
     }
+    MissingCode();
+
+    for (int i = 0; i < 16; i++) {
+        battleVar2->m0[param_1].m1C[i] = party1C_InitialValues[i];
+    }
+
     MissingCode();
 
     if (apConfigArray[param_1].m1 == 0) {
@@ -1547,6 +1588,14 @@ void setupTurnRenderLoop(int param_1) {
         MissingCode();
     }
     else {
+        if (battleVar2->m0[param_1].m1C[9] == 0) {
+            battleVar2->m2DD_currentActiveBattleMenu = 0x10;
+            setupTurnRenderLoop_menuVar = 0;
+        }
+        else {
+            battleVar2->m2DD_currentActiveBattleMenu = 0x13;
+            setupTurnRenderLoop_menuVar = 3;
+        }
         MissingCode();
     }
 
@@ -1571,6 +1620,12 @@ void setupTurnRenderLoop(int param_1) {
             switch (battleVar2->m2DD_currentActiveBattleMenu) {
             case 1:
                 drawCircleMenuAttackActive(param_1);
+                break;
+            case 3:
+                drawCircleMenuDefend(param_1);
+                break;
+            case 4:
+                drawCircleMenuChi(param_1);
                 break;
             case 7:
                 drawBattleMenu7(param_1);
