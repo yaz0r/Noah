@@ -26,8 +26,40 @@ struct sApStruct {
     u8 m4_currentAP;
     // size 8
 };
-
 extern std::array<sApStruct, 3> apConfigArray;
+
+struct sBattleVar2Sub {
+    std::array<u8, 8> m0_circleMenuBattleCommandsMapping;
+    std::array<s16, 16> m1C;
+    u8 m3C;
+    // size 0x40
+};
+
+struct sBattleVar2 {
+    std::array<sBattleVar2Sub, 3> m0;
+    std::array<u8, 4> m2C0_circleMenuCommandsNames;
+    u8 m2D3_currentEntityTurn;
+    u8 m2D4_remainingAP;
+    u8 m2D5_maxAP;
+    u8 m2DA_indexInBattleVar48;
+    u8 m2DB;
+    u8 m2DC;
+    u8 m2DD_currentActiveBattleMenu;
+    u8 m2DE;
+    u8 m2DF;
+    u8 m2E0;
+    u8 m2E1;
+    u8 m2E2_previousActiveBattleMenu;
+    u8 m2E3;
+    u8 m2E4;
+    u8 m2E9;
+    u8 m2EA;
+    std::array<u8, 3> m2EB;
+    u8 m2F6;
+    // size 0x2F8
+};
+
+extern sBattleVar2* battleVar2;
 
 struct sBattleVar0Sub {
     std::array<std::array<POLY_FT4, 2>, 2> m0;
@@ -99,7 +131,7 @@ struct sBattleVar1 {
     std::array<u8, 7> mB0_isDialogWindowInitialized;
     u8 mCB;
     std::array<u8, 3> mCC;
-    std::array<u8, 2> mD0;
+    std::array<u8, 2> mD0_battleCommandLength;
     std::array<u8, 3> mE0;
     s16 m104_timeBarAnimationScale;
     s16 m106_timeBarAnimationRotation;
@@ -171,7 +203,7 @@ extern sBattleMechaInitData* battleLoadDataVar2Bis;
 
 void battleEntryPoint(void);
 void battleHandleInput(void);
-void playBattleSound(int);
+void battleSoundEffect2(u32);
 
 extern u8 battleInitVar0;
 

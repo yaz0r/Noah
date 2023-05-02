@@ -303,12 +303,20 @@ void initBattleInventory(void) {
     MissingCode();
 }
 
+std::array<std::array<u8, 8>, 1> battleCommandsSetups = { {
+    {0x1E, 0x1C, 0x22, 0x25, 0x2C, 0x1C, 0x1A, 0x2E},
+} };
+
 void batteLoaderPhase2_2() {
     if (currentBattleConfig.m1_flags & 0x20) {
         assert(0);
     }
 
     for (int i = 0; i < 3; i++) {
+        apConfigArray[i].m4_currentAP = gameState.m16C0[battleCharacters[i]].m17_energyPerTurn;
+        for (int j = 0; j < 8; j++) {
+            battleVar2->m0[i].m0_circleMenuBattleCommandsMapping[j] = battleCommandsSetups[battleEntities[i].m0_base.m56_battleCommandLoadout][j];
+        }
         MissingCode();
     }
 

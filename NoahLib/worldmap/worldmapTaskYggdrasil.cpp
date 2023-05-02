@@ -446,7 +446,7 @@ int getWorldmapElevationWithWater(uint x, uint z) {
     }
     uVar4 = (int)uVar4 >> 3 & 0xffff;
     if ((pbVar2[1] & 0x80) == 0) {
-        if ((int)((uVar5 - 0x10000) * VECTOR_worldmap__8009b244.vx + -uVar4 * VECTOR_worldmap__8009b244.vz) < 0) {
+        if ((int)((uVar5 - 0x10000) * VECTOR_worldmap__8009b244.vx + -(s32)uVar4 * VECTOR_worldmap__8009b244.vz) < 0) {
             DAT_1f800000.vx = -0x80;
             DAT_1f800000.vz = -0x80;
             VECTOR_1f800010.vx = -0x80;
@@ -460,7 +460,7 @@ int getWorldmapElevationWithWater(uint x, uint z) {
         sVar1 = SVECTOR_1f8000a8.vy;
     }
     else {
-        if (-1 < (int)(uVar5 * VECTOR_worldmap__8009b254.vx + -uVar4 * VECTOR_worldmap__8009b254.vz)) {
+        if (-1 < (int)(uVar5 * VECTOR_worldmap__8009b254.vx + -(s32)uVar4 * VECTOR_worldmap__8009b254.vz)) {
             DAT_1f800000.vx = 0x80;
             VECTOR_1f800010.vx = 0x80;
             DAT_1f800000.vz = 0;
@@ -481,7 +481,7 @@ LAB_worldmap__80093dcc:
     OuterProduct0(&VECTOR_1f800010, &DAT_1f800000, &VECTOR_1f800020);
     VectorNormal(&VECTOR_1f800020, &DAT_1f800000);
     VECTOR_1f800010.vx = (int)x >> 0xc & 0x7f;
-    VECTOR_1f800010.vz = -((int)z >> 0xc & 0x7fU);
+    VECTOR_1f800010.vz = -(s32)((int)z >> 0xc & 0x7fU);
     if ((pbVar2[1] & 0x80) == 0) {
         VECTOR_1f800020.vx = 0x80;
         sVar1 = SVECTOR_1f8000a8.vy;

@@ -443,7 +443,7 @@ void tweakWorldmapTexture(std::vector<u16>::iterator param_1, std::vector<u16>::
             if (param_3 == 0) {
                 assert(0);
             }
-            if ((param_3 == -1) && (iVar5 == -0x80000000)) {
+            if ((param_3 == -1) && (iVar5 == -(s32)0x80000000)) {
                 assert(0);
             }
             s32 iVar7 = 0;

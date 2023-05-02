@@ -667,7 +667,7 @@ std::array<u16, 16> updateCharacterRotationOrder2 = {
 
 int OP_UPDATE_CHARACTER_Sub0(sFieldScriptEntity* param_1)
 {
-    return -(uint)((param_1->m0_fieldScriptFlags.m_rawFlags >> 9 & 3 & (uint)param_1->m14_currentTriangleFlag >> 3) != 0);
+    return -(int)((param_1->m0_fieldScriptFlags.m_rawFlags >> 9 & 3 & (uint)param_1->m14_currentTriangleFlag >> 3) != 0);
 }
 
 // Initialize `encounterCount` timers

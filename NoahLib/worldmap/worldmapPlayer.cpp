@@ -68,7 +68,7 @@ void averageVector(VECTOR* param_1, VECTOR* param_2, VECTOR* param_3)
     if (iVar2 == 0) {
         assert(0);
     }
-    if ((iVar2 == -1) && (iVar1 == -0x80000000)) {
+    if ((iVar2 == -1) && (iVar1 == -(s32)0x80000000)) {
         assert(0);
     }
     param_1->vy = iVar3;
@@ -102,7 +102,7 @@ void interpolateWorldPosition(VECTOR* param_1, int x, int y)
     }
     uVar3 = y >> 3 & 0xffff;
     if ((pcVar2[1] & 0x80) == 0) {
-        if ((int)((uVar2 - 0x10000) * DAT_worldmap__8009b244 + -uVar3 * DAT_worldmap__8009b24c) < 0) {
+        if ((int)((uVar2 - 0x10000) * DAT_worldmap__8009b244 + -(s32)uVar3 * DAT_worldmap__8009b24c) < 0) {
             DAT_1f800000.vx = -0x10;
             VECTOR_1f800010.vz = 0;
             DAT_1f800000.vy = (int)(char)pcVar2[0x24] - (int)(char)pcVar2[4];
@@ -118,7 +118,7 @@ void interpolateWorldPosition(VECTOR* param_1, int x, int y)
         DAT_1f800000.vz = -0x10;
         VECTOR_1f800010.vy = (int)(char)bVar1 - (int)(char)pcVar2[4];
     }
-    else if ((int)(uVar2 * DAT_worldmap__8009b254 + -uVar3 * DAT_worldmap__8009b25c) < 0) {
+    else if ((int)(uVar2 * DAT_worldmap__8009b254 + -(s32)uVar3 * DAT_worldmap__8009b25c) < 0) {
         DAT_1f800000.vx = 0x10;
         DAT_1f800000.vz = -0x10;
         VECTOR_1f800010.vx = 0;
@@ -160,7 +160,7 @@ s32 worldmapGetAltitudeFor2dPoint(s32 x, s32 y) {
     if (y < 0) {
         iVar2 = y + 7;
     }
-    local_40.vz = -(iVar2 >> 3 & 0xffffU);
+    local_40.vz = -(s32)(iVar2 >> 3 & 0xffffU);
     if ((pcVar2[1] & 0x80) == 0) {
         local_30.vx = 0x10000;
         bVar1 = pcVar2[4];
@@ -492,7 +492,7 @@ int checkWorldmapPositionSub1_0_2(VECTOR* position, VECTOR* step, std::array<VEC
     if (iVar2 == 0) {
         trap(0x1c00);
     }
-    if ((iVar2 == -1) && (iVar6 == -0x80000000)) {
+    if ((iVar2 == -1) && (iVar6 == -(s32)0x80000000)) {
         trap(0x1800);
     }
     iVar2 = (position->vz & 0xfff80000U) - position->vz;
@@ -542,7 +542,7 @@ int checkWorldmapPositionSub1_0_5(VECTOR* position, VECTOR* step, std::array<VEC
     if (iVar2 == 0) {
         trap(0x1c00);
     }
-    if ((iVar2 == -1) && (iVar6 == -0x80000000)) {
+    if ((iVar2 == -1) && (iVar6 == -(s32)0x80000000)) {
         trap(0x1800);
     }
     iVar2 = (output[1].vz & 0xfff80000U) - position->vz;
@@ -593,7 +593,7 @@ int checkWorldmapPositionSub1_0_4(VECTOR* position, VECTOR* step, std::array<VEC
     if (iVar2 == 0) {
         trap(0x1c00);
     }
-    if ((iVar2 == -1) && (iVar7 == -0x80000000)) {
+    if ((iVar2 == -1) && (iVar7 == -(s32)0x80000000)) {
         trap(0x1800);
     }
     iVar2 = (position->vx & 0xfff80000U) - position->vx;
@@ -622,7 +622,7 @@ int checkWorldmapPositionSub1_0_4(VECTOR* position, VECTOR* step, std::array<VEC
         checkWorldmapPositionSub0(&output[3]);
         sVar1 = getWorldmapGroundType(&output[3]);
         sVar1 = checkWorldmapPositionSub1_0_1((int)param_4, (int)sVar1);
-        uVar3 = -(uint)(sVar1 == 0) & 3;
+        uVar3 = -(s32)(sVar1 == 0) & 3;
     }
     return uVar3;
 }
@@ -644,7 +644,7 @@ int checkWorldmapPositionSub1_0_3(VECTOR* position, VECTOR* step, std::array<VEC
     if (iVar3 == 0) {
         trap(0x1c00);
     }
-    if ((iVar3 == -1) && (iVar7 == -0x80000000)) {
+    if ((iVar3 == -1) && (iVar7 == -(s32)0x80000000)) {
         trap(0x1800);
     }
     iVar3 = (output[1].vx & 0xfff80000U) - position->vx;

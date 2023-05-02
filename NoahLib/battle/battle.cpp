@@ -23,6 +23,8 @@ s8 currentBattleMode = 0;
 s8 makeBattleTimeProgress = 0;
 s8 battlePartyLayoutType = 0;
 s8 drawBattleMode1Disabled = 0;
+s8 newBattleInputButton2;
+s8 previousNewBattleInputButton;
 
 std::vector<u8> battleFont;
 
@@ -72,37 +74,7 @@ void initGraphicsForBattle(void) {
 
 sBattleVar0* battleVar0 = nullptr;
 sBattleVar1* battleVar1 = nullptr;
-
-struct sBattleVar2Sub {
-    std::array<u8, 8> m0_circleMenuBattleCommandsMapping;
-    std::array<s16, 16> m1C;
-    u8 m3C;
-    // size 0x40
-};
-
-struct sBattleVar2 {
-    std::array<sBattleVar2Sub, 3> m0;
-    std::array<u8, 4> m2C0_circleMenuCommandsNames;
-    u8 m2D3_currentEntityTurn;
-    u8 m2D4_remainingAP;
-    u8 m2D5_maxAP;
-    u8 m2DA_indexInBattleVar48;
-    u8 m2DB;
-    u8 m2DC;
-    u8 m2DD_currentActiveBattleMenu;
-    u8 m2DE;
-    u8 m2DF;
-    u8 m2E0;
-    u8 m2E1;
-    u8 m2E2_previousActiveBattleMenu;
-    u8 m2E3;
-    u8 m2E4;
-    u8 m2E9;
-    u8 m2EA;
-    std::array<u8, 3> m2EB;
-    u8 m2F6;
-    // size 0x2F8
-}*battleVar2 = nullptr;
+sBattleVar2* battleVar2 = nullptr;
 
 s8 battleTransitionEffect = 0;
 s8 currentBattleLoaderTransitionEffect;
@@ -1028,7 +1000,7 @@ void battleDrawAPBar() {
 void battleRenderCommandRing() {
     if (battleVar1->mCB) {
         for (int i = 0; i < 2; i++) {
-            battleRenderPolyArray(&battleVar0->m641C[i][0], battleVar1->mD0[i], battleVar1->mA3);
+            battleRenderPolyArray(&battleVar0->m641C[i][0], battleVar1->mD0_battleCommandLength[i], battleVar1->mA3);
         }
     }
 }
@@ -1235,6 +1207,14 @@ std::array<std::array<s16, 3>, 3> partyMemberSpritesOffset = { {
     {0x0, 0x0, 0x0} // 3 PC
 } };
 
+void battleSoundEffect(u32) {
+    MissingCode();
+}
+
+void battleSoundEffect2(u32) {
+    MissingCode();
+}
+
 void drawCircleMenuChi(int param_1) {
     switch (battleInputButton) {
     case 8:
@@ -1246,6 +1226,36 @@ void drawCircleMenuChi(int param_1) {
 
 void drawCircleMenuDefend(int param_1) {
     switch (battleInputButton) {
+    case 0:
+        if (battleVar2->m0[param_1].m1C[9] == 0) {
+            battleVar2->m2DD_currentActiveBattleMenu = 1;
+            return;
+        }
+        if ((battleVar2->m2F6 != 0) && (newBattleInputButton2 == '\0')) {
+            if (battleVar2->m0[param_1].m1C[5] == 0) {
+                battleVar2->m2DD_currentActiveBattleMenu = 7;
+                goto LAB_Battle__80081688;
+            }
+        LAB_Battle__80081674:
+            battleSoundEffect2(0x4f);
+        LAB_Battle__80081688:
+            battleVar2->m2F6 = 0;
+            return;
+        }
+        battleVar2->m2F6 = 1;
+        break;
+    case 1:
+        if (battleVar2->m0[param_1].m1C[0xb] == 0) {
+            battleVar2->m2DD_currentActiveBattleMenu = 2;
+            return;
+        }
+        break;
+    case 2:
+        if (battleVar2->m0[param_1].m1C[8] == 0) {
+            battleVar2->m2DD_currentActiveBattleMenu = 9;
+            return;
+        }
+        break;
     case 8:
         break;
     default:
@@ -1264,6 +1274,24 @@ void drawCircleMenuAttackActive(int param_1) {
     case 2: // left
         battleVar2->m2DD_currentActiveBattleMenu = 3;
         return;
+    case 3: // up
+        if (battleVar2->m0[param_1 & 0xff].m1C[10] == 0) {
+            battleVar2->m2DD_currentActiveBattleMenu = 4;
+            return;
+        }
+        if ((battleVar2->m2F6 != 0) && (newBattleInputButton2 == '\x03')) {
+            if (battleVar2->m0[param_1 & 0xff].m1C[7] == 0) {
+                battleVar2->m2DD_currentActiveBattleMenu = 10;
+            }
+            else {
+                battleSoundEffect2(0x4f);
+            }
+            battleVar2->m2F6 = 0;
+            return;
+        }
+        battleVar2->m2F6 = 1;
+        break;
+        break;
     case 4:
     case 6:
     case 7:
@@ -1293,6 +1321,18 @@ void drawBattleMenu7(int param_1) {
             return;
         }
         break;
+    case 8:
+    case 0xE:
+        return;
+    default:
+        assert(0);
+    }
+    MissingCode();
+}
+
+
+void drawBattleMenuEscape(int param_1) {
+    switch (battleInputButton) {
     case 8:
     case 0xE:
         return;
@@ -1339,42 +1379,42 @@ struct sBattleMenuGraphicConfigs2 {
     // size 0x8
 };
 
-const std::array<const std::vector<sBattleMenuGraphicConfigs2>, 6> battleMenuGraphicConfigs2 = { {
-    { // 0
-        {0x4000, 0x80, 0x48, 0x2009},
-        {0x4001, 0x60, 0x60, 0x208B},
-        {0x4002, 0x40, 0x48, 0x0080},
-        {0x4003, 0x60, 0x30, 0x208A},
+const std::array<const std::vector<sBattleMenuGraphicConfigs2>, 8> battleMenuGraphicConfigs2 = { {
+    { // 0 Attack
+        {0x4000, 0x80, 0x48, 0x2009}, //Attack
+        {0x4001, 0x60, 0x60, 0x208B}, //Item
+        {0x4002, 0x40, 0x48, 0x0080}, //Defend
+        {0x4003, 0x60, 0x30, 0x208A}, //Chi
         {0x56, 0x60, 0x40, 0x80},
         {0x54, 0x68, 0x48, 0x0},
         {0x54, 0x68, 0x48, 0x0},
         {-1}
     },
-    { // 1
-        {0x4000, 0x80, 0x48, 0x2089},
-        {0x4001, 0x60, 0x60, 0x200B},
-        {0x4002, 0x40, 0x48, 0x0080},
-        {0x4003, 0x60, 0x30, 0x208A},
-        {0x56, 0x60, 0x40, 0x80},
-        {0x54, 0x68, 0x48, 0x0},
-        {0x57, 0x60, 0x50, 0x0},
-        {-1}
-    },
-    { // 2
-        {0x4000, 0x80, 0x48, 0x2089},
-        {0x4001, 0x60, 0x60, 0x208B},
-        {0x4002, 0x40, 0x48, 0x0000},
-        {0x4003, 0x60, 0x30, 0x208A},
+    { // 1 Item
+        {0x4000, 0x80, 0x48, 0x2089}, //Attack
+        {0x4001, 0x60, 0x60, 0x200B}, //Item
+        {0x4002, 0x40, 0x48, 0x0080}, //Defend
+        {0x4003, 0x60, 0x30, 0x208A}, //Chi
         {0x56, 0x60, 0x40, 0x80},
         {0x54, 0x68, 0x48, 0x0},
         {0x57, 0x60, 0x50, 0x0},
         {-1}
     },
-    { // 3
-        {0x4000, 0x80, 0x48, 0x2089},
-        {0x4001, 0x60, 0x60, 0x208B},
-        {0x4002, 0x40, 0x48, 0x0080},
-        {0x4003, 0x60, 0x30, 0x200A},
+    { // 2 Defend
+        {0x4000, 0x80, 0x48, 0x2089}, //Attack
+        {0x4001, 0x60, 0x60, 0x208B}, //Item
+        {0x4002, 0x40, 0x48, 0x0000}, //Defend
+        {0x4003, 0x60, 0x30, 0x208A}, //Chi
+        {0x56, 0x60, 0x40, 0x80},
+        {0x54, 0x68, 0x48, 0x0},
+        {0x57, 0x60, 0x50, 0x0},
+        {-1}
+    },
+    { // 3 Chi menu
+        {0x4000, 0x80, 0x48, 0x2089}, //Attack
+        {0x4001, 0x60, 0x60, 0x208B}, //Item
+        {0x4002, 0x40, 0x48, 0x0080}, //Defend
+        {0x4003, 0x60, 0x30, 0x200A}, //Chi
         {0x56, 0x60, 0x40, 0x80},
         {0x54, 0x68, 0x48, 0x0},
         {0x57, 0x60, 0x50, 0x0},
@@ -1401,6 +1441,26 @@ const std::array<const std::vector<sBattleMenuGraphicConfigs2>, 6> battleMenuGra
         {0x57, 0x60, 0x50, 0x0},
         {-1}
     },
+    { // 6
+        {0x4004, 0x80, 0x48, 0x2085},
+        {0x4005, 0x60, 0x60, 0x0000},
+        {0x4006, 0x40, 0x48, 0x2088},
+        {0x4007, 0x60, 0x30, 0x2087},
+        {0x56, 0x60, 0x40, 0x80},
+        {0x54, 0x68, 0x48, 0x0},
+        {0x57, 0x60, 0x50, 0x0},
+        {-1}
+    },
+    { // 7
+        {0x4004, 0x80, 0x48, 0x2085},
+        {0x4005, 0x60, 0x60, 0x0080},
+        {0x4006, 0x40, 0x48, 0x2008},
+        {0x4007, 0x60, 0x30, 0x2087},
+        {0x56, 0x60, 0x40, 0x80},
+        {0x54, 0x68, 0x48, 0x0},
+        {0x57, 0x60, 0x50, 0x0},
+        {-1}
+    },
 } };
 
 uint updateBattleMenuSpriteForMenu(uint param_1, uint menuId, char param_3) {
@@ -1410,7 +1470,7 @@ uint updateBattleMenuSpriteForMenu(uint param_1, uint menuId, char param_3) {
         for (int i = 0; i < 2; i++) {
             menuConfig1[i] = battleMenuGraphicConfigs[menuId & 0xFF][i];
             menuConfig2[i] = battleMenuGraphicConfigs[menuId & 0xFF][i + 2];
-            battleVar1->mD0[i] = 0;
+            battleVar1->mD0_battleCommandLength[i] = 0;
         }
 
         for (int i = 0; i < 2; i++) {
@@ -1425,31 +1485,33 @@ uint updateBattleMenuSpriteForMenu(uint param_1, uint menuId, char param_3) {
                         continue;
                     }
                 }
-                int iVar10 = battleVar1->mD0[menuConfig1[i]];
-                battleVar1->mD0[menuConfig1[i]] += battleSetupStringInPolyFT4Large(value, &battleVar0->m641C[menuConfig1[i]][battleVar1->mD0[menuConfig1[i]]], it->m2_X, it->m4_Y);
+                int startOfCurrentBattleCommand = battleVar1->mD0_battleCommandLength[menuConfig1[i]];
+                battleVar1->mD0_battleCommandLength[menuConfig1[i]] += battleSetupStringInPolyFT4Large(value, &battleVar0->m641C[menuConfig1[i]][battleVar1->mD0_battleCommandLength[menuConfig1[i]]], it->m2_X, it->m4_Y);
 
                 int uVar2 = it->m6;
-                int uVar4 = (uVar2 & 0xFF) / 2;
+                int commandTransparency = (uVar2 & 0xFF) / 2;
                 if (it->m6 > 0x1FFF) {
-                    uVar4 = 0x10;
+                    commandTransparency = 0x10;
                     if (battleVar2->m0[param_1].m1C[uVar2 & 0xF] == 0) {
-                        uVar4 = (uVar2 & 0xF0) / 2;
+                        commandTransparency = (uVar2 & 0xF0) / 2;
                     }
                 }
-                if (uVar4 == 0) {
-                    for (int j = iVar10; j < battleVar1->mD0[menuConfig1[i]]; j++) {
+                if (commandTransparency == 0) {
+                    // command is solid
+                    for (int j = startOfCurrentBattleCommand; j < battleVar1->mD0_battleCommandLength[menuConfig1[i]]; j++) {
                         battleVar0->m641C[menuConfig1[i]][j][battleOddOrEven].r0 = 0x80;
                         battleVar0->m641C[menuConfig1[i]][j][battleOddOrEven].g0 = 0x80;
                         battleVar0->m641C[menuConfig1[i]][j][battleOddOrEven].b0 = 0x80;
                     }
                 }
-                else if (iVar10 < battleVar1->mD0[menuConfig1[i]]) {
-                    for (int j = iVar10; j < battleVar1->mD0[menuConfig1[i]]; j++) {
+                else {
+                    // command is transparent
+                    for (int j = startOfCurrentBattleCommand; j < battleVar1->mD0_battleCommandLength[menuConfig1[i]]; j++) {
                         SetSemiTrans(&battleVar0->m641C[menuConfig1[i]][j][battleOddOrEven], 1);
                         SetShadeTex(&battleVar0->m641C[menuConfig1[i]][j][battleOddOrEven], 0);
-                        battleVar0->m641C[menuConfig1[i]][j][battleOddOrEven].r0 = uVar4;
-                        battleVar0->m641C[menuConfig1[i]][j][battleOddOrEven].g0 = uVar4;
-                        battleVar0->m641C[menuConfig1[i]][j][battleOddOrEven].b0 = uVar4;
+                        battleVar0->m641C[menuConfig1[i]][j][battleOddOrEven].r0 = commandTransparency;
+                        battleVar0->m641C[menuConfig1[i]][j][battleOddOrEven].g0 = commandTransparency;
+                        battleVar0->m641C[menuConfig1[i]][j][battleOddOrEven].b0 = commandTransparency;
                         battleVar0->m641C[menuConfig1[i]][j][battleOddOrEven].tpage |= 0x20;
                     }
                 }
@@ -1461,10 +1523,6 @@ uint updateBattleMenuSpriteForMenu(uint param_1, uint menuId, char param_3) {
         assert(0);
         return battleVar1->mA3;
     }
-}
-
-void battleSoundEffect(u32) {
-    MissingCode();
 }
 
 u32 handleMenuSelectEnemySub(u32, u32) {
@@ -1566,7 +1624,7 @@ void setupTurnRenderLoop(int param_1) {
     MissingCode();
 
     for (int i = 0; i < 16; i++) {
-        battleVar2->m0[param_1].m1C[i] = party1C_InitialValues[i];
+        battleVar2->m0[param_1].m1C[i] = battleEntities[param_1].m0_base.m7A_commandEnabledBF & party1C_InitialValues[i];
     }
 
     MissingCode();
@@ -1629,6 +1687,9 @@ void setupTurnRenderLoop(int param_1) {
                 break;
             case 7:
                 drawBattleMenu7(param_1);
+                break;
+            case 9:
+                drawBattleMenuEscape(param_1);
                 break;
             case 5:
                 handleMenuSelectEnemy(param_1);
@@ -1871,13 +1932,6 @@ void battleEntryPoint(void) {
     bootGame(0);
 }
 
-void playBattleSound(int) {
-    MissingCode();
-}
-
-s8 newBattleInputButton2;
-s8 previousNewBattleInputButton;
-
 void battleHandleInput(void) {
     u32 savedPlayTime;
     bool isPaused = true;
@@ -1909,28 +1963,28 @@ void battleHandleInput(void) {
                 MissingCode();
                 if (battleIsPaused == false) {
                     if (newPadButtonForField & controllerButtons::RIGHT) {
-                        playBattleSound(0x4C);
+                        battleSoundEffect2(0x4C);
                         newBattleInputButton = 0;
                         previousNewBattleInputButton = newBattleInputButton2;
                         newBattleInputButton2 = newBattleInputButton;
                         break;
                     }
                     else if (newPadButtonForField & controllerButtons::DOWN) {
-                        playBattleSound(0x4C);
+                        battleSoundEffect2(0x4C);
                         newBattleInputButton = 1;
                         previousNewBattleInputButton = newBattleInputButton2;
                         newBattleInputButton2 = newBattleInputButton;
                         break;
                     }
                     else if (newPadButtonForField & controllerButtons::LEFT) {
-                        playBattleSound(0x4C);
+                        battleSoundEffect2(0x4C);
                         newBattleInputButton = 2;
                         previousNewBattleInputButton = newBattleInputButton2;
                         newBattleInputButton2 = newBattleInputButton;
                         break;
                     }
                     else if (newPadButtonForField & controllerButtons::UP) {
-                        playBattleSound(0x4C);
+                        battleSoundEffect2(0x4C);
                         newBattleInputButton = 3;
                         previousNewBattleInputButton = newBattleInputButton2;
                         newBattleInputButton2 = newBattleInputButton;
@@ -1938,21 +1992,21 @@ void battleHandleInput(void) {
                     }
                     else if (newPadButtonForField & controllerButtons::INTERACT) {
                         newBattleInputButton = 4;
-                        playBattleSound(0x4d);
+                        battleSoundEffect2(0x4d);
                         break;
                     }
                     else if (newPadButtonForDialogs & controllerButtons::CROSS) {
                         newBattleInputButton = 5;
-                        playBattleSound(0x4e);
+                        battleSoundEffect2(0x4e);
                         break;
                     }
                     else if (newPadButtonForDialogs & controllerButtons::JUMP) {
                         newBattleInputButton = 6;
-                        playBattleSound(0x4d);
+                        battleSoundEffect2(0x4d);
                     }
                     else if (newPadButtonForDialogs & controllerButtons::TRIANGLE) {
                         newBattleInputButton = 7;
-                        playBattleSound(0x4d);
+                        battleSoundEffect2(0x4d);
                         break;
                     }
                     else if (newPadButtonForDialogs & 1) {
@@ -1970,7 +2024,7 @@ void battleHandleInput(void) {
                     }
                     else if (newPadButtonForDialogs & controllerButtons::SELECT) {
                         newBattleInputButton = 0xd;
-                        playBattleSound(0x4d);
+                        battleSoundEffect2(0x4d);
                         break;
                     }
                     else if ((*pRunningOnDTL != -1) && (newPadButtonForField & controllerButtons::R1) && (newPadButtonForField & controllerButtons::L1)) { // debug command
