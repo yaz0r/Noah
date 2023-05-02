@@ -160,10 +160,10 @@ void batteLoaderPhase1_0() {
     for (int i = 0; i < 11; i++) {
         battleVisualEntities[i].m3 = 0;
         if (battleForceOnGear == 0) {
-            battleVisualEntities[i].m4 = gameState.m22B1_isOnGear[i];
+            battleVisualEntities[i].m4_isGear = gameState.m22B1_isOnGear[i];
         }
         else {
-            battleVisualEntities[i].m4 = 1;
+            battleVisualEntities[i].m4_isGear = 1;
         }
         battleVisualEntities[i].m5 = 0;
     }
@@ -196,7 +196,7 @@ void batteLoaderPhase1_1() {
             isBattleSlotFilled[i] = 0;
         }
 
-        if (battleVisualEntities[i].m4 == 0) {
+        if (battleVisualEntities[i].m4_isGear == 0) {
             battleVisualEntities[i].m0 = currentBattleConfig.m4[i] & 0x7F;
         }
         else {
@@ -213,12 +213,12 @@ void batteLoaderPhase1_1() {
             battleEntities[i].m0_base.m26_MaxHP = 0;
             battleEntities[i].m0_base.m24_HP = 0;
             battleVisualEntities[i].m3 = 0;
-            battleVisualEntities[i].m4 = 0;
+            battleVisualEntities[i].m4_isGear = 0;
             isBattleSlotFilled[i] = 0;
         }
         else {
             battleVisualEntities[i].m3 = currentBattleConfig.m10[i - 3] & 0x80;
-            battleVisualEntities[i].m4 = currentBattleConfig.m4[i + 1] & 0x80;
+            battleVisualEntities[i].m4_isGear = currentBattleConfig.m4[i + 1] & 0x80;
             battleVisualEntities[i].m5 = currentBattleConfig.m10[i - 3] & 0x1;
             isBattleSlotFilled[i] = 1;
             battleVisualEntities[i].m0 = currentBattleConfig.m18[i - 3] & 0x7F;
@@ -237,7 +237,7 @@ void batteLoaderPhase1_1() {
         // party members
         for (int i = 0; i < 3; i++) {
             if (battleVisualEntities[i].m2 != 0x7F) {
-                if (battleVisualEntities[i].m4 == 0) {
+                if (battleVisualEntities[i].m4_isGear == 0) {
                     battleVisualEntities[i].m1 = battleSlotLayout[battleVisualEntities[i].m0][0];
                     battleSlotLayout[battleVisualEntities[i].m0][1] |= characterIdToTargetBitmask(battleVisualEntities[i].m1);
                     battleSlotLayout[battleVisualEntities[i].m0][0]++;
@@ -253,7 +253,7 @@ void batteLoaderPhase1_1() {
         // monsters
         for (int i = 3; i < 11; i++) {
             if (battleVisualEntities[i].m2 != 0x7F) {
-                if (battleVisualEntities[i].m4 == 0) {
+                if (battleVisualEntities[i].m4_isGear == 0) {
                     battleVisualEntities[i].m1 = battleSlotLayout[battleVisualEntities[i].m0 + 8][0];
                     battleSlotLayout[battleVisualEntities[i].m0 + 8][1] |= characterIdToTargetBitmask(battleVisualEntities[i].m1);
                     battleSlotLayout[battleVisualEntities[i].m0 + 8][0]++;
@@ -272,7 +272,7 @@ void batteLoaderPhase1_1() {
         // party
         for (int i = 0; i < 3; i++) {
             if (battleVisualEntities[i].m2 != 0x7F) {
-                if (battleVisualEntities[i].m4 == 0) {
+                if (battleVisualEntities[i].m4_isGear == 0) {
                     battleVisualEntities[i].mA_X = battleLoadDataVar2Bis->m4[battleVisualEntities[i].m0][battleVisualEntities[i].m1].vx;
                     battleVisualEntities[i].mC_Z = battleLoadDataVar2Bis->m4[battleVisualEntities[i].m0][battleVisualEntities[i].m1].vy;
                 }
@@ -286,7 +286,7 @@ void batteLoaderPhase1_1() {
         // monsters
         for (int i = 3; i < 11; i++) {
             if (battleVisualEntities[i].m2 != 0x7F) {
-                if (battleVisualEntities[i].m4 == 0) {
+                if (battleVisualEntities[i].m4_isGear == 0) {
                     battleVisualEntities[i].mA_X = battleLoadDataVar2Bis->m4[battleVisualEntities[i].m0][battleVisualEntities[i].m1 + 3].vx;
                     battleVisualEntities[i].mC_Z = battleLoadDataVar2Bis->m4[battleVisualEntities[i].m0][battleVisualEntities[i].m1 + 3].vy;
                 }
@@ -606,7 +606,7 @@ void batteLoaderPhase1_3() {
         }
         else {
             battleVar0->m835C[i].m1E1 = 1; // display AP
-            if (battleVisualEntities[i].m4 == 0) {
+            if (battleVisualEntities[i].m4_isGear == 0) {
                 apConfigArray[i].m1 = 0;
                 battleEntities[i].m15A_flags &= 0x7F;
             }

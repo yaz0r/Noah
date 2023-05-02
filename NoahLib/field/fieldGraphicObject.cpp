@@ -603,7 +603,7 @@ void createSavePointMeshDataMode2(sSavePointMesh2* param_1)
     (param_1->m38_spriteActorCore).m20->getAsObject()->m40 = 0;
 }
 
-int initFieldEntitySub4Sub5Sub1(const sFieldEntitySub4_110_0* param_1)
+int isVramPreBacked(const sFieldEntitySub4_110_0* param_1)
 {
     return param_1->m0_header.mx8000_isVramPrebacked;
 }
@@ -1831,7 +1831,7 @@ void setAnimationBundle(sSpriteActorCore* param_1, sSpriteActorAnimationBundle* 
 			param_1->m3C = param_1->m3C | 0x40000000;
 		}
 		if (isBattleOverlayLoaded != '\0') {
-			if (initFieldEntitySub4Sub5Sub1(psVar2->m0_spriteData) == 0) {
+			if (isVramPreBacked(psVar2->m0_spriteData) == 0) {
 				psVar2->m4_vramLocation.vx = 0x300;
 				psVar2->m4_vramLocation.vy = 0x100;
 			}
@@ -1847,7 +1847,6 @@ void spriteActorSetPlayingAnimation(sSpriteActorCore* param_1, int animationId)
 {
 	ushort uVar1;
 	uint uVar2;
-	int iVar3;
 
 	if (param_1->m48_defaultAnimationbundle == nullptr) {
 		param_1->m64_spriteByteCode.makeNull();
@@ -1863,7 +1862,7 @@ void spriteActorSetPlayingAnimation(sSpriteActorCore* param_1, int animationId)
 		if (animationId < 0) {
 			setAnimationBundle(param_1, param_1->m4C_specialAnimation);
 			if ((isBattleOverlayLoaded != 0) &&
-				(iVar3 = initFieldEntitySub4Sub5Sub1(param_1->m24_vramData->m0_spriteData), iVar3 == 0)) {
+				(isVramPreBacked(param_1->m24_vramData->m0_spriteData) == 0)) {
 				param_1->m24_vramData->m4_vramLocation.vx = 0x100;
 				param_1->m24_vramData->m4_vramLocation.vy = 0x300;
 			}

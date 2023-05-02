@@ -26,6 +26,9 @@ s8 drawBattleMode1Disabled = 0;
 s8 newBattleInputButton2;
 s8 previousNewBattleInputButton;
 
+std::array<sBattleSpriteActor*, 11> battleSpriteActors;
+std::array<sSpriteActorCore*, 11> battleSpriteActorCores;
+
 std::vector<u8> battleFont;
 
 std::array<s16, 0xB> battleSlotStatusVar0;
@@ -1227,12 +1230,12 @@ void drawCircleMenuChi(int param_1) {
 void drawCircleMenuDefend(int param_1) {
     switch (battleInputButton) {
     case 0:
-        if (battleVar2->m0[param_1].m1C[9] == 0) {
+        if (battleVar2->m0[param_1].m1C_isCommandEnabled[9] == 0) {
             battleVar2->m2DD_currentActiveBattleMenu = 1;
             return;
         }
         if ((battleVar2->m2F6 != 0) && (newBattleInputButton2 == '\0')) {
-            if (battleVar2->m0[param_1].m1C[5] == 0) {
+            if (battleVar2->m0[param_1].m1C_isCommandEnabled[5] == 0) {
                 battleVar2->m2DD_currentActiveBattleMenu = 7;
                 goto LAB_Battle__80081688;
             }
@@ -1245,13 +1248,13 @@ void drawCircleMenuDefend(int param_1) {
         battleVar2->m2F6 = 1;
         break;
     case 1:
-        if (battleVar2->m0[param_1].m1C[0xb] == 0) {
+        if (battleVar2->m0[param_1].m1C_isCommandEnabled[0xb] == 0) {
             battleVar2->m2DD_currentActiveBattleMenu = 2;
             return;
         }
         break;
     case 2:
-        if (battleVar2->m0[param_1].m1C[8] == 0) {
+        if (battleVar2->m0[param_1].m1C_isCommandEnabled[8] == 0) {
             battleVar2->m2DD_currentActiveBattleMenu = 9;
             return;
         }
@@ -1263,11 +1266,130 @@ void drawCircleMenuDefend(int param_1) {
     }
 }
 
+void updateAPCounterDisplay() {
+    MissingCode();
+}
+
+struct sBattleVar48 {
+    u16 m16_targetBitMask;
+    u8 m23_battleEntityIndex;
+    u8 m47;
+
+    //size 0x48
+};
+
+std::array<sBattleVar48, 32> battleVar48;
+
+void initAnimSeqFromCharacterToCharacter(u8 entity, u8 target) {
+    for (int i = 0; i < 0x20; i++) {
+        battleVar48[i].m47 = 0xFF;
+        battleVar48[i].m23_battleEntityIndex = entity;
+        battleVar48[i].m16_targetBitMask = characterIdToTargetBitmask(target);
+    }
+}
+
+struct sBattleJump {
+    s16 m0_X;
+    s16 m2_Z;
+    u8 m4;
+};
+
+std::array<sBattleJump, 9> battleJumpData;
+
+bool initJumpData(uint entity, uint target) {
+    for (int i = 0; i < 9; i++) {
+        battleJumpData[i].m0_X = -1;
+        battleJumpData[i].m2_Z = -1;
+    }
+
+    battleJumpData[0].m0_X = battleVisualEntities[entity].mA_X;
+    battleJumpData[0].m2_Z = battleVisualEntities[entity].mC_Z;
+    battleJumpData[0].m4 = 0;
+
+    for (int i = 1; i < 8; i++) {
+        u8 var2 = battleLoadDataVar2Bis->m140[battleVisualEntities[entity].m0][battleVisualEntities[target].m0][i];
+        if (var2 == 0xFF)
+            break;
+
+        battleJumpData[i].m0_X = battleLoadDataVar2Bis->m4[(var2 & 7) - 1][7].vx;
+        battleJumpData[i].m2_Z = battleLoadDataVar2Bis->m4[(var2 & 7) - 1][7].vy;
+        battleJumpData[i].m4 = var2 & 0x80;
+    }
+
+    return battleCharacters[entity] == 4;
+}
+
+u32 computeFacingForJump(int) {
+    MissingCode();
+    return 0;
+}
+
+struct sJumpAnimationControlStruct {
+    sSpriteActorCore* m4 = nullptr;
+    u32 m24;
+    // size 0x50
+};
+
+sJumpAnimationControlStruct* jumpAnimationControlStruct = nullptr;
+
+sJumpAnimationControlStruct* allocateJumpAnimationStruct() {
+    sJumpAnimationControlStruct* pNewData = new sJumpAnimationControlStruct;
+    MissingCode();
+    pNewData->m4 = nullptr;
+    MissingCode();
+    return pNewData;
+}
+
+sSpriteActorCore* getSpriteCoreForAnimation(int param_1) {
+    if (jumpAnimationControlStruct->m4) {
+        assert(0);
+    }
+    jumpAnimationControlStruct->m24 = param_1;
+    jumpAnimationControlStruct->m4 = battleSpriteActorCores[param_1];
+    return jumpAnimationControlStruct->m4;
+}
+
+void setupBattleAnimationSpriteCore(sSpriteActorCore* param_1) {
+
+    MissingCode();
+}
+
+void startJumpAnimation(int isBilly, uint actor, uint jumpTarget, uint facing) {
+    MissingCode();
+    assert(jumpAnimationControlStruct == nullptr);
+    battleRender();
+    battleRender();
+    MissingCode();
+    jumpAnimationControlStruct = allocateJumpAnimationStruct();
+
+    MissingCode();
+
+    setupBattleAnimationSpriteCore(getSpriteCoreForAnimation(actor));
+
+    MissingCode();
+}
+
+void startCharacterJumpToEnemy(int param_1) {
+    param_1 &= 0xFF;
+    initAnimSeqFromCharacterToCharacter(param_1, battleVar2->m0[param_1].m3C_currentTarget);
+    MissingCode();
+    bool isBilly = initJumpData(param_1, battleVar2->m0[param_1].m3C_currentTarget);
+    startJumpAnimation(isBilly, param_1, battleVar2->m0[param_1].m3C_currentTarget, computeFacingForJump(param_1));
+    MissingCode();
+
+}
+
 void drawCircleMenuAttackActive(int param_1) {
     switch (battleInputButton) {
-    case 0:
-        if (battleVar2->m0[param_1 & 0xff].m1C[5] == 0) {
+    case 0: // right
+        if (battleVar2->m0[param_1 & 0xff].m1C_isCommandEnabled[5] == 0) {
             battleVar2->m2DD_currentActiveBattleMenu = 7;
+            return;
+        }
+        break;
+    case 1: // down
+        if (battleVar2->m0[param_1 & 0xff].m1C_isCommandEnabled[0xb] == 0) {
+            battleVar2->m2DD_currentActiveBattleMenu = 2;
             return;
         }
         break;
@@ -1275,12 +1397,12 @@ void drawCircleMenuAttackActive(int param_1) {
         battleVar2->m2DD_currentActiveBattleMenu = 3;
         return;
     case 3: // up
-        if (battleVar2->m0[param_1 & 0xff].m1C[10] == 0) {
+        if (battleVar2->m0[param_1 & 0xff].m1C_isCommandEnabled[10] == 0) {
             battleVar2->m2DD_currentActiveBattleMenu = 4;
             return;
         }
         if ((battleVar2->m2F6 != 0) && (newBattleInputButton2 == '\x03')) {
-            if (battleVar2->m0[param_1 & 0xff].m1C[7] == 0) {
+            if (battleVar2->m0[param_1 & 0xff].m1C_isCommandEnabled[7] == 0) {
                 battleVar2->m2DD_currentActiveBattleMenu = 10;
             }
             else {
@@ -1292,11 +1414,13 @@ void drawCircleMenuAttackActive(int param_1) {
         battleVar2->m2F6 = 1;
         break;
         break;
-    case 4:
+    case 4: // attack!
     case 6:
     case 7:
         param_1 &= 0xFF;
-        if (battleVar2->m0[param_1].m3C != 0xFF) {
+        if (battleVar2->m0[param_1].m3C_currentTarget != 0xFF) {
+            MissingCode();
+            startCharacterJumpToEnemy(param_1);
             MissingCode();
             battleVar2->m2DD_currentActiveBattleMenu = 5;
             return;
@@ -1313,10 +1437,54 @@ void drawCircleMenuAttackActive(int param_1) {
     MissingCode();
 }
 
+void drawCircleMenuItemActive(int param_1) {
+    switch (battleInputButton) {
+    case 0:
+        if (battleVar2->m0[param_1 & 0xff].m1C_isCommandEnabled[9] == 0) {
+            battleVar2->m2DD_currentActiveBattleMenu = 1;
+            return;
+        }
+        break;
+    case 1:
+        if (battleVar2->m0[param_1].m1C_isCommandEnabled[0xb] == 0) {
+            battleVar2->m2DD_currentActiveBattleMenu = 8;
+            return;
+        }
+        break;
+    case 2:
+        battleVar2->m2DD_currentActiveBattleMenu = 3;
+        return;
+    case 3:
+        if (battleVar2->m0[param_1].m1C_isCommandEnabled[10] == 0) {
+            battleVar2->m2DD_currentActiveBattleMenu = 4;
+            return;
+        }
+        if ((battleVar2->m2F6 != 0) && (newBattleInputButton2 == '\x03')) {
+            if (battleVar2->m0[param_1].m1C_isCommandEnabled[7] == 0) {
+                battleVar2->m2DD_currentActiveBattleMenu = 10;
+                battleVar2->m2F6 = 0;
+                return;
+            }
+            battleSoundEffect2(0x4f);
+            battleVar2->m2F6 = 0;
+            return;
+        }
+        battleVar2->m2F6 = 1;
+        battleSoundEffect2(0x4f);
+        return;
+    case 8:
+    case 0xE:
+        return;
+    default:
+        assert(0);
+    }
+    MissingCode();
+}
+
 void drawBattleMenu7(int param_1) {
     switch (battleInputButton) {
     case 0:
-        if (battleVar2->m0[param_1 & 0xff].m1C[9] == 0) {
+        if (battleVar2->m0[param_1 & 0xff].m1C_isCommandEnabled[9] == 0) {
             battleVar2->m2DD_currentActiveBattleMenu = 1;
             return;
         }
@@ -1492,7 +1660,7 @@ uint updateBattleMenuSpriteForMenu(uint param_1, uint menuId, char param_3) {
                 int commandTransparency = (uVar2 & 0xFF) / 2;
                 if (it->m6 > 0x1FFF) {
                     commandTransparency = 0x10;
-                    if (battleVar2->m0[param_1].m1C[uVar2 & 0xF] == 0) {
+                    if (battleVar2->m0[param_1].m1C_isCommandEnabled[uVar2 & 0xF] == 0) {
                         commandTransparency = (uVar2 & 0xF0) / 2;
                     }
                 }
@@ -1546,19 +1714,19 @@ void handleMenuSelectEnemy(u8 param_1) {
         }
         break;
     case 4:
-        if (battleVar2->m0[param_1].m1C[2]) {
+        if (battleVar2->m0[param_1].m1C_isCommandEnabled[2]) {
             battleInputButton = 5;
             battleSoundEffect(0x4F);
         }
         break;
     case 6:
-        if (battleVar2->m0[param_1].m1C[0]) {
+        if (battleVar2->m0[param_1].m1C_isCommandEnabled[0]) {
             battleInputButton = 5;
             battleSoundEffect(0x4F);
         }
         break;
     case 7:
-        if (battleVar2->m0[param_1].m1C[1]) {
+        if (battleVar2->m0[param_1].m1C_isCommandEnabled[1]) {
             battleInputButton = 5;
             battleSoundEffect(0x4F);
         }
@@ -1624,13 +1792,13 @@ void setupTurnRenderLoop(int param_1) {
     MissingCode();
 
     for (int i = 0; i < 16; i++) {
-        battleVar2->m0[param_1].m1C[i] = battleEntities[param_1].m0_base.m7A_commandEnabledBF & party1C_InitialValues[i];
+        battleVar2->m0[param_1].m1C_isCommandEnabled[i] = battleEntities[param_1].m0_base.m7A_commandEnabledBF & party1C_InitialValues[i];
     }
 
     MissingCode();
 
     if (apConfigArray[param_1].m1 == 0) {
-        if (battleVar2->m0[param_1].m1C[9] == 0) {
+        if (battleVar2->m0[param_1].m1C_isCommandEnabled[9] == 0) {
             battleVar2->m2DD_currentActiveBattleMenu = 1;
             setupTurnRenderLoop_menuVar = 0;
         }
@@ -1646,7 +1814,7 @@ void setupTurnRenderLoop(int param_1) {
         MissingCode();
     }
     else {
-        if (battleVar2->m0[param_1].m1C[9] == 0) {
+        if (battleVar2->m0[param_1].m1C_isCommandEnabled[9] == 0) {
             battleVar2->m2DD_currentActiveBattleMenu = 0x10;
             setupTurnRenderLoop_menuVar = 0;
         }
@@ -1678,6 +1846,9 @@ void setupTurnRenderLoop(int param_1) {
             switch (battleVar2->m2DD_currentActiveBattleMenu) {
             case 1:
                 drawCircleMenuAttackActive(param_1);
+                break;
+            case 2:
+                drawCircleMenuItemActive(param_1);
                 break;
             case 3:
                 drawCircleMenuDefend(param_1);

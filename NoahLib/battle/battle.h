@@ -30,8 +30,8 @@ extern std::array<sApStruct, 3> apConfigArray;
 
 struct sBattleVar2Sub {
     std::array<u8, 8> m0_circleMenuBattleCommandsMapping;
-    std::array<s16, 16> m1C;
-    u8 m3C;
+    std::array<s16, 16> m1C_isCommandEnabled;
+    u8 m3C_currentTarget;
     // size 0x40
 };
 
@@ -162,6 +162,17 @@ struct sBattleMechaInitData {
             }
         }
 
+        {
+            auto it2 = it + 0x140;
+            for (int i = 0; i < m140.size(); i++) {
+                for (int j = 0; j < m140[i].size(); j++) {
+                    for (int k = 0; k < m140[i][j].size(); k++) {
+                        m140[i][j][k] = READ_LE_U8(it2); it2++;
+                    }
+                }
+            }
+        }
+
         m348 = READ_LE_S16(it + 0x348);
         m34A = READ_LE_S16(it + 0x34A);
         m47C_at.vx = READ_LE_S16(it + 0x47C + 0);
@@ -173,6 +184,7 @@ struct sBattleMechaInitData {
     }
     std::array<std::array<sVec2_s16, 8>, 4> m4;
     std::array<std::array<sVec2_s16, 2>, 2> m100;
+    std::array<std::array<std::array<u8, 8>, 8>, 8> m140;
     s16 m348;
     s16 m34A;
     SFP_VEC3 m47C_at;
@@ -227,7 +239,7 @@ struct sBattleVisualEntity {
     u8 m1;
     u8 m2;
     u8 m3;
-    u8 m4;
+    u8 m4_isGear;
     u8 m5;
     s8 m6_direction;
     s16 mA_X;
@@ -236,6 +248,15 @@ struct sBattleVisualEntity {
     // size 0x1C
 };
 extern std::array<sBattleVisualEntity, 0x11> battleVisualEntities;
+
+struct sBattleSpriteActor {
+    sTaskHeader m0;
+    sTaskHeader m1C;
+    sSpriteActor m38_spriteActor;
+};
+
+extern std::array<sBattleSpriteActor*, 11> battleSpriteActors;
+extern std::array<sSpriteActorCore*, 11> battleSpriteActorCores;
 
 extern MATRIX battleRenderingMatrix;
 extern s8 battleTimeEnabled;

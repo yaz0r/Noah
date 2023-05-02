@@ -146,15 +146,6 @@ std::array<u8, 12> battleSpriteWidthPerCharacter = { {
         0x10, 0x10, 0x10, 0x10, 0x10, 0x18, 0x10, 0x10, 0x10, 0x18, 0x10, 0x10
 } };
 
-struct sBattleSpriteActor {
-    sTaskHeader m0;
-    sTaskHeader m1C;
-    sSpriteActor m38_spriteActor;
-};
-
-std::array<sBattleSpriteActor*, 11> battleSpriteActors;
-std::array<sSpriteActorCore*, 11> battleSpriteActorCores;
-
 template <typename T>
 T* createCustomRenderableEntity(size_t param_1, sSavePointMesh1* param_2, void(*updateCallback)(sTaskHeader*), void(*drawCallback)(sTaskHeader*), void(*deleteCallback)(sTaskHeader*)) {
     T* pNewEntity = new T;
@@ -306,7 +297,7 @@ std::array<std::array<int, 2>, 14> battlePartyFileMapping = { {
 
 void createBattlePlayerSpriteActors() {
     for (int i = 0; i < 3; i++) {
-        if ((battleVisualEntities[i].m2 < 0x11) && battleVisualEntities[i].m4 == 0) {
+        if ((battleVisualEntities[i].m2 < 0x11) && battleVisualEntities[i].m4_isGear == 0) {
             battleVisualBuffers[i].m6_vramY = 0x1C0;
             battleVisualBuffers[i].m4_vramX = battleSpriteX + 0x100;
             battleSpriteX += battleSpriteWidthPerCharacter[battleVisualEntities[i].m2];
@@ -381,7 +372,7 @@ void setupPlayerSpriteLoadingCommands(std::array<sLoadingBatchCommands, 4>::iter
     std::array<sLoadingBatchCommands, 4>::iterator start = param_1;
     setCurrentDirectory(0x2c, 1);
     for (int i = 0; i < 3; i++) {
-        if ((battleVisualEntities[i].m2 < 0x11) && battleVisualEntities[i].m4 == 0) {
+        if ((battleVisualEntities[i].m2 < 0x11) && battleVisualEntities[i].m4_isGear == 0) {
             param_1->m0_fileIndex = battlePartyFileMapping[battleVisualEntities[i].m2][0];
             sLoadableDataRaw* pNewLoadable = new sLoadableDataRaw(getFileSizeAligned(param_1->m0_fileIndex));
             param_1->m4_loadPtr = pNewLoadable;
