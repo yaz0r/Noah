@@ -172,7 +172,7 @@ bool battleSpritesDisabled = false;
 void battleSpriteUpdate(sTaskHeader* param_1) {
     sSpriteActorCore* pSprite = param_1->m4->getAsSpriteActorCore();
 
-    if (battleSpritesDisabled == '\0') {
+    if (battleSpritesDisabled == 0) {
         OP_INIT_ENTITY_SCRIPT_sub0Sub9(pSprite);
         savePointCallback8Sub0(pSprite);
         if ((pSprite->mAC >> 6 & 1) != 0) {

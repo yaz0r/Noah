@@ -339,7 +339,8 @@ int modulateSpeed(sSpriteActorCore* param_1, int param_2)
 }
 
 void savePointCallback8Sub0Sub0_battle(sSpriteActorCore* param_1) {
-    //assert(0); // this expects the battle overlay to be loaded
+    assert(isBattleOverlayLoaded);
+
     MissingCode();
 }
 
@@ -350,6 +351,8 @@ void savePointCallback8Sub0Sub0(sSpriteActorCore* param_1)
         (param_1->mC_step).vy += param_1->m1C_gravity;
         return;
     }
+
+    assert(isBattleOverlayLoaded);
 
     short sVar1;
     int iVar2;
@@ -749,7 +752,7 @@ void spriteBytecode2ExtendedE0(sSpriteActorCore* param_1, sPS1Pointer param_2, s
     pSavePointMesh->m38_spriteActorCore.m70 = param_1;
     pSavePointMesh->m38_spriteActorCore.m44_currentAnimationBundle = param_1->m44_currentAnimationBundle;
     pSavePointMesh->m38_spriteActorCore.m48_defaultAnimationbundle = param_1->m48_defaultAnimationbundle;
-    pSavePointMesh->m38_spriteActorCore.m74 = param_1->m74;
+    pSavePointMesh->m38_spriteActorCore.m74_pNextSpriteCore = param_1->m74_pNextSpriteCore;
     pSavePointMesh->m38_spriteActorCore.m82 = param_1->m82;
     pSavePointMesh->m38_spriteActorCore.m50 = param_1->m50;
     pSavePointMesh->m38_spriteActorCore.m8D = (param_1->mAC >> 24) & 0xFF;
@@ -1224,6 +1227,7 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
 	// default
 	case 0xB1:
 	case 0xF8:
+        assert(isBattleOverlayLoaded == 0);
 		break;
 	}
 }
@@ -1315,15 +1319,14 @@ sPS1Pointer popPointerFromAnimationStack(sSpriteActorCore* param_1)
 
 int spriteCallback2Var0 = 0;
 
+void executeSpriteBytecode2_battle(sSpriteActorCore* param_1);
+
 void executeSpriteBytecode2(sSpriteActorCore* param_1)
 {
-    Hack("This normally would call in the same function but inside the battle overlay, not sure if there is any difference");
-    /*
-	if (isBattleOverlayLoaded != '\0') {
-		assert(0);
-		return;
-	}
-    */
+    if (isBattleOverlayLoaded != '\0') {
+        executeSpriteBytecode2_battle(param_1);
+        return;
+    }
 
 	do
 	{

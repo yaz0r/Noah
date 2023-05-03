@@ -148,7 +148,7 @@ struct sSpriteActorCore : public sCustomRenderable {
     void(*m68)(sSpriteActorCore*);
     void* m6C_pointerToOwnerStructure;
     sSpriteActorCore* m70;
-    u32 m74;
+    sSpriteActorCore* m74_pNextSpriteCore;
     u32 m78;
     sFieldEntitySub4_F4* m7C;
     s16 m80;
@@ -284,6 +284,16 @@ void regCallback8(sTaskHeader* param_1, void (*param_2)(sTaskHeader*));
 void regCallbackC(sTaskHeader* param_1, void (*param_2)(sTaskHeader*));
 void allocateSavePointMeshDataSub0(sSavePointMesh1* param_1, sTaskHeader* param_2);
 void allocateSavePointMeshDataSub0_callback(sTaskHeader* param_1);
+int isVramPreBacked(const sFieldEntitySub4_110_0* param_1);
+void addToSpriteTransferList(sSpriteActorCore* param_1, short param_2);
+void executeSpriteBytecode2Sub1(sSpriteActorCore* param_1);
+sPS1Pointer popPointerFromAnimationStack(sSpriteActorCore* param_1);
+void pushBytecodePointerOnAnimationStack(sSpriteActorCore* param_1, sPS1Pointer param_2);
+void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS1Pointer param_3);
+u8 popByteFromAnimationStack(sSpriteActorCore* param_1);
+void pushByteOnAnimationStack(sSpriteActorCore* param_1, u8 param);
+void savePointCallback8Sub0Sub0(sSpriteActorCore* param_1);
 
+extern const std::array<u8, 256> sizePerBytecodeTable;
 extern u32 allocateSavePointMeshDataSub0_var0;
 extern u8 spriteBytecode2ExtendedE0_Var0;

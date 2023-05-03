@@ -181,10 +181,9 @@ u16 characterIdToTargetBitmask(uint param_1)
 std::array<s8, 11> battleMonsterMapping;
 
 void batteLoaderPhase1_1() {
-    battlePartyLayoutType = 0;
-    MissingCode();
+    battlePartyLayoutType = 0;  
     battleLoadDataVar2Bis = battleLoadDataVar2;
-    MissingCode();
+    battleLoadDataVar2Ter = battleLoadDataVar2;
 
     //party
     for (int i = 0; i < 3; i++) {

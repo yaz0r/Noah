@@ -8,6 +8,7 @@
 #include "kernel/gameState.h"
 #include "kernel/math.h"
 #include "psx/gpuprims.h"
+#include "field/fieldGraphicObject.h"
 
 extern std::array<s16, 0xB> battleSlotStatusVar0;
 extern std::array<s16, 0xB> battleSlotStatusVar1;
@@ -52,6 +53,7 @@ struct sBattleVar2 {
     u8 m2E2_previousActiveBattleMenu;
     u8 m2E3;
     u8 m2E4;
+    u8 m2E8;
     u8 m2E9;
     u8 m2EA;
     std::array<u8, 3> m2EB;
@@ -212,6 +214,7 @@ extern sLoadableDataRaw* battleLoadDataVar0_raw;
 extern std::vector<u8>::iterator battleLoadDataVar1;
 extern sBattleMechaInitData* battleLoadDataVar2;
 extern sBattleMechaInitData* battleLoadDataVar2Bis;
+extern sBattleMechaInitData* battleLoadDataVar2Ter;
 
 void battleEntryPoint(void);
 void battleHandleInput(void);
