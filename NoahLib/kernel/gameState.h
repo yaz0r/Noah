@@ -44,12 +44,14 @@ struct sGameStateA42
         m12_maxEther = READ_LE_S16(buffer + 0x12);
         m38_HP = READ_LE_S32(buffer + 0x38);
         m3C_maxHP = READ_LE_S32(buffer + 0x3C);
+        m7C = READ_LE_U16(buffer + 0x7C);
     }
 
     s16 m10_ether;
     s16 m12_maxEther;
     s32 m38_HP;
     s32 m3C_maxHP;
+    u16 m7C;
     //size 0xA4
 };
 
@@ -66,7 +68,7 @@ struct sGameState
 {
     void deserialize(std::vector<u8>& rawGameState) {
         for (int i = 0; i < m26C_party.size(); i++) m26C_party[i].deserialize(rawGameState.begin() + 0x294 + i * 0xA4);
-        for (int i = 0; i < m978_gears.size(); i++) m978_gears[i].deserialize(rawGameState.begin() + 0x16C0 + i * 0xA4);
+        for (int i = 0; i < m978_gears.size(); i++) m978_gears[i].deserialize(rawGameState.begin() + 0x978 + i * 0xA4);
         for (int i = 0; i < m16C0.size(); i++) m16C0[i].deserialize(rawGameState.begin() + 0x16C0 + i * 0x20);
         m1924_Gold = READ_LE_U32(rawGameState.begin() + 0x1924);
         for (int i = 0; i < 3; i++) m1D34_currentParty[i] = READ_LE_U8(rawGameState.begin() + 0x1D34 + i);

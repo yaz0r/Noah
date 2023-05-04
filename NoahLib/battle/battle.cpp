@@ -1010,6 +1010,34 @@ void battleRenderCommandRing() {
     }
 }
 
+void renderTargetSelectionCursor() {
+    if (battleVar1->mC6_isTargetSelectionCursorVisible) {
+        if (battleG3->mE5_fadeDirection == 0) {
+            battleG3->mE0_fadeValue += 4;
+            if (battleG3->mE0_fadeValue >= 0x100) {
+                battleG3->mE5_fadeDirection = 1;
+                battleG3->mE0_fadeValue = 0xfc;
+            }
+        }
+        else {
+            battleG3->mE0_fadeValue -= 4;
+            if (battleG3->mE0_fadeValue < 0x40) {
+                battleG3->mE5_fadeDirection = 0;
+                battleG3->mE0_fadeValue = 0x40;
+            }
+        }
+
+        for (int i = 0; i < 4; i++) {
+            if (battleG3->mE6_isDirectionEnabled[i]) {
+                battleG3->m0_poly[i][battleG3->mE4_oddOrEven].r0 = battleG3->mE0_fadeValue & 0xFF;
+                battleG3->m0_poly[i][battleG3->mE4_oddOrEven].g0 = 0;
+                battleG3->m0_poly[i][battleG3->mE4_oddOrEven].b0 = 0;
+                AddPrim(&(*pCurrentBattleOT)[1], &battleG3->m0_poly[i][battleG3->mE4_oddOrEven]);
+            }
+        }
+    }
+}
+
 void drawBattleMode1() {
     if (!drawBattleMode1Disabled) {
         MissingCode();
@@ -1019,6 +1047,7 @@ void drawBattleMode1() {
         battleRenderPlayerPortraits();
         battleRenderCommandRing();
         MissingCode();
+        renderTargetSelectionCursor();
         battleDrawAPBar();
         MissingCode();
     }
@@ -1309,7 +1338,7 @@ bool initJumpData(uint entity, uint target) {
     battleJumpData[0].m4 = 0;
 
     for (int i = 1; i < 8; i++) {
-        u8 var2 = battleLoadDataVar2Bis->m140[battleVisualEntities[entity].m0][battleVisualEntities[target].m0][i];
+        u8 var2 = battleLoadDataVar2Bis->m140[battleVisualEntities[entity].m0_positionSlot][battleVisualEntities[target].m0_positionSlot][i];
         if (var2 == 0xFF)
             break;
 
@@ -1551,7 +1580,6 @@ void jumpUpdatePositionSub0(sSpriteActorCore* param_1, sSpriteActorCore* param_2
             sVar2 = 0x50;
         }
         (param_1->mA0).vx = (param_2->m0_position).vx.getIntegerPart() + sVar2;
-
         (param_1->mA0).vy = 0;
         (param_1->mA0).vz = (param_2->m0_position).vz.getIntegerPart();
 
@@ -1661,6 +1689,69 @@ void startCharacterJumpToEnemy(int param_1) {
 
 }
 
+void initBattleG3Array(void) {
+    battleG3->reset();
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 2; j++) {
+            SetPolyG3(&battleG3->m0_poly[i][j]);
+            switch (i) {
+            case 0:
+                battleG3->m0_poly[i][j].x0 = 0xc0;
+                battleG3->m0_poly[i][j].y0 = 0x70;
+                battleG3->m0_poly[i][j].x1 = 0xb0;
+                battleG3->m0_poly[i][j].y1 = 0x78;
+                battleG3->m0_poly[i][j].x2 = 0xb0;
+                battleG3->m0_poly[i][j].y2 = 0x68;
+                break;
+            case 1:
+                battleG3->m0_poly[i][j].x0 = 0xA0;
+                battleG3->m0_poly[i][j].y0 = 0x90;
+                battleG3->m0_poly[i][j].x1 = 0x98;
+                battleG3->m0_poly[i][j].y1 = 0x80;
+                battleG3->m0_poly[i][j].x2 = 0xA8;
+                battleG3->m0_poly[i][j].y2 = 0x80;
+                break;
+            case 2:
+                battleG3->m0_poly[i][j].x0 = 0x80;
+                battleG3->m0_poly[i][j].y0 = 0x70;
+                battleG3->m0_poly[i][j].x1 = 0x90;
+                battleG3->m0_poly[i][j].y1 = 0x68;
+                battleG3->m0_poly[i][j].x2 = 0x90;
+                battleG3->m0_poly[i][j].y2 = 0x78;
+                break;
+            case 3:
+                battleG3->m0_poly[i][j].x0 = 0xA0;
+                battleG3->m0_poly[i][j].y0 = 0x50;
+                battleG3->m0_poly[i][j].x1 = 0x98;
+                battleG3->m0_poly[i][j].y1 = 0x60;
+                battleG3->m0_poly[i][j].x2 = 0xA8;
+                battleG3->m0_poly[i][j].y2 = 0x60;
+                break;
+            default:
+                assert(0);
+            }
+
+            battleG3->m0_poly[i][j].r0 = 0xff;
+            battleG3->m0_poly[i][j].g0 = 0;
+            battleG3->m0_poly[i][j].b0 = 0;
+            battleG3->m0_poly[i][j].r1 = 0x40;
+            battleG3->m0_poly[i][j].g1 = 0;
+            battleG3->m0_poly[i][j].b1 = 0;
+            battleG3->m0_poly[i][j].r2 = 0x40;
+            battleG3->m0_poly[i][j].g2 = 0;
+            battleG3->m0_poly[i][j].b2 = 0;
+        }
+        
+    }
+
+    battleG3->mE0_fadeValue = 0xff;
+    battleG3->mE5_fadeDirection = 1;
+    battleG3->mE4_oddOrEven = (byte)battleOddOrEven;
+    battleVar1->mC6_isTargetSelectionCursorVisible = 1;
+}
+
+u8 startCharacterJumpToEnemyVar0;
+
 void drawCircleMenuAttackActive(int param_1) {
     switch (battleInputButton) {
     case 0: // right
@@ -1701,9 +1792,10 @@ void drawCircleMenuAttackActive(int param_1) {
     case 7:
         param_1 &= 0xFF;
         if (battleVar2->m0[param_1].m3C_currentTarget != 0xFF) {
-            MissingCode();
+            startCharacterJumpToEnemyVar0 = 0;
             startCharacterJumpToEnemy(param_1);
             MissingCode();
+            initBattleG3Array();
             battleVar2->m2DD_currentActiveBattleMenu = 5;
             return;
         }
@@ -1980,32 +2072,82 @@ u32 handleMenuSelectEnemySub(u32, u32) {
     return 0;
 }
 
-u8 startCharacterJumpToEnemyVar0;
-
-struct sBattle800c3e24 {
-    std::array<u8, 4> mE6_isDirectionEnabled;
-};
-
 sBattle800c3e24* battleG3 = nullptr;
 
 void updateTargetSelectionMarkerSub0(u32) {
     MissingCode();
 }
 
+u8 numValidTarget = 0;
+std::array<u8, 12> targetsPerPriority;
+
 u8 selectNewSlotByDirection(byte slot, byte direction) {
-    MissingCode();
-    return 0;
+    s32 bestResult = 0xffffff;
+
+    for (int i = 0; i < 12; i++) {
+        if (targetsPerPriority[i] != 0xFF) {
+            bool bVar1 = false;
+            if (targetsPerPriority[i] != slot) {
+                s32 lVar3 = ratan2(
+                    battleVisualEntities[targetsPerPriority[i]].mC_Z - battleVisualEntities[slot].mC_Z,
+                    battleVisualEntities[targetsPerPriority[i]].mA_X - battleVisualEntities[slot].mA_X
+                );
+
+                switch (direction) {
+                case 0:
+                    if ((lVar3 + 0x200) < 0x400)
+                        bVar1 = true;
+                    break;
+                case 1:
+                    if ((lVar3 + 0x600) < 0x400)
+                        bVar1 = true;
+                    break;
+                case 2:
+                    bVar1 = (lVar3 + 0x800U & 0xffff) < 0x200;
+                    if ((lVar3 - 0x600U & 0xffff) < 0x201)
+                        bVar1 = true;
+                    break;
+                case 3:
+                    if ((lVar3 - 0x200) < 0x400)
+                        bVar1 = true;
+                    break;
+                default:
+                    assert(0);
+                }
+
+                if (bVar1) {
+                    s32 zDiff = battleVisualEntities[targetsPerPriority[i]].mC_Z - battleVisualEntities[slot].mC_Z;
+                    s32 zDiffSquare = zDiff * zDiff;
+                    if (zDiff < 0) {
+                        zDiffSquare = battleVisualEntities[slot].mC_Z - battleVisualEntities[targetsPerPriority[i]].mC_Z;
+                        zDiffSquare = zDiffSquare * zDiffSquare;
+                    }
+                    s32 xDiff = (uint)(ushort)battleVisualEntities[targetsPerPriority[i]].mA_X - (uint)(ushort)battleVisualEntities[slot].mA_X;
+                    s32 xDiffSquare = xDiff * xDiff;
+                    if (xDiff < 0) {
+                        xDiffSquare = (uint)(ushort)battleVisualEntities[slot].mA_X - (uint)(ushort)battleVisualEntities[targetsPerPriority[i]].mA_X;
+                        xDiffSquare = xDiffSquare * xDiffSquare;
+                    }
+                    if (zDiffSquare + xDiffSquare < bestResult) {
+                        slot = targetsPerPriority[i];
+                        bestResult = zDiffSquare + xDiffSquare;
+                    }
+                }
+            }
+        }
+    }
+    return slot;
 }
 
 u8 updateTargetSelectionMarkerVar0 = 0;
 
 void updateTargetSelectionMarker(u8 param_1) {
     if (battleVar2->m2E9 == 0) {
-        setCameraVisibleEntities(characterIdToTargetBitmask(battleVar2->m2E8));
-        updateTargetSelectionMarkerSub0(characterIdToTargetBitmask(battleVar2->m2E8));
+        setCameraVisibleEntities(characterIdToTargetBitmask(battleVar2->m2E8_currentTarget));
+        updateTargetSelectionMarkerSub0(characterIdToTargetBitmask(battleVar2->m2E8_currentTarget));
 
         for (int i = 0; i < 4; i++) {
-            if (selectNewSlotByDirection(battleVar2->m2E8, i) == battleVar2->m2E8) {
+            if (selectNewSlotByDirection(battleVar2->m2E8_currentTarget, i) == battleVar2->m2E8_currentTarget) {
                 battleG3->mE6_isDirectionEnabled[i] = 0;
             }
             else {
@@ -2013,10 +2155,12 @@ void updateTargetSelectionMarker(u8 param_1) {
             }
         }
 
-        if (updateTargetSelectionMarkerVar0 != 4) {
+        MissingCode();
+/*        if (updateTargetSelectionMarkerVar0 != 4) {
             assert(0);
             //updateTargetSelectionMarkerSub1(param_1);
         }
+        */
     }
 }
 
@@ -2059,13 +2203,40 @@ void handleMenuSelectEnemy(u8 param_1) {
             battleSoundEffect(0x4F);
         }
         break;
+    case 0: // right
+    case 1: // down
+    case 2: // left
+    case 3: // up
     case 8:
         break;
     default:
         assert(0);
     }
-    if (battleVar2->m2E9) {
-        MissingCode();
+    if (battleVar2->m2E9 == 0) { // if we can still move
+        // handle target change
+        switch (battleInputButton) {
+        case 0:
+            battleVar2->m2E8_currentTarget = selectNewSlotByDirection(battleVar2->m2E8_currentTarget, 0);
+            initAnimSeqFromCharacterToCharacter(battleVar2->m2D3_currentEntityTurn, battleVar2->m2E8_currentTarget);
+            battleSoundEffect(0x4c);
+            break;
+        case 1:
+            battleVar2->m2E8_currentTarget = selectNewSlotByDirection(battleVar2->m2E8_currentTarget, 1);
+            initAnimSeqFromCharacterToCharacter(battleVar2->m2D3_currentEntityTurn, battleVar2->m2E8_currentTarget);
+            battleSoundEffect(0x4c);
+            break;
+        case 2:
+            battleVar2->m2E8_currentTarget = selectNewSlotByDirection(battleVar2->m2E8_currentTarget, 2);
+            initAnimSeqFromCharacterToCharacter(battleVar2->m2D3_currentEntityTurn, battleVar2->m2E8_currentTarget);
+            battleSoundEffect(0x4c);
+            break;
+        case 3:
+            battleVar2->m2E8_currentTarget = selectNewSlotByDirection(battleVar2->m2E8_currentTarget, 3);
+            initAnimSeqFromCharacterToCharacter(battleVar2->m2D3_currentEntityTurn, battleVar2->m2E8_currentTarget);
+            battleSoundEffect(0x4c);
+            break;
+        }
+        initJumpData(param_1, battleVar2->m2E8_currentTarget);
     }
     battleVar1->mAF = 1;
     if (battleInputButton == 5) {
@@ -2088,7 +2259,38 @@ void handleMenuSelectEnemy(u8 param_1) {
     }
     battleVar2->m2DF = battleVar2->m2DF + '\x01';
 LAB_Battle__80081e90:
-    MissingCode();
+    battleVar2->m2DF = battleVar2->m2DF + '\x01';
+    if ((int)((uint)(byte)battleVar2->m2D4_remainingAP - (uint)(byte)battleVar2->m2DF) < 0) {
+        battleSoundEffect(0x4f);
+    }
+    else {
+        battleSoundEffect(0x4d);
+        MissingCode();
+        if (battleVar1->mCB == '\0') {
+            battleVar2->m2DD_currentActiveBattleMenu = 5;
+            battleVar2->m2E2_previousActiveBattleMenu = 5;
+        }
+        else {
+            battleVar2->m2DD_currentActiveBattleMenu = 100;
+            battleVar2->m2E2_previousActiveBattleMenu = 0xff;
+            battleVar2->m2E0 = 1;
+        }
+        battleVar2->m2D4_remainingAP = battleVar2->m2D4_remainingAP - battleVar2->m2DF;
+        updateAPCounterDisplay();
+        MissingCode();
+    }
+    if (battleVar2->m2D4_remainingAP == '\0') {
+        //FUN_Battle__80080b64(param_1);
+        MissingCode();
+        battleVar2->m2E1 = 1;
+    }
+    MissingCode(); /*
+    if (battleVar2->field_0x2e5 != '\0') {
+        //FUN_Battle__80080b64(param_1);
+        MissingCode();
+        battleVar2->m2E1 = 1;
+    }
+    */
 }
 
 const std::array<u16, 16> party1C_InitialValues = { {
@@ -2209,6 +2411,103 @@ void setupTurnRenderLoop(int param_1) {
     MissingCode();
 }
 
+bool isTargetValid(uint param_1, uint param_2)
+{
+    bool bVar1;
+
+    param_2 = param_2 & 0xff;
+    bVar1 = false;
+    if (isBattleSlotFilled[param_2] != 0) {
+        if (battleVisualEntities[param_2].m3 == 0) {
+            if (apConfigArray[param_2].m1 == 0) {
+                if (battleLoadDataVar2Bis->m140[battleVisualEntities[param_1].m0_positionSlot][battleVisualEntities[param_2].m0_positionSlot][0] == 0) {
+                    bVar1 = (battleEntities[param_2].m0_base.m7C & 0xc001) == 0;
+                }
+            }
+            else if ((battleEntities[param_2].mA4_gear.m7C & 0xc001) == 0) {
+                bVar1 = true;
+            }
+        }
+    }
+    return bVar1;
+}
+
+u8 getEntityToFace(u8 param_1) {
+    numValidTarget = 0;
+
+    std::array<u8, 12> array1;
+    std::array<u8, 12> array2;
+    for (int i = 0; i < 12; i++) {
+        array2[i] = 0xFF;
+        targetsPerPriority[i] = 0xFF;
+        array1[i] = 0;
+    }
+
+    if (param_1 < 3) {
+        // Player
+        auto array2It = array2.begin();
+        for (int j = 3; j < 11; j++) {
+            if (isTargetValid(param_1, j)) {
+                *(array2It++) = j;
+                numValidTarget++;
+            }
+        }
+    }
+    else {
+        // Enemy
+        auto array2It = array2.begin();
+        for (int j = 0; j < 3; j++) {
+            if (isTargetValid(param_1, j)) {
+                *(array2It++) = j;
+                numValidTarget++;
+            }
+        }
+    }
+
+    // add current one first
+    {
+        auto targetsPerPriorityIt = targetsPerPriority.begin();
+        auto array1It = array1.begin();
+        for (int i = 0; i < numValidTarget; i++) {
+            if (battleVisualEntities[param_1].m0_positionSlot == battleVisualEntities[array2[i]].m0_positionSlot) {
+                *(targetsPerPriorityIt++) = array2[i];
+                array2[i] = 0xFF; // so that we don't count it twice
+                *(array1It++) = 1;
+            }
+        }
+    }
+
+    // add leftovers
+    {
+        auto targetsPerPriorityIt = targetsPerPriority.begin();
+        for (int i = 0; i < numValidTarget; i++) {
+            if (array2[i] != 0xFF) {
+                *(targetsPerPriorityIt++) = array2[i];
+            }
+        }
+    }
+
+    if (array1[0] == 0) {
+        assert(0);
+    }
+    else if (numValidTarget > 1) {
+        for (int i = 1; i < numValidTarget; i++) {
+            if (array1[i] != 0) {
+                if (battleEntities[targetsPerPriority[i]].m0_base.m24_HP < battleEntities[targetsPerPriority[0]].m0_base.m24_HP) {
+                    std::swap<u8>(targetsPerPriority[0], targetsPerPriority[i]);
+                }
+            }
+        }
+    }
+
+    return targetsPerPriority[0];
+}
+
+bool getDirectionBetween2BattleEntities(uint param_1, uint param_2)
+{
+    return battleVisualEntities[param_2 & 0xff].mA_X < battleVisualEntities[param_1 & 0xff].mA_X;
+}
+
 void battleTickMain(s8 param_1) {
     battleTickMain_var0 = 1;
     battleTickMain_var1 = 0;
@@ -2266,6 +2565,13 @@ void battleTickMain(s8 param_1) {
     }
     else {
         MissingCode();
+    }
+
+    MissingCode();
+    battleVar0->m6415 = 0;
+    for (int i = 0; i < 0xB; i++) {
+        battleVar2->m0[i].m3C_currentTarget = getEntityToFace(i);
+        battleVisualEntities[i].m6_direction = getDirectionBetween2BattleEntities(currentEntityTurn, battleVar2->m0[i].m3C_currentTarget);
     }
 
     MissingCode();

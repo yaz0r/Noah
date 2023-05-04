@@ -27,7 +27,7 @@ struct sApStruct {
     u8 m4_currentAP;
     // size 8
 };
-extern std::array<sApStruct, 3> apConfigArray;
+extern std::array<sApStruct, 11> apConfigArray;
 
 struct sBattleVar2Sub {
     std::array<u8, 8> m0_circleMenuBattleCommandsMapping;
@@ -53,7 +53,7 @@ struct sBattleVar2 {
     u8 m2E2_previousActiveBattleMenu;
     u8 m2E3;
     u8 m2E4;
-    u8 m2E8;
+    u8 m2E8_currentTarget;
     u8 m2E9;
     u8 m2EA;
     std::array<u8, 3> m2EB;
@@ -131,6 +131,7 @@ struct sBattleVar1 {
     u8 mAB_timeBarNumAnimationSteps;
     u8 mAF;
     std::array<u8, 7> mB0_isDialogWindowInitialized;
+    u8 mC6_isTargetSelectionCursorVisible;
     u8 mCB;
     std::array<u8, 3> mCC;
     std::array<u8, 2> mD0_battleCommandLength;
@@ -140,6 +141,19 @@ struct sBattleVar1 {
     // size 0x10C
 };
 extern sBattleVar1* battleVar1;
+
+struct sBattle800c3e24 {
+    void reset() {
+        MissingCode(); // normally a memset 0
+    }
+
+    std::array<std::array<POLY_G3, 2>, 4> m0_poly;
+    s32 mE0_fadeValue;
+    u8 mE4_oddOrEven;
+    u8 mE5_fadeDirection;
+    std::array<u8, 4> mE6_isDirectionEnabled;
+};
+extern sBattle800c3e24* battleG3;
 
 struct sBattleMechaInitData {
     void init(std::vector<u8>::iterator it, u32 size) {
@@ -238,7 +252,7 @@ struct sBattleVisualBuffer {
 extern std::array<sBattleVisualBuffer, 0x11> battleVisualBuffers;
 
 struct sBattleVisualEntity {
-    u8 m0;
+    u8 m0_positionSlot;
     u8 m1;
     u8 m2;
     u8 m3;
@@ -284,3 +298,7 @@ extern std::vector<u8> battleFont;
 int battleSetupStringInPolyFT4Small(int character, std::array<POLY_FT4, 2>* polyArray, short x, short y);
 int battleSetupStringInPolyFT4Large(int character, std::array<POLY_FT4, 2>* polyArray, short x, short y);
 void battleSetupTextPoly(POLY_FT4* param_1);
+
+u8 getEntityToFace(u8 param_1);
+bool getDirectionBetween2BattleEntities(uint param_1, uint param_2);
+extern const std::array<u16, 16> party1C_InitialValues;

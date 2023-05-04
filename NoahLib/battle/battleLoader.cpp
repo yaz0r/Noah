@@ -196,10 +196,10 @@ void batteLoaderPhase1_1() {
         }
 
         if (battleVisualEntities[i].m4_isGear == 0) {
-            battleVisualEntities[i].m0 = currentBattleConfig.m4[i] & 0x7F;
+            battleVisualEntities[i].m0_positionSlot = currentBattleConfig.m4[i] & 0x7F;
         }
         else {
-            battleVisualEntities[i].m0 = i;
+            battleVisualEntities[i].m0_positionSlot = i;
         }
     }
 
@@ -220,7 +220,7 @@ void batteLoaderPhase1_1() {
             battleVisualEntities[i].m4_isGear = currentBattleConfig.m4[i + 1] & 0x80;
             battleVisualEntities[i].m5 = currentBattleConfig.m10[i - 3] & 0x1;
             isBattleSlotFilled[i] = 1;
-            battleVisualEntities[i].m0 = currentBattleConfig.m18[i - 3] & 0x7F;
+            battleVisualEntities[i].m0_positionSlot = currentBattleConfig.m18[i - 3] & 0x7F;
         }
         battleMonsterMapping[i] = battleVisualEntities[i].m2 + 1;
     }
@@ -237,14 +237,14 @@ void batteLoaderPhase1_1() {
         for (int i = 0; i < 3; i++) {
             if (battleVisualEntities[i].m2 != 0x7F) {
                 if (battleVisualEntities[i].m4_isGear == 0) {
-                    battleVisualEntities[i].m1 = battleSlotLayout[battleVisualEntities[i].m0][0];
-                    battleSlotLayout[battleVisualEntities[i].m0][1] |= characterIdToTargetBitmask(battleVisualEntities[i].m1);
-                    battleSlotLayout[battleVisualEntities[i].m0][0]++;
+                    battleVisualEntities[i].m1 = battleSlotLayout[battleVisualEntities[i].m0_positionSlot][0];
+                    battleSlotLayout[battleVisualEntities[i].m0_positionSlot][1] |= characterIdToTargetBitmask(battleVisualEntities[i].m1);
+                    battleSlotLayout[battleVisualEntities[i].m0_positionSlot][0]++;
                 }
                 else {
                     battleVisualEntities[i].m1 = 0;
-                    battleSlotLayout[battleVisualEntities[i].m0 + 0x10][1] = 1;
-                    battleSlotLayout[battleVisualEntities[i].m0 + 0x10][0] = 1;
+                    battleSlotLayout[battleVisualEntities[i].m0_positionSlot + 0x10][1] = 1;
+                    battleSlotLayout[battleVisualEntities[i].m0_positionSlot + 0x10][0] = 1;
                 }
             }
         }
@@ -253,14 +253,14 @@ void batteLoaderPhase1_1() {
         for (int i = 3; i < 11; i++) {
             if (battleVisualEntities[i].m2 != 0x7F) {
                 if (battleVisualEntities[i].m4_isGear == 0) {
-                    battleVisualEntities[i].m1 = battleSlotLayout[battleVisualEntities[i].m0 + 8][0];
-                    battleSlotLayout[battleVisualEntities[i].m0 + 8][1] |= characterIdToTargetBitmask(battleVisualEntities[i].m1);
-                    battleSlotLayout[battleVisualEntities[i].m0 + 8][0]++;
+                    battleVisualEntities[i].m1 = battleSlotLayout[battleVisualEntities[i].m0_positionSlot + 8][0];
+                    battleSlotLayout[battleVisualEntities[i].m0_positionSlot + 8][1] |= characterIdToTargetBitmask(battleVisualEntities[i].m1);
+                    battleSlotLayout[battleVisualEntities[i].m0_positionSlot + 8][0]++;
                 }
                 else {
                     battleVisualEntities[i].m1 = 0;
-                    battleSlotLayout[battleVisualEntities[i].m0 + 0x18][1] = 1;
-                    battleSlotLayout[battleVisualEntities[i].m0 + 0x18][0] = 1;
+                    battleSlotLayout[battleVisualEntities[i].m0_positionSlot + 0x18][1] = 1;
+                    battleSlotLayout[battleVisualEntities[i].m0_positionSlot + 0x18][0] = 1;
                 }
             }
         }
@@ -272,12 +272,12 @@ void batteLoaderPhase1_1() {
         for (int i = 0; i < 3; i++) {
             if (battleVisualEntities[i].m2 != 0x7F) {
                 if (battleVisualEntities[i].m4_isGear == 0) {
-                    battleVisualEntities[i].mA_X = battleLoadDataVar2Bis->m4[battleVisualEntities[i].m0][battleVisualEntities[i].m1].vx;
-                    battleVisualEntities[i].mC_Z = battleLoadDataVar2Bis->m4[battleVisualEntities[i].m0][battleVisualEntities[i].m1].vy;
+                    battleVisualEntities[i].mA_X = battleLoadDataVar2Bis->m4[battleVisualEntities[i].m0_positionSlot][battleVisualEntities[i].m1].vx;
+                    battleVisualEntities[i].mC_Z = battleLoadDataVar2Bis->m4[battleVisualEntities[i].m0_positionSlot][battleVisualEntities[i].m1].vy;
                 }
                 else {
-                    battleVisualEntities[i].mA_X = battleLoadDataVar2Bis->m100[battleVisualEntities[i].m0][0].vx;
-                    battleVisualEntities[i].mC_Z = battleLoadDataVar2Bis->m100[battleVisualEntities[i].m0][0].vy;
+                    battleVisualEntities[i].mA_X = battleLoadDataVar2Bis->m100[battleVisualEntities[i].m0_positionSlot][0].vx;
+                    battleVisualEntities[i].mC_Z = battleLoadDataVar2Bis->m100[battleVisualEntities[i].m0_positionSlot][0].vy;
                 }
             }
         }
@@ -286,12 +286,12 @@ void batteLoaderPhase1_1() {
         for (int i = 3; i < 11; i++) {
             if (battleVisualEntities[i].m2 != 0x7F) {
                 if (battleVisualEntities[i].m4_isGear == 0) {
-                    battleVisualEntities[i].mA_X = battleLoadDataVar2Bis->m4[battleVisualEntities[i].m0][battleVisualEntities[i].m1 + 3].vx;
-                    battleVisualEntities[i].mC_Z = battleLoadDataVar2Bis->m4[battleVisualEntities[i].m0][battleVisualEntities[i].m1 + 3].vy;
+                    battleVisualEntities[i].mA_X = battleLoadDataVar2Bis->m4[battleVisualEntities[i].m0_positionSlot][battleVisualEntities[i].m1 + 3].vx;
+                    battleVisualEntities[i].mC_Z = battleLoadDataVar2Bis->m4[battleVisualEntities[i].m0_positionSlot][battleVisualEntities[i].m1 + 3].vy;
                 }
                 else {
-                    battleVisualEntities[i].mA_X = battleLoadDataVar2Bis->m100[battleVisualEntities[i].m0][1].vx;
-                    battleVisualEntities[i].mC_Z = battleLoadDataVar2Bis->m100[battleVisualEntities[i].m0][1].vy;
+                    battleVisualEntities[i].mA_X = battleLoadDataVar2Bis->m100[battleVisualEntities[i].m0_positionSlot][1].vx;
+                    battleVisualEntities[i].mC_Z = battleLoadDataVar2Bis->m100[battleVisualEntities[i].m0_positionSlot][1].vy;
                 }
             }
         }
@@ -315,6 +315,12 @@ void batteLoaderPhase2_2() {
         apConfigArray[i].m4_currentAP = gameState.m16C0[battleCharacters[i]].m17_energyPerTurn;
         for (int j = 0; j < 8; j++) {
             battleVar2->m0[i].m0_circleMenuBattleCommandsMapping[j] = battleCommandsSetups[battleEntities[i].m0_base.m56_battleCommandLoadout][j];
+        }
+        MissingCode();
+        battleVar2->m0[i].m3C_currentTarget = getEntityToFace(i);
+        battleVisualEntities[i].m6_direction = getDirectionBetween2BattleEntities(i, battleVar2->m0[i].m3C_currentTarget);
+        for (int j = 0; j < 0x10; j++) {
+            battleVar2->m0[i].m1C_isCommandEnabled[j] = battleEntities[i].m0_base.m7A_commandEnabledBF & party1C_InitialValues[j];
         }
         MissingCode();
     }
@@ -592,7 +598,7 @@ void batteLoaderPhase3_1() {
     renderItemTargetsLabels();
 }
 
-std::array<sApStruct, 3> apConfigArray;
+std::array<sApStruct, 11> apConfigArray;
 
 void batteLoaderPhase1_3() {
     MissingCode();
@@ -638,7 +644,8 @@ void battleLoaderTick(s8 param_1) {
         initBattleInventory();
         batteLoaderPhase2_1();
         batteLoaderPhase2_2();
-        MissingCode();
+        battleG3 = new sBattle800c3e24();
+        dummpyLoaderEnd();
         break;
     case 3:
         batteLoaderPhase3_0();
