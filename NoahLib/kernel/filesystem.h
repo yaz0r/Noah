@@ -81,7 +81,7 @@ int setCurrentDirectory(int directory, int offset);
 int isCDBusy();
 int waitReadCompletion(int);
 std::vector<std::vector<u8>::iterator> doPointerRelocation(std::vector<u8>& inputData);
-std::vector<std::vector<u8>> doPointerRelocationAndSplit(std::vector<u8>::iterator& inputData);
+std::vector<std::vector<u8>> doPointerRelocationAndSplit(std::vector<u8>::iterator inputData);
 
 void filessystemDebugInfo_load();
 void filessystemDebugInfo_save();

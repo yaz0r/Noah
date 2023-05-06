@@ -498,7 +498,7 @@ void batchStartLoadingFiles(sLoadingBatchCommands* pCommands, int param_2)
     }
 }
 
-std::vector<std::vector<u8>> doPointerRelocationAndSplit(std::vector<u8>::iterator& it)
+std::vector<std::vector<u8>> doPointerRelocationAndSplit(std::vector<u8>::iterator it)
 {
     std::vector<std::vector<u8>> splitBuffers;
 

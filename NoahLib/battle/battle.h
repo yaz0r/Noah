@@ -37,7 +37,7 @@ struct sBattleVar2Sub {
 };
 
 struct sBattleVar2 {
-    std::array<sBattleVar2Sub, 3> m0;
+    std::array<sBattleVar2Sub, 11> m0;
     std::array<u8, 4> m2C0_circleMenuCommandsNames;
     u8 m2D3_currentEntityTurn;
     u8 m2D4_remainingAP;
@@ -294,6 +294,8 @@ struct sBattleEntity {
 
 extern std::array<sBattleEntity, 11> battleEntities;
 extern std::vector<u8> battleFont;
+
+extern u8 battleGetSlotStatusSub_current28Index;
 
 int battleSetupStringInPolyFT4Small(int character, std::array<POLY_FT4, 2>* polyArray, short x, short y);
 int battleSetupStringInPolyFT4Large(int character, std::array<POLY_FT4, 2>* polyArray, short x, short y);

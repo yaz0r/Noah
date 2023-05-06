@@ -2,7 +2,7 @@
 
 struct sGameStateA4
 {
-    void deserialize(std::vector<u8>::iterator& buffer) {
+    void deserialize(std::vector<u8>::iterator buffer) {
         m1C = READ_LE_S32(buffer + 0x1C);
         m20 = READ_LE_S32(buffer + 0x20);
         m24_HP = READ_LE_S16(buffer + 0x24);
@@ -39,12 +39,13 @@ struct sGameStateA4
 
 struct sGameStateA42
 {
-    void deserialize(std::vector<u8>::iterator& buffer) {
+    void deserialize(std::vector<u8>::iterator buffer) {
         m10_ether = READ_LE_S16(buffer + 0x10);
         m12_maxEther = READ_LE_S16(buffer + 0x12);
         m38_HP = READ_LE_S32(buffer + 0x38);
         m3C_maxHP = READ_LE_S32(buffer + 0x3C);
         m7C = READ_LE_U16(buffer + 0x7C);
+        m82 = READ_LE_U16(buffer + 0x82);
     }
 
     s16 m10_ether;
@@ -52,11 +53,12 @@ struct sGameStateA42
     s32 m38_HP;
     s32 m3C_maxHP;
     u16 m7C;
+    u16 m82;
     //size 0xA4
 };
 
 struct sGameStateSize20 {
-    void deserialize(std::vector<u8>::iterator& buffer) {
+    void deserialize(std::vector<u8>::iterator buffer) {
         m17_energyPerTurn = READ_LE_U8(buffer + 0x17);
     }
 

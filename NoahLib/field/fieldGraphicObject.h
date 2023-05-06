@@ -212,7 +212,7 @@ struct sTaskHeader
 
     void* m0_owner;
     sCustomRenderable* m4;
-    void (*m8)(sTaskHeader*);
+    void (*m8_updateCallback)(sTaskHeader*);
     void (*mC)(sTaskHeader*);
     u32 m10;
     u32 m14;
@@ -282,7 +282,7 @@ void resetSpriteCallbacks(void);
 
 void regCallback8(sTaskHeader* param_1, void (*param_2)(sTaskHeader*));
 void regCallbackC(sTaskHeader* param_1, void (*param_2)(sTaskHeader*));
-void allocateSavePointMeshDataSub0(sSavePointMesh1* param_1, sTaskHeader* param_2);
+void allocateSavePointMeshDataSub0(sTaskHeader* param_1, sTaskHeader* param_2);
 void allocateSavePointMeshDataSub0_callback(sTaskHeader* param_1);
 int isVramPreBacked(const sFieldEntitySub4_110_0* param_1);
 void addToSpriteTransferList(sSpriteActorCore* param_1, short param_2);
@@ -293,7 +293,30 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
 u8 popByteFromAnimationStack(sSpriteActorCore* param_1);
 void pushByteOnAnimationStack(sSpriteActorCore* param_1, u8 param);
 void savePointCallback8Sub0Sub0(sSpriteActorCore* param_1);
+void savePointCallback8Sub0Sub0_battle(sSpriteActorCore* param_1);
 
 extern const std::array<u8, 256> sizePerBytecodeTable;
 extern u32 allocateSavePointMeshDataSub0_var0;
 extern u8 spriteBytecode2ExtendedE0_Var0;
+
+
+template <typename T>
+T* createCustomRenderableEntity(size_t param_1, sTaskHeader* param_2, void(*updateCallback)(sTaskHeader*), void(*drawCallback)(sTaskHeader*), void(*deleteCallback)(sTaskHeader*)) {
+    T* pNewEntity = new T;
+    allocateSavePointMeshDataSub0(param_2, &pNewEntity->m0);
+    registerSpriteCallback2(&pNewEntity->m0, &pNewEntity->m1C);
+    regCallback8(&pNewEntity->m0, updateCallback);
+    spriteBytecode2ExtendedE0_Sub0Sub0Sub0(&pNewEntity->m1C, drawCallback);
+    if (deleteCallback == nullptr) {
+        assert(0);
+    }
+    else {
+        regCallbackC(&pNewEntity->m0, deleteCallback);
+    }
+
+    // TODO: Gross!
+    pNewEntity->m0.m4 = (sSpriteActorCore*)pNewEntity;
+    pNewEntity->m1C.m4 = (sSpriteActorCore*)pNewEntity;
+
+    return pNewEntity;
+}

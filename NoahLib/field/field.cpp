@@ -2140,7 +2140,7 @@ void execSpritesCallback(void)
         do {
             ppsVar1 = &spriteCallback2Var1->m18_pNext;
             auto previous = spriteCallback2Var1;
-            void (*puVar2)(sTaskHeader*) = spriteCallback2Var1->m8;
+            void (*puVar2)(sTaskHeader*) = spriteCallback2Var1->m8_updateCallback;
             spriteCallback2Var3 = spriteCallback2Var1;
             spriteCallback2Var1 = *ppsVar1;
             if (puVar2 != nullptr) {
@@ -2159,8 +2159,8 @@ void execSpritesCallbacks2()
             do {
                 spriteCallback2Var3 = spriteCallback2Var1;
                 spriteCallback2Var1 = spriteCallback2Var1->m18_pNext;
-                if (spriteCallback2Var3->m8 != nullptr) {
-                    spriteCallback2Var3->m8(spriteCallback2Var3);
+                if (spriteCallback2Var3->m8_updateCallback != nullptr) {
+                    spriteCallback2Var3->m8_updateCallback(spriteCallback2Var3);
                 }
             } while (spriteCallback2Var1 != (void*)0x0);
         }

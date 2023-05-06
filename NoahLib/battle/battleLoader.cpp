@@ -373,7 +373,6 @@ struct sBattle800CDD40Sub {
 };
 
 sBattle800CDD40Sub* battleGetSlotStatusSub_current28Entry;
-u8 battleGetSlotStatusSub_current28Index = 0;
 
 struct sBattle800cdd40 {
     std::array<sBattle800CDD40Sub, 1> m0;

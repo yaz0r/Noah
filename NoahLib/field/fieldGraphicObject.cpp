@@ -272,15 +272,15 @@ void allocateSavePointMeshDataSub0_callback(sTaskHeader* param_1)
 }
 
 u32 registerSpriteCallback2Counter2 = 0;
-void allocateSavePointMeshDataSub0(sSavePointMesh1* param_1, sTaskHeader* param_2)
+void allocateSavePointMeshDataSub0(sTaskHeader* param_1, sTaskHeader* param_2)
 {
     param_2->m0_owner = param_1;
     param_2->mC = allocateSavePointMeshDataSub0_callback;
-    param_2->m8 = 0;
+    param_2->m8_updateCallback = 0;
     param_2->m18_pNext = spriteCallback2Var2;
     spriteCallback2Var2 = param_2;
     if(param_1) // hack: this wasn't in original, and could deference null pointer?
-        param_2->m14 = param_1->m0.m10 & 0x1fffffff;
+        param_2->m14 = param_1->m10 & 0x1fffffff;
     param_2->m10 = param_2->m10 & 0xe0000000 | (registerSpriteCallback2Counter2 & 0x1fffffff);
     registerSpriteCallback2Counter2++;
 
@@ -308,7 +308,7 @@ void registerSpriteCallback2(sTaskHeader* param_1, sTaskHeader* param_2) {
     registerSpriteCallback2Counter2 = registerSpriteCallback2Counter2 + 1;
     param_2->m18_pNext = spriteCallback2Head;
     spriteCallback2Head = param_2;
-    param_2->m8 = nullptr;
+    param_2->m8_updateCallback = nullptr;
     param_2->mC = registerSpriteCallback2Sub0;
     registerSpriteCallback2Counter = registerSpriteCallback2Counter + 1;
     param_2->m14 = param_1->m10 & 0x1fffffff;
@@ -316,7 +316,7 @@ void registerSpriteCallback2(sTaskHeader* param_1, sTaskHeader* param_2) {
 
 void regCallback8(sTaskHeader* param_1, void (*param_2)(sTaskHeader*))
 {
-    param_1->m8 = param_2;
+    param_1->m8_updateCallback = param_2;
 }
 
 void regCallbackC(sTaskHeader* param_1, void (*param_2)(sTaskHeader*))
@@ -342,6 +342,19 @@ void savePointCallback8Sub0Sub0_battle(sSpriteActorCore* param_1) {
     assert(isBattleOverlayLoaded);
 
     MissingCode();
+    /*
+    SVECTOR local_28;
+    local_28.vx = param_1->m0_position.vx.getIntegerPart();
+    local_28.vy = param_1->m0_position.vy.getIntegerPart();
+    local_28.vz = param_1->m0_position.vz.getIntegerPart();
+    uVar1 = battleSpriteOp89Sub0(&local_28, param_1->m78, 4, in_a3);
+    if ((int)uVar1 < 0) {
+        uVar1 = battleSpriteOp89Sub1(&local_28);
+    }
+    battleSpriteOp89Sub2(&local_28, uVar1, auStack_20);
+    param_1->m78 = uVar1;
+    param_1->m84_maxY = local_28.vy;
+    */
 }
 
 void savePointCallback8Sub0Sub0(sSpriteActorCore* param_1)
@@ -557,7 +570,7 @@ void initFieldEntitySub4Sub1(sSpriteActorCore* param_1)
 sSavePointMeshAbstract* allocateSavePointMeshData(sSavePointMeshAbstract* pThis, sSavePointMesh1* param_1)
 {
     sSavePointMeshAbstract* pvVar1 = pThis;
-    allocateSavePointMeshDataSub0(param_1, &pvVar1->m0);
+    allocateSavePointMeshDataSub0(&param_1->m0, &pvVar1->m0);
     registerSpriteCallback2(&pvVar1->m0, &pvVar1->m1C);
 
     initFieldEntitySub4Sub1(&pvVar1->m38_spriteActorCore);
@@ -657,7 +670,7 @@ sSavePointMeshAbstract* createSavePointMeshData(int mode1, int mode2, sFieldEnti
 
 void spriteBytecode2ExtendedE0_Sub0Sub0Sub0(sTaskHeader* param_1, void (*param_2)(sTaskHeader*))
 {
-    param_1->m8 = param_2;
+    param_1->m8_updateCallback = param_2;
     return;
 }
 

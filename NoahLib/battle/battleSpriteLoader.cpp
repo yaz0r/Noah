@@ -27,7 +27,7 @@ T* battleLoaderAllocateMainBattleSprite(sSavePointMesh1* param_1, int param_2)
     T* psVar1;
 
     psVar1 = new T;
-    allocateSavePointMeshDataSub0(param_1, psVar1);
+    allocateSavePointMeshDataSub0(&param_1->m0, psVar1);
     psVar1->mC = defaultBattleSpriteDeleteCallback;
     psVar1->m4 = nullptr;
     return psVar1;
@@ -146,27 +146,6 @@ std::array<u8, 12> battleSpriteWidthPerCharacter = { {
         0x10, 0x10, 0x10, 0x10, 0x10, 0x18, 0x10, 0x10, 0x10, 0x18, 0x10, 0x10
 } };
 
-template <typename T>
-T* createCustomRenderableEntity(size_t param_1, sSavePointMesh1* param_2, void(*updateCallback)(sTaskHeader*), void(*drawCallback)(sTaskHeader*), void(*deleteCallback)(sTaskHeader*)) {
-    T* pNewEntity = new T;
-    allocateSavePointMeshDataSub0(param_2, &pNewEntity->m0);
-    registerSpriteCallback2(&pNewEntity->m0, &pNewEntity->m1C);
-    regCallback8(&pNewEntity->m0, updateCallback);
-    spriteBytecode2ExtendedE0_Sub0Sub0Sub0(&pNewEntity->m1C, drawCallback);
-    if (deleteCallback == nullptr) {
-        assert(0);
-    }
-    else {
-        regCallbackC(&pNewEntity->m0, deleteCallback);
-    }
-
-    // TODO: Gross!
-    pNewEntity->m0.m4 = (sSpriteActorCore*)pNewEntity;
-    pNewEntity->m1C.m4 = (sSpriteActorCore*)pNewEntity;
-
-    return pNewEntity;
-}
-
 bool battleSpritesDisabled = false;
 
 void battleSpriteUpdate(sTaskHeader* param_1) {
@@ -275,8 +254,6 @@ void createBattleSpriteActor(uint entityIndex, int visualBufferIndex, short anim
     }
 }
 
-void savePointCallback8Sub0Sub0_battle(sSpriteActorCore* param_1);
-
 // actual size is 14, to be filled up later
 std::array<std::array<int, 2>, 14> battlePartyFileMapping = { {
     {0x1, 0x12},
@@ -368,7 +345,7 @@ void mainBattleSpriteCallback_phase2(sTaskHeader* param_1) {
     }
 }
 
-void setupPlayerSpriteLoadingCommands(std::array<sLoadingBatchCommands, 4>::iterator& param_1) {
+void setupPlayerSpriteLoadingCommands(std::array<sLoadingBatchCommands, 4>::iterator param_1) {
     std::array<sLoadingBatchCommands, 4>::iterator start = param_1;
     setCurrentDirectory(0x2c, 1);
     for (int i = 0; i < 3; i++) {

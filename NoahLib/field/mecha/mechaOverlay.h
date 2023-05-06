@@ -84,7 +84,7 @@ struct sMechaDataTable2_8 {
 };
 
 struct sMechaDataTable2 {
-    void init(std::vector<u8>::iterator& input) {
+    void init(const std::vector<u8>::iterator& input) {
         //m_raw = input;
         std::vector<std::vector<u8>> relocatedData = doPointerRelocationAndSplit(input);
 
@@ -156,7 +156,7 @@ struct sMechaDataTable1_10 {
 };
 
 struct sMechaDataTable1 {
-    void init(std::vector<u8>::iterator& input) {
+    void init(const std::vector<u8>::iterator& input) {
         //m_raw = input;
         std::vector<std::vector<u8>> relocatedData = doPointerRelocationAndSplit(input);
 
