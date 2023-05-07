@@ -601,9 +601,9 @@ void computeBattleCameraParams(uint bitmask) {
     }
     allEntitiesToFitInView = bitmask;
     if (numEntries) {
-        int minX = (positionSum.vx / numEntries) / 2;
-        int minY = (positionSum.vy / numEntries) / 2;
-        int minZ = (positionSum.vz / numEntries) / 2;
+        int minX = (positionSum.vx / numEntries) * 2;
+        int minY = (positionSum.vy / numEntries) * 2;
+        int minZ = (positionSum.vz / numEntries) * 2;
         int maxX = minX;
         int maxY = minY;
         int maxZ = minZ;
