@@ -115,13 +115,20 @@ endif()
 
 endmacro()
 
+add_bin2c("battleCursor.bin" BIN2C_DEPS)
+
+set(SOURCES
+    ${SOURCES}
+    ${BIN2C_DEPS}
+)
+
 addShaderProgram(vertexColor_vs vertexColor_ps vertexColor.varying.def)
 addShaderProgram(model3d_vs model3d_ps model3d.varying.def)
 addShaderProgram(PSXGeneric_vs PSXGeneric_ps PSXGeneric.varying.def)
 
 assign_source_group(${SOURCES})
 
-add_library (NoahLib ${SOURCES})
+add_library (NoahLib ${SOURCES} )
 
 #if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
 #		target_compile_definitions( NoahLib PUBLIC "BX_CONFIG_DEBUG=1" )

@@ -606,6 +606,12 @@ void AVSZ4(u32 function)
 	OTZ = Lm_D(s_mac0, 1);
 }
 
+void AVSZ3(u32 function)
+{
+    MAC0 = F((int64_t)(ZSF3 * SZ1) + (ZSF3 * SZ2) + (ZSF3 * SZ3));
+    OTZ = Lm_D(s_mac0, 1);
+}
+
 void SQR(u32 function)
 {
 	int lm = GTE_LM(function);
@@ -690,6 +696,9 @@ void copFunction(int cop, u32 function)
 	case 0x28:
 		SQR(function);
 		return;
+    case 0x2D:
+        AVSZ3(function);
+        return;
 	case 0x2E:
 		AVSZ4(function);
 		return;
@@ -716,6 +725,10 @@ void gte_op0() {
 void gte_rt()
 {
     copFunction(2, 0x0480012);
+}
+
+void gte_avsz3() {
+    copFunction(2, 0x0158002D);
 }
 
 void gte_nclip()
@@ -886,6 +899,14 @@ void gte_stlzc(int* pOutput)
 	*pOutput = getCopReg(2, 0x800 * 31);
 }
 
+void gte_stopz(s32* pZ) {
+    *pZ = getCopReg(2, 0x800 * 24);
+}
+
+void gte_stotz(s32* pZ) {
+    *pZ = getCopReg(2, 0x800 * 7);
+}
+
 void gte_getMAC0(int* pOutput)
 {
 	*pOutput = getCopReg(2, 0x800 * 24);
@@ -977,3 +998,9 @@ s32 gte_stOFX() {
 s32 gte_stOFY() {
     return getCopControlWord(2, 0xc800);
 }
+
+void gte_stflg(int* pOutput)
+{
+    *pOutput = gte_stFLAG();
+}
+

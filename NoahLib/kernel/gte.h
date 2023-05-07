@@ -17,6 +17,7 @@ void gte_rtpt();
 void gte_rt();
 void gte_op0();
 void gte_nclip();
+void gte_avsz3();
 void gte_rtps();
 void gte_rtv0();
 void gte_rtir();
@@ -30,6 +31,9 @@ void gte_ldv3(std::vector<u8>::iterator& pVertices0, std::vector<u8>::iterator& 
 void gte_ldv3(u8* pVertices0, u8* pVertices1, u8* pVertices2);
 void gte_ldv3(const SFP_VEC4* pVertices0, const SFP_VEC4* pVertices1, const SFP_VEC4* pVertices2);
 void gte_stlzc(int* pFlag);
+void gte_stflg(int* pFlag);
+void gte_stopz(s32* pZ);
+void gte_stotz(s32* pZ);
 void gte_getMAC0(int* pOutput);
 void gte_stsxy3(sVec2_s16* xy0, sVec2_s16* xy1, sVec2_s16* xy2);
 void gte_stsxy2(sVec2_s16* xy);

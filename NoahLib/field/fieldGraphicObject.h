@@ -294,6 +294,8 @@ u8 popByteFromAnimationStack(sSpriteActorCore* param_1);
 void pushByteOnAnimationStack(sSpriteActorCore* param_1, u8 param);
 void savePointCallback8Sub0Sub0(sSpriteActorCore* param_1);
 void savePointCallback8Sub0Sub0_battle(sSpriteActorCore* param_1);
+void updateAllSubsprites(sSpriteActorCore* param_1);
+void registerSpriteCallback2_2(sTaskHeader* param_1);
 
 extern const std::array<u8, 256> sizePerBytecodeTable;
 extern u32 allocateSavePointMeshDataSub0_var0;

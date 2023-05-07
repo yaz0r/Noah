@@ -298,7 +298,30 @@ sTaskHeader* spriteCallback2Head = nullptr;
 u32 registerSpriteCallback2Counter = 0;
 
 void registerSpriteCallback2Sub0(sTaskHeader* param_1) {
-    MissingCode();
+    sTaskHeader* pPrevious = nullptr;
+    sTaskHeader* pCurrent = spriteCallback2Head;
+    while (pCurrent) {
+        if (pCurrent->m0_owner == param_1) {
+            if (((pCurrent->m14 >> 0x1E) & 1) == 0) {
+                if ((pCurrent->m14 & 0x1fffffff) == (param_1->m10 & 0x1fffffff)) {
+                    if (pPrevious == nullptr) {
+                        spriteCallback2Head = pCurrent->m18_pNext;
+                    }
+                    else {
+                        pPrevious->m18_pNext = pCurrent->m18_pNext;
+                    }
+                    if (spriteCallback2Var1 == pCurrent) {
+                        spriteCallback2Var1 = pCurrent->m18_pNext;
+                    }
+                    registerSpriteCallback2Counter--;
+                    break;
+                }
+            }
+        }
+
+        pPrevious = pCurrent;
+        pCurrent = pCurrent->m18_pNext;
+    }
 }
 
 
@@ -908,8 +931,62 @@ void customVramUpload()
     uploadTextureToVram(customVramUploadPtr, 1, customVramUploadX, customVramUploadY, 0,0,0);
 }
 
-void registerSpriteCallback2_2(void* param_1) {
-    MissingCode();
+void registerSpriteCallback2_2(sTaskHeader* param_1) {
+    {
+        sTaskHeader* pPrevious = nullptr;
+        sTaskHeader* pCurrent = spriteCallback2Head;
+        while (pCurrent) {
+            if (pCurrent->m0_owner == param_1) {
+                if (((pCurrent->m14 >> 0x1E) & 1) == 0) {
+                    if ((pCurrent->m14 & 0x1fffffff) == (param_1->m10 & 0x1fffffff)) {
+                        if (pPrevious == nullptr) {
+                            spriteCallback2Head = pCurrent->m18_pNext;
+                        }
+                        else {
+                            pPrevious->m18_pNext = pCurrent->m18_pNext;
+                        }
+                        if (spriteCallback2Var1 == pCurrent) {
+                            spriteCallback2Var1 = pCurrent->m18_pNext;
+                        }
+                        if (pCurrent->mC) {
+                            pCurrent->mC(pCurrent);
+                        }
+                    }
+                }
+            }
+
+            pPrevious = pCurrent;
+            pCurrent = pCurrent->m18_pNext;
+        }
+    }
+
+    {
+        sTaskHeader* pPrevious = nullptr;
+        sTaskHeader* pCurrent = spriteCallback2Var2;
+        while (pCurrent) {
+            if (pCurrent->m0_owner == param_1) {
+                if (((pCurrent->m14 >> 0x1E) & 1) == 0) {
+                    if ((pCurrent->m14 & 0x1fffffff) == (param_1->m10 & 0x1fffffff)) {
+                        if (pPrevious == nullptr) {
+                            spriteCallback2Var2 = pCurrent->m18_pNext;
+                        }
+                        else {
+                            pPrevious->m18_pNext = pCurrent->m18_pNext;
+                        }
+                        if (spriteCallback2Var1 == pCurrent) {
+                            spriteCallback2Var1 = pCurrent->m18_pNext;
+                        }
+                        if (pCurrent->mC) {
+                            pCurrent->mC(pCurrent);
+                        }
+                    }
+                }
+            }
+
+            pPrevious = pCurrent;
+            pCurrent = pCurrent->m18_pNext;
+        }
+    }
 }
 
 void setGraphicEntityScale(sSpriteActorCore* param_1, int param_2)
@@ -955,7 +1032,8 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
         param_1->m3C = param_1->m3C | 0x10000000;
         break;
 	case 0x96:
-        registerSpriteCallback2_2(param_1->m6C_pointerToOwnerStructure);
+        // TODO: type-check that
+        registerSpriteCallback2_2(&((sSavePointMeshAbstract*)param_1->m6C_pointerToOwnerStructure)->m0);
 		break;
     case 0xA9:
     {
