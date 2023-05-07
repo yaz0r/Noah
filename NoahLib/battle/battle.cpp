@@ -424,9 +424,9 @@ s32 startOfBattleTime;
 MATRIX battleRenderingMatrix;
 
 SVECTOR battleCameraEye;
-SVECTOR battleCameraEye2;
+SVECTOR battleCameraEyeTarget;
 SVECTOR battleCameraAt;
-SVECTOR battleCameraAt2;
+SVECTOR battleCameraAtTarget;
 SVECTOR battleCameraUp = { 0x0, 0x1000, 0x0 };
 SVECTOR battleSceneRenderingMatrixOffset = { 0,0,0 };
 s8 renderBattleSceneDisabled = 0;
@@ -577,13 +577,165 @@ void renderMechasBattle(MATRIX* pMatrix, MATRIX* param_2, OTTable& OT, int oddOr
     MissingCode();
 }
 
+s32 battleCameraVar2;
+u32 allEntitiesToFitInView = 0xFFFFFFFF;
+SVECTOR battleCameraParamsVar0;
+
 // Compute camera to fit all characters from bitmask in view
 void computeBattleCameraParams(uint bitmask) {
-    MissingCode();
+    VECTOR positionSum = { 0,0,0,0 };
+
+    s32 bestDistance = 0;
+    u32 numEntries = 0;
+    {
+        u32 currentBitmask = bitmask;
+        for (int i = 0; i < 11; i++) {
+            if ((currentBitmask & 1) && (battleVisualEntities[i].m3 == 0) && (battleSpriteActorCores[i])) {
+                positionSum.vx += battleSpriteActorCores[i]->m0_position.vx / 2;
+                positionSum.vy += battleSpriteActorCores[i]->m0_position.vy / 2;
+                positionSum.vz += battleSpriteActorCores[i]->m0_position.vz / 2;
+                numEntries++;
+            }
+            currentBitmask >>= 1;
+        }
+    }
+    allEntitiesToFitInView = bitmask;
+    if (numEntries) {
+        int minX = (positionSum.vx / numEntries) / 2;
+        int minY = (positionSum.vy / numEntries) / 2;
+        int minZ = (positionSum.vz / numEntries) / 2;
+        int maxX = minX;
+        int maxY = minY;
+        int maxZ = minZ;
+
+        u32 currentBitmask = bitmask;
+        for (int i = 0; i < 11; i++) {
+            if ((currentBitmask & 1) && (battleVisualEntities[i].m3 == 0) && (battleSpriteActorCores[i])) {
+                s32 X = (battleSpriteActorCores[i]->m0_position).vx;
+                if (maxX < X) {
+                    maxX = X;
+                }
+                if (X < minX) {
+                    minX = X;
+                }
+                s32 Z = (battleSpriteActorCores[i]->m0_position).vz;
+                if (maxZ < Z) {
+                    maxZ = Z;
+                }
+                if (Z < minZ) {
+                    minZ = Z;
+                }
+                s32 Y = (battleSpriteActorCores[i]->m0_position).vy;
+                if (maxY < Y) {
+                    maxY = Y;
+                }
+                if (Y < minY) {
+                    minY = Y;
+                }
+            }
+            currentBitmask >>= 1;
+        }
+
+        positionSum.vx = (minX + maxX) - (minX + maxX >> 0x1f) >> 0x11;
+        positionSum.vy = (maxY + minY) - (maxY + minY >> 0x1f) >> 0x11;
+        positionSum.vz = (minZ + maxZ) - (minZ + maxZ >> 0x1f) >> 0x11;
+
+        MATRIX MStack_f0;
+        RotMatrixZYX(&battleCameraParamsVar0, &MStack_f0);
+        SVECTOR local_b0;
+        local_b0.vx = 0;
+        local_b0.vy = 0;
+        local_b0.vz = (ReadGeomScreen() << 3);
+
+        VECTOR local_d0;
+        ApplyMatrix(&MStack_f0, &local_b0, &local_d0);
+
+        SVECTOR local_f8;
+        SVECTOR local_100;
+        local_f8.vx = (short)positionSum.vx;
+        local_100.vx = (short)positionSum.vx - (short)local_d0.vx;
+        local_f8.vy = (short)positionSum.vy;
+        local_f8.vz = (short)positionSum.vz;
+        local_100.vy = (short)positionSum.vy + (short)local_d0.vy;
+        local_100.vz = (short)positionSum.vz - (short)local_d0.vz;
+        lookAtNoDivide(&MStack_f0, &local_100, &local_f8, &battleCameraUp);
+        SetRotMatrix(&MStack_f0);
+        SetTransMatrix(&MStack_f0);
+
+        for (int i = 0; i < 11; i++) {
+            if ((bitmask & 1) && (battleVisualEntities[i].m3 == 0) && (battleSpriteActorCores[i])) {
+                SVECTOR local_c0;
+                local_c0.vx = (battleSpriteActorCores[i]->m0_position).vx.getIntegerPart();
+                local_c0.vy = (battleSpriteActorCores[i]->m0_position).vy.getIntegerPart();
+                local_c0.vz = (battleSpriteActorCores[i]->m0_position).vz.getIntegerPart();
+
+                sVec2_s16 transformed;
+                long dummy1;
+                long dummy2;
+                RotTransPers(&local_c0, &transformed, &dummy1, &dummy2);
+
+                s32 X = ((transformed.vx - 0xa0) * 0x40000) >> 0x10;
+                s32 Y = ((transformed.vy - 0xa4) * 0x40000) >> 0x10;
+
+                transformed.vx = (transformed.vx - 0xa0) * 4;
+                transformed.vy = (transformed.vy - 0xa4) * 4;
+
+                s32 distance = X * X + Y * Y;
+                if (bestDistance < distance) {
+                    bestDistance = distance;
+                }
+                if (battleVisualEntities[i].m4_isGear) {
+                    assert(0);
+                }
+            }
+
+            bitmask >>= 1;
+        }
+
+        s32 realDistance = SquareRoot0(bestDistance);
+        VECTOR local_c0;
+        s32 finalZ;
+        if (realDistance < 0x78) {
+            MATRIX MStack_a0;
+            RotMatrixZYX(&battleCameraParamsVar0, &MStack_a0);
+            SVECTOR local_70;
+            local_70.vx = 0;
+            local_70.vy = 0;
+            realDistance = ReadGeomScreen();
+            local_70.vz = (short)(realDistance << 1);
+            realDistance = ReadGeomScreen();
+            battleCameraVar2 = realDistance << 1;
+            ApplyMatrix(&MStack_a0, &local_70, (VECTOR*)&local_c0);
+        }
+        else {
+            s32 lVar1 = ReadGeomScreen();
+            bestDistance = ((realDistance * 0x4000) / 0x78) * 2 * lVar1 >> 0xe;
+            battleCameraVar2 = bestDistance;
+            MATRIX MStack_68;
+            RotMatrixZYX(&battleCameraParamsVar0, &MStack_68);
+            SVECTOR local_38;
+            local_38.vx = 0;
+            local_38.vy = 0;
+            local_38.vz = (short)bestDistance;
+            VECTOR local_80;
+            ApplyMatrix(&MStack_68, &local_38, (VECTOR*)&local_80);
+            local_c0.vy = local_80.vy;
+            local_c0.vz = local_80.vz;
+            local_c0.vx = local_80.vx;
+        }
+ 
+        battleCameraEyeTarget.vx = (short)positionSum.vx - local_c0.vx;
+        battleCameraEyeTarget.vy = (short)positionSum.vy + local_c0.vy;
+        battleCameraEyeTarget.vz = (short)positionSum.vz - local_c0.vz;
+        battleCameraAtTarget.vx = (short)positionSum.vx;
+        battleCameraAtTarget.vy = (short)positionSum.vy;
+        battleCameraAtTarget.vz = (short)positionSum.vz;
+    }
 }
 
 s32 battleCameraMode = 0;
-u32 allEntitiesToFitInView = 0xFFFFFFFF;
+s32 battleCameraModeInterpolation;
+s32 battleIR0 = 0x200;
 
 void updateBattleCamera() {
     switch (battleCameraMode) {
@@ -594,6 +746,49 @@ void updateBattleCamera() {
         assert(0);
     }
 
+    if (battleCameraModeInterpolation == 1) {
+        gte_ldIR0(battleIR0);
+
+        {
+            VECTOR difference;
+            difference.vx = battleCameraEyeTarget.vx - battleCameraEye.vx;
+            difference.vy = battleCameraEyeTarget.vy - battleCameraEye.vy;
+            difference.vz = battleCameraEyeTarget.vz - battleCameraEye.vz;
+            gte_ldlvl(&difference);
+            gte_gpf12();
+            gte_stlvl(&difference);
+
+            if ((difference.vx | difference.vy | difference.vz) == 0) {
+                battleCameraEye = battleCameraEyeTarget;
+            }
+            else {
+                battleCameraEye.vx += difference.vx;
+                battleCameraEye.vy += difference.vy;
+                battleCameraEye.vz += difference.vz;
+            }
+        }
+
+        {
+            VECTOR difference;
+            difference.vx = battleCameraAtTarget.vx - battleCameraAt.vx;
+            difference.vy = battleCameraAtTarget.vy - battleCameraAt.vy;
+            difference.vz = battleCameraAtTarget.vz - battleCameraAt.vz;
+            gte_ldlvl(&difference);
+            gte_gpf12();
+            gte_stlvl(&difference);
+
+            if ((difference.vx | difference.vy | difference.vz) == 0) {
+                battleCameraAt = battleCameraAtTarget;
+            }
+            else {
+                battleCameraAt.vx += difference.vx;
+                battleCameraAt.vy += difference.vy;
+                battleCameraAt.vz += difference.vz;
+            }
+        }
+    }
+
+    // update battleCameraSpriteDistance/battleCameraSpriteOrientation
     MissingCode();
 }
 
@@ -1151,13 +1346,44 @@ void initBattle3dRendering(void) {
     MissingCode();
 }
 
+void (*battleCameraModeCallback1)() = nullptr;
+void (*battleCameraModeCallback2)() = nullptr;
+
+void setBattleCameraMode(int param_1) {
+    battleCameraModeInterpolation = 1;
+    battleCameraMode = param_1;
+
+    switch (param_1)
+    {
+    case 2:
+    case 4:
+        assert(0);
+    default:
+        if (battleCameraModeCallback1) {
+            assert(0);
+        }
+        if (battleCameraModeCallback2) {
+            assert(0);
+        }
+        break;
+    }
+}
+
+void resetBattleCameraMode() {
+    battleIR0 = 0x200;
+    allEntitiesToFitInView = 0xffffffff;
+    MissingCode();
+    battleCameraModeInterpolation = 1;
+    setBattleCameraMode(0);
+}
+
 void initBattleSpriteSystem() {
     isBattleOverlayLoaded = 1;
     allocateSavePointMeshDataSub0_var0 = 0;
     spriteBytecode2ExtendedE0_Var0 = 0;
     MissingCode();
     resetSpriteCallbacks();
-    MissingCode();
+    resetBattleCameraMode();
     allocateShapeTransfert(0x5000);
     MissingCode();
     objectClippingMask = 0;
@@ -1175,34 +1401,22 @@ void initBattleGraphics(sBattleSpriteConfigs* param_1) {
     initBattle3dRendering();
     initBattleSpriteSystem();
     createBattleSpriteLoadingTask(param_1);
-    setupSVector(&battleCameraEye2, battleMechaInitData->m482_eye.vx, battleMechaInitData->m482_eye.vy, battleMechaInitData->m482_eye.vz);
+    setupSVector(&battleCameraEyeTarget, battleMechaInitData->m482_eye.vx, battleMechaInitData->m482_eye.vy, battleMechaInitData->m482_eye.vz);
     setupSVector(&battleCameraEye, battleMechaInitData->m482_eye.vx, battleMechaInitData->m482_eye.vy, battleMechaInitData->m482_eye.vz);
-    setupSVector(&battleCameraAt2, battleMechaInitData->m47C_at.vx, battleMechaInitData->m47C_at.vy, battleMechaInitData->m47C_at.vz);
+    setupSVector(&battleCameraAtTarget, battleMechaInitData->m47C_at.vx, battleMechaInitData->m47C_at.vy, battleMechaInitData->m47C_at.vz);
     setupSVector(&battleCameraAt, battleMechaInitData->m47C_at.vx, battleMechaInitData->m47C_at.vy, battleMechaInitData->m47C_at.vz);
     SetDispMask(1);
 }
 
-s32 battleCameraModeSet = 0;
-void setBattleCameraMode(int param_1) {
-    battleCameraModeSet = 1;
-    battleCameraMode = param_1;
-
-    switch (param_1)
-    {
-    case 2:
-    case 4:
-        assert(0);
-    default:
-        MissingCode();
-        break;
-    }
-}
+s8 battleCameraVar0 = 0;
+s16 battleCameraVar1 = 0;
 
 void setCameraVisibleEntities(uint playerBitmask) {
-    MissingCode();
-    setBattleCameraMode(1);
-    computeBattleCameraParams(playerBitmask);
-    MissingCode();
+    if (battleCameraVar0 == '\0') {
+        setBattleCameraMode(1);
+        computeBattleCameraParams(playerBitmask);
+    }
+    battleCameraVar1 = battleCameraVar2;
 }
 
 s8 battleTickMain_var0 = 1;
@@ -1586,7 +1800,6 @@ void loadWdsDataIfNeeded(void)
 }
 
 u8 battleAnimationSoundLoaded;
-SVECTOR battleCameraParamsVar0;
 
 void setBattleCameraParamX(short param_1)
 {

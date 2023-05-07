@@ -89,6 +89,10 @@ enum eCOP2D
 	COP2D_Z1 = 3,
 	COP2D_XY2 = 4,
 	COP2D_Z2 = 5,
+    COP2D_IR0 = 8,
+    COP2D_IR1 = 9,
+    COP2D_IR2 = 10,
+    COP2D_IR3 = 11,
 };
 
 s32 length2d(s32 param_1, s32 param_2);

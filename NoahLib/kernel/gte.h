@@ -22,6 +22,7 @@ void gte_rtps();
 void gte_rtv0();
 void gte_rtir();
 void gte_rtir_sf0();
+void gte_gpf12();
 void gte_ldv0(std::vector<u8>::iterator& pVertices);
 void gte_ldv0(u8* pVertices);
 void gte_ldv0(const SFP_VEC4* pVertices0);
@@ -42,9 +43,10 @@ void gte_stsz4(int* sz0, int* sz1, int* sz2, int* sz3);
 void gte_stsxy(sVec2_s16* xy);
 void gte_stlvnl(VECTOR* pOutput);
 void gte_ldlvl(VECTOR* pInput);
-
+void gte_stlvl(VECTOR* pOutput);
 void gte_stsz(s32* output);
 
+void gte_ldIR0(s32);
 void gte_ldVXY0(SVECTOR*);
 void gte_ldVZ0(s16*);
 void gte_ldVXY1(SVECTOR*);
