@@ -2421,7 +2421,7 @@ void emptyPartySlot(int param_1)
 
 int getGearForCharacter(int param_1)
 {
-    return pKernelGameState->m26C_party[param_1].m78_partyData_gearNum;
+    return pKernelGameState->m26C_party[param_1].mA0_partyData_gearNum;
 }
 
 void startPartyCharacterASyncLoading(int partyCharacter, int partySlot)

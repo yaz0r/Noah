@@ -3,37 +3,46 @@
 struct sGameStateA4
 {
     void deserialize(std::vector<u8>::iterator buffer) {
-        m1C = READ_LE_S32(buffer + 0x1C);
-        m20 = READ_LE_S32(buffer + 0x20);
-        m24_HP = READ_LE_S16(buffer + 0x24);
-        m26_MaxHP = READ_LE_S16(buffer + 0x26);
-        m28_MP = READ_LE_S16(buffer + 0x28);
-        m2A_MaxMP = READ_LE_S16(buffer + 0x2A);
-        m3A_Level = READ_LE_S8(buffer + 0x3A);
-        m3B_Level2 = READ_LE_S8(buffer + 0x3B);
+        m34 = READ_LE_S16(buffer + 0x34);
+        m44 = READ_LE_S32(buffer + 0x44);
+        m48 = READ_LE_S32(buffer + 0x48);
+        m4C_HP = READ_LE_S16(buffer + 0x4C);
+        m4E_MaxHP = READ_LE_S16(buffer + 0x4E);
+        m50_MP = READ_LE_S16(buffer + 0x50);
+        m52_MaxMP = READ_LE_S16(buffer + 0x52);
+        m55 = READ_LE_S8(buffer + 0x55);
         m56_battleCommandLoadout = READ_LE_S8(buffer + 0x56);
         m5A = READ_LE_S8(buffer + 0x5A);
-        m78_partyData_gearNum = READ_LE_S8(buffer + 0x78);
+        m62_Level = READ_LE_S8(buffer + 0x62);
+        m63_Level2 = READ_LE_S8(buffer + 0x63);
+        mA0_partyData_gearNum = READ_LE_S8(buffer + 0xA0);
         m7A_commandEnabledBF = READ_LE_U16(buffer + 0x7A);
         m7C = READ_LE_U16(buffer + 0x7C);
         m80 = READ_LE_U16(buffer + 0x80);
+        for (int i = 0; i < m90.size(); i++) {
+            m90[i] = READ_LE_U16(buffer + 0x90 + 2 * i);
+        }
+        mA1 = READ_LE_S8(buffer + 0xA1);
     }
 
-    s32 m1C;
-    s32 m20;
-    s16 m24_HP;
-    s16 m26_MaxHP;
-    s16 m28_MP;
-    s16 m2A_MaxMP;
     s16 m34;
-    s8 m3A_Level;
-    s8 m3B_Level2;
+    s32 m44;
+    s32 m48;
+    s16 m4C_HP;
+    s16 m4E_MaxHP;
+    s16 m50_MP;
+    s16 m52_MaxMP;
+    s8 m55;
     s8 m56_battleCommandLoadout;
     s8 m5A;
-    s8 m78_partyData_gearNum;
+    s8 m62_Level;
+    s8 m63_Level2;
+    s8 mA0_partyData_gearNum;
     u16 m7A_commandEnabledBF;
     u16 m7C;
     u16 m80;
+    std::array<u16, 8> m90;
+    s8 mA1;
     //size 0xA4
 };
 

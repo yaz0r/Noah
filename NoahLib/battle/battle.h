@@ -47,12 +47,13 @@ struct sBattleVar2 {
     u8 m2DC;
     u8 m2DD_currentActiveBattleMenu;
     u8 m2DE;
-    u8 m2DF;
+    u8 m2DF_currentAttackNumOfApUsed;
     u8 m2E0;
-    u8 m2E1;
+    u8 m2E1_waitBeforeNextAttackInput;
     u8 m2E2_previousActiveBattleMenu;
     u8 m2E3;
     u8 m2E4;
+    u8 m2E5;
     u8 m2E8_currentTarget;
     u8 m2E9;
     u8 m2EA;
@@ -304,3 +305,23 @@ void battleSetupTextPoly(POLY_FT4* param_1);
 u8 getEntityToFace(u8 param_1);
 bool getDirectionBetween2BattleEntities(uint param_1, uint param_2);
 extern const std::array<u16, 16> party1C_InitialValues;
+
+struct sBattle800CDD40Sub {
+    s16 m2;
+    u16 mA;
+    s8 m16;
+    s8 m27;
+    //size 0x28
+};
+struct sBattle800cdd40 {
+    std::array<sBattle800CDD40Sub, 11> m0;
+
+    // size 0x5f0 ?
+};
+
+extern sBattle800CDD40Sub* battleGetSlotStatusSub_current28Entry;
+extern std::array<sBattle800cdd40, 3> battle800CDD40;
+extern sBattleEntity* battleGetSlotStatusSub_currentBattleEntity;
+extern sGameStateA42* battleGetSlotStatusSub_currentBattleEntityGear;
+
+void setupBattleAnimationSpriteCore(sSpriteActorCore* param_1);

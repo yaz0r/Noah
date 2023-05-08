@@ -333,11 +333,11 @@ void battleDebugSelector()
                 gameState.m22B1_isOnGear[i] = 0;
                 break;
             case 1: // normal gears
-                gameState.m26C_party[i].m78_partyData_gearNum = battleDebugSelectorGearMapping[i];
+                gameState.m26C_party[i].mA0_partyData_gearNum = battleDebugSelectorGearMapping[i];
                 gameState.m22B1_isOnGear[i] = 1;
                 break;
             case 2: // omni gears
-                gameState.m26C_party[i].m78_partyData_gearNum = battleDebugSelectorOmniGearMapping[i];
+                gameState.m26C_party[i].mA0_partyData_gearNum = battleDebugSelectorOmniGearMapping[i];
                 gameState.m22B1_isOnGear[i] = 1;
                 break;
             default:
@@ -374,10 +374,10 @@ void battleDebugSelector()
     battleSetDebugInventory();
 
     for (int i = 0; i < 0xB; i++) {
-        gameState.m26C_party[i].m24_HP = 999;
-        gameState.m26C_party[i].m26_MaxHP = 999;
-        gameState.m26C_party[i].m28_MP = 99;
-        gameState.m26C_party[i].m2A_MaxMP = 99;
+        gameState.m26C_party[i].m4C_HP = 999;
+        gameState.m26C_party[i].m4E_MaxHP = 999;
+        gameState.m26C_party[i].m50_MP = 99;
+        gameState.m26C_party[i].m52_MaxMP = 99;
     }
 
     gameState.m1D30_partyMemberBitField = 0xffff;

@@ -52,7 +52,7 @@ int createWorldmapGear(sWorldmapStateEntry* param_1, int param_2)
         case 4:
         case 6:
             Hack("check that the party member id is not negative to avoid getting out of bound");
-            if (gameState.m1D34_currentParty[param_2] == 0xFF || gameState.m26C_party[gameState.m1D34_currentParty[param_2]].m78_partyData_gearNum == -1) {
+            if (gameState.m1D34_currentParty[param_2] == 0xFF || gameState.m26C_party[gameState.m1D34_currentParty[param_2]].mA0_partyData_gearNum == -1) {
                 return 3;
             }
             else {
@@ -64,7 +64,7 @@ int createWorldmapGear(sWorldmapStateEntry* param_1, int param_2)
             (param_1->m28_position).vx = 0;
             break;
         case 1:
-            if (gameState.m26C_party[gameState.m1D34_currentParty[param_2]].m78_partyData_gearNum == -1) {
+            if (gameState.m26C_party[gameState.m1D34_currentParty[param_2]].mA0_partyData_gearNum == -1) {
                 return 3;
             }
             else {

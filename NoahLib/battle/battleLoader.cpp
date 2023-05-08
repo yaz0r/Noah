@@ -101,10 +101,10 @@ void loadPartyMembers() {
             battleEntities[i].m0_base = gameState.m26C_party[battleCharacters[i]];
 
             if (battleForceOnGear && (i - 1U < 2)) {
-                battleEntities[i].m0_base.m78_partyData_gearNum = 0x11;
+                battleEntities[i].m0_base.mA0_partyData_gearNum = 0x11;
             }
 
-            int gearId = battleEntities[i].m0_base.m78_partyData_gearNum;
+            int gearId = battleEntities[i].m0_base.mA0_partyData_gearNum;
             if (gearId == -1) {
                 gearId = 0;
             }
@@ -209,8 +209,8 @@ void batteLoaderPhase1_1() {
     for (int i = 3; i < 11; i++) {
         battleVisualEntities[i].m2 = currentBattleConfig.m4[i + 1] & 0x7F;
         if (battleVisualEntities[i].m2 == 0x7F) {
-            battleEntities[i].m0_base.m26_MaxHP = 0;
-            battleEntities[i].m0_base.m24_HP = 0;
+            battleEntities[i].m0_base.m4E_MaxHP = 0;
+            battleEntities[i].m0_base.m4C_HP = 0;
             battleVisualEntities[i].m3 = 0;
             battleVisualEntities[i].m4_isGear = 0;
             isBattleSlotFilled[i] = 0;
@@ -359,27 +359,9 @@ u32 getRandomValueInRange(u32 param_1, u32 param_2)
     return uVar1;
 }
 
-
-sBattleEntity* battleGetSlotStatusSub_currentBattleEntity;
-sGameStateA42* battleGetSlotStatusSub_currentBattleEntityGear;
-
 void updatePlayerWithStatusC000And2() {
     MissingCode();
 }
-
-struct sBattle800CDD40Sub {
-    s8 m27;
-    //size 0x28
-};
-
-sBattle800CDD40Sub* battleGetSlotStatusSub_current28Entry;
-
-struct sBattle800cdd40 {
-    std::array<sBattle800CDD40Sub, 1> m0;
-
-    // size 0x5f0 ?
-};
-std::array<sBattle800cdd40, 3> battle800CDD40;
 
 u32 battleGetSlotStatusSub(u32 param_1) {
     u32 entityIndex = param_1 & 0xFF;

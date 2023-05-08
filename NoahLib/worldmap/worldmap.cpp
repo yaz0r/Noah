@@ -86,11 +86,11 @@ void worldmapMode0_init(void) {
         }
         else {
             worldmapPartySpritesRaw[i].resize(getFileSizeAligned(gameState.m1D34_currentParty[i] + 2));
-            if (gameState.m26C_party[i].m78_partyData_gearNum == -1) {
+            if (gameState.m26C_party[i].mA0_partyData_gearNum == -1) {
                 worldmapPartyGearSpritesRaw[i].clear();
             }
             else {
-                worldmapPartyGearSpritesRaw[i].resize(getFileSizeAligned(gameState.m26C_party[i].m78_partyData_gearNum + 0x19));
+                worldmapPartyGearSpritesRaw[i].resize(getFileSizeAligned(gameState.m26C_party[i].mA0_partyData_gearNum + 0x19));
             }
         }
     }
@@ -104,8 +104,8 @@ void worldmapMode0_init(void) {
             it->m4_loadPtr = &worldmapPartySpritesRaw[i];
             it++;
             worldmapNumActivePartyMembers++;
-            if (gameState.m26C_party[i].m78_partyData_gearNum != -1) {
-                it->m0_fileIndex = gameState.m26C_party[i].m78_partyData_gearNum + 0x13;
+            if (gameState.m26C_party[i].mA0_partyData_gearNum != -1) {
+                it->m0_fileIndex = gameState.m26C_party[i].mA0_partyData_gearNum + 0x13;
                 it->m4_loadPtr = &worldmapPartyGearSpritesRaw[i];
                 it++;
             }
@@ -996,16 +996,16 @@ void worldmapEntryPoint(void) {
         gameState.m182C[2] = 0x2a00;
         gameState.m1820_worldmapPosition[1] = 0x2c00;
         gameState.m1D34_currentParty[1] = 10;
-        gameState.m26C_party[0].m78_partyData_gearNum = 0xf;
-        gameState.m26C_party[1].m78_partyData_gearNum = 2;
-        gameState.m26C_party[3].m78_partyData_gearNum = 4;
+        gameState.m26C_party[0].mA0_partyData_gearNum = 0xf;
+        gameState.m26C_party[1].mA0_partyData_gearNum = 2;
+        gameState.m26C_party[3].mA0_partyData_gearNum = 4;
         gameState.m1D34_currentParty[2] = 5;
-        gameState.m26C_party[4].m78_partyData_gearNum = 5;
-        gameState.m26C_party[5].m78_partyData_gearNum = 6;
-        gameState.m26C_party[7].m78_partyData_gearNum = 7;
-        gameState.m26C_party[8].m78_partyData_gearNum = 8;
-        gameState.m26C_party[2].m78_partyData_gearNum = 3;
-        gameState.m26C_party[9].m78_partyData_gearNum = 3;
+        gameState.m26C_party[4].mA0_partyData_gearNum = 5;
+        gameState.m26C_party[5].mA0_partyData_gearNum = 6;
+        gameState.m26C_party[7].mA0_partyData_gearNum = 7;
+        gameState.m26C_party[8].mA0_partyData_gearNum = 8;
+        gameState.m26C_party[2].mA0_partyData_gearNum = 3;
+        gameState.m26C_party[9].mA0_partyData_gearNum = 3;
         gameState.m1836 = 1;
         gameState.m182C[3] = 0;
         gameState.m1820_worldmapPosition[0] = 0x7580;
@@ -1015,8 +1015,8 @@ void worldmapEntryPoint(void) {
         gameState.m22B1_isOnGear[0] = 0;
         gameState.m22B1_isOnGear[1] = 0;
         gameState.m22B1_isOnGear[2] = 0;
-        gameState.m26C_party[6].m78_partyData_gearNum = 9;
-        gameState.m26C_party[10].m78_partyData_gearNum = 9;
+        gameState.m26C_party[6].mA0_partyData_gearNum = 9;
+        gameState.m26C_party[10].mA0_partyData_gearNum = 9;
         gameState.m1930_fieldVarsBackup[21] = 0x400;
         gameState.m1930_fieldVarsBackup[22] = 0x7500;
         gameState.m1930_fieldVarsBackup[23] = 0x2e58;
