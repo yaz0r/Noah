@@ -587,7 +587,7 @@ void initFieldEntitySub4Sub1(sSpriteActorCore* param_1)
     param_1->m8C_stackPosition = 0x10;
     param_1->m84_maxY = 0;
     param_1->m6C_pointerToOwnerStructure = nullptr;
-    param_1->m50 = 0;
+    param_1->m50.reset();
 }
 
 sSavePointMeshAbstract* allocateSavePointMeshData(sSavePointMeshAbstract* pThis, sSavePointMesh1* param_1)

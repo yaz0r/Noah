@@ -312,21 +312,57 @@ void batteLoaderPhase2_2() {
     }
 
     for (int i = 0; i < 3; i++) {
+        if (battleCharacters[i] == 0x7F) // FIX: this wasn't in the original code and would read past the end of the array
+            continue;
+
         apConfigArray[i].m4_currentAP = gameState.m16C0[battleCharacters[i]].m17_energyPerTurn;
         for (int j = 0; j < 8; j++) {
             battleVar2->m0[i].m0_circleMenuBattleCommandsMapping[j] = battleCommandsSetups[battleEntities[i].m0_base.m56_battleCommandLoadout][j];
         }
-        MissingCode();
+        for (int j = 0; j < 4; j++) {
+
+            if (battleCharacters[i] == 7) {
+                static const std::array<u8, 8> batteLoaderPhase2_2_arrayFor7 = { {
+                        0x1F, 0x1D, 0x22, 0x2A,
+                        0x1F, 0x1D, 0x22, 0x2B
+                } };
+                battleVar2->m0[i].m8[j] = batteLoaderPhase2_2_arrayFor7[j];
+            }
+            else {
+                static const std::array<u8, 8> batteLoaderPhase2_2_array = { {
+                        0x1F, 0x1D, 0x23, 0x2B,
+                        0x1F, 0x1D, 0x23, 0x2B
+                } };
+                battleVar2->m0[i].m8[j] = batteLoaderPhase2_2_array[j];
+            }
+            static const std::array<u8, 8> batteLoaderPhase2_2_array3 = { {
+                    0x2D, 0x1D, 0x1B, 0x2F,
+                    0x2D, 0x1D, 0x1B, 0x2F
+            } };
+            battleVar2->m0[i].mC[j] = batteLoaderPhase2_2_array3[j];
+        }
         battleVar2->m0[i].m3C_currentTarget = getEntityToFace(i);
         battleVisualEntities[i].m6_direction = getDirectionBetween2BattleEntities(i, battleVar2->m0[i].m3C_currentTarget);
         for (int j = 0; j < 0x10; j++) {
             battleVar2->m0[i].m1C_isCommandEnabled[j] = battleEntities[i].m0_base.m7A_commandEnabledBF & party1C_InitialValues[j];
         }
-        MissingCode();
+        // Disable call gear command if no gear or battle disallow gears
+        if ((battleEntities[i].m0_base.mA0_partyData_gearNum == -1) || (currentBattleConfig.m1_flags & 0x40)) {
+            battleVar2->m0[i].m1C_isCommandEnabled[7] = party1C_InitialValues[7];
+            battleEntities[i].m0_base.m7A_commandEnabledBF |= party1C_InitialValues[7];
+        }
+
+        // Disable escape
+        if (currentBattleConfig.m1_flags & 0x80) {
+            battleVar2->m0[i].m1C_isCommandEnabled[8] = party1C_InitialValues[8];
+            battleEntities[i].m0_base.m7A_commandEnabledBF |= party1C_InitialValues[8];
+        }
     }
 
     for (int i = 3; i < 11; i++) {
-        MissingCode(); // TODO: here figure out who each enemy is facing
+        // figure out who each enemy is facing
+        battleVar2->m0[i].m3C_currentTarget = getEntityToFace(i);
+        battleVisualEntities[i].m6_direction = getDirectionBetween2BattleEntities(i, battleVar2->m0[i].m3C_currentTarget);
     }
 }
 

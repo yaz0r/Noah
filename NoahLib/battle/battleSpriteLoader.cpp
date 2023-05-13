@@ -254,7 +254,6 @@ void createBattleSpriteActor(uint entityIndex, int visualBufferIndex, short anim
     }
 }
 
-// actual size is 14, to be filled up later
 std::array<std::array<int, 2>, 14> battlePartyFileMapping = { {
     {0x1, 0x12},
     {0x2, 0x13},
@@ -302,7 +301,11 @@ void createBattlePlayerSpriteActors() {
 
 void mainBattleSpriteCallback_phase6(sTaskHeader* param_1) {
     if (((sBattleSpriteLoaderTask*)param_1)->m90_frameToDeleteCount == 0) {
-        MissingCode();
+        for (int i = 0; i < 3; i++) {
+            if (!battleVisualEntities[i].m4_isGear && battleSpriteActorCores[i] && (battleSpriteActorCores[i]->m0_position.vy.getIntegerPart() != battleSpriteActorCores[i]->m84_maxY)) {
+                return;
+            }
+        }
         battleTimeEnabled = 1;
         defaultBattleSpriteDeleteCallback(param_1);
     }
@@ -319,10 +322,17 @@ void mainBattleSpriteCallback_phase5(sTaskHeader* param_1) {
     }
 }
 
+void startPlayableCharactersJumpToPosition() {
+    for (int i = 0; i < 3; i++) {
+        if ((battleVisualEntities[i].m2 < 0x11) && (battleVisualEntities[i].m4_isGear)) {
+            assert(0);
+        }
+    }
+}
+
 void mainBattleSpriteCallback_phase4(sTaskHeader* param_1) {
-    MissingCode();
-    /*if (waitForMusic(0) == 0)*/ {
-        MissingCode();
+    if (waitForMusic(0) == 0) {
+        startPlayableCharactersJumpToPosition();
         regCallback8(param_1, &mainBattleSpriteCallback_phase5);
     }
 }

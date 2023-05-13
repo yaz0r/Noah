@@ -19,6 +19,8 @@ struct sGameStateA4
         m7A_commandEnabledBF = READ_LE_U16(buffer + 0x7A);
         m7C = READ_LE_U16(buffer + 0x7C);
         m80 = READ_LE_U16(buffer + 0x80);
+        m84 = READ_LE_U16(buffer + 0x84);
+        m86 = READ_LE_U16(buffer + 0x86);
         for (int i = 0; i < m90.size(); i++) {
             m90[i] = READ_LE_U16(buffer + 0x90 + 2 * i);
         }
@@ -41,6 +43,8 @@ struct sGameStateA4
     u16 m7A_commandEnabledBF;
     u16 m7C;
     u16 m80;
+    u16 m84;
+    u16 m86;
     std::array<u16, 8> m90;
     s8 mA1;
     //size 0xA4
@@ -53,6 +57,8 @@ struct sGameStateA42
         m12_maxEther = READ_LE_S16(buffer + 0x12);
         m38_HP = READ_LE_S32(buffer + 0x38);
         m3C_maxHP = READ_LE_S32(buffer + 0x3C);
+        m60 = READ_LE_S32(buffer + 0x60);
+        m64 = READ_LE_S32(buffer + 0x64);
         m7C = READ_LE_U16(buffer + 0x7C);
         m82 = READ_LE_U16(buffer + 0x82);
     }
@@ -61,6 +67,8 @@ struct sGameStateA42
     s16 m12_maxEther;
     s32 m38_HP;
     s32 m3C_maxHP;
+    s32 m60;
+    s32 m64;
     u16 m7C;
     u16 m82;
     //size 0xA4

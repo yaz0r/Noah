@@ -2817,7 +2817,7 @@ void OPX_47()
 s32 load2dAnimVar = 0;
 s32 loadCompleted = 0;
 
-void setupSpecialAnimation(sSpriteActor* param_1, sSpriteActorAnimationBundle* param_2)
+void setupSpecialAnimation(sSpriteActorCore* param_1, sSpriteActorAnimationBundle* param_2)
 {
     param_1->m4C_specialAnimation = param_2;
     return;

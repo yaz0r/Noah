@@ -45,12 +45,12 @@ void battleDebugSelectorInit()
     gameState.m1D34_currentParty[2] = 2;
 
     // SceneNo
-    battleDebugSelectorTableValues[0][0] = 0; // TODO: this was 3 in original binary
+    battleDebugSelectorTableValues[0][0] = 3; // TODO: this was 3 in original binary
 
     // Party
     battleDebugSelectorTableValues[1][0] = 0;
-    battleDebugSelectorTableValues[1][1] = 1;
-    battleDebugSelectorTableValues[1][2] = 2;
+    battleDebugSelectorTableValues[1][1] = 2;
+    battleDebugSelectorTableValues[1][2] = 0xFF; // TODO: this was originally setup as 0,1,2
 
     // Robo
     battleDebugSelectorTableValues[2][2] = 0;
@@ -58,7 +58,7 @@ void battleDebugSelectorInit()
     battleDebugSelectorTableValues[2][0] = 0;
 
     // FileNo
-    battleDebugSelectorTableValues[3][0] = 4; // TODO: this was 0 in original binary
+    battleDebugSelectorTableValues[3][0] = 2; // TODO: this was 0 in original binary
 
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 3; j++) {

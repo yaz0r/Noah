@@ -1,6 +1,7 @@
 #pragma once
 #include "kernel/math.h"
 #include "psx/gpuprims.h"
+#include <optional>
 
 extern int spriteCallback2Var0;
 extern s8 isBattleOverlayLoaded;
@@ -139,7 +140,7 @@ struct sSpriteActorCore : public sCustomRenderable {
     struct sSpriteActorAnimationBundle* m44_currentAnimationBundle;
     struct sSpriteActorAnimationBundle* m48_defaultAnimationbundle;
     struct sSpriteActorAnimationBundle* m4C_specialAnimation;
-    s32 m50;
+    std::optional<std::vector<u8>::iterator> m50;
     sPS1Pointer m54;
     sPS1Pointer m58_startOfCurrentAnimation;
     sPS1Pointer m5C;
@@ -322,3 +323,6 @@ T* createCustomRenderableEntity(size_t param_1, sTaskHeader* param_2, void(*upda
 
     return pNewEntity;
 }
+
+extern sFieldEntitySub4_110 sFieldEntitySub4_110_8005a474;
+void initFieldEntitySub4Sub5Sub0(sFieldEntitySub4_110* param_1, sSpriteActorAnimationBundle* param_2, sVec2_s16 param_3_vramLocation, sVec2_s16 clut);

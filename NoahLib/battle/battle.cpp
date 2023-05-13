@@ -30,6 +30,8 @@ s8 newBattleInputButton2;
 s8 previousNewBattleInputButton;
 u8 startCharacterJumpToEnemyVar0;
 u8 startCharacterJumpToEnemyVar1;
+u8 numValidTarget = 0;
+std::array<u8, 12> targetsPerPriority;
 
 std::array<sBattleSpriteActor*, 11> battleSpriteActors;
 std::array<sSpriteActorCore*, 11> battleSpriteActorCores;
@@ -70,6 +72,8 @@ std::array<sBattleEntity, 11> battleEntities;
 sGameStateA4* startBattleAttackAnimationVar5;
 sGameStateA42* startBattleAttackAnimationVar6;
 
+void jumpUpdatePositionSub0(sSpriteActorCore* param_1, sSpriteActorCore* param_2);
+
 void initGraphicsForBattle(void) {
     ResetGraph(1);
     Noah_MissingCode("Some dummy function calls");
@@ -91,6 +95,24 @@ sBattleVar2* battleVar2 = nullptr;
 s8 battleTransitionEffect = 0;
 s8 currentBattleLoaderTransitionEffect;
 s8 setupTurnRenderLoop_menuVar;
+
+u8 startJumpAnimationVar1;
+u16 jumpAnimationActiveActorBF = 0;
+s16 startJumpAnimationVar2;
+void* loadWdsDataNeeded = nullptr;
+u8 startJumpAnimationVar3 = 0;
+u32 startReadingBattleJumpAnimationVar0 = 0;
+
+void loadWdsDataIfNeeded(void)
+{
+    if (loadWdsDataNeeded != 0) {
+        assert(0);
+    }
+    loadWdsDataNeeded = 0;
+    return;
+}
+
+
 
 void initBattleDefDrawContext() {
     SetGeomOffset(0xa0, 0xa4);
@@ -167,6 +189,7 @@ MATRIX battleMatrix800CCBB4;
 
 std::vector<sMechaBone>* environmentModelConfigs;
 sMechaInitVar4* environmentModelBlocks = nullptr;
+u8 battleAnimationSoundLoaded;
 
 std::array<struct sBackgroundPoly*, 2> battleEnvBackgroundPolys;
 
@@ -178,6 +201,14 @@ std::array<sMechaInitVar4, 0x14> battleMechaInitVar4;
 void sMechaModel_init(sModel& modelBlock, sMechaInitVar4* param_2);
 std::vector<sMechaBone>* processMechaMesh(sMechaInitVar4* param_1, std::vector<sMechaDataTable1_C>& param_2, u32 param_3, int useTpageAndClut, short tpageX, short tpageY, short clutX, short clutY);
 void initMechSub110(sLoadedMechas* param_1);
+
+void* sendWds(std::vector<u8>::iterator buffer, u32 param_2) {
+    return nullptr;
+}
+
+int waitForMusic(uint param_1) {
+    return 0;
+}
 
 void mechaInitEnvironmentMechaMesh(int entryId, ushort flags, sMechaDataTable2* pData2, sMechaDataTable1* pData1, ushort tpageX, ushort tpageY, ushort clutX, short clutY, SFP_VEC3* param_9)
 {
@@ -447,7 +478,22 @@ void renderBattleScenePolys(sMechaInitVar4* envBlocks, std::vector<sMechaBone>* 
 
             // billboard
             if ((pBone->m52 - 1) < 2) {
-                MissingCode();
+                m1F800040.m[0][0] = 0x1000;
+                m1F800040.m[0][2] = 0;
+                m1F800040.m[1][0] = 0;
+                m1F800040.m[1][2] = 0;
+                m1F800040.m[2][0] = 0;
+                m1F800040.m[2][2] = 0x1000;
+                if (pBone->m52 == 1) {
+                    m1F800040.m[0][1] = matrix->m[0][1];
+                    m1F800040.m[1][1] = matrix->m[1][1];
+                    m1F800040.m[2][1] = matrix->m[2][1];
+                }
+                else {
+                    m1F800040.m[0][1] = 0;
+                    m1F800040.m[1][1] = 0x1000;
+                    m1F800040.m[2][1] = 0;
+                }
             }
             SetRotMatrix(&m1F800040);
             SetTransMatrix(&m1F800040);
@@ -503,7 +549,7 @@ void battleDrawEnv(MATRIX* param_1, MATRIX* lightMatrix, s32 param_3, std::vecto
     }
     MissingCode();
     if (environmentModelConfigs) {
-        // hack param 5 is not 0, but it's probably garbage (uninitialized) and not user anyway
+        // hack param 5 is not 0, but it's probably garbage (uninitialized) and not used anyway
         renderBattleScenePolys(environmentModelBlocks, environmentModelConfigs, param_1, lightMatrix, 0, OT, oddOrEven, param_8);
     }
     MissingCode();
@@ -739,6 +785,8 @@ void computeBattleCameraParams(uint bitmask) {
 s32 battleCameraMode = 0;
 s32 battleCameraModeInterpolation;
 s32 battleIR0 = 0x200;
+s32 battleCameraSpriteDistance;
+SVECTOR battleCameraSpriteOrientation;
 
 void updateBattleCamera() {
     switch (battleCameraMode) {
@@ -792,7 +840,17 @@ void updateBattleCamera() {
     }
 
     // update battleCameraSpriteDistance/battleCameraSpriteOrientation
-    MissingCode();
+    VECTOR temp40;
+    temp40.vx = battleCameraAt.vx - battleCameraEye.vx;
+    temp40.vy = battleCameraAt.vy - battleCameraEye.vy;
+    temp40.vz = battleCameraAt.vz - battleCameraEye.vz;
+
+    VECTOR squareVector;
+    Square0(&temp40, &squareVector);
+    battleCameraSpriteDistance = SquareRoot0(squareVector.vx + squareVector.vy + squareVector.vz);
+    battleCameraSpriteOrientation.vy = -ratan2(temp40.vz,  temp40.vx);
+    battleCameraSpriteOrientation.vx = -ratan2(temp40.vy, SquareRoot0(squareVector.vx + squareVector.vz));
+    battleCameraSpriteOrientation.vz = 0;
 }
 
 void execSpritesCallback(void);
@@ -803,7 +861,9 @@ void battleTimeProgress() {
         for (int i = 0; i < 11; i++) {
             if (isBattleSlotFilled[i] && !isEntityReadyForBattle[i]) {
                 s8 iVar5 = 1;
-                MissingCode();
+                if ((battleEntities[i].m0_base.m84 | battleEntities[i].m0_base.m86) & 0x8000) {
+                    iVar5 = 2;
+                }
                 if (((battleEntities[i].m0_base.m7C & 0x1000) == 0) || ((battleSlotStatusVar1[i] ^= 1) == 0)) {
                     if ((battleEntities[i].m0_base.m7C & 0x2000) == 0) {
                         if (((battleEntities[i].m0_base.m7C & 0x80) == 0) && ((battleEntities[i].m0_base.m80 & 0x1000) == 0)) {
@@ -832,8 +892,6 @@ void battleUpdateInputs_mode1(int mode) {
         battleHandleInput();
     }
 
-    MissingCode();
-
     battleVar1->mA9_timeBarNumMoveSteps = battleVar1->mA9_timeBarNumMoveSteps + '\x06';
     battleVar1->mAB_timeBarNumAnimationSteps = battleVar1->mAB_timeBarNumAnimationSteps + 1;
 
@@ -857,8 +915,71 @@ void battleUpdateInputs_mode1(int mode) {
     MissingCode();
 }
 
+void battleUpdateInputs_mode0(int mode) {
+    bool bVar1 = true;
+    bool wasPaused = false;
+    do 
+    {
+        if (!isControllerConnected(0)) {
+            assert(0);
+        }
+        else {
+            bVar1 = false;
+            if (wasPaused) {
+                assert(0);
+            }
+        }
+
+    } while (bVar1);
+
+    if (battleVar1->mCF == 0) {
+        battleInputButton = 0xff;
+    }
+    do 
+    {
+        if (!getInputOverflowed()) {
+            do {
+                if (!loadInputFromVSyncBuffer()) {
+                    goto LAB_Battle__8008a804;
+                }
+                if (newPadButtonForDialogs & 0x20) {
+                    battleInputButton = 4;
+                    goto LAB_Battle__8008a804;
+                }
+            } while ((newPadButtonForDialogs & 0x800) == 0);
+            if (battleIsPaused == '\0') {
+                pauseMusic();
+                decompressPauseSignToVram(0x88, 100);
+                decompressPauseSignToVram(0x88, 0x144);
+                battleIsPaused = '\x01';
+                //unaff_s1 = playTimeInVsync;
+                assert(0);
+            }
+            else {
+                resumeMusic();
+                battleIsPaused = '\0';
+                //playTimeInVsync = unaff_s1;
+                assert(0);
+            }
+        }
+        else {
+            resetInputs();
+        }
+LAB_Battle__8008a804:
+        if (battleIsPaused == 0) {
+            MissingCode();
+
+            return;
+        }
+
+    } while (1);
+}
+
 void battleUpdateInputs(int mode) {
     switch (currentBattleMode) {
+    case 0:
+        battleUpdateInputs_mode0(mode);
+        break;
     case 1:
         battleUpdateInputs_mode1(mode);
         break;
@@ -919,9 +1040,9 @@ void battleRenderPlayerPortraits() {
     if (battleVar1->mAF) {
         MissingCode();
     }
+
     for (int j = 0; j < 3; j++) {
-        MissingCode();
-        //battleRenderPolyArray(&battleVar0->m3A88[j][0], battleVar1->mE0[j], battleVar1->m93_oddOrEven[j]);
+        battleRenderPolyArray(&battleVar0->m3A88[j][0], battleVar1->mE0[j], battleVar1->m93_oddOrEven[j]);
     }
     for (int j = 0; j < 3; j++) {
         if (battleVisualEntities[j].m2 != 0x7F) {
@@ -1240,9 +1361,264 @@ void renderTargetSelectionCursor() {
     }
 }
 
+std::array<u8, 9> printIntegerToStringBattleBuffer;
+
+void printIntegerToStringBattle(uint param_1)
+{
+    int iVar2;
+    uint uVar3;
+    uint uVar4;
+
+    uVar3 = 100000000;
+    iVar2 = 0;
+    do {
+        uVar4 = param_1 / uVar3;
+        param_1 = param_1 % uVar3;
+        uVar3 = uVar3 / 10;
+        printIntegerToStringBattleBuffer[iVar2] = (byte)uVar4;
+        iVar2 = iVar2 + 1;
+    } while (iVar2 < 9);
+    iVar2 = 1;
+    auto pbVar1 = printIntegerToStringBattleBuffer.begin();
+    do {
+        if (printIntegerToStringBattleBuffer[iVar2] != 0) {
+            if (*pbVar1 != 0) {
+                return;
+            }
+            *pbVar1 = 0xff;
+            return;
+        }
+        *pbVar1 = 0xff;
+        iVar2 = iVar2 + 1;
+        pbVar1 = pbVar1 + 1;
+    } while (iVar2 < 9);
+    return;
+}
+
+void setupPolyArray3A88_HP(int param_1) {
+    short currentHP;
+    if (battleVar0->m835C[param_1].m1E1 == 1) {
+        currentHP = apConfigArray[param_1].m0;
+    }
+    else {
+        currentHP = battleEntities[param_1].mA4_gear.m38_HP;
+    }
+    printIntegerToStringBattle(currentHP);
+    
+    for (int i = 0; i < 4; i++) {
+        int characterIndex = i + 5;
+        if (printIntegerToStringBattleBuffer[characterIndex] != 0xFF) {
+            battleVar1->mEC[param_1] += battleSetupStringInPolyFT4Large(
+                0x83 + printIntegerToStringBattleBuffer[characterIndex],
+                &battleVar0->m6008[param_1][battleVar1->mEC[param_1]],
+                partyMemberSpritesOffset[battlePartyLayoutType][param_1] + 0x60 * param_1 + 0x4A + i * 6,
+                0x25);
+        }
+    }
+
+    battleVar1->m99_oddOrEven[param_1] = battleOddOrEven;
+}
+
+int currentEntityMaxHpForDisplay;
+int currentEntityHpForDisplay;
+int currentEntityGearMaxHpForDisplay;
+int currentEntityGearHpForDisplay;
+
+std::array<u8, 3> currentEntityHpForDisplayBuffer;
+std::array<u8, 3> currentEntityMaxHpForDisplayBuffer;
+std::array<u8, 5> currentEntityGearMaxHpForDisplayBuffer;
+s16 currentEntityHpForDisplayLastDigit;
+s16 currentEntityMaxHpForDisplayLastDigit;
+s16 currentEntityGearMaxHpForDisplayLastDigit;
+
+int setupPolyArray3A88_HP2(int param_1, char param_2) {
+
+    int returnValue = 0;
+
+    currentEntityMaxHpForDisplay = battleEntities[param_1].m0_base.m4E_MaxHP;
+    currentEntityHpForDisplay = battleEntities[param_1].m0_base.m4C_HP;
+    currentEntityGearMaxHpForDisplay = battleEntities[param_1].mA4_gear.m60;
+    currentEntityGearHpForDisplay = battleEntities[param_1].mA4_gear.m64;
+
+    int bVar1;
+    int iVar2;
+    if (param_2 == '\0') {
+        int iVar4 = (int)(short)currentEntityMaxHpForDisplay;
+        int iVar2 = iVar4;
+        if (iVar4 < 0) {
+            iVar2 = iVar4 + 7;
+        }
+        if (iVar2 >> 3 < (int)(short)currentEntityHpForDisplay) {
+            if (iVar4 < 0) {
+                iVar4 = iVar4 + 3;
+            }
+            bVar1 = iVar4 >> 2 < (int)(short)currentEntityHpForDisplay;
+            goto LAB_Battle__8007304c;
+        }
+    }
+    else {
+        iVar2 = currentEntityGearHpForDisplay;
+        if (currentEntityGearHpForDisplay < 0) {
+            iVar2 = currentEntityGearHpForDisplay + 7;
+        }
+        if (iVar2 >> 3 < currentEntityGearMaxHpForDisplay) {
+            iVar2 = currentEntityGearHpForDisplay;
+            if (currentEntityGearHpForDisplay < 0) {
+                iVar2 = currentEntityGearHpForDisplay + 3;
+            }
+            bVar1 = iVar2 >> 2 < currentEntityGearMaxHpForDisplay;
+        LAB_Battle__8007304c:
+            if (!bVar1) {
+                returnValue = 1;
+            }
+            goto LAB_Battle__8007305c;
+        }
+    }
+    returnValue = 2;
+LAB_Battle__8007305c:
+
+    int iVar5 = (uint)currentEntityHpForDisplay +
+        (((int)(short)currentEntityHpForDisplay / 100) * 0x10000 >> 0x10) * -100;
+    int iVar7 = (uint)currentEntityMaxHpForDisplay +
+        (((int)(short)currentEntityMaxHpForDisplay / 100) * 0x10000 >> 0x10) * -100;
+    iVar2 = (iVar5 * 0x10000 >> 0x10) / 10;
+    int iVar6 = (currentEntityGearMaxHpForDisplay % 10000) % 1000;
+    int iVar4 = (iVar7 * 0x10000 >> 0x10) / 10;
+    currentEntityHpForDisplayLastDigit = (short)iVar5 + (short)((uint)(iVar2 * 0x10000) >> 0x10) * -10
+        ;
+    iVar5 = iVar6 % 100;
+    currentEntityMaxHpForDisplayLastDigit =
+        (short)iVar7 + (short)((uint)(iVar4 * 0x10000) >> 0x10) * -10;
+    currentEntityGearMaxHpForDisplayLastDigit = iVar5 % 10;
+    currentEntityHpForDisplayBuffer[0] = (byte)((int)(short)currentEntityHpForDisplay / 100);
+    currentEntityHpForDisplayBuffer[1] = (byte)iVar2;
+    currentEntityMaxHpForDisplayBuffer[0] = (byte)((int)(short)currentEntityMaxHpForDisplay / 100);
+    currentEntityMaxHpForDisplayBuffer[1] = (byte)iVar4;
+    currentEntityGearMaxHpForDisplayBuffer[0] = (byte)(currentEntityGearMaxHpForDisplay / 10000);
+    currentEntityGearMaxHpForDisplayBuffer[1] =
+        (byte)((currentEntityGearMaxHpForDisplay % 10000) / 1000);
+    currentEntityGearMaxHpForDisplayBuffer[2] = (byte)(iVar6 / 100);
+    currentEntityGearMaxHpForDisplayBuffer[3] = (byte)(iVar5 / 10);
+    currentEntityHpForDisplayBuffer[2] = (byte)currentEntityHpForDisplayLastDigit;
+    currentEntityMaxHpForDisplayBuffer[2] = (byte)currentEntityMaxHpForDisplayLastDigit;
+    currentEntityGearMaxHpForDisplayBuffer[4] = (byte)currentEntityGearMaxHpForDisplayLastDigit;
+
+    // Replace all leading 0 by 0xFF
+    for (auto it = currentEntityHpForDisplayBuffer.begin(); it < currentEntityHpForDisplayBuffer.end() - 1; it++) {
+        if (*it)
+            break;
+        *it = 0xFF;
+    }
+    for (auto it = currentEntityMaxHpForDisplayBuffer.begin(); it < currentEntityMaxHpForDisplayBuffer.end() - 1; it++) {
+        if (*it)
+            break;
+        *it = 0xFF;
+    }
+    for (auto it = currentEntityGearMaxHpForDisplayBuffer.begin(); it < currentEntityGearMaxHpForDisplayBuffer.end() - 1; it++) {
+        if (*it)
+            break;
+        *it = 0xFF;
+    }
+
+    return returnValue;
+}
+
+struct sHPPosition {
+    std::array<s16, 7> m0;
+};
+
+std::array<sHPPosition, 3> HP_positionTable = { {
+    {
+        {0x2c, 0x34, 0x3C, 0x44, 0x4C, 0x54, 0x5C},
+    },
+    {
+        {0x8c, 0x94, 0x9C, 0xA4, 0xAC, 0xB4, 0xBC},
+    },
+    {
+        {0xEC, 0xF4, 0xFC, 0x104, 0x10C, 0x114, 0x11C},
+    },
+} };
+
+void tintFT4(std::array<POLY_FT4, 2>* poly, int from, int to, u8 param_4) {
+    for (int i = from; i < to; i++) {
+        SetShadeTex(&poly[i][battleOddOrEven], 0);
+        if (param_4 == 1) {
+            poly[i][battleOddOrEven].r0 = 0x80;
+            poly[i][battleOddOrEven].g0 = 0x80;
+            poly[i][battleOddOrEven].b0 = 0x00;
+        }
+        else {
+            poly[i][battleOddOrEven].r0 = 0x80;
+            poly[i][battleOddOrEven].g0 = 0x00;
+            poly[i][battleOddOrEven].b0 = 0x00;
+        }
+    }
+}
+
+void tintHP(int param_1, char param_2) {
+    int start = battleVar1->mE0[param_1];
+    for (int i = 0; i < 3; i++) {
+        if (currentEntityHpForDisplayBuffer[i] != 0xFF) {
+            battleVar1->mE0[param_1] += battleSetupStringInPolyFT4Large(
+                0x67 + currentEntityHpForDisplayBuffer[i],
+                &battleVar0->m3A88[param_1][battleVar1->mE0[param_1]],
+                HP_positionTable[param_1].m0[i] + partyMemberSpritesOffset[battlePartyLayoutType][param_1],
+                0x10
+            );
+        }
+    }
+    // separator
+    battleVar1->mE0[param_1] += battleSetupStringInPolyFT4Large(
+        0x71,
+        &battleVar0->m3A88[param_1][battleVar1->mE0[param_1]],
+        HP_positionTable[param_1].m0[3] + partyMemberSpritesOffset[battlePartyLayoutType][param_1], 0x10
+    );
+
+    for (int i = 4; i < 7; i++) {
+        if (currentEntityMaxHpForDisplayBuffer[i-4] != 0xFF) {
+            battleVar1->mE0[param_1] += battleSetupStringInPolyFT4Large(
+                0x67 + currentEntityMaxHpForDisplayBuffer[i-4],
+                &battleVar0->m3A88[param_1][battleVar1->mE0[param_1]],
+                HP_positionTable[param_1].m0[i] + partyMemberSpritesOffset[battlePartyLayoutType][param_1],
+                0x10
+            );
+        }
+    }
+
+    if (param_2 != '\0') {
+        tintFT4(&battleVar0->m3A88[param_1][0], start, battleVar1->mE0[param_1], param_2);
+    }
+}
+
+void tintHpGear(int param_1, char param_2) {
+    assert(0);
+}
+
+void updatePolyArray3A88() {
+    for (int i = 0; i < 3; i++) {
+        if (battleVar1->m7C[i]) {
+            battleVar1->mE0[i] = 0;
+            battleVar1->mEC[i] = 0;
+            if (battleVisualEntities[i].m2 != 0x7F) {
+                setupPolyArray3A88_HP(i);
+                int tint = setupPolyArray3A88_HP2(i, apConfigArray[i].m1);
+                if (apConfigArray[i].m1 == 0) {
+                    tintHP(i, tint & 0xff);
+                }
+                else {
+                    tintHpGear(i, tint & 0xff);
+                }
+                battleVar1->m93_oddOrEven[i] = battleOddOrEven;
+                battleVar1->m7C[i] = 0;
+            }
+        }
+    }
+}
+
 void drawBattleMode1() {
     if (!drawBattleMode1Disabled) {
         MissingCode();
+        updatePolyArray3A88();
         renderGearHP();
         updatePortraits();
         battleRenderPortraitSelection();
@@ -1255,9 +1631,29 @@ void drawBattleMode1() {
     }
 }
 
+void drawBattleDialogWindows() {
+    MissingCode();
+}
+
+void battleResultDraw(void) {
+    MissingCode();
+}
+
+void drawBattleMode0(void)
+{
+    battleDebugDisplay = 0;
+    drawBattleDialogWindows();
+    battleResultDraw();
+    battleDrawAPBar();
+    return;
+}
+
 void drawBattleFromModes() {
     switch (currentBattleMode)
     {
+    case 0:
+        drawBattleMode0();
+        break;
     case 1:
         drawBattleMode1();
         break;
@@ -1290,6 +1686,12 @@ struct sJumpAnimationControlStruct {
 };
 
 sJumpAnimationControlStruct* jumpAnimationControlStruct = nullptr;
+
+u8 isFxFragmentsSetup = 0;
+
+void fxFragmentSetup(u8 value) {
+    assert(0);
+}
 
 void battleRender() {
     battleRenderCount++;
@@ -1335,6 +1737,11 @@ void battleRender() {
     if (battleRenderCount == 1) {
         if (jumpAnimationControlStruct != nullptr) {
             jumpAnimationControlStruct->m8(jumpAnimationControlStruct);
+        }
+        if (isFxFragmentsSetup != 0) {
+            u8 oldValue = isFxFragmentsSetup;
+            isFxFragmentsSetup = 0;
+            fxFragmentSetup(oldValue);
         }
         MissingCode();
     }
@@ -1406,11 +1813,20 @@ void resetBattleCameraMode() {
     setBattleCameraMode(0);
 }
 
+s32 initBattleUnkData0Var0;
+s32 initBattleUnkData0Var1;
+
+void initBattleUnkData0() {
+    initBattleUnkData0Var0 = 0;
+    initBattleUnkData0Var1 = 0;
+}
+
 void initBattleSpriteSystem() {
     isBattleOverlayLoaded = 1;
     allocateSavePointMeshDataSub0_var0 = 0;
     spriteBytecode2ExtendedE0_Var0 = 0;
     MissingCode();
+    initBattleUnkData0();
     resetSpriteCallbacks();
     resetBattleCameraMode();
     allocateShapeTransfert(0x5000);
@@ -1763,7 +2179,7 @@ void battleAnimationCallback_2(sSpriteActorCore* param_1, sSpriteActorCore* para
 
 int needFxFragments = 0;
 int isInJumpAnimationCallbackCode = 0;
-sSpriteActorCore* pSpriteCoreListHead = nullptr;
+std::array<sSpriteActorCore*, 11> pSpriteCoreListHead;
 
 void setRenderingInfoForItemUser(sSpriteActorCore*) {
     MissingCode();
@@ -1778,8 +2194,97 @@ sSpriteActorCore* getSpriteCoreForAnimation(int param_1) {
     return jumpAnimationControlStruct->m4;
 }
 
+int countBattleActorCoresActiveForBitmask(uint bitmask, std::array<sSpriteActorCore*, 11>& param_2, sSpriteActorCore* param_3) {
+    sSpriteActorCore* psVar1;
+    sBattleMechaInitData** ppsVar2;
+    int iVar4;
+
+    iVar4 = 0;
+    ppsVar2 = &battleLoadDataVar2Ter;
+    std::array<sSpriteActorCore*, 11>::iterator ppsVar1 = param_2.begin();
+    for(int i=0; i<11; i++) {
+        if (((bitmask & 1) != 0) &&
+            (psVar1 = battleSpriteActorCores[0], psVar1 != (sSpriteActorCore*)0x0)) {
+            psVar1->m74_pNextSpriteCore = param_3;
+            *ppsVar1 = psVar1;
+            ppsVar1 = ppsVar1 + 1;
+            iVar4 = iVar4 + 1;
+        }
+        ppsVar2 = ppsVar2 + 1;
+        bitmask = (bitmask & 0xffff) >> 1;
+    }
+    param_2[iVar4] = nullptr;
+    return iVar4;
+}
+
+s16 performAttackSub3_var0 = 0;
+s16 processBattleAnimationSub0_var0 = 0;
+sSpriteActorCore* processBattleAnimationSub0_var1 = 0;
+u8 needBattleAnimationDataLoading = 0;
+
+void updateBattleAnimationDataLoading(void) {
+    if (needBattleAnimationDataLoading) {
+        assert(0);
+    }
+}
+
 int processBattleAnimationSub0(void) {
-    MissingCode();
+    std::array< sSpriteActorCore*, 11> local_50;
+    bool hasPlayedAnimationOnMecha = false;
+
+    int count = 0;
+    int slot = countBattleActorCoresActiveForBitmask(performAttackSub3_var0 & (performAttackSub3_var0 ^ processBattleAnimationSub0_var0), local_50, processBattleAnimationSub0_var1);
+    if (slot != 0) {
+        for (int i = slot - 1; i > -1; i--) {
+            sSpriteActorCore* pSlotEntry = local_50[i];
+            if ((jumpAnimationActiveActorBF >> ((pSlotEntry->mAC & 3) << 2 | (uint)pSlotEntry->mA8.mx1E) & 1U) == 0) {
+                pSlotEntry->m9E_wait = 0;
+                int entityId = (pSlotEntry->mAC & 3) << 2 | (uint)pSlotEntry->mA8.mx1E;
+                if (battleVisualEntities[entityId].m4_isGear == 0) {
+                    if (((int)pSlotEntry->mAC>>24) != '\x15') {
+                        spriteActorSetPlayingAnimation(pSlotEntry, 0x15);
+                    }
+                }
+                else {
+                    hasPlayedAnimationOnMecha = true;
+                    battleMechas[entityId]->m38 = 1;
+                    entityId = (pSlotEntry->mAC & 3) << 2 | (uint)pSlotEntry->mA8.mx1E;
+                    performMechaPlayAnimation(entityId, entityId, 0x15);
+                }
+                count++;
+                processBattleAnimationSub0_var0 |= 1 << ((pSlotEntry->mAC & 3) << 2 | (uint)pSlotEntry->mA8.mx1E);
+            }
+            else {
+                local_50[i] = nullptr;
+            }
+        }
+    }
+
+    while (true) {
+        bool bVar3 = false;
+        int iVar1 = 0;
+        auto ppsVar2 = local_50.begin();
+        if (count != 0) {
+            do {
+                sSpriteActorCore* pSlotEntry = *ppsVar2;
+                if (((pSlotEntry != nullptr) &&
+                    (pSlotEntry->m48_defaultAnimationbundle != nullptr)) &&
+                    (pSlotEntry->m9E_wait != 0)) {
+                    bVar3 = true;
+                }
+                iVar1 = iVar1 + 1;
+                ppsVar2 = ppsVar2 + 1;
+            } while (iVar1 != count);
+        }
+        if (!bVar3) break;
+        if ((count != 0) && (updateBattleAnimationDataLoading(), count != 0)) {
+            battleRender();
+        }
+    }
+
+    if (hasPlayedAnimationOnMecha) {
+        assert(0);
+    }
     return 0;
 }
 
@@ -1788,7 +2293,82 @@ void startJumpAnimationCallback(sSpriteActorCore*) {
     jumpAnimationControlStruct->m49 = jumpAnimationControlStruct->m1C & 0xFF;
 }
 
+void battleIdleDuringLoading(void)
+{
+    int iVar1;
+
+    while (iVar1 = isCDBusy(), iVar1 != 0) {
+        battleRender();
+    }
+    return;
+}
+
+struct sBattleAnimationSpecial : public sSpriteActorAnimationBundle {
+    void init(std::vector<u8> inputData) {
+        m_rawData = inputData;
+        sSpriteActorAnimationBundle::init(m_rawData.begin());
+    }
+
+    std::vector<u8> m_rawData;
+};
+
+sBattleAnimationSpecial battleAnimationLoadingDest;
+
+s8 fxFragmentLoaded = 0;
+s16 attackInProgress = 0;
+
 s16 delayBattleAnimationCounter = 0;
+
+void startSeq(std::vector<u8>::iterator param_1) {
+    MissingCode();
+}
+
+void loadEffectFragmentsAndAudioModel(sBattleAnimationSpecial& buffer, u32 offset) {
+    MissingCode();
+}
+
+std::optional<std::vector<u8>::iterator> loadEffectFragmentsAndAudio(sBattleAnimationSpecial& buffer) {
+    std::optional<std::vector<u8>::iterator> pWds;
+    int numEntries = READ_LE_U32(buffer.m_rawData.begin());
+    for (int i = 0; i< numEntries - 3; i++) {
+        u32 offset = READ_LE_U32(buffer.m_rawData.begin() + 0x10 + 4 * i);
+        std::vector<u8>::iterator entry = buffer.m_rawData.begin() + offset;
+        u32 magic = READ_LE_U32(entry);
+        if (magic == ' sdw') {
+            loadWdsDataIfNeeded();
+            battleAnimationSoundLoaded = 0;
+            startJumpAnimationVar3 = 0;
+            loadWdsDataNeeded = sendWds(entry, 0);
+            while (waitForMusic(0)) {
+                if (runningOnDTL != -1) {
+                    trap(0x400);
+                }
+            }
+            if (i == 1) {
+                loadEffectFragmentsAndAudioModel(buffer, offset);
+            }
+        }
+        else if (magic == 'sdes') {
+            startSeq(entry);
+            pWds = entry;
+        }
+        else {
+            assert(0);
+            initFieldEntitySub4Sub5Sub0(&sFieldEntitySub4_110_8005a474, nullptr, sVec2_s16::fromValue(0x380, 0x100), sVec2_s16::fromValue(0x0, 0x1F4));
+        }
+    }
+    return pWds;
+}
+
+std::optional<std::vector<u8>::iterator> loadFragmentIsNotLoadedYet() {
+    std::optional<std::vector<u8>::iterator> fragmentPtr;
+    if (fxFragmentLoaded == 0) {
+        fragmentPtr = loadEffectFragmentsAndAudio(battleAnimationLoadingDest);
+        fxFragmentLoaded = 1;
+    }
+    return fragmentPtr;
+}
+
 void processBattleAnimation(sSpriteActorCore* param_1) {
     if (delayBattleAnimationCounter != 0) {
         delayBattleAnimationCounter = delayBattleAnimationCounter + -1;
@@ -1834,14 +2414,31 @@ void processBattleAnimation(sSpriteActorCore* param_1) {
     case 4: // 1ap
     case 5: // 2ap
     case 6: // 3ap
-        MissingCode();
+        attackInProgress = 0;
         setRenderingInfoForItemUser(param_1->getAsSpriteActorCore());
         OP_INIT_ENTITY_SCRIPT_sub0Sub8(param_1->getAsSpriteActorCore(), startJumpAnimationCallback);
         (param_1->getAsSpriteActorCore()->m7C)->m8 =
             (uint)battleVar48[allocateJumpAnimationStructVar0].m18_operationType
             [(param_1->getAsSpriteActorCore()->m74_pNextSpriteCore->mAC & 3) << 2 | param_1->getAsSpriteActorCore()->m74_pNextSpriteCore->mA8.mx1E];
-        if (isVramPreBacked((param_1->getAsSpriteActorCore()->m24_vramData)->m0_spriteData)) {
-            assert(0);
+        if (!isVramPreBacked((param_1->getAsSpriteActorCore()->m24_vramData)->m0_spriteData)) {
+            if (battleVar48[allocateJumpAnimationStructVar0].m47 < 0x10) {
+                if ((fxFragmentLoaded == '\0') && (battleAnimationLoadingDest.m_rawData.size() != 0)) {
+                    battleIdleDuringLoading();
+                    (param_1->getAsSpriteActorCore())->m50 = loadFragmentIsNotLoadedYet();
+                    setupSpecialAnimation(param_1, &battleAnimationLoadingDest);
+                }
+                if (jumpAnimationControlStruct->m20_actor ==
+                    (((param_1->getAsSpriteActorCore())->mAC & 3) << 2 |
+                        (uint)(param_1->getAsSpriteActorCore())->mA8.mx1E)) {
+                    spriteActorSetPlayingAnimation(param_1->getAsSpriteActorCore(), ~battleVar48[allocateJumpAnimationStructVar0].m47);
+                }
+                else {
+                    spriteActorSetPlayingAnimation(param_1->getAsSpriteActorCore(), battleVar48[allocateJumpAnimationStructVar0].m47);
+                }
+            }
+            else {
+                assert(0);
+            }
         }
         else {
             spriteActorSetPlayingAnimation(param_1->getAsSpriteActorCore(), battleVar48[allocateJumpAnimationStructVar0].m47);
@@ -1885,6 +2482,10 @@ void battleAnimationCallback_5(int param_1) {
     }
 }
 
+bool getInitBattleUnkData0Var0Set() {
+    return initBattleUnkData0Var0 != 0;
+}
+
 void allocateJumpAnimationStructCallback(sJumpAnimationControlStruct* param_1) {
     if (isInJumpAnimationCallbackCode) {
         return;
@@ -1901,21 +2502,41 @@ void allocateJumpAnimationStructCallback(sJumpAnimationControlStruct* param_1) {
         jumpAnimationControlStruct->m34 = jumpAnimationControlStruct->m34 - 1;
     }
 
-    switch (jumpAnimationControlStruct->m49) {
-    case 0:
-        break;
-    case 2: // happens when jump animation completes
-        battleAnimationCallback_2(param_1->m4, param_1->m4->m74_pNextSpriteCore);
-        break;
-    case 5: // end of attack
-        if (battleVisualEntities[(param_1->m4->mAC & 3) << 2 | (uint)param_1->m4->mA8.mx1E].m3 == 0) {
-            spriteActorSetPlayingAnimation(param_1->m4, param_1->m4->mB0 & 0xFF);
+    // if we have a pending change
+    if(jumpAnimationControlStruct->m49)
+    {
+        switch (jumpAnimationControlStruct->m49) {
+        case 2: // happens when jump animation completes
+            battleAnimationCallback_2(param_1->m4, param_1->m4->m74_pNextSpriteCore);
+            break;
+        case 4:
+        {
+            int index = (pSpriteCoreListHead[0]->mAC & 3) << 2 | (uint)pSpriteCoreListHead[0]->mA8.mx1E;
+            if ((index < 3) && (battleVisualEntities[index].m4_isGear == 0) && (battleVar48[allocateJumpAnimationStructVar0 + -1].m18_operationType[index] == 7)) {
+                setRenderingInfoForItemUser(pSpriteCoreListHead[0]);
+                spriteActorSetPlayingAnimation(pSpriteCoreListHead[0], 0x1B);
+                while (pSpriteCoreListHead[0]->mAC >> 24 == 0x1B) {
+                    battleRender();
+                }
+            }
+            break;
         }
-        battleAnimationCallback_5(jumpAnimationControlStruct->m24);
-        setupJumpAnimationStruct1C(10);
-        break;
-    default:
-        assert(0);
+        case 5: // end of attack
+            if (battleVisualEntities[(param_1->m4->mAC & 3) << 2 | (uint)param_1->m4->mA8.mx1E].m3 == 0) {
+                spriteActorSetPlayingAnimation(param_1->m4, param_1->m4->mB0 & 0xFF);
+            }
+            battleAnimationCallback_5(jumpAnimationControlStruct->m24);
+            setupJumpAnimationStruct1C(10);
+            break;
+        case 6:
+            jumpUpdatePositionSub0(param_1->m4, param_1->m4->m74_pNextSpriteCore);
+            break;
+        case 10:
+            break;
+        default:
+            assert(0);
+        }
+        jumpAnimationControlStruct->m49 = 0;
     }
 
     switch (jumpAnimationControlStruct->m1C) {
@@ -1938,8 +2559,26 @@ void allocateJumpAnimationStructCallback(sJumpAnimationControlStruct* param_1) {
             startPlayingAttackAnimation();
         }
         break;
+    case 5:
+        break;
+    case 6:
+    {
+        s32 distance = computerJumpDistanceToTarget(
+            sVec2_s16::fromValue(param_1->m4->m0_position.vx.getIntegerPart(), param_1->m4->m0_position.vz.getIntegerPart()),
+            sVec2_s16::fromValue(param_1->m4->mA0.vx, param_1->m4->mA0.vz)
+        );
+        if (jumpAnimationControlStruct->m44_distanceToTarget < distance) {
+            jumpUpdatePositionSub0(param_1->m4, param_1->m4C);
+            isInJumpAnimationCallbackCode = 0;
+            return;
+        }
+        jumpAnimationControlStruct->m44_distanceToTarget = distance;
+        break;
+    }
     case 10: // during attack
-        MissingCode();
+        if (allocateSavePointMeshDataSub0_var0 == getInitBattleUnkData0Var0Set()) {
+            assert(0);
+        }
         break;
     default:
         assert(0);
@@ -1968,65 +2607,23 @@ sJumpAnimationControlStruct* allocateJumpAnimationStruct() {
 u16 currentJumpAnimationBitMask;
 s16 numActiveSpriteCores;
 
-int countBattleActorCoresActiveForBitmask(uint bitmask, sSpriteActorCore** param_2, sSpriteActorCore* param_3) {
-    sSpriteActorCore* psVar1;
-    sSpriteActorCore** ppsVar1;
-    sBattleMechaInitData** ppsVar2;
-    int iVar3;
-    int iVar4;
-
-    iVar3 = 0;
-    iVar4 = 0;
-    ppsVar2 = &battleLoadDataVar2Ter;
-    ppsVar1 = param_2;
-    do {
-        if (((bitmask & 1) != 0) &&
-            (psVar1 = battleSpriteActorCores[0], psVar1 != (sSpriteActorCore*)0x0)) {
-            psVar1->m74_pNextSpriteCore = param_3;
-            *ppsVar1 = psVar1;
-            ppsVar1 = ppsVar1 + 1;
-            iVar4 = iVar4 + 1;
-        }
-        ppsVar2 = ppsVar2 + 1;
-        iVar3 = iVar3 + 1;
-        bitmask = (bitmask & 0xffff) >> 1;
-    } while (iVar3 != 0xb);
-    param_2[iVar4] = (sSpriteActorCore*)0x0;
-    return iVar4;
-}
-
 void setupBattleAnimationSpriteCore(sSpriteActorCore* param_1) {
     currentJumpAnimationBitMask = battleVar48[allocateJumpAnimationStructVar0].m16_targetBitMask;
-    numActiveSpriteCores = countBattleActorCoresActiveForBitmask(battleVar48[allocateJumpAnimationStructVar0].m16_targetBitMask, &pSpriteCoreListHead, param_1);
+    numActiveSpriteCores = countBattleActorCoresActiveForBitmask(battleVar48[allocateJumpAnimationStructVar0].m16_targetBitMask, pSpriteCoreListHead, param_1);
 
     if (numActiveSpriteCores == 0) {
-        pSpriteCoreListHead = param_1;
+        pSpriteCoreListHead[0] = param_1;
     }
 
-    param_1->m74_pNextSpriteCore = pSpriteCoreListHead;
-    pSpriteCoreListHead->m74_pNextSpriteCore = param_1;
-    jumpAnimationControlStruct->m4C = pSpriteCoreListHead;
-    jumpAnimationControlStruct->m28 = (pSpriteCoreListHead->mAC & 3) << 2 | pSpriteCoreListHead->mA8.mx1E;
+    param_1->m74_pNextSpriteCore = pSpriteCoreListHead[0];
+    pSpriteCoreListHead[0]->m74_pNextSpriteCore = param_1;
+    jumpAnimationControlStruct->m4C = pSpriteCoreListHead[0];
+    jumpAnimationControlStruct->m28 = (pSpriteCoreListHead[0]->mAC & 3) << 2 | pSpriteCoreListHead[0]->mA8.mx1E;
     setSpriteActorAngle(param_1, spriteActorCoreRatan2(param_1, param_1->m74_pNextSpriteCore));
-    if ((pSpriteCoreListHead->mAC >> 24) != 0x15) {
-        setSpriteActorAngle(pSpriteCoreListHead, spriteActorCoreRatan2(param_1->m74_pNextSpriteCore, param_1));
+    if ((pSpriteCoreListHead[0]->mAC >> 24) != 0x15) {
+        setSpriteActorAngle(pSpriteCoreListHead[0], spriteActorCoreRatan2(param_1->m74_pNextSpriteCore, param_1));
     }
 }
-u8 startJumpAnimationVar1;
-u16 jumpAnimationActiveActorBF = 0;
-s16 startJumpAnimationVar2;
-void* loadWdsDataNeeded = nullptr;
-
-void loadWdsDataIfNeeded(void)
-{
-    if (loadWdsDataNeeded != 0) {
-        assert(0);
-    }
-    loadWdsDataNeeded = 0;
-    return;
-}
-
-u8 battleAnimationSoundLoaded;
 
 void setBattleCameraParamX(short param_1)
 {
@@ -2034,33 +2631,12 @@ void setBattleCameraParamX(short param_1)
     return;
 }
 
-u8 startJumpAnimationVar3 = 0;
-
-void battleIdleDuringLoading(void)
-{
-    int iVar1;
-
-    while (iVar1 = isCDBusy(), iVar1 != 0) {
-        battleRender();
-    }
-    return;
-}
-
-void* sendWds(std::vector<u8>& buffer, u32 param_2) {
-    return nullptr;
-}
-
-int waitForMusic(uint param_1) {
-    return 0;
-}
-
-std::vector<u8> battleAnimationLoadingDest;
-u32 startReadingBattleJumpAnimationVar0 = 0;
-
 void startReadingBattleJumpAnimation(sSpriteActorCore* param_1) {
     MissingCode();
     setCurrentDirectory(0x2c, 1);
-    battleAnimationLoadingDest.resize(getFileSizeAligned(param_1->m7C->m0));
+    battleAnimationLoadingDest.m_rawData.resize(getFileSizeAligned(param_1->m7C->m0));
+    readFile(param_1->m7C->m0, battleAnimationLoadingDest.m_rawData, 0, 0x80);
+    battleAnimationLoadingDest.init(battleAnimationLoadingDest.m_rawData);
     startReadingBattleJumpAnimationVar0 = (param_1->mAC & 3) << 2 | param_1->mA8.mx1E;
 }
 void jumpUpdatePosition(sSpriteActorCore* param_1);
@@ -2114,14 +2690,24 @@ void jumpUpdatePosition(sSpriteActorCore* param_1) {
     if ((battleJumpData[jumpAnimationControlStruct->m2C].m0_X == -1) &&
         (battleJumpData[jumpAnimationControlStruct->m2C].m2_Z == -1)) {
 
-        (param_1->mA0).vy = 0;
         (param_1->mA0).vx = param_1->m0_position.vx.getIntegerPart();
+        (param_1->mA0).vy = 0;
         (param_1->mA0).vz = param_1->m0_position.vz.getIntegerPart();
 
         jumpUpdatePositionSub0(param_1, param_1->m74_pNextSpriteCore);
     }
     else {
-        assert(0);
+        (param_1->mA0).vx = battleJumpData[jumpAnimationControlStruct->m2C].m0_X;
+        (param_1->mA0).vy = 0;
+        (param_1->mA0).vz = battleJumpData[jumpAnimationControlStruct->m2C].m2_Z;
+
+        int uVar5 = 2;
+        if (battleJumpData[jumpAnimationControlStruct->m2C].m4 != 0) {
+            uVar5 = 3;
+        }
+
+        jumpUpdatePositionSub1(param_1, uVar5);
+        jumpAnimationControlStruct->m2C++;;
     }
 
 }
@@ -2146,7 +2732,7 @@ void startJumpAnimation(int isBilly, uint actor, uint jumpTarget, uint facing) {
         int isPrebacked = isVramPreBacked(jumpAnimationControlStruct->m4->m24_vramData->m0_spriteData);
         if (isPrebacked == 0) {
             startJumpAnimationVar3 = 0;
-            if ((battleAnimationLoadingDest.size() == 0) ||
+            if ((battleAnimationLoadingDest.m_rawData.size() == 0) ||
                 (((jumpAnimationControlStruct->m4->mAC & 3) << 2 | jumpAnimationControlStruct->m4->mA8.mx1E ) != startReadingBattleJumpAnimationVar0)) {
                 startReadingBattleJumpAnimation(jumpAnimationControlStruct->m4);
             }
@@ -2160,7 +2746,7 @@ void startJumpAnimation(int isBilly, uint actor, uint jumpTarget, uint facing) {
                 readFile(7, buffer, 0, 0x80);
                 battleIdleDuringLoading();
                 loadWdsDataIfNeeded();
-                loadWdsDataNeeded = sendWds(buffer, 0);
+                loadWdsDataNeeded = sendWds(buffer.begin(), 0);
                 while (waitForMusic(0)) {
                     battleRender();
                 }
@@ -2264,6 +2850,21 @@ void initBattleG3Array(void) {
     battleVar1->mC6_isTargetSelectionCursorVisible = 1;
 }
 
+void selectDefaultTarget(int param_1) {
+    battleVar2->m2E8_currentTarget = battleVar2->m0[param_1].m3C_currentTarget;
+    getEntityToFace(param_1);
+    bool bTargetIsValid = false;
+    for (int i = 0; i < numValidTarget; i++) {
+        if (targetsPerPriority[i] == battleVar2->m0[param_1].m3C_currentTarget) {
+            bTargetIsValid = true;
+        }
+    }
+
+    if (!bTargetIsValid) {
+        battleVar2->m2E8_currentTarget = targetsPerPriority[0];
+    }
+}
+
 void drawCircleMenuAttackActive(int param_1) {
     switch (battleInputButton) {
     case 0: // right
@@ -2306,7 +2907,7 @@ void drawCircleMenuAttackActive(int param_1) {
         if (battleVar2->m0[param_1].m3C_currentTarget != 0xFF) {
             startCharacterJumpToEnemyVar0 = 0;
             startCharacterJumpToEnemy(param_1);
-            MissingCode();
+            selectDefaultTarget(param_1);
             initBattleG3Array();
             battleVar2->m2DD_currentActiveBattleMenu = 5;
             return;
@@ -3146,12 +3747,9 @@ void updateCharacterBlinkingTask(u32 param_1) {
     }
 }
 
-u8 numValidTarget = 0;
-std::array<u8, 12> targetsPerPriority;
-
-u8 selectNewSlotByDirection(byte slot, byte direction) {
+u8 selectNewSlotByDirection(byte inputSlot, byte direction) {
     s32 bestResult = 0xffffff;
-
+    byte slot = inputSlot;
     for (int i = 0; i < 12; i++) {
         if (targetsPerPriority[i] != 0xFF) {
             bool bVar1 = false;
@@ -3176,7 +3774,7 @@ u8 selectNewSlotByDirection(byte slot, byte direction) {
                         bVar1 = true;
                     break;
                 case 3:
-                    if ((lVar3 - 0x200) < 0x400)
+                    if ((lVar3 - 0x200 & 0xffff) < 0x400)
                         bVar1 = true;
                     break;
                 default:
@@ -3379,7 +3977,6 @@ std::array<std::array<s8, 3>, 8> perApTable = { {
 } };
 
 s16 performAttack_type = 0;
-s16 performAttackSub3_var0 = 0;
 u16 performAttackSub3_varBitMask;
 u8 performAttackSub3_attacker;
 
@@ -3624,6 +4221,7 @@ void handleMenuSelectEnemy(u8 param_1) {
     case 2: // left
     case 3: // up
     case 8:
+    case 0xFF:
         break;
     default:
         assert(0);

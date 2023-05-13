@@ -465,7 +465,7 @@ void setVar(int varIndex, s16 value);
 void startPartyCharacterASyncLoading(int partyCharacter, int partySlot);
 void fieldEntryPoint();
 
-void setupSpecialAnimation(sSpriteActor* param_1, struct sSpriteActorAnimationBundle* param_2);
+void setupSpecialAnimation(sSpriteActorCore* param_1, struct sSpriteActorAnimationBundle* param_2);
 void OP_INIT_ENTITY_SCRIPT_sub0(int actorId, int param_2, struct sSpriteActorAnimationBundle* pSetup, int param_4, int param_5, int param_6, int param_7);
 void OP_INIT_ENTITY_SCRIPT_sub1();
 void setCurrentActor2DPosition(int posX, int posZ);

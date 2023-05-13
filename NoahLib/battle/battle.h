@@ -31,6 +31,8 @@ extern std::array<sApStruct, 11> apConfigArray;
 
 struct sBattleVar2Sub {
     std::array<u8, 8> m0_circleMenuBattleCommandsMapping;
+    std::array<u8, 4> m8;
+    std::array<u8, 4> mC;
     std::array<s16, 16> m1C_isCommandEnabled;
     u8 m3C_currentTarget;
     // size 0x40
@@ -81,6 +83,7 @@ struct sBattleVar0 {
     std::array<std::array<POLY_FT4, 2>, 3> m818; // unsure size
     std::array<std::array<std::array<POLY_FT4, 2>, 10>, 4> m2E08_timeBars;
     std::array<std::array<std::array<POLY_FT4, 2>, 40>, 3> m3A88;
+    std::array<std::array<std::array<POLY_FT4, 2>, 4>, 3> m6008;
     std::array<POLY_F4, 2> m63C8;
     std::array<DR_MODE, 2> m63F8;
     s32 m6410 = 0;
@@ -126,6 +129,7 @@ struct sBattleVar1 {
     std::array<u8, 3> m90_perPCTimeBarStatus;
     std::array<u8, 3> m93_oddOrEven;
     u8 m97;
+    std::array<u8, 3> m99_oddOrEven;
     u8 mA2;
     u8 mA3;
     u8 mA9_timeBarNumMoveSteps;
@@ -135,8 +139,10 @@ struct sBattleVar1 {
     u8 mC6_isTargetSelectionCursorVisible;
     u8 mCB;
     std::array<u8, 3> mCC;
+    u8 mCF;
     std::array<u8, 2> mD0_battleCommandLength;
     std::array<u8, 3> mE0;
+    std::array<u8, 3> mEC;
     s16 m104_timeBarAnimationScale;
     s16 m106_timeBarAnimationRotation;
     // size 0x10C
@@ -323,5 +329,8 @@ extern sBattle800CDD40Sub* battleGetSlotStatusSub_current28Entry;
 extern std::array<sBattle800cdd40, 3> battle800CDD40;
 extern sBattleEntity* battleGetSlotStatusSub_currentBattleEntity;
 extern sGameStateA42* battleGetSlotStatusSub_currentBattleEntityGear;
+extern u16 jumpAnimationActiveActorBF;
 
 void setupBattleAnimationSpriteCore(sSpriteActorCore* param_1);
+void performMechaPlayAnimation(ushort param_1, short param_2, int param_3);
+int waitForMusic(uint param_1);
