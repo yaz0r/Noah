@@ -1,5 +1,7 @@
 #pragma once
 
+#include "kernel/filesystem.h"
+
 struct sFieldEntitySub4_110_0_frame {
     void init(std::vector<u8>::iterator data) {
         rawPointer.setPointer(&data[0]);
@@ -34,8 +36,12 @@ struct sFieldEntitySub4_110_0 {
     sPS1Pointer rawPointer;
 };
 
-struct sSpriteActorAnimationBundle
+struct sSpriteActorAnimationBundle : public sLoadableData
 {
+    virtual void init(std::vector<u8>& inputData) override {
+        init(inputData.begin());
+    }
+
     void init(std::vector<u8>::iterator inputData)
     {
         rawData = &inputData[0];

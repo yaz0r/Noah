@@ -72,6 +72,8 @@ std::array<sBattleEntity, 11> battleEntities;
 sGameStateA4* startBattleAttackAnimationVar5;
 sGameStateA42* startBattleAttackAnimationVar6;
 
+bool battleSpritesDisabled = false;
+
 void jumpUpdatePositionSub0(sSpriteActorCore* param_1, sSpriteActorCore* param_2);
 
 void initGraphicsForBattle(void) {
@@ -2055,7 +2057,7 @@ struct sBattleVar48 {
     u8 m23_battleEntityIndex;
     std::array<s16, 11> m24;
     std::array<u8,11> m3C;
-    u8 m47;
+    s8 m47_battleAnimationToPlay;
 
     //size 0x48
 };
@@ -2064,7 +2066,7 @@ std::array<sBattleVar48, 32> battleVar48;
 
 void initAnimSeqFromCharacterToCharacter(u8 entity, u8 target) {
     for (int i = 0; i < 0x20; i++) {
-        battleVar48[i].m47 = 0xFF;
+        battleVar48[i].m47_battleAnimationToPlay = -1;
         battleVar48[i].m23_battleEntityIndex = entity;
         battleVar48[i].m16_targetBitMask = characterIdToTargetBitmask(target);
     }
@@ -2172,7 +2174,7 @@ void battleAnimationCallback_2(sSpriteActorCore* param_1, sSpriteActorCore* para
     (param_1->m0_position).vz = (int)sVar1 << 0x10;
     jumpAnimationControlStruct->m48 = 1;
     setupJumpAnimationStruct1C(4);
-    spriteActorSetPlayingAnimation(param_1, (int)*(char*)&param_1->mB0);
+    spriteActorSetPlayingAnimation(param_1, param_1->mB0.mx0_animationId);
     battleAnimationCallback_2Sub0(param_1, param_2);
     return;
 }
@@ -2187,7 +2189,7 @@ void setRenderingInfoForItemUser(sSpriteActorCore*) {
 
 sSpriteActorCore* getSpriteCoreForAnimation(int param_1) {
     if (jumpAnimationControlStruct->m4 && (jumpAnimationControlStruct->m24 != param_1) && (battleVisualEntities[(jumpAnimationControlStruct->m4->mAC & 3) << 2 | jumpAnimationControlStruct->m4->mA8.mx1E].m3 == 0)) {
-        spriteActorSetPlayingAnimation(jumpAnimationControlStruct->m4, jumpAnimationControlStruct->m4->mB0 & 0xFF);
+        spriteActorSetPlayingAnimation(jumpAnimationControlStruct->m4, jumpAnimationControlStruct->m4->mB0.mx0_animationId);
     }
     jumpAnimationControlStruct->m24 = param_1;
     jumpAnimationControlStruct->m4 = battleSpriteActorCores[param_1];
@@ -2306,7 +2308,7 @@ void battleIdleDuringLoading(void)
 struct sBattleAnimationSpecial : public sSpriteActorAnimationBundle {
     void init(std::vector<u8> inputData) {
         m_rawData = inputData;
-        sSpriteActorAnimationBundle::init(m_rawData.begin());
+        sSpriteActorAnimationBundle::init(m_rawData);
     }
 
     std::vector<u8> m_rawData;
@@ -2375,8 +2377,8 @@ void processBattleAnimation(sSpriteActorCore* param_1) {
         return;
     }
 
-    switch (battleVar48[allocateJumpAnimationStructVar0].m47) {
-    case 0xFF: // waiting for attack prompt
+    switch (battleVar48[allocateJumpAnimationStructVar0].m47_battleAnimationToPlay) {
+    case -1: // waiting for attack prompt
         OP_INIT_ENTITY_SCRIPT_sub0Sub8(param_1->getAsSpriteActorCore(), 0);
         jumpAnimationControlStruct->m48 = 1;
         if (processBattleAnimationSub0() == 0) {
@@ -2387,11 +2389,11 @@ void processBattleAnimation(sSpriteActorCore* param_1) {
                 m3 != 0) {
                 return;
             }
-            spriteActorSetPlayingAnimation(param_1->getAsSpriteActorCore(), param_1->getAsSpriteActorCore()->mB0 & 0xFF);
+            spriteActorSetPlayingAnimation(param_1->getAsSpriteActorCore(), param_1->getAsSpriteActorCore()->mB0.mx0_animationId);
             return;
         }
         assert(0);
-    case 0xFE:
+    case -2:
     {
         jumpAnimationControlStruct->m48 = 0;
         sSpriteActorCore* psVar10 = getSpriteCoreForAnimation(jumpAnimationControlStruct->m20_actor);
@@ -2421,19 +2423,18 @@ void processBattleAnimation(sSpriteActorCore* param_1) {
             (uint)battleVar48[allocateJumpAnimationStructVar0].m18_operationType
             [(param_1->getAsSpriteActorCore()->m74_pNextSpriteCore->mAC & 3) << 2 | param_1->getAsSpriteActorCore()->m74_pNextSpriteCore->mA8.mx1E];
         if (!isVramPreBacked((param_1->getAsSpriteActorCore()->m24_vramData)->m0_spriteData)) {
-            if (battleVar48[allocateJumpAnimationStructVar0].m47 < 0x10) {
+            if (battleVar48[allocateJumpAnimationStructVar0].m47_battleAnimationToPlay < 0x10) {
                 if ((fxFragmentLoaded == '\0') && (battleAnimationLoadingDest.m_rawData.size() != 0)) {
                     battleIdleDuringLoading();
                     (param_1->getAsSpriteActorCore())->m50 = loadFragmentIsNotLoadedYet();
                     setupSpecialAnimation(param_1, &battleAnimationLoadingDest);
                 }
-                if (jumpAnimationControlStruct->m20_actor ==
-                    (((param_1->getAsSpriteActorCore())->mAC & 3) << 2 |
-                        (uint)(param_1->getAsSpriteActorCore())->mA8.mx1E)) {
-                    spriteActorSetPlayingAnimation(param_1->getAsSpriteActorCore(), ~battleVar48[allocateJumpAnimationStructVar0].m47);
+                int expectActorId = (((param_1->getAsSpriteActorCore())->mAC & 3) << 2 | (uint)(param_1->getAsSpriteActorCore())->mA8.mx1E);
+                if (jumpAnimationControlStruct->m20_actor == expectActorId) {
+                    spriteActorSetPlayingAnimation(param_1->getAsSpriteActorCore(), ~battleVar48[allocateJumpAnimationStructVar0].m47_battleAnimationToPlay);
                 }
                 else {
-                    spriteActorSetPlayingAnimation(param_1->getAsSpriteActorCore(), battleVar48[allocateJumpAnimationStructVar0].m47);
+                    spriteActorSetPlayingAnimation(param_1->getAsSpriteActorCore(), battleVar48[allocateJumpAnimationStructVar0].m47_battleAnimationToPlay);
                 }
             }
             else {
@@ -2441,7 +2442,7 @@ void processBattleAnimation(sSpriteActorCore* param_1) {
             }
         }
         else {
-            spriteActorSetPlayingAnimation(param_1->getAsSpriteActorCore(), battleVar48[allocateJumpAnimationStructVar0].m47);
+            spriteActorSetPlayingAnimation(param_1->getAsSpriteActorCore(), battleVar48[allocateJumpAnimationStructVar0].m47_battleAnimationToPlay);
             sSpriteActorCore* psVar10 = param_1->getAsSpriteActorCore()->m74_pNextSpriteCore;
             computeBattleCameraParams
             (1 << ((param_1->getAsSpriteActorCore()->mAC & 3) << 2 |
@@ -2523,7 +2524,7 @@ void allocateJumpAnimationStructCallback(sJumpAnimationControlStruct* param_1) {
         }
         case 5: // end of attack
             if (battleVisualEntities[(param_1->m4->mAC & 3) << 2 | (uint)param_1->m4->mA8.mx1E].m3 == 0) {
-                spriteActorSetPlayingAnimation(param_1->m4, param_1->m4->mB0 & 0xFF);
+                spriteActorSetPlayingAnimation(param_1->m4, param_1->m4->mB0.mx0_animationId);
             }
             battleAnimationCallback_5(jumpAnimationControlStruct->m24);
             setupJumpAnimationStruct1C(10);
@@ -3888,7 +3889,7 @@ void drawCircleMenuCallGear(byte param_1) {
 
 void handleMenuSelectEnemy_cancel_sub0(u8 param_1)
 {
-    battleVar48[battleVar2->m2DA_indexInBattleVar48].m47 = 0xfe;
+    battleVar48[battleVar2->m2DA_indexInBattleVar48].m47_battleAnimationToPlay = -2;
     battleVar48[battleVar2->m2DA_indexInBattleVar48].m23_battleEntityIndex = param_1;
     startCharacterJumpToEnemyVar0 = 0;
     return;
@@ -3925,7 +3926,6 @@ void deleteJumpAnimationControlStruct(void)
 
 void cancelJumpAnim(void)
 {
-    char cVar1;
     sJumpAnimationControlStruct* psVar2;
     uint uVar3;
     sSpriteActorCore* psVar4;
@@ -3939,9 +3939,8 @@ void cancelJumpAnim(void)
             (psVar4->m0_position).vx = (uint)(ushort)battleVisualEntities[jumpAnimationControlStruct->m24].mA_X << 0x10;
             (psVar4->m0_position).vz = (uint)(ushort)battleVisualEntities[jumpAnimationControlStruct->m24].mC_Z << 0x10;
             savePointCallback8Sub0Sub0_battle(psVar4);
-            cVar1 = psVar4->mB0 & 0xFF;
             (psVar4->m0_position).vy = (int)psVar4->m84_maxY << 0x10;
-            spriteActorSetPlayingAnimation(psVar4, (int)cVar1);
+            spriteActorSetPlayingAnimation(psVar4, psVar4->mB0.mx0_animationId);
             OP_INIT_ENTITY_SCRIPT_sub0Sub8(psVar4, 0);
         }
         else {
@@ -3995,8 +3994,10 @@ std::array<sBattle800cdd40, 3> battle800CDD40;
 sBattleEntity* battleGetSlotStatusSub_currentBattleEntity;
 sGameStateA42* battleGetSlotStatusSub_currentBattleEntityGear;
 
-void startBattleAttackAnimationSub0(u8, u8) {
-    MissingCode();
+void startBattleAttackAnimationSub0(u8 attacker, u8 param_2) {
+    if ((param_2 == 0) || (battleGetSlotStatusSub_current28Entry->mA & 0x100)) {
+        assert(0);
+    }
 }
 
 byte startBattleAttackAnimationVar0;
@@ -4161,7 +4162,7 @@ int performAttack(byte param_1, uint numAPUsed) {
     int oldVar48 = battleVar2->m2DA_indexInBattleVar48;
     battleVar48[battleVar2->m2DA_indexInBattleVar48].m23_battleEntityIndex = param_1;
     battleVar48[battleVar2->m2DA_indexInBattleVar48].m16_targetBitMask = battleTickMain_var4;
-    battleVar48[battleVar2->m2DA_indexInBattleVar48].m47 = (byte)performAttack_type;
+    battleVar48[battleVar2->m2DA_indexInBattleVar48].m47_battleAnimationToPlay = performAttack_type;
     battleVar2->m2DA_indexInBattleVar48++;
     updateMonsterScriptEntitiesVarByAtttack(param_1, battleVar2->m0[param_1].m3C_currentTarget);
     if ((2 < battleVar2->m0[param_1].m3C_currentTarget) && (executeMonsterScriptWhenAttacked(battleVar2->m0[param_1].m3C_currentTarget) != '\0'))
@@ -5017,14 +5018,12 @@ void executeSpriteBytecode2_battle(sSpriteActorCore* param_1) {
                 param_1->m68(param_1);
                 return;
             }
-            if (-1 < *(char*)&param_1->mB0) {
-                spriteActorSetPlayingAnimation(param_1, *(char*)&param_1->mB0);
+            if (param_1->mB0.mx0_animationId > -1) {
+                spriteActorSetPlayingAnimation(param_1, param_1->mB0.mx0_animationId);
             }
             param_1->mA8.mx1C = 0;
             return;
-        case 0x8E:
         case 0x98:
-        case 0xC8:
         case 0xD4:
         case 0xFA:
             assert(0);
@@ -5129,6 +5128,10 @@ void executeSpriteBytecode2_battle(sSpriteActorCore* param_1) {
                 param_1->m9E_wait = param_1->m9E_wait + sVar11;
             }
             return;
+        case 0xCA:
+            MissingCode();
+            param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
+            break;
         case 0xE1: // jump in bytecode
             param_1->m64_spriteByteCode += READ_LE_S16(pEndOfOpcode);
             break;
@@ -5152,12 +5155,24 @@ void executeSpriteBytecode2_battle(sSpriteActorCore* param_1) {
         break;
 
         // BATTLE SPECIFIC!
+        case 0x8E:
+            param_1->m64_spriteByteCode.makeNull();
+            return;
         case 0x89: 
             battleSpriteOp89(param_1);
             param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
             break;
         case 0x97:
             MissingCode();
+            param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
+            break;
+        case 0xA4:
+            if (param_1->m74_pNextSpriteCore->m48_defaultAnimationbundle == nullptr) {
+                assert(0);
+            }
+            else {
+                spriteActorSetPlayingAnimation(param_1->m74_pNextSpriteCore, READ_LE_S8(pEndOfOpcode));
+            }
             param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
             break;
         case 0xC2:
@@ -5178,6 +5193,20 @@ void executeSpriteBytecode2_battle(sSpriteActorCore* param_1) {
             param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
             break;
         }
+        case 0xC3:
+            MissingCode(); // battle sprite effect
+            param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
+            break;
+        case 0xC8:
+        {
+            MissingCode();
+            param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
+            break;
+        }
+        case 0xE8: // Battle sprite effect
+            MissingCode();
+            param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
+            break;
         case 0xF8: // switch for battle
         {
             u8 attack = battleVar48[allocateJumpAnimationStructVar0 + -1].m18_operationType
@@ -5185,7 +5214,17 @@ void executeSpriteBytecode2_battle(sSpriteActorCore* param_1) {
                 param_1->m74_pNextSpriteCore->mA8.mx1E];
 
             bool bVar6;
-            switch (READ_LE_U8(pEndOfOpcode + 2) & 0x7F) {
+            u8 attackType = READ_LE_U8(pEndOfOpcode + 2) & 0x7F;
+            switch (attackType) {
+            case 0:
+                bVar6 = attack == 0;
+                break;
+            case 4:
+                bVar6 = attack == 4;
+                break;
+            case 5:
+                bVar6 = attack == 5;
+                break;
             default:
                 assert(0);
             }
@@ -5194,9 +5233,11 @@ void executeSpriteBytecode2_battle(sSpriteActorCore* param_1) {
                 bVar6 = !bVar6;
             }
             if (bVar6) {
-                assert(0);
+                param_1->m64_spriteByteCode += READ_LE_S16(pEndOfOpcode);
             }
-            param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
+            else {
+                param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
+            }
             break;
         }
 

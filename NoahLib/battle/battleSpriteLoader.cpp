@@ -12,7 +12,11 @@ sBattleSpriteConfigs battleConfigFile3;
 
 struct sBattleSpriteLoaderTask : public sTaskHeader{
     sBattleSpriteConfigs* m20;
+    sSpriteActorAnimationBundle* m24;
+    sLoadableDataRaw* m28;
+    sLoadableDataRaw* m2C_seq;
     std::array<sLoadingBatchCommands, 4> m30_loadingCommands;
+    std::array<sLoadingBatchCommands, 4> m50_loadingCommandsPhase2;
     s32 m90_frameToDeleteCount;
 };
 
@@ -146,8 +150,6 @@ std::array<u8, 12> battleSpriteWidthPerCharacter = { {
         0x10, 0x10, 0x10, 0x10, 0x10, 0x18, 0x10, 0x10, 0x10, 0x18, 0x10, 0x10
 } };
 
-bool battleSpritesDisabled = false;
-
 void battleSpriteUpdate(sTaskHeader* param_1) {
     sSpriteActorCore* pSprite = param_1->m4->getAsSpriteActorCore();
 
@@ -212,7 +214,7 @@ sBattleSpriteActor* allocateBattleSpriteActor(sSpriteActorAnimationBundle* param
     pSprite->m38_spriteActor.m0_spriteActorCore.m0_position.vx = X << 0x10;
     pSprite->m38_spriteActor.m0_spriteActorCore.m0_position.vy = Y << 0x10;
     pSprite->m38_spriteActor.m0_spriteActorCore.m0_position.vz = Z << 0x10;
-    *(char*)&pSprite->m38_spriteActor.m0_spriteActorCore.mB0 = animationId;
+    pSprite->m38_spriteActor.m0_spriteActorCore.mB0.mx0_animationId = animationId;
     pSprite->m38_spriteActor.m0_spriteActorCore.m3C |= 4;
     pSprite->m38_spriteActor.m0_spriteActorCore.m32_direction = direction;
     setGraphicEntityScale(&pSprite->m38_spriteActor, 0x2000);
@@ -271,6 +273,38 @@ std::array<std::array<int, 2>, 14> battlePartyFileMapping = { {
     {0x1, 0x12},
 } };
 
+/*
+Battle animation list:
+0x00: idle (unused?)
+0x01: idle ready to fight
+0x02: run?
+0x03: jump?
+0x04: jump?
+0x05: run?
+0x06: kneeling
+0x07: dead (lying down on the floor)
+0x08: ? (assert in animation code)
+0x09: Dodge?
+0x0A: ? (assert in animation code, bytecode 0xC3)
+0x0B: ? (assert in animation code, bytecode 0xC3)
+0x0C: ? (assert in animation code, bytecode 0xC3)
+0x0D: ? (assert in animation code, bytecode 0xC3)
+0x0E: ? (assert in animation code, bytecode 0xC3)
+0x0F: ? (assert in animation code, bytecode 0xC3)
+0x10: stand up
+0x11: casting
+0x12: casting end?
+0x13: ? (assert in animation code, bytecode 0xC3)
+0x14: kneeling
+0x15: ? (assert in animation code, bytecode 0xC3)
+0x16: ? (assert in animation code, bytecode 0xC3)
+0x17: Jump for battle intro
+0x18: victory
+0x19: idle breaker?
+0x1A: idle breaker?
+0x1B: dodge (crash!)
+*/
+
 void createBattlePlayerSpriteActors() {
     for (int i = 0; i < 3; i++) {
         if ((battleVisualEntities[i].m2 < 0x11) && battleVisualEntities[i].m4_isGear == 0) {
@@ -285,6 +319,7 @@ void createBattlePlayerSpriteActors() {
         }
     }
 
+    // Start characters jumping in during battle intro
     if (currentBattleLoaderTransitionEffect == 0) {
         for (int i = 0; i < 3; i++) {
             if (battleSpriteActorCores[i]) {
@@ -340,18 +375,31 @@ void mainBattleSpriteCallback_phase4(sTaskHeader* param_1) {
 void mainBattleSpriteCallback_phase3(sTaskHeader* param_1) {
     if (isCDBusy() == 0) {
         MissingCode();
+        initFieldEntitySub4Sub5Sub0(&createSavePointMeshData_mode5, ((sBattleSpriteLoaderTask*)param_1)->m24, sVec2_s16::fromS32(0x380), sVec2_s16::fromS32(0x1d10000));
         regCallback8(param_1, &mainBattleSpriteCallback_phase4);
         MissingCode();
     }
 }
 
 void mainBattleSpriteCallback_phase2(sTaskHeader* param_1) {
-
+    sBattleSpriteLoaderTask* pThis = (sBattleSpriteLoaderTask*)param_1;
     setCurrentDirectory(0x2c, 0);
     if (!isCDBusy()) {
         createBattlePlayerSpriteActors();
-        MissingCode(); // load battle music stuff
-        regCallback8(param_1, mainBattleSpriteCallback_phase3);
+        pThis->m50_loadingCommandsPhase2[0].m4_loadPtr = pThis->m28 = new sLoadableDataRaw();
+        pThis->m50_loadingCommandsPhase2[0].m0_fileIndex = 1;
+
+        pThis->m50_loadingCommandsPhase2[1].m4_loadPtr = pThis->m24 = new sSpriteActorAnimationBundle();
+        pThis->m50_loadingCommandsPhase2[1].m0_fileIndex = 2;
+
+        pThis->m50_loadingCommandsPhase2[2].m4_loadPtr = pThis->m2C_seq = new sLoadableDataRaw();
+        pThis->m50_loadingCommandsPhase2[2].m0_fileIndex = 3;
+
+        pThis->m50_loadingCommandsPhase2[3].m4_loadPtr = nullptr;
+        pThis->m50_loadingCommandsPhase2[3].m0_fileIndex = 0;
+
+        batchStartLoadingFiles(&pThis->m50_loadingCommandsPhase2[0], 0);
+        regCallback8(pThis, mainBattleSpriteCallback_phase3);
     }
 }
 

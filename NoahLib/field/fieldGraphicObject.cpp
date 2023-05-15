@@ -3,6 +3,7 @@
 #include "field.h"
 #include "sprite/spriteSetup.h"
 #include "kernel/TIM.h"
+#include "battle/battle.h"
 
 int OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1_var = 0x2000;
 int fieldDrawEnvsInitialized = 0;
@@ -511,6 +512,14 @@ void spriteCallback_render2_updateMatrix(sSpriteActorCore* param_1)
     return;
 }
 
+void spriteCallback_render8(sTaskHeader* param_1) {
+    assert(0);
+}
+
+void spriteCallback_render9(sTaskHeader* param_1) {
+    MissingCode();
+}
+
 void spriteCallback_render2(sTaskHeader* param_1) {
     sSpriteActorCore* pSpriteActor = param_1->m4->getAsSpriteActorCore();
 
@@ -571,7 +580,7 @@ void initFieldEntitySub4Sub1(sSpriteActorCore* param_1)
     param_1->m3C = param_1->m3C & 0xfe00ffe3;
     param_1->m40 = param_1->m40 & 0xfffe0003;
     param_1->mAC = 0;
-    param_1->mB0 = 0;
+    param_1->mB0.mRaw = 0;
     int iVar1 = (fieldDrawEnvsInitialized + 1) * (fieldDrawEnvsInitialized + 1) * 0x4000 * param_1->m82;
     param_1->mAC = param_1->mAC & 0xfff8007f | 0x8000;
     param_1->mA8.mx11 = 0;
@@ -624,14 +633,17 @@ void initsFieldEntitySub4_B4(sFieldEntitySub4_B4_alt* pThis)
     pThis->m0_rotation.vz = 0;
     //pThis->m2C.clear();
 }
+void createSavePointMeshDataMode0(sSpriteActorCore* param_1) {
+    param_1->m20 = nullptr;
+}
 
 void createSavePointMeshDataMode1(sSavePointMesh1* param_1)
 {
     (param_1->m38_spriteActorCore).m20 = &param_1->mB4;
     initsFieldEntitySub4_B4(&param_1->mB4);
-    (param_1->m38_spriteActorCore).m20->getAsObject()->m30 = &param_1->mF4;
-    (param_1->m38_spriteActorCore).m20->getAsObject()->m34_pModelBlock = nullptr;
-    (param_1->m38_spriteActorCore).m20->getAsObject()->m38 = nullptr;
+    (param_1->m38_spriteActorCore).m20->getAsSprite()->m30 = &param_1->mF4;
+    (param_1->m38_spriteActorCore).m20->getAsSprite()->m34_perSubgroupTransform = nullptr;
+    (param_1->m38_spriteActorCore).m20->getAsSprite()->m38_pNext = nullptr;
 }
 
 void createSavePointMeshDataMode2(sSavePointMesh2* param_1)
@@ -652,27 +664,38 @@ int initFieldEntitySub4Sub4(const sFieldEntitySub4_110_0* param_1)
     return param_1->m0_header.m_0x7E00;
 }
 
+sFieldEntitySub4_110 createSavePointMeshData_mode5;
+
 sSavePointMeshAbstract* createSavePointMeshData(int mode1, int mode2, sFieldEntitySub4_110* param_3, int param_4, sSavePointMesh1* param_5)
 {
     // NOTE: this is kinda different from the original code, that was handcrafting those various structure in a very hackish way
     sSavePointMeshAbstract* pNewSavePoint = nullptr;
     switch (mode2) {
-    case 1:
+    case 0: // used in battle when hitting
+    {
+        // todo: figure that one out too
+        sSavePointMeshAbstract* pNewSavePoint0 = new sSavePointMeshAbstract;
+        pNewSavePoint = allocateSavePointMeshData(pNewSavePoint0, param_5);
+        createSavePointMeshDataMode0(&pNewSavePoint0->m38_spriteActorCore);
+        break;
+    }
+    break;
+    case 1: // this is used for sprite, especially in battle for attack sprite special effects
         if (mode1 == 5) {
-            assert(0);
+            param_3 = &createSavePointMeshData_mode5;
         }
         if (mode1 == 6) {
             assert(0);
         }
         {
             sSavePointMesh1* pNewSavePoint1 = new sSavePointMesh1;
-            int numF4 = initFieldEntitySub4Sub4(param_3->m0_spriteData) - 1;
+            int numF4 = initFieldEntitySub4Sub4(param_3->m0_spriteData)/* - 1*/; // TODO: HACK! removed the -1 here
             pNewSavePoint = allocateSavePointMeshData(pNewSavePoint1, param_5);
             pNewSavePoint1->mF4.resize(numF4);
             createSavePointMeshDataMode1(pNewSavePoint1);
             break;
         }
-    case 2:
+    case 2: // this is used by field 3d objects like save points
         {
             // todo: this is a different struct without the last F4 array
             sSavePointMesh2* pNewSavePoint2 = new sSavePointMesh2;
@@ -698,13 +721,49 @@ void spriteBytecode2ExtendedE0_Sub0Sub0Sub0(sTaskHeader* param_1, void (*param_2
 }
 
 void spriteCallback_render0(sTaskHeader* param_1) {
-    assert(0);
+    sSpriteActorCore* pSpriteSheet = param_1->m4->getAsSpriteActorCore();
+    if ((!pSpriteSheet->mB0.mx8) || !battleSpritesDisabled) {
+        SVECTOR local_30;
+        local_30.vx = pSpriteSheet->m0_position.vx.getIntegerPart();
+        local_30.vy = pSpriteSheet->m0_position.vy.getIntegerPart();
+        local_30.vz = pSpriteSheet->m0_position.vz.getIntegerPart();
+
+        SetRotMatrix(&currentRenderingMatrix);
+        SetTransMatrix(&currentRenderingMatrix);
+        sVec2_s16 dummy1;
+        long dummy2;
+        long flags;
+        int depth = RotTransPers(&local_30, &dummy1, &dummy2, &flags);
+        int OTIndex = (depth >> (gDepthDivider & 0x1f)) + (int)pSpriteSheet->m30;
+        if (flags & 0x8000) {
+            OTIndex = 0;
+        }
+        pSpriteSheet->m2E = OTIndex;
+        if ((pSpriteSheet->m3C >> 0x18 & 1) == 0) {
+            if ((pSpriteSheet->m3C >> 0x1d & 1) != 0) {
+                OTIndex = (int)pSpriteSheet->m70->m2E;
+            }
+            if (OTIndex - 1U < 0xfff) {
+                renderSpriteActor(pSpriteSheet, &(*characterRenderingOT)[OTIndex]);
+            }
+        }
+        else {
+            assert(0);
+        }
+    }
 }
 
 const std::vector<void (*)(sTaskHeader*)> spriteBytecode2ExtendedE0_Sub0Sub0_callback = { {
         spriteCallback_render0,
         nullptr,
         spriteCallback_render2,
+        nullptr,
+        nullptr,
+        spriteCallback_render0,
+        spriteCallback_render0,
+        spriteCallback_render2,
+        spriteCallback_render8,
+        spriteCallback_render9,
 } };
 
 void spriteBytecode2ExtendedE0_Sub0Sub0(sTaskHeader* param_1, int param_2)
@@ -720,6 +779,12 @@ void spriteBytecode2ExtendedE0_Sub0(sSavePointMeshAbstract* param_1)
     {
     case 0:
     case 2:
+    case 5:
+        break;
+    case 9:
+        param_1->m38_spriteActorCore.m36 = 3;
+        param_1->m38_spriteActorCore.m28_colorAndCode.m3_code = 0x60;
+        param_1->m38_spriteActorCore.m34_currentSpriteFrame = 1;
         break;
     default:
         assert(0);
@@ -731,9 +796,9 @@ void spriteBytecode2ExtendedE0_Sub0(sSavePointMeshAbstract* param_1)
 void spriteBytecode2ExtendedE0(sSpriteActorCore* param_1, sPS1Pointer param_2, sFieldEntitySub4_110* param_3)
 {
     u8 oldSpriteBytecode2ExtendedE0_Var0 = spriteBytecode2ExtendedE0_Var0;
-    u32 b0_flag = param_1->mB0;
-    param_1->mB0 = b0_flag | 0x800;
-    if ((b0_flag & 0x100) != 0) {
+    auto b0_flag = param_1->mB0;
+    param_1->mB0.mx10 = 1;
+    if (b0_flag.mx8) {
         spriteBytecode2ExtendedE0_Var0 = 0;
     }
     u32 savePointCreationMode1 = getSavePointCreationMode1(param_2);
@@ -762,27 +827,26 @@ void spriteBytecode2ExtendedE0(sSpriteActorCore* param_1, sPS1Pointer param_2, s
     pSavePointMesh->m38_spriteActorCore.m32_direction = param_1->m32_direction;
     pSavePointMesh->m38_spriteActorCore.m2C_scale = param_1->m2C_scale;
     pSavePointMesh->m38_spriteActorCore.m34_currentSpriteFrame = param_1->m34_currentSpriteFrame;
-    savePointCreationMode1 = (uint)param_1->mB0 >> 9 & 1;
-    pSavePointMesh->m38_spriteActorCore.mB0 = pSavePointMesh->m38_spriteActorCore.mB0 & 0xfffffdff | savePointCreationMode1 << 9;
+    pSavePointMesh->m38_spriteActorCore.mB0.mx9 = param_1->mB0.mx9;
 
-    if (savePointCreationMode1 != 0) {
+    if (param_1->mB0.mx9) {
         pSavePointMesh->m38_spriteActorCore.m3A = param_1->m3A;
         pSavePointMesh->m38_spriteActorCore.m40 = pSavePointMesh->m38_spriteActorCore.m40 & 0xffffe0ff | 0x300;
     }
 
     pSavePointMesh->m38_spriteActorCore.mA8.mx1E = param_1->mA8.mx1E;
     pSavePointMesh->m38_spriteActorCore.mAC = pSavePointMesh->m38_spriteActorCore.mAC & 0xfffffffc | param_1->mAC & 3;
-    pSavePointMesh->m38_spriteActorCore.mB0 = pSavePointMesh->m38_spriteActorCore.mB0 & 0xfffffeffU | param_1->mB0 & 0x100U;
+    pSavePointMesh->m38_spriteActorCore.mB0.mx8 = param_1->mB0.mx8;
     pSavePointMesh->m38_spriteActorCore.mAC = pSavePointMesh->m38_spriteActorCore.mAC & 0xffffffbf | param_1->mAC & 0x40;
     pSavePointMesh->m38_spriteActorCore.mAC = pSavePointMesh->m38_spriteActorCore.mAC & 0xfff8003f | param_1->mAC & 0x40 | param_1->mAC & 0x7ff80;
     pSavePointMesh->m38_spriteActorCore.mA8.mx0 = 0;
     pSavePointMesh->m38_spriteActorCore.mAC = pSavePointMesh->m38_spriteActorCore.mAC & 0xfff8003b | param_1->mAC & 0x40 | param_1->mAC & 0x7ff80 | param_1->mAC & 4;
 
-    if (((uint)param_1->mA8.mx0) == 0) {
+    if (param_1->mA8.mx0 == 0) {
         pSavePointMesh->m38_spriteActorCore.m7C = param_1->m7C;
     }
     else {
-        pSavePointMesh->m38_spriteActorCore.m7C = (sFieldEntitySub4_F4*)0x0;
+        pSavePointMesh->m38_spriteActorCore.m7C = nullptr;
     }
 
     pSavePointMesh->m38_spriteActorCore.m70 = param_1;
@@ -844,7 +908,7 @@ void computeStepFromMoveSpeed(sSpriteActorCore* param1)
 	param1->mC_step.vz = -((getAngleCos((int)param1->m32_direction) >> 2) * iVar2) >> 6;
 }
 
-sStackElement* executeSpriteBytecode2Sub3(sSpriteActor* param_1, sPS1Pointer param_2)
+sStackElement* executeSpriteBytecode2Sub3(sSpriteActorCore* param_1, sPS1Pointer param_2)
 {
 	byte bVar1;
 
@@ -1003,6 +1067,13 @@ void setGraphicEntityScale(sSpriteActorCore* param_1, int param_2)
     }
 }
 
+void initPerSubgroupTransforms(sSpriteActorCore* param_1) {
+    if (param_1->m20->getAsSprite()->m34_perSubgroupTransform == nullptr) {
+        param_1->m20->getAsSprite()->m34_perSubgroupTransform = new std::array<sFieldEntitySub4_124, 8>;
+        resetPerSubgroupTransforms(param_1);
+    }
+}
+
 void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS1Pointer param_3)
 {
 	switch (bytecode & 0xff) {
@@ -1020,10 +1091,30 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
     case 0x8D:
         setupOverrideTPage(param_1->m24_vramData->m4_vramLocation.vx, param_1->m24_vramData->m4_vramLocation.vy);
         break;
+    case 0x91:
+        param_1->m28_colorAndCode.m3_code &= ~1; // make solid
+        updateAllSubsprites(param_1);
+        break;
 	case 0x92:
 		param_1->m28_colorAndCode.m3_code |= 1; // make transparent
 		updateAllSubsprites(param_1);
 		break;
+    case 0x93:
+        if (param_1->m70 && (param_1->m3C & 3)) {
+            if (!isVramPreBacked(param_1->m24_vramData->m0_spriteData)) {
+                param_1->m40 = param_1->m40 & 0xfffe1fff | 0x1c000;
+            }
+            if (param_1->m20 && param_1->m70->m20->getAsSprite()->m34_perSubgroupTransform) {
+                initPerSubgroupTransforms(param_1);
+                for (int i = 0; i < 8; i++) {
+                    (*param_1->m20->getAsSprite()->m34_perSubgroupTransform)[i] = (*param_1->m70->m20->getAsSprite()->m34_perSubgroupTransform)[i];
+                }
+                param_1->m3C = param_1->m70->m3C;
+                param_1->m32_direction = param_1->m70->m32_direction;
+            }
+            addToSpriteTransferList(param_1, param_1->m34_currentSpriteFrame);
+        }
+        break;
     case 0x94:
         if ((param_1->m3C & 3) != 2) {
             return;
@@ -1035,6 +1126,9 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
         // TODO: type-check that
         registerSpriteCallback2_2(&((sSavePointMeshAbstract*)param_1->m6C_pointerToOwnerStructure)->m0);
 		break;
+    case 0xA4:
+        spriteActorSetPlayingAnimation(param_1->m74_pNextSpriteCore, READ_LE_S8(param_3));
+        break;
     case 0xA9:
     {
         s32 magnitude = READ_LE_U8(param_3) * param_1->m2C_scale;
@@ -1082,10 +1176,47 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
             setGraphicEntityScale(param_1, (short)((READ_LE_U8(param_3) << 0x18) >> 0x10));
         }
         break;
+    case 0xBA:
+        setTransparencyMode(param_1, READ_LE_U8(param_3));
+        break;
     case 0xBC: // VERY Complicated, used by save points
         {
-            if ((READ_LE_U8(param_3) & 0x80) == 0) {
-                MissingCode();
+            u8 type = READ_LE_U8(param_3);
+            if ((type & 0x80) == 0) {
+                sSpriteActorCore* psVar25 = param_1->m70;
+                if (psVar25 == nullptr) {
+                    return;
+                }
+                if (psVar25->m20 == nullptr) {
+                    return;
+                }
+                if ((psVar25->m3C & 3) != 1) {
+                    return;
+                }
+                s32 X;
+                s32 Y;
+                if (psVar25->m20->getAsSprite()->m34_perSubgroupTransform == nullptr) {
+                    X = Y = 0;
+                }
+                else {
+                    X = (*psVar25->m20->getAsSprite()->m34_perSubgroupTransform)[type].m0_translateX;
+                    Y = (*psVar25->m20->getAsSprite()->m34_perSubgroupTransform)[type].m1_translateY;
+                }
+                if ((psVar25->m3C >> 3) & 1) {
+                    X = -X;
+                }
+                Y *= psVar25->m2C_scale;
+                X *= psVar25->m2C_scale;
+                if (Y < 0) {
+                    Y += 0xFFF;
+                }
+                if (X < 0) {
+                    X += 0xFFF;
+                }
+                (param_1->m0_position).vz = (psVar25->m0_position).vz;
+                (param_1->m0_position).vx = (psVar25->m0_position).vx + (X >> 0xc) * 0x10000;
+                (param_1->m0_position).vy = (psVar25->m0_position).vy + (Y >> 0xc) * 0x10000;
+                return;
             }
             bool applyToMatrix = (param_1->m3C >> 24) & 1;
             SFP_VEC4 local_70;
@@ -1176,9 +1307,24 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
             (param_1->mC_step).vy = (param_1->mC_step).vy + ((iVar13 >> 0xc) << 0x10) / (int)(param_1->mAC >> 7 & 0xfff);
         }
         break;
+    case 0xB8: // stack pop
+        param_1->m8C_stackPosition -= READ_LE_U8(param_3);
+        break;
+    case 0xB9: // play sound effect, used when player attacks enemy
+        MissingCode();
+        break;
+    case 0xbb:
+        param_1->m30 = param_1->m30 + READ_LE_U8(param_3);
+        break;
+    case 0xbf:
+        param_1->m36 = READ_LE_U8(param_3);
+        break;
 	case 0xC1:
 		MissingCode();
 		break;
+    case 0xC4:
+        MissingCode(); //Set step in a random direction
+        break;
 	case 0xC5:
 		{
 			int iVar11 = READ_LE_U8(param_3) / (fieldDrawEnvsInitialized + 1);
@@ -1194,11 +1340,14 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
 		}
 		break;
     case 0xCC:
-        MissingCode();
+        param_1->m88_stack2 = param_1->m64_spriteByteCode + READ_LE_S16(param_3);
         break;
-    case 0xCE: // save point spinning
+    case 0xCD: // Spin on X axis (unused?)
+        assert(0);
+        break;
+    case 0xCE: // Spin on Y axis (save point spinning)
         {
-            sFieldEntitySub4_B4_alt* psVar22 = param_1->m20->getAsObject();
+            sFieldEntitySub4_B4_base* psVar22 = param_1->m20;
             if (psVar22 == nullptr) {
                 return;
             }
@@ -1211,7 +1360,7 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
             }
             if ((uVar16 >> 0xc & 1) == 0) {
                 if (uVar15 != 0) {
-                    sModelBlock* pasVar3 = psVar22->m34_pModelBlock;
+                    sModelBlock* pasVar3 = psVar22->getAsObject()->m34_pModelBlock;
                     if (pasVar3 == nullptr) {
                         return;
                     }
@@ -1237,6 +1386,47 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
         }
         param_1->m3C = param_1->m3C | 0x10000000;
         break;
+    case 0xCF: // Spin on Z axis
+    {
+        if (param_1->m20 == nullptr) {
+            return;
+        }
+        u16 uVar1 = READ_LE_U16(param_3) & 0x1ff;
+        u32 sVar14 = uVar1 * 8;
+        u16 uVar16 = (int)(READ_LE_U8(param_3 + 1) << 0x18) >> 0x10 & 0xffff;
+        s32 uVar15 = uVar16 >> 9 & 7;
+        if ((param_1->mAC >> 2 & 1) != 0) {
+            sVar14 = uVar1 * -8;
+        }
+        if ((uVar16 >> 0xc & 1) == 0) {
+            if (uVar15 != 0) {
+                sFieldEntitySub4_B4_alt* psVar22 = param_1->m20->getAsObject();
+                sModelBlock* pasVar3 = psVar22->m34_pModelBlock;
+                if (pasVar3 == nullptr) {
+                    return;
+                }
+                //(*pasVar3)[uVar15].m2_rotateZ = (*pasVar3)[uVar15].m2_rotateZ + sVar14;
+                assert(0);
+                return;
+            }
+            param_1->m20->m0_rotation[2] += sVar14;
+        }
+        else {
+            if (uVar15 != 0) {
+                assert(0);
+                /*
+                if (psVar22->m34_perSubgroupTransform == (sFieldEntitySub4_124(*)[8])0x0) {
+                    return;
+                }
+                (*psVar22->m34_perSubgroupTransform)[uVar15].m2_rotateZ = sVar14;
+                */
+                return;
+            }
+            param_1->m20->m0_rotation[2] = sVar14;
+        }
+    }
+    param_1->m3C = param_1->m3C | 0x10000000;
+    break;
 	case 0xd1:
 		MissingCode();
 		//executeSpriteBytecode2Sub3(param_1, param_3)->asU8 *= executeSpriteBytecode2Sub3(param_1, param_3 + 1)->asU8;
@@ -1256,6 +1446,16 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
 		MissingCode();
 		//executeSpriteBytecode2Sub3(param_1, param_3)->asU8 += executeSpriteBytecode2Sub3(param_1, param_3 + 1)->asU8;
 		break;
+    case 0xDF: // used in battle when attacking
+        //executeSpriteBytecode2Sub3(param_1, param_3)->asU8 = READ_LE_U8(param_3 + 1);
+        MissingCode();
+        break;
+    case 0xE5: // set random value in stack
+        MissingCode();
+        break;
+    case 0xAC:
+        OP_INIT_ENTITY_SCRIPT_sub0Sub7(param_1, param_1->m32_direction + ((((rand() & 0xFF) * READ_LE_U32(param_3) >> 8) - READ_LE_U32(param_3) / 2) * 0x10));
+        break;
 	case 0xe0:
 		spriteBytecode2ExtendedE0(param_1, param_3 + READ_LE_S16(param_3), param_1->m24_vramData);
 		break;
@@ -1280,6 +1480,20 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
 			updateAllSubsprites(param_1);
 		}
 		break;
+    case 0xF2:
+        param_1->m28_colorAndCode.m0_r = addAndClamp(param_1->m28_colorAndCode.m0_r, READ_LE_U8(param_3));
+        param_1->m28_colorAndCode.m1_g = addAndClamp(param_1->m28_colorAndCode.m1_g, READ_LE_U8(param_3+1));
+        param_1->m28_colorAndCode.m2_b = addAndClamp(param_1->m28_colorAndCode.m2_b, READ_LE_U8(param_3+2));
+        if ((param_1->m3C & 3) == 2) {
+            assert(0);
+        }
+        if ((param_1->m3C & 3) == 1) {
+            updateAllSubsprites(param_1);
+        }
+        if ((param_1->m40 >> 0xd & 0xf) == 0xf) {
+            assert(0);
+        }
+        break;
     case 0xF5:
     {
         s32 offsetToMesh = READ_LE_U8(param_3) + READ_LE_U8(param_3 + 1) * 0x100 + READ_LE_U8(param_3 + 2) * 0x10000;
@@ -1487,9 +1701,9 @@ void executeSpriteBytecode2(sSpriteActorCore* param_1)
 				param_1->m68(param_1);
 				return;
 			}
-			if (-1 < *(char*)&param_1->mB0) {
-				spriteActorSetPlayingAnimation(param_1, *(char*)&param_1->mB0);
-			}
+            if (param_1->mB0.mx0_animationId > -1) {
+                spriteActorSetPlayingAnimation(param_1, param_1->mB0.mx0_animationId);
+            }
 			param_1->mA8.mx1C = 0;
 			return;
 		case 0x8E:
@@ -1728,12 +1942,14 @@ void setCurrentAnimationPtr(sSpriteActorCore* param_1, const sPS1Pointer startOf
 	}
 	param_1->m8C_stackPosition = 0x10;
 	param_1->m30 = 0;
-	param_1->mA8.mx1 = 0;
 	param_1->m9E_wait = 1;
+
+    param_1->mA8.mx1 = 0;
 	param_1->mA8.mx16 = 0;
 	param_1->mA8.mx1C = 0;
 	param_1->mA8.mxB = 0x3F;
-	param_1->mA8.mx1E = 2;
+	param_1->mA8.mx1C = 2;
+
 	if ((param_1->m7C != nullptr) && (param_1->mA8.mx0)) {
 		param_1->m7C->m4 = 0;
 		param_1->m7C->m0 = 0;
@@ -1940,25 +2156,24 @@ void setAnimationBundle(sSpriteActorCore* param_1, sSpriteActorAnimationBundle* 
 void spriteActorSetPlayingAnimation(sSpriteActorCore* param_1, int animationId)
 {
 	ushort uVar1;
-	uint uVar2;
 
 	if (param_1->m48_defaultAnimationbundle == nullptr) {
 		param_1->m64_spriteByteCode.makeNull();
 	}
 	else {
 		if (param_1->m44_currentAnimationBundle == param_1->m48_defaultAnimationbundle) {
-			uVar2 = param_1->mB0 & ~0x400;
+            param_1->mB0.mRaw &= ~0x400;
 		}
 		else {
-			uVar2 = param_1->mB0 | 0x400;
+            param_1->mB0.mRaw |= 0x400;
 		}
-		param_1->mB0 = uVar2;
+
 		if (animationId < 0) {
 			setAnimationBundle(param_1, param_1->m4C_specialAnimation);
 			if ((isBattleOverlayLoaded != 0) &&
 				(isVramPreBacked(param_1->m24_vramData->m0_spriteData) == 0)) {
-				param_1->m24_vramData->m4_vramLocation.vx = 0x100;
-				param_1->m24_vramData->m4_vramLocation.vy = 0x300;
+				param_1->m24_vramData->m4_vramLocation.vx = 0x300;
+				param_1->m24_vramData->m4_vramLocation.vy = 0x100;
 			}
 		}
 		else {
@@ -2128,7 +2343,7 @@ sSpriteActor* createSpriteActorEX(sSpriteActorAnimationBundle* pSetup, int clutX
 	return pVar1;
 }
 
-void setTransparencyMode(sSpriteActor* sprite, u32 mode)
+void setTransparencyMode(sSpriteActorCore* sprite, u32 mode)
 {
     byte bVar1;
     uint uVar2;
@@ -2161,4 +2376,20 @@ void resetSpriteCallbacks(void)
     spriteCallback2Var2 = (sTaskHeader*)0x0;
     spriteCallback2Head = (sTaskHeader*)0x0;
     return;
+}
+
+int addAndClamp(int param_1, int param_2)
+{
+    int iVar1;
+
+    iVar1 = param_1 + param_2;
+    if (iVar1 < 0x100) {
+        if (iVar1 < 0) {
+            iVar1 = 0;
+        }
+    }
+    else {
+        iVar1 = 0xff;
+    }
+    return iVar1;
 }

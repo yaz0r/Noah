@@ -7815,6 +7815,24 @@ void uploadCharacterSpriteSub1(sSpriteActorCore* param_1, int param_2, sFieldEnt
     param_1->m40 = param_1->m40 & 0xffffff03 | (uVar22 & 0x3f) << 2;
 }
 
+s16 specialEffectSpriteX = 0;
+s16 specialEffectSpriteY = 0;
+
+sVec2_s16* allocateSpecialEffectSpriteVram(sVec2_s16* param_1, int param_2) {
+    if (0x40 < specialEffectSpriteX + param_2) {
+        specialEffectSpriteX = 0;
+        specialEffectSpriteY = specialEffectSpriteY + 1;
+        if (2 < specialEffectSpriteY) {
+            specialEffectSpriteY = 0;
+        }
+    }
+    
+    param_1->set(specialEffectSpriteX + 0x300, specialEffectSpriteY * 0x40);
+    specialEffectSpriteX += param_2;
+
+    return param_1;
+}
+
 void uploadCharacterSprite(sSpriteActorCore* param_1, int spriteFrame, sFieldEntitySub4_110* param_3)
 {
     param_1->m40 &= ~0x000a0000;
@@ -7837,8 +7855,7 @@ void uploadCharacterSprite(sSpriteActorCore* param_1, int spriteFrame, sFieldEnt
             sFieldEntitySub4_110_0_frame& frame = param_3->m0_spriteData->m4_frames[spriteFrame];
 
             if ((param_1->m40 >> 0xd & 0xf) == 0xe) {
-                //uploadCharacterSpriteSub0(&vramLocation, subDataPtr[4]);
-                assert(0);
+                allocateSpecialEffectSpriteVram(&vramLocation, READ_LE_U8(framePtr + 4));
             }
 
             u8 frameHeader = READ_LE_U8(framePtr);

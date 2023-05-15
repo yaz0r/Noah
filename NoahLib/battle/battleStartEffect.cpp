@@ -170,22 +170,6 @@ sBattleStartEffect* createBattleStartEffect() {
     return initBattleStartEffect(psVar1);
 }
 
-int addAndClamp(int param_1, int param_2)
-{
-    int iVar1;
-
-    iVar1 = param_1 + param_2;
-    if (iVar1 < 0x100) {
-        if (iVar1 < 0) {
-            iVar1 = 0;
-        }
-    }
-    else {
-        iVar1 = 0xff;
-    }
-    return iVar1;
-}
-
 s32  RotTransPers3(const SVECTOR* v0, const SVECTOR* v1, const SVECTOR* v2, sVec2_s16* p0, sVec2_s16* p1, sVec2_s16* p2, s32* p, s32* flag) {
     gte_ldv3(v0, v1, v2);
     gte_rtpt_b();

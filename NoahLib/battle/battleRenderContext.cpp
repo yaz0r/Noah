@@ -8,7 +8,7 @@ s32 battleOddOrEven = 0;
 
 void initBattleRenderStructs(sBattleRenderStruct* param_1) {
     param_1->m70_OT.resize(4096);
-    (param_1->m0_drawEnv).isbg = '\x01';
+    (param_1->m0_drawEnv).isbg = 1;
     (param_1->m0_drawEnv).dtd = 1;
     (param_1->m0_drawEnv).r0 = 0x3c;
     (param_1->m0_drawEnv).g0 = 0x78;

@@ -303,6 +303,7 @@ extern std::array<sBattleEntity, 11> battleEntities;
 extern std::vector<u8> battleFont;
 
 extern u8 battleGetSlotStatusSub_current28Index;
+extern bool battleSpritesDisabled;
 
 int battleSetupStringInPolyFT4Small(int character, std::array<POLY_FT4, 2>* polyArray, short x, short y);
 int battleSetupStringInPolyFT4Large(int character, std::array<POLY_FT4, 2>* polyArray, short x, short y);

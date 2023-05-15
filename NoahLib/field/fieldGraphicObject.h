@@ -156,6 +156,7 @@ struct sSpriteActorCore : public sCustomRenderable {
     s16 m82;
     s16 m84_maxY;
     u16 m86_thisSize;
+    sPS1Pointer m88_stack2;
     s8 m8C_stackPosition;
     s8 m8D;
     std::array<sStackElement, 16> m8E_stack;
@@ -177,7 +178,15 @@ struct sSpriteActorCore : public sCustomRenderable {
         }
     } mA8;
     u32 mAC; // animation speed >> 7 & 0xFFF
-    u32 mB0;
+    union {
+        struct {
+            s32 mx0_animationId : 8;
+            u32 mx8 : 1;
+            u32 mx9 : 1;
+            u32 mx10 : 1;
+        };
+        u32 mRaw;
+    } mB0;
 };
 
 struct sSpriteActor : public sSpriteActorCore
@@ -228,10 +237,10 @@ struct sSavePointMeshAbstract {
 };
 
 
-// size of this one is 0xEC(base size) + 0x58(size of sFieldEntitySub4_B4_alt? but that is 4 off) and 0x18*count (size of sFieldEntitySub4_B4_sub)
+// size of this one is 0xEC(base size) + 0x58(size of sFieldEntitySub4_B4?) and 0x18*count (size of sFieldEntitySub4_B4_sub)
 struct sSavePointMesh1 : public sSavePointMeshAbstract
 {
-    sFieldEntitySub4_B4_alt mB4;
+    sFieldEntitySub4_B4 mB4;
     std::vector<sFieldEntitySub4_B4_sub> mF4;
 };
 
@@ -268,7 +277,7 @@ void fieldActorCallback(sSpriteActorCore* pThis);
 void setSpriteActorAngle(sSpriteActorCore* param_1, short param_2);
 void resetPerSubgroupTransforms(sSpriteActorCore* param_1);
 
-void setTransparencyMode(sSpriteActor* param_1, u32 mode);
+void setTransparencyMode(sSpriteActorCore* param_1, u32 mode);
 void setCurrentAnimationPtr(sSpriteActorCore* param_1, const sPS1Pointer startOfAnimation);
 
 void uploadTextureToVram(sPS1Pointer param_1, short param_2, short tpageX, short tpageY, short param_5, short clutX, short clutY);
@@ -326,3 +335,6 @@ T* createCustomRenderableEntity(size_t param_1, sTaskHeader* param_2, void(*upda
 
 extern sFieldEntitySub4_110 sFieldEntitySub4_110_8005a474;
 void initFieldEntitySub4Sub5Sub0(sFieldEntitySub4_110* param_1, sSpriteActorAnimationBundle* param_2, sVec2_s16 param_3_vramLocation, sVec2_s16 clut);
+
+extern sFieldEntitySub4_110 createSavePointMeshData_mode5;
+int addAndClamp(int param_1, int param_2);
