@@ -7667,6 +7667,29 @@ void renderObjects()
     }
 }
 
+std::array<sVec2_s16, 16> tpageLocationTable = { {
+    {0x300, 0x0},
+    {0x340, 0x0},
+    {0x380, 0x0},
+    {0x3C0, 0x0},
+
+    {0x300, 0x100},
+    {0x340, 0x100},
+    {0x380, 0x100},
+    {0x3C0, 0x100},
+
+    // Those are dynamicaly setup
+    {0x0, 0x0},
+    {0x0, 0x0},
+    {0x0, 0x0},
+    {0x0, 0x0},
+
+    {0x0, 0x0},
+    {0x0, 0x0},
+    {0x0, 0x0},
+    {0x0, 0x0},
+} };
+
 void uploadCharacterSpriteSub1(sSpriteActorCore* param_1, int param_2, sFieldEntitySub4_110* param_3)
 {
     sPS1Pointer puVar16 = param_3->m0_spriteData->rawPointer;
@@ -7781,14 +7804,11 @@ void uploadCharacterSpriteSub1(sSpriteActorCore* param_1, int param_2, sFieldEnt
                 psVar13->mC_clut = (param_3->m8_clut).vy << 6 | (ushort)((int)((int)(param_3->m8_clut).vx + (bVar5 & 0xf) * 0x10) >> 4) & 0x3f;
             }
             else {
-                assert(0);
-                /*                pbVar19 = pbVar19 + 1;
-                                uVar17 = (uint)CONCAT11(*pbVar19, bVar4);
-                                uVar9 = GetTPage(uVar17 & 1, (int)(short)uVar15, (int)tpageLocationTable[uVar17 & 0xe], (int)tpageLocationTable[(uVar17 & 0xe) + 1]);
-                                psVar13->mA_tpage = uVar9;
-                                uVar9 = GetClut((int)uVar17 >> 1 & 0xf0, ((int)uVar17 >> 9 & 0xfU) + 0x1cc);
-                                psVar13->mC_clut = uVar9;
-                                */
+                pbVar19 = pbVar19 + 1;
+                uVar17 = (READ_LE_U8(pbVar19) << 8) | bVar4;
+                psVar13->mA_tpage = GetTPage(uVar17 & 1, (int)(short)uVar15, (int)tpageLocationTable[uVar17 & 0xe].vx, (int)tpageLocationTable[uVar17 & 0xe].vy);
+                psVar13->mC_clut = GetClut((int)uVar17 >> 1 & 0xf0, ((int)uVar17 >> 9 & 0xfU) + 0x1cc);
+                                
             }
             psVar13->m14.m0x0 = transformId;
             psVar13->m4_texcoordX = texcoordStartX + READ_LE_U8(pbVar19 + 1);

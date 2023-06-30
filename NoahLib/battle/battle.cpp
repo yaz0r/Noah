@@ -4917,6 +4917,23 @@ void battleSpriteOp89Sub3(sSpriteActorCore* param_1, short param_2)
     return;
 }
 
+void battleSpriteOp8BSub0(int param_1) {
+    MissingCode();
+}
+
+void battleSpriteOp8B() {
+    bool bVar1 = false;
+    for (int i = 0; i < 11; i++) {
+        if (battleVar48[allocateJumpAnimationStructVar0 - 1].m18_operationType[i] == 7) {
+            bVar1 = true;
+        }
+        if (battleSpriteActorCores[i]) {
+            if ((processBattleAnimationSub0_var1 != battleSpriteActorCores[i]) || (!bVar1)) {
+                battleSpriteOp8BSub0(i);
+            }
+        }
+    }
+}
 
 void battleSpriteOp89(sSpriteActorCore* param_1) {
     param_1->m0_position.vx &= 0xFFFF0000;
@@ -5160,6 +5177,10 @@ void executeSpriteBytecode2_battle(sSpriteActorCore* param_1) {
             return;
         case 0x89: 
             battleSpriteOp89(param_1);
+            param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
+            break;
+        case 0x8B:
+            battleSpriteOp8B();
             param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
             break;
         case 0x97:

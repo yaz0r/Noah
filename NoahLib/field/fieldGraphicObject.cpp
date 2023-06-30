@@ -1307,6 +1307,13 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
             (param_1->mC_step).vy = (param_1->mC_step).vy + ((iVar13 >> 0xc) << 0x10) / (int)(param_1->mAC >> 7 & 0xfff);
         }
         break;
+    case 0xA8:
+        param_1->m32_direction += (READ_LE_S8(param_3) << 4);
+        computeStepFromMoveSpeed(param_1);
+        break;
+    case 0xAD:
+        param_1->mA8.mx1 = READ_LE_U8(param_3);
+        break;
     case 0xB8: // stack pop
         param_1->m8C_stackPosition -= READ_LE_U8(param_3);
         break;
@@ -1342,9 +1349,47 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
     case 0xCC:
         param_1->m88_stack2 = param_1->m64_spriteByteCode + READ_LE_S16(param_3);
         break;
-    case 0xCD: // Spin on X axis (unused?)
-        assert(0);
-        break;
+    case 0xCD: // Spin on X axis
+    {
+        sFieldEntitySub4_B4_base* psVar22 = param_1->m20;
+        if (psVar22 == nullptr) {
+            return;
+        }
+        u16 uVar1 = READ_LE_U16(param_3) & 0x1ff;
+        u32 sVar14 = uVar1 * 8;
+        u16 uVar16 = (int)(READ_LE_U8(param_3 + 1) << 0x18) >> 0x10 & 0xffff;
+        s32 uVar15 = uVar16 >> 9 & 7;
+        if ((param_1->mAC >> 2 & 1) != 0) {
+            sVar14 = uVar1 * -8;
+        }
+        if ((uVar16 >> 0xc & 1) == 0) {
+            if (uVar15 != 0) {
+                sModelBlock* pasVar3 = psVar22->getAsObject()->m34_pModelBlock;
+                if (pasVar3 == nullptr) {
+                    return;
+                }
+                //(*pasVar3)[uVar15].m2_rotateX = (*pasVar3)[uVar15].m2_rotateY + sVar14;
+                assert(0);
+                return;
+            }
+            psVar22->m0_rotation[0] = psVar22->m0_rotation[0] + sVar14;
+        }
+        else {
+            if (uVar15 != 0) {
+                assert(0);
+                /*
+                if (psVar22->m34_perSubgroupTransform == (sFieldEntitySub4_124(*)[8])0x0) {
+                    return;
+                }
+                (*psVar22->m34_perSubgroupTransform)[uVar15].m2_rotateY = sVar14;
+                */
+                return;
+            }
+            psVar22->m0_rotation[0] = sVar14;
+        }
+    }
+    param_1->m3C = param_1->m3C | 0x10000000;
+    break;
     case 0xCE: // Spin on Y axis (save point spinning)
         {
             sFieldEntitySub4_B4_base* psVar22 = param_1->m20;
@@ -1461,6 +1506,11 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
 		break;
     case 0xe7:
         setGraphicEntityScale(param_1, param_1->m2C_scale + READ_LE_S16(param_3));
+        break;
+    case 0xE9:
+        if (param_1->m20) {
+            param_1->m20->m6_scale[0] += READ_LE_S16(param_3) * 2;
+        }
         break;
     case 0xEA:
         if (param_1->m20) {
