@@ -94,7 +94,7 @@ void createSpinningEnemySelectionCursor(sBattleSpriteActor* param_1) {
     pNewTask->m38 = param_1->m0.m4;
     pNewTask->m54 = param_1->m0.m4->getAsSpriteActorCore()->m36;
     if (spriteBytecode2ExtendedE0_Var0) {
-        spriteBytecode2ExtendedE0_Var0--;
+        allocateSavePointMeshDataSub0_var0--;
     }
     pNewTask->m0.m14 &= 0x7fffffff;
     setupSVector(&pNewTask->m4C_rotation, 0, 0, 0);

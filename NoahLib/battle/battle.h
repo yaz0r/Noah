@@ -129,6 +129,7 @@ struct sBattleVar1 {
     std::array<u8, 4> m84_timeBarsOddOrEven;
     std::array<u8, 3> m90_perPCTimeBarStatus;
     std::array<u8, 3> m93_oddOrEven;
+    u8 m96;
     u8 m97;
     std::array<u8, 3> m99_oddOrEven;
     u8 mA2;
@@ -136,6 +137,7 @@ struct sBattleVar1 {
     u8 mA4_oddOrEven7B;
     u8 mA9_timeBarNumMoveSteps;
     u8 mAB_timeBarNumAnimationSteps;
+    u8 mAE;
     u8 mAF;
     std::array<u8, 7> mB0_isDialogWindowInitialized;
     u8 mC6_isTargetSelectionCursorVisible;

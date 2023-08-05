@@ -85,6 +85,7 @@ sGameStateA42* startBattleAttackAnimationVar6;
 bool battleSpritesDisabled = false;
 
 void jumpUpdatePositionSub0(sSpriteActorCore* param_1, sSpriteActorCore* param_2);
+void jumpUpdatePosition(sSpriteActorCore* param_1);
 
 void initGraphicsForBattle(void) {
     ResetGraph(1);
@@ -2048,9 +2049,10 @@ void updateAPCounterDisplay() {
 struct sBattleVar48 {
     std::array<u16, 11> m0;
     u16 m16_targetBitMask;
-    std::array<u8, 11> m18_operationType;
+    std::array<s8, 11> m18_operationType;
     u8 m23_battleEntityIndex;
     std::array<s16, 11> m24;
+    s16 m3A;
     std::array<u8,11> m3C;
     s8 m47_battleAnimationToPlay;
 
@@ -2405,6 +2407,15 @@ void processBattleAnimation(sSpriteActorCore* param_1) {
         spriteActorSetPlayingAnimation(psVar10, 4);
         return;
     }
+    case -3:
+        jumpAnimationControlStruct->m48 = 1;
+        if (battleVar48[allocateJumpAnimationStructVar0].m3A == 0) {
+            jumpAnimationControlStruct->m48 = 0;
+            jumpUpdatePosition(param_1->getAsSpriteActorCore());
+            OP_INIT_ENTITY_SCRIPT_sub0Sub8(param_1->getAsSpriteActorCore(), startJumpAnimationCallback);
+        }
+        allocateJumpAnimationStructVar0 = allocateJumpAnimationStructVar0 + 1;
+        return;
     //start attack animation
     case 4: // 1ap
     case 5: // 2ap
@@ -2696,12 +2707,13 @@ void jumpUpdatePositionSub0(sSpriteActorCore* param_1, sSpriteActorCore* param_2
         (param_1->mA0).vy = 0;
         (param_1->mA0).vz = (param_2->m0_position).vz.getIntegerPart();
 
+        // Are we at the correct location for the attack?
         if (((param_1->mA0).vx == (param_1->m0_position).vx.getIntegerPart()) &&
             ((param_1->mA0).vz == (param_1->m0_position).vz.getIntegerPart())) {
-            assert(0);
+            battleAnimationCallback_2(param_1, param_2); // we are already at the right spot!
         }
         else {
-            jumpUpdatePositionSub1(param_1, 3);
+            jumpUpdatePositionSub1(param_1, 3); // need to move to the correct location, that happens when changing target after entering attack mode
             setupJumpAnimationStruct1C(2);
         }
     }
@@ -3852,6 +3864,40 @@ int performAttack(byte param_1, uint numAPUsed) {
     return returnValue;
 }
 
+void freeBattleVar1_AE() {
+    if (battleVar1->mAE) {
+        assert(0);
+    }
+}
+
+void freeBattleVar1_96() {
+    if (battleVar1->m96) {
+        assert(0);
+    }
+}
+
+void removeBattleCursorDuringAttack(u8 param_1) {
+    if (battleVar2->m2E9 == 0) {
+        battleVar2->m2E9 = 1;
+        updateCharacterBlinkingTask(0);
+        battleVar2->m0[param_1].m3C_currentTarget = battleVar2->m2E8_currentTarget;
+        freeBattleVar1_AE();
+        freeBattleVar1_96();
+        removeTargetSelectionCursors();
+
+        setCameraVisibleEntities((characterIdToTargetBitmask(param_1) | characterIdToTargetBitmask(battleVar2->m0[param_1].m3C_currentTarget)) & 0xffff);
+
+        if (battleCharacters[param_1] != 4) {
+            battleVar48[battleVar2->m2DA_indexInBattleVar48].m23_battleEntityIndex = param_1;
+            battleVar48[battleVar2->m2DA_indexInBattleVar48].m47_battleAnimationToPlay = -3;
+            battleVar48[battleVar2->m2DA_indexInBattleVar48].m3A = 0;
+            battleVar48[battleVar2->m2DA_indexInBattleVar48].m16_targetBitMask = characterIdToTargetBitmask(battleVar2->m0[param_1].m3C_currentTarget);
+            battleVar2->m2DA_indexInBattleVar48 = battleVar2->m2DA_indexInBattleVar48 + 1;
+        }
+        removeBillyWindow(param_1, 0);
+    }
+}
+
 void handleMenuSelectEnemy(u8 param_1) {
     startCharacterJumpToEnemyVar0 = 0;
     if (battleVar2->m2E1_waitBeforeNextAttackInput != 0) {
@@ -3959,7 +4005,7 @@ LAB_Battle__80081e90:
     }
     else {
         battleSoundEffect(0x4d);
-        MissingCode();
+        removeBattleCursorDuringAttack(param_1);
         if (battleVar1->mCB == '\0') {
             battleVar2->m2DD_currentActiveBattleMenu = 5;
             battleVar2->m2E2_previousActiveBattleMenu = 5;
