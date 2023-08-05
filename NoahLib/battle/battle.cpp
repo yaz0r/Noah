@@ -3767,20 +3767,20 @@ u8 selectNewSlotByDirection(byte inputSlot, battleInputDirection direction) {
 
                 switch (direction) {
                 case 0:
-                    if ((lVar3 + 0x200) < 0x400)
+                    if (((lVar3 + 0x200) & 0xFFFF) < 0x400)
                         bVar1 = true;
                     break;
                 case 1:
-                    if ((lVar3 + 0x600) < 0x400)
+                    if (((lVar3 + 0x600) & 0xFFFF) < 0x400)
                         bVar1 = true;
                     break;
                 case 2:
-                    bVar1 = (lVar3 + 0x800U & 0xffff) < 0x200;
-                    if ((lVar3 - 0x600U & 0xffff) < 0x201)
+                    bVar1 = ((lVar3 + 0x800U) & 0xffff) < 0x200;
+                    if (((lVar3 - 0x600U) & 0xffff) < 0x201)
                         bVar1 = true;
                     break;
                 case 3:
-                    if ((lVar3 - 0x200 & 0xffff) < 0x400)
+                    if (((lVar3 - 0x200) & 0xffff) < 0x400)
                         bVar1 = true;
                     break;
                 default:
