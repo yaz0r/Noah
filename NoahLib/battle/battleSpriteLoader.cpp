@@ -354,7 +354,7 @@ int mainBattleSpriteCallback_phase5Var = 0;
 void mainBattleSpriteCallback_phase5(sTaskHeader* param_1) {
     if (mainBattleSpriteCallback_phase5Var == 0) {
         ((sBattleSpriteLoaderTask*)param_1)->m90_frameToDeleteCount = 0x10;
-        regCallback8(param_1, &mainBattleSpriteCallback_phase6);
+        setTaskUpdateFunction(param_1, &mainBattleSpriteCallback_phase6);
     }
 }
 
@@ -369,7 +369,7 @@ void startPlayableCharactersJumpToPosition() {
 void mainBattleSpriteCallback_phase4(sTaskHeader* param_1) {
     if (waitForMusic(0) == 0) {
         startPlayableCharactersJumpToPosition();
-        regCallback8(param_1, &mainBattleSpriteCallback_phase5);
+        setTaskUpdateFunction(param_1, &mainBattleSpriteCallback_phase5);
     }
 }
 
@@ -377,7 +377,7 @@ void mainBattleSpriteCallback_phase3(sTaskHeader* param_1) {
     if (isCDBusy() == 0) {
         MissingCode();
         initFieldEntitySub4Sub5Sub0(&createSavePointMeshData_mode5, ((sBattleSpriteLoaderTask*)param_1)->m24, sVec2_s16::fromS32(0x380), sVec2_s16::fromS32(0x1d10000));
-        regCallback8(param_1, &mainBattleSpriteCallback_phase4);
+        setTaskUpdateFunction(param_1, &mainBattleSpriteCallback_phase4);
         MissingCode();
     }
 }
@@ -400,7 +400,7 @@ void mainBattleSpriteCallback_phase2(sTaskHeader* param_1) {
         pThis->m50_loadingCommandsPhase2[3].m0_fileIndex = 0;
 
         batchStartLoadingFiles(&pThis->m50_loadingCommandsPhase2[0], 0);
-        regCallback8(pThis, mainBattleSpriteCallback_phase3);
+        setTaskUpdateFunction(pThis, mainBattleSpriteCallback_phase3);
     }
 }
 
@@ -435,7 +435,7 @@ void mainBattleSpriteCallback_phase1(sTaskHeader* param_1) {
         DrawSync(0);
         //delete pTask->m20; // hack: this is currently a static
         pTask->m20 = nullptr; // not in original
-        regCallback8(pTask, mainBattleSpriteCallback_phase2);
+        setTaskUpdateFunction(pTask, mainBattleSpriteCallback_phase2);
         setupPlayerSpriteLoadingCommands(pTask->m30_loadingCommands.begin());
     }
 }
@@ -445,7 +445,7 @@ void createBattleSpriteLoadingTaskSub(sBattleSpriteConfigs* param_1)
     sBattleSpriteLoaderTask* psVar1;
 
     psVar1 = battleLoaderAllocateMainBattleSprite<sBattleSpriteLoaderTask>(nullptr, 0x78);
-    regCallback8(psVar1, mainBattleSpriteCallback_phase1);
+    setTaskUpdateFunction(psVar1, mainBattleSpriteCallback_phase1);
     psVar1->m20 = param_1;
     return;
 }

@@ -552,8 +552,8 @@ sSavePointMeshAbstract* allocateSavePointMeshData(sSavePointMeshAbstract* pThis,
     pvVar1->m0.m4 = &pvVar1->m38_spriteActorCore;
     pvVar1->m1C.m4 = &pvVar1->m38_spriteActorCore;
 
-    regCallback8(&pvVar1->m0, savePointCallback8);
-    regCallbackC(&pvVar1->m0, savePointCallbackC);
+    setTaskUpdateFunction(&pvVar1->m0, savePointCallback8);
+    setTaskDeleteFunction(&pvVar1->m0, savePointCallbackC);
 
     return pvVar1;
 }
@@ -656,7 +656,7 @@ sSavePointMeshAbstract* createSavePointMeshData(int mode1, int mode2, sFieldEnti
     return pNewSavePoint;
 }
 
-void spriteBytecode2ExtendedE0_Sub0Sub0Sub0(sTaskHeader* param_1, void (*param_2)(sTaskHeader*))
+void setTaskDrawFunction(sTaskHeader* param_1, void (*param_2)(sTaskHeader*))
 {
     param_1->m8_updateCallback = param_2;
     return;
@@ -710,7 +710,7 @@ const std::vector<void (*)(sTaskHeader*)> spriteBytecode2ExtendedE0_Sub0Sub0_cal
 
 void spriteBytecode2ExtendedE0_Sub0Sub0(sTaskHeader* param_1, int param_2)
 {
-    spriteBytecode2ExtendedE0_Sub0Sub0Sub0(param_1, spriteBytecode2ExtendedE0_Sub0Sub0_callback[param_2]);
+    setTaskDrawFunction(param_1, spriteBytecode2ExtendedE0_Sub0Sub0_callback[param_2]);
     return;
 }
 

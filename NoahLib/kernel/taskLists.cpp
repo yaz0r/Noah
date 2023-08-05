@@ -182,12 +182,12 @@ void allocateSavePointMeshDataSub0(sTaskHeader* param_1, sTaskHeader* param_2)
     allocateSavePointMeshDataSub0_var1++;
 }
 
-void regCallback8(sTaskHeader* param_1, void (*param_2)(sTaskHeader*))
+void setTaskUpdateFunction(sTaskHeader* param_1, void (*param_2)(sTaskHeader*))
 {
     param_1->m8_updateCallback = param_2;
 }
 
-void regCallbackC(sTaskHeader* param_1, void (*param_2)(sTaskHeader*))
+void setTaskDeleteFunction(sTaskHeader* param_1, void (*param_2)(sTaskHeader*))
 {
     param_1->mC_deleteCallback = param_2;
 }

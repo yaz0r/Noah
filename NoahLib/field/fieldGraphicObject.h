@@ -245,7 +245,7 @@ extern sSpriteActorCore* spriteTransfertListHead;
 
 void savePointCallback8Sub0(sSpriteActorCore* param_1);
 void registerSpriteCallback2(sTaskHeader* param_1, sTaskHeader* param_2);
-void spriteBytecode2ExtendedE0_Sub0Sub0Sub0(sTaskHeader* param_1, void (*param_2)(sTaskHeader*));
+void setTaskDrawFunction(sTaskHeader* param_1, void (*param_2)(sTaskHeader*));
 
 void SetTimeScale(sSpriteActor* param_1, int param_2); // 0x80021BCC
 void OP_INIT_ENTITY_SCRIPT_sub0Sub9(sSpriteActorCore* param_1);
@@ -280,8 +280,8 @@ void setGraphicEntityScale(sSpriteActorCore* param_1, int param_2);
 
 void resetSpriteCallbacks(void);
 
-void regCallback8(sTaskHeader* param_1, void (*param_2)(sTaskHeader*));
-void regCallbackC(sTaskHeader* param_1, void (*param_2)(sTaskHeader*));
+void setTaskUpdateFunction(sTaskHeader* param_1, void (*param_2)(sTaskHeader*));
+void setTaskDeleteFunction(sTaskHeader* param_1, void (*param_2)(sTaskHeader*));
 void allocateSavePointMeshDataSub0(sTaskHeader* param_1, sTaskHeader* param_2);
 int isVramPreBacked(const sFieldEntitySub4_110_0* param_1);
 void addToSpriteTransferList(sSpriteActorCore* param_1, short param_2);
@@ -306,13 +306,13 @@ T* createCustomRenderableEntity(size_t param_1, sTaskHeader* param_2, void(*upda
     T* pNewEntity = new T;
     allocateSavePointMeshDataSub0(param_2, &pNewEntity->m0);
     registerSpriteCallback2(&pNewEntity->m0, &pNewEntity->m1C);
-    regCallback8(&pNewEntity->m0, updateCallback);
-    spriteBytecode2ExtendedE0_Sub0Sub0Sub0(&pNewEntity->m1C, drawCallback);
+    setTaskUpdateFunction(&pNewEntity->m0, updateCallback);
+    setTaskDrawFunction(&pNewEntity->m1C, drawCallback);
     if (deleteCallback == nullptr) {
         assert(0);
     }
     else {
-        regCallbackC(&pNewEntity->m0, deleteCallback);
+        setTaskDeleteFunction(&pNewEntity->m0, deleteCallback);
     }
 
     // TODO: Gross!

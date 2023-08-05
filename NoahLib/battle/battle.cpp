@@ -15,6 +15,8 @@
 #include "kernel/trigo.h"
 #include "kernel/gte.h"
 #include "battle/spinningEnemySelectionCursor.h"
+#include "battle/damageDisplay.h"
+#include "battle/damageDisplay2.h"
 
 u16 allPlayerCharacterBitmask = 0;
 u8 battleInitVar0 = 0;
@@ -1820,14 +1822,6 @@ void resetBattleCameraMode() {
     setBattleCameraMode(0);
 }
 
-s32 initBattleUnkData0Var0;
-s32 initBattleUnkData0Var1;
-
-void initBattleUnkData0() {
-    initBattleUnkData0Var0 = 0;
-    initBattleUnkData0Var1 = 0;
-}
-
 void initBattleSpriteSystem() {
     isBattleOverlayLoaded = 1;
     allocateSavePointMeshDataSub0_var0 = 0;
@@ -2392,7 +2386,7 @@ void processBattleAnimation(sSpriteActorCore* param_1) {
             return;
         }
         assert(0);
-    case -2:
+    case -2: // jump back to initial position at end of turn
     {
         jumpAnimationControlStruct->m48 = 0;
         sSpriteActorCore* psVar10 = getSpriteCoreForAnimation(jumpAnimationControlStruct->m20_actor);
@@ -2482,8 +2476,43 @@ void battleAnimationCallback_5(int param_1) {
     }
 }
 
-bool getInitBattleUnkData0Var0Set() {
-    return initBattleUnkData0Var0 != 0;
+void deleteJumpAnimationControlStruct(void)
+{
+    delete jumpAnimationControlStruct;
+    allocateSavePointMeshDataSub0_var0 = 0;
+    jumpAnimationControlStruct = nullptr;
+    spriteBytecode2ExtendedE0_Var0 = 0;
+    return;
+}
+
+void setBattleCameraParamX(short param_1)
+{
+    battleCameraParamsVar0.vx = param_1;
+    return;
+}
+
+void deleteJumpAnimationControlStructEndOfAttack() {
+    if (jumpAnimationControlStruct != nullptr) {
+        startJumpAnimationVar1 = 0;
+        startJumpAnimationVar2 = 0;
+        startJumpAnimationVar3 = 0;
+
+        DrawSync(0);
+        auto uVar5 = jumpAnimationControlStruct->m40_facing;
+        OP_INIT_ENTITY_SCRIPT_sub0Sub8(jumpAnimationControlStruct->m4, 0);
+        processBattleAnimationSub0();
+        while (isDamageDisplayPolysTask2Running() != allocateSavePointMeshDataSub0_var0)
+        {
+            battleRender();
+        }
+
+        MissingCode();
+
+        setBattleCameraParamX(0xc0);
+        deleteJumpAnimationControlStruct();
+
+        MissingCode();
+    }
 }
 
 void allocateJumpAnimationStructCallback(sJumpAnimationControlStruct* param_1) {
@@ -2576,8 +2605,8 @@ void allocateJumpAnimationStructCallback(sJumpAnimationControlStruct* param_1) {
         break;
     }
     case 10: // during attack
-        if (allocateSavePointMeshDataSub0_var0 == getInitBattleUnkData0Var0Set()) {
-            assert(0);
+        if (allocateSavePointMeshDataSub0_var0 == isDamageDisplayPolysTask2Running()) {
+            deleteJumpAnimationControlStructEndOfAttack();
         }
         break;
     default:
@@ -2623,12 +2652,6 @@ void setupBattleAnimationSpriteCore(sSpriteActorCore* param_1) {
     if ((pSpriteCoreListHead[0]->mAC >> 24) != 0x15) {
         setSpriteActorAngle(pSpriteCoreListHead[0], spriteActorCoreRatan2(param_1->m74_pTargetEntitySprite, param_1));
     }
-}
-
-void setBattleCameraParamX(short param_1)
-{
-    battleCameraParamsVar0.vx = param_1;
-    return;
 }
 
 void startReadingBattleJumpAnimation(sSpriteActorCore* param_1) {
@@ -3580,15 +3603,6 @@ void performMechaPlayAnimation(ushort param_1, short param_2, int param_3)
     return;
 }
 
-void deleteJumpAnimationControlStruct(void)
-{
-    delete jumpAnimationControlStruct;
-    allocateSavePointMeshDataSub0_var0 = 0;
-    jumpAnimationControlStruct = nullptr;
-    spriteBytecode2ExtendedE0_Var0 = 0;
-    return;
-}
-
 void cancelJumpAnim(void)
 {
     sJumpAnimationControlStruct* psVar2;
@@ -3962,11 +3976,11 @@ LAB_Battle__80081e90:
         MissingCode();
         battleVar2->m2E3 = 1;
     }
-    if (battleVar2->m2D4_remainingAP == '\0') {
+    if (battleVar2->m2D4_remainingAP == 0) {
         handleMenuSelectEnemy_cancel_sub0(param_1);
         battleVar2->m2E1_waitBeforeNextAttackInput = 1;
     }
-    if (battleVar2->m2E5 != '\0') {
+    if (battleVar2->m2E5 != 0) {
         handleMenuSelectEnemy_cancel_sub0(param_1);
         battleVar2->m2E1_waitBeforeNextAttackInput = 1;
     }
@@ -4584,7 +4598,16 @@ void battleSpriteOp89Sub3(sSpriteActorCore* param_1, short param_2)
 }
 
 void battleSpriteOp8BSub0(int param_1) {
-    MissingCode();
+    if (battleVar48[allocateJumpAnimationStructVar0 + -1].m18_operationType[param_1] != -1) {
+        if ((battleVar48[allocateJumpAnimationStructVar0 + -1].m0[param_1] != -1) && battleSpriteActorCores[param_1]) {
+            damageDisplayVar0 = battleVar48[allocateJumpAnimationStructVar0 + -1].m24[param_1];
+            damageDisplayVar1 = battleVar48[allocateJumpAnimationStructVar0 + -1].m3C[param_1];
+            createDamageDisplay(battleSpriteActorCores[param_1],
+                battleVar48[allocateJumpAnimationStructVar0 + -1].m0[param_1],
+                battleVar48[allocateJumpAnimationStructVar0 + -1].m18_operationType[param_1]);
+            battleVar48[allocateJumpAnimationStructVar0 + -1].m0[param_1] = -1;
+        }
+    }
 }
 
 void battleSpriteOp8B() {

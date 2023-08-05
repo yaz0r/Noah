@@ -328,6 +328,8 @@ struct sBattle800cdd40 {
     // size 0x5f0 ?
 };
 
+extern struct sJumpAnimationControlStruct* jumpAnimationControlStruct;
+
 extern sBattle800CDD40Sub* battleGetSlotStatusSub_current28Entry;
 extern std::array<sBattle800cdd40, 3> battle800CDD40;
 extern sBattleEntity* battleGetSlotStatusSub_currentBattleEntity;
