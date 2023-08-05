@@ -81,6 +81,7 @@ struct sBattleVar0 {
     std::array<std::array<POLY_GT4, 2>, 4> m5A0;
     std::array<std::array<POLY_G4, 2>, 3> m740_APOrFuelPoly;
     std::array<std::array<POLY_FT4, 2>, 3> m818; // unsure size
+    std::array < std::array<POLY_FT4, 2>, 3> m9C8_APCounterDisplayPolys; // unsure size
     std::array<std::array<std::array<POLY_FT4, 2>, 10>, 4> m2E08_timeBars;
     std::array<std::array<std::array<POLY_FT4, 2>, 40>, 3> m3A88;
     std::array<std::array<std::array<POLY_FT4, 2>, 4>, 3> m6008;
@@ -132,6 +133,7 @@ struct sBattleVar1 {
     std::array<u8, 3> m99_oddOrEven;
     u8 mA2;
     u8 mA3;
+    u8 mA4_oddOrEven7B;
     u8 mA9_timeBarNumMoveSteps;
     u8 mAB_timeBarNumAnimationSteps;
     u8 mAF;

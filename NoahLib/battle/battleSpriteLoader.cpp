@@ -6,6 +6,7 @@
 #include "battle/battle.h"
 #include "field/field.h"
 
+
 bool battleScriptLoaderTaskCreationInProgress = 0;
 
 sBattleSpriteConfigs battleConfigFile3;

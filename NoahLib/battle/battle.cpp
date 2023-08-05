@@ -1045,7 +1045,7 @@ void battleRenderPlayerPortraits() {
     }
 
     if (battleVar1->mAF) {
-        MissingCode();
+        battleRenderPolyArray(&battleVar0->m9C8_APCounterDisplayPolys[0], battleVar1->m7B, battleVar1->mA4_oddOrEven7B);
     }
 
     for (int j = 0; j < 3; j++) {
@@ -2044,7 +2044,11 @@ void drawCircleMenuDefend(int param_1) {
 }
 
 void updateAPCounterDisplay() {
-    MissingCode();
+    battleVar1->m7B = 0;
+    battleVar1->m7B += battleSetupStringInPolyFT4Large(battleVar2->m2D4_remainingAP + 0xF, &battleVar0->m9C8_APCounterDisplayPolys[battleVar1->m7B], 0x2A, 0xD0);
+    battleVar1->m7B += battleSetupStringInPolyFT4Large(0x19, &battleVar0->m9C8_APCounterDisplayPolys[battleVar1->m7B], 0x32, 0xD0);
+    battleVar1->m7B += battleSetupStringInPolyFT4Large(battleVar2->m2D5_maxAP + 0xF, &battleVar0->m9C8_APCounterDisplayPolys[battleVar1->m7B], 0x3A, 0xD0);
+    battleVar1->mA4_oddOrEven7B = battleOddOrEven;
 }
 
 struct sBattleVar48 {
@@ -2777,6 +2781,7 @@ void startJumpAnimation(int isBilly, uint actor, uint jumpTarget, uint facing) {
 }
 
 void startCharacterJumpToEnemy(int param_1) {
+    updateAPCounterDisplay();
     param_1 &= 0xFF;
     initAnimSeqFromCharacterToCharacter(param_1, battleVar2->m0[param_1].m3C_currentTarget);
     startCharacterJumpToEnemyVar0 = 0;
