@@ -443,7 +443,7 @@ void createBattleSpriteLoadingTaskSub(sBattleSpriteConfigs* param_1)
 {
     sBattleSpriteLoaderTask* psVar1;
 
-    psVar1 = battleLoaderAllocateMainBattleSprite<sBattleSpriteLoaderTask>(0, 0x78);
+    psVar1 = battleLoaderAllocateMainBattleSprite<sBattleSpriteLoaderTask>(nullptr, 0x78);
     regCallback8(psVar1, mainBattleSpriteCallback_phase1);
     psVar1->m20 = param_1;
     return;

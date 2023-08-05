@@ -283,7 +283,6 @@ void resetSpriteCallbacks(void);
 void regCallback8(sTaskHeader* param_1, void (*param_2)(sTaskHeader*));
 void regCallbackC(sTaskHeader* param_1, void (*param_2)(sTaskHeader*));
 void allocateSavePointMeshDataSub0(sTaskHeader* param_1, sTaskHeader* param_2);
-void allocateSavePointMeshDataSub0_callback(sTaskHeader* param_1);
 int isVramPreBacked(const sFieldEntitySub4_110_0* param_1);
 void addToSpriteTransferList(sSpriteActorCore* param_1, short param_2);
 void executeSpriteBytecode2Sub1(sSpriteActorCore* param_1);

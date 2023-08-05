@@ -148,7 +148,7 @@ void allocateSavePointMeshDataSub0_callback(sTaskHeader* param_1)
         } while (pEntry->m18_pNext);
     }
 
-    if (param_1->m14 < 0) {
+    if (param_1->m14 & 0x80000000) {
         allocateSavePointMeshDataSub0_var0--;
     }
     allocateSavePointMeshDataSub0_var1--;
@@ -161,8 +161,14 @@ void allocateSavePointMeshDataSub0(sTaskHeader* param_1, sTaskHeader* param_2)
     param_2->m8_updateCallback = 0;
     param_2->m18_pNext = spriteCallback2Var2;
     spriteCallback2Var2 = param_2;
-    if (param_1) // hack: this wasn't in original, and could deference null pointer?
+    if (param_1) // hack: this wasn't in original, and it would read from pointer 0x10 in ram (that happens to be 0)
+    {
         param_2->m14 = param_1->m10 & 0x1fffffff;
+    }
+    else {
+        param_2->m14 = 0;
+    }
+        
     param_2->m10 = param_2->m10 & 0xe0000000 | (registerSpriteCallback2Counter2 & 0x1fffffff);
     registerSpriteCallback2Counter2++;
 

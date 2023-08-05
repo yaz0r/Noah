@@ -25,4 +25,6 @@ void execSpritesCallbacksList2();
 
 void registerSpriteCallback2(sTaskHeader* param_1, sTaskHeader* param_2);
 void registerSpriteCallback2Sub0(sTaskHeader* param_1);
+void allocateSavePointMeshDataSub0_callback(sTaskHeader* param_1);
+
 
