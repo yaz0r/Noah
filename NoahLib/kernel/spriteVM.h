@@ -224,11 +224,11 @@ do
         param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
         break;
     case 0xA4:
-        if (param_1->m74_pNextSpriteCore->m48_defaultAnimationbundle == nullptr) {
+        if (param_1->m74_pTargetEntitySprite->m48_defaultAnimationbundle == nullptr) {
             assert(0);
         }
         else {
-            spriteActorSetPlayingAnimation(param_1->m74_pNextSpriteCore, READ_LE_S8(pEndOfOpcode));
+            spriteActorSetPlayingAnimation(param_1->m74_pTargetEntitySprite, READ_LE_S8(pEndOfOpcode));
         }
         param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
         break;
@@ -243,9 +243,9 @@ do
         if (((param_1->mAC >> 2) & 1) == 0) {
             scale = -scale;
         }
-        param_1->mA0.vx = param_1->m74_pNextSpriteCore->m0_position.vx.getIntegerPart() + scale;
+        param_1->mA0.vx = param_1->m74_pTargetEntitySprite->m0_position.vx.getIntegerPart() + scale;
         param_1->mA0.vy = 0;
-        param_1->mA0.vz = param_1->m74_pNextSpriteCore->m0_position.vx.getIntegerPart();
+        param_1->mA0.vz = param_1->m74_pTargetEntitySprite->m0_position.vx.getIntegerPart();
         battleSpriteOp89(param_1);
         param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
         break;
@@ -267,8 +267,8 @@ do
     case 0xF8: // switch for battle
     {
         u8 attack = battleVar48[allocateJumpAnimationStructVar0 + -1].m18_operationType
-            [(param_1->m74_pNextSpriteCore->mAC & 3) << 2 |
-            param_1->m74_pNextSpriteCore->mA8.mx1E];
+            [(param_1->m74_pTargetEntitySprite->mAC & 3) << 2 |
+            param_1->m74_pTargetEntitySprite->mA8.mx1E];
 
         bool bVar6;
         u8 attackType = READ_LE_U8(pEndOfOpcode + 2) & 0x7F;

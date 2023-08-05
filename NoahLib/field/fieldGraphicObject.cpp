@@ -794,7 +794,7 @@ void spriteBytecode2ExtendedE0(sSpriteActorCore* param_1, sPS1Pointer param_2, s
     pSavePointMesh->m38_spriteActorCore.m70 = param_1;
     pSavePointMesh->m38_spriteActorCore.m44_currentAnimationBundle = param_1->m44_currentAnimationBundle;
     pSavePointMesh->m38_spriteActorCore.m48_defaultAnimationbundle = param_1->m48_defaultAnimationbundle;
-    pSavePointMesh->m38_spriteActorCore.m74_pNextSpriteCore = param_1->m74_pNextSpriteCore;
+    pSavePointMesh->m38_spriteActorCore.m74_pTargetEntitySprite = param_1->m74_pTargetEntitySprite;
     pSavePointMesh->m38_spriteActorCore.m82 = param_1->m82;
     pSavePointMesh->m38_spriteActorCore.m50 = param_1->m50;
     pSavePointMesh->m38_spriteActorCore.m8D = (param_1->mAC >> 24) & 0xFF;
@@ -1069,7 +1069,7 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
         registerSpriteCallback2_2(param_1->m6C_pointerToOwnerStructure);
 		break;
     case 0xA4:
-        spriteActorSetPlayingAnimation(param_1->m74_pNextSpriteCore, READ_LE_S8(param_3));
+        spriteActorSetPlayingAnimation(param_1->m74_pTargetEntitySprite, READ_LE_S8(param_3));
         break;
     case 0xA9:
     {

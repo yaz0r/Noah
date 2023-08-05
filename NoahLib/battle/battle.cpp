@@ -31,6 +31,14 @@ s8 previousNewBattleInputButton;
 u8 startCharacterJumpToEnemyVar0;
 u8 startCharacterJumpToEnemyVar1;
 u8 numValidTarget = 0;
+
+enum battleInputDirection : u8 {
+    BDIR_RIGHT = 0,
+    BDIR_DOWN = 1,
+    BDIR_LEFT = 2,
+    BDIR_UP = 3,
+};
+
 std::array<u8, 12> targetsPerPriority;
 
 std::array<sBattleSpriteActor*, 11> battleSpriteActors;
@@ -2194,7 +2202,6 @@ sSpriteActorCore* getSpriteCoreForAnimation(int param_1) {
 }
 
 int countBattleActorCoresActiveForBitmask(uint bitmask, std::array<sSpriteActorCore*, 11>& param_2, sSpriteActorCore* param_3) {
-    sSpriteActorCore* psVar1;
     sBattleMechaInitData** ppsVar2;
     int iVar4;
 
@@ -2202,10 +2209,9 @@ int countBattleActorCoresActiveForBitmask(uint bitmask, std::array<sSpriteActorC
     ppsVar2 = &battleLoadDataVar2Ter;
     std::array<sSpriteActorCore*, 11>::iterator ppsVar1 = param_2.begin();
     for(int i=0; i<11; i++) {
-        if (((bitmask & 1) != 0) &&
-            (psVar1 = battleSpriteActorCores[0], psVar1 != (sSpriteActorCore*)0x0)) {
-            psVar1->m74_pNextSpriteCore = param_3;
-            *ppsVar1 = psVar1;
+        if ((bitmask & 1) && battleSpriteActorCores[i]) {
+            battleSpriteActorCores[i]->m74_pTargetEntitySprite = param_3;
+            *ppsVar1 = battleSpriteActorCores[i];
             ppsVar1 = ppsVar1 + 1;
             iVar4 = iVar4 + 1;
         }
@@ -2418,7 +2424,7 @@ void processBattleAnimation(sSpriteActorCore* param_1) {
         OP_INIT_ENTITY_SCRIPT_sub0Sub8(param_1->getAsSpriteActorCore(), startJumpAnimationCallback);
         (param_1->getAsSpriteActorCore()->m7C)->m8 =
             (uint)battleVar48[allocateJumpAnimationStructVar0].m18_operationType
-            [(param_1->getAsSpriteActorCore()->m74_pNextSpriteCore->mAC & 3) << 2 | param_1->getAsSpriteActorCore()->m74_pNextSpriteCore->mA8.mx1E];
+            [(param_1->getAsSpriteActorCore()->m74_pTargetEntitySprite->mAC & 3) << 2 | param_1->getAsSpriteActorCore()->m74_pTargetEntitySprite->mA8.mx1E];
         if (!isVramPreBacked((param_1->getAsSpriteActorCore()->m24_vramData)->m0_spriteData)) {
             if (battleVar48[allocateJumpAnimationStructVar0].m47_battleAnimationToPlay < 0x10) {
                 if ((fxFragmentLoaded == '\0') && (battleAnimationLoadingDest.m_rawData.size() != 0)) {
@@ -2440,7 +2446,7 @@ void processBattleAnimation(sSpriteActorCore* param_1) {
         }
         else {
             spriteActorSetPlayingAnimation(param_1->getAsSpriteActorCore(), battleVar48[allocateJumpAnimationStructVar0].m47_battleAnimationToPlay);
-            sSpriteActorCore* psVar10 = param_1->getAsSpriteActorCore()->m74_pNextSpriteCore;
+            sSpriteActorCore* psVar10 = param_1->getAsSpriteActorCore()->m74_pTargetEntitySprite;
             computeBattleCameraParams
             (1 << ((param_1->getAsSpriteActorCore()->mAC & 3) << 2 |
                 (uint)param_1->getAsSpriteActorCore()->mA8.mx1E) |
@@ -2505,7 +2511,7 @@ void allocateJumpAnimationStructCallback(sJumpAnimationControlStruct* param_1) {
     {
         switch (jumpAnimationControlStruct->m49) {
         case 2: // happens when jump animation completes
-            battleAnimationCallback_2(param_1->m4, param_1->m4->m74_pNextSpriteCore);
+            battleAnimationCallback_2(param_1->m4, param_1->m4->m74_pTargetEntitySprite);
             break;
         case 4:
         {
@@ -2527,7 +2533,7 @@ void allocateJumpAnimationStructCallback(sJumpAnimationControlStruct* param_1) {
             setupJumpAnimationStruct1C(10);
             break;
         case 6:
-            jumpUpdatePositionSub0(param_1->m4, param_1->m4->m74_pNextSpriteCore);
+            jumpUpdatePositionSub0(param_1->m4, param_1->m4->m74_pTargetEntitySprite);
             break;
         case 10:
             break;
@@ -2613,13 +2619,13 @@ void setupBattleAnimationSpriteCore(sSpriteActorCore* param_1) {
         pSpriteCoreListHead[0] = param_1;
     }
 
-    param_1->m74_pNextSpriteCore = pSpriteCoreListHead[0];
-    pSpriteCoreListHead[0]->m74_pNextSpriteCore = param_1;
+    param_1->m74_pTargetEntitySprite = pSpriteCoreListHead[0];
+    pSpriteCoreListHead[0]->m74_pTargetEntitySprite = param_1;
     jumpAnimationControlStruct->m4C = pSpriteCoreListHead[0];
     jumpAnimationControlStruct->m28 = (pSpriteCoreListHead[0]->mAC & 3) << 2 | pSpriteCoreListHead[0]->mA8.mx1E;
-    setSpriteActorAngle(param_1, spriteActorCoreRatan2(param_1, param_1->m74_pNextSpriteCore));
+    setSpriteActorAngle(param_1, spriteActorCoreRatan2(param_1, param_1->m74_pTargetEntitySprite));
     if ((pSpriteCoreListHead[0]->mAC >> 24) != 0x15) {
-        setSpriteActorAngle(pSpriteCoreListHead[0], spriteActorCoreRatan2(param_1->m74_pNextSpriteCore, param_1));
+        setSpriteActorAngle(pSpriteCoreListHead[0], spriteActorCoreRatan2(param_1->m74_pTargetEntitySprite, param_1));
     }
 }
 
@@ -2655,6 +2661,7 @@ void jumpUpdatePositionSub1(sSpriteActorCore* param_1, uint param_2) {
     setupJumpAnimationStruct1C(6);
 }
 
+// param_1 is the entity we are jumping next to
 void jumpUpdatePositionSub0(sSpriteActorCore* param_1, sSpriteActorCore* param_2) {
     if ((battleJumpData[jumpAnimationControlStruct->m2C].m0_X == -1) &&
         (battleJumpData[jumpAnimationControlStruct->m2C].m2_Z == -1)) {
@@ -2684,6 +2691,7 @@ void jumpUpdatePositionSub0(sSpriteActorCore* param_1, sSpriteActorCore* param_2
     }
 }
 
+// param_1 is the entity we're jumping next to
 void jumpUpdatePosition(sSpriteActorCore* param_1) {
     if ((battleJumpData[jumpAnimationControlStruct->m2C].m0_X == -1) &&
         (battleJumpData[jumpAnimationControlStruct->m2C].m2_Z == -1)) {
@@ -2692,7 +2700,7 @@ void jumpUpdatePosition(sSpriteActorCore* param_1) {
         (param_1->mA0).vy = 0;
         (param_1->mA0).vz = param_1->m0_position.vz.getIntegerPart();
 
-        jumpUpdatePositionSub0(param_1, param_1->m74_pNextSpriteCore);
+        jumpUpdatePositionSub0(param_1, param_1->m74_pTargetEntitySprite);
     }
     else {
         (param_1->mA0).vx = battleJumpData[jumpAnimationControlStruct->m2C].m0_X;
@@ -3745,7 +3753,7 @@ void updateCharacterBlinkingTask(u32 param_1) {
     }
 }
 
-u8 selectNewSlotByDirection(byte inputSlot, byte direction) {
+u8 selectNewSlotByDirection(byte inputSlot, battleInputDirection direction) {
     s32 bestResult = 0xffffff;
     byte slot = inputSlot;
     for (int i = 0; i < 12; i++) {
@@ -3815,7 +3823,7 @@ void updateTargetSelectionMarker(u8 param_1) {
         updateCharacterBlinkingTask(characterIdToTargetBitmask(battleVar2->m2E8_currentTarget));
 
         for (int i = 0; i < 4; i++) {
-            if (selectNewSlotByDirection(battleVar2->m2E8_currentTarget, i) == battleVar2->m2E8_currentTarget) {
+            if (selectNewSlotByDirection(battleVar2->m2E8_currentTarget, (battleInputDirection)i) == battleVar2->m2E8_currentTarget) {
                 battleG3->mE6_isDirectionEnabled[i] = 0;
             }
             else {
@@ -4227,23 +4235,23 @@ void handleMenuSelectEnemy(u8 param_1) {
     if (battleVar2->m2E9 == 0) { // if we can still move
         // handle target change
         switch (battleInputButton) {
-        case 0:
-            battleVar2->m2E8_currentTarget = selectNewSlotByDirection(battleVar2->m2E8_currentTarget, 0);
+        case battleInputDirection::BDIR_RIGHT: // right
+            battleVar2->m2E8_currentTarget = selectNewSlotByDirection(battleVar2->m2E8_currentTarget, battleInputDirection::BDIR_RIGHT);
             initAnimSeqFromCharacterToCharacter(battleVar2->m2D3_currentEntityTurn, battleVar2->m2E8_currentTarget);
             battleSoundEffect(0x4c);
             break;
-        case 1:
-            battleVar2->m2E8_currentTarget = selectNewSlotByDirection(battleVar2->m2E8_currentTarget, 1);
+        case battleInputDirection::BDIR_DOWN: // down
+            battleVar2->m2E8_currentTarget = selectNewSlotByDirection(battleVar2->m2E8_currentTarget, battleInputDirection::BDIR_DOWN);
             initAnimSeqFromCharacterToCharacter(battleVar2->m2D3_currentEntityTurn, battleVar2->m2E8_currentTarget);
             battleSoundEffect(0x4c);
             break;
-        case 2:
-            battleVar2->m2E8_currentTarget = selectNewSlotByDirection(battleVar2->m2E8_currentTarget, 2);
+        case battleInputDirection::BDIR_LEFT: // left
+            battleVar2->m2E8_currentTarget = selectNewSlotByDirection(battleVar2->m2E8_currentTarget, battleInputDirection::BDIR_LEFT);
             initAnimSeqFromCharacterToCharacter(battleVar2->m2D3_currentEntityTurn, battleVar2->m2E8_currentTarget);
             battleSoundEffect(0x4c);
             break;
-        case 3:
-            battleVar2->m2E8_currentTarget = selectNewSlotByDirection(battleVar2->m2E8_currentTarget, 3);
+        case battleInputDirection::BDIR_UP: // up
+            battleVar2->m2E8_currentTarget = selectNewSlotByDirection(battleVar2->m2E8_currentTarget, battleInputDirection::BDIR_UP);
             initAnimSeqFromCharacterToCharacter(battleVar2->m2D3_currentEntityTurn, battleVar2->m2E8_currentTarget);
             battleSoundEffect(0x4c);
             break;
@@ -4898,6 +4906,7 @@ void battleHandleInput(void) {
     } while (true);
 }
 
+// compute the direction and step for the jump
 void battleSpriteOp89Sub3(sSpriteActorCore* param_1, short param_2)
 {
     short sVar1;

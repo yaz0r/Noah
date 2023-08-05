@@ -153,7 +153,7 @@ struct sSpriteActorCore : public sCustomRenderable {
         struct sSpriteActor* m6C_pointerToOwnerStructureSpriteActor;
     };
     sSpriteActorCore* m70;
-    sSpriteActorCore* m74_pNextSpriteCore;
+    sSpriteActorCore* m74_pTargetEntitySprite;
     u32 m78;
     sFieldEntitySub4_F4* m7C;
     s16 m80;
