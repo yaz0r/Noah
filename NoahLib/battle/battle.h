@@ -335,3 +335,4 @@ extern u16 jumpAnimationActiveActorBF;
 void setupBattleAnimationSpriteCore(sSpriteActorCore* param_1);
 void performMechaPlayAnimation(ushort param_1, short param_2, int param_3);
 int waitForMusic(uint param_1);
+void clearShapeTransferEntry(void*);

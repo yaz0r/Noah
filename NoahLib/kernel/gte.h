@@ -75,3 +75,5 @@ void SetDQB(s32);
 void read_sz_fifo3(s16*, s16*, s16*);
 
 #define gte_rtpt_b gte_rtpt
+
+extern s32 gDepthDivider;

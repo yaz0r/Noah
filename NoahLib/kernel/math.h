@@ -113,3 +113,4 @@ MATRIX* RotMatrixYXZ(SFP_VEC4* r, MATRIX* m);
 VECTOR* ApplyRotMatrixLV(VECTOR* $2, VECTOR* $3);
 VECTOR* ApplyRotMatrix(SVECTOR* $2, VECTOR* $3);
 void setupVector(VECTOR* param_1, long param_2, long param_3, long param_4);
+void setupSVector(SVECTOR* param_1, short param_2, short param_3, short param_4);

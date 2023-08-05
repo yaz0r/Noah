@@ -2,6 +2,8 @@
 #include "gte.h"
 #include <math.h>
 
+s32 gDepthDivider = 2;
+
 typedef union {
 #if defined(__BIGENDIAN__)
 	struct {

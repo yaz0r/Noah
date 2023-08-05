@@ -14,7 +14,7 @@
 #include "battleSpriteLoader.h"
 #include "kernel/trigo.h"
 #include "kernel/gte.h"
-#include "battleCursor.generated.h"
+#include "battle/spinningEnemySelectionCursor.h"
 
 u16 allPlayerCharacterBitmask = 0;
 u8 battleInitVar0 = 0;
@@ -1841,14 +1841,6 @@ void initBattleSpriteSystem() {
     objectClippingMask = 0;
 }
 
-void setupSVector(SVECTOR* param_1, short param_2, short param_3, short param_4)
-{
-    param_1->vx = param_2;
-    param_1->vy = param_3;
-    param_1->vz = param_4;
-    return;
-}
-
 void initBattleGraphics(sBattleSpriteConfigs* param_1) {
     initBattle3dRendering();
     initBattleSpriteSystem();
@@ -3381,345 +3373,8 @@ sTaskHeader* findMatchingGraphicEntity(sTaskHeader* param_1, void (*param_2)(sTa
     return nullptr;
 }
 
-struct sCustomPolySubBufferPacket {
-    std::vector<u8>::iterator init(std::vector<u8>::iterator primBuffer) {
-        int size = READ_LE_U8(primBuffer) * 4;
-        m_rawData.insert(m_rawData.begin(), primBuffer, primBuffer + size);
-
-        m0_runtimeSizeNeededInWords = READ_LE_U8(m_rawData.begin() + 0);
-        m1_offsetToNextPacketSizeInWords = READ_LE_U8(m_rawData.begin() + 1);
-        m2_polyType0 = READ_LE_U8(m_rawData.begin() + 2);
-        m3_polyType1 = READ_LE_U8(m_rawData.begin() + 3);
-
-        return primBuffer + size;
-    }
-    u8 m0_runtimeSizeNeededInWords;
-    u8 m1_offsetToNextPacketSizeInWords;
-    u8 m2_polyType0;
-    u8 m3_polyType1;
-    std::vector<u8> m_rawData;
-};
-
-struct sCustomPolySubBuffer {
-    void init(std::vector<u8>::iterator currentSubBuffer) {
-        m0_offsetToVertices = READ_LE_U32(currentSubBuffer + 0x00);
-        m4_numVertices = READ_LE_U32(currentSubBuffer + 0x04);
-        m10_offset = READ_LE_U32(currentSubBuffer + 0x10);
-        m14_count = READ_LE_U32(currentSubBuffer + 0x14);
-        
-        std::vector<u8>::iterator currentPrim = currentSubBuffer + m10_offset;
-        m1C_packets.resize(m14_count);
-        for (int i = 0; i < m14_count; i++) {
-            currentPrim = m1C_packets[i].init(currentPrim);
-        }
-
-        m_vertices.resize(m4_numVertices);
-        std::vector<u8>::iterator currentVertice = currentSubBuffer + m0_offsetToVertices;
-        for (int i = 0; i < m4_numVertices; i++) {
-            m_vertices[i].vx = READ_LE_S16(currentVertice + 0);
-            m_vertices[i].vy = READ_LE_S16(currentVertice + 2);
-            m_vertices[i].vz = READ_LE_S16(currentVertice + 4);
-            m_vertices[i].pad = READ_LE_S16(currentVertice + 6);
-            currentVertice += 8;
-        }
-
-    }
-    u32 m0_offsetToVertices;
-    u32 m4_numVertices;
-    u32 m10_offset;
-    u32 m14_count;
-    std::vector<sCustomPolySubBufferPacket> m1C_packets;
-    std::vector<SVECTOR> m_vertices;
-};
-
-struct sCustomPolyBuffer {
-    sCustomPolyBuffer(u8* rawBuffer, u32 rawBufferSize) {
-        buffer = std::initializer_list<u8>(rawBuffer, rawBuffer + rawBufferSize);
-
-        m8_count = READ_LE_U16(buffer.begin() + 0x8);
-        mC_buffers.resize(m8_count);
-        assert(m8_count == 1);
-        std::vector<u8>::iterator currentSubBuffer = buffer.begin() + 0xC;
-        for (int i = 0; i < m8_count; i++) {
-            mC_buffers[i].init(currentSubBuffer);
-        }
-    }
-    u32 m8_count;
-    std::vector<sCustomPolySubBuffer> mC_buffers;
-    std::vector<u8> buffer;
-};
-
-struct sAnyPoly {
-    POLY_F3 mF3;
-    POLY_G3 mG3;
-};
-
-struct sBattleCharacterBlinkingTask {
-    sTaskHeader m0;
-    sTaskHeader m1C;
-    sCustomRenderable* m38;
-    VECTOR m3C_translation;
-    SVECTOR m4C_rotation;
-    u32 m54;
-    u32 m58_tick;
-    std::array<std::vector<sAnyPoly>,2> m5C_buffer;
-    const sCustomPolySubBuffer* m64_customPolySubBuffer;
-};
-
-void updateColorFromSin(sSpriteActorCore* param_1, int param_2) {
-    int iVar1;
-    byte bVar2;
-
-    iVar1 = getAngleCos(param_2 << 6);
-    iVar1 = (iVar1 + 0x1000 >> 6) + 0x80;
-    if (0xff < iVar1) {
-        iVar1 = 0xff;
-    }
-    bVar2 = (byte)iVar1;
-    param_1->m28_colorAndCode.m0_r = bVar2;
-    param_1->m28_colorAndCode.m1_g = bVar2;
-    param_1->m28_colorAndCode.m2_b = bVar2;
-    updateAllSubsprites(param_1);
-}
-
-void updateBattleCharacterBlinking(sTaskHeader* param_1) {
-    sBattleCharacterBlinkingTask* pThis = (sBattleCharacterBlinkingTask*)param_1->m4;
-
-    pThis->m3C_translation.vx = pThis->m38->getAsSpriteActorCore()->m0_position.vx.getIntegerPart();
-    pThis->m3C_translation.vy = pThis->m38->getAsSpriteActorCore()->m0_position.vy.getIntegerPart();
-    pThis->m3C_translation.vz = pThis->m38->getAsSpriteActorCore()->m0_position.vz.getIntegerPart();
-
-    pThis->m58_tick++;
-
-    pThis->m3C_translation.vy -= pThis->m54 + 0x20;
-
-    updateColorFromSin(pThis->m38->getAsSpriteActorCore(), pThis->m58_tick);
-
-    (pThis->m4C_rotation).vy += 0x10;
-}
-
-void renderCustomPolyBuffer(const sCustomPolySubBuffer* param_1, std::vector<sAnyPoly>& param_2, OTTable* param_3, int param_4, int param_5, int param_6)
-{
-    if (param_6) {
-        assert(0);
-    }
-
-    for (int i = 0; i < param_1->m14_count; i++) {
-        sAnyPoly& currentAnyPoint = param_2[i];
-
-        const sCustomPolySubBufferPacket* polySource = &param_1->m1C_packets[i];
-        u16 polyType = (polySource->m3_polyType1 & 0x1C) | ((polySource->m2_polyType0 ^ 1) & 1) << 8;
-
-        switch (polyType) {
-        case 0: // F3
-        {
-            const SVECTOR* v0 = &param_1->m_vertices[READ_LE_U16(polySource->m_rawData.begin() + 8)];
-            const SVECTOR* v1 = &param_1->m_vertices[READ_LE_U16(polySource->m_rawData.begin() + 10)];
-            const SVECTOR* v2 = &param_1->m_vertices[READ_LE_U16(polySource->m_rawData.begin() + 12)];
-
-            gte_ldv3(v0, v1, v2);
-            gte_rtpt();
-            int flag;
-            gte_stflg(&flag);
-            gte_nclip();
-            if (flag & 0x4000) {
-                break;
-            }
-            int z;
-            gte_stopz(&z);
-            gte_avsz3();
-            if (z < 1) break;
-            int z2;
-            gte_stotz(&z2);
-
-            z2 = (z2 >> (gDepthDivider & 0x1F)) + param_5;
-            if (z2 < 5) {
-                z2 = 5;
-            }
-            if (z2 > 0xFFF)
-                break;
-
-            POLY_F3* pF3 = &currentAnyPoint.mF3;
-            gte_stsxy3(&pF3->x0y0, &pF3->x1y1, &pF3->x2y2);
-
-            pF3->m0_pNext = (*param_3)[z2].m0_pNext;
-            (*param_3)[z2].m0_pNext = pF3;
-
-            if (param_6 != 0) {
-                assert(0);
-            }
-            break;
-        }
-        case 0x10: // G3
-        {
-            const SVECTOR* v0 = &param_1->m_vertices[READ_LE_U16(polySource->m_rawData.begin() + 0x10)];
-            const SVECTOR* v1 = &param_1->m_vertices[READ_LE_U16(polySource->m_rawData.begin() + 0x12)];
-            const SVECTOR* v2 = &param_1->m_vertices[READ_LE_U16(polySource->m_rawData.begin() + 0x14)];
-
-            gte_ldv3(v0, v1, v2);
-            gte_rtpt();
-            int flag;
-            gte_stflg(&flag);
-            gte_nclip();
-            if (flag & 0x4000) {
-                break;
-            }
-            int z;
-            gte_stopz(&z);
-            gte_avsz3();
-            if (z < 1) break;
-            int z2;
-            gte_stotz(&z2);
-
-            z2 = (z2 >> (gDepthDivider & 0x1F)) + param_5;
-            if (z2 < 5) {
-                z2 = 5;
-            }
-            if (z2 > 0xFFF)
-                break;
-
-            POLY_G3* pG3 = &currentAnyPoint.mG3;
-            gte_stsxy3(&pG3->x0y0, &pG3->x1y1, &pG3->x2y2);
-
-            pG3->m0_pNext = (*param_3)[z2].m0_pNext;
-            (*param_3)[z2].m0_pNext = pG3;
-
-            if (param_6 != 0) {
-                assert(0);
-            }
-            break;
-        }
-        default:
-            assert(0);
-        }
-    }
-}
-
-void drawBattleCharacterBlinking(sTaskHeader* param_1) {
-    sBattleCharacterBlinkingTask* pThis = (sBattleCharacterBlinkingTask*)param_1->m4;
-
-    MATRIX MStack_40;
-    TransMatrix(&MStack_40, &pThis->m3C_translation);
-    createRotationMatrix(&pThis->m4C_rotation, &MStack_40);
-    CompMatrix(&currentRenderingMatrix, &MStack_40, &MStack_40);
-
-    long lVar1;
-    int iVar2;
-    lVar1 = ReadGeomScreen();
-    iVar2 = lVar1 << 0xc;
-    if (MStack_40.t[2] != 0) {
-        iVar2 = iVar2 / MStack_40.t[2];
-    }
-    iVar2 = (0x1000000 / iVar2) / 2;
-    VECTOR VStack_20;
-    setupVector(&VStack_20, iVar2, iVar2, iVar2);
-    ScaleMatrixL(&MStack_40, &VStack_20);
-    SetRotMatrix(&MStack_40);
-    SetTransMatrix(&MStack_40);
-    renderCustomPolyBuffer(pThis->m64_customPolySubBuffer, pThis->m5C_buffer[battleOddOrEven], characterRenderingOT, 0, 0, 0);
-}
-
 void clearShapeTransferEntry(void*) {
     MissingCode();
-}
-
-void deleteBattleCharacterBlinking(sTaskHeader* param_1) {
-    sBattleCharacterBlinkingTask* pThis = (sBattleCharacterBlinkingTask*)param_1->m4;
-
-    pThis->m38->getAsSpriteActorCore()->m28_colorAndCode.m3_code |= 1;
-    updateAllSubsprites(pThis->m38->getAsSpriteActorCore());
-    clearShapeTransferEntry(&pThis->m5C_buffer);
-    registerSpriteCallback2_2(param_1);
-    allocateSavePointMeshDataSub0_callback(param_1);
-    delete pThis;
-}
-
-sCustomPolyBuffer battleBlinkingPolyBuffer(battleCursor_bin, battleCursor_bin_size);
-
-const sCustomPolySubBuffer* getCustomPolySubBuffer(const sCustomPolyBuffer* param_1, int param_2) {
-    return &param_1->mC_buffers[param_2];
-}
-
-int getCustomPolySubBufferSize(const sCustomPolySubBuffer* param_1) {
-    int count = 0;
-    for (int i = 0; i < param_1->m14_count; i++) {
-        count += (param_1->m1C_packets[i].m0_runtimeSizeNeededInWords + 1) * 4;
-    }
-    return count;
-}
-
-void copyCustomPolySubBuffer(const sCustomPolySubBuffer* param_1, std::vector<sAnyPoly>& param_2, int isTransparent, uint isShaded) {
-    for (int i = 0; i < param_1->m14_count; i++) {
-        const sCustomPolySubBufferPacket* polySource = &param_1->m1C_packets[i];
-
-        u8 tagSize = polySource->m0_runtimeSizeNeededInWords;
-        u8 code = polySource->m3_polyType1;
-
-        u16 polyType = (polySource->m3_polyType1 & 0x1C) | ((polySource->m2_polyType0 ^ 1) & 1) << 8;
-        switch (polyType) {
-        case 0: // F3
-        {
-            sAnyPoly& newEntry = param_2.emplace_back();
-            POLY_F3* poly = &newEntry.mF3;
-            poly->m3_size = polySource->m0_runtimeSizeNeededInWords;
-            poly->m_colorAndCode.command = polySource->m3_polyType1;
-            SetShadeTex(poly, isShaded);
-            if (isTransparent) {
-                SetSemiTrans(poly, isTransparent);
-            }
-            poly->r0 = READ_LE_U8(polySource->m_rawData.begin() + 4);
-            poly->g0 = READ_LE_U8(polySource->m_rawData.begin() + 5);
-            poly->b0 = READ_LE_U8(polySource->m_rawData.begin() + 6);
-            break;
-        }
-        case 0x10: // G3
-        {
-            sAnyPoly& newEntry = param_2.emplace_back();
-            POLY_G3* poly = &newEntry.mG3;
-            poly->m3_size = polySource->m0_runtimeSizeNeededInWords;
-            poly->m_colorAndCode.command = polySource->m3_polyType1;
-            SetShadeTex(poly, isShaded);
-            if (isTransparent) {
-                SetSemiTrans(poly, isTransparent);
-            }
-            poly->r0 = READ_LE_U8(polySource->m_rawData.begin() + 4);
-            poly->g0 = READ_LE_U8(polySource->m_rawData.begin() + 5);
-            poly->b0 = READ_LE_U8(polySource->m_rawData.begin() + 6);
-            poly->r1 = READ_LE_U8(polySource->m_rawData.begin() + 8);
-            poly->g1 = READ_LE_U8(polySource->m_rawData.begin() + 9);
-            poly->b1 = READ_LE_U8(polySource->m_rawData.begin() + 10);
-            poly->r2 = READ_LE_U8(polySource->m_rawData.begin() + 12);
-            poly->g2 = READ_LE_U8(polySource->m_rawData.begin() + 13);
-            poly->b2 = READ_LE_U8(polySource->m_rawData.begin() + 14);
-            break;
-        }
-        default:
-            assert(0);
-        }
-    }
-}
-
-void createCharacterBlinkingTask(sBattleSpriteActor* param_1) {
-    sBattleCharacterBlinkingTask* pNewTask = createCustomRenderableEntity<sBattleCharacterBlinkingTask>(0x68, &param_1->m0, updateBattleCharacterBlinking, drawBattleCharacterBlinking, deleteBattleCharacterBlinking);
-    pNewTask->m38 = param_1->m0.m4;
-    pNewTask->m54 = param_1->m0.m4->getAsSpriteActorCore()->m36;
-    if (spriteBytecode2ExtendedE0_Var0) {
-        spriteBytecode2ExtendedE0_Var0--;
-    }
-    pNewTask->m0.m14 &= 0x7fffffff;
-    setupSVector(&pNewTask->m4C_rotation, 0, 0, 0);
-    int singleBufferSize = getCustomPolySubBufferSize(getCustomPolySubBuffer(&battleBlinkingPolyBuffer, 0));
-    std::vector<sAnyPoly> dest;
-    copyCustomPolySubBuffer(getCustomPolySubBuffer(&battleBlinkingPolyBuffer, 0), dest, 0, 1);
-
-    pNewTask->m5C_buffer[0] = dest;
-    pNewTask->m5C_buffer[1] = dest;
-   
-    pNewTask->m64_customPolySubBuffer = getCustomPolySubBuffer(&battleBlinkingPolyBuffer, 0);
-
-    param_1->m0.m4->getAsSpriteActorCore()->m28_colorAndCode.m3_code &= 0xFE;
-    updateAllSubsprites(param_1->m0.m4->getAsSpriteActorCore());
-    updateBattleCharacterBlinking(&pNewTask->m0);
 }
 
 void updateCharacterBlinkingTask(u32 param_1) {
@@ -3735,7 +3390,7 @@ void updateCharacterBlinkingTask(u32 param_1) {
     for (int i = 0; i < 11; i++) {
         if (!(param_1 & 1)) {
             if (battleSpriteActors[i]) {
-                sTaskHeader* pTask = findMatchingGraphicEntity(&battleSpriteActors[i]->m0, updateBattleCharacterBlinking);
+                sTaskHeader* pTask = findMatchingGraphicEntity(&battleSpriteActors[i]->m0, updateSpinningEnemySelectionCursor);
                 if (pTask) {
                     pTask->mC_deleteCallback(pTask);
                 }
@@ -3743,9 +3398,9 @@ void updateCharacterBlinkingTask(u32 param_1) {
         }
         else {
             if (battleSpriteActors[i]) {
-                sTaskHeader* pTask = findMatchingGraphicEntity(&battleSpriteActors[i]->m0, updateBattleCharacterBlinking);
+                sTaskHeader* pTask = findMatchingGraphicEntity(&battleSpriteActors[i]->m0, updateSpinningEnemySelectionCursor);
                 if (pTask == nullptr) {
-                    createCharacterBlinkingTask(battleSpriteActors[i]);
+                    createSpinningEnemySelectionCursor(battleSpriteActors[i]);
                 }
             }
         }

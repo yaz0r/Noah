@@ -1155,8 +1155,6 @@ int primC_init(u8* displayList, u8* meshBlock, int initParam)
 s32 screenClippingX = 319;
 s32 screenClippingY = 238 << 0x10;
 
-s32 gDepthDivider = 2;
-
 OTTable::iterator currentOTEntry;
 
 void genericTrianglePrim_14(u8* meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)

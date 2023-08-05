@@ -369,8 +369,6 @@ extern int shapeTransfertDoubleBufferIndex;
 extern s32 bootModeReady;
 extern s32 newBootMode;
 
-extern s32 gDepthDivider;
-
 extern u8 kernelAndFieldStatesSynced;
 
 extern s32 fieldTransitionMode;
