@@ -2126,53 +2126,6 @@ void sprintf_screen(const char* format, ...)
     MissingCode();
 }
 
-sTaskHeader* spriteCallback2Var1 = nullptr;
-sTaskHeader* spriteCallback2Var2 = nullptr;
-sTaskHeader* spriteCallback2Var3 = nullptr;
-int spriteCallback2Var4 = 0;
-
-void execSpritesCallback(void)
-{
-    sTaskHeader** ppsVar1;
-
-    spriteCallback2Var1 = spriteCallback2Head;
-    if (spriteCallback2Head != (sTaskHeader*)0x0) {
-        do {
-            ppsVar1 = &spriteCallback2Var1->m18_pNext;
-            auto previous = spriteCallback2Var1;
-            void (*puVar2)(sTaskHeader*) = spriteCallback2Var1->m8_updateCallback;
-            spriteCallback2Var3 = spriteCallback2Var1;
-            spriteCallback2Var1 = *ppsVar1;
-            if (puVar2 != nullptr) {
-                puVar2(previous);
-            }
-        } while (spriteCallback2Var1 != (sTaskHeader*)0x0);
-    }
-    return;
-}
-
-void execSpritesCallbacks2()
-{
-    if (spriteCallback2Var0 == 0) {
-        spriteCallback2Var1 = spriteCallback2Var2;
-        if (spriteCallback2Var2 != nullptr) {
-            do {
-                spriteCallback2Var3 = spriteCallback2Var1;
-                spriteCallback2Var1 = spriteCallback2Var1->m18_pNext;
-                if (spriteCallback2Var3->m8_updateCallback != nullptr) {
-                    spriteCallback2Var3->m8_updateCallback(spriteCallback2Var3);
-                }
-            } while (spriteCallback2Var1 != (void*)0x0);
-        }
-    }
-    else {
-        spriteCallback2Var0 = spriteCallback2Var0 + -1;
-        if (spriteCallback2Var0 == 0) {
-            spriteCallback2Var4 = 0;
-        }
-    }
-}
-
 void OP_INIT_ENTITY_SCRIPT_sub0(int actorId, int clutYEntry, sSpriteActorAnimationBundle* pSetup, int param_4, int clutXEntry, int param_6, int param_7)
 {
     resetMemoryAllocStats(8, 0);
@@ -2276,7 +2229,7 @@ void OP_INIT_ENTITY_SCRIPT_sub0(int actorId, int clutYEntry, sSpriteActorAnimati
     if (!param_7)
     {
         OP_INIT_ENTITY_SCRIPT_sub0Sub9(pFieldEntitySub4);
-        execSpritesCallbacks2();
+        execSpritesCallbacksList2();
         if (pFieldEntitySub4->m7C->mC == 0xff) {
             (actorArray[actorId].m4C_scriptEntity)->mEA_forcedAnimation = 0xff;
             (actorArray[actorId].m4C_scriptEntity)->m4_flags.m_rawFlags |= 0x1000000;
@@ -8612,8 +8565,8 @@ void renderChars()
         setCharacterRenderingOT(pCurrentFieldRenderingContext->mCC_OT);
         setCurrentRenderingMatrix(&currentProjectionMatrix);
         uploadCharacterSprites();
-        execSpritesCallback();
-        execSpritesCallbacks2();
+        execSpritesCallbacksList1();
+        execSpritesCallbacksList2();
         renderFieldCharacterSprites(pCurrentFieldRenderingContext->mCC_OT, g_frameOddOrEven);
 
         for (int i = 0; i < totalActors; i++)

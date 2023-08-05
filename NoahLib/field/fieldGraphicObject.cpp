@@ -206,8 +206,6 @@ void pushByteOnAnimationStack(sSpriteActorCore* param_1, u8 param)
 	param_1->m8E_stack[--param_1->m8C_stackPosition].asU8 = param;
 }
 
-u8 spriteBytecode2ExtendedE0_Var0 = 0;
-
 u16 getSavePointCreationMode1(sPS1Pointer param_1)
 {
     u16 uVar1;
@@ -236,116 +234,6 @@ u32 getModeForSavePointMesh(u32 param_1)
     case 0xf:
         return 2;
     }
-}
-
-u32 allocateSavePointMeshDataSub0_var0 = 0;
-u32 allocateSavePointMeshDataSub0_var1 = 0;
-
-void allocateSavePointMeshDataSub0_callback(sTaskHeader* param_1)
-{
-    sTaskHeader* pCurrentHead = spriteCallback2Var2;
-    sTaskHeader* pPrevious = nullptr;
-    sTaskHeader* pEntry;
-    if (pCurrentHead) {
-        do {
-            pEntry = pCurrentHead;
-            if (pEntry == param_1) {
-                if (pPrevious == nullptr) {
-                    spriteCallback2Var2 = param_1->m18_pNext;
-                }
-                else {
-                    pPrevious->m18_pNext = param_1->m18_pNext;
-                }
-                if (spriteCallback2Var1 == param_1) {
-                    spriteCallback2Var1 = param_1->m18_pNext;
-                }
-                break;
-            }
-            pCurrentHead = pEntry->m18_pNext;
-            pPrevious = pEntry;
-        } while (pEntry->m18_pNext);
-    }
-
-    if (param_1->m14 < 0) {
-        allocateSavePointMeshDataSub0_var0--;
-    }
-    allocateSavePointMeshDataSub0_var1--;
-}
-
-u32 registerSpriteCallback2Counter2 = 0;
-void allocateSavePointMeshDataSub0(sTaskHeader* param_1, sTaskHeader* param_2)
-{
-    param_2->m0_owner = param_1;
-    param_2->mC = allocateSavePointMeshDataSub0_callback;
-    param_2->m8_updateCallback = 0;
-    param_2->m18_pNext = spriteCallback2Var2;
-    spriteCallback2Var2 = param_2;
-    if(param_1) // hack: this wasn't in original, and could deference null pointer?
-        param_2->m14 = param_1->m10 & 0x1fffffff;
-    param_2->m10 = param_2->m10 & 0xe0000000 | (registerSpriteCallback2Counter2 & 0x1fffffff);
-    registerSpriteCallback2Counter2++;
-
-    if (spriteBytecode2ExtendedE0_Var0 == 0) {
-        param_2->m14 &= ~0x80000000;
-    }
-    else {
-        allocateSavePointMeshDataSub0_var0++;
-        param_2->m14 |= 0x80000000;
-    }
-    allocateSavePointMeshDataSub0_var1++;
-}
-
-sTaskHeader* spriteCallback2Head = nullptr;
-u32 registerSpriteCallback2Counter = 0;
-
-void registerSpriteCallback2Sub0(sTaskHeader* param_1) {
-    sTaskHeader* pPrevious = nullptr;
-    sTaskHeader* pCurrent = spriteCallback2Head;
-    while (pCurrent) {
-        if (pCurrent->m0_owner == param_1) {
-            if (((pCurrent->m14 >> 0x1E) & 1) == 0) {
-                if ((pCurrent->m14 & 0x1fffffff) == (param_1->m10 & 0x1fffffff)) {
-                    if (pPrevious == nullptr) {
-                        spriteCallback2Head = pCurrent->m18_pNext;
-                    }
-                    else {
-                        pPrevious->m18_pNext = pCurrent->m18_pNext;
-                    }
-                    if (spriteCallback2Var1 == pCurrent) {
-                        spriteCallback2Var1 = pCurrent->m18_pNext;
-                    }
-                    registerSpriteCallback2Counter--;
-                    break;
-                }
-            }
-        }
-
-        pPrevious = pCurrent;
-        pCurrent = pCurrent->m18_pNext;
-    }
-}
-
-
-void registerSpriteCallback2(sTaskHeader* param_1, sTaskHeader* param_2) {
-    param_2->m0_owner = param_1;
-    param_2->m10 = param_2->m10 & 0xe0000000 | (registerSpriteCallback2Counter2 & 0x1fffffff);
-    registerSpriteCallback2Counter2 = registerSpriteCallback2Counter2 + 1;
-    param_2->m18_pNext = spriteCallback2Head;
-    spriteCallback2Head = param_2;
-    param_2->m8_updateCallback = nullptr;
-    param_2->mC = registerSpriteCallback2Sub0;
-    registerSpriteCallback2Counter = registerSpriteCallback2Counter + 1;
-    param_2->m14 = param_1->m10 & 0x1fffffff;
-}
-
-void regCallback8(sTaskHeader* param_1, void (*param_2)(sTaskHeader*))
-{
-    param_1->m8_updateCallback = param_2;
-}
-
-void regCallbackC(sTaskHeader* param_1, void (*param_2)(sTaskHeader*))
-{
-    param_1->mC = param_2;
 }
 
 int modulateSpeed(sSpriteActorCore* param_1, int param_2)
@@ -559,12 +447,66 @@ void savePointCallback8(sTaskHeader* param_1) {
             return;
         }
     }
-    param_1->mC(param_1);
+    param_1->mC_deleteCallback(param_1);
+}
+
+void savePointCallbackC_sub1(sSpriteActorCore* param_1) {
+    sSpriteActorCore* psVar1;
+    sSpriteActorCore* psVar2;
+    sSpriteActorCore* psVar3;
+
+    psVar1 = spriteTransfertListHead;
+    psVar2 = (sSpriteActor*)0x0;
+    if (spriteTransfertListHead != (sSpriteActor*)0x0) {
+        do {
+            psVar3 = psVar1;
+            if (psVar1 == param_1) {
+                psVar3 = psVar2;
+                if (psVar2 == (sSpriteActor*)0x0) {
+                    spriteTransfertListHead = psVar2->m20->getAsSprite()->m38_pNext;
+                }
+                else {
+                    psVar2->m20->getAsSprite()->m38_pNext = psVar1->m20->getAsSprite()->m38_pNext;
+                }
+            }
+            psVar1 = psVar1->m20->getAsSprite()->m38_pNext;
+            psVar2 = psVar3;
+        } while (psVar1 != (sSpriteActor*)0x0);
+    }
 }
 
 void savePointCallbackC(sTaskHeader* param_1) {
-    MissingCode();
+    sSpriteActorCore* pSpriteActor = param_1->m4->getAsSpriteActorCore();
+
+    if (pSpriteActor->m20) {
+        if (pSpriteActor->m20->getAsSprite()->m2C) {
+            //clearShapeTransferEntry(pSpriteActor->m20->getAsSprite()->m2C);
+            assert(0);
+        }
+    }
+
+    if ((pSpriteActor->m3C & 3) == 1) {
+        if (pSpriteActor->m20->getAsSprite()->m34_perSubgroupTransform) {
+            delete pSpriteActor->m20->getAsSprite()->m34_perSubgroupTransform;
+            pSpriteActor->m20->getAsSprite()->m34_perSubgroupTransform = nullptr;
+        }
+    }
+
+    if ((pSpriteActor->mAC >> 5) & 1) {
+        registerSpriteCallback2_2(param_1);
+    }
+
+    if ((pSpriteActor->mB0.mRaw >> 0xB) & 1) {
+        assert(0);
+    }
+
+    if ((pSpriteActor->m3C & 3) == 1) {
+        savePointCallbackC_sub1(pSpriteActor);
+    }
+
+    allocateSavePointMeshDataSub0_callback(param_1);
     registerSpriteCallback2Sub0(param_1 + 1);
+    delete param_1;
 }
 
 void initFieldEntitySub4Sub1(sSpriteActorCore* param_1)
@@ -689,9 +631,9 @@ sSavePointMeshAbstract* createSavePointMeshData(int mode1, int mode2, sFieldEnti
         }
         {
             sSavePointMesh1* pNewSavePoint1 = new sSavePointMesh1;
-            int numF4 = initFieldEntitySub4Sub4(param_3->m0_spriteData)/* - 1*/; // TODO: HACK! removed the -1 here
+            int numF4 = initFieldEntitySub4Sub4(param_3->m0_spriteData)/* - 1*/;
             pNewSavePoint = allocateSavePointMeshData(pNewSavePoint1, param_5);
-            pNewSavePoint1->mF4.resize(numF4);
+            pNewSavePoint1->mF4.resize(numF4); // TODO: HACK! removed the -1 here. should have been 'iVar2 = (iVar2 + -1) * 0x18 + 0x58;'
             createSavePointMeshDataMode1(pNewSavePoint1);
             break;
         }
@@ -707,7 +649,7 @@ sSavePointMeshAbstract* createSavePointMeshData(int mode1, int mode2, sFieldEnti
         assert(0);
     }
 
-    pNewSavePoint->m38_spriteActorCore.m6C_pointerToOwnerStructure = pNewSavePoint;
+    pNewSavePoint->m38_spriteActorCore.m6C_pointerToOwnerStructure = &pNewSavePoint->m0;
     pNewSavePoint->m38_spriteActorCore.m86_thisSize = mode2;
     pNewSavePoint->m38_spriteActorCore.m24_vramData = param_3;
 
@@ -998,22 +940,22 @@ void customVramUpload()
 void registerSpriteCallback2_2(sTaskHeader* param_1) {
     {
         sTaskHeader* pPrevious = nullptr;
-        sTaskHeader* pCurrent = spriteCallback2Head;
+        sTaskHeader* pCurrent = spriteCallbackHead;
         while (pCurrent) {
             if (pCurrent->m0_owner == param_1) {
                 if (((pCurrent->m14 >> 0x1E) & 1) == 0) {
                     if ((pCurrent->m14 & 0x1fffffff) == (param_1->m10 & 0x1fffffff)) {
                         if (pPrevious == nullptr) {
-                            spriteCallback2Head = pCurrent->m18_pNext;
+                            spriteCallbackHead = pCurrent->m18_pNext;
                         }
                         else {
                             pPrevious->m18_pNext = pCurrent->m18_pNext;
                         }
-                        if (spriteCallback2Var1 == pCurrent) {
-                            spriteCallback2Var1 = pCurrent->m18_pNext;
+                        if (spriteCallbacksCurrentEntry == pCurrent) {
+                            spriteCallbacksCurrentEntry = pCurrent->m18_pNext;
                         }
-                        if (pCurrent->mC) {
-                            pCurrent->mC(pCurrent);
+                        if (pCurrent->mC_deleteCallback) {
+                            pCurrent->mC_deleteCallback(pCurrent);
                         }
                     }
                 }
@@ -1037,11 +979,11 @@ void registerSpriteCallback2_2(sTaskHeader* param_1) {
                         else {
                             pPrevious->m18_pNext = pCurrent->m18_pNext;
                         }
-                        if (spriteCallback2Var1 == pCurrent) {
-                            spriteCallback2Var1 = pCurrent->m18_pNext;
+                        if (spriteCallbacksCurrentEntry == pCurrent) {
+                            spriteCallbacksCurrentEntry = pCurrent->m18_pNext;
                         }
-                        if (pCurrent->mC) {
-                            pCurrent->mC(pCurrent);
+                        if (pCurrent->mC_deleteCallback) {
+                            pCurrent->mC_deleteCallback(pCurrent);
                         }
                     }
                 }
@@ -1124,7 +1066,7 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
         break;
 	case 0x96:
         // TODO: type-check that
-        registerSpriteCallback2_2(&((sSavePointMeshAbstract*)param_1->m6C_pointerToOwnerStructure)->m0);
+        registerSpriteCallback2_2(param_1->m6C_pointerToOwnerStructure);
 		break;
     case 0xA4:
         spriteActorSetPlayingAnimation(param_1->m74_pNextSpriteCore, READ_LE_S8(param_3));
@@ -1236,7 +1178,7 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
                 break;
             case 0x24:
                 // TODO: type-check that
-                ((sSavePointMeshAbstract*)param_1->m6C_pointerToOwnerStructure)->m0.m14 |= 0x40000000;
+                param_1->m6C_pointerToOwnerStructure->m14 |= 0x40000000;
                 local_70.vx = param_1->m70->m0_position.vx.getIntegerPart();
                 local_70.vy = param_1->m70->m0_position.vy.getIntegerPart();
                 local_70.vz = param_1->m70->m0_position.vz.getIntegerPart();
@@ -1244,7 +1186,7 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
                 break;
             case 0x25:
                 // TODO: type-check that
-                ((sSavePointMeshAbstract*)param_1->m6C_pointerToOwnerStructure)->m0.m14 &= ~0x40000000;
+                param_1->m6C_pointerToOwnerStructure->m14 &= ~0x40000000;
                 local_70.vx = param_1->m70->m0_position.vx.getIntegerPart();
                 local_70.vy = param_1->m70->m0_position.vy.getIntegerPart();
                 local_70.vz = param_1->m70->m0_position.vz.getIntegerPart();
@@ -1672,8 +1614,6 @@ sPS1Pointer popPointerFromAnimationStack(sSpriteActorCore* param_1)
     return param_1->m8E_stack[param_1->m8C_stackPosition++].asPs1Pointer;
 }
 
-int spriteCallback2Var0 = 0;
-
 void executeSpriteBytecode2_battle(sSpriteActorCore* param_1);
 
 void executeSpriteBytecode2(sSpriteActorCore* param_1)
@@ -1847,7 +1787,7 @@ void executeSpriteBytecode2(sSpriteActorCore* param_1)
 		case 0xA7:
 			param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
 			if ((READ_LE_U8(pEndOfOpcode) & 0x80) != 0) {
-				spriteCallback2Var0 = (READ_LE_U8(pEndOfOpcode) & 0x7f) + 1;
+				spritesCallback2Delay = (READ_LE_U8(pEndOfOpcode) & 0x7f) + 1;
 				param_1->m9E_wait = param_1->m9E_wait + 1;
 				return;
 			}
@@ -2283,7 +2223,7 @@ sSpriteActor* initializeSpriteActor(sSpriteActor* param_1, sSpriteActorAnimation
 		param_1->m7C->mC = 0;
 	}
 
-	param_1->m6C_pointerToOwnerStructure = param_1;
+	param_1->m6C_pointerToOwnerStructureSpriteActor = param_1;
 	param_1->m3C = param_1->m3C & 0xff00ffff | (initFieldVar2 & 0xf) << 0x14 | (initFieldVar2 & 0xf) << 0x10;;
 
 	int count = initFieldEntitySub4Sub4(&pSetup->m8_pData);
@@ -2415,17 +2355,6 @@ void setTransparencyMode(sSpriteActorCore* sprite, u32 mode)
     else {
         updateAllSubsprites(sprite);
     }
-}
-
-
-void resetSpriteCallbacks(void)
-{
-    allocateSavePointMeshDataSub0_var1 = 0;
-    registerSpriteCallback2Counter = 0;
-    spriteCallback2Var0 = 0;
-    spriteCallback2Var2 = (sTaskHeader*)0x0;
-    spriteCallback2Head = (sTaskHeader*)0x0;
-    return;
 }
 
 int addAndClamp(int param_1, int param_2)

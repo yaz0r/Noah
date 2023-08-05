@@ -855,9 +855,6 @@ void updateBattleCamera() {
     battleCameraSpriteOrientation.vz = 0;
 }
 
-void execSpritesCallback(void);
-void execSpritesCallbacks2(void);
-
 void battleTimeProgress() {
     if (makeBattleTimeProgress) {
         for (int i = 0; i < 11; i++) {
@@ -1723,8 +1720,8 @@ void battleRender() {
     MissingCode();
     renderMechasBattle(&battleRenderingMatrix, &battleMatrix800CCB94, *characterRenderingOT, battleOddOrEven);
     uploadCharacterSprites();
-    execSpritesCallback();
-    execSpritesCallbacks2();
+    execSpritesCallbacksList1();
+    execSpritesCallbacksList2();
     MissingCode();
 
     drawBattleFromModes();
@@ -3732,7 +3729,7 @@ void updateCharacterBlinkingTask(u32 param_1) {
             if (battleSpriteActors[i]) {
                 sTaskHeader* pTask = findMatchingGraphicEntity(&battleSpriteActors[i]->m0, updateBattleCharacterBlinking);
                 if (pTask) {
-                    pTask->mC(pTask);
+                    pTask->mC_deleteCallback(pTask);
                 }
             }
         }
@@ -5129,7 +5126,7 @@ void executeSpriteBytecode2_battle(sSpriteActorCore* param_1) {
         case 0xA7:
             param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
             if ((READ_LE_U8(pEndOfOpcode) & 0x80) != 0) {
-                spriteCallback2Var0 = (READ_LE_U8(pEndOfOpcode) & 0x7f) + 1;
+                spritesCallback2Delay = (READ_LE_U8(pEndOfOpcode) & 0x7f) + 1;
                 param_1->m9E_wait = param_1->m9E_wait + 1;
                 return;
             }

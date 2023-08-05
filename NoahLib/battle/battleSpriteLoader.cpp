@@ -32,7 +32,7 @@ T* battleLoaderAllocateMainBattleSprite(sSavePointMesh1* param_1, int param_2)
 
     psVar1 = new T;
     allocateSavePointMeshDataSub0(&param_1->m0, psVar1);
-    psVar1->mC = defaultBattleSpriteDeleteCallback;
+    psVar1->mC_deleteCallback = defaultBattleSpriteDeleteCallback;
     psVar1->m4 = nullptr;
     return psVar1;
 }
@@ -210,7 +210,7 @@ sBattleSpriteActor* allocateBattleSpriteActor(sSpriteActorAnimationBundle* param
     pSprite->m1C.m4 = &pSprite->m38_spriteActor;
     pSprite->m1C.m0_owner = nullptr;
     initBattleSpriteActorVram(&pSprite->m38_spriteActor, param_1, clutX, clutY, vramX, vramY, (int)param_6, param_14);
-    pSprite->m38_spriteActor.m0_spriteActorCore.m6C_pointerToOwnerStructure = pSprite;
+    pSprite->m38_spriteActor.m0_spriteActorCore.m6C_pointerToOwnerStructure = &pSprite->m0;
     pSprite->m38_spriteActor.m0_spriteActorCore.m0_position.vx = X << 0x10;
     pSprite->m38_spriteActor.m0_spriteActorCore.m0_position.vy = Y << 0x10;
     pSprite->m38_spriteActor.m0_spriteActorCore.m0_position.vz = Z << 0x10;

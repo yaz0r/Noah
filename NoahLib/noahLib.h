@@ -37,7 +37,7 @@ public:
         return m_pointer;
     }
 
-    bool operator == (const sPS1Pointer& other) {
+    bool operator == (const sPS1Pointer& other) const {
         return (other.m_pointer == m_pointer);
     }
 

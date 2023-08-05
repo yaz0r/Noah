@@ -3,7 +3,8 @@
 #include "psx/gpuprims.h"
 #include <optional>
 
-extern int spriteCallback2Var0;
+#include "kernel/taskLists.h"
+
 extern s8 isBattleOverlayLoaded;
 
 struct sFieldEntitySub4_124
@@ -147,7 +148,10 @@ struct sSpriteActorCore : public sCustomRenderable {
     //sPS1Pointer m60_endOfAnimationContainer; weird thing, skipped its init for now
     sPS1Pointer m64_spriteByteCode;
     void(*m68)(sSpriteActorCore*);
-    void* m6C_pointerToOwnerStructure;
+    union {
+        struct sTaskHeader* m6C_pointerToOwnerStructure;
+        struct sSpriteActor* m6C_pointerToOwnerStructureSpriteActor;
+    };
     sSpriteActorCore* m70;
     sSpriteActorCore* m74_pNextSpriteCore;
     u32 m78;
@@ -216,19 +220,6 @@ struct sSavePointMesh_data2
 };
 
 
-struct sTaskHeader
-{
-    virtual ~sTaskHeader() {}
-
-    void* m0_owner;
-    sCustomRenderable* m4;
-    void (*m8_updateCallback)(sTaskHeader*);
-    void (*mC)(sTaskHeader*);
-    u32 m10;
-    u32 m14;
-    sTaskHeader* m18_pNext;
-};
-
 // base size of one of those is expected to be 0xEC
 struct sSavePointMeshAbstract {
     sTaskHeader m0;
@@ -251,7 +242,6 @@ struct sSavePointMesh2 : public sSavePointMeshAbstract
 };
 
 extern sSpriteActorCore* spriteTransfertListHead;
-extern sTaskHeader* spriteCallback2Head;
 
 void savePointCallback8Sub0(sSpriteActorCore* param_1);
 void registerSpriteCallback2(sTaskHeader* param_1, sTaskHeader* param_2);
