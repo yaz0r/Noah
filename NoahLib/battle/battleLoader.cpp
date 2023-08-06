@@ -111,13 +111,13 @@ void loadPartyMembers() {
 
             battleEntities[i].mA4_gear = gameState.m978_gears[gearId];
 
-            mallocAndDecompress(relocatedPointer[5 + battleCharacters[i]]);
-            Noah_MissingCode("battle800CDD40");
-
+            partyBattleStats[i].init(mallocAndDecompress(relocatedPointer[5 + battleCharacters[i]]));
             mallocAndDecompress(relocatedPointer[17 + gearId]);
             Noah_MissingCode("battle800CEF10");
         }
     }
+
+    enemiesBattleStats.init(mallocAndDecompress(relocatedPointer[2]));
 
     Noah_MissingCode("battle800D02C0");
     Noah_MissingCode("battle800D2200");
@@ -408,10 +408,10 @@ u32 battleGetSlotStatusSub(u32 param_1) {
 
     if (entityIndex < 3) {
         if ((battleEntities[entityIndex].m15A_flags & 0x80) == 0) {
-            battleGetSlotStatusSub_current28Entry = &battle800CDD40[entityIndex].m0[battleGetSlotStatusSub_current28Index];
+            currentEntityBattleStats = &partyBattleStats[entityIndex].m0[battleGetSlotStatusSub_current28Index];
             s32 index2 = battleEntities[entityIndex].m0_base.m5A;
-            s32 result = index2 - battleGetSlotStatusSub_current28Entry->m27;
-            if ((int)(char)battleGetSlotStatusSub_current28Entry->m27 < (int)index2) {
+            s32 result = index2 - currentEntityBattleStats->m27;
+            if ((int)(char)currentEntityBattleStats->m27 < (int)index2) {
                 s32 randVar2 = result * 8;
                 result2 = randVar2 + result;
             }

@@ -1411,7 +1411,7 @@ void setupPolyArray3A88_HP(int param_1) {
         currentHP = apConfigArray[param_1].m0;
     }
     else {
-        currentHP = battleEntities[param_1].mA4_gear.m38_HP;
+        currentHP = battleEntities[param_1].mA4_gear.m38_fuel;
     }
     printIntegerToStringBattle(currentHP);
     
@@ -1447,7 +1447,7 @@ int setupPolyArray3A88_HP2(int param_1, char param_2) {
 
     currentEntityMaxHpForDisplay = battleEntities[param_1].m0_base.m4E_MaxHP;
     currentEntityHpForDisplay = battleEntities[param_1].m0_base.m4C_HP;
-    currentEntityGearMaxHpForDisplay = battleEntities[param_1].mA4_gear.m60;
+    currentEntityGearMaxHpForDisplay = battleEntities[param_1].mA4_gear.m60_hp;
     currentEntityGearHpForDisplay = battleEntities[param_1].mA4_gear.m64;
 
     int bVar1;
@@ -2047,25 +2047,25 @@ void updateAPCounterDisplay() {
 }
 
 struct sBattleVar48 {
-    std::array<u16, 11> m0;
+    std::array<u16, 11> m0_damageValue;
     u16 m16_targetBitMask;
-    std::array<s8, 11> m18_operationType;
+    std::array<s8, 11> m18_damageType;
     u8 m23_battleEntityIndex;
     std::array<s16, 11> m24;
     s16 m3A;
-    std::array<u8,11> m3C;
+    std::array<s8,11> m3C;
     s8 m47_battleAnimationToPlay;
 
     //size 0x48
 };
 
-std::array<sBattleVar48, 32> battleVar48;
+std::array<sBattleVar48, 32> battleCurrentDamages;
 
 void initAnimSeqFromCharacterToCharacter(u8 entity, u8 target) {
     for (int i = 0; i < 0x20; i++) {
-        battleVar48[i].m47_battleAnimationToPlay = -1;
-        battleVar48[i].m23_battleEntityIndex = entity;
-        battleVar48[i].m16_targetBitMask = characterIdToTargetBitmask(target);
+        battleCurrentDamages[i].m47_battleAnimationToPlay = -1;
+        battleCurrentDamages[i].m23_battleEntityIndex = entity;
+        battleCurrentDamages[i].m16_targetBitMask = characterIdToTargetBitmask(target);
     }
 }
 
@@ -2372,7 +2372,7 @@ void processBattleAnimation(sSpriteActorCore* param_1) {
         return;
     }
 
-    switch (battleVar48[allocateJumpAnimationStructVar0].m47_battleAnimationToPlay) {
+    switch (battleCurrentDamages[allocateJumpAnimationStructVar0].m47_battleAnimationToPlay) {
     case -1: // waiting for attack prompt
         OP_INIT_ENTITY_SCRIPT_sub0Sub8(param_1->getAsSpriteActorCore(), 0);
         jumpAnimationControlStruct->m48 = 1;
@@ -2409,7 +2409,7 @@ void processBattleAnimation(sSpriteActorCore* param_1) {
     }
     case -3:
         jumpAnimationControlStruct->m48 = 1;
-        if (battleVar48[allocateJumpAnimationStructVar0].m3A == 0) {
+        if (battleCurrentDamages[allocateJumpAnimationStructVar0].m3A == 0) {
             jumpAnimationControlStruct->m48 = 0;
             jumpUpdatePosition(param_1->getAsSpriteActorCore());
             OP_INIT_ENTITY_SCRIPT_sub0Sub8(param_1->getAsSpriteActorCore(), startJumpAnimationCallback);
@@ -2424,10 +2424,10 @@ void processBattleAnimation(sSpriteActorCore* param_1) {
         setRenderingInfoForItemUser(param_1->getAsSpriteActorCore());
         OP_INIT_ENTITY_SCRIPT_sub0Sub8(param_1->getAsSpriteActorCore(), startJumpAnimationCallback);
         (param_1->getAsSpriteActorCore()->m7C)->m8 =
-            (uint)battleVar48[allocateJumpAnimationStructVar0].m18_operationType
+            (uint)battleCurrentDamages[allocateJumpAnimationStructVar0].m18_damageType
             [(param_1->getAsSpriteActorCore()->m74_pTargetEntitySprite->mAC & 3) << 2 | param_1->getAsSpriteActorCore()->m74_pTargetEntitySprite->mA8.mx1E];
         if (!isVramPreBacked((param_1->getAsSpriteActorCore()->m24_vramData)->m0_spriteData)) {
-            if (battleVar48[allocateJumpAnimationStructVar0].m47_battleAnimationToPlay < 0x10) {
+            if (battleCurrentDamages[allocateJumpAnimationStructVar0].m47_battleAnimationToPlay < 0x10) {
                 if ((fxFragmentLoaded == '\0') && (battleAnimationLoadingDest.m_rawData.size() != 0)) {
                     battleIdleDuringLoading();
                     (param_1->getAsSpriteActorCore())->m50 = loadFragmentIsNotLoadedYet();
@@ -2435,10 +2435,10 @@ void processBattleAnimation(sSpriteActorCore* param_1) {
                 }
                 int expectActorId = (((param_1->getAsSpriteActorCore())->mAC & 3) << 2 | (uint)(param_1->getAsSpriteActorCore())->mA8.mx1E);
                 if (jumpAnimationControlStruct->m20_actor == expectActorId) {
-                    spriteActorSetPlayingAnimation(param_1->getAsSpriteActorCore(), ~battleVar48[allocateJumpAnimationStructVar0].m47_battleAnimationToPlay);
+                    spriteActorSetPlayingAnimation(param_1->getAsSpriteActorCore(), ~battleCurrentDamages[allocateJumpAnimationStructVar0].m47_battleAnimationToPlay);
                 }
                 else {
-                    spriteActorSetPlayingAnimation(param_1->getAsSpriteActorCore(), battleVar48[allocateJumpAnimationStructVar0].m47_battleAnimationToPlay);
+                    spriteActorSetPlayingAnimation(param_1->getAsSpriteActorCore(), battleCurrentDamages[allocateJumpAnimationStructVar0].m47_battleAnimationToPlay);
                 }
             }
             else {
@@ -2446,7 +2446,7 @@ void processBattleAnimation(sSpriteActorCore* param_1) {
             }
         }
         else {
-            spriteActorSetPlayingAnimation(param_1->getAsSpriteActorCore(), battleVar48[allocateJumpAnimationStructVar0].m47_battleAnimationToPlay);
+            spriteActorSetPlayingAnimation(param_1->getAsSpriteActorCore(), battleCurrentDamages[allocateJumpAnimationStructVar0].m47_battleAnimationToPlay);
             sSpriteActorCore* psVar10 = param_1->getAsSpriteActorCore()->m74_pTargetEntitySprite;
             computeBattleCameraParams
             (1 << ((param_1->getAsSpriteActorCore()->mAC & 3) << 2 |
@@ -2465,7 +2465,7 @@ void processBattleAnimation(sSpriteActorCore* param_1) {
 s8 startPlayingAttackAnimationVar0 = 0;
 void startPlayingAttackAnimation() {
     getSpriteCoreForAnimation
-    ((uint)(byte)battleVar48[allocateJumpAnimationStructVar0].m23_battleEntityIndex);
+    ((uint)(byte)battleCurrentDamages[allocateJumpAnimationStructVar0].m23_battleEntityIndex);
     setupBattleAnimationSpriteCore(jumpAnimationControlStruct->m4);
 
     if (startPlayingAttackAnimationVar0) {
@@ -2552,7 +2552,7 @@ void allocateJumpAnimationStructCallback(sJumpAnimationControlStruct* param_1) {
         case 4:
         {
             int index = (pSpriteCoreListHead[0]->mAC & 3) << 2 | (uint)pSpriteCoreListHead[0]->mA8.mx1E;
-            if ((index < 3) && (battleVisualEntities[index].m4_isGear == 0) && (battleVar48[allocateJumpAnimationStructVar0 + -1].m18_operationType[index] == 7)) {
+            if ((index < 3) && (battleVisualEntities[index].m4_isGear == 0) && (battleCurrentDamages[allocateJumpAnimationStructVar0 + -1].m18_damageType[index] == 7)) {
                 setRenderingInfoForItemUser(pSpriteCoreListHead[0]);
                 spriteActorSetPlayingAnimation(pSpriteCoreListHead[0], 0x1B);
                 while (pSpriteCoreListHead[0]->mAC >> 24 == 0x1B) {
@@ -2648,8 +2648,8 @@ u16 currentJumpAnimationBitMask;
 s16 numActiveSpriteCores;
 
 void setupBattleAnimationSpriteCore(sSpriteActorCore* param_1) {
-    currentJumpAnimationBitMask = battleVar48[allocateJumpAnimationStructVar0].m16_targetBitMask;
-    numActiveSpriteCores = countBattleActorCoresActiveForBitmask(battleVar48[allocateJumpAnimationStructVar0].m16_targetBitMask, pSpriteCoreListHead, param_1);
+    currentJumpAnimationBitMask = battleCurrentDamages[allocateJumpAnimationStructVar0].m16_targetBitMask;
+    numActiveSpriteCores = countBattleActorCoresActiveForBitmask(battleCurrentDamages[allocateJumpAnimationStructVar0].m16_targetBitMask, pSpriteCoreListHead, param_1);
 
     if (numActiveSpriteCores == 0) {
         pSpriteCoreListHead[0] = param_1;
@@ -3589,8 +3589,8 @@ void drawCircleMenuCallGear(byte param_1) {
 
 void handleMenuSelectEnemy_cancel_sub0(u8 param_1)
 {
-    battleVar48[battleVar2->m2DA_indexInBattleVar48].m47_battleAnimationToPlay = -2;
-    battleVar48[battleVar2->m2DA_indexInBattleVar48].m23_battleEntityIndex = param_1;
+    battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m47_battleAnimationToPlay = -2;
+    battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m23_battleEntityIndex = param_1;
     startCharacterJumpToEnemyVar0 = 0;
     return;
 }
@@ -3648,10 +3648,10 @@ void moveEntityToOtherEntity(byte param_1, uint param_2) {
 
 void performAttackSub2() {
     for (int i = 0; i < 11; i++) {
-        battleVar48[battleVar2->m2DA_indexInBattleVar48].m0[i] = 0;
-        battleVar48[battleVar2->m2DA_indexInBattleVar48].m18_operationType[i] = 0xFF;
-        battleVar48[battleVar2->m2DA_indexInBattleVar48].m24[i] = 0;
-        battleVar48[battleVar2->m2DA_indexInBattleVar48].m3C[i] = 0xFF;
+        battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m0_damageValue[i] = 0;
+        battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m18_damageType[i] = -1;
+        battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m24[i] = 0;
+        battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m3C[i] = -1;
     }
 }
 
@@ -3680,13 +3680,14 @@ void initBattleAttackStatus() {
     }
 }
 
-sBattle800CDD40Sub* battleGetSlotStatusSub_current28Entry;
-std::array<sBattle800cdd40, 3> battle800CDD40;
+sBattle800CDD40Sub* currentEntityBattleStats;
+std::array<sBattle800cdd40, 3> partyBattleStats;
+sBattle800D02C0 enemiesBattleStats;
 sBattleEntity* battleGetSlotStatusSub_currentBattleEntity;
 sGameStateA42* battleGetSlotStatusSub_currentBattleEntityGear;
 
 void startBattleAttackAnimationSub0(u8 attacker, u8 param_2) {
-    if ((param_2 == 0) || (battleGetSlotStatusSub_current28Entry->mA & 0x100)) {
+    if ((param_2 == 0) || (currentEntityBattleStats->mA & 0x100)) {
         assert(0);
     }
 }
@@ -3701,8 +3702,544 @@ void startBattleAttackAnimationVar8Unimplemented() {
     assert(0);
 }
 
+s8 computeBattleDamageSub0() {
+    int iVar5 = 0;
+    int iVar6 = 0;
+    if (((currentEntityBattleStats->mA & 0x40) != 0) &&
+        ((battleEntities[startBattleAttackAnimationVar4].m15A_flags & 0x80) != 0)) {
+        return 3;
+    }
+
+    if (battleGetSlotStatusSub_currentBattleEntity->m0_base.m56_battleCommandLoadout == 4) {
+        assert(0);
+    }
+    else {
+        if ((currentEntityBattleStats->mA & 0x200) != 0) {
+            if ((startBattleAttackAnimationVar5->m34 & 8U) != 0) {
+                return 3;
+            }
+            if ((battleEntities[startBattleAttackAnimationVar4].m15A_flags & 0x80) != 0) {
+                return 3;
+            }
+        }
+        s16 uVar1 = currentEntityBattleStats->mA;
+        if ((uVar1 & 0x1000) != 0) {
+            return 3;
+        }
+        s16 uVar2 = startBattleAttackAnimationVar5->m84 | startBattleAttackAnimationVar5->m86;
+        if ((uVar2 & 0x100) != 0) {
+            return 3;
+        }
+        if ((startBattleAttackAnimationVar5->m7C & 0x2000) != 0) {
+            return 1;
+        }
+        if ((startBattleAttackAnimationVar5->m80 & 0x1000) != 0) {
+            return 1;
+        }
+        if ((uVar1 & 0x8000) != 0) {
+            return 1;
+        }
+        if ((uVar1 & 2) != 0) {
+            return 5;
+        }
+        if (((battleGetSlotStatusSub_currentBattleEntity->m0_base).m7C & 0x400) != 0) {
+            iVar5 = -0x32;
+        }
+        if ((((battleGetSlotStatusSub_currentBattleEntity->m0_base).m84 |
+            (battleGetSlotStatusSub_currentBattleEntity->m0_base).m86) & 0x1000) != 0) {
+            iVar5 = iVar5 + 0x1e;
+        }
+        if ((uVar2 & 0x800) != 0) {
+            iVar6 = 0x32;
+        }
+        int iVar4 = ((uint)(battleGetSlotStatusSub_currentBattleEntity->m0_base).m5E_hitPercentage +
+            (int)(char)currentEntityBattleStats->m15) - (uint)startBattleAttackAnimationVar5->m5F_evadePercentage;
+        if ((battleEntities[startBattleAttackAnimationVar4].m15A_flags & 1) != 0) {
+            iVar5 = rand();
+            if (0x5e < iVar5 % 100) {
+                return 1;
+            }
+            return 2;
+        }
+        if ((uVar2 & 0x20) != 0) {
+            iVar5 = rand();
+            if ((iVar5 % 100 - iVar4) * 0x10000 >> 0x10 < 50) {
+                return 1;
+            }
+            return 3;
+        }
+        if (((startBattleAttackAnimationVar5->m84 | startBattleAttackAnimationVar5->m86) & 0x40) != 0) {
+            iVar5 = rand();
+            if ((iVar5 % 100 - iVar4) * 0x10000 >> 0x10 < 50) {
+                return 1;
+            }
+            return 2;
+        }
+        int iVar3 = rand();
+        if ((iVar3 % 100 - iVar4) * 0x10000 >> 0x10 < (iVar5 - (iVar6 + -0x5a)) * 0x10000 >> 0x10) {
+            iVar3 = rand();
+            if ((iVar5 - (iVar6 + -0x55)) * 0x10000 >> 0x10 <= (iVar3 % 100 - iVar4) * 0x10000 >> 0x10) {
+                return 2;
+            }
+            return 1;
+        }
+    }
+    return 3;
+}
+
+int computeBattleDamageSub1() {
+    byte bVar4 = 0;
+    std::array<byte, 5> local_30;
+    u32 uVar2;
+
+    if ((battleEntities[startBattleAttackAnimationVar2].m15A_flags & 0x80) == 0) {
+        uVar2 = 0;
+        do {
+            bVar4 = bVar4 + 1;
+            local_30[uVar2] = (battleGetSlotStatusSub_currentBattleEntity->m0_base).m4[uVar2].m0;
+            uVar2 = (uint)bVar4;
+        } while (bVar4 < 4);
+        uVar2 = (uint)(byte)(battleGetSlotStatusSub_currentBattleEntity->m0_base).m58_attack;
+    }
+    else {
+        assert(0); // on gear
+    }
+
+    bVar4 = currentEntityBattleStats->m10;
+    uint uVar6 = (uint)(battleGetSlotStatusSub_currentBattleEntity->m0_base).m5B_ether;
+    uint uVar5 = 0;
+    if ((bVar4 & 0x80) != 0) {
+        uVar5 = (uint)local_30[0];
+    }
+    if ((bVar4 & 0x40) != 0) {
+        uVar5 = local_30[1] + uVar5;
+    }
+    if ((bVar4 & 0x20) != 0) {
+        uVar5 = local_30[2] + uVar5;
+    }
+    if ((bVar4 & 0x10) != 0) {
+        uVar5 = local_30[3] + uVar5;
+    }
+    if ((bVar4 & 8) != 0) {
+        assert(0);  // isn't local_30[4] uninitialized?
+        uVar5 = local_30[4] + uVar5;
+    }
+    if ((((battleGetSlotStatusSub_currentBattleEntity->m0_base).m8C |
+        (battleGetSlotStatusSub_currentBattleEntity->m0_base).m8E) & 1U) != 0) {
+        uVar5 = uVar5 + (uVar5 >> 1);
+    }
+    u16 uVar1;
+
+    u32 uVar3;
+    if ((currentEntityBattleStats->mA & 0x100) == 0) {
+        if ((battleEntities[startBattleAttackAnimationVar2].m15A_flags & 0x80) == 0) {
+            uVar1 = (battleGetSlotStatusSub_currentBattleEntity->m0_base).m84 |
+                (battleGetSlotStatusSub_currentBattleEntity->m0_base).m86;
+            uVar3 = 4;
+            if ((uVar1 & 0x2000) != 0) {
+                uVar3 = 5;
+            }
+            if (((battleGetSlotStatusSub_currentBattleEntity->m0_base).m7C & 0x200) != 0) {
+                uVar3 = uVar3 - 1;
+            }
+            if ((uVar1 & 0x400) != 0) {
+                uVar3 = (uVar3 + 10) -
+                    (uint)(ushort)(battleGetSlotStatusSub_currentBattleEntity->m0_base).m4C_HP /
+                    ((ushort)(battleGetSlotStatusSub_currentBattleEntity->m0_base).m4E_MaxHP / 10);
+            }
+            uVar3 = (uVar2 & 0xffff) * (uVar3 & 0xff);
+            uVar2 = uVar3 >> 2;
+            if (false) { // ?
+                uVar2 = uVar3 + 3 >> 2;
+            }
+        }
+    }
+    else {
+        assert(0);
+    }
+
+    ushort local_28 = 0;
+
+    if ((currentEntityBattleStats->mA & 0x20) != 0) {
+        uVar2 = 0;
+    }
+
+    switch (currentEntityBattleStats->m1A) {
+    case 0:
+        uVar1 = (short)uVar5 + (short)uVar2;
+        local_28 = uVar1;
+        break;
+    default:
+        assert(0);
+        break;
+    }
+    
+
+    if (startBattleAttackAnimationVar2 < 3) {
+        if ((battleGetSlotStatusSub_currentBattleEntity->m0_base).m56_battleCommandLoadout == 7) {
+            assert(0);
+        }
+        if (((battleGetSlotStatusSub_currentBattleEntity->m0_base).m56_battleCommandLoadout == 4) ||
+            ((currentEntityBattleStats->m22 & 0x20) != 0)) {
+            assert(0);
+        }
+        if ((((battleGetSlotStatusSub_currentBattleEntity->m0_base).m56_battleCommandLoadout == 8) &&
+            ((battleEntities[startBattleAttackAnimationVar2].m15A_flags & 0x80) == 0)) &&
+            ((currentEntityBattleStats->mA & 0x100) != 0)) {
+            assert(0);
+        }
+        if ((battleGetSlotStatusSub_currentBattleEntity->m0_base).m56_battleCommandLoadout == 10) {
+            local_28 = local_28 + local_28 / 5;
+        }
+        if ((((currentEntityBattleStats->m22 & 0x10) != 0) &&
+            ((startBattleAttackAnimationVar5->m38 & 0x10) != 0)) &&
+            (local_28 = local_28 + (local_28 >> 2), (startBattleAttackAnimationVar5->m38 & 0x10) != 0)) {
+            local_28 = local_28 + (local_28 >> 2);
+        }
+    }
+
+    return (int)(short)local_28;
+}
+
+u16 computeBattleDamageSub2() {
+    u16 uVar5;
+    uint in_a2;
+    if ((battleEntities[startBattleAttackAnimationVar4].m15A_flags & 0x80) == 0) {
+        in_a2 = (uint)startBattleAttackAnimationVar5->m59_defence;
+        uVar5 = (uint)startBattleAttackAnimationVar5->m2D;
+    }
+    else {
+        uVar5 = (uint)startBattleAttackAnimationVar6->m70;
+    }
+    uint uVar2 = (uint)startBattleAttackAnimationVar5->m5C_etherDefence;
+    if ((currentEntityBattleStats->mA & 0x100) == 0) {
+        if ((battleEntities[startBattleAttackAnimationVar4].m15A_flags & 0x80) == 0) {
+            if (((startBattleAttackAnimationVar5->m84 | startBattleAttackAnimationVar5->m86) & 0x100) != 0
+                ) {
+                in_a2 = (in_a2 & 0xffff) * 3 >> 1;
+            }
+            goto LAB_Battle__80097730;
+        }
+    }
+    else {
+        assert(0);
+
+    LAB_Battle__80097730:
+        if ((battleEntities[startBattleAttackAnimationVar4].m15A_flags & 0x80) == 0)
+            goto LAB_Battle__80097774;
+    }
+
+    in_a2 = 0;
+LAB_Battle__80097774:
+    switch (currentEntityBattleStats->m1B) {
+    case 0:
+        uVar2 = uVar5 + in_a2;
+        break;
+    default:
+        assert(0);
+    }
+
+    s16 sVar4 = (short)uVar2;
+    if ((battleEntities[startBattleAttackAnimationVar4].m15A_flags & 0x80) == 0) {
+        uint uVar3 = 0;
+        byte bVar1 = 0;
+        uVar5 = 0;
+        do {
+            bVar1 = bVar1 + 1;
+            if ((battleEntities[uVar5].m0_base.m7C & 0x8000) != 0) {
+                uVar3 = uVar3 + 1;
+            }
+            uVar5 = (uint)bVar1;
+        } while (bVar1 < 3);
+        if ((((startBattleAttackAnimationVar5->m32 & 4U) != 0) && ((uVar3 & 0xff) != 0)) &&
+            ((currentEntityBattleStats->mA & 0x100) == 0)) {
+            uVar5 = (uVar2 & 0xffff) * (4 - (uVar3 & 0xff));
+            uVar2 = uVar5 >> 2;
+            if ((int)uVar5 < 0) {
+                uVar2 = uVar5 + 3 >> 2;
+            }
+        }
+        if ((((startBattleAttackAnimationVar5->m32 & 2U) != 0) && ((uVar3 & 0xff) != 0)) &&
+            ((currentEntityBattleStats->mA & 0x100) == 0)) {
+            uVar2 = (uVar2 & 0xffff) * ((uVar3 & 0xff) + 2) >> 1;
+        }
+        sVar4 = (short)uVar2;
+        if (((startBattleAttackAnimationVar5->m32 & 1U) != 0) && ((uVar3 & 0xff) != 0)) {
+            sVar4 = (short)((uVar2 & 0xffff) * ((uVar3 & 0xff) + 2) >> 1);
+        }
+    }
+    return (int)sVar4;
+}
+
+void computeBattleDamageSub3(ushort* param_1, ushort* param_2, s8* param_3)
+
+{
+    ushort uVar1;
+    uint uVar2;
+    uint uVar3;
+    int iVar4;
+    char cVar5;
+    int iVar6;
+    ushort uVar7;
+    uint uVar8;
+    int iVar9;
+
+    uVar8 = (byte)currentEntityBattleStats->m22 & 0x3f;
+    if ((char)battleEntities[startBattleAttackAnimationVar2].m15A_flags < '\0') {
+        uVar7 = battleGetSlotStatusSub_currentBattleEntityGear->m84 |
+            battleGetSlotStatusSub_currentBattleEntityGear->m86;
+    }
+    else {
+        uVar7 = (battleGetSlotStatusSub_currentBattleEntity->m0_base).m8C |
+            (battleGetSlotStatusSub_currentBattleEntity->m0_base).m8E;
+    }
+    uVar3 = (uint)(uVar7 >> 0xc);
+    uVar2 = uVar8;
+    if (((currentEntityBattleStats->m22 & 0x3f) != 0) || (uVar2 = uVar3, uVar3 != 0)) {
+        uVar8 = uVar2;
+    }
+    iVar6 = 10;
+    iVar9 = 10;
+    if ((uVar8 & *(byte*)&startBattleAttackAnimationVar5->m38 & 0x3f) != 0) {
+        iVar6 = 0xf;
+        if ((startBattleAttackAnimationVar5->m38 & 0x40) != 0) {
+            iVar6 = 0x12;
+        }
+        if ((uVar8 & uVar3) != 0) {
+            iVar6 = iVar6 + 2;
+        }
+    }
+    uVar7 = 0;
+    if ((char)battleEntities[startBattleAttackAnimationVar4].m15A_flags < '\0') {
+        uVar1 = startBattleAttackAnimationVar6->m84 | startBattleAttackAnimationVar6->m86;
+        uVar2 = (uint)uVar1;
+        uVar3 = (uVar2 & 0xf00) >> 8;
+        if ((uVar1 & 2) != 0) {
+            uVar7 = 1;
+        }
+    }
+    else {
+        uVar7 = startBattleAttackAnimationVar5->m8C | startBattleAttackAnimationVar5->m8E;
+        uVar2 = (uint)uVar7;
+        uVar3 = (uVar2 & 0xf00) >> 8;
+        uVar7 = uVar7 >> 1 & 1;
+    }
+    if ((uVar8 & uVar3) != 0) {
+        iVar4 = iVar6 + -3;
+        if ((currentEntityBattleStats->mA & 0x100) != 0) {
+            if ((uVar2 & 4) != 0) {
+                iVar4 = iVar6 + -6;
+            }
+            iVar6 = iVar4;
+            if ((uVar2 & 8) != 0) {
+                *param_3 = 4;
+            }
+        }
+        if (((uVar8 & uVar3) != 0) && (iVar4 = iVar6 + -3, uVar7 != 0)) {
+            if ((uVar2 & 4) != 0) {
+                iVar4 = iVar6 + -6;
+            }
+            iVar6 = iVar4;
+            if ((uVar2 & 8) != 0) {
+                *param_3 = 4;
+            }
+        }
+    }
+    cVar5 = (char)iVar6;
+    uVar3 = uVar3 << 8;
+    if (uVar8 == 2) {
+        uVar3 = uVar3 & 0x100;
+    }
+    else if (uVar8 < 3) {
+        uVar3 = uVar3 & 0x200;
+        if (uVar8 != 1) {
+            iVar4 = iVar6 << 0x18;
+            goto LAB_Battle__80096724;
+        }
+    }
+    else if (uVar8 == 4) {
+        uVar3 = uVar3 & 0x800;
+    }
+    else {
+        iVar4 = iVar6 << 0x18;
+        if (uVar8 != 8) goto LAB_Battle__80096724;
+        uVar3 = uVar3 & 0x400;
+    }
+    iVar4 = iVar6 << 0x18;
+    if (uVar3 != 0) {
+        cVar5 = (char)(iVar6 + 3);
+        iVar4 = (iVar6 + 3) * 0x1000000;
+    }
+LAB_Battle__80096724:
+    if (iVar4 < 1) {
+        cVar5 = '\x01';
+    }
+    if (false) {
+        iVar9 = 1;
+    }
+    *param_1 = (ushort)((int)((uint)*param_1 * (int)cVar5) / 10);
+    *param_2 = (ushort)((iVar9 * (uint)*param_2) / 10);
+    if (((battleGetSlotStatusSub_currentBattleEntity->m0_base).m32 & 0x10) != 0) {
+        *param_1 = *param_1 + *param_1 / 5;
+    }
+    if ((startBattleAttackAnimationVar5->m32 & 0x10) != 0) {
+        *param_2 = *param_2 + *param_2 / 5;
+    }
+    return;
+}
+
 void startBattleAttackAnimationVar8_0() {
-    MissingCode();
+    u32 uVar5 = currentEntityBattleStats->m11;
+
+    u16 uVar1;
+    if ((currentEntityBattleStats->mA & 0x100) == 0) {
+        uVar1 = startBattleAttackAnimationVar5->m34 & 0x8000;
+    }
+    else {
+        uVar1 = startBattleAttackAnimationVar5->m34 & 0x4000;
+    }
+    if (uVar1 != 0) {
+        initBattleAttackStatusArray0[startBattleAttackAnimationVar4] = 0;
+        return;
+    }
+
+    s8 local_14 = computeBattleDamageSub0();
+    u16 local_18 = computeBattleDamageSub1();
+    u16 local_16 = computeBattleDamageSub2();
+
+    if ((((battleGetSlotStatusSub_currentBattleEntity->m0_base).m88 |
+        (battleGetSlotStatusSub_currentBattleEntity->m0_base).m8A) & 8) != 0) {
+        local_18 = local_18 + local_18 / 5;
+    }
+    if ((((battleGetSlotStatusSub_currentBattleEntity->m0_base).m88 |
+        (battleGetSlotStatusSub_currentBattleEntity->m0_base).m8A) & 2) != 0) {
+        local_18 = local_18 + local_18 / 10;
+    }
+    if ((((battleGetSlotStatusSub_currentBattleEntity->m0_base).m88 |
+        (battleGetSlotStatusSub_currentBattleEntity->m0_base).m8A) & 4) != 0) {
+        local_18 = local_18 - local_18 / 5;
+    }
+    if ((((battleGetSlotStatusSub_currentBattleEntity->m0_base).m88 |
+        (battleGetSlotStatusSub_currentBattleEntity->m0_base).m8A) & 1) != 0) {
+        local_18 = local_18 - local_18 / 10;
+    }
+    if (((startBattleAttackAnimationVar5->m88 | startBattleAttackAnimationVar5->m8A) & 4) != 0) {
+        local_16 = local_16 + local_16 / 5;
+    }
+    if (((startBattleAttackAnimationVar5->m88 | startBattleAttackAnimationVar5->m8A) & 1) != 0) {
+        local_16 = local_16 + local_16 / 10;
+    }
+    if (((startBattleAttackAnimationVar5->m88 | startBattleAttackAnimationVar5->m8A) & 8) != 0) {
+        local_16 = local_16 - local_16 / 5;
+    }
+    if (((startBattleAttackAnimationVar5->m88 | startBattleAttackAnimationVar5->m8A) & 2) != 0) {
+        local_16 = local_16 - local_16 / 10;
+    }
+
+    if ((currentEntityBattleStats->m22 & 0x10) != 0) {
+        if ((startBattleAttackAnimationVar5->m82 & 0x40) == 0) {
+            startBattleAttackAnimationVar5->m80 = startBattleAttackAnimationVar5->m80 | 0x40;
+        }
+        if ((((battleGetSlotStatusSub_currentBattleEntity->m0_base).m8C |
+            (battleGetSlotStatusSub_currentBattleEntity->m0_base).m8E) & 0x4000) != 0) {
+            initBattleAttackStatusArray0[startBattleAttackAnimationVar2] = 3;
+            damageDonePerAttack[startBattleAttackAnimationVar2] =
+                (ushort)(battleGetSlotStatusSub_currentBattleEntity->m0_base).m52_MaxMP / 10 << 1;
+        }
+        if ((((battleGetSlotStatusSub_currentBattleEntity->m0_base).m8C |
+            (battleGetSlotStatusSub_currentBattleEntity->m0_base).m8E) & 0x1000) != 0) {
+            initBattleAttackStatusArray0[startBattleAttackAnimationVar2] = 2;
+            damageDonePerAttack[startBattleAttackAnimationVar2] =
+                (ushort)(battleGetSlotStatusSub_currentBattleEntity->m0_base).m4E_MaxHP / 10 << 1;
+        }
+    }
+
+    if (((currentEntityBattleStats->m22 & 0x20) != 0) &&
+        ((startBattleAttackAnimationVar5->m82 & 0x80) == 0)) {
+        startBattleAttackAnimationVar5->m80 = startBattleAttackAnimationVar5->m80 | 0x80;
+    }
+    if ((startBattleAttackAnimationVar5->m80 & 0x40) != 0) {
+        local_16 = local_16 - (local_16 >> 2);
+        startBattleAttackAnimationVar5->m80 = startBattleAttackAnimationVar5->m80 & 0xffbf;
+    }
+    if (((battleGetSlotStatusSub_currentBattleEntity->m0_base).m80 & 0x80) != 0) {
+        local_18 = local_18 - (local_18 >> 2);
+        (battleGetSlotStatusSub_currentBattleEntity->m0_base).m80 =
+            (battleGetSlotStatusSub_currentBattleEntity->m0_base).m80 & 0xff7f;
+    }
+    if ((currentEntityBattleStats->mA & 0x400) != 0) {
+        uVar5 = 0x14;
+    }
+
+    computeBattleDamageSub3(&local_18, &local_16, &local_14);
+
+    int iVar3 = 5;
+    int iVar4;
+    if ((currentEntityBattleStats->mA & 0x100) == 0) {
+        iVar3 = 4;
+        iVar4 = 3;
+    }
+    else {
+        iVar4 = 4;
+    }
+    if (local_16 == 0) {
+        iVar3 = iVar3 * (uint)local_18;
+    }
+    else {
+        iVar3 = iVar3 * (uint)local_18 - iVar4 * (uint)local_16;
+    }
+    if ((true) && (currentEntityBattleStats->m1A < 2)) {
+        iVar3 = (int)(uVar5 * iVar3) / 0x14;
+    }
+    int damageDone;
+    if (iVar3 < 1) {
+        damageDone = 0;
+    }
+    else if (iVar3 < 10) {
+        iVar4 = rand();
+        damageDone = iVar3 + iVar4 % 2;
+    }
+    else {
+        iVar4 = rand();
+        damageDone = iVar3 + iVar4 % (iVar3 / 10 + 2);
+    }
+    switch ((int)((local_14 - 1) * 0x1000000) >> 0x18) {
+    case 0:
+        if (damageDone < 1) {
+            damageDone = 1;
+        }
+        initBattleAttackStatusArray0[startBattleAttackAnimationVar4] = 0;
+        break;
+    case 1:
+        damageDone = damageDone / 2;
+        initBattleAttackStatusArray0[startBattleAttackAnimationVar4] = 5;
+        break;
+    case 2:
+        damageDone = 0;
+        initBattleAttackStatusArray0[startBattleAttackAnimationVar4] = 4;
+        break;
+    case 3:
+        initBattleAttackStatusArray0[startBattleAttackAnimationVar4] = 2;
+        break;
+    case 4:
+        initBattleAttackStatusArray0[startBattleAttackAnimationVar4] = 7;
+        break;
+    default:
+        assert(0);
+    }
+
+    if (((startBattleAttackAnimationVar3 != '\0') && ((currentEntityBattleStats->mA & 0x100) != 0)) &&
+        (damageDone != 0)) {
+        damageDone = damageDone / 3;
+    }
+    if (9999 < damageDone) {
+        damageDone = 9999;
+    }
+    if (damageDone < 0) {
+        damageDone = 0;
+    }
+    damageDonePerAttack[startBattleAttackAnimationVar4] = damageDone;
+    return;
 }
 
 typedef void(*startBattleAttackAnimationVar8Type)();
@@ -3729,15 +4266,15 @@ u32 startBattleAttackAnimation() {
 
     if ((battleEntities[performAttackSub3_attacker].m15A_flags & 0x80) == 0) {
         if (performAttackSub3_attacker < 3) {
-            battleGetSlotStatusSub_current28Entry = &battle800CDD40[performAttackSub3_attacker].m0[battleGetSlotStatusSub_current28Index];
+            currentEntityBattleStats = &partyBattleStats[performAttackSub3_attacker].m0[battleGetSlotStatusSub_current28Index];
         }
         else {
-            assert(0);
+            currentEntityBattleStats = &enemiesBattleStats.m0[battleGetSlotStatusSub_current28Index];
         }
         startBattleAttackAnimationSub0(performAttackSub3_attacker, 1);
-        if ((battleGetSlotStatusSub_current28Entry->mA & 0x10) == 0) {
+        if ((currentEntityBattleStats->mA & 0x10) == 0) {
             startBattleAttackAnimationVar3 = 0;
-            if (((battleGetSlotStatusSub_current28Entry->mA & 0x100) != 0) &&
+            if (((currentEntityBattleStats->mA & 0x100) != 0) &&
                 ((battleGetSlotStatusSub_currentBattleEntity->m0_base).m56_battleCommandLoadout == 1)) {
                 assert(0);
             }
@@ -3759,15 +4296,15 @@ u32 startBattleAttackAnimation() {
                     if (startBattleAttackAnimationVar4 < 3) {
                         assert(0);
                     }
-                    startBattleAttackAnimationVar8[battleGetSlotStatusSub_current28Entry->m16](); // This computes the damage done
+                    startBattleAttackAnimationVar8[currentEntityBattleStats->m16](); // This computes the damage done
                     MissingCode();
                     if (initBattleAttackStatusArray0[startBattleAttackAnimationVar4] == 0) {
                     }
-                    if ((battleGetSlotStatusSub_current28Entry->mA & 1) == 0) {
+                    if ((currentEntityBattleStats->mA & 1) == 0) {
                         performAttack_type = battleGetSlotStatusSub_current28Index;
                     }
                     else {
-                        performAttack_type = battleGetSlotStatusSub_current28Entry->m2;
+                        performAttack_type = currentEntityBattleStats->m2;
                     }
                 }
             }
@@ -3851,9 +4388,9 @@ int performAttack(byte param_1, uint numAPUsed) {
     }
     performAttackSub3(param_1, characterIdToTargetBitmask(battleVar2->m0[param_1].m3C_currentTarget), battleVar2->m2DC - 1);
     int oldVar48 = battleVar2->m2DA_indexInBattleVar48;
-    battleVar48[battleVar2->m2DA_indexInBattleVar48].m23_battleEntityIndex = param_1;
-    battleVar48[battleVar2->m2DA_indexInBattleVar48].m16_targetBitMask = battleTickMain_var4;
-    battleVar48[battleVar2->m2DA_indexInBattleVar48].m47_battleAnimationToPlay = performAttack_type;
+    battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m23_battleEntityIndex = param_1;
+    battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m16_targetBitMask = battleTickMain_var4;
+    battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m47_battleAnimationToPlay = performAttack_type;
     battleVar2->m2DA_indexInBattleVar48++;
     updateMonsterScriptEntitiesVarByAtttack(param_1, battleVar2->m0[param_1].m3C_currentTarget);
     if ((2 < battleVar2->m0[param_1].m3C_currentTarget) && (executeMonsterScriptWhenAttacked(battleVar2->m0[param_1].m3C_currentTarget) != '\0'))
@@ -3888,10 +4425,10 @@ void removeBattleCursorDuringAttack(u8 param_1) {
         setCameraVisibleEntities((characterIdToTargetBitmask(param_1) | characterIdToTargetBitmask(battleVar2->m0[param_1].m3C_currentTarget)) & 0xffff);
 
         if (battleCharacters[param_1] != 4) {
-            battleVar48[battleVar2->m2DA_indexInBattleVar48].m23_battleEntityIndex = param_1;
-            battleVar48[battleVar2->m2DA_indexInBattleVar48].m47_battleAnimationToPlay = -3;
-            battleVar48[battleVar2->m2DA_indexInBattleVar48].m3A = 0;
-            battleVar48[battleVar2->m2DA_indexInBattleVar48].m16_targetBitMask = characterIdToTargetBitmask(battleVar2->m0[param_1].m3C_currentTarget);
+            battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m23_battleEntityIndex = param_1;
+            battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m47_battleAnimationToPlay = -3;
+            battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m3A = 0;
+            battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m16_targetBitMask = characterIdToTargetBitmask(battleVar2->m0[param_1].m3C_currentTarget);
             battleVar2->m2DA_indexInBattleVar48 = battleVar2->m2DA_indexInBattleVar48 + 1;
         }
         removeBillyWindow(param_1, 0);
@@ -4643,28 +5180,28 @@ void battleSpriteOp89Sub3(sSpriteActorCore* param_1, short param_2)
     return;
 }
 
-void battleSpriteOp8BSub0(int param_1) {
-    if (battleVar48[allocateJumpAnimationStructVar0 + -1].m18_operationType[param_1] != -1) {
-        if ((battleVar48[allocateJumpAnimationStructVar0 + -1].m0[param_1] != -1) && battleSpriteActorCores[param_1]) {
-            damageDisplayVar0 = battleVar48[allocateJumpAnimationStructVar0 + -1].m24[param_1];
-            damageDisplayVar1 = battleVar48[allocateJumpAnimationStructVar0 + -1].m3C[param_1];
+void createDamageDisplayIfValid(int param_1) {
+    if (battleCurrentDamages[allocateJumpAnimationStructVar0 + -1].m18_damageType[param_1] != -1) {
+        if ((battleCurrentDamages[allocateJumpAnimationStructVar0 + -1].m0_damageValue[param_1] != -1) && battleSpriteActorCores[param_1]) {
+            damageDisplayVar0 = battleCurrentDamages[allocateJumpAnimationStructVar0 + -1].m24[param_1];
+            damageDisplayVar1 = battleCurrentDamages[allocateJumpAnimationStructVar0 + -1].m3C[param_1];
             createDamageDisplay(battleSpriteActorCores[param_1],
-                battleVar48[allocateJumpAnimationStructVar0 + -1].m0[param_1],
-                battleVar48[allocateJumpAnimationStructVar0 + -1].m18_operationType[param_1]);
-            battleVar48[allocateJumpAnimationStructVar0 + -1].m0[param_1] = -1;
+                battleCurrentDamages[allocateJumpAnimationStructVar0 + -1].m0_damageValue[param_1],
+                battleCurrentDamages[allocateJumpAnimationStructVar0 + -1].m18_damageType[param_1]);
+            battleCurrentDamages[allocateJumpAnimationStructVar0 + -1].m0_damageValue[param_1] = -1;
         }
     }
 }
 
-void battleSpriteOp8B() {
+void createAllDamageDisplays() {
     bool bVar1 = false;
     for (int i = 0; i < 11; i++) {
-        if (battleVar48[allocateJumpAnimationStructVar0 - 1].m18_operationType[i] == 7) {
+        if (battleCurrentDamages[allocateJumpAnimationStructVar0 - 1].m18_damageType[i] == 7) {
             bVar1 = true;
         }
         if (battleSpriteActorCores[i]) {
             if ((processBattleAnimationSub0_var1 != battleSpriteActorCores[i]) || (!bVar1)) {
-                battleSpriteOp8BSub0(i);
+                createDamageDisplayIfValid(i);
             }
         }
     }

@@ -320,20 +320,59 @@ extern const std::array<u16, 16> party1C_InitialValues;
 struct sBattle800CDD40Sub {
     s16 m2;
     u16 mA;
+    s8 m10;
+    s8 m11;
+    s8 m15;
     s8 m16;
+    s8 m1A;
+    s8 m1B;
+    s8 m22;
     s8 m27;
+
+    void init(std::vector<u8>::const_iterator inputBuffer) {
+        m2 = READ_LE_S16(inputBuffer + 2);
+        mA = READ_LE_S16(inputBuffer + 0xA);
+        m10 = READ_LE_S8(inputBuffer + 0x10);
+        m11 = READ_LE_S8(inputBuffer + 0x11);
+        m15 = READ_LE_S8(inputBuffer + 0x15);
+        m16 = READ_LE_S8(inputBuffer + 0x16);
+        m1A = READ_LE_S8(inputBuffer + 0x1A);
+        m1B = READ_LE_S8(inputBuffer + 0x1B);
+        m22 = READ_LE_S8(inputBuffer + 0x22);
+        m27 = READ_LE_S8(inputBuffer + 0x27);
+    }
+
     //size 0x28
 };
 struct sBattle800cdd40 {
     std::array<sBattle800CDD40Sub, 11> m0;
 
-    // size 0x5f0 ?
+    void init(const std::vector<u8>& inputBuffer) {
+        for (int i = 0; i < 11; i++) {
+            m0[i].init(inputBuffer.cbegin() + 0x28 * i);
+        }
+    }
+
+    // size 0x5f0
+};
+
+struct sBattle800D02C0 {
+    std::array<sBattle800CDD40Sub, 3> m0;
+
+    void init(const std::vector<u8>& inputBuffer) {
+        for (int i = 0; i < 3; i++) {
+            m0[i].init(inputBuffer.cbegin() + 0x28 * i);
+        }
+    }
+    // size 0x1f40
 };
 
 extern struct sJumpAnimationControlStruct* jumpAnimationControlStruct;
 
-extern sBattle800CDD40Sub* battleGetSlotStatusSub_current28Entry;
-extern std::array<sBattle800cdd40, 3> battle800CDD40;
+extern sBattle800CDD40Sub* currentEntityBattleStats;
+
+extern std::array<sBattle800cdd40, 3> partyBattleStats;
+extern sBattle800D02C0 enemiesBattleStats;
 extern sBattleEntity* battleGetSlotStatusSub_currentBattleEntity;
 extern sGameStateA42* battleGetSlotStatusSub_currentBattleEntityGear;
 extern u16 jumpAnimationActiveActorBF;

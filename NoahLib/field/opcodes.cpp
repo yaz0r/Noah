@@ -3306,7 +3306,7 @@ void OP_RESTORE_GEAR()
 {
     for (int i = 0; i < 20; i++)
     {
-        pKernelGameState->m978_gears[i].m38_HP = pKernelGameState->m978_gears[i].m3C_maxHP;
+        pKernelGameState->m978_gears[i].m38_fuel = pKernelGameState->m978_gears[i].m3C_maxFuel;
         pKernelGameState->m978_gears[i].m10_ether = pKernelGameState->m978_gears[i].m12_maxEther;
     }
     ADVANCE_VM(0x1);

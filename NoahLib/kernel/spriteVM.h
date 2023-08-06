@@ -216,7 +216,7 @@ do
         param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
         break;
     case 0x8B:
-        battleSpriteOp8B();
+        createAllDamageDisplays();
         param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
         break;
     case 0x97:
@@ -266,7 +266,7 @@ do
         break;
     case 0xF8: // switch for battle
     {
-        u8 attack = battleVar48[allocateJumpAnimationStructVar0 + -1].m18_operationType
+        u8 attack = battleCurrentDamages[allocateJumpAnimationStructVar0 + -1].m18_damageType
             [(param_1->m74_pTargetEntitySprite->mAC & 3) << 2 |
             param_1->m74_pTargetEntitySprite->mA8.mx1E];
 
