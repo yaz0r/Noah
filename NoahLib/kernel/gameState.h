@@ -19,7 +19,9 @@ struct sGameStateA4
         m2D = READ_LE_S8(buffer + 0x2D);
         m32 = READ_LE_U16(buffer + 0x32);
         m34 = READ_LE_S16(buffer + 0x34);
+        m36 = READ_LE_U16(buffer + 0x36);
         m38 = READ_LE_U16(buffer + 0x38);
+        m3A = READ_LE_S16(buffer + 0x3A);
         m44 = READ_LE_S32(buffer + 0x44);
         m48 = READ_LE_S32(buffer + 0x48);
         m4C_HP = READ_LE_S16(buffer + 0x4C);
@@ -58,7 +60,9 @@ struct sGameStateA4
     s8 m2D;
     u16 m32;
     s16 m34;
+    u16 m36;
     u16 m38;
+    s16 m3A;
     s32 m44;
     s32 m48;
     s16 m4C_HP;

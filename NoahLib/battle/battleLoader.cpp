@@ -68,7 +68,31 @@ void loadBattleCharacterPortraits(const std::vector<u8>& input, s8 param_2) {
 }
 
 std::array<sLoadingBatchCommands, 3> playerLoadingCommands;
-sLoadableDataRaw battleConfigFile2;
+
+struct sBattleEnemyInitialStats : public sLoadableData {
+    std::array<std::array<s16, 4>, 4> m0_scriptsOffsets;
+    std::array<sBattleEntity,8> m32;
+
+    virtual void init(std::vector<u8>& data) override {
+        m_rawData = data;
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                m0_scriptsOffsets[i][j] = READ_LE_S16(data.begin() + 0 + 4 * 2 * i + 2 * j);
+            }
+        }
+        for (int i = 0; i < 8; i++) {
+            m32[i].deserialize(data.begin() + 0x32 + 0x170 * i);
+        }
+    }
+
+    std::vector<u8>::iterator getPointerForScript(int setupId, int scriptType) {
+        return m_rawData.begin() + m0_scriptsOffsets[setupId][scriptType];
+    }
+
+    std::vector<u8> m_rawData;
+};
+
+sBattleEnemyInitialStats battleConfigFile2;
 
 void loadPartyMembers() {
     battleForceOnGear = (battleVar8006f9dd & 0x10) != 0;
@@ -119,7 +143,6 @@ void loadPartyMembers() {
 
     enemiesBattleStats.init(mallocAndDecompress(relocatedPointer[2]));
 
-    Noah_MissingCode("battle800D02C0");
     Noah_MissingCode("battle800D2200");
 
     // battle UI graphic elements
@@ -135,7 +158,7 @@ void loadPartyMembers() {
 
     setCurrentDirectory(0xc, 1);
 
-    battleConfigFile2.resize(getFileSizeAligned(currentBattleConfig.m0 * 2 + 2));
+    //battleConfigFile2.resize(getFileSizeAligned(currentBattleConfig.m0 * 2 + 2));
     playerLoadingCommands[0].m0_fileIndex = currentBattleConfig.m0 * 2 + 2;
     playerLoadingCommands[0].m4_loadPtr = &battleConfigFile2;
 
@@ -645,6 +668,60 @@ void batteLoaderPhase1_3() {
     MissingCode();
 }
 
+struct sBattleScriptEntity {
+    std::array<std::optional<std::vector<u8>::iterator>, 4> m0_scripts;
+    std::array<s32, 4> m10;
+    std::array<s16, 8> m20;
+    std::array<s8, 16> m30_varArray;
+};
+
+std::array<sBattleScriptEntity, 8> monstersScriptsEntities;
+
+void loadEnemies() {
+    for (int i = 3; i < 11; i++) {
+        unknownMonsterStatus0[i - 3].m3 = 0;
+        if (battleVisualEntities[3].m2 == 0x7F) {
+            memset(&battleEntities[i], 0, sizeof(battleEntities[i]));
+            unknownMonsterStatus0[i - 3].m0 = 0;
+            unknownMonsterStatus0[i - 3].m1 = 0;
+        }
+        else {
+            // If that happens, we are using scripts from previous battle, those need to be cleared!
+            assert(!monstersScriptsEntities[i - 3].m0_scripts[0].has_value());
+            assert(!monstersScriptsEntities[i - 3].m0_scripts[1].has_value());
+            assert(!monstersScriptsEntities[i - 3].m0_scripts[2].has_value());
+            assert(!monstersScriptsEntities[i - 3].m0_scripts[3].has_value());
+
+            battleEntities[i] = battleConfigFile2.m32[battleVisualEntities[3].m2];
+            monstersScriptsEntities[i-3].m0_scripts[0] = battleConfigFile2.getPointerForScript(battleVisualEntities[3].m2, 0);
+            monstersScriptsEntities[i-3].m0_scripts[1] = battleConfigFile2.getPointerForScript(battleVisualEntities[3].m2, 1);
+            if (battleConfigFile2.m0_scriptsOffsets[battleVisualEntities[3].m2][2] == -1) {
+                unknownMonsterStatus0[i - 3].m0 = 0;
+            }
+            else {
+                monstersScriptsEntities[i - 3].m0_scripts[2] = battleConfigFile2.getPointerForScript(battleVisualEntities[3].m2, 2);
+                unknownMonsterStatus0[i - 3].m0 = 1;
+            }
+            if (battleConfigFile2.m0_scriptsOffsets[battleVisualEntities[3].m2][3] == -1) {
+                unknownMonsterStatus0[i - 3].m1 = 0;
+            }
+            else {
+                monstersScriptsEntities[i - 3].m0_scripts[3] = battleConfigFile2.getPointerForScript(battleVisualEntities[3].m2, 3);
+                unknownMonsterStatus0[i - 3].m1 = 1;
+            }
+            for (int j = 0; j < 4; j++) {
+                monstersScriptsEntities[i - 3].m10[j] = 0;
+            }
+            for (int j = 0; j < 8; j++) {
+                monstersScriptsEntities[i - 3].m20[j] = 0;
+            }
+            for (int j = 0; j < 16; j++) {
+                monstersScriptsEntities[i - 3].m30_varArray[j] = 0;
+            }
+        }
+    }
+}
+
 void battleLoaderTick(s8 param_1) {
     switch (param_1) {
     case 0:
@@ -654,7 +731,7 @@ void battleLoaderTick(s8 param_1) {
     case 1:
         batteLoaderPhase1_0();
         batteLoaderPhase1_1();
-        MissingCode();
+        loadEnemies();
         batteLoaderPhase1_3();
         break;
     case 2:

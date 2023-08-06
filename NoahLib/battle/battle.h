@@ -59,7 +59,7 @@ struct sBattleVar2 {
     u8 m2E8_currentTarget;
     u8 m2E9;
     u8 m2EA;
-    std::array<u8, 3> m2EB;
+    std::array<u8, 11> m2EB;
     u8 m2F6;
     // size 0x2F8
 };
@@ -137,6 +137,7 @@ struct sBattleVar1 {
     u8 mA4_oddOrEven7B;
     u8 mA9_timeBarNumMoveSteps;
     u8 mAB_timeBarNumAnimationSteps;
+    u8 mAD;
     u8 mAE;
     u8 mAF;
     std::array<u8, 7> mB0_isDialogWindowInitialized;
@@ -301,6 +302,14 @@ struct sBattleEntity {
     sGameStateA4 m0_base;
     sGameStateA42 mA4_gear;
     u8 m15A_flags;
+
+    void deserialize(std::vector<u8>::iterator buffer) {
+        m0_base.deserialize(buffer + 0);
+        mA4_gear.deserialize(buffer + 0xA4);
+        m15A_flags = READ_LE_U8(buffer + 0x15A);
+    }
+
+    // size 0x170
 };
 
 extern std::array<sBattleEntity, 11> battleEntities;
@@ -316,6 +325,15 @@ void battleSetupTextPoly(POLY_FT4* param_1);
 u8 getEntityToFace(u8 param_1);
 bool getDirectionBetween2BattleEntities(uint param_1, uint param_2);
 extern const std::array<u16, 16> party1C_InitialValues;
+
+struct sUnkMonsterStatus {
+    s8 m0;
+    s8 m1;
+    s8 m2;
+    s8 m3;
+    // size 4
+};
+extern std::array<sUnkMonsterStatus, 8> unknownMonsterStatus0;
 
 struct sBattle800CDD40Sub {
     s16 m2;
