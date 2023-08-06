@@ -1,6 +1,7 @@
 #pragma once
 
 #include "kernel/graphics.h"
+#include "kernel/font.h"
 
 extern s32 menuIdToOpen;
 extern s32 menuOpenCount;
@@ -177,7 +178,7 @@ struct sMenuContext {
     FP_VEC4 m1E0_menuTranslation = { 0,0,0,0 };
     SFP_VEC4 m218_menuRotation2 = { 0,0,0,0 };
     FP_VEC4 m220_menuTranslation2 = { 0,0,0,0 };
-    std::vector<u8> m2DC_font;
+    sFont m2DC_font;
     std::vector<u8> m2E0_textBundle;
     u32 m2E8;
     u8 m325_menuButton;
@@ -223,6 +224,6 @@ void enterMenu(void);
 void loadAndOpenMenu(void);
 
 void fillStringDisplayBuffer(uint param_1);
-int setupStringInPolyFT4(std::vector<u8>& fontData, int character, std::array<POLY_FT4, 2>* polyArray, int oddOrEven, short x, short y, ushort scale);
+int setupStringInPolyFT4(struct sFont& font, int character, std::array<POLY_FT4, 2>* polyArray, int oddOrEven, short x, short y, ushort scale);
 void iniMenuContext364And380(byte param_1, short param_2, short param_3, ushort param_4, ushort param_5, char param_6, byte param_7, s32 param_8, byte param_9);
 void playMenuSoundEffect(uint param_1);

@@ -8,6 +8,7 @@
 #include "kernel/gameState.h"
 #include "kernel/memory.h"
 #include "kernel/gameMode.h"
+#include "kernel/font.h"
 
 #include "menus/menuGold.h"
 #include "menus/statusMenu.h"
@@ -229,15 +230,15 @@ void loadMenuSharedResources() {
 
     loadMenuImageBundle(mallocAndDecompress(relocatedPtr[1]));
 
-    gMenuContext->m2DC_font = mallocAndDecompress(relocatedPtr[2]);
+    gMenuContext->m2DC_font.deserialize(mallocAndDecompress(relocatedPtr[2]));
     gMenuContext->m2E0_textBundle = mallocAndDecompress(relocatedPtr[3]);
 
     int menuBorderData[3][6];
 
-    computeMenuBorder(gMenuContext->m2DC_font, 0x0e0, &menuBorderData[0][0], &menuBorderData[0][1], &menuBorderData[0][2], &menuBorderData[0][3], &menuBorderData[0][4], &menuBorderData[0][5]);
-    computeMenuBorder(gMenuContext->m2DC_font, 0x14b, &menuBorderData[0][0], &menuBorderData[0][1], &menuBorderData[0][2], &menuBorderData[0][3], &menuBorderData[0][4], &menuBorderData[0][5]);
-    computeMenuBorder(gMenuContext->m2DC_font, 0x14c, &menuBorderData[1][0], &menuBorderData[1][1], &menuBorderData[1][2], &menuBorderData[1][3], &menuBorderData[1][4], &menuBorderData[1][5]);
-    computeMenuBorder(gMenuContext->m2DC_font, 0x14d, &menuBorderData[2][0], &menuBorderData[2][1], &menuBorderData[2][2], &menuBorderData[2][3], &menuBorderData[2][4], &menuBorderData[2][5]);
+    computeMenuBorder(gMenuContext->m2DC_font.m_data, 0x0e0, &menuBorderData[0][0], &menuBorderData[0][1], &menuBorderData[0][2], &menuBorderData[0][3], &menuBorderData[0][4], &menuBorderData[0][5]);
+    computeMenuBorder(gMenuContext->m2DC_font.m_data, 0x14b, &menuBorderData[0][0], &menuBorderData[0][1], &menuBorderData[0][2], &menuBorderData[0][3], &menuBorderData[0][4], &menuBorderData[0][5]);
+    computeMenuBorder(gMenuContext->m2DC_font.m_data, 0x14c, &menuBorderData[1][0], &menuBorderData[1][1], &menuBorderData[1][2], &menuBorderData[1][3], &menuBorderData[1][4], &menuBorderData[1][5]);
+    computeMenuBorder(gMenuContext->m2DC_font.m_data, 0x14d, &menuBorderData[2][0], &menuBorderData[2][1], &menuBorderData[2][2], &menuBorderData[2][3], &menuBorderData[2][4], &menuBorderData[2][5]);
 
     menuBorderData[1][4] += 0xC;
 
@@ -470,13 +471,13 @@ void initPrimitives_348_cursor()
 
 void computeMenuBorders(void)
 {
-    computeMenuBorder(gMenuContext->m2DC_font, 0xfe, &gMenuContext->m46C_menuBorders[0].m0, &gMenuContext->m46C_menuBorders[0].m4_tp, &gMenuContext->m46C_menuBorders[0].m8_clutX,
+    computeMenuBorder(gMenuContext->m2DC_font.m_data, 0xfe, &gMenuContext->m46C_menuBorders[0].m0, &gMenuContext->m46C_menuBorders[0].m4_tp, &gMenuContext->m46C_menuBorders[0].m8_clutX,
         &gMenuContext->m46C_menuBorders[0].mC_clutY, &gMenuContext->m46C_menuBorders[0].m10_tpageX, &gMenuContext->m46C_menuBorders[0].m14_tpageY);
-    computeMenuBorder(gMenuContext->m2DC_font, 0x103, &gMenuContext->m46C_menuBorders[1].m0, &gMenuContext->m46C_menuBorders[1].m4_tp, &gMenuContext->m46C_menuBorders[1].m8_clutX,
+    computeMenuBorder(gMenuContext->m2DC_font.m_data, 0x103, &gMenuContext->m46C_menuBorders[1].m0, &gMenuContext->m46C_menuBorders[1].m4_tp, &gMenuContext->m46C_menuBorders[1].m8_clutX,
         &gMenuContext->m46C_menuBorders[1].mC_clutY, &gMenuContext->m46C_menuBorders[1].m10_tpageX, &gMenuContext->m46C_menuBorders[1].m14_tpageY);
-    computeMenuBorder(gMenuContext->m2DC_font, 0x100, &gMenuContext->m46C_menuBorders[2].m0, &gMenuContext->m46C_menuBorders[2].m4_tp, &gMenuContext->m46C_menuBorders[2].m8_clutX,
+    computeMenuBorder(gMenuContext->m2DC_font.m_data, 0x100, &gMenuContext->m46C_menuBorders[2].m0, &gMenuContext->m46C_menuBorders[2].m4_tp, &gMenuContext->m46C_menuBorders[2].m8_clutX,
         &gMenuContext->m46C_menuBorders[2].mC_clutY, &gMenuContext->m46C_menuBorders[2].m10_tpageX, &gMenuContext->m46C_menuBorders[2].m14_tpageY);
-    computeMenuBorder(gMenuContext->m2DC_font, 0x101, &gMenuContext->m46C_menuBorders[3].m0, &gMenuContext->m46C_menuBorders[3].m4_tp, &gMenuContext->m46C_menuBorders[3].m8_clutX,
+    computeMenuBorder(gMenuContext->m2DC_font.m_data, 0x101, &gMenuContext->m46C_menuBorders[3].m0, &gMenuContext->m46C_menuBorders[3].m4_tp, &gMenuContext->m46C_menuBorders[3].m8_clutX,
         &gMenuContext->m46C_menuBorders[3].mC_clutY, &gMenuContext->m46C_menuBorders[3].m10_tpageX, &gMenuContext->m46C_menuBorders[3].m14_tpageY);
     return;
 }
@@ -843,107 +844,100 @@ void updatePlayTimeString(uint param_1)
     return;
 }
 
-int setupStringInPolyFT4(std::vector<u8>& fontData, int character, std::array<POLY_FT4, 2>* polyArray, int oddOrEven, short x, short y, ushort scale) {
-    std::vector<u8>::iterator characterData = fontData.begin() + READ_LE_U16(fontData.begin() + character * 2 + 4);
-    if (READ_LE_U16(characterData)) {
-        int offsetToCharacterData = 4;
-        for (int i = 0; i < READ_LE_U16(characterData); i++)
-        {
-            std::vector<u8>::iterator characterData2 = characterData + offsetToCharacterData;
-
-            s32 x0Tmp = READ_LE_S16(characterData2 + 4 * 2) * scale;
-            if (x0Tmp < 0) {
-                x0Tmp = x0Tmp + 0xfff;
-            }
-            s32 y0Tmp = READ_LE_S16(characterData2 + 5 * 2) * scale;
-            if ((int)y0Tmp < 0) {
-                y0Tmp = y0Tmp + 0xfff;
-            }
-            s32 x1Tmp = READ_LE_S16(characterData2 + 2 * 2) * scale;
-            if (x1Tmp < 0) {
-                x1Tmp = x1Tmp + 0xfff;
-            }
-            s32 y1Tmp = READ_LE_S16(characterData2 + 3 * 2) * scale;
-            if ((int)y1Tmp < 0) {
-                y1Tmp = y1Tmp + 0xfff;
-            }
-
-            POLY_FT4* p = &(*polyArray)[oddOrEven];
-
-            SetPolyFT4(p);
-            SetSemiTrans(p, 0);
-            SetShadeTex(p, 1);
-
-            p->tpage = GetTPage(READ_LE_U16(characterData2 + 8 * 2), 0, READ_LE_U16(characterData2 + 11 * 2), READ_LE_U16(characterData2 + 12 * 2));
-            p->clut = GetClut(READ_LE_U16(characterData2 + 9 * 2), READ_LE_U16(characterData2 + 10 * 2));
-
-            //setup UVs
-            s32 v0Tmp = READ_LE_U16(characterData2 + 0 * 2);
-            s32 uVar1 = READ_LE_U16(characterData2 + 1 * 2);
-            s32 width = READ_LE_U16(characterData2 + 2 * 2);
-            s32 height = READ_LE_U16(characterData2 + 3 * 2);
-            s32 u0Tmp = v0Tmp - 1;
-            s32 x1 = (short)(x1Tmp >> 0xc);
-            s32 x0 = (short)(x0Tmp >> 0xc);
-            if (READ_LE_U8(characterData2 + 0x1A) == '\0') {
-                x0 = x + x0;
-                x1 = x1 + x0;
-                p->x0y0.vx = x0;
-                p->x1y1.vx = x1;
-                p->x2y2.vx = x0;
-                p->x3y3.vx = x1;
-                u0Tmp = v0Tmp;
-            }
-            else {
-                x0 = x + x0;
-                x1 = x1 + x0;
-                p->x0y0.vx = x1;
-                p->x1y1.vx = x0;
-                p->x2y2.vx = x1;
-                p->x3y3.vx = x0;
-                if ((int)((uint)u0Tmp << 0x10) < 0) {
-                    u0Tmp = 0;
-                    width = width + -1;
-                }
-            }
-            v0Tmp = uVar1 - 1;
-            s32 y1 = (short)(y1Tmp >> 0xc);
-            s32 y0 = (short)(y0Tmp >> 0xc);
-            if (READ_LE_U8(characterData2 + 0x1B) == '\0') {
-                s32 yTemp = y + y0;
-                p->x0y0.vy = yTemp;
-                p->x1y1.vy = yTemp;
-                p->x2y2.vy = y1 + yTemp;
-                p->x3y3.vy = y1 + yTemp;
-                v0Tmp = uVar1;
-            }
-            else {
-                x1 = y + y0;
-                p->x0y0.vy = y1 + x1;
-                p->x1y1.vy = y1 + x1;
-                p->x2y2.vy = x1;
-                p->x3y3.vy = x1;
-                if ((int)((uint)v0Tmp << 0x10) < 0) {
-                    v0Tmp = 0;
-                    height = height + -1;
-                }
-            }
-            s32 u0 = (u8)u0Tmp;
-            s32 v0 = (u8)v0Tmp;
-            p->u0 = u0;
-            p->v0 = v0;
-            p->u1 = u0 + width;
-            p->v1 = v0;
-            p->u2 = u0;
-            p->v2 = v0 + height;
-            p->u3 = u0 + width;
-            p->v3 = v0 + height;
-
-            offsetToCharacterData += 0x1c;
-            polyArray++;
+int setupStringInPolyFT4(sFont& font, int character, std::array<POLY_FT4, 2>* polyArray, int oddOrEven, short x, short y, ushort scale) {
+    for (int i = 0; i < font.m4[character].m0_polyCount; i++)
+    {
+        sFontGlyphPoly& glyphPoly = font.m4[character].m4_polys[i];
+        s32 x0Tmp = glyphPoly.m8_width * scale;
+        if (x0Tmp < 0) {
+            x0Tmp = x0Tmp + 0xfff;
         }
+        s32 y0Tmp = glyphPoly.mA_height * scale;
+        if ((int)y0Tmp < 0) {
+            y0Tmp = y0Tmp + 0xfff;
+        }
+        s32 x1Tmp = glyphPoly.m4_U * scale;
+        if (x1Tmp < 0) {
+            x1Tmp = x1Tmp + 0xfff;
+        }
+        s32 y1Tmp = glyphPoly.m6_V * scale;
+        if ((int)y1Tmp < 0) {
+            y1Tmp = y1Tmp + 0xfff;
+        }
+
+        POLY_FT4* p = &(*polyArray)[oddOrEven];
+
+        SetPolyFT4(p);
+        SetSemiTrans(p, 0);
+        SetShadeTex(p, 1);
+
+        p->tpage = GetTPage(glyphPoly.m10_tpageAbe, 0, glyphPoly.m16_tpageX, glyphPoly.m18_tpageY);
+        p->clut = GetClut(glyphPoly.m12_clutX, glyphPoly.m14_clutY);
+
+        //setup UVs
+        s32 v0Tmp = glyphPoly.m0_X;
+        s32 uVar1 = glyphPoly.m2_Y;
+        s32 width = glyphPoly.m4_U;
+        s32 height = glyphPoly.m6_V;
+        s32 u0Tmp = v0Tmp - 1;
+        s32 x1 = (short)(x1Tmp >> 0xc);
+        s32 x0 = (short)(x0Tmp >> 0xc);
+        if (glyphPoly.m1A_flipX == '\0') {
+            x0 = x + x0;
+            x1 = x1 + x0;
+            p->x0y0.vx = x0;
+            p->x1y1.vx = x1;
+            p->x2y2.vx = x0;
+            p->x3y3.vx = x1;
+            u0Tmp = v0Tmp;
+        }
+        else {
+            x0 = x + x0;
+            x1 = x1 + x0;
+            p->x0y0.vx = x1;
+            p->x1y1.vx = x0;
+            p->x2y2.vx = x1;
+            p->x3y3.vx = x0;
+            if ((int)((uint)u0Tmp << 0x10) < 0) {
+                u0Tmp = 0;
+                width = width + -1;
+            }
+        }
+        v0Tmp = uVar1 - 1;
+        s32 y1 = (short)(y1Tmp >> 0xc);
+        s32 y0 = (short)(y0Tmp >> 0xc);
+        if (glyphPoly.m1B_flipY == '\0') {
+            s32 yTemp = y + y0;
+            p->x0y0.vy = yTemp;
+            p->x1y1.vy = yTemp;
+            p->x2y2.vy = y1 + yTemp;
+            p->x3y3.vy = y1 + yTemp;
+            v0Tmp = uVar1;
+        }
+        else {
+            x1 = y + y0;
+            p->x0y0.vy = y1 + x1;
+            p->x1y1.vy = y1 + x1;
+            p->x2y2.vy = x1;
+            p->x3y3.vy = x1;
+            if ((int)((uint)v0Tmp << 0x10) < 0) {
+                v0Tmp = 0;
+                height = height + -1;
+            }
+        }
+        s32 u0 = (u8)u0Tmp;
+        s32 v0 = (u8)v0Tmp;
+        p->u0 = u0;
+        p->v0 = v0;
+        p->u1 = u0 + width;
+        p->v1 = v0;
+        p->u2 = u0;
+        p->v2 = v0 + height;
+        p->u3 = u0 + width;
+        p->v3 = v0 + height;
+        polyArray++;
     }
-    return READ_LE_U16(characterData);
+    return font.m4[character].m0_polyCount;
 }
 
 

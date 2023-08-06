@@ -46,7 +46,7 @@ std::array<u8, 12> targetsPerPriority;
 std::array<sBattleSpriteActor*, 11> battleSpriteActors;
 std::array<sSpriteActorCore*, 11> battleSpriteActorCores;
 
-std::vector<u8> battleFont;
+sFont battleFont;
 
 std::array<s16, 0xB> battleSlotStatusVar0;
 std::array<s16, 0xB> battleSlotStatusVar1;
@@ -1182,9 +1182,9 @@ void timerBarUpdateStartOfTurnAnimation(int param_1) {
 
     battleVar1->mA9_timeBarNumMoveSteps = 0;
     battleVar1->m74_timeBarsLengths[3] = 0;
-    battleVar1->m74_timeBarsLengths[3] += battleSetupStringInPolyFTRot(battleFont, 0x52, &battleVar0->m2E08_timeBars[3][battleVar1->m74_timeBarsLengths[3]], battleOddOrEven, barX, barY, battleVar1->m104_timeBarAnimationScale, battleVar1->m104_timeBarAnimationScale, battleVar1->m106_timeBarAnimationRotation);
+    battleVar1->m74_timeBarsLengths[3] += battleSetupStringInPolyFTRot(battleFont.m_data, 0x52, &battleVar0->m2E08_timeBars[3][battleVar1->m74_timeBarsLengths[3]], battleOddOrEven, barX, barY, battleVar1->m104_timeBarAnimationScale, battleVar1->m104_timeBarAnimationScale, battleVar1->m106_timeBarAnimationRotation);
     int startOfShadowSprite = battleVar1->m74_timeBarsLengths[3];
-    battleVar1->m74_timeBarsLengths[3] += battleSetupStringInPolyFTRot(battleFont, 0x53, &battleVar0->m2E08_timeBars[3][battleVar1->m74_timeBarsLengths[3]], battleOddOrEven, barX, barY, battleVar1->m104_timeBarAnimationScale, battleVar1->m104_timeBarAnimationScale, battleVar1->m106_timeBarAnimationRotation);
+    battleVar1->m74_timeBarsLengths[3] += battleSetupStringInPolyFTRot(battleFont.m_data, 0x53, &battleVar0->m2E08_timeBars[3][battleVar1->m74_timeBarsLengths[3]], battleOddOrEven, barX, barY, battleVar1->m104_timeBarAnimationScale, battleVar1->m104_timeBarAnimationScale, battleVar1->m106_timeBarAnimationRotation);
 
     for (int i = startOfShadowSprite; i < battleVar1->m74_timeBarsLengths[3]; i++) {
         SetSemiTrans(&battleVar0->m2E08_timeBars[3][i][battleOddOrEven], 1);
@@ -1254,10 +1254,10 @@ void updatePortraits() {
                 break;
             case 1: // Time bar visible on left screen
                 battleVar1->m74_timeBarsLengths[3] = 0;
-                battleVar1->m74_timeBarsLengths[3] += battleSetupStringInPolyFTRot(battleFont, 0x52, &battleVar0->m2E08_timeBars[3][battleVar1->m74_timeBarsLengths[3]], battleOddOrEven, 0x10, 0x98, 0x1000, 0x1000, 0xc00);
+                battleVar1->m74_timeBarsLengths[3] += battleSetupStringInPolyFTRot(battleFont.m_data, 0x52, &battleVar0->m2E08_timeBars[3][battleVar1->m74_timeBarsLengths[3]], battleOddOrEven, 0x10, 0x98, 0x1000, 0x1000, 0xc00);
                 {
                     int length = battleVar1->m74_timeBarsLengths[3];
-                    battleVar1->m74_timeBarsLengths[3] += battleSetupStringInPolyFTRot(battleFont, 0x53, &battleVar0->m2E08_timeBars[3][battleVar1->m74_timeBarsLengths[3]], battleOddOrEven, 0x10, 0x98, 0x1000, 0x1000, 0xc00);
+                    battleVar1->m74_timeBarsLengths[3] += battleSetupStringInPolyFTRot(battleFont.m_data, 0x53, &battleVar0->m2E08_timeBars[3][battleVar1->m74_timeBarsLengths[3]], battleOddOrEven, 0x10, 0x98, 0x1000, 0x1000, 0xc00);
                     while (length < battleVar1->m74_timeBarsLengths[3]) {
                         battleSetupTextPoly(&battleVar0->m2E08_timeBars[3][length][battleOddOrEven]);
                         length++;

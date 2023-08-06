@@ -252,7 +252,7 @@ void createDamageDisplay(sSpriteActorCore* param_1, int damageValue, int damageT
 
     if (damageType != 4) {
         for (int i = 0; i < damageString.m0_length; i++) {
-            pNewDamageTask->m8C_damageStringLength += setupDamagePoly(battleFont, damageString.m1_string[i] + 0x72, &pNewDamageTask->m90[pNewDamageTask->m8C_damageStringLength], displayOffset, -16);
+            pNewDamageTask->m8C_damageStringLength += setupDamagePoly(battleFont.m_data, damageString.m1_string[i] + 0x72, &pNewDamageTask->m90[pNewDamageTask->m8C_damageStringLength], displayOffset, -16);
         }
     }
 }

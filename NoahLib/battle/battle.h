@@ -9,6 +9,7 @@
 #include "kernel/math.h"
 #include "psx/gpuprims.h"
 #include "field/fieldGraphicObject.h"
+#include "kernel/font.h"
 
 extern std::array<s16, 0xB> battleSlotStatusVar0;
 extern std::array<s16, 0xB> battleSlotStatusVar1;
@@ -313,7 +314,7 @@ struct sBattleEntity {
 };
 
 extern std::array<sBattleEntity, 11> battleEntities;
-extern std::vector<u8> battleFont;
+extern sFont battleFont;
 
 extern u8 battleGetSlotStatusSub_current28Index;
 extern bool battleSpritesDisabled;
