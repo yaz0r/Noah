@@ -1101,23 +1101,23 @@ int battleSetupStringInPolyFTRot(sFont& font, int param_2, std::array<POLY_FT4,2
         SetShadeTex(p, 1);
 
         sFontGlyphPoly& poly = font.m4[param_2].m4_polys[i];
-        p->tpage = GetTPage(poly.m10_tpageAbe, 0, poly.m16_tpageX, poly.m18_tpageY);
+        p->tpage = GetTPage(poly.m10_colorDepth, 0, poly.m16_tpageX, poly.m18_tpageY);
         p->clut = GetClut(poly.m12_clutX, poly.m14_clutY);
 
         std::array<SVECTOR, 4> tempVectorArray;
         tempVectorArray.fill({ 0,0,0x1000,0x0 });
 
         tempVectorArray[3].vy = poly.mA_height;
-        tempVectorArray[3].vx = poly.m8_width + poly.m4_U;
+        tempVectorArray[3].vx = poly.m8_width + poly.m4_textureWidth;
         tempVectorArray[2].vx = poly.m8_width;
         if (poly.m1A_flipX == 0) {
             tempVectorArray[2].vx = tempVectorArray[3].vx;
             tempVectorArray[3].vx = poly.m8_width;
         }
-        tempVectorArray[1].vy = tempVectorArray[3].vy + poly.m6_V;
+        tempVectorArray[1].vy = tempVectorArray[3].vy + poly.m6_textureHeight;
         if (poly.m1B_flipY == 0) {
             tempVectorArray[1].vy = tempVectorArray[3].vy;
-            tempVectorArray[3].vy = tempVectorArray[3].vy + poly.m6_V;
+            tempVectorArray[3].vy = tempVectorArray[3].vy + poly.m6_textureHeight;
         }
         tempVectorArray[0].vx = tempVectorArray[3].vx;
         tempVectorArray[0].vy = tempVectorArray[1].vy;
@@ -1130,10 +1130,10 @@ int battleSetupStringInPolyFTRot(sFont& font, int param_2, std::array<POLY_FT4,2
             &p->x0y0, &p->x1y1, &p->x3y3, &p->x2y2,
             &lStack_40, &lStack_3c);
 
-        s16 uVar6 = poly.m0_X;
-        s16 uVar7 = poly.m2_Y;
-        s16 cVar8 = poly.m4_U;
-        s16 cVar9 = poly.m6_V;
+        s16 uVar6 = poly.m0_textureU;
+        s16 uVar7 = poly.m2_textureV;
+        s16 cVar8 = poly.m4_textureWidth;
+        s16 cVar9 = poly.m6_textureHeight;
         if ((rotZ & 0xfff) == 0xc00) {
             uVar6 = uVar6 - 1;
         }

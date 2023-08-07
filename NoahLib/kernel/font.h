@@ -13,15 +13,15 @@ void initFont(std::vector<u8>& fontData);
 void setupPrintDialogTextVar(std::vector<u8>& fontData);
 
 struct sFontGlyphPoly {
-    s16 m0_X;
-    s16 m2_Y;
-    s16 m4_U;
-    s16 m6_V;
+    s16 m0_textureU;
+    s16 m2_textureV;
+    s16 m4_textureWidth;
+    s16 m6_textureHeight;
     s16 m8_width;
     s16 mA_height;
     u16 mC;
     u16 mE;
-    u16 m10_tpageAbe;
+    u16 m10_colorDepth;
     u16 m12_clutX;
     u16 m14_clutY;
     u16 m16_tpageX;
@@ -30,15 +30,15 @@ struct sFontGlyphPoly {
     u8 m1B_flipY;
 
     void deserialize(const std::vector<u8>::const_iterator input) {
-        m0_X = READ_LE_S16(input + 0x00);
-        m2_Y = READ_LE_S16(input + 0x02);
-        m4_U = READ_LE_S16(input + 0x04);
-        m6_V = READ_LE_S16(input + 0x06);
+        m0_textureU = READ_LE_S16(input + 0x00);
+        m2_textureV = READ_LE_S16(input + 0x02);
+        m4_textureWidth = READ_LE_S16(input + 0x04);
+        m6_textureHeight = READ_LE_S16(input + 0x06);
         m8_width = READ_LE_S16(input + 0x08);
         mA_height = READ_LE_S16(input + 0x0A);
         mC = READ_LE_U16(input + 0x0C);
         mE = READ_LE_U16(input + 0x0E);
-        m10_tpageAbe = READ_LE_U16(input + 0x10);
+        m10_colorDepth = READ_LE_U16(input + 0x10);
         m12_clutX = READ_LE_U16(input + 0x12);
         m14_clutY = READ_LE_U16(input + 0x14);
         m16_tpageX = READ_LE_U16(input + 0x16);

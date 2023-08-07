@@ -139,19 +139,19 @@ const std::array<s16, 5> damageDysplayOffsetBySize = {
 int setupDamagePoly(sFont fontData, int character, sDamageDisplaySub0* param_3, short param_4, short param_5) {
     for (int i = 0; i < fontData.m4[character].m0_polyCount; i++) {
         sFontGlyphPoly& poly = fontData.m4[character].m4_polys[i];
-        int tpageX = poly.m0_X << 0x10;
-        if (poly.m10_tpageAbe == 0) {
-            tpageX >>= 0x14;
+        int textureU = poly.m0_textureU << 0x10;
+        if (poly.m10_colorDepth == 0) {
+            textureU >>= 0x14;
         }
         else {
-            tpageX >>= 0x12;
+            textureU >>= 0x12;
         }
         param_3->mC_clut = GetClut(poly.m12_clutX, poly.m14_clutY);
-        param_3->mA_tpage = GetTPage(poly.m10_tpageAbe, 1, (poly.m16_tpageX & 0xFFC0) + tpageX, (poly.m18_tpageY & 0xFF00) + poly.m2_Y);
-        param_3->m4_U = poly.m0_X;
-        param_3->m5_V = poly.m2_Y;
-        param_3->m6_width = poly.m4_U;
-        param_3->m7_height = poly.m6_V;
+        param_3->mA_tpage = GetTPage(poly.m10_colorDepth, 1, (poly.m16_tpageX & 0xFFC0) + textureU, (poly.m18_tpageY & 0xFF00) + poly.m2_textureV);
+        param_3->m4_U = poly.m0_textureU;
+        param_3->m5_V = poly.m2_textureV;
+        param_3->m6_width = poly.m4_textureWidth;
+        param_3->m7_height = poly.m6_textureHeight;
         param_3->m8 = poly.mC;
 
         param_3->m0_screenPosition[0] = poly.m8_width + param_4;

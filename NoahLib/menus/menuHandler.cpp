@@ -202,21 +202,23 @@ void initMenuContext(void)
 
 void computeMenuBorder(sFont& font, int param_2, int* param_3, int* param_4, int* param_5, int* param_6, int* param_7, int* param_8)
 {
-    int iVar2;
+    int textureU;
 
     sFontGlyph& glyph = font.m4[param_2];
     *param_3 = glyph.m0_polyCount;
-    if (glyph.m4_polys[0].m10_tpageAbe == 0) {
-        iVar2 = (glyph.m4_polys[0].m0_X << 0x10) >> 0x14;
+
+    sFontGlyphPoly& poly = glyph.m4_polys[0];
+    if (poly.m10_colorDepth == 0) {
+        textureU = (poly.m0_textureU << 0x10) >> 0x14;
     }
     else {
-        iVar2 = (glyph.m4_polys[0].m0_X << 0x10) >> 0x12;
+        textureU = (poly.m0_textureU << 0x10) >> 0x12;
     }
-    *param_4 = glyph.m4_polys[0].m10_tpageAbe;
-    *param_5 = glyph.m4_polys[0].m12_clutX;
-    *param_6 = glyph.m4_polys[0].m14_clutY;
-    *param_7 = (glyph.m4_polys[0].m16_tpageX & 0xffc0) + iVar2;
-    *param_8 = (glyph.m4_polys[0].m18_tpageY & 0xff00) + glyph.m4_polys[0].m2_Y;
+    *param_4 = poly.m10_colorDepth;
+    *param_5 = poly.m12_clutX;
+    *param_6 = poly.m14_clutY;
+    *param_7 = (poly.m16_tpageX & 0xffc0) + textureU;
+    *param_8 = (poly.m18_tpageY & 0xff00) + poly.m2_textureV;
     return;
 }
 
@@ -855,11 +857,11 @@ int setupStringInPolyFT4(sFont& font, int character, std::array<POLY_FT4, 2>* po
         if ((int)y0Tmp < 0) {
             y0Tmp = y0Tmp + 0xfff;
         }
-        s32 x1Tmp = glyphPoly.m4_U * scale;
+        s32 x1Tmp = glyphPoly.m4_textureWidth * scale;
         if (x1Tmp < 0) {
             x1Tmp = x1Tmp + 0xfff;
         }
-        s32 y1Tmp = glyphPoly.m6_V * scale;
+        s32 y1Tmp = glyphPoly.m6_textureHeight * scale;
         if ((int)y1Tmp < 0) {
             y1Tmp = y1Tmp + 0xfff;
         }
@@ -870,14 +872,14 @@ int setupStringInPolyFT4(sFont& font, int character, std::array<POLY_FT4, 2>* po
         SetSemiTrans(p, 0);
         SetShadeTex(p, 1);
 
-        p->tpage = GetTPage(glyphPoly.m10_tpageAbe, 0, glyphPoly.m16_tpageX, glyphPoly.m18_tpageY);
+        p->tpage = GetTPage(glyphPoly.m10_colorDepth, 0, glyphPoly.m16_tpageX, glyphPoly.m18_tpageY);
         p->clut = GetClut(glyphPoly.m12_clutX, glyphPoly.m14_clutY);
 
         //setup UVs
-        s32 v0Tmp = glyphPoly.m0_X;
-        s32 uVar1 = glyphPoly.m2_Y;
-        s32 width = glyphPoly.m4_U;
-        s32 height = glyphPoly.m6_V;
+        s32 v0Tmp = glyphPoly.m0_textureU;
+        s32 uVar1 = glyphPoly.m2_textureV;
+        s32 width = glyphPoly.m4_textureWidth;
+        s32 height = glyphPoly.m6_textureHeight;
         s32 u0Tmp = v0Tmp - 1;
         s32 x1 = (short)(x1Tmp >> 0xc);
         s32 x0 = (short)(x0Tmp >> 0xc);
