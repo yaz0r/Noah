@@ -1074,7 +1074,7 @@ MATRIX identityMatrix = {
     {0,0,0}
 };
 
-int battleSetupStringInPolyFTRot(std::vector<u8>& param_1, int param_2, std::array<POLY_FT4,2>* param_3, int param_4, short posX, short posY, short scaleX, short scaleY, ushort rotZ)
+int battleSetupStringInPolyFTRot(sFont& font, int param_2, std::array<POLY_FT4,2>* param_3, int param_4, short posX, short posY, short scaleX, short scaleY, ushort rotZ)
 {
     MATRIX localMatrix = identityMatrix;
     VECTOR scale = { scaleX, scaleY, 0x1000 };
@@ -1094,32 +1094,30 @@ int battleSetupStringInPolyFTRot(std::vector<u8>& param_1, int param_2, std::arr
     SetRotMatrix(&localMatrix);
     SetTransMatrix(&localMatrix);
 
-    std::vector<u8>::iterator fontData = param_1.begin() + READ_LE_U16(param_1.begin() + 4 + param_2 * 2);
-    int count = READ_LE_U16(fontData);
-    for (int i = 0; i < count; i++) {
+    for (int i = 0; i < font.m4[param_2].m0_polyCount; i++) {
         POLY_FT4* p = &param_3[i][param_4];
         SetPolyFT4(p);
         SetSemiTrans(p, 0);
         SetShadeTex(p, 1);
 
-        std::vector<u8>::iterator characterData = fontData + 4 + 0x1C * i;
-        p->tpage = GetTPage(READ_LE_U16(characterData + 0x10), 0, READ_LE_U16(characterData + 0x16), READ_LE_U16(characterData + 0x18));
-        p->clut = GetClut(READ_LE_U16(characterData + 0x12), READ_LE_U16(characterData + 0x14));
+        sFontGlyphPoly& poly = font.m4[param_2].m4_polys[i];
+        p->tpage = GetTPage(poly.m10_tpageAbe, 0, poly.m16_tpageX, poly.m18_tpageY);
+        p->clut = GetClut(poly.m12_clutX, poly.m14_clutY);
 
         std::array<SVECTOR, 4> tempVectorArray;
         tempVectorArray.fill({ 0,0,0x1000,0x0 });
 
-        tempVectorArray[3].vy = READ_LE_S16(characterData + 10);
-        tempVectorArray[3].vx = READ_LE_S16(characterData + 8) + READ_LE_S16(characterData + 4);
-        tempVectorArray[2].vx = READ_LE_S16(characterData + 8);
-        if (READ_LE_U8(characterData + 0x1A) == 0) {
+        tempVectorArray[3].vy = poly.mA_height;
+        tempVectorArray[3].vx = poly.m8_width + poly.m4_U;
+        tempVectorArray[2].vx = poly.m8_width;
+        if (poly.m1A_flipX == 0) {
             tempVectorArray[2].vx = tempVectorArray[3].vx;
-            tempVectorArray[3].vx = READ_LE_S16(characterData + 8);
+            tempVectorArray[3].vx = poly.m8_width;
         }
-        tempVectorArray[1].vy = tempVectorArray[3].vy + READ_LE_S16(characterData + 6);
-        if (READ_LE_U8(characterData + 0x1B) == 0) {
+        tempVectorArray[1].vy = tempVectorArray[3].vy + poly.m6_V;
+        if (poly.m1B_flipY == 0) {
             tempVectorArray[1].vy = tempVectorArray[3].vy;
-            tempVectorArray[3].vy = tempVectorArray[3].vy + READ_LE_S16(characterData + 6);
+            tempVectorArray[3].vy = tempVectorArray[3].vy + poly.m6_V;
         }
         tempVectorArray[0].vx = tempVectorArray[3].vx;
         tempVectorArray[0].vy = tempVectorArray[1].vy;
@@ -1132,10 +1130,10 @@ int battleSetupStringInPolyFTRot(std::vector<u8>& param_1, int param_2, std::arr
             &p->x0y0, &p->x1y1, &p->x3y3, &p->x2y2,
             &lStack_40, &lStack_3c);
 
-        s16 uVar6 = READ_LE_S16(characterData + 0);
-        s16 uVar7 = READ_LE_S16(characterData + 2);
-        s16 cVar8 = READ_LE_S16(characterData + 4);
-        s16 cVar9 = READ_LE_S16(characterData + 6);
+        s16 uVar6 = poly.m0_X;
+        s16 uVar7 = poly.m2_Y;
+        s16 cVar8 = poly.m4_U;
+        s16 cVar9 = poly.m6_V;
         if ((rotZ & 0xfff) == 0xc00) {
             uVar6 = uVar6 - 1;
         }
@@ -1165,7 +1163,7 @@ int battleSetupStringInPolyFTRot(std::vector<u8>& param_1, int param_2, std::arr
     SetGeomOffset(geoX, geoY);
     SetGeomScreen(geoScreen);
     PopMatrix();
-    return count;
+    return font.m4[param_2].m0_polyCount;
 }
 
 void timerBarUpdateStartOfTurnAnimation(int param_1) {
@@ -1182,9 +1180,9 @@ void timerBarUpdateStartOfTurnAnimation(int param_1) {
 
     battleVar1->mA9_timeBarNumMoveSteps = 0;
     battleVar1->m74_timeBarsLengths[3] = 0;
-    battleVar1->m74_timeBarsLengths[3] += battleSetupStringInPolyFTRot(battleFont.m_data, 0x52, &battleVar0->m2E08_timeBars[3][battleVar1->m74_timeBarsLengths[3]], battleOddOrEven, barX, barY, battleVar1->m104_timeBarAnimationScale, battleVar1->m104_timeBarAnimationScale, battleVar1->m106_timeBarAnimationRotation);
+    battleVar1->m74_timeBarsLengths[3] += battleSetupStringInPolyFTRot(battleFont, 0x52, &battleVar0->m2E08_timeBars[3][battleVar1->m74_timeBarsLengths[3]], battleOddOrEven, barX, barY, battleVar1->m104_timeBarAnimationScale, battleVar1->m104_timeBarAnimationScale, battleVar1->m106_timeBarAnimationRotation);
     int startOfShadowSprite = battleVar1->m74_timeBarsLengths[3];
-    battleVar1->m74_timeBarsLengths[3] += battleSetupStringInPolyFTRot(battleFont.m_data, 0x53, &battleVar0->m2E08_timeBars[3][battleVar1->m74_timeBarsLengths[3]], battleOddOrEven, barX, barY, battleVar1->m104_timeBarAnimationScale, battleVar1->m104_timeBarAnimationScale, battleVar1->m106_timeBarAnimationRotation);
+    battleVar1->m74_timeBarsLengths[3] += battleSetupStringInPolyFTRot(battleFont, 0x53, &battleVar0->m2E08_timeBars[3][battleVar1->m74_timeBarsLengths[3]], battleOddOrEven, barX, barY, battleVar1->m104_timeBarAnimationScale, battleVar1->m104_timeBarAnimationScale, battleVar1->m106_timeBarAnimationRotation);
 
     for (int i = startOfShadowSprite; i < battleVar1->m74_timeBarsLengths[3]; i++) {
         SetSemiTrans(&battleVar0->m2E08_timeBars[3][i][battleOddOrEven], 1);
@@ -1254,10 +1252,10 @@ void updatePortraits() {
                 break;
             case 1: // Time bar visible on left screen
                 battleVar1->m74_timeBarsLengths[3] = 0;
-                battleVar1->m74_timeBarsLengths[3] += battleSetupStringInPolyFTRot(battleFont.m_data, 0x52, &battleVar0->m2E08_timeBars[3][battleVar1->m74_timeBarsLengths[3]], battleOddOrEven, 0x10, 0x98, 0x1000, 0x1000, 0xc00);
+                battleVar1->m74_timeBarsLengths[3] += battleSetupStringInPolyFTRot(battleFont, 0x52, &battleVar0->m2E08_timeBars[3][battleVar1->m74_timeBarsLengths[3]], battleOddOrEven, 0x10, 0x98, 0x1000, 0x1000, 0xc00);
                 {
                     int length = battleVar1->m74_timeBarsLengths[3];
-                    battleVar1->m74_timeBarsLengths[3] += battleSetupStringInPolyFTRot(battleFont.m_data, 0x53, &battleVar0->m2E08_timeBars[3][battleVar1->m74_timeBarsLengths[3]], battleOddOrEven, 0x10, 0x98, 0x1000, 0x1000, 0xc00);
+                    battleVar1->m74_timeBarsLengths[3] += battleSetupStringInPolyFTRot(battleFont, 0x53, &battleVar0->m2E08_timeBars[3][battleVar1->m74_timeBarsLengths[3]], battleOddOrEven, 0x10, 0x98, 0x1000, 0x1000, 0xc00);
                     while (length < battleVar1->m74_timeBarsLengths[3]) {
                         battleSetupTextPoly(&battleVar0->m2E08_timeBars[3][length][battleOddOrEven]);
                         length++;

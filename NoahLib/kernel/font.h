@@ -70,8 +70,6 @@ struct sFont {
     std::vector<sFontGlyph> m4;
 
     void deserialize(const std::vector<u8>& input) {
-        m_data = input;
-
         m0_numGlyphs = READ_LE_U32(input.begin() + 0);
         assert(READ_LE_U16(input.begin() + 4) == m0_numGlyphs * 2 + 4);
         m4.resize(m0_numGlyphs);
@@ -79,6 +77,4 @@ struct sFont {
             m4[i].deserialize(input.cbegin() + READ_LE_U16(input.begin() + 4 + 2 * i));
         }
     }
-
-    std::vector<u8> m_data;
 };

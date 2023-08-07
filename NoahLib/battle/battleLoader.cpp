@@ -39,7 +39,7 @@ ushort bitmaskCharacterCheck(ushort bitmask, uint characterId)
     return result;
 }
 
-void computeMenuBorder(std::vector<u8>& param_1, int param_2, int* param_3, int* param_4, int* param_5, int* param_6, int* param_7, int* param_8);
+void computeMenuBorder(sFont& param_1, int param_2, int* param_3, int* param_4, int* param_5, int* param_6, int* param_7, int* param_8);
 
 void loadBattleCharacterPortraits(const std::vector<u8>& input, s8 param_2) {
 
@@ -55,7 +55,7 @@ void loadBattleCharacterPortraits(const std::vector<u8>& input, s8 param_2) {
             OpenTIM(input.begin() + characterId * 0x460);
             TIM_IMAGE tim;
             ReadTIM(&tim);
-            computeMenuBorder(battleFont.m_data, param_2 + i, &menuBorderData[i][0], &menuBorderData[i][1], &menuBorderData[i][2], &menuBorderData[i][3], &menuBorderData[i][4], &menuBorderData[i][5]);
+            computeMenuBorder(battleFont, param_2 + i, &menuBorderData[i][0], &menuBorderData[i][1], &menuBorderData[i][2], &menuBorderData[i][3], &menuBorderData[i][4], &menuBorderData[i][5]);
             tim.crect->x = menuBorderData[i][2];
             tim.crect->y = menuBorderData[i][3];
             tim.prect->x = menuBorderData[i][4] + 6 * i;
@@ -527,7 +527,7 @@ void batteLoaderPhase3_0_sub0() {
     battleVar1->m7C[1] = 1;
     battleVar1->m7C[2] = 1;
 
-    computeMenuBorder(battleFont.m_data, 0x5C, &battleVar0->mA234, &battleVar0->mA238, &battleVar0->mA23C, &battleVar0->mA240, &battleVar0->mA244_X, &battleVar0->mA248_Y);
+    computeMenuBorder(battleFont, 0x5C, &battleVar0->mA234, &battleVar0->mA238, &battleVar0->mA23C, &battleVar0->mA240, &battleVar0->mA244_X, &battleVar0->mA248_Y);
     battleVar0->mA2AE = GetClut(battleVar0->mA23C, battleVar0->mA240);
     battleVar0->mA2AC = GetClut(battleVar0->mA23C, battleVar0->mA240 - 1);
     battleVar0->mA2B2 = GetClut(battleVar0->mA23C, battleVar0->mA240 - 2);

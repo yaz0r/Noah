@@ -200,24 +200,23 @@ void initMenuContext(void)
     initMenuContext32C(1);
 }
 
-void computeMenuBorder(std::vector<u8>& param_1, int param_2, int* param_3, int* param_4, int* param_5, int* param_6, int* param_7, int* param_8)
+void computeMenuBorder(sFont& font, int param_2, int* param_3, int* param_4, int* param_5, int* param_6, int* param_7, int* param_8)
 {
     int iVar2;
 
-    std::vector<u8>::iterator data = param_1.begin() + READ_LE_U16(param_1.begin() + 4 + param_2 * 2);
-
-    *param_3 = READ_LE_S16(data + 0);
-    if (READ_LE_S16(data + 0x14) == 0) {
-        iVar2 = (int)((uint)(ushort)READ_LE_S16(data + 4) << 0x10) >> 0x14;
+    sFontGlyph& glyph = font.m4[param_2];
+    *param_3 = glyph.m0_polyCount;
+    if (glyph.m4_polys[0].m10_tpageAbe == 0) {
+        iVar2 = (glyph.m4_polys[0].m0_X << 0x10) >> 0x14;
     }
     else {
-        iVar2 = (int)((uint)(ushort)READ_LE_S16(data + 4) << 0x10) >> 0x12;
+        iVar2 = (glyph.m4_polys[0].m0_X << 0x10) >> 0x12;
     }
-    *param_4 = READ_LE_S16(data + 0x14);
-    *param_5 = READ_LE_S16(data + 0x16);
-    *param_6 = READ_LE_S16(data + 0x18);
-    *param_7 = (short)(READ_LE_S16(data + 0x1A) & 0xffc0) + iVar2;
-    *param_8 = (int)(short)(READ_LE_S16(data + 0x1C) & 0xff00) + READ_LE_S16(data + 0x6);
+    *param_4 = glyph.m4_polys[0].m10_tpageAbe;
+    *param_5 = glyph.m4_polys[0].m12_clutX;
+    *param_6 = glyph.m4_polys[0].m14_clutY;
+    *param_7 = (glyph.m4_polys[0].m16_tpageX & 0xffc0) + iVar2;
+    *param_8 = (glyph.m4_polys[0].m18_tpageY & 0xff00) + glyph.m4_polys[0].m2_Y;
     return;
 }
 
@@ -235,10 +234,10 @@ void loadMenuSharedResources() {
 
     int menuBorderData[3][6];
 
-    computeMenuBorder(gMenuContext->m2DC_font.m_data, 0x0e0, &menuBorderData[0][0], &menuBorderData[0][1], &menuBorderData[0][2], &menuBorderData[0][3], &menuBorderData[0][4], &menuBorderData[0][5]);
-    computeMenuBorder(gMenuContext->m2DC_font.m_data, 0x14b, &menuBorderData[0][0], &menuBorderData[0][1], &menuBorderData[0][2], &menuBorderData[0][3], &menuBorderData[0][4], &menuBorderData[0][5]);
-    computeMenuBorder(gMenuContext->m2DC_font.m_data, 0x14c, &menuBorderData[1][0], &menuBorderData[1][1], &menuBorderData[1][2], &menuBorderData[1][3], &menuBorderData[1][4], &menuBorderData[1][5]);
-    computeMenuBorder(gMenuContext->m2DC_font.m_data, 0x14d, &menuBorderData[2][0], &menuBorderData[2][1], &menuBorderData[2][2], &menuBorderData[2][3], &menuBorderData[2][4], &menuBorderData[2][5]);
+    computeMenuBorder(gMenuContext->m2DC_font, 0x0e0, &menuBorderData[0][0], &menuBorderData[0][1], &menuBorderData[0][2], &menuBorderData[0][3], &menuBorderData[0][4], &menuBorderData[0][5]);
+    computeMenuBorder(gMenuContext->m2DC_font, 0x14b, &menuBorderData[0][0], &menuBorderData[0][1], &menuBorderData[0][2], &menuBorderData[0][3], &menuBorderData[0][4], &menuBorderData[0][5]);
+    computeMenuBorder(gMenuContext->m2DC_font, 0x14c, &menuBorderData[1][0], &menuBorderData[1][1], &menuBorderData[1][2], &menuBorderData[1][3], &menuBorderData[1][4], &menuBorderData[1][5]);
+    computeMenuBorder(gMenuContext->m2DC_font, 0x14d, &menuBorderData[2][0], &menuBorderData[2][1], &menuBorderData[2][2], &menuBorderData[2][3], &menuBorderData[2][4], &menuBorderData[2][5]);
 
     menuBorderData[1][4] += 0xC;
 
@@ -471,13 +470,13 @@ void initPrimitives_348_cursor()
 
 void computeMenuBorders(void)
 {
-    computeMenuBorder(gMenuContext->m2DC_font.m_data, 0xfe, &gMenuContext->m46C_menuBorders[0].m0, &gMenuContext->m46C_menuBorders[0].m4_tp, &gMenuContext->m46C_menuBorders[0].m8_clutX,
+    computeMenuBorder(gMenuContext->m2DC_font, 0xfe, &gMenuContext->m46C_menuBorders[0].m0, &gMenuContext->m46C_menuBorders[0].m4_tp, &gMenuContext->m46C_menuBorders[0].m8_clutX,
         &gMenuContext->m46C_menuBorders[0].mC_clutY, &gMenuContext->m46C_menuBorders[0].m10_tpageX, &gMenuContext->m46C_menuBorders[0].m14_tpageY);
-    computeMenuBorder(gMenuContext->m2DC_font.m_data, 0x103, &gMenuContext->m46C_menuBorders[1].m0, &gMenuContext->m46C_menuBorders[1].m4_tp, &gMenuContext->m46C_menuBorders[1].m8_clutX,
+    computeMenuBorder(gMenuContext->m2DC_font, 0x103, &gMenuContext->m46C_menuBorders[1].m0, &gMenuContext->m46C_menuBorders[1].m4_tp, &gMenuContext->m46C_menuBorders[1].m8_clutX,
         &gMenuContext->m46C_menuBorders[1].mC_clutY, &gMenuContext->m46C_menuBorders[1].m10_tpageX, &gMenuContext->m46C_menuBorders[1].m14_tpageY);
-    computeMenuBorder(gMenuContext->m2DC_font.m_data, 0x100, &gMenuContext->m46C_menuBorders[2].m0, &gMenuContext->m46C_menuBorders[2].m4_tp, &gMenuContext->m46C_menuBorders[2].m8_clutX,
+    computeMenuBorder(gMenuContext->m2DC_font, 0x100, &gMenuContext->m46C_menuBorders[2].m0, &gMenuContext->m46C_menuBorders[2].m4_tp, &gMenuContext->m46C_menuBorders[2].m8_clutX,
         &gMenuContext->m46C_menuBorders[2].mC_clutY, &gMenuContext->m46C_menuBorders[2].m10_tpageX, &gMenuContext->m46C_menuBorders[2].m14_tpageY);
-    computeMenuBorder(gMenuContext->m2DC_font.m_data, 0x101, &gMenuContext->m46C_menuBorders[3].m0, &gMenuContext->m46C_menuBorders[3].m4_tp, &gMenuContext->m46C_menuBorders[3].m8_clutX,
+    computeMenuBorder(gMenuContext->m2DC_font, 0x101, &gMenuContext->m46C_menuBorders[3].m0, &gMenuContext->m46C_menuBorders[3].m4_tp, &gMenuContext->m46C_menuBorders[3].m8_clutX,
         &gMenuContext->m46C_menuBorders[3].mC_clutY, &gMenuContext->m46C_menuBorders[3].m10_tpageX, &gMenuContext->m46C_menuBorders[3].m14_tpageY);
     return;
 }

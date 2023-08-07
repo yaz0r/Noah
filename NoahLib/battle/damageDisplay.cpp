@@ -136,38 +136,29 @@ const std::array<s16, 5> damageDysplayOffsetBySize = {
     -4,     -8,    -12,    -16, -20
 };
 
-int setupDamagePoly(std::vector<u8>& fontData, int character, sDamageDisplaySub0* param_3, short param_4, short param_5) {
-    std::vector<u8>::iterator characterData = fontData.begin() + READ_LE_U16(fontData.begin() + character * 2 + 4);
-    u16 count = READ_LE_U16(characterData);
-    std::vector<u8>::iterator characterData3 = characterData + 2 * 2;
-    for (int i = 0; i < count; i++) {
-        characterData = characterData + 7 * 2;
-        int tpageX;
-        if (READ_LE_U16(characterData + 3) == 0) {
-            tpageX = (READ_LE_U16(characterData3) << 0x10) >> 0x14;
+int setupDamagePoly(sFont fontData, int character, sDamageDisplaySub0* param_3, short param_4, short param_5) {
+    for (int i = 0; i < fontData.m4[character].m0_polyCount; i++) {
+        sFontGlyphPoly& poly = fontData.m4[character].m4_polys[i];
+        int tpageX = poly.m0_X << 0x10;
+        if (poly.m10_tpageAbe == 0) {
+            tpageX >>= 0x14;
         }
         else {
-            tpageX = (READ_LE_U16(characterData3) << 0x10) >> 0x12;
+            tpageX >>= 0x12;
         }
-        u16 XInTpage = READ_LE_U16(characterData + 6 * 2);
-        u16 YInTpage = READ_LE_U16(characterData + 7 * 2);
-        u16 tp = READ_LE_U16(characterData + 3 * 2);
-        u16 tpageY = READ_LE_U16(characterData -1 * 2);
-        param_3->mC_clut = GetClut(READ_LE_U16(characterData + 4 * 2), READ_LE_U16(characterData + 5 * 2));
-        param_3->mA_tpage = GetTPage(tp, 1, (XInTpage & 0xFFC0) + tpageX, (YInTpage & 0xFF00) + tpageY);
-        param_3->m4_U = READ_LE_U8(characterData3);
-        param_3->m5_V = READ_LE_U8(characterData - 4 * 2);
-        param_3->m6_width = READ_LE_U8(characterData - 4 * 2);
-        param_3->m7_height = READ_LE_U8(characterData - 3 * 2);
-        param_3->m8 = READ_LE_U8(characterData - 2 * 2);
+        param_3->mC_clut = GetClut(poly.m12_clutX, poly.m14_clutY);
+        param_3->mA_tpage = GetTPage(poly.m10_tpageAbe, 1, (poly.m16_tpageX & 0xFFC0) + tpageX, (poly.m18_tpageY & 0xFF00) + poly.m2_Y);
+        param_3->m4_U = poly.m0_X;
+        param_3->m5_V = poly.m2_Y;
+        param_3->m6_width = poly.m4_U;
+        param_3->m7_height = poly.m6_V;
+        param_3->m8 = poly.mC;
 
-        characterData3 += 0xE * 2;
-        param_3->m0_screenPosition[0] = READ_LE_U16(characterData - 1 * 2) + param_4;
-        param_3->m0_screenPosition[1] = READ_LE_U16(characterData) + param_5;
-        characterData += 0xE * 2;
+        param_3->m0_screenPosition[0] = poly.m8_width + param_4;
+        param_3->m0_screenPosition[1] = poly.mA_height + param_5;
     }
 
-    return count;
+    return fontData.m4[character].m0_polyCount;
 }
 
 extern u8* shapeTransfertTableCurrentEntry;
@@ -252,7 +243,7 @@ void createDamageDisplay(sSpriteActorCore* param_1, int damageValue, int damageT
 
     if (damageType != 4) {
         for (int i = 0; i < damageString.m0_length; i++) {
-            pNewDamageTask->m8C_damageStringLength += setupDamagePoly(battleFont.m_data, damageString.m1_string[i] + 0x72, &pNewDamageTask->m90[pNewDamageTask->m8C_damageStringLength], displayOffset, -16);
+            pNewDamageTask->m8C_damageStringLength += setupDamagePoly(battleFont, damageString.m1_string[i] + 0x72, &pNewDamageTask->m90[pNewDamageTask->m8C_damageStringLength], displayOffset, -16);
         }
     }
 }
