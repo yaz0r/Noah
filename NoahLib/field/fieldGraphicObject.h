@@ -108,13 +108,7 @@ struct sStackElement
 	sPS1Pointer asPs1Pointer;
 };
 
-struct sCustomRenderable {
-    virtual struct sSpriteActorCore* getAsSpriteActorCore() { assert(0); return nullptr; }
-};
-
-struct sSpriteActorCore : public sCustomRenderable {
-    virtual struct sSpriteActorCore* getAsSpriteActorCore() override { return this; }
-
+struct sSpriteActorCore {
     FP_VEC3 m0_position;
     FP_VEC3 mC_step;
     s32 m18_moveSpeed;

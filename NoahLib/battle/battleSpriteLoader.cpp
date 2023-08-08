@@ -152,7 +152,7 @@ std::array<u8, 12> battleSpriteWidthPerCharacter = { {
 } };
 
 void battleSpriteUpdate(sTaskHeader* param_1) {
-    sSpriteActorCore* pSprite = ((sSpriteActorCore*)param_1->m4)->getAsSpriteActorCore();
+    sSpriteActorCore* pSprite = ((sSpriteActorCore*)param_1->m4);
 
     if (battleSpritesDisabled == 0) {
         OP_INIT_ENTITY_SCRIPT_sub0Sub9(pSprite);
@@ -165,7 +165,7 @@ void battleSpriteUpdate(sTaskHeader* param_1) {
 }
 
 void battleSpriteRender(sTaskHeader* param_1) {
-    sSpriteActorCore* pSprite = ((sSpriteActorCore*)param_1->m4)->getAsSpriteActorCore();
+    sSpriteActorCore* pSprite = ((sSpriteActorCore*)param_1->m4);
 
     if (battleSpritesDisabled == '\0') {
         SetRotMatrix(&battleRenderingMatrix);
@@ -234,7 +234,7 @@ void createBattleSpriteActor(uint entityIndex, int visualBufferIndex, short anim
     battleVisualBuffers[visualBufferIndex].bundle.init(*battleVisualBuffers[visualBufferIndex].m0_spriteData);
     sBattleSpriteActor* pSprite = allocateBattleSpriteActor(&battleVisualBuffers[visualBufferIndex].bundle, 0, entityIndex + 0x1C0, battleVisualBuffers[visualBufferIndex].m4_vramX, battleVisualBuffers[visualBufferIndex].m6_vramY, 0x20, 0, 0, 0, animationId, 0, 0, 0, battleVisualBuffers[visualBufferIndex].m8);
 
-    sSpriteActorCore* pSpriteCore = ((sSpriteActorCore*)pSprite->m0.m4)->getAsSpriteActorCore();
+    sSpriteActorCore* pSpriteCore = ((sSpriteActorCore*)pSprite->m0.m4);
     pSpriteCore->m24_vramData->m4_vramLocation.vx = battleVisualBuffers[visualBufferIndex].m4_vramX;
     pSpriteCore->m24_vramData->m4_vramLocation.vy = battleVisualBuffers[visualBufferIndex].m6_vramY;
     MissingCode(); // very confusing code here

@@ -2367,17 +2367,17 @@ void processBattleAnimation(sSpriteActorCore* param_1) {
 
     switch (battleCurrentDamages[allocateJumpAnimationStructVar0].m47_battleAnimationToPlay) {
     case -1: // waiting for attack prompt
-        OP_INIT_ENTITY_SCRIPT_sub0Sub8(param_1->getAsSpriteActorCore(), 0);
+        OP_INIT_ENTITY_SCRIPT_sub0Sub8(param_1, 0);
         jumpAnimationControlStruct->m48 = 1;
         if (processBattleAnimationSub0() == 0) {
-            if (param_1->getAsSpriteActorCore()->mA8.mx1C != 0) {
+            if (param_1->mA8.mx1C != 0) {
                 return;
             }
-            if (battleVisualEntities[(param_1->getAsSpriteActorCore()->mAC & 3) << 2 | param_1->getAsSpriteActorCore()->mA8.mx1E].
+            if (battleVisualEntities[(param_1->mAC & 3) << 2 | param_1->mA8.mx1E].
                 m3 != 0) {
                 return;
             }
-            spriteActorSetPlayingAnimation(param_1->getAsSpriteActorCore(), param_1->getAsSpriteActorCore()->mB0.mx0_animationId);
+            spriteActorSetPlayingAnimation(param_1, param_1->mB0.mx0_animationId);
             return;
         }
         assert(0);
@@ -2404,8 +2404,8 @@ void processBattleAnimation(sSpriteActorCore* param_1) {
         jumpAnimationControlStruct->m48 = 1;
         if (battleCurrentDamages[allocateJumpAnimationStructVar0].m3A == 0) {
             jumpAnimationControlStruct->m48 = 0;
-            jumpUpdatePosition(param_1->getAsSpriteActorCore());
-            OP_INIT_ENTITY_SCRIPT_sub0Sub8(param_1->getAsSpriteActorCore(), startJumpAnimationCallback);
+            jumpUpdatePosition(param_1);
+            OP_INIT_ENTITY_SCRIPT_sub0Sub8(param_1, startJumpAnimationCallback);
         }
         allocateJumpAnimationStructVar0 = allocateJumpAnimationStructVar0 + 1;
         return;
@@ -2414,24 +2414,24 @@ void processBattleAnimation(sSpriteActorCore* param_1) {
     case 5: // 2ap
     case 6: // 3ap
         attackInProgress = 0;
-        setRenderingInfoForItemUser(param_1->getAsSpriteActorCore());
-        OP_INIT_ENTITY_SCRIPT_sub0Sub8(param_1->getAsSpriteActorCore(), startJumpAnimationCallback);
-        (param_1->getAsSpriteActorCore()->m7C)->m8 =
+        setRenderingInfoForItemUser(param_1);
+        OP_INIT_ENTITY_SCRIPT_sub0Sub8(param_1, startJumpAnimationCallback);
+        (param_1->m7C)->m8 =
             (uint)battleCurrentDamages[allocateJumpAnimationStructVar0].m18_damageType
-            [(param_1->getAsSpriteActorCore()->m74_pTargetEntitySprite->mAC & 3) << 2 | param_1->getAsSpriteActorCore()->m74_pTargetEntitySprite->mA8.mx1E];
-        if (!isVramPreBacked((param_1->getAsSpriteActorCore()->m24_vramData)->m0_spriteData)) {
+            [(param_1->m74_pTargetEntitySprite->mAC & 3) << 2 | param_1->m74_pTargetEntitySprite->mA8.mx1E];
+        if (!isVramPreBacked((param_1->m24_vramData)->m0_spriteData)) {
             if (battleCurrentDamages[allocateJumpAnimationStructVar0].m47_battleAnimationToPlay < 0x10) {
                 if ((fxFragmentLoaded == '\0') && (battleAnimationLoadingDest.m_rawData.size() != 0)) {
                     battleIdleDuringLoading();
-                    (param_1->getAsSpriteActorCore())->m50 = loadFragmentIsNotLoadedYet();
+                    (param_1)->m50 = loadFragmentIsNotLoadedYet();
                     setupSpecialAnimation(param_1, &battleAnimationLoadingDest);
                 }
-                int expectActorId = (((param_1->getAsSpriteActorCore())->mAC & 3) << 2 | (uint)(param_1->getAsSpriteActorCore())->mA8.mx1E);
+                int expectActorId = (((param_1)->mAC & 3) << 2 | (uint)(param_1)->mA8.mx1E);
                 if (jumpAnimationControlStruct->m20_actor == expectActorId) {
-                    spriteActorSetPlayingAnimation(param_1->getAsSpriteActorCore(), ~battleCurrentDamages[allocateJumpAnimationStructVar0].m47_battleAnimationToPlay);
+                    spriteActorSetPlayingAnimation(param_1, ~battleCurrentDamages[allocateJumpAnimationStructVar0].m47_battleAnimationToPlay);
                 }
                 else {
-                    spriteActorSetPlayingAnimation(param_1->getAsSpriteActorCore(), battleCurrentDamages[allocateJumpAnimationStructVar0].m47_battleAnimationToPlay);
+                    spriteActorSetPlayingAnimation(param_1, battleCurrentDamages[allocateJumpAnimationStructVar0].m47_battleAnimationToPlay);
                 }
             }
             else {
@@ -2439,11 +2439,11 @@ void processBattleAnimation(sSpriteActorCore* param_1) {
             }
         }
         else {
-            spriteActorSetPlayingAnimation(param_1->getAsSpriteActorCore(), battleCurrentDamages[allocateJumpAnimationStructVar0].m47_battleAnimationToPlay);
-            sSpriteActorCore* psVar10 = param_1->getAsSpriteActorCore()->m74_pTargetEntitySprite;
+            spriteActorSetPlayingAnimation(param_1, battleCurrentDamages[allocateJumpAnimationStructVar0].m47_battleAnimationToPlay);
+            sSpriteActorCore* psVar10 = param_1->m74_pTargetEntitySprite;
             computeBattleCameraParams
-            (1 << ((param_1->getAsSpriteActorCore()->mAC & 3) << 2 |
-                (uint)param_1->getAsSpriteActorCore()->mA8.mx1E) |
+            (1 << ((param_1->mAC & 3) << 2 |
+                (uint)param_1->mA8.mx1E) |
                 1 << ((psVar10->mAC & 3) << 2 | (uint)psVar10->mA8.mx1E));
         }
         jumpAnimationControlStruct->m48 = 0;
