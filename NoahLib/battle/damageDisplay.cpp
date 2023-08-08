@@ -1,23 +1,11 @@
 #include "noahLib.h"
 #include "battle.h"
-
+#include "field/field.h" // for OT Table TODO: Remove
 #include "damageDisplay.h"
 #include "damageDisplay2.h"
 
 u16 damageDisplayVar0 = 0;
 u16 damageDisplayVar1 = 0;
-
-struct sDamageDisplaySub0 {
-    std::array<s16, 2> m0_screenPosition;
-    u8 m4_U;
-    u8 m5_V;
-    u8 m6_width;
-    u8 m7_height;
-    u8 m8;
-    u16 mA_tpage;
-    u16 mC_clut;
-    // 0x18
-};
 
 struct sDamageDisplayTask {
     sTaskHeader m0;
@@ -26,7 +14,7 @@ struct sDamageDisplayTask {
     sDamageDisplayTask* m38_pNext;
     SVECTOR m40;
     VECTOR m48;
-    std::array<s32, 3> m58;
+    VECTOR m58;
     sSpriteActorCore* m78;
     u8 m7C_direction;
     sColorAndCode m80_colorAndCode;
@@ -87,9 +75,38 @@ void updateDamageDisplayTask(sTaskHeader* param_1) {
     }
 }
 
+void customRenderableEntityGenericDelete(sTaskHeader* param_1) {
+    registerSpriteCallback2Sub0(param_1 + 1);
+    allocateSavePointMeshDataSub0_callback(param_1);
+    delete param_1;
+}
+
 void deleteDamageDisplayTask(sTaskHeader* param_1) {
     sDamageDisplayTask* pTask = (sDamageDisplayTask*)param_1;
-    MissingCode();
+
+    sDamageDisplayTask* psVar1;
+    sDamageDisplayTask* psVar2;
+    sDamageDisplayTask* psVar3;
+
+    psVar1 = damageTaskDisplayListHead;
+    psVar3 = (sDamageDisplayTask*)0x0;
+    if (damageTaskDisplayListHead != (sDamageDisplayTask*)0x0) {
+        do {
+            psVar2 = psVar1;
+            if (psVar2 == pTask) {
+                if (psVar3 == (sDamageDisplayTask*)0x0) {
+                    damageTaskDisplayListHead = psVar2->m38_pNext;
+                }
+                else {
+                    psVar3->m38_pNext = psVar2->m38_pNext;
+                }
+                break;
+            }
+            psVar1 = psVar2->m38_pNext;
+            psVar3 = psVar2;
+        } while (psVar2->m38_pNext != (sDamageDisplayTask*)0x0);
+    }
+    customRenderableEntityGenericDelete(&pTask->m0);
 }
 
 static const std::array<u32, 9> damageDecimals = {
@@ -163,24 +180,93 @@ int setupDamagePoly(sFont fontData, int character, sDamageDisplaySub0* param_3, 
 
 extern u8* shapeTransfertTableCurrentEntry;
 extern u8* shapeTransfertTableEnd;
+extern SFP_VEC4 currentSpriteCharacterSize[4];
 
 void drawDamageDisplayCharacter(sDamageDisplaySub0* param_1, sColorAndCode colorAndCode) {
     if ((shapeTransfertTableCurrentEntry + sizeof(POLY_FT4) < shapeTransfertTableEnd)) {
-        POLY_FT4* pPoly = (POLY_FT4*)shapeTransfertTableCurrentEntry;
+        POLY_FT4* pPoly = new(shapeTransfertTableCurrentEntry) POLY_FT4;
         shapeTransfertTableCurrentEntry += sizeof(POLY_FT4);
 
         pPoly->m3_size = 9;
         pPoly->m_colorAndCode = colorAndCode;
-        assert(0);
+        pPoly->tpage = param_1->mA_tpage;
+        pPoly->clut = param_1->mC_clut;
+
+        currentSpriteCharacterSize[0].vx = param_1->m0_screenPosition[0];
+        currentSpriteCharacterSize[0].vy = param_1->m0_screenPosition[1];
+        currentSpriteCharacterSize[1].vx = currentSpriteCharacterSize[0].vx + (ushort)param_1->m6_width;
+        currentSpriteCharacterSize[2].vy = currentSpriteCharacterSize[0].vy + (ushort)param_1->m7_height;
+        currentSpriteCharacterSize[1].vy = currentSpriteCharacterSize[0].vy;
+        currentSpriteCharacterSize[2].vx = currentSpriteCharacterSize[1].vx;
+        currentSpriteCharacterSize[3].vx = currentSpriteCharacterSize[0].vx;
+        currentSpriteCharacterSize[3].vy = currentSpriteCharacterSize[2].vy;
+
+        long lStack18;
+        long lStack14;
+        RotTransPers4(&currentSpriteCharacterSize[0], &currentSpriteCharacterSize[1], &currentSpriteCharacterSize[2], &currentSpriteCharacterSize[3], &pPoly->x0y0, &pPoly->x1y1, &pPoly->x3y3, &pPoly->x2y2, &lStack18, &lStack14);
+
+        pPoly->v1 = pPoly->v0 = param_1->m5_V;
+        pPoly->v3 = pPoly->v2 = param_1->m5_V + param_1->m7_height;
+        pPoly->x2 = pPoly->x0 = param_1->m4_U;
+        pPoly->x3 = pPoly->x1 = param_1->m4_U + param_1->m6_width;
+
+        AddPrim(&(*characterRenderingOT)[0], pPoly);
     }
+}
+
+MATRIX damageDisplayMatrix = {
+    {{
+        {0x1000, 0, 0},
+        {0, 0x1000, 0},
+        {0, 0, 0x1000}
+    }},
+    {0,0,0x200}
+};
+
+void setupDamageDisplayMatrix(SVECTOR* param_1, VECTOR* param_2) {
+    long lVar1;
+    sVec2_s16 local_28;
+    long lStack_20;
+    long lStack_1c;
+    int local_18;
+    int local_14;
+
+    SetRotMatrix(&battleRenderingMatrix);
+    SetTransMatrix(&battleRenderingMatrix);
+    RotTransPers(param_1, &local_28, &lStack_20, &lStack_1c);
+    ReadGeomOffset(&local_18, &local_14);
+    param_2->vx = (local_28.vx - local_18) * 2;
+    param_2->vy = (local_28.vy - local_14) * 2;
+    lVar1 = ReadGeomScreen();
+    param_2->vz = lVar1;
+    return;
 }
 
 void drawDamageDisplayTask(sTaskHeader* param_1) {
     sDamageDisplayTask* pTask = (sDamageDisplayTask*)param_1;
 
     sDamageDisplayTask* pOwner = (sDamageDisplayTask*)pTask->m0.m4;
+    damageDisplayMatrix.t[2] = ReadGeomScreen();
 
-    MissingCode();
+    SVECTOR local_30;
+    local_30.vx = pOwner->m48.vx.getIntegerPart();
+    local_30.vy = pOwner->m48.vy.getIntegerPart();
+    local_30.vz = pOwner->m48.vz.getIntegerPart();
+
+    VECTOR VStack_28;
+    setupDamageDisplayMatrix(&local_30, &VStack_28);
+
+    MATRIX MStack_50;
+    createRotationMatrix(&pOwner->m40, &MStack_50);
+    TransMatrix(&MStack_50, &VStack_28);
+    CompMatrix(&damageDisplayMatrix, &MStack_50, &MStack_50);
+    ScaleMatrix(&MStack_50, &pOwner->m58);
+    SetRotMatrix(&MStack_50);
+    SetTransMatrix(&MStack_50);
+
+    for (int i = 0; i < pOwner->m8C_damageStringLength; i++) {
+        drawDamageDisplayCharacter(&pOwner->m90[i], pOwner->m80_colorAndCode);
+    }
 }
 
 void createDamageDisplay(sSpriteActorCore* param_1, int damageValue, int damageType) {
