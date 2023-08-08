@@ -409,7 +409,7 @@ void spriteCallback_render9(sTaskHeader* param_1) {
 }
 
 void spriteCallback_render2(sTaskHeader* param_1) {
-    sSpriteActorCore* pSpriteActor = param_1->m4->getAsSpriteActorCore();
+    sSpriteActorCore* pSpriteActor = ((sSpriteActorCore*)param_1->m4)->getAsSpriteActorCore();
 
     spriteCallback_render2_updateMatrix(pSpriteActor);
 
@@ -433,17 +433,19 @@ void spriteCallback_render2(sTaskHeader* param_1) {
 }
 
 void savePointCallback8(sTaskHeader* param_1) {
-    OP_INIT_ENTITY_SCRIPT_sub0Sub9(param_1->m4->getAsSpriteActorCore());
-    savePointCallback8Sub0(param_1->m4->getAsSpriteActorCore());
+    sSpriteActorCore* pSpriteActor = ((sSpriteActorCore*)param_1->m4)->getAsSpriteActorCore();
 
-    if (param_1->m4->getAsSpriteActorCore()->m64_spriteByteCode.getPointer()) {
-        if (((param_1->m4->getAsSpriteActorCore()->mAC >> 6) & 1) == 0) {
+    OP_INIT_ENTITY_SCRIPT_sub0Sub9(pSpriteActor);
+    savePointCallback8Sub0(pSpriteActor);
+
+    if (pSpriteActor->m64_spriteByteCode.getPointer()) {
+        if (((pSpriteActor->mAC >> 6) & 1) == 0) {
             return;
         }
 
-        OP_INIT_ENTITY_SCRIPT_sub0Sub9(param_1->m4->getAsSpriteActorCore());
-        savePointCallback8Sub0(param_1->m4->getAsSpriteActorCore());
-        if (param_1->m4->getAsSpriteActorCore()->m64_spriteByteCode.getPointer()) {
+        OP_INIT_ENTITY_SCRIPT_sub0Sub9(pSpriteActor);
+        savePointCallback8Sub0(pSpriteActor);
+        if (pSpriteActor->m64_spriteByteCode.getPointer()) {
             return;
         }
     }
@@ -476,7 +478,7 @@ void savePointCallbackC_sub1(sSpriteActorCore* param_1) {
 }
 
 void savePointCallbackC(sTaskHeader* param_1) {
-    sSpriteActorCore* pSpriteActor = param_1->m4->getAsSpriteActorCore();
+    sSpriteActorCore* pSpriteActor = ((sSpriteActorCore*)param_1->m4)->getAsSpriteActorCore();
 
     if (pSpriteActor->m20) {
         if (pSpriteActor->m20->getAsSprite()->m2C) {
@@ -663,7 +665,7 @@ void setTaskDrawFunction(sTaskHeader* param_1, void (*param_2)(sTaskHeader*))
 }
 
 void spriteCallback_render0(sTaskHeader* param_1) {
-    sSpriteActorCore* pSpriteSheet = param_1->m4->getAsSpriteActorCore();
+    sSpriteActorCore* pSpriteSheet = ((sSpriteActorCore*)param_1->m4)->getAsSpriteActorCore();
     if ((!pSpriteSheet->mB0.mx8) || !battleSpritesDisabled) {
         SVECTOR local_30;
         local_30.vx = pSpriteSheet->m0_position.vx.getIntegerPart();

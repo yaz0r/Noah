@@ -221,9 +221,7 @@ struct sSavePointMesh_data2
 
 
 // base size of one of those is expected to be 0xEC
-struct sSavePointMeshAbstract {
-    sTaskHeader m0;
-    sTaskHeader m1C;
+struct sSavePointMeshAbstract : public sTaskHeaderPair {
     sSpriteActorCore m38_spriteActorCore;
 };
 

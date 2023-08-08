@@ -11,10 +11,7 @@ This task is responsible for displaying the "Total damage" text on screen during
 extern OTTable* characterRenderingOT;
 extern MATRIX damageDisplayMatrix;
 
-struct sDamageDisplayPoly {
-    sTaskHeader m0;
-    sTaskHeader m1C;
-
+struct sDamageDisplayPoly : public sTaskHeaderPair {
     SVECTOR m38_transformedPos;
     VECTOR m40_pos;
 

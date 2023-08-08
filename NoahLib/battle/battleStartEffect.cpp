@@ -25,9 +25,7 @@ struct sBattleStartEffectSub {
     s32 m78_gravity;
 };
 
-struct sBattleStartEffect : public sCustomRenderable {
-    sTaskHeader m0;
-    sTaskHeader m1C;
+struct sBattleStartEffect : public sTaskHeaderPair {
     s32 m38_frameCounter;
     sBattleStartEffectSub m3C_triangleData[2][14][20];
 };

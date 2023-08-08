@@ -7,10 +7,7 @@
 u16 damageDisplayVar0 = 0;
 u16 damageDisplayVar1 = 0;
 
-struct sDamageDisplayTask {
-    sTaskHeader m0;
-    sTaskHeader m1C;
-
+struct sDamageDisplayTask : public sTaskHeaderPair {
     sDamageDisplayTask* m38_pNext;
     SVECTOR m40;
     VECTOR m48;

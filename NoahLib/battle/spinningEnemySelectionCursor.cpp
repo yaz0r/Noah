@@ -8,9 +8,7 @@
 
 #include "battleCursor.generated.h"
 
-struct sBattleSpinningEnemySelectionCursor {
-    sTaskHeader m0;
-    sTaskHeader m1C;
+struct sBattleSpinningEnemySelectionCursor : public sTaskHeaderPair {
     sCustomRenderable* m38;
     VECTOR m3C_translation;
     SVECTOR m4C_rotation;
@@ -91,8 +89,8 @@ void deleteSpinningEnemySelectionCursor(sTaskHeader* param_1) {
 
 void createSpinningEnemySelectionCursor(sBattleSpriteActor* param_1) {
     sBattleSpinningEnemySelectionCursor* pNewTask = createCustomRenderableEntity<sBattleSpinningEnemySelectionCursor>(0x68, &param_1->m0, updateSpinningEnemySelectionCursor, drawSpinningEnemySelectionCursor, deleteSpinningEnemySelectionCursor);
-    pNewTask->m38 = param_1->m0.m4;
-    pNewTask->m54 = param_1->m0.m4->getAsSpriteActorCore()->m36;
+    pNewTask->m38 = (sCustomRenderable*)param_1->m0.m4;
+    pNewTask->m54 = ((sCustomRenderable*)param_1->m0.m4)->getAsSpriteActorCore()->m36;
     if (spriteBytecode2ExtendedE0_Var0) {
         allocateSavePointMeshDataSub0_var0--;
     }
@@ -107,7 +105,8 @@ void createSpinningEnemySelectionCursor(sBattleSpriteActor* param_1) {
 
     pNewTask->m64_customPolySubBuffer = getCustomPolySubBuffer(&battleBlinkingPolyBuffer, 0);
 
-    param_1->m0.m4->getAsSpriteActorCore()->m28_colorAndCode.m3_code &= 0xFE;
-    updateAllSubsprites(param_1->m0.m4->getAsSpriteActorCore());
+    sSpriteActorCore* pSpriteActor = ((sCustomRenderable*)param_1->m0.m4)->getAsSpriteActorCore();
+    pSpriteActor->m28_colorAndCode.m3_code &= 0xFE;
+    updateAllSubsprites(pSpriteActor);
     updateSpinningEnemySelectionCursor(&pNewTask->m0);
 }

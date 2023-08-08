@@ -279,9 +279,7 @@ struct sBattleVisualEntity {
 };
 extern std::array<sBattleVisualEntity, 0x11> battleVisualEntities;
 
-struct sBattleSpriteActor {
-    sTaskHeader m0;
-    sTaskHeader m1C;
+struct sBattleSpriteActor : public sTaskHeaderPair {
     sSpriteActor m38_spriteActor;
 };
 

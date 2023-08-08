@@ -5,12 +5,17 @@ struct sTaskHeader
     virtual ~sTaskHeader() {}
 
     void* m0_owner;
-    struct sCustomRenderable* m4;
+    void* m4;
     void (*m8_updateCallback)(sTaskHeader*);
     void (*mC_deleteCallback)(sTaskHeader*);
     u32 m10;
     u32 m14;
     sTaskHeader* m18_pNext;
+};
+
+struct sTaskHeaderPair {
+    sTaskHeader m0;
+    sTaskHeader m1C;
 };
 
 extern sTaskHeader* spriteCallbackHead;
