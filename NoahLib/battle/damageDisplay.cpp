@@ -72,9 +72,9 @@ void updateDamageDisplayTask(sTaskHeader* param_1) {
     }
 }
 
-void customRenderableEntityGenericDelete(sTaskHeader* param_1) {
-    registerSpriteCallback2Sub0(param_1 + 1);
-    allocateSavePointMeshDataSub0_callback(param_1);
+void customRenderableEntityGenericDelete(sTaskHeaderPair* param_1) {
+    registerSpriteCallback2Sub0(&param_1->m1C);
+    allocateSavePointMeshDataSub0_callback(&param_1->m0);
     delete param_1;
 }
 
@@ -86,12 +86,12 @@ void deleteDamageDisplayTask(sTaskHeader* param_1) {
     sDamageDisplayTask* psVar3;
 
     psVar1 = damageTaskDisplayListHead;
-    psVar3 = (sDamageDisplayTask*)0x0;
-    if (damageTaskDisplayListHead != (sDamageDisplayTask*)0x0) {
+    psVar3 = nullptr;
+    if (damageTaskDisplayListHead != nullptr) {
         do {
             psVar2 = psVar1;
             if (psVar2 == pTask) {
-                if (psVar3 == (sDamageDisplayTask*)0x0) {
+                if (psVar3 == nullptr) {
                     damageTaskDisplayListHead = psVar2->m38_pNext;
                 }
                 else {
@@ -101,9 +101,9 @@ void deleteDamageDisplayTask(sTaskHeader* param_1) {
             }
             psVar1 = psVar2->m38_pNext;
             psVar3 = psVar2;
-        } while (psVar2->m38_pNext != (sDamageDisplayTask*)0x0);
+        } while (psVar2->m38_pNext != nullptr);
     }
-    customRenderableEntityGenericDelete(&pTask->m0);
+    customRenderableEntityGenericDelete(pTask);
 }
 
 static const std::array<u32, 9> damageDecimals = {
@@ -204,8 +204,8 @@ void drawDamageDisplayCharacter(sDamageDisplaySub0* param_1, sColorAndCode color
 
         pPoly->v1 = pPoly->v0 = param_1->m5_V;
         pPoly->v3 = pPoly->v2 = param_1->m5_V + param_1->m7_height;
-        pPoly->x2 = pPoly->x0 = param_1->m4_U;
-        pPoly->x3 = pPoly->x1 = param_1->m4_U + param_1->m6_width;
+        pPoly->u2 = pPoly->u0 = param_1->m4_U;
+        pPoly->u3 = pPoly->u1 = param_1->m4_U + param_1->m6_width;
 
         AddPrim(&(*characterRenderingOT)[0], pPoly);
     }
