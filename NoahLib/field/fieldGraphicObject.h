@@ -60,6 +60,7 @@ struct sFieldEntitySub4_B4_base {
     SFP_VEC4 m6_scale;
     MATRIX mC_matrix;
 
+    virtual ~sFieldEntitySub4_B4_base() = default;
     virtual struct sFieldEntitySub4_B4* getAsSprite() = 0;
     virtual struct sFieldEntitySub4_B4_alt* getAsObject() = 0;
 };
@@ -134,7 +135,7 @@ struct sSpriteActorCore {
 
     struct sSpriteActorAnimationBundle* m44_currentAnimationBundle;
     struct sSpriteActorAnimationBundle* m48_defaultAnimationbundle;
-    struct sSpriteActorAnimationBundle* m4C_specialAnimation;
+    struct sSpriteActorAnimationBundle* m4C_specialAnimation = nullptr;
     std::optional<std::vector<u8>::iterator> m50;
     sPS1Pointer m54;
     sPS1Pointer m58_startOfCurrentAnimation;
@@ -296,19 +297,19 @@ extern u8 spriteBytecode2ExtendedE0_Var0;
 template <typename T>
 T* createCustomRenderableEntity(size_t param_1, sTaskHeader* param_2, void(*updateCallback)(sTaskHeader*), void(*drawCallback)(sTaskHeader*), void(*deleteCallback)(sTaskHeader*)) {
     T* pNewEntity = new T;
-    allocateSavePointMeshDataSub0(param_2, &pNewEntity->m0);
-    registerSpriteCallback2(&pNewEntity->m0, &pNewEntity->m1C);
-    setTaskUpdateFunction(&pNewEntity->m0, updateCallback);
+    allocateSavePointMeshDataSub0(param_2, pNewEntity);
+    registerSpriteCallback2(pNewEntity, &pNewEntity->m1C);
+    setTaskUpdateFunction(pNewEntity, updateCallback);
     setTaskDrawFunction(&pNewEntity->m1C, drawCallback);
     if (deleteCallback == nullptr) {
         assert(0);
     }
     else {
-        setTaskDeleteFunction(&pNewEntity->m0, deleteCallback);
+        setTaskDeleteFunction(pNewEntity, deleteCallback);
     }
 
     // TODO: Gross!
-    pNewEntity->m0.m4 = (sSpriteActorCore*)pNewEntity;
+    pNewEntity->m4 = (sSpriteActorCore*)pNewEntity;
     pNewEntity->m1C.m4 = (sSpriteActorCore*)pNewEntity;
 
     return pNewEntity;

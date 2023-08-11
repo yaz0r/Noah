@@ -2,7 +2,7 @@
 
 struct sTaskHeader
 {
-    virtual ~sTaskHeader() {}
+    virtual ~sTaskHeader() = default;
 
     void* m0_owner;
     void* m4;
@@ -14,8 +14,7 @@ struct sTaskHeader
 };
 
 
-struct sTaskHeaderPair {
-    sTaskHeader m0;
+struct sTaskHeaderPair : public sTaskHeader {
     sTaskHeader m1C;
 };
 

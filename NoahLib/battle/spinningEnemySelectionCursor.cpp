@@ -88,13 +88,13 @@ void deleteSpinningEnemySelectionCursor(sTaskHeader* param_1) {
 }
 
 void createSpinningEnemySelectionCursor(sBattleSpriteActor* param_1) {
-    sBattleSpinningEnemySelectionCursor* pNewTask = createCustomRenderableEntity<sBattleSpinningEnemySelectionCursor>(0x68, &param_1->m0, updateSpinningEnemySelectionCursor, drawSpinningEnemySelectionCursor, deleteSpinningEnemySelectionCursor);
-    pNewTask->m38 = (sSpriteActorCore*)param_1->m0.m4;
-    pNewTask->m54 = ((sSpriteActorCore*)param_1->m0.m4)->m36;
+    sBattleSpinningEnemySelectionCursor* pNewTask = createCustomRenderableEntity<sBattleSpinningEnemySelectionCursor>(0x68, param_1, updateSpinningEnemySelectionCursor, drawSpinningEnemySelectionCursor, deleteSpinningEnemySelectionCursor);
+    pNewTask->m38 = (sSpriteActorCore*)param_1->m4;
+    pNewTask->m54 = ((sSpriteActorCore*)param_1->m4)->m36;
     if (spriteBytecode2ExtendedE0_Var0) {
         allocateSavePointMeshDataSub0_var0--;
     }
-    pNewTask->m0.m14 &= 0x7fffffff;
+    pNewTask->m14 &= 0x7fffffff;
     setupSVector(&pNewTask->m4C_rotation, 0, 0, 0);
     int singleBufferSize = getCustomPolySubBufferSize(getCustomPolySubBuffer(&battleBlinkingPolyBuffer, 0));
     std::vector<sAnyPoly> dest;
@@ -105,8 +105,8 @@ void createSpinningEnemySelectionCursor(sBattleSpriteActor* param_1) {
 
     pNewTask->m64_customPolySubBuffer = getCustomPolySubBuffer(&battleBlinkingPolyBuffer, 0);
 
-    sSpriteActorCore* pSpriteActor = ((sSpriteActorCore*)param_1->m0.m4);
+    sSpriteActorCore* pSpriteActor = ((sSpriteActorCore*)param_1->m4);
     pSpriteActor->m28_colorAndCode.m3_code &= 0xFE;
     updateAllSubsprites(pSpriteActor);
-    updateSpinningEnemySelectionCursor(&pNewTask->m0);
+    updateSpinningEnemySelectionCursor(pNewTask);
 }

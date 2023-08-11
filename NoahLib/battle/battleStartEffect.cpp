@@ -163,7 +163,7 @@ sBattleStartEffect* initBattleStartEffect(sBattleStartEffect* param_1) {
 
 sBattleStartEffect* createBattleStartEffect() {
     sBattleStartEffect* psVar1 = new sBattleStartEffect;
-    psVar1->m0.m4 = psVar1;
+    psVar1->m4 = psVar1;
     psVar1->m1C.m4 = psVar1;
     return initBattleStartEffect(psVar1);
 }
@@ -180,7 +180,7 @@ s32  RotTransPers3(const SVECTOR* v0, const SVECTOR* v1, const SVECTOR* v2, sVec
 }
 
 void renderBattleStartEffect(sBattleStartEffect* param_1) {
-    sBattleStartEffect* pEffect = (sBattleStartEffect*)param_1->m0.m4;
+    sBattleStartEffect* pEffect = (sBattleStartEffect*)param_1->m4;
 
     s32 oldScreenOffsetX;
     s32 oldScreenOffsetY;
@@ -230,7 +230,7 @@ void renderBattleStartEffect(sBattleStartEffect* param_1) {
 }
 
 void updateBattleStartEffect(sBattleStartEffect* param_1) {
-    sBattleStartEffect* pEffect = (sBattleStartEffect*)param_1->m0.m4;
+    sBattleStartEffect* pEffect = (sBattleStartEffect*)param_1->m4;
     pEffect->m38_frameCounter++;
 
     for (int i = 0; i < 2; i++) {

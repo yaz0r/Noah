@@ -1023,7 +1023,9 @@ void battleRenderPolyArray(std::array<POLY_FT4, 2>* p, int param2, int param3) {
 
 void battleRenderPlayerPortraits() {
     if (battleVar1->m97) {
-        assert(0);
+        for (int i = 0; i < battleVar1->m97; i++) {
+            AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->m908[i][battleVar1->m98]);
+        }
     }
 
     for (int i = 0; i < 4; i++) {
@@ -1903,12 +1905,12 @@ void drawCircleMenuChi(int param_1) {
     switch (battleInputButton) {
     case 0:
         if (battleVar2->m0[param_1].m1C_isCommandEnabled[9] == 0) {
-            battleVar2->m2DD_currentActiveBattleMenu = 1;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_AttackHighlighted;
             return;
         }
         if ((battleVar2->m2F6 != 0) && (newBattleInputButton2 == '\0')) {
             if (battleVar2->m0[param_1].m1C_isCommandEnabled[5] == 0) {
-                battleVar2->m2DD_currentActiveBattleMenu = 7;
+                battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_ComboHighlighted;
             }
             else {
                 battleSoundEffect2(0x4f);
@@ -1921,17 +1923,17 @@ void drawCircleMenuChi(int param_1) {
         return;
     case 1:
         if (battleVar2->m0[param_1].m1C_isCommandEnabled[0xb] == 0) {
-            battleVar2->m2DD_currentActiveBattleMenu = 2;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_ItemHighlighted;
             return;
         }
         battleSoundEffect2(0x4f);
         return;
     case 2:
-        battleVar2->m2DD_currentActiveBattleMenu = 3;
+        battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_DefendHighlighted;
         return;
     case 3:
         if (battleVar2->m0[param_1].m1C_isCommandEnabled[7] == 0) {
-            battleVar2->m2DD_currentActiveBattleMenu = 10;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_CallGear;
             return;
         }
         battleSoundEffect2(0x4f);
@@ -1969,12 +1971,12 @@ void drawCircleMenuDefend(int param_1) {
     switch (battleInputButton) {
     case 0:
         if (battleVar2->m0[param_1].m1C_isCommandEnabled[9] == 0) {
-            battleVar2->m2DD_currentActiveBattleMenu = 1;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_AttackHighlighted;
             return;
         }
         if ((battleVar2->m2F6 != 0) && (newBattleInputButton2 == '\0')) {
             if (battleVar2->m0[param_1].m1C_isCommandEnabled[5] == 0) {
-                battleVar2->m2DD_currentActiveBattleMenu = 7;
+                battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_ComboHighlighted;
                 battleVar2->m2F6 = 0;
                 return;
             }
@@ -1987,26 +1989,26 @@ void drawCircleMenuDefend(int param_1) {
         return;
     case 1:
         if (battleVar2->m0[param_1].m1C_isCommandEnabled[0xb] == 0) {
-            battleVar2->m2DD_currentActiveBattleMenu = 2;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_ItemHighlighted;
             return;
         }
         battleSoundEffect2(0x4f);
         return;
     case 2:
         if (battleVar2->m0[param_1].m1C_isCommandEnabled[8] == 0) {
-            battleVar2->m2DD_currentActiveBattleMenu = 9;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_EscapeHighlighted;
             return;
         }
         battleSoundEffect2(0x4f);
         return;
     case 3:
         if (battleVar2->m0[param_1].m1C_isCommandEnabled[10] == 0) {
-            battleVar2->m2DD_currentActiveBattleMenu = 4;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_ChiHighlighted;
             return;
         }
         if ((battleVar2->m2F6 != 0) && (newBattleInputButton2 == '\x03')) {
             if (battleVar2->m0[param_1].m1C_isCommandEnabled[7] == 0) {
-                battleVar2->m2DD_currentActiveBattleMenu = 10;
+                battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_CallGear;
                 battleVar2->m2F6 = 0;
                 return;
             }
@@ -2302,7 +2304,7 @@ struct sBattleAnimationSpecial : public sSpriteActorAnimationBundle {
     std::vector<u8> m_rawData;
 };
 
-sBattleAnimationSpecial battleAnimationLoadingDest;
+std::optional<sBattleAnimationSpecial> battleAnimationLoadingDest;
 
 s8 fxFragmentLoaded = 0;
 s16 attackInProgress = 0;
@@ -2353,7 +2355,7 @@ std::optional<std::vector<u8>::iterator> loadEffectFragmentsAndAudio(sBattleAnim
 std::optional<std::vector<u8>::iterator> loadFragmentIsNotLoadedYet() {
     std::optional<std::vector<u8>::iterator> fragmentPtr;
     if (fxFragmentLoaded == 0) {
-        fragmentPtr = loadEffectFragmentsAndAudio(battleAnimationLoadingDest);
+        fragmentPtr = loadEffectFragmentsAndAudio(battleAnimationLoadingDest.value());
         fxFragmentLoaded = 1;
     }
     return fragmentPtr;
@@ -2421,10 +2423,10 @@ void processBattleAnimation(sSpriteActorCore* param_1) {
             [(param_1->m74_pTargetEntitySprite->mAC & 3) << 2 | param_1->m74_pTargetEntitySprite->mA8.mx1E];
         if (!isVramPreBacked((param_1->m24_vramData)->m0_spriteData)) {
             if (battleCurrentDamages[allocateJumpAnimationStructVar0].m47_battleAnimationToPlay < 0x10) {
-                if ((fxFragmentLoaded == '\0') && (battleAnimationLoadingDest.m_rawData.size() != 0)) {
+                if ((fxFragmentLoaded == '\0') && (battleAnimationLoadingDest.has_value() != 0)) {
                     battleIdleDuringLoading();
                     (param_1)->m50 = loadFragmentIsNotLoadedYet();
-                    setupSpecialAnimation(param_1, &battleAnimationLoadingDest);
+                    setupSpecialAnimation(param_1, &battleAnimationLoadingDest.value());
                 }
                 int expectActorId = (((param_1)->mAC & 3) << 2 | (uint)(param_1)->mA8.mx1E);
                 if (jumpAnimationControlStruct->m20_actor == expectActorId) {
@@ -2495,12 +2497,71 @@ void setBattleCameraParamX(short param_1)
     return;
 }
 
+void freeBattleVar1_AE() {
+    if (battleVar1->mAE) {
+        assert(0);
+    }
+}
+
+void freeBattleVar1_96() {
+    if (battleVar1->m96) {
+        assert(0);
+    }
+}
+
+void* pBattleRenderStruct2 = nullptr;
+
+void freeBattleRenderStruct2(u32 param_1) {
+    battleVar1->mAD = 0;
+    battleVar1->mC7 = 0;
+    battleVar1->mA8 = 0;
+    if (apConfigArray[param_1 & 0xff].m1 == 2) {
+        apConfigArray[param_1 & 0xff].m1 = 1;
+    }
+    delete pBattleRenderStruct2;
+}
+
+void freeBillyBattleStructs(u32 param_1) {
+    if (battleCharacters[param_1 & 0xff] == 4) {
+        assert(0);
+    }
+}
+
+u8 battleVar800c204c = 0;
+
+void freePlayerTurnStructs(void) {
+    battleVar2->m2DB = 1;
+    if ((battleVar2->m2D3_currentEntityTurn < 3) && (battleVar800c204c == '\0')) {
+        freeBattleVar1_AE();
+        freeBattleVar1_96();
+        freeBattleRenderStruct2(battleVar2->m2D3_currentEntityTurn);
+        freeBillyBattleStructs(battleVar2->m2D3_currentEntityTurn);
+    }
+}
+
+void waitBattleAnimationSpriteLoading() {
+    battleIdleDuringLoading();
+    updateBattleAnimationDataLoading();
+    while (allocateSavePointMeshDataSub0_var0 !=isDamageDisplayPolysTask2Running()) {
+        battleRender();
+    }
+    MissingCode();
+    if (battleAnimationLoadingDest.has_value()) {
+        battleAnimationLoadingDest.reset();
+    }
+}
+
+void clearBattleAnimationData() {
+    MissingCode();
+    waitBattleAnimationSpriteLoading();
+}
+
 void deleteJumpAnimationControlStructEndOfAttack() {
     if (jumpAnimationControlStruct != nullptr) {
         startJumpAnimationVar1 = 0;
         startJumpAnimationVar2 = 0;
         startJumpAnimationVar3 = 0;
-
+        freePlayerTurnStructs();
         DrawSync(0);
         auto uVar5 = jumpAnimationControlStruct->m40_facing;
         OP_INIT_ENTITY_SCRIPT_sub0Sub8(jumpAnimationControlStruct->m4, 0);
@@ -2510,6 +2571,12 @@ void deleteJumpAnimationControlStructEndOfAttack() {
             battleRender();
         }
 
+        MissingCode();
+        clearBattleAnimationData();
+        //startJumpAnimationSub0(1);
+        MissingCode();
+        freeDamageDisplayPolysTask2();
+        updateBattleAnimationDataLoading();
         MissingCode();
 
         setBattleCameraParamX(0xc0);
@@ -2661,9 +2728,10 @@ void setupBattleAnimationSpriteCore(sSpriteActorCore* param_1) {
 void startReadingBattleJumpAnimation(sSpriteActorCore* param_1) {
     MissingCode();
     setCurrentDirectory(0x2c, 1);
-    battleAnimationLoadingDest.m_rawData.resize(getFileSizeAligned(param_1->m7C->m0));
-    readFile(param_1->m7C->m0, battleAnimationLoadingDest.m_rawData, 0, 0x80);
-    battleAnimationLoadingDest.init(battleAnimationLoadingDest.m_rawData);
+    battleAnimationLoadingDest.emplace();
+    battleAnimationLoadingDest->m_rawData.resize(getFileSizeAligned(param_1->m7C->m0));
+    readFile(param_1->m7C->m0, battleAnimationLoadingDest->m_rawData, 0, 0x80);
+    battleAnimationLoadingDest->init(battleAnimationLoadingDest->m_rawData);
     startReadingBattleJumpAnimationVar0 = (param_1->mAC & 3) << 2 | param_1->mA8.mx1E;
 }
 void jumpUpdatePosition(sSpriteActorCore* param_1);
@@ -2762,7 +2830,7 @@ void startJumpAnimation(int isBilly, uint actor, uint jumpTarget, uint facing) {
         int isPrebacked = isVramPreBacked(jumpAnimationControlStruct->m4->m24_vramData->m0_spriteData);
         if (isPrebacked == 0) {
             startJumpAnimationVar3 = 0;
-            if ((battleAnimationLoadingDest.m_rawData.size() == 0) ||
+            if ((battleAnimationLoadingDest.has_value() == 0) ||
                 (((jumpAnimationControlStruct->m4->mAC & 3) << 2 | jumpAnimationControlStruct->m4->mA8.mx1E ) != startReadingBattleJumpAnimationVar0)) {
                 startReadingBattleJumpAnimation(jumpAnimationControlStruct->m4);
             }
@@ -2900,27 +2968,27 @@ void drawCircleMenuAttackActive(int param_1) {
     switch (battleInputButton) {
     case 0: // right
         if (battleVar2->m0[param_1 & 0xff].m1C_isCommandEnabled[5] == 0) {
-            battleVar2->m2DD_currentActiveBattleMenu = 7;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_ComboHighlighted;
             return;
         }
         break;
     case 1: // down
         if (battleVar2->m0[param_1 & 0xff].m1C_isCommandEnabled[0xb] == 0) {
-            battleVar2->m2DD_currentActiveBattleMenu = 2;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_ItemHighlighted;
             return;
         }
         break;
     case 2: // left
-        battleVar2->m2DD_currentActiveBattleMenu = 3;
+        battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_DefendHighlighted;
         return;
     case 3: // up
         if (battleVar2->m0[param_1 & 0xff].m1C_isCommandEnabled[10] == 0) {
-            battleVar2->m2DD_currentActiveBattleMenu = 4;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_ChiHighlighted;
             return;
         }
         if ((battleVar2->m2F6 != 0) && (newBattleInputButton2 == '\x03')) {
             if (battleVar2->m0[param_1 & 0xff].m1C_isCommandEnabled[7] == 0) {
-                battleVar2->m2DD_currentActiveBattleMenu = 10;
+                battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_CallGear;
             }
             else {
                 battleSoundEffect2(0x4f);
@@ -2940,7 +3008,7 @@ void drawCircleMenuAttackActive(int param_1) {
             startCharacterJumpToEnemy(param_1);
             selectDefaultTarget(param_1);
             initBattleG3Array();
-            battleVar2->m2DD_currentActiveBattleMenu = 5;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_AttackSelectEnemy;
             return;
         }
         break;
@@ -2959,27 +3027,27 @@ void drawCircleMenuItemActive(int param_1) {
     switch (battleInputButton) {
     case 0:
         if (battleVar2->m0[param_1 & 0xff].m1C_isCommandEnabled[9] == 0) {
-            battleVar2->m2DD_currentActiveBattleMenu = 1;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_AttackHighlighted;
             return;
         }
         break;
     case 1:
         if (battleVar2->m0[param_1].m1C_isCommandEnabled[0xb] == 0) {
-            battleVar2->m2DD_currentActiveBattleMenu = 8;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_ItemAltHighlighted;
             return;
         }
         break;
     case 2:
-        battleVar2->m2DD_currentActiveBattleMenu = 3;
+        battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_DefendHighlighted;
         return;
     case 3:
         if (battleVar2->m0[param_1].m1C_isCommandEnabled[10] == 0) {
-            battleVar2->m2DD_currentActiveBattleMenu = 4;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_ChiHighlighted;
             return;
         }
         if ((battleVar2->m2F6 != 0) && (newBattleInputButton2 == '\x03')) {
             if (battleVar2->m0[param_1].m1C_isCommandEnabled[7] == 0) {
-                battleVar2->m2DD_currentActiveBattleMenu = 10;
+                battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_CallGear;
                 battleVar2->m2F6 = 0;
                 return;
             }
@@ -3003,12 +3071,12 @@ void drawCircleMenuItemSecondaryActive(int param_1) {
     switch (battleInputButton) {
     case 0:
         if (battleVar2->m0[param_1].m1C_isCommandEnabled[5] == 0) {
-            battleVar2->m2DD_currentActiveBattleMenu = 7;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_ComboHighlighted;
             return;
         }
         if ((battleVar2->m2F6 != 0) && (newBattleInputButton2 == '\0')) {
             if (battleVar2->m0[param_1].m1C_isCommandEnabled[9] == 0) {
-                battleVar2->m2DD_currentActiveBattleMenu = 1;
+                battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_AttackHighlighted;
                 battleVar2->m2F6 = 0;
                 return;
             }
@@ -3021,17 +3089,17 @@ void drawCircleMenuItemSecondaryActive(int param_1) {
         break;
     case 1:
         if (battleVar2->m0[param_1].m1C_isCommandEnabled[0xb] == 0) {
-            battleVar2->m2DD_currentActiveBattleMenu = 2;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_ItemHighlighted;
             return;
         }
         break;
     case 2:
         if (battleVar2->m0[param_1].m1C_isCommandEnabled[8] == 0) {
-            battleVar2->m2DD_currentActiveBattleMenu = 9;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_EscapeHighlighted;
             return;
         }
         if ((battleVar2->m2F6 != 0) && (newBattleInputButton2 == '\x02')) {
-            battleVar2->m2DD_currentActiveBattleMenu = 3;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_DefendHighlighted;
             battleVar2->m2F6 = 0;
             return;
         }
@@ -3040,12 +3108,12 @@ void drawCircleMenuItemSecondaryActive(int param_1) {
         break;
     case 3:
         if (battleVar2->m0[param_1].m1C_isCommandEnabled[7] == 0) {
-            battleVar2->m2DD_currentActiveBattleMenu = 10;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_CallGear;
             return;
         }
         if ((battleVar2->m2F6 != 0) && (newBattleInputButton2 == '\x03')) {
             if (battleVar2->m0[param_1].m1C_isCommandEnabled[10] == 0) {
-                battleVar2->m2DD_currentActiveBattleMenu = 4;
+                battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_ChiHighlighted;
                 battleVar2->m2F6 = 0;
                 return;
             }
@@ -3063,27 +3131,27 @@ void drawCircleMenuItemSecondaryActive(int param_1) {
     }
 }
 
-void drawBattleMenu7(int param_1) {
+void drawCircleMenuCombo(int param_1) {
     switch (battleInputButton) {
     case 0:
         if (battleVar2->m0[param_1 & 0xff].m1C_isCommandEnabled[9] == 0) {
-            battleVar2->m2DD_currentActiveBattleMenu = 1;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_AttackHighlighted;
             return;
         }
         break;
     case 1:
         if (battleVar2->m0[param_1 & 0xff].m1C_isCommandEnabled[0xb] == 0) {
-            battleVar2->m2DD_currentActiveBattleMenu = 8;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_ItemAltHighlighted;
             return;
         }
         break;
     case 2:
         if (battleVar2->m0[param_1 & 0xff].m1C_isCommandEnabled[8] == 0) {
-            battleVar2->m2DD_currentActiveBattleMenu = 9;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_EscapeHighlighted;
             return;
         }
         if ((battleVar2->m2F6 != 0) && (newBattleInputButton2 == '\x02')) {
-            battleVar2->m2DD_currentActiveBattleMenu = 3;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_DefendHighlighted;
             battleVar2->m2F6 = 0;
             return;
         }
@@ -3092,7 +3160,7 @@ void drawBattleMenu7(int param_1) {
         return;
     case 3:
         if (battleVar2->m0[param_1 & 0xff].m1C_isCommandEnabled[7] == 0) {
-            battleVar2->m2DD_currentActiveBattleMenu = 10;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_CallGear;
             return;
         }
         if ((battleVar2->m2F6 != 0) && (newBattleInputButton2 == '\x03')) {
@@ -3101,7 +3169,7 @@ void drawBattleMenu7(int param_1) {
                 battleVar2->m2F6 = 0;
                 return;
             }
-            battleVar2->m2DD_currentActiveBattleMenu = 4;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_ChiHighlighted;
             battleVar2->m2F6 = 0;
             return;
         }
@@ -3122,7 +3190,7 @@ void drawBattleMenuEscape(int param_1) {
     switch (battleInputButton) {
     case 0: // right
         if (battleVar2->m0[param_1 & 0xff].m1C_isCommandEnabled[5] == 0) {
-            battleVar2->m2DD_currentActiveBattleMenu = 7;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_ComboHighlighted;
             return;
         }
         if ((battleVar2->m2F6 == 0) || (newBattleInputButton2 != '\0')) {
@@ -3135,7 +3203,7 @@ void drawBattleMenuEscape(int param_1) {
             battleVar2->m2F6 = 0;
             return;
         }
-        battleVar2->m2DD_currentActiveBattleMenu = 1;
+        battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_AttackHighlighted;
         battleVar2->m2F6 = 0;
         break;
     case 1:
@@ -3143,14 +3211,14 @@ void drawBattleMenuEscape(int param_1) {
             battleSoundEffect2(0x4f);
             return;
         }
-        battleVar2->m2DD_currentActiveBattleMenu = 8;
+        battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_ItemAltHighlighted;
         return;
     case 2: // left
-        battleVar2->m2DD_currentActiveBattleMenu = 3;
+        battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_DefendHighlighted;
         return;
     case 3:
         if (battleVar2->m0[param_1 & 0xff].m1C_isCommandEnabled[7] == 0) {
-            battleVar2->m2DD_currentActiveBattleMenu = 10;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_CallGear;
             return;
         }
         if ((battleVar2->m2F6 == 0) || (newBattleInputButton2 != '\x03')) {
@@ -3159,7 +3227,7 @@ void drawBattleMenuEscape(int param_1) {
             return;
         }
         if (battleVar2->m0[param_1 & 0xff].m1C_isCommandEnabled[10] == 0) {
-            battleVar2->m2DD_currentActiveBattleMenu = 4;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_ChiHighlighted;
         }
         else {
             battleSoundEffect2(0x4f);
@@ -3310,8 +3378,8 @@ void makeAllBattleCommandsDisabled() {
     MissingCode();
 }
 
-uint updateBattleMenuSpriteForMenu(uint param_1, uint menuId, char param_3) {
-    if (param_3 == 0) {
+uint updateBattleMenuSpriteForMenu(uint param_1, uint menuId, char isMenuDisabled) {
+    if (isMenuDisabled == 0) {
         std::array<u8, 2> menuConfig1;
         std::array<u8, 2> menuConfig2;
         for (int i = 0; i < 2; i++) {
@@ -3423,7 +3491,7 @@ void updateCharacterBlinkingTask(u32 param_1) {
     for (int i = 0; i < 11; i++) {
         if (!(param_1 & 1)) {
             if (battleSpriteActors[i]) {
-                sTaskHeader* pTask = findMatchingGraphicEntity(&battleSpriteActors[i]->m0, updateSpinningEnemySelectionCursor);
+                sTaskHeader* pTask = findMatchingGraphicEntity(battleSpriteActors[i], updateSpinningEnemySelectionCursor);
                 if (pTask) {
                     pTask->mC_deleteCallback(pTask);
                 }
@@ -3431,7 +3499,7 @@ void updateCharacterBlinkingTask(u32 param_1) {
         }
         else {
             if (battleSpriteActors[i]) {
-                sTaskHeader* pTask = findMatchingGraphicEntity(&battleSpriteActors[i]->m0, updateSpinningEnemySelectionCursor);
+                sTaskHeader* pTask = findMatchingGraphicEntity(battleSpriteActors[i], updateSpinningEnemySelectionCursor);
                 if (pTask == nullptr) {
                     createSpinningEnemySelectionCursor(battleSpriteActors[i]);
                 }
@@ -3529,12 +3597,12 @@ void drawCircleMenuCallGear(byte param_1) {
     switch (battleInputButton) {
     case 0:
         if (battleVar2->m0[param_1].m1C_isCommandEnabled[5] == 0) {
-            battleVar2->m2DD_currentActiveBattleMenu = 7;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_ComboHighlighted;
             return;
         }
         if ((battleVar2->m2F6 != 0) && (newBattleInputButton2 == '\0')) {
             if (battleVar2->m0[param_1].m1C_isCommandEnabled[9] == 0) {
-                battleVar2->m2DD_currentActiveBattleMenu = 1;
+                battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_AttackHighlighted;
             }
             else {
                 battleSoundEffect2(0x4f);
@@ -3547,18 +3615,18 @@ void drawCircleMenuCallGear(byte param_1) {
         return;
     case 1:
         if (battleVar2->m0[param_1].m1C_isCommandEnabled[0xb] == 0) {
-            battleVar2->m2DD_currentActiveBattleMenu = 8;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_ItemAltHighlighted;
             return;
         }
         battleSoundEffect2(0x4f);
         return;
     case 2:
         if (battleVar2->m0[param_1].m1C_isCommandEnabled[8] == 0) {
-            battleVar2->m2DD_currentActiveBattleMenu = 9;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_EscapeHighlighted;
             return;
         }
         if ((battleVar2->m2F6 != 0) && (newBattleInputButton2 == '\x02')) {
-            battleVar2->m2DD_currentActiveBattleMenu = 3;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_DefendHighlighted;
             battleVar2->m2F6 = 0;
             return;
         }
@@ -3567,7 +3635,7 @@ void drawCircleMenuCallGear(byte param_1) {
         return;
     case 3:
         if (battleVar2->m0[param_1].m1C_isCommandEnabled[10] == 0) {
-            battleVar2->m2DD_currentActiveBattleMenu = 4;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_ChiHighlighted;
             return;
         }
         battleSoundEffect2(0x4f);
@@ -4601,19 +4669,6 @@ int performAttack(byte param_1, uint numAPUsed) {
     performAttackSub6(oldVar48);
     return returnValue;
 }
-
-void freeBattleVar1_AE() {
-    if (battleVar1->mAE) {
-        assert(0);
-    }
-}
-
-void freeBattleVar1_96() {
-    if (battleVar1->m96) {
-        assert(0);
-    }
-}
-
 void removeBattleCursorDuringAttack(u8 param_1) {
     if (battleVar2->m2E9 == 0) {
         battleVar2->m2E9 = 1;
@@ -4652,7 +4707,7 @@ void handleMenuSelectEnemy(u8 param_1) {
             startCharacterJumpToEnemyVar0 = 1;
             battleVar1->m7B = 0;
             battleVar1->mAF = 0;
-            battleVar2->m2DD_currentActiveBattleMenu = 1;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_AttackHighlighted;
             removeTargetSelectionCursors();
             removeBillyWindow(param_1, 1);
         }
@@ -4745,13 +4800,13 @@ LAB_Battle__80081e90:
         battleSoundEffect(0x4d);
         removeBattleCursorDuringAttack(param_1);
         if (battleVar1->mCB == '\0') {
-            battleVar2->m2DD_currentActiveBattleMenu = 5;
-            battleVar2->m2E2_previousActiveBattleMenu = 5;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_AttackSelectEnemy;
+            battleVar2->m2E2_previousActiveBattleMenu = eActiveBattleMenu::Menu_AttackSelectEnemy;
         }
         else {
-            battleVar2->m2DD_currentActiveBattleMenu = 100;
-            battleVar2->m2E2_previousActiveBattleMenu = 0xff;
-            battleVar2->m2E0 = 1;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_AttackSelectEnemy_bis;
+            battleVar2->m2E2_previousActiveBattleMenu = eActiveBattleMenu::Undefined;
+            battleVar2->m2E0_isBattleMenuDisabled = 1;
         }
         battleVar2->m2D4_remainingAP = battleVar2->m2D4_remainingAP - battleVar2->m2DF_currentAttackNumOfApUsed;
         updateAPCounterDisplay();
@@ -4777,13 +4832,27 @@ const std::array<u16, 16> party1C_InitialValues = { {
         0x8, 0x4, 0x2, 0x1
 } };
 
+void setAPMarksPositions(uint max_ap, byte remaining_ap) {
+    max_ap = max_ap & 0xff;
+    if (max_ap == remaining_ap) {
+        remaining_ap = remaining_ap - 1;
+    }
+
+    for (int i = 0; i < max_ap - 1; i++) {
+        MissingCode();
+    }
+
+    battleVar1->m97 = remaining_ap;
+    battleVar1->m98 = battleOddOrEven;
+}
+
 void setupTurnRenderLoop(int param_1) {
     battleVar2->m2EA = 0;
     battleVar2->m2E9 = 0;
     battleVar2->m2DE = 0;
-    battleVar2->m2E0 = 0;
+    battleVar2->m2E0_isBattleMenuDisabled = 0;
     battleVar2->m2E1_waitBeforeNextAttackInput = 0;
-    battleVar2->m2E2_previousActiveBattleMenu = 0xff;
+    battleVar2->m2E2_previousActiveBattleMenu = eActiveBattleMenu::Undefined;
     battleVar2->m2E3 = 0;
     battleVar2->m2E4 = 0;
     battleVar2->m2DC = 0;
@@ -4809,15 +4878,15 @@ void setupTurnRenderLoop(int param_1) {
 
     if (apConfigArray[param_1].m1 == 0) {
         if (battleVar2->m0[param_1].m1C_isCommandEnabled[9] == 0) {
-            battleVar2->m2DD_currentActiveBattleMenu = 1;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_AttackHighlighted;
             setupTurnRenderLoop_menuVar = 0;
         }
         else {
-            battleVar2->m2DD_currentActiveBattleMenu = 4;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_ChiHighlighted;
             setupTurnRenderLoop_menuVar = 3;
         }
         if ((battleEntities[param_1].m0_base.m7C & 2) != 0) {
-            battleVar2->m2DD_currentActiveBattleMenu = 2;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_ItemHighlighted;
             setupTurnRenderLoop_menuVar = 1;
         }
         //initBattleRenderStruct2();
@@ -4825,11 +4894,11 @@ void setupTurnRenderLoop(int param_1) {
     }
     else {
         if (battleVar2->m0[param_1].m1C_isCommandEnabled[9] == 0) {
-            battleVar2->m2DD_currentActiveBattleMenu = 0x10;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_16;
             setupTurnRenderLoop_menuVar = 0;
         }
         else {
-            battleVar2->m2DD_currentActiveBattleMenu = 0x13;
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_19;
             setupTurnRenderLoop_menuVar = 3;
         }
         MissingCode();
@@ -4840,49 +4909,50 @@ void setupTurnRenderLoop(int param_1) {
     if (((battleVar2->m2DE == '\0') && (battleRunningVar1 == '\0')) && (battleVar2->m2DB == '\0')) {
         while (1) {
             if (apConfigArray[param_1].m1 == 0) {
-                //setAPMarksPositions(battleVar2->m2D5_maxAP, battleVar2->m2D4_remainingAP);
-                MissingCode();
+                setAPMarksPositions(battleVar2->m2D5_maxAP, battleVar2->m2D4_remainingAP);
             }
             if (battleVar2->m2E2_previousActiveBattleMenu != battleVar2->m2DD_currentActiveBattleMenu) {
                 battleVar2->m2F6 = 0;
                 battleVar2->m2E2_previousActiveBattleMenu = battleVar2->m2DD_currentActiveBattleMenu;
                 battleVar1->mCB = 0;
-                battleVar1->mA3 = updateBattleMenuSpriteForMenu(param_1, battleVar2->m2DD_currentActiveBattleMenu, battleVar2->m2E0);
+                battleVar1->mA3 = updateBattleMenuSpriteForMenu(param_1, battleVar2->m2DD_currentActiveBattleMenu, battleVar2->m2E0_isBattleMenuDisabled);
                 battleVar1->mCB = 1;
             }
             if ((battleInputButton == -1) || (battleRenderDebugAndMain(), battleVar2->m2DB != '\0'))
                 break;
-            MissingCode();
+            if (battleVar2->m2E0_isBattleMenuDisabled == '\0') {
+                startCharacterJumpToEnemyVar0 = 1;
+            }
             switch (battleVar2->m2DD_currentActiveBattleMenu) {
-            case 1:
+            case eActiveBattleMenu::Menu_AttackHighlighted:
                 drawCircleMenuAttackActive(param_1);
                 break;
-            case 2:
+            case eActiveBattleMenu::Menu_ItemHighlighted:
                 drawCircleMenuItemActive(param_1);
                 break;
-            case 3:
+            case eActiveBattleMenu::Menu_DefendHighlighted:
                 drawCircleMenuDefend(param_1);
                 break;
-            case 4:
+            case eActiveBattleMenu::Menu_ChiHighlighted:
                 drawCircleMenuChi(param_1);
                 break;
-            case 7:
-                drawBattleMenu7(param_1);
+            case eActiveBattleMenu::Menu_ComboHighlighted:
+                drawCircleMenuCombo(param_1);
                 break;
-            case 8:
+            case eActiveBattleMenu::Menu_ItemAltHighlighted:
                 drawCircleMenuItemSecondaryActive(param_1);
                 break;
-            case 9:
+            case eActiveBattleMenu::Menu_EscapeHighlighted:
                 drawBattleMenuEscape(param_1);
                 break;
-            case 5:
+            case eActiveBattleMenu::Menu_AttackSelectEnemy:
                 handleMenuSelectEnemy(param_1);
                 break;
-            case 10:
+            case eActiveBattleMenu::Menu_CallGear:
                 drawCircleMenuCallGear(param_1);
                 break;
-            case 100:
-                battleVar2->m2E2_previousActiveBattleMenu = 0xff;
+            case eActiveBattleMenu::Menu_AttackSelectEnemy_bis:
+                battleVar2->m2E2_previousActiveBattleMenu = eActiveBattleMenu::Undefined;
                 handleMenuSelectEnemy(param_1);
                 break;
             default:

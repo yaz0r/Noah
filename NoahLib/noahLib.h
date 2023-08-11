@@ -232,9 +232,9 @@ extern ImLogger Noah_Logger[eLogCategories::log_max];
 void UnimplementedImpl(const char* functionName);
 void HackImpl(const char* functionName);
 
-#define MissingCode() { static bool printed = false; if(!printed) {printed = true; UnimplementedImpl(__FUNCTION__);}}
-#define Hack(x) { static bool printed = false; if(!printed) {printed = true; HackImpl(__FUNCTION__);}}
+#define MissingCode(...) { static bool printed = false; if(!printed) {printed = true; UnimplementedImpl(__FUNCTION__);}}
+#define Hack(...) { static bool printed = false; if(!printed) {printed = true; HackImpl(__FUNCTION__);}}
 
-#define trap(x) assert(0)
+#define trap(...) assert(0)
 
 extern s32 gDepthDivider; // not sure yet where to put that

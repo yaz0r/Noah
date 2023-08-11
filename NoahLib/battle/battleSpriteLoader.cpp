@@ -32,7 +32,7 @@ T* battleLoaderAllocateMainBattleSprite(sSavePointMesh1* param_1, int param_2)
     T* psVar1;
 
     psVar1 = new T;
-    allocateSavePointMeshDataSub0(&param_1->m0, psVar1);
+    allocateSavePointMeshDataSub0(param_1, psVar1);
     psVar1->mC_deleteCallback = defaultBattleSpriteDeleteCallback;
     psVar1->m4 = nullptr;
     return psVar1;
@@ -207,11 +207,11 @@ void initBattleSpriteActorVram(sSpriteActor* param_1, sSpriteActorAnimationBundl
 sBattleSpriteActor* allocateBattleSpriteActor(sSpriteActorAnimationBundle* param_1, short clutX, short clutY, short vramX, short vramY, short param_6, int X, int Y, int Z, short animationId, short direction, int param_12_00, int param_13, u32 param_14) {
     sBattleSpriteActor* pSprite = createCustomRenderableEntity<sBattleSpriteActor>(0x19c, nullptr, battleSpriteUpdate, battleSpriteRender, battleSpriteDelete);
 
-    pSprite->m0.m4 = &pSprite->m38_spriteActor;
+    pSprite->m4 = &pSprite->m38_spriteActor;
     pSprite->m1C.m4 = &pSprite->m38_spriteActor;
     pSprite->m1C.m0_owner = nullptr;
     initBattleSpriteActorVram(&pSprite->m38_spriteActor, param_1, clutX, clutY, vramX, vramY, (int)param_6, param_14);
-    pSprite->m38_spriteActor.m0_spriteActorCore.m6C_pointerToOwnerStructure = &pSprite->m0;
+    pSprite->m38_spriteActor.m0_spriteActorCore.m6C_pointerToOwnerStructure = pSprite;
     pSprite->m38_spriteActor.m0_spriteActorCore.m0_position.vx = X << 0x10;
     pSprite->m38_spriteActor.m0_spriteActorCore.m0_position.vy = Y << 0x10;
     pSprite->m38_spriteActor.m0_spriteActorCore.m0_position.vz = Z << 0x10;
@@ -234,7 +234,7 @@ void createBattleSpriteActor(uint entityIndex, int visualBufferIndex, short anim
     battleVisualBuffers[visualBufferIndex].bundle.init(*battleVisualBuffers[visualBufferIndex].m0_spriteData);
     sBattleSpriteActor* pSprite = allocateBattleSpriteActor(&battleVisualBuffers[visualBufferIndex].bundle, 0, entityIndex + 0x1C0, battleVisualBuffers[visualBufferIndex].m4_vramX, battleVisualBuffers[visualBufferIndex].m6_vramY, 0x20, 0, 0, 0, animationId, 0, 0, 0, battleVisualBuffers[visualBufferIndex].m8);
 
-    sSpriteActorCore* pSpriteCore = ((sSpriteActorCore*)pSprite->m0.m4);
+    sSpriteActorCore* pSpriteCore = ((sSpriteActorCore*)pSprite->m4);
     pSpriteCore->m24_vramData->m4_vramLocation.vx = battleVisualBuffers[visualBufferIndex].m4_vramX;
     pSpriteCore->m24_vramData->m4_vramLocation.vy = battleVisualBuffers[visualBufferIndex].m6_vramY;
     MissingCode(); // very confusing code here

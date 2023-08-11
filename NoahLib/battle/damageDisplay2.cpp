@@ -11,12 +11,7 @@ This task is responsible for displaying the "Total damage" text on screen during
 extern OTTable* characterRenderingOT;
 extern MATRIX damageDisplayMatrix;
 
-struct sDamageDisplayPoly : public sTaskHeaderPair {
-    SVECTOR m38_transformedPos;
-    VECTOR m40_pos;
-
-    std::array<sDamageDisplaySub0,2> m50;
-} damageDisplayPolyTask2;
+sDamageDisplayPoly damageDisplayPolyTask2;
 sDamageDisplayPoly* pDamageDisplayPolysTask2 = nullptr;
 
 u8 damageDisplayPolysTask2Disabled = 0;
@@ -112,14 +107,14 @@ int createDamageDisplayPolysTask2Var0 = 0;
 void createDamageDisplayPolysTask2() {
     if ((pDamageDisplayPolysTask2 == nullptr) && !damageDisplayPolysTask2Disabled) {
         pDamageDisplayPolysTask2 = &damageDisplayPolyTask2;
-        allocateSavePointMeshDataSub0(nullptr, &damageDisplayPolyTask2.m0);
-        registerSpriteCallback2(&damageDisplayPolyTask2.m0, &damageDisplayPolyTask2.m1C);
-        setTaskUpdateFunction(&damageDisplayPolyTask2.m0, updateDamageDisplayPolysTask2);
+        allocateSavePointMeshDataSub0(nullptr, &damageDisplayPolyTask2);
+        registerSpriteCallback2(&damageDisplayPolyTask2, &damageDisplayPolyTask2.m1C);
+        setTaskUpdateFunction(&damageDisplayPolyTask2, updateDamageDisplayPolysTask2);
         setTaskDrawFunction(&damageDisplayPolyTask2.m1C, drawDamageDisplayPolysTask2);
-        setTaskDeleteFunction(&damageDisplayPolyTask2.m0, deleteDamageDisplayPolysTask2);
+        setTaskDeleteFunction(&damageDisplayPolyTask2, deleteDamageDisplayPolysTask2);
         damageDisplayPolyTask2.m50[0].m0_screenPosition[0] = 0x90;
         damageDisplayPolyTask2.m50[0].m0_screenPosition[1] = 0x2a;
-        damageDisplayPolyTask2.m0.m4 = (sSpriteActorCore*)&damageDisplayPolyTask2;
+        damageDisplayPolyTask2.m4 = (sSpriteActorCore*)&damageDisplayPolyTask2;
         damageDisplayPolyTask2.m1C.m4 = (sSpriteActorCore*)&damageDisplayPolyTask2;
         damageDisplayPolyTask2.m50[0].m14 = 0;
         createDamageDisplayPolysTask2Var0 = -1;
@@ -135,4 +130,10 @@ void initBattleUnkData0() {
 
 bool isDamageDisplayPolysTask2Running() {
     return pDamageDisplayPolysTask2 != 0;
+}
+
+void freeDamageDisplayPolysTask2() {
+    if (pDamageDisplayPolysTask2 != nullptr) {
+        deleteDamageDisplayPolysTask2(pDamageDisplayPolysTask2);
+    }
 }

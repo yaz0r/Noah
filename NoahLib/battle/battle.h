@@ -39,6 +39,27 @@ struct sBattleVar2Sub {
     // size 0x40
 };
 
+enum eActiveBattleMenu : s8 {
+    Undefined = -1,
+    Menu_AttackHighlighted = 1,
+    Menu_ItemHighlighted = 2,
+    Menu_DefendHighlighted = 3,
+    Menu_ChiHighlighted = 4,
+    Menu_AttackSelectEnemy = 5,
+    Menu_6 = 6,
+    Menu_ComboHighlighted = 7,
+    Menu_ItemAltHighlighted = 8,
+    Menu_EscapeHighlighted = 9,
+    Menu_CallGear = 10,
+    Menu_11 = 11,
+    Menu_12 = 12,
+    Menu_13 = 13,
+    Menu_14 = 14,
+    Menu_16 = 16,
+    Menu_19 = 19,
+    Menu_AttackSelectEnemy_bis = 100,
+};
+
 struct sBattleVar2 {
     std::array<sBattleVar2Sub, 11> m0;
     std::array<u8, 4> m2C0_circleMenuCommandsNames;
@@ -48,12 +69,12 @@ struct sBattleVar2 {
     u8 m2DA_indexInBattleVar48;
     u8 m2DB;
     u8 m2DC;
-    u8 m2DD_currentActiveBattleMenu;
+    eActiveBattleMenu m2DD_currentActiveBattleMenu;
     u8 m2DE;
     u8 m2DF_currentAttackNumOfApUsed;
-    u8 m2E0;
+    u8 m2E0_isBattleMenuDisabled;
     u8 m2E1_waitBeforeNextAttackInput;
-    u8 m2E2_previousActiveBattleMenu;
+    eActiveBattleMenu m2E2_previousActiveBattleMenu;
     u8 m2E3;
     u8 m2E4;
     u8 m2E5;
@@ -82,6 +103,7 @@ struct sBattleVar0 {
     std::array<std::array<POLY_GT4, 2>, 4> m5A0;
     std::array<std::array<POLY_G4, 2>, 3> m740_APOrFuelPoly;
     std::array<std::array<POLY_FT4, 2>, 3> m818; // unsure size
+    std::array<std::array<LINE_F2, 2>, 12> m908;
     std::array < std::array<POLY_FT4, 2>, 3> m9C8_APCounterDisplayPolys; // unsure size
     std::array<std::array<std::array<POLY_FT4, 2>, 10>, 4> m2E08_timeBars;
     std::array<std::array<std::array<POLY_FT4, 2>, 40>, 3> m3A88;
@@ -132,10 +154,12 @@ struct sBattleVar1 {
     std::array<u8, 3> m93_oddOrEven;
     u8 m96;
     u8 m97;
+    u8 m98;
     std::array<u8, 3> m99_oddOrEven;
     u8 mA2;
     u8 mA3;
     u8 mA4_oddOrEven7B;
+    u8 mA8;
     u8 mA9_timeBarNumMoveSteps;
     u8 mAB_timeBarNumAnimationSteps;
     u8 mAD;
@@ -143,6 +167,7 @@ struct sBattleVar1 {
     u8 mAF;
     std::array<u8, 7> mB0_isDialogWindowInitialized;
     u8 mC6_isTargetSelectionCursorVisible;
+    u8 mC7;
     u8 mCB;
     std::array<u8, 3> mCC;
     u8 mCF;

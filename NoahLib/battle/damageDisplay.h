@@ -19,3 +19,11 @@ struct sDamageDisplaySub0 {
 
 void createDamageDisplay(sSpriteActorCore* param_1, int param_2, int param_3);
 void drawDamageDisplayCharacter(sDamageDisplaySub0* param_1, sColorAndCode colorAndCode);
+
+struct sDamageString {
+    char m0_length;
+    std::array<char, 7> m1_string;
+};
+
+void formatDamageString(uint param_1, sDamageString& damageString, int param_3, char param_4, char param_5);
+

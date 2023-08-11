@@ -546,16 +546,16 @@ void initFieldEntitySub4Sub1(sSpriteActorCore* param_1)
 sSavePointMeshAbstract* allocateSavePointMeshData(sSavePointMeshAbstract* pThis, sSavePointMesh1* param_1)
 {
     sSavePointMeshAbstract* pvVar1 = pThis;
-    allocateSavePointMeshDataSub0(&param_1->m0, &pvVar1->m0);
-    registerSpriteCallback2(&pvVar1->m0, &pvVar1->m1C);
+    allocateSavePointMeshDataSub0(param_1, pvVar1);
+    registerSpriteCallback2(pvVar1, &pvVar1->m1C);
 
     initFieldEntitySub4Sub1(&pvVar1->m38_spriteActorCore);
 
-    pvVar1->m0.m4 = &pvVar1->m38_spriteActorCore;
+    pvVar1->m4 = &pvVar1->m38_spriteActorCore;
     pvVar1->m1C.m4 = &pvVar1->m38_spriteActorCore;
 
-    setTaskUpdateFunction(&pvVar1->m0, savePointCallback8);
-    setTaskDeleteFunction(&pvVar1->m0, savePointCallbackC);
+    setTaskUpdateFunction(pvVar1, savePointCallback8);
+    setTaskDeleteFunction(pvVar1, savePointCallbackC);
 
     return pvVar1;
 }
@@ -651,7 +651,7 @@ sSavePointMeshAbstract* createSavePointMeshData(int mode1, int mode2, sFieldEnti
         assert(0);
     }
 
-    pNewSavePoint->m38_spriteActorCore.m6C_pointerToOwnerStructure = &pNewSavePoint->m0;
+    pNewSavePoint->m38_spriteActorCore.m6C_pointerToOwnerStructure = pNewSavePoint;
     pNewSavePoint->m38_spriteActorCore.m86_thisSize = mode2;
     pNewSavePoint->m38_spriteActorCore.m24_vramData = param_3;
 
@@ -752,7 +752,7 @@ void spriteBytecode2ExtendedE0(sSpriteActorCore* param_1, sPS1Pointer param_2, s
     u32 savePointCreationMode2 = getModeForSavePointMesh(savePointCreationMode1);
 
     sSavePointMeshAbstract* pSavePointMesh = createSavePointMeshData(savePointCreationMode1, savePointCreationMode2, param_3, 0, (sSavePointMesh1*)param_1->m6C_pointerToOwnerStructure);
-    pSavePointMesh->m0.m14 |= 0x20000000;
+    pSavePointMesh->m14 |= 0x20000000;
 
     pSavePointMesh->m38_spriteActorCore.m40 = pSavePointMesh->m38_spriteActorCore.m40 & 0xfffe1fff | (savePointCreationMode1 & 0xf) << 0xd;
     pSavePointMesh->m38_spriteActorCore.m3C = pSavePointMesh->m38_spriteActorCore.m3C & 0xfffffffc | savePointCreationMode2 & 3;

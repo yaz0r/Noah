@@ -382,6 +382,23 @@ struct POLY_G4 : public sTag
     virtual void execute() override {}
 };
 
+struct LINE_F2 : public sTag
+{
+    union {
+        struct {
+            u8 r0; //4
+            u8 g0;
+            u8 b0;
+            u8 code; //7
+        };
+        sColorAndCode m_colorAndCode;
+    };
+    sVec2_s16 x0y0;
+    sVec2_s16 x1y1; // 10
+
+    virtual void execute() override {}
+};
+
 struct LINE_F3 : public sTag
 {
     union {

@@ -23,10 +23,6 @@ struct sDamageDisplayTask : public sTaskHeaderPair {
 
 sDamageDisplayTask* damageTaskDisplayListHead = nullptr;
 
-void updateDamageDisplayPolys() {
-    MissingCode();
-}
-
 void updateDamageDisplayTask_FadeOut(sTaskHeader* param_1) {
     sDamageDisplayTask* pTask = (sDamageDisplayTask*)param_1;
 
@@ -74,7 +70,7 @@ void updateDamageDisplayTask(sTaskHeader* param_1) {
 
 void customRenderableEntityGenericDelete(sTaskHeaderPair* param_1) {
     registerSpriteCallback2Sub0(&param_1->m1C);
-    allocateSavePointMeshDataSub0_callback(&param_1->m0);
+    allocateSavePointMeshDataSub0_callback(param_1);
     delete param_1;
 }
 
@@ -110,11 +106,6 @@ static const std::array<u32, 9> damageDecimals = {
      10,          100,         1000,        10000,
      100000,      1000000,     10000000,    100000000,
      1000000000
-};
-
-struct sDamageString {
-    char m0_length;
-    std::array<char, 7> m1_string;
 };
 
 void formatDamageString(uint param_1, sDamageString& damageString, int param_3, char param_4, char param_5) {
@@ -242,7 +233,7 @@ void setupDamageDisplayMatrix(SVECTOR* param_1, VECTOR* param_2) {
 void drawDamageDisplayTask(sTaskHeader* param_1) {
     sDamageDisplayTask* pTask = (sDamageDisplayTask*)param_1;
 
-    sDamageDisplayTask* pOwner = (sDamageDisplayTask*)pTask->m0.m4;
+    sDamageDisplayTask* pOwner = (sDamageDisplayTask*)pTask->m4;
     damageDisplayMatrix.t[2] = ReadGeomScreen();
 
     SVECTOR local_30;
@@ -331,3 +322,57 @@ void createDamageDisplay(sSpriteActorCore* param_1, int damageValue, int damageT
     }
 }
 
+void createDamageDisplayTask3(int damageValue) {
+    MissingCode();
+}
+
+
+void updateDamageDisplayPolys() {
+    if (pDamageDisplayPolysTask2 == nullptr) {
+        return;
+    }
+
+    if (damageDisplayPolysTask2Disabled != '\0') {
+        return;
+    }
+    if (damageDisplayVar0 == createDamageDisplayPolysTask2Var0) {
+        return;
+    }
+    createDamageDisplayPolysTask2Var0 = damageDisplayVar0;
+
+    createDamageDisplayTask3(damageDisplayVar0);
+
+    sDamageDisplayPoly* pTarget = pDamageDisplayPolysTask2;
+    pTarget->m50[0].m10.m3_code = 0x2D;
+    (pTarget->m40_pos).vx = 0x2000;
+    (pTarget->m40_pos).vy = 0x2000;
+    (pTarget->m40_pos).vz = 0x2000;
+
+    pTarget->m50[0].m10.m3_code = 0x2c;
+    (pTarget->m38_transformedPos).vx = 0;
+    (pTarget->m38_transformedPos).vy = 0;
+    (pTarget->m38_transformedPos).vz = 0;
+
+    switch (damageDisplayVar1) {
+    case 5:
+        pTarget->m50[0].m10.m0_r = 0x80;
+        pTarget->m50[0].m10.m1_g = 0x80;
+        pTarget->m50[0].m10.m2_b = 0x80;
+        break;
+    default:
+        assert(0);
+    }
+
+    sDamageString local_20;
+    formatDamageString(damageDisplayVar0, local_20, 5, 0, 0);
+
+    pTarget->m50[0].m14 = 0;
+
+    int X = damageDysplayOffsetBySize[local_20.m0_length];
+    int Y = -8;
+
+    for (int i = 0; i < local_20.m0_length; i++) {
+        setupDamagePoly(battleFont, 0x72 + local_20.m1_string[i], &pTarget->m50[pTarget->m50[0].m14 + 1], X, Y);
+        X += 10;
+    }
+}
