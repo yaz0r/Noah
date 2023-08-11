@@ -1073,14 +1073,14 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
     case 0xA4:
         spriteActorSetPlayingAnimation(param_1->m74_pTargetEntitySprite, READ_LE_S8(param_3));
         break;
-    case 0xA9:
+    case 0xA9: // Move X
     {
-        s32 magnitude = READ_LE_U8(param_3) * param_1->m2C_scale;
+        s32 magnitude = READ_LE_S8(param_3) * param_1->m2C_scale;
         if (magnitude < 0) {
             magnitude += 0xFFF;
         }
         s32 offset;
-        if ((param_1->mAC >> 2) & 1) {
+        if ((param_1->mAC >> 2) & 1) { // switch based on facing
             offset = modulateSpeed(param_1, magnitude >> 0xC) * -0x10000;
         }
         else {
@@ -1089,9 +1089,9 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
         param_1->m0_position.vx += offset;
         break;
     }
-    case 0xAA:
+    case 0xAA: // Move Y
     {
-        s32 magnitude = READ_LE_U8(param_3) * param_1->m2C_scale;
+        s32 magnitude = READ_LE_S8(param_3) * param_1->m2C_scale;
         if (magnitude < 0) {
             magnitude += 0xFFF;
         }
@@ -1099,9 +1099,9 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
         param_1->m0_position.vy += offset;
         break;
     }
-    case 0xAB:
+    case 0xAB: // Move Z
     {
-        s32 magnitude = READ_LE_U8(param_3) * param_1->m2C_scale;
+        s32 magnitude = READ_LE_S8(param_3) * param_1->m2C_scale;
         if (magnitude < 0) {
             magnitude += 0xFFF;
         }

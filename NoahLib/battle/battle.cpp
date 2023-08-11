@@ -4518,9 +4518,28 @@ void updateMonsterScriptEntitiesVarByAtttack(byte param_1, byte param_2) {
     MissingCode();
 }
 
+struct sBattleScriptContext {
+    u8 m0;
+} battleScriptContext;
+
 int executeMonsterScriptWhenAttacked(char param_1) {
-    MissingCode();
-    return 0;
+    int result = 0;
+    int result2 = 0;
+    if ((battleEntities[param_1].m0_base.m7C & 0x8000) == 0) {
+        result = 0;
+        if (battleEntities[param_1].m0_base.m34 & 0x800) {
+            battleScriptContext.m0 = 0;
+            result = result2;
+            if (unknownMonsterStatus0[param_1 - 3].m0 != 0) {
+                assert(0);
+            }
+            if (battleScriptContext.m0) {
+                assert(0);
+            }
+        }
+    }
+
+    return result;
 }
 
 void setDamageDone(uint param_1)
