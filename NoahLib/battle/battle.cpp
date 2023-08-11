@@ -2539,13 +2539,23 @@ void freePlayerTurnStructs(void) {
     }
 }
 
+void clearFxFragment(void)
+{
+    if (fxFragmentLoaded != '\0') {
+        //FUN_Battle__800c1140(battleAnimationLoadingDest);
+        MissingCode();
+        fxFragmentLoaded = '\0';
+    }
+    return;
+}
+
 void waitBattleAnimationSpriteLoading() {
     battleIdleDuringLoading();
     updateBattleAnimationDataLoading();
     while (allocateSavePointMeshDataSub0_var0 !=isDamageDisplayPolysTask2Running()) {
         battleRender();
     }
-    MissingCode();
+    clearFxFragment();
     if (battleAnimationLoadingDest.has_value()) {
         battleAnimationLoadingDest.reset();
     }
@@ -4293,12 +4303,17 @@ void startBattleAttackAnimationVar8_0() {
         (damageDone != 0)) {
         damageDone = damageDone / 3;
     }
+
+    Hack("Hacked damage to 1000");
+    damageDone = 1000;
+
     if (9999 < damageDone) {
         damageDone = 9999;
     }
     if (damageDone < 0) {
         damageDone = 0;
     }
+
     damageDonePerAttack[startBattleAttackAnimationVar4] = damageDone;
     return;
 }
@@ -4469,7 +4484,12 @@ u32 startBattleAttackAnimation() {
                     startBattleAttackAnimationVar8[currentEntityBattleStats->m16](); // This computes the damage done
                     postComputeAttachDone();
                     if (initBattleAttackStatusArray0[startBattleAttackAnimationVar4] == 0) {
-                        assert(0);
+                        if ((currentEntityBattleStats->mA & 0x800) == 0) {
+                            assert(0);
+                        }
+                        else {
+                            MissingCode();
+                        }
                     }
                     if ((currentEntityBattleStats->mA & 1) == 0) {
                         performAttack_type = battleGetSlotStatusSub_current28Index;
@@ -4550,6 +4570,19 @@ void setDamageDone(uint param_1)
 
         switch (initBattleAttackStatusArray0[i]) {
         case -1:
+            break;
+        case 0:
+            switch (battleTickMainSub0Var1[i]) {
+            case -1:
+                if (damageDonePerAttack[i] - battleTickMainSub0Var0[i] >= 0) {
+                    battleTickMainSub0Var0[i] = damageDonePerAttack[i] - battleTickMainSub0Var0[i];
+                }
+                else {
+                    battleTickMainSub0Var0[i] = battleTickMainSub0Var0[i] - damageDonePerAttack[i];
+                }
+                battleTickMainSub0Var1[i] = 0;
+                break;
+            }
             break;
         case 5:
             switch (battleTickMainSub0Var1[i]) {

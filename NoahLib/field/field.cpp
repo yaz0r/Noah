@@ -7798,7 +7798,7 @@ sVec2_s16* allocateSpecialEffectSpriteVram(sVec2_s16* param_1, int param_2) {
         }
     }
     
-    param_1->set(specialEffectSpriteX + 0x300, specialEffectSpriteY * 0x40);
+    param_1->set(specialEffectSpriteX + 0x300, 0x140 + specialEffectSpriteY * 0x40);
     specialEffectSpriteX += param_2;
 
     return param_1;
