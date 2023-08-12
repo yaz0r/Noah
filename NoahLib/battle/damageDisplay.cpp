@@ -304,6 +304,8 @@ void createDamageDisplay(sSpriteActorCore* param_1, int damageValue, int damageT
     }
 
     switch (damageType) {
+    case 0:
+        break;
     case 5:
         (pNewDamageTask->m80_colorAndCode).m0_r = 0x80;
         (pNewDamageTask->m80_colorAndCode).m1_g = 0;
@@ -318,6 +320,7 @@ void createDamageDisplay(sSpriteActorCore* param_1, int damageValue, int damageT
     if (damageType != 4) {
         for (int i = 0; i < damageString.m0_length; i++) {
             pNewDamageTask->m8C_damageStringLength += setupDamagePoly(battleFont, damageString.m1_string[i] + 0x72, &pNewDamageTask->m90[pNewDamageTask->m8C_damageStringLength], displayOffset, -16);
+            displayOffset += 10;
         }
     }
 }
@@ -354,6 +357,7 @@ void updateDamageDisplayPolys() {
     (pTarget->m38_transformedPos).vz = 0;
 
     switch (damageDisplayVar1) {
+    case 0:
     case 5:
         pTarget->m50[0].m10.m0_r = 0x80;
         pTarget->m50[0].m10.m1_g = 0x80;

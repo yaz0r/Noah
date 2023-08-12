@@ -1,5 +1,6 @@
 #include "noahLib.h"
 #include "battle.h"
+#include "battleLoader.h"
 #include "kernel/filesystem.h"
 #include "kernel/graphics.h"
 #include "battleRenderContext.h"
@@ -41,7 +42,7 @@ enum battleInputDirection : u8 {
     BDIR_UP = 3,
 };
 
-std::array<u8, 12> targetsPerPriority;
+std::array<s8, 12> targetsPerPriority;
 
 std::array<sBattleSpriteActor*, 11> battleSpriteActors;
 std::array<sSpriteActorCore*, 11> battleSpriteActorCores;
@@ -86,6 +87,11 @@ bool battleSpritesDisabled = false;
 
 void jumpUpdatePositionSub0(sSpriteActorCore* param_1, sSpriteActorCore* param_2);
 void jumpUpdatePosition(sSpriteActorCore* param_1);
+
+ushort characterOdToInverseTargetBitmask(uint param_1)
+{
+    return ~bitmaskCharacter[param_1 & 0xff];
+}
 
 void initGraphicsForBattle(void) {
     ResetGraph(1);
@@ -1769,23 +1775,77 @@ int battleRenderDebugAndMain(void) {
 
 void checkWinConditions() {
     allPlayerCharacterBitmask = 0;
-    for (int i = 0; i < 3; i++) {
+    for (s8 i = 0; i < 3; i++) {
         if (isBattleSlotFilled[i]) {
             if ((battleEntities[i].m0_base.m7C & 0xC000) == 0) {
                 if (battleVisualEntities[i].m3 == 0) {
-                    allPlayerCharacterBitmask |= characterIdToTargetBitmask(i & 0xff);
+                    allPlayerCharacterBitmask |= characterIdToTargetBitmask(i);
                 }
             }
             else {
                 if ((battleEntities[i].m0_base.m7C & 0x8000) == 0) {
                     battleEntities[i].m0_base.m4C_HP = 0;
                 }
-                isEntityReadyForBattle[i] = 0xFF;
+                isEntityReadyForBattle[i] = -1;
             }
         }
     }
 
-    MissingCode();
+    for (int i = 0; i < 8; i++) {
+        if (isBattleSlotFilled[i + 3]) {
+            if (battleVisualEntities[i].m4_isGear == 0) {
+                if (battleEntities[i].m0_base.m7C & 0xC000) {
+                    if (bitmaskCharacterCheck(jumpAnimationActiveActorBF, i + 3)) {
+                        allPlayerCharacterBitmask |= characterIdToTargetBitmask(i + 3);
+                    }
+                    else {
+                        battleEntities[i + 3].m0_base.m4C_HP = 0;
+                        isEntityReadyForBattle[i + 3] = -1;
+                    }
+                }
+                else {
+                    if ((battleVisualEntities[i + 3].m3) || (unknownMonsterStatus0[i + 3].m3)) {
+                        // nothing
+                    }
+                    else {
+                        allPlayerCharacterBitmask |= characterIdToTargetBitmask(i + 3);
+                    }
+                }
+            }
+            else {
+                assert(0);
+            }
+        }
+    }
+
+    if ((allPlayerCharacterBitmask & 0x7f8) == 0) {
+        battleRunningVar1 = '\x01';
+    }
+    if ((allPlayerCharacterBitmask & 7) == 0) {
+        battleRunningVar1 = -0x7f;
+    }
+
+    if (battleRunningVar1 == '\0') {
+        u32 uVar2 = allPlayerCharacterBitmask;
+        for (int i = 0; i < 11; i++) {
+            if (bitmaskCharacterCheck(uVar2, i)) {
+                if (battleEntities[i].m0_base.m80 & 0x1000) {
+                    uVar2 &= characterOdToInverseTargetBitmask(i);
+                }
+            }
+        }
+
+        if (uVar2 == 0) {
+            for (int i = 0; i < 11; i++) {
+                if (bitmaskCharacterCheck(allPlayerCharacterBitmask, i)) {
+                    if (battleEntities[i].m0_base.m80 & 0x1000) {
+                        battleEntities[i].m0_base.m80 &= ~0x1000;
+                        return;
+                    }
+                }
+            }
+        }
+    }
 }
 
 void initBattle3dRendering(void) {
@@ -2230,11 +2290,14 @@ int processBattleAnimationSub0(void) {
         for (int i = slot - 1; i > -1; i--) {
             sSpriteActorCore* pSlotEntry = local_50[i];
             if ((jumpAnimationActiveActorBF >> ((pSlotEntry->mAC & 3) << 2 | (uint)pSlotEntry->mA8.mx1E) & 1U) == 0) {
+
+                // start playing death animation
+
                 pSlotEntry->m9E_wait = 0;
                 int entityId = (pSlotEntry->mAC & 3) << 2 | (uint)pSlotEntry->mA8.mx1E;
                 if (battleVisualEntities[entityId].m4_isGear == 0) {
                     if (((int)pSlotEntry->mAC>>24) != '\x15') {
-                        spriteActorSetPlayingAnimation(pSlotEntry, 0x15);
+                        spriteActorSetPlayingAnimation(pSlotEntry, 0x15); // death animation
                     }
                 }
                 else {
@@ -3523,7 +3586,7 @@ u8 selectNewSlotByDirection(byte inputSlot, battleInputDirection direction) {
     s32 bestResult = 0xffffff;
     byte slot = inputSlot;
     for (int i = 0; i < 12; i++) {
-        if (targetsPerPriority[i] != 0xFF) {
+        if (targetsPerPriority[i] != -1) {
             bool bVar1 = false;
             if (targetsPerPriority[i] != slot) {
                 s32 lVar3 = ratan2(
@@ -4602,15 +4665,6 @@ void setDamageDone(uint param_1)
     }
 }
 
-extern std::array<u16, 16> bitmaskCharacter;
-extern std::array<std::array<u8, 4>, 32> battleSlotLayout;
-
-ushort characterOdToInverseTargetBitmask(uint param_1)
-{
-    return ~bitmaskCharacter[param_1 & 0xff];
-}
-
-
 void markEnemyDead(uint param_1)
 {
     byte bVar1;
@@ -5044,14 +5098,14 @@ bool isTargetValid(uint param_1, uint param_2)
     return bVar1;
 }
 
-u8 getEntityToFace(u8 param_1) {
+s8 getEntityToFace(u8 param_1) {
     numValidTarget = 0;
 
-    std::array<u8, 12> array1;
-    std::array<u8, 12> array2;
+    std::array<s8, 12> array1;
+    std::array<s8, 12> array2;
     for (int i = 0; i < 12; i++) {
-        array2[i] = 0xFF;
-        targetsPerPriority[i] = 0xFF;
+        array2[i] = -1;
+        targetsPerPriority[i] = -1;
         array1[i] = 0;
     }
 
@@ -5083,7 +5137,7 @@ u8 getEntityToFace(u8 param_1) {
         for (int i = 0; i < numValidTarget; i++) {
             if (battleVisualEntities[param_1].m0_positionSlot == battleVisualEntities[array2[i]].m0_positionSlot) {
                 *(targetsPerPriorityIt++) = array2[i];
-                array2[i] = 0xFF; // so that we don't count it twice
+                array2[i] = -1; // so that we don't count it twice
                 *(array1It++) = 1;
             }
         }
@@ -5093,7 +5147,7 @@ u8 getEntityToFace(u8 param_1) {
     {
         auto targetsPerPriorityIt = targetsPerPriority.begin();
         for (int i = 0; i < numValidTarget; i++) {
-            if (array2[i] != 0xFF) {
+            if (array2[i] != -1) {
                 *(targetsPerPriorityIt++) = array2[i];
             }
         }
@@ -5102,7 +5156,7 @@ u8 getEntityToFace(u8 param_1) {
     if (array1[0] == 0) {
         for (int i = 1; i < numValidTarget; i++) {
             if (battleEntities[targetsPerPriority[i]].m0_base.m4C_HP < battleEntities[targetsPerPriority[0]].m0_base.m4C_HP) {
-                std::swap<u8>(targetsPerPriority[0], targetsPerPriority[i]);
+                std::swap<s8>(targetsPerPriority[0], targetsPerPriority[i]);
             }
         }
     }
@@ -5110,7 +5164,7 @@ u8 getEntityToFace(u8 param_1) {
         for (int i = 1; i < numValidTarget; i++) {
             if (array1[i] != 0) {
                 if (battleEntities[targetsPerPriority[i]].m0_base.m4C_HP < battleEntities[targetsPerPriority[0]].m0_base.m4C_HP) {
-                    std::swap<u8>(targetsPerPriority[0], targetsPerPriority[i]);
+                    std::swap<s8>(targetsPerPriority[0], targetsPerPriority[i]);
                 }
             }
         }
@@ -5119,9 +5173,9 @@ u8 getEntityToFace(u8 param_1) {
     return targetsPerPriority[0];
 }
 
-bool getDirectionBetween2BattleEntities(uint param_1, uint param_2)
+bool getDirectionBetween2BattleEntities(s8 param_1, s8 param_2)
 {
-    return battleVisualEntities[param_2 & 0xff].mA_X < battleVisualEntities[param_1 & 0xff].mA_X;
+    return battleVisualEntities[param_2].mA_X < battleVisualEntities[param_1].mA_X;
 }
 
 void battleTickMain(s8 param_1) {

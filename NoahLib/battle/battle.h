@@ -35,7 +35,7 @@ struct sBattleVar2Sub {
     std::array<u8, 4> m8;
     std::array<u8, 4> mC;
     std::array<s16, 16> m1C_isCommandEnabled;
-    u8 m3C_currentTarget;
+    s8 m3C_currentTarget;
     // size 0x40
 };
 
@@ -346,8 +346,8 @@ int battleSetupStringInPolyFT4Small(int character, std::array<POLY_FT4, 2>* poly
 int battleSetupStringInPolyFT4Large(int character, std::array<POLY_FT4, 2>* polyArray, short x, short y);
 void battleSetupTextPoly(POLY_FT4* param_1);
 
-u8 getEntityToFace(u8 param_1);
-bool getDirectionBetween2BattleEntities(uint param_1, uint param_2);
+s8 getEntityToFace(u8 param_1);
+bool getDirectionBetween2BattleEntities(s8 param_1, s8 param_2);
 extern const std::array<u16, 16> party1C_InitialValues;
 
 struct sUnkMonsterStatus {

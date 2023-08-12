@@ -5,7 +5,7 @@
 #include "kernel/TIM.h"
 #include "battle/battle.h"
 
-int OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1_var = 0x2000;
+int battleDefaultEntityScale = 0x2000;
 int fieldDrawEnvsInitialized = 0;
 s8 isBattleOverlayLoaded = 0;
 s32 initFieldVar2 = 0;
@@ -1700,24 +1700,20 @@ void setCurrentAnimationPtr(sSpriteActorCore* param_1, const sPS1Pointer startOf
 	}
 	if (param_1->m20)
 	{
-		if ((flags >> 0xc & 1) == 0) {
+		if (((flags >> 0xc) & 1) == 0) {
 			param_1->m20->m0_rotation.vx = 0;
 			param_1->m20->m0_rotation.vy = 0;
 			param_1->m20->m0_rotation.vz = 0;
 			setupSpriteObjectMatrix(param_1);
 		}
-		if ((flags >> 0xd & 1) == 0) {
+		if (((flags >> 0xd) & 1) == 0) {
 			if (isBattleOverlayLoaded != '\0') {
-				setGraphicEntityScale(param_1, (short)OP_INIT_ENTITY_SCRIPT_sub0Sub6Sub1_var);
-				goto LAB_800236f4;
+				setGraphicEntityScale(param_1, (short)battleDefaultEntityScale);
 			}
 		}
-		else {
-		LAB_800236f4:
-			if (isBattleOverlayLoaded != '\0') {
-				setupSpriteObjectMatrix(param_1);
-			}
-		}
+        if (isBattleOverlayLoaded != '\0') {
+            setupSpriteObjectMatrix(param_1);
+        }
 		if ((param_1->m3C & 3) == 1) {
 			param_1->m20->getAsSprite()->m3D = 0;
 			param_1->m20->getAsSprite()->m3C = 0;
