@@ -409,6 +409,21 @@ struct sBattle800D02C0 {
     // size 0x1f40
 };
 
+struct sBattleVar48 {
+    std::array<u16, 11> m0_damageValue;
+    u16 m16_targetBitMask;
+    std::array<s8, 11> m18_damageType;
+    u8 m23_battleEntityIndex;
+    std::array<s16, 11> m24;
+    s16 m3A;
+    std::array<s8, 11> m3C;
+    s8 m47_battleAnimationToPlay;
+
+    //size 0x48
+};
+
+extern std::array<sBattleVar48, 32> battleCurrentDamages;
+
 extern struct sJumpAnimationControlStruct* jumpAnimationControlStruct;
 
 extern sBattle800CDD40Sub* currentEntityBattleStats;
@@ -423,3 +438,4 @@ void setupBattleAnimationSpriteCore(sSpriteActorCore* param_1);
 void performMechaPlayAnimation(ushort param_1, short param_2, int param_3);
 int waitForMusic(uint param_1);
 void clearShapeTransferEntry(void*);
+void performAttackSub2();

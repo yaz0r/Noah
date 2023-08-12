@@ -11,6 +11,7 @@
 #include "battleSpriteLoader.h"
 #include "battleRenderContext.h"
 #include "menus/menuHandler.h"
+#include "battle/enemyScript.h"
 
 void dummpyLoaderEnd() {
     // empty, probably an old logging code
@@ -667,15 +668,6 @@ void batteLoaderPhase1_3() {
 
     MissingCode();
 }
-
-struct sBattleScriptEntity {
-    std::array<std::optional<std::vector<u8>::iterator>, 4> m0_scripts;
-    std::array<s32, 4> m10;
-    std::array<s16, 8> m20;
-    std::array<s8, 16> m30_varArray;
-};
-
-std::array<sBattleScriptEntity, 8> monstersScriptsEntities;
 
 void loadEnemies() {
     for (int i = 3; i < 11; i++) {

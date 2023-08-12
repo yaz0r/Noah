@@ -18,6 +18,7 @@
 #include "battle/spinningEnemySelectionCursor.h"
 #include "battle/damageDisplay.h"
 #include "battle/damageDisplay2.h"
+#include "battle/enemyScript.h"
 
 u16 allPlayerCharacterBitmask = 0;
 u8 battleInitVar0 = 0;
@@ -1922,7 +1923,7 @@ s8 battleTickMain_var0 = 1;
 s8 battleTickMain_var1 = 0;
 s8 battleTickMain_var2;
 
-std::array<s8, 5> battleTickMain_var3;
+std::array<u8, 5> battleTickMain_var3;
 std::array<s8, 11> battleTickMainSub0Var1;
 std::array<s16, 11> battleTickMainSub0Var0;
 
@@ -2100,19 +2101,6 @@ void updateAPCounterDisplay() {
     battleVar1->m7B += battleSetupStringInPolyFT4Large(battleVar2->m2D5_maxAP + 0xF, &battleVar0->m9C8_APCounterDisplayPolys[battleVar1->m7B], 0x3A, 0xD0);
     battleVar1->mA4_oddOrEven7B = battleOddOrEven;
 }
-
-struct sBattleVar48 {
-    std::array<u16, 11> m0_damageValue;
-    u16 m16_targetBitMask;
-    std::array<s8, 11> m18_damageType;
-    u8 m23_battleEntityIndex;
-    std::array<s16, 11> m24;
-    s16 m3A;
-    std::array<s8,11> m3C;
-    s8 m47_battleAnimationToPlay;
-
-    //size 0x48
-};
 
 std::array<sBattleVar48, 32> battleCurrentDamages;
 
@@ -4597,32 +4585,21 @@ void performAttackSub3(s8 param_1, s16 param_2, s16 param_3) {
     startBattleAttackAnimation();
 }
 
-void updateMonsterScriptEntitiesVarByAtttack(byte param_1, byte param_2) {
-    MissingCode();
-}
+void updateMonsterScriptEntitiesVarByAtttack(byte param_1, byte targetId) {
+    if (targetId >= 3) { // don't do anything for players
+        targetId -= 3;
+        monstersScriptsEntities[targetId].m20[7] = characterIdToTargetBitmask(param_1);
+        for (int i = 0; i < 5; i++) {
+            monstersScriptsEntities[targetId].m30_varArray[9 + i] = battleTickMain_var3[i];
 
-struct sBattleScriptContext {
-    u8 m0;
-} battleScriptContext;
-
-int executeMonsterScriptWhenAttacked(char param_1) {
-    int result = 0;
-    int result2 = 0;
-    if ((battleEntities[param_1].m0_base.m7C & 0x8000) == 0) {
-        result = 0;
-        if (battleEntities[param_1].m0_base.m34 & 0x800) {
-            battleScriptContext.m0 = 0;
-            result = result2;
-            if (unknownMonsterStatus0[param_1 - 3].m0 != 0) {
-                assert(0);
+            if ((performAttackSub3_var0 & characterIdToTargetBitmask(battleVar2->m0[param_1].m3C_currentTarget)) == 0) {
+                monstersScriptsEntities[targetId].m30_varArray[0xe] = 0;
             }
-            if (battleScriptContext.m0) {
-                assert(0);
+            else {
+                monstersScriptsEntities[targetId].m30_varArray[0xe] = 1;
             }
         }
     }
-
-    return result;
 }
 
 void setDamageDone(uint param_1)
@@ -5178,6 +5155,124 @@ bool getDirectionBetween2BattleEntities(s8 param_1, s8 param_2)
     return battleVisualEntities[param_2].mA_X < battleVisualEntities[param_1].mA_X;
 }
 
+void finishMonsterTurn(byte param_1) {
+    if (apConfigArray[param_1].m1 != 0) {
+        battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m23_battleEntityIndex = param_1;
+        battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m47_battleAnimationToPlay = 0x1b;
+        battleVar2->m2DA_indexInBattleVar48 = battleVar2->m2DA_indexInBattleVar48 + 1;
+    }
+    battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m23_battleEntityIndex = param_1;
+    battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m47_battleAnimationToPlay = -2;
+    startCharacterJumpToEnemyVar0 = 0;
+}
+
+void monsterJumpToTarget(byte param_1) {
+    battleVar2->m2DA_indexInBattleVar48 = 0;
+    battleTickMainSub0();
+    performAttackSub2();
+    battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m23_battleEntityIndex = param_1;
+    u32 actor = (uint)param_1;
+    battleRenderDebugAndMain();
+    int facing = computeFacingForJump(actor);
+    startJumpAnimation(1, actor, 0, facing);
+    executeBattleCode(actor);
+    finishMonsterTurn(actor);
+    while (battleVar2->m2DB == '\0') {
+        battleRenderDebugAndMain();
+    }
+}
+
+void loadMonsterAttackName() {
+    MissingCode();
+}
+
+void displayAndWaitMonsterAttackName() {
+    MissingCode();
+}
+
+void removeCurrentMonsterNameString() {
+    MissingCode();
+}
+
+void updateBattleOverlay801E5000(int) {
+    MissingCode();
+}
+
+void execMonsterScriptEndOfPlayerTurn() {
+    MissingCode();
+}
+
+void updateRunningAnimations() {
+    MissingCode();
+}
+
+void copyBattleVar1_m7C(void) {
+    for (int i = 0; i < 3; i++) {
+        battleVar1->m7C[i] = battleVar2->m2EB[i];
+    }
+    battleRenderDebugAndMain();
+}
+
+u16 battleEffectBF = 0;
+
+void applyBattleEffectBF7() {
+    if ((battleEffectBF & 7) != 0) {
+    }
+    battleEffectBF = 0;
+}
+
+void applyPassiveModifiersAtEndOfTurn(byte param_1){
+    MissingCode();
+}
+u32 battleGetSlotStatusSub(u32 param_1);
+
+void updateTicksEndOfTurn() {
+    sBattleVar2* psVar1;
+    uint uVar2;
+
+    if (isEntityReadyForBattle[battleVar2->m2D3_currentEntityTurn] != -1) {
+        isEntityReadyForBattle[battleVar2->m2D3_currentEntityTurn] = 0;
+    }
+    uVar2 = battleGetSlotStatusSub((uint)battleVar2->m2D3_currentEntityTurn);
+    psVar1 = battleVar2;
+    numTicksBeforeReady[battleVar2->m2D3_currentEntityTurn] = (short)uVar2;
+    battleSlotStatusVar0[psVar1->m2D3_currentEntityTurn] =
+        numTicksBeforeReady[psVar1->m2D3_currentEntityTurn];
+}
+
+void clearAnimationsEndOfTurnSub() {
+    MissingCode();
+}
+
+void waitBattleAnimationSoundLoaded() {
+    if (!battleAnimationSoundLoaded) {
+        assert(0);
+    }
+}
+
+void clearAnimationsEndOfTurn(int param_1) {
+    allocateSavePointMeshDataSub0_var0 = 0;
+    spriteBytecode2ExtendedE0_Var0 = 0;
+    clearAnimationsEndOfTurnSub();
+    if (battleVisualEntities[param_1].m4_isGear == 0) {
+        if (param_1 < 3) {
+            if (battleSpriteActorCores[param_1] != (sSpriteActorCore*)0x0) {
+                startReadingBattleJumpAnimation(battleSpriteActorCores[param_1]);
+            }
+        }
+        else {
+            clearBattleAnimationData();
+        }
+    }
+    else {
+        clearBattleAnimationData();
+        waitBattleAnimationSoundLoaded();
+    }
+    setBattleCameraParamX(0xc0);
+}
+
+s8 previousEntityTurn = 0;
+
 void battleTickMain(s8 param_1) {
     battleTickMain_var0 = 1;
     battleTickMain_var1 = 0;
@@ -5227,28 +5322,70 @@ void battleTickMain(s8 param_1) {
                 else {
                     assert(0);
                 }
-                MissingCode();
+                if (battleVar2->m2EA != 0) {
+                    assert(0);
+                }
+                previousEntityTurn = battleVar2->m2D3_currentEntityTurn;
+                battleVar1->m97 = 0;
+                updateCharacterBlinkingTask(0);
             }
         }
 
-        MissingCode();
+        loadMonsterAttackName();
+        displayAndWaitMonsterAttackName();
+        removeCurrentMonsterNameString();
+        updateBattleOverlay801E5000(0);
+
+        for (int i = 0; i < 8; i++) {
+            if (bitmaskCharacterCheck(battleTickMain_var4, i + 3)) {
+                unknownMonsterStatus0[i].m2 = 1;
+            }
+        }
+
+        execMonsterScriptEndOfPlayerTurn();
     }
     else {
-        MissingCode();
-    }
+        if (param_1 == '\0') {
+            executeMonsterScript(currentEntityTurn, battleEntities[currentEntityTurn].m0_base.m80 & 0x2000);
 
-    MissingCode();
+            if (((battleVisualEntities[battleVar2->m2D3_currentEntityTurn].m3 & 0x80) == 0) &&
+                ((battleEntities[battleVar2->m2D3_currentEntityTurn].m0_base.m34 & 0x400U) == 0)) {
+                // Display the enemy's name
+                MissingCode();
+                /*battleVar1->mB0_isDialogWindowInitialized[5] = 1;
+                auto pString = getDialogParamPointer(battleStrings, battleMonsterMapping[battleVar2->m2D3_currentEntityTurn]);
+                currentMonsterNameStringWidth = renderString(pString, ramBufferFromMonsterName, 0x39, 0);
+                monsterNameIsDisplayed = 1;*/
+            }
+        }
+        if (((battleEntities[battleVar2->m2D3_currentEntityTurn].m0_base.m7C & 0x2080) == 0) &&
+            ((battleEntities[battleVar2->m2D3_currentEntityTurn].m0_base.m80 & 0x1000) == 0)) {
+            monsterJumpToTarget(battleVar2->m2D3_currentEntityTurn);
+            removeCurrentMonsterNameString();
+            loadMonsterAttackName();
+            displayAndWaitMonsterAttackName();
+        }
+        removeCurrentMonsterNameString();
+        updateBattleOverlay801E5000(0);
+    }
+    copyBattleVar1_m7C();
+    applyBattleEffectBF7();
     battleVar0->m6415 = 0;
     for (int i = 0; i < 0xB; i++) {
         battleVar2->m0[i].m3C_currentTarget = getEntityToFace(i);
         battleVisualEntities[i].m6_direction = getDirectionBetween2BattleEntities(currentEntityTurn, battleVar2->m0[i].m3C_currentTarget);
     }
 
-    MissingCode();
-
+    clearAnimationsEndOfTurn(computeFacingForJump(battleVar2->m2D3_currentEntityTurn));
+    resetBattleVar2_m2EB();
     checkWinConditions();
-
-    MissingCode();
+    if (battleRunningVar1 == '\0') {
+        applyPassiveModifiersAtEndOfTurn(battleVar2->m2D3_currentEntityTurn);
+    }
+    checkWinConditions();
+    copyBattleVar1_m7C();
+    updateRunningAnimations();
+    updateTicksEndOfTurn();
 
     makeBattleTimeProgress = 1;
 }
@@ -5285,6 +5422,9 @@ void battleTickGameplay() {
         }
         battleVar2->m2D3_currentEntityTurn = bBattleTickMode1;
         MissingCode();
+        uint uVar2 = (uint)bBattleTickMode1;
+        bBattleTickMode1 = 0;
+        battleSlotStatusVar0[uVar2 + 10] = 0;
         battleTickMain(0);
     }
     else {
