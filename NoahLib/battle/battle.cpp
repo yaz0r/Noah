@@ -497,24 +497,36 @@ void renderBattleScenePolys(sMechaInitVar4* envBlocks, std::vector<sMechaBone>* 
             CompMatrix(matrix, &pBone->m2C_boneFinalMatrix, &m1F800040);
 
             // billboard
-            if ((pBone->m52 - 1) < 2) {
+            switch (pBone->m52) {
+            case 0:
+                break;
+            case 1:
                 m1F800040.m[0][0] = 0x1000;
                 m1F800040.m[0][2] = 0;
                 m1F800040.m[1][0] = 0;
                 m1F800040.m[1][2] = 0;
                 m1F800040.m[2][0] = 0;
                 m1F800040.m[2][2] = 0x1000;
-                if (pBone->m52 == 1) {
-                    m1F800040.m[0][1] = matrix->m[0][1];
-                    m1F800040.m[1][1] = matrix->m[1][1];
-                    m1F800040.m[2][1] = matrix->m[2][1];
-                }
-                else {
-                    m1F800040.m[0][1] = 0;
-                    m1F800040.m[1][1] = 0x1000;
-                    m1F800040.m[2][1] = 0;
-                }
+                m1F800040.m[0][1] = matrix->m[0][1];
+                m1F800040.m[1][1] = matrix->m[1][1];
+                m1F800040.m[2][1] = matrix->m[2][1];
+                break;
+            case 2:
+                m1F800040.m[0][0] = 0x1000;
+                m1F800040.m[0][2] = 0;
+                m1F800040.m[1][0] = 0;
+                m1F800040.m[1][2] = 0;
+                m1F800040.m[2][0] = 0;
+                m1F800040.m[2][2] = 0x1000;
+                m1F800040.m[0][1] = 0;
+                m1F800040.m[1][1] = 0x1000;
+                m1F800040.m[2][1] = 0;
+                break;
+            default:
+                assert(0);
+
             }
+
             SetRotMatrix(&m1F800040);
             SetTransMatrix(&m1F800040);
 
@@ -1850,6 +1862,8 @@ void checkWinConditions() {
 }
 
 void initBattle3dRendering(void) {
+    MissingCode();
+    gDepthDivider = 2;
     MissingCode();
 }
 

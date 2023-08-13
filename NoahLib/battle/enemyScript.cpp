@@ -69,6 +69,23 @@ bool isMonsterTargetValid(uint param_1, char param_2) {
 
 u32 getRandomValueInRange(u32 param_1, u32 param_2);
 
+void monsterBattleOpcode_40(sBattleScriptExecutionContext* param_1, uint param_2) {
+    std::array<u8, 3> local_28;
+    monstersScriptsEntities[param_2].m20[param_1->m0_scriptPtr[1]] = 0;
+    do {
+        u32 uVar3 = getRandomValueInRange(0, 2);
+        u32 uVar5 = uVar3 & 0xff;
+        if (local_28[uVar5] == 0) {
+            bool cVar1 = isMonsterTargetValid(uVar5, param_1->m0_scriptPtr[2]);
+            if ((cVar1 != '\0') && (apConfigArray[uVar5].m1 == 0)) {
+                monstersScriptsEntities[param_2].m20[param_1->m0_scriptPtr[1]] = characterIdToTargetBitmask(uVar5);
+                return;
+            }
+            local_28[uVar3 & 0xff] = 1;
+        }
+    } while ((local_28[2] & local_28[0] & local_28[1]) == 0);
+}
+
 void monsterBattleOpcode_41(sBattleScriptExecutionContext* param_1, uint param_2) {
     std::array<u8, 3> local_28;
     monstersScriptsEntities[param_2].m20[param_1->m0_scriptPtr[1]] = 0;
@@ -144,6 +161,10 @@ void monsterBattleOpcode_52(sBattleScriptExecutionContext* param_1, std::array<s
     (&param_2[param_4 & 0xff].m1)[param_1->m0_scriptPtr[1]] = (char)((ushort)uVar1 >> 8);
 }
 
+void monsterBattleOpcode_64(sBattleScriptExecutionContext* param_1, uint param_2) {
+    monstersScriptsEntities[param_2].m20[param_1->m0_scriptPtr[1]] = characterIdToTargetBitmask(param_2 + 3);
+}
+
 byte monsterBattleOpcode_1(sBattleScriptExecutionContext* param_1, std::array<sBattleScriptContext, 32>& param_2, byte param_3) {
     (&param_2[param_3].m0_attackType)[(byte)param_1->m0_scriptPtr[1]] = param_1->m0_scriptPtr[2];
     if (param_1->m0_scriptPtr[1] == '\0') {
@@ -167,6 +188,9 @@ int executeMonsterScriptLower(sBattleScriptExecutionContext* pScriptContext, int
     case 0x3E:
         monsterBattleOpcode_3E(pScriptContext, entityIndex);
         break;
+    case 0x40:
+        monsterBattleOpcode_40(pScriptContext, entityIndex);
+        break;
     case 0x41:
         monsterBattleOpcode_41(pScriptContext, entityIndex);
         break;
@@ -178,6 +202,9 @@ int executeMonsterScriptLower(sBattleScriptExecutionContext* pScriptContext, int
         break;
     case 0x52:
         monsterBattleOpcode_52(pScriptContext, battleScriptContext, entityIndex, numIterations);
+        break;
+    case 0x64:
+        monsterBattleOpcode_64(pScriptContext, entityIndex);
         break;
 
     default:
@@ -203,6 +230,10 @@ int executeMonsterScriptUpper(sBattleScriptExecutionContext* pScriptContext, int
     unk = 0;
     do {
         switch (*pScriptContext->m0_scriptPtr) {
+        case 0x80:
+        case 0x9a:
+            operationResult = 1;
+            break;
         default:
             assert(0);
             break;
