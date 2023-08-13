@@ -1215,6 +1215,9 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
             (param_1->m0_position).vz = (int)local_70.vz << 0x10;
             break;
         }
+    case 0xBD:
+        spriteBytecode2ExtendedE0(param_1, (*createSavePointMeshData_mode5.m10_startOfAnimationContainer)[READ_LE_U8(param_3)], param_1->m24_vramData);
+        break;
 	case 0xA0: // set the move speed for the character
 		{
 			int iVar11 = READ_LE_S8(param_3 )* 0x10 * (fieldDrawEnvsInitialized + 1) * (int)param_1->m82;
@@ -1461,6 +1464,15 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
             param_1->m20->m6_scale[1] += READ_LE_S16(param_3) * 2;
         }
         break;
+    case 0xEE:
+    {
+        int scaledValue = READ_LE_S16(param_3) * param_1->m2C_scale;
+        if (scaledValue < 0) {
+            scaledValue += 0xfff;
+        }
+        (param_1->m0_position).vy = (param_1->m84_maxY + (scaledValue >> 0xc)) * 0x10000;
+    }
+    break;
 	case 0xF0:
 		return;
 	case 0xf1:
