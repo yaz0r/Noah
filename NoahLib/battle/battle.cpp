@@ -89,6 +89,8 @@ bool battleSpritesDisabled = false;
 void jumpUpdatePositionSub0(sSpriteActorCore* param_1, sSpriteActorCore* param_2);
 void jumpUpdatePosition(sSpriteActorCore* param_1);
 
+extern int spriteCallback2Var4;
+
 ushort characterOdToInverseTargetBitmask(uint param_1)
 {
     return ~bitmaskCharacter[param_1 & 0xff];
@@ -1753,9 +1755,20 @@ void battleRender() {
     execSpritesCallbacksList1();
     execSpritesCallbacksList2();
     MissingCode();
+    /*
+    int iVar3 = (int)spriteCallback2Var4;
+    while (iVar3 = iVar3 + -1, iVar3 != -1) {
+        updateBattleCamera();
+        execSpritesCallbacksList2();
+    }*/
 
     drawBattleFromModes();
     battleUpdateInputs(0);
+    MissingCode();
+    /*
+    while (spriteCallback2Var4 = spriteCallback2Var4 + -1, spriteCallback2Var4 != -1) {
+        battleUpdateInputs(1);
+    }*/
     MissingCode();
 
     PutDispEnv(&pCurrentBattleRenderStruct->m5C_dispEnv);
@@ -1954,7 +1967,7 @@ void resetBattleVar2_m2EB() {
     }
 }
 
-s16 battleTickMain_var4;
+s16 entitiesHitInCurrentAttackBF;
 
 void updateBattleEntityStatus(int index) {
     MissingCode();
@@ -2273,7 +2286,7 @@ int countBattleActorCoresActiveForBitmask(uint bitmask, std::array<sSpriteActorC
 
 s16 performAttackSub3_var0 = 0;
 s16 processBattleAnimationSub0_var0 = 0;
-sSpriteActorCore* processBattleAnimationSub0_var1 = 0;
+sSpriteActorCore* processBattleAnimationSub0_var1 = nullptr;
 u8 needBattleAnimationDataLoading = 0;
 
 void updateBattleAnimationDataLoading(void) {
@@ -3996,29 +4009,29 @@ s8 computeBattleDamageSub0() {
         int iVar4 = ((uint)(battleGetSlotStatusSub_currentBattleEntity->m0_base).m5E_hitPercentage +
             (int)(char)currentEntityBattleStats->m15) - (uint)startBattleAttackAnimationVar5->m5F_evadePercentage;
         if ((battleEntities[startBattleAttackAnimationVar4].m15A_flags & 1) != 0) {
-            iVar5 = rand();
+            iVar5 = xenoRand();
             if (0x5e < iVar5 % 100) {
                 return 1;
             }
             return 2;
         }
         if ((uVar2 & 0x20) != 0) {
-            iVar5 = rand();
+            iVar5 = xenoRand();
             if ((iVar5 % 100 - iVar4) * 0x10000 >> 0x10 < 50) {
                 return 1;
             }
             return 3;
         }
         if (((startBattleAttackAnimationVar5->m84 | startBattleAttackAnimationVar5->m86) & 0x40) != 0) {
-            iVar5 = rand();
+            iVar5 = xenoRand();
             if ((iVar5 % 100 - iVar4) * 0x10000 >> 0x10 < 50) {
                 return 1;
             }
             return 2;
         }
-        int iVar3 = rand();
+        int iVar3 = xenoRand();
         if ((iVar3 % 100 - iVar4) * 0x10000 >> 0x10 < (iVar5 - (iVar6 + -0x5a)) * 0x10000 >> 0x10) {
-            iVar3 = rand();
+            iVar3 = xenoRand();
             if ((iVar5 - (iVar6 + -0x55)) * 0x10000 >> 0x10 <= (iVar3 % 100 - iVar4) * 0x10000 >> 0x10) {
                 return 2;
             }
@@ -4437,11 +4450,11 @@ void startBattleAttackAnimationVar8_0() {
         damageDone = 0;
     }
     else if (iVar3 < 10) {
-        iVar4 = rand();
+        iVar4 = xenoRand();
         damageDone = iVar3 + iVar4 % 2;
     }
     else {
-        iVar4 = rand();
+        iVar4 = xenoRand();
         damageDone = iVar3 + iVar4 % (iVar3 / 10 + 2);
     }
     switch ((int)((local_14 - 1) * 0x1000000) >> 0x18) {
@@ -4474,8 +4487,8 @@ void startBattleAttackAnimationVar8_0() {
         damageDone = damageDone / 3;
     }
 
-    Hack("Hacked damage to 1000");
-    damageDone = 1000;
+    //Hack("Hacked damage to 1000");
+    //damageDone = 1000;
 
     if (9999 < damageDone) {
         damageDone = 9999;
@@ -4526,7 +4539,7 @@ void postComputeAttachDone(void)
         }
         uVar7 = startBattleAttackAnimationVar5->m80;
         startBattleAttackAnimationVar5->m80 = uVar7 & 0xefff;
-        if (((uVar7 & 0x2000) != 0) && (iVar3 = rand(), iVar3 % 100 < 0x46)) {
+        if (((uVar7 & 0x2000) != 0) && (iVar3 = xenoRand(), iVar3 % 100 < 0x46)) {
             startBattleAttackAnimationVar5->m80 = startBattleAttackAnimationVar5->m80 & 0xdfff;
         }
         if ((currentEntityBattleStats->mA & 0x100) != 0) {
@@ -4638,12 +4651,12 @@ u32 startBattleAttackAnimation() {
                 assert(0);
             }
             if (((((battleGetSlotStatusSub_currentBattleEntity->m0_base).m80 & 0x20) != 0) &&
-                ((battleTickMain_var4 & 7) != 0)) && (battleTickMain_var4 < 7)) {
+                ((entitiesHitInCurrentAttackBF & 7) != 0)) && (entitiesHitInCurrentAttackBF < 7)) {
                 assert(0);
             }
             for (startBattleAttackAnimationVar4 = 0; startBattleAttackAnimationVar4 < 11; startBattleAttackAnimationVar4++) {
                 u16 bitflag = 1 << startBattleAttackAnimationVar4;
-                if ((bitflag & battleTickMain_var4) != 0) {
+                if ((bitflag & entitiesHitInCurrentAttackBF) != 0) {
                     startBattleAttackAnimationVar5 = &battleEntities[startBattleAttackAnimationVar4].m0_base;
                     startBattleAttackAnimationVar6 = &battleEntities[startBattleAttackAnimationVar4].mA4_gear;
                     MissingCode();
@@ -4694,11 +4707,11 @@ u32 startBattleAttackAnimation() {
 
 }
 
-void performAttackSub3(s8 param_1, s16 param_2, s16 param_3) {
+void performAttackSub3(s8 param_1, s16 hitEntitiesBF, s16 param_3) {
     performAttackSub3_var0 = 0;
     performAttackSub3_varBitMask = allPlayerCharacterBitmask;
     battleGetSlotStatusSub_current28Index = battleVar2->m2DC + -1;
-    battleTickMain_var4 = param_2;
+    entitiesHitInCurrentAttackBF = hitEntitiesBF;
     performAttack_type = param_3;
     performAttackSub3_attacker = param_1;
     startBattleAttackAnimation();
@@ -4860,7 +4873,7 @@ int performAttack(byte param_1, uint numAPUsed) {
     performAttackSub3(param_1, characterIdToTargetBitmask(battleVar2->m0[param_1].m3C_currentTarget), battleVar2->m2DC - 1);
     int oldVar48 = battleVar2->m2DA_indexInBattleVar48;
     battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m23_battleEntityIndex = param_1;
-    battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m16_targetBitMask = battleTickMain_var4;
+    battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m16_targetBitMask = entitiesHitInCurrentAttackBF;
     battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m47_battleAnimationToPlay = performAttack_type;
     battleVar2->m2DA_indexInBattleVar48++;
     updateMonsterScriptEntitiesVarByAtttack(param_1, battleVar2->m0[param_1].m3C_currentTarget);
@@ -5409,7 +5422,7 @@ void battleTickMain(s8 param_1) {
         battleTickMain_var3[i] = 0;
     }
 
-    battleTickMain_var4 = 0;
+    entitiesHitInCurrentAttackBF = 0;
     updateBattleEntityStatus(battleVar2->m2D3_currentEntityTurn);
 
     int currentEntityTurn = battleVar2->m2D3_currentEntityTurn;
@@ -5454,7 +5467,7 @@ void battleTickMain(s8 param_1) {
         updateBattleOverlay801E5000(0);
 
         for (int i = 0; i < 8; i++) {
-            if (bitmaskCharacterCheck(battleTickMain_var4, i + 3)) {
+            if (bitmaskCharacterCheck(entitiesHitInCurrentAttackBF, i + 3)) {
                 unknownMonsterStatus0[i].m2 = 1;
             }
         }

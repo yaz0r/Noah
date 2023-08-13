@@ -629,7 +629,7 @@ sSavePointMeshAbstract* createSavePointMeshData(int mode1, int mode2, sFieldEnti
             param_3 = &createSavePointMeshData_mode5;
         }
         if (mode1 == 6) {
-            assert(0);
+            param_3 = &sFieldEntitySub4_110_8005a474;
         }
         {
             sSavePointMesh1* pNewSavePoint1 = new sSavePointMesh1;
@@ -1073,6 +1073,16 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
     case 0xA4:
         spriteActorSetPlayingAnimation(param_1->m74_pTargetEntitySprite, READ_LE_S8(param_3));
         break;
+    case 0xA5:
+    {
+        int iVar16 = READ_LE_S8(param_3) * 0x10 * (fieldDrawEnvsInitialized + 1) * (int)param_1->m82;
+        if (iVar16 < 0) {
+            iVar16 = iVar16 + 0xfff;
+        }
+        param_1->m18_moveSpeed = param_1->m18_moveSpeed + (iVar16 >> 0xc) * 0x100;
+        computeStepFromMoveSpeed(param_1); 
+    }
+    break;
     case 0xA9: // Move X
     {
         s32 magnitude = READ_LE_S8(param_3) * param_1->m2C_scale;
@@ -1166,6 +1176,11 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
             SFP_VEC4 local_70;
             switch (READ_LE_U8(param_3) & 0x3F)
             {
+            case 0:
+                local_70.vx = param_1->m74_pTargetEntitySprite->m0_position.vx.getIntegerPart();
+                local_70.vy = param_1->m74_pTargetEntitySprite->m0_position.vy.getIntegerPart();
+                local_70.vz = param_1->m74_pTargetEntitySprite->m0_position.vz.getIntegerPart();
+                break;
             case 0x16:
                 local_70.vx = param_1->m70->m0_position.vx.getIntegerPart();
                 local_70.vy = param_1->m70->m0_position.vy.getIntegerPart();
@@ -1446,7 +1461,7 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
         MissingCode();
         break;
     case 0xAC:
-        OP_INIT_ENTITY_SCRIPT_sub0Sub7(param_1, param_1->m32_direction + ((((rand() & 0xFF) * READ_LE_U32(param_3) >> 8) - READ_LE_U32(param_3) / 2) * 0x10));
+        OP_INIT_ENTITY_SCRIPT_sub0Sub7(param_1, param_1->m32_direction + ((((xenoRand() & 0xFF) * READ_LE_U32(param_3) >> 8) - READ_LE_U32(param_3) / 2) * 0x10));
         break;
 	case 0xe0:
 		spriteBytecode2ExtendedE0(param_1, param_3 + READ_LE_S16(param_3), param_1->m24_vramData);

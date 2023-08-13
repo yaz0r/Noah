@@ -675,7 +675,7 @@ void initFieldScriptEntityValues(int index)
 
     pFieldScriptEntity->m134.m5 = 0;
 
-    pFieldScriptEntity->m102_numSteps = rand();
+    pFieldScriptEntity->m102_numSteps = xenoRand();
 
     pFieldScriptEntity->mF4_scale3d[0] = 0x1000;
     pFieldScriptEntity->mF4_scale3d[1] = 0x1000;
@@ -9021,7 +9021,7 @@ int updateMusicState2(int param_1)
 
 void updateMusicState()
 {
-    rand();
+    xenoRand();
     if (fieldMusicLoadPending == -1) {
         fieldMusicLoadPending = updateMusicState2(currentlyPlayingMusic);
     }

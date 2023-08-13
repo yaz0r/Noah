@@ -215,8 +215,16 @@ int executeMonsterScriptLower(sBattleScriptExecutionContext* pScriptContext, int
     return numIterations;
 }
 
+bool executeMonsterScriptUpper_81(sBattleScriptExecutionContext* param_1, uint param_2) {
+    return monstersScriptsEntities[param_2].m30_varArray[param_1->m0_scriptPtr[1]] == param_1->m0_scriptPtr[2];
+}
+
+bool executeMonsterScriptUpper_82(sBattleScriptExecutionContext* param_1, uint param_2) {
+    return monstersScriptsEntities[param_2].m20[param_1->m0_scriptPtr[1]] == READ_LE_S16(param_1->m0_scriptPtr + 2);
+}
+
 bool monsterBattleOpcode_90(sBattleScriptExecutionContext* param_1, uint param_2) {
-    return monstersScriptsEntities[param_2].m20[param_1->m0_scriptPtr[1]] != param_1->m0_scriptPtr[2];
+    return monstersScriptsEntities[param_2].m20[param_1->m0_scriptPtr[1]] != READ_LE_S16(param_1->m0_scriptPtr + 2);
 }
 
 int executeMonsterScriptUpper(sBattleScriptExecutionContext* pScriptContext, int entityIndex) {
@@ -233,6 +241,12 @@ int executeMonsterScriptUpper(sBattleScriptExecutionContext* pScriptContext, int
         case 0x80:
         case 0x9a:
             operationResult = 1;
+            break;
+        case 0x81:
+            operationResult = executeMonsterScriptUpper_81(pScriptContext, entityIndex);
+            break;
+        case 0x82:
+            operationResult = executeMonsterScriptUpper_82(pScriptContext, entityIndex);
             break;
         default:
             assert(0);
@@ -363,7 +377,7 @@ void executeBattleCode_C(uint param_1, byte param_2)
 
 void performAttackSub3(s8 param_1, s16 param_2, s16 param_3);
 void performAttackSub6(s8 param_1);
-extern s16 battleTickMain_var4;;
+extern s16 entitiesHitInCurrentAttackBF;;
 
 void executeBattleCode_1(byte param_1, uint param_2)
 {
@@ -377,15 +391,15 @@ void executeBattleCode_1(byte param_1, uint param_2)
     performAttackSub3(param_1, battleScriptContext[param_2].m6_mask, battleScriptContext[param_2].m2);
     performAttackSub6(battleVar2->m2DA_indexInBattleVar48);
     battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m47_battleAnimationToPlay = battleScriptContext[param_2].m2;
-    battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m16_targetBitMask = battleTickMain_var4;
+    battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m16_targetBitMask = entitiesHitInCurrentAttackBF;
     executeBattleCode_attack2Sub(param_1, param_2);
-    if ((battleScriptContext[param_2].m6_mask != battleTickMain_var4) &&
+    if ((battleScriptContext[param_2].m6_mask != entitiesHitInCurrentAttackBF) &&
         (iVar2 = 0, battleVar2->m2DA_indexInBattleVar48 != 0)) {
         iVar1 = 0;
         do {
             iVar2 = iVar2 + 1;
             if (battleCurrentDamages[0].m3C[iVar1 + 0xb] == 0xfd) {
-                battleCurrentDamages[iVar1].m16_targetBitMask = battleTickMain_var4;
+                battleCurrentDamages[iVar1].m16_targetBitMask = entitiesHitInCurrentAttackBF;
                 return;
             }
             iVar1 = iVar1 + 0x48;

@@ -399,10 +399,10 @@ struct sBattle800cdd40 {
 };
 
 struct sBattle800D02C0 {
-    std::array<sBattle800CDD40Sub, 3> m0;
+    std::array<sBattle800CDD40Sub, 11> m0;
 
     void init(const std::vector<u8>& inputBuffer) {
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < m0.size(); i++) {
             m0[i].init(inputBuffer.cbegin() + 0x28 * i);
         }
     }

@@ -238,3 +238,5 @@ void HackImpl(const char* functionName);
 #define trap(...) assert(0)
 
 extern s32 gDepthDivider; // not sure yet where to put that
+
+int xenoRand();

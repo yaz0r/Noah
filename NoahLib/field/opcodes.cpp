@@ -692,7 +692,7 @@ void setInitialEncounterData()
         LAB_Field__8008e798:
 
             int s1 = 0;
-            int r = rand() * (encounterTimer + 1);
+            int r = xenoRand() * (encounterTimer + 1);
             int r2 = (r >> 0xf) & 0xffff;
 
             for (int i = 0; i < 32; i++)
@@ -792,7 +792,7 @@ void checkForRandomEncounter()
             iPreviousSum += encounterProbabilityWeight[v1];
         }
 
-        int iVar5 = (rand() * (iTotalEncounterSum + 1)) >> 0xf;
+        int iVar5 = (xenoRand() * (iTotalEncounterSum + 1)) >> 0xf;
         bool bShouldTriggerEncounter = false;
         int selectedEncounter = 0;
 
@@ -1136,7 +1136,7 @@ void OP_RAND_ROTATION()
     uVar5 = pCurrentFieldScriptActor->m106_currentRotation;
     pCurrentFieldScriptActor->m102_numSteps++;
     if ((pCurrentFieldScriptActor->m102_numSteps & 0xf) == 0) {
-        uVar4 = rand();
+        uVar4 = xenoRand();
         if ((uVar4 & 1) == 0) {
             uVar5 = pCurrentFieldScriptActor->m106_currentRotation + 0x200;
         }
@@ -1707,7 +1707,7 @@ void OP_WALK_RANDOM_DIRECTION()
     pCurrentFieldScriptActor->m102_numSteps++;
 
     if ((pCurrentFieldScriptActor->m102_numSteps & 0xf) == 0) {
-        u32 uVar4 = rand();
+        u32 uVar4 = xenoRand();
         if ((uVar4 & 0x30) == 0) {
             if ((uVar4 & 1) == 0) {
                 newRotation = pCurrentFieldScriptActor->m106_currentRotation + 0x200;
@@ -2180,7 +2180,7 @@ void OP_A8()
     int iVar2;
     int iVar3;
 
-    iVar2 = rand();
+    iVar2 = xenoRand();
     iVar3 = getImmediateOrVariableUnsigned(3);
     uVar1 = readU16FromScript(1);
     setVar(uVar1, iVar2 * (iVar3 + 1) >> 0xf);
@@ -4170,7 +4170,7 @@ void OP_SET_VAR_DEC(void)
 
 void OP_SET_VAR_RANDOM()
 {
-    setVar(readU16FromScript(1), rand());
+    setVar(readU16FromScript(1), xenoRand());
     ADVANCE_VM(0x3);
 }
 

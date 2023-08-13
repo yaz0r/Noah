@@ -315,3 +315,10 @@ void UnimplementedImpl(const char* functionName) {
 void HackImpl(const char* functionName) {
     Noah_Logger[eLogCategories::log_hacks].AddLog("Hack in %s\n", functionName);
 }
+
+uint randSeed = 0;
+
+int xenoRand() {
+    randSeed = randSeed * 0x41c64e6d + 0x3039;
+    return randSeed >> 0x10 & 0x7fff;
+}

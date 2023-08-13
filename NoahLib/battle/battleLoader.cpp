@@ -413,11 +413,11 @@ u32 getRandomValueInRange(u32 param_1, u32 param_2)
             uVar1 = uVar2;
             if (uVar2 != param_2) {
                 if ((int)(param_2 - uVar2) < 0xff) {
-                    uVar1 = rand();
+                    uVar1 = xenoRand();
                     uVar1 = param_1 + (int)(uVar1 & 0xff) % (int)((param_2 - uVar2) + 1) & 0xff;
                 }
                 else {
-                    uVar1 = rand();
+                    uVar1 = xenoRand();
                     uVar1 = uVar1 & 0xff;
                 }
             }
@@ -465,7 +465,7 @@ u32 battleGetSlotStatusSub(u32 param_1) {
         result2 = 0xa0;
     }
     result2 = 0xa5 - result2;
-    u32 randVar1 = rand();
+    u32 randVar1 = xenoRand();
     u32 randVar2 = randVar1;
     if (randVar1 < 0) {
         randVar2 = randVar1 + 7;

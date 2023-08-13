@@ -199,7 +199,7 @@ void deleteParticleEffect(int param_1) {
 
 int evalParticleRange(int param_1)
 {
-    return rand() * param_1 + 1 >> 0xf;
+    return xenoRand() * param_1 + 1 >> 0xf;
 }
 
 static const std::array<u8, 8> cameraToParticleMapping = { {
@@ -215,7 +215,7 @@ void spawnParticle(sParticleConfig* pParticleEffect, sParticle* pParticle, int* 
         pParticle->m6 = pParticleEffect->m76_rotationAngle;
     }
     else {
-        pParticle->m6 = (ushort)rand() & 0xfff;
+        pParticle->m6 = (ushort)xenoRand() & 0xfff;
     }
 
     s32 uVar6;

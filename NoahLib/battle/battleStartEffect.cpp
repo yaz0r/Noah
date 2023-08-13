@@ -62,7 +62,7 @@ sBattleStartEffect* initBattleStartEffect(sBattleStartEffect* param_1) {
                 }
 
                 effectGravity.vz = -0x1f40000;
-                s32 randValue = rand();
+                s32 randValue = xenoRand();
                 effectGravity.vz = effectGravity.vz + ((randValue / 1000) * 1000 - randValue) * 0x10000;
 
                 VECTOR local_90;
@@ -91,13 +91,13 @@ sBattleStartEffect* initBattleStartEffect(sBattleStartEffect* param_1) {
                     s32 y = (pSub->m10_position).vy;
                     s32 x = (pSub->m10_position).vx;
                     s32 ratan2Value = ratan2(y, x);
-                    s32 iVar5 = rand();
+                    s32 iVar5 = xenoRand();
                     s32 iVar4 = iVar5;
                     if (iVar5 < 0) {
                         iVar4 = iVar5 + 0x3ff;
                     }
                     s32 iVar9 = (lVar3 << 0xb) / local_58;
-                    s32 iVar6 = rand();
+                    s32 iVar6 = xenoRand();
                     s32 l = iVar6;
                     if (iVar6 < 0) {
                         l = iVar6 + 0x3f;
@@ -110,18 +110,18 @@ sBattleStartEffect* initBattleStartEffect(sBattleStartEffect* param_1) {
                     RotMatrixZYX(&local_80, &MStack120);
                     ApplyMatrixLV(&MStack120, &effectGravity, &pSub->m68_velocity);
 
-                    iVar4 = rand();
+                    iVar4 = xenoRand();
                     s8 bVar1 = (byte)(k*0x10) & 0x3f;
                     s32 uVar8 = bVar1 + 0x10;
                     iVar5 = 0x24;
                     s32 uVar7 = (char)local_4c + '\x10';
                     pSub->m78_gravity = (iVar4 % 0x640) * -0x100 + 0x70800;
                     s32 local_40 = k * 0x10;
-                    iVar4 = rand();
+                    iVar4 = xenoRand();
                     (pSub->m8_rotationStep).vx = ((ushort)iVar4 & 0xff) - 0x7f;
-                    iVar4 = rand();
+                    iVar4 = xenoRand();
                     (pSub->m8_rotationStep).vy = ((ushort)iVar4 & 0xff) - 0x7f;
-                    iVar4 = rand();
+                    iVar4 = xenoRand();
                     (pSub->m8_rotationStep).vz = ((ushort)iVar4 & 0x1ff) - 0xff;
 
                     for (l = 0; l < 2; l++) {
