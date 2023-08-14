@@ -1,7 +1,7 @@
 #pragma once
 
-extern u16 damageDisplayVar0;
-extern u16 damageDisplayVar1;
+extern s16 damageDisplayVar0;
+extern s16 damageDisplayVar1;
 
 struct sDamageDisplaySub0 {
     std::array<s16, 2> m0_screenPosition;

@@ -361,7 +361,7 @@ extern std::array<sUnkMonsterStatus, 8> unknownMonsterStatus0;
 
 struct sBattle800CDD40Sub {
     s16 m2;
-    u16 mA;
+    s16 mA;
     s8 m10;
     s8 m11;
     s8 m15;
@@ -388,11 +388,13 @@ struct sBattle800CDD40Sub {
 };
 struct sBattle800cdd40 {
     std::array<sBattle800CDD40Sub, 11> m0;
+    sBattle800CDD40Sub m320;
 
     void init(const std::vector<u8>& inputBuffer) {
         for (int i = 0; i < 11; i++) {
             m0[i].init(inputBuffer.cbegin() + 0x28 * i);
         }
+        m320.init(inputBuffer.cbegin() + 0x320);
     }
 
     // size 0x5f0
@@ -430,7 +432,7 @@ extern sBattle800CDD40Sub* currentEntityBattleStats;
 
 extern std::array<sBattle800cdd40, 3> partyBattleStats;
 extern sBattle800D02C0 enemiesBattleStats;
-extern sBattleEntity* battleGetSlotStatusSub_currentBattleEntity;
+extern sGameStateA4* battleGetSlotStatusSub_currentBattleEntity;
 extern sGameStateA42* battleGetSlotStatusSub_currentBattleEntityGear;
 extern u16 jumpAnimationActiveActorBF;
 

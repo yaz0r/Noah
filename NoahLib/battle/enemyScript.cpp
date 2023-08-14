@@ -70,7 +70,7 @@ bool isMonsterTargetValid(uint param_1, char param_2) {
 u32 getRandomValueInRange(u32 param_1, u32 param_2);
 
 void monsterBattleOpcode_40(sBattleScriptExecutionContext* param_1, uint param_2) {
-    std::array<u8, 3> local_28;
+    std::array<u8, 3> local_28 = { 0,0,0 };
     monstersScriptsEntities[param_2].m20[param_1->m0_scriptPtr[1]] = 0;
     do {
         u32 uVar3 = getRandomValueInRange(0, 2);
@@ -87,7 +87,7 @@ void monsterBattleOpcode_40(sBattleScriptExecutionContext* param_1, uint param_2
 }
 
 void monsterBattleOpcode_41(sBattleScriptExecutionContext* param_1, uint param_2) {
-    std::array<u8, 3> local_28;
+    std::array<u8, 3> local_28 = { 0,0,0 };
     monstersScriptsEntities[param_2].m20[param_1->m0_scriptPtr[1]] = 0;
     do {
         u32 uVar3 = getRandomValueInRange(0, 2);
@@ -106,7 +106,7 @@ void monsterBattleOpcode_41(sBattleScriptExecutionContext* param_1, uint param_2
 }
 
 void monsterBattleOpcode_43(sBattleScriptExecutionContext* param_1, uint param_2) {
-    std::array<u8, 3> local_28;
+    std::array<u8, 3> local_28 = { 0,0,0 };
     monstersScriptsEntities[param_2].m20[param_1->m0_scriptPtr[1]] = 0;
     do {
         u32 uVar3 = getRandomValueInRange(0, 2);
@@ -156,9 +156,15 @@ void monsterBattleOpcode_3E(sBattleScriptExecutionContext* param_1, uint param_2
 }
 
 void monsterBattleOpcode_52(sBattleScriptExecutionContext* param_1, std::array<sBattleScriptContext, 32>& param_2, uint param_3, uint param_4) {
-    s16 uVar1 = monstersScriptsEntities[param_3].m20[param_1->m0_scriptPtr[2]];
-    (&param_2[param_4 & 0xff].m0_attackType)[param_1->m0_scriptPtr[1]] = (byte)uVar1;
-    (&param_2[param_4 & 0xff].m1)[param_1->m0_scriptPtr[1]] = (char)((ushort)uVar1 >> 8);
+    s16 value = monstersScriptsEntities[param_3].m20[param_1->m0_scriptPtr[2]];
+    
+    switch (param_1->m0_scriptPtr[1]) {
+    case 6:
+        param_2[param_4 & 0xff].m6_mask = value;
+        break;
+    default:
+        assert(0);
+    }
 }
 
 void monsterBattleOpcode_64(sBattleScriptExecutionContext* param_1, uint param_2) {
@@ -382,8 +388,7 @@ extern s16 entitiesHitInCurrentAttackBF;;
 void executeBattleCode_1(byte param_1, uint param_2)
 {
     int iVar1;
-    int iVar2;
-
+    
     param_2 = param_2 & 0xff;
     //FUN_Battle__8007893c(param_2, param_1);
     MissingCode();
@@ -393,17 +398,14 @@ void executeBattleCode_1(byte param_1, uint param_2)
     battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m47_battleAnimationToPlay = battleScriptContext[param_2].m2;
     battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m16_targetBitMask = entitiesHitInCurrentAttackBF;
     executeBattleCode_attack2Sub(param_1, param_2);
-    if ((battleScriptContext[param_2].m6_mask != entitiesHitInCurrentAttackBF) &&
-        (iVar2 = 0, battleVar2->m2DA_indexInBattleVar48 != 0)) {
-        iVar1 = 0;
-        do {
-            iVar2 = iVar2 + 1;
-            if (battleCurrentDamages[0].m3C[iVar1 + 0xb] == 0xfd) {
-                battleCurrentDamages[iVar1].m16_targetBitMask = entitiesHitInCurrentAttackBF;
+    if (battleScriptContext[param_2].m6_mask != entitiesHitInCurrentAttackBF)
+    {
+        for (int i = 0; i < battleVar2->m2DA_indexInBattleVar48; i++) {
+            if (battleCurrentDamages[i].m47_battleAnimationToPlay == -3) {
+                battleCurrentDamages[i].m16_targetBitMask = entitiesHitInCurrentAttackBF;
                 return;
             }
-            iVar1 = iVar1 + 0x48;
-        } while (iVar2 < (int)(uint)battleVar2->m2DA_indexInBattleVar48);
+        }
     }
     return;
 }

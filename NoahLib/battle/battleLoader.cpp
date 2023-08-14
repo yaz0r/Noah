@@ -149,7 +149,7 @@ void loadPartyMembers() {
         }
     }
 
-    enemiesBattleStats.init(mallocAndDecompress(relocatedPointer[2]));
+    enemiesBattleStats.init(mallocAndDecompress(relocatedPointer[3]));
 
     Noah_MissingCode("battle800D2200");
 
@@ -434,7 +434,7 @@ void updatePlayerWithStatusC000And2() {
 
 u32 battleGetSlotStatusSub(u32 param_1) {
     u32 entityIndex = param_1 & 0xFF;
-    battleGetSlotStatusSub_currentBattleEntity = &battleEntities[entityIndex];
+    battleGetSlotStatusSub_currentBattleEntity = &battleEntities[entityIndex].m0_base;
     battleGetSlotStatusSub_currentBattleEntityGear = &battleEntities[entityIndex].mA4_gear;
 
     u32 result2;

@@ -4,8 +4,8 @@
 #include "damageDisplay.h"
 #include "damageDisplay2.h"
 
-u16 damageDisplayVar0 = 0;
-u16 damageDisplayVar1 = 0;
+s16 damageDisplayVar0 = 0;
+s16 damageDisplayVar1 = 0;
 
 struct sDamageDisplayTask : public sTaskHeaderPair {
     sDamageDisplayTask* m38_pNext;
@@ -161,6 +161,7 @@ int setupDamagePoly(sFont fontData, int character, sDamageDisplaySub0* param_3, 
 
         param_3->m0_screenPosition[0] = poly.m8_width + param_4;
         param_3->m0_screenPosition[1] = poly.mA_height + param_5;
+        param_3++;
     }
 
     return fontData.m4[character].m0_polyCount;
@@ -257,6 +258,17 @@ void drawDamageDisplayTask(sTaskHeader* param_1) {
     }
 }
 
+void damageMissUpdate(sTaskHeader* param_1) {
+    sDamageDisplayTask* pTask = (sDamageDisplayTask*)param_1;
+    updateDamageDisplayPolys();
+    (pTask->m80_colorAndCode).m0_r = (pTask->m80_colorAndCode).m0_r - 2;
+    (pTask->m80_colorAndCode).m1_g = (pTask->m80_colorAndCode).m1_g - 2;
+    (pTask->m80_colorAndCode).m2_b = (pTask->m80_colorAndCode).m2_b - 2;
+    if (--pTask->m88_timer < 0) {
+        pTask->mC_deleteCallback(pTask);
+    }
+}
+
 void createDamageDisplay(sSpriteActorCore* param_1, int damageValue, int damageType) {
     if (jumpAnimationControlStruct == nullptr) {
         return;
@@ -269,7 +281,11 @@ void createDamageDisplay(sSpriteActorCore* param_1, int damageValue, int damageT
     {
         sDamageDisplayTask* pCurrentDamageTask = damageTaskDisplayListHead;
         while (pCurrentDamageTask) {
-            assert(0);
+            sDamageDisplayTask* pNext = pCurrentDamageTask->m38_pNext;
+            if (pCurrentDamageTask->m78 == param_1) {
+                pCurrentDamageTask->mC_deleteCallback(pCurrentDamageTask);
+            }
+            pCurrentDamageTask = pNext;
         }
     }
 
@@ -305,6 +321,12 @@ void createDamageDisplay(sSpriteActorCore* param_1, int damageValue, int damageT
 
     switch (damageType) {
     case 0:
+        break;
+    case 4: // miss
+        pNewDamageTask->m88_timer = 0x40;
+        pNewDamageTask->m8C_damageStringLength = setupDamagePoly(battleFont, 0x7c, &pNewDamageTask->m90[0], -20, -16);
+        (pNewDamageTask->m80_colorAndCode).m3_code = (pNewDamageTask->m80_colorAndCode).m3_code & 0xfe | 2;
+        setTaskUpdateFunction(pNewDamageTask, damageMissUpdate);
         break;
     case 5:
         (pNewDamageTask->m80_colorAndCode).m0_r = 0x80;
@@ -357,7 +379,9 @@ void updateDamageDisplayPolys() {
     (pTarget->m38_transformedPos).vz = 0;
 
     switch (damageDisplayVar1) {
+    case -1:
     case 0:
+    case 4:
     case 5:
         pTarget->m50[0].m10.m0_r = 0x80;
         pTarget->m50[0].m10.m1_g = 0x80;
