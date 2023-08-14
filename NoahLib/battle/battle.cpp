@@ -5586,6 +5586,11 @@ void init8920() {
 }
 
 void battleMain() {
+
+#if 0
+    randSeed = 0x73D63221;
+#endif
+
     battleVar0 = new sBattleVar0;
     battleVar1 = new sBattleVar1;
     battleVar2 = new sBattleVar2;

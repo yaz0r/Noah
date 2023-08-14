@@ -240,3 +240,5 @@ void HackImpl(const char* functionName);
 extern s32 gDepthDivider; // not sure yet where to put that
 
 int xenoRand();
+
+extern uint randSeed;
