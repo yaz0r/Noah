@@ -333,8 +333,10 @@ void initBattleInventory(void) {
     MissingCode();
 }
 
-std::array<std::array<u8, 8>, 1> battleCommandsSetups = { {
+std::array<std::array<u8, 8>, 3> battleCommandsSetups = { {
     {0x1E, 0x1C, 0x22, 0x25, 0x2C, 0x1C, 0x1A, 0x2E},
+    {0x1E, 0x1C, 0x22, 0x24, 0x2C, 0x1C, 0x1A, 0x2E},
+    {0x1E, 0x1C, 0x22, 0x26, 0x2C, 0x1C, 0x1A, 0x2E},
 } };
 
 void batteLoaderPhase2_2() {
@@ -440,7 +442,7 @@ u32 battleGetSlotStatusSub(u32 param_1) {
     if (entityIndex < 3) {
         if ((battleEntities[entityIndex].m15A_flags & 0x80) == 0) {
             currentEntityBattleStats = &partyBattleStats[entityIndex].m0[battleGetSlotStatusSub_current28Index];
-            s32 index2 = battleEntities[entityIndex].m0_base.m5A;
+            s32 index2 = battleEntities[entityIndex].m0_base.m5A_agility;
             s32 result = index2 - currentEntityBattleStats->m27;
             if ((int)(char)currentEntityBattleStats->m27 < (int)index2) {
                 s32 randVar2 = result * 8;
@@ -456,7 +458,7 @@ u32 battleGetSlotStatusSub(u32 param_1) {
         
     }
     else {
-        s32 result = (uint)(byte)battleEntities[entityIndex].m0_base.m5A;
+        s32 result = (uint)(byte)battleEntities[entityIndex].m0_base.m5A_agility;
         s32 randVar2 = result << 3;
         result2 = randVar2 + result;
     }

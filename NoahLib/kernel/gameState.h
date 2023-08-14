@@ -32,7 +32,7 @@ struct sGameStateA4
         m56_battleCommandLoadout = READ_LE_S8(buffer + 0x56);
         m58_attack = READ_LE_S8(buffer + 0x58);
         m59_defence = READ_LE_S8(buffer + 0x59);
-        m5A = READ_LE_S8(buffer + 0x5A);
+        m5A_agility = READ_LE_S8(buffer + 0x5A);
         m5B_ether = READ_LE_S8(buffer + 0x5B);
         m5C_etherDefence = READ_LE_S8(buffer + 0x5C);
         m5E_hitPercentage = READ_LE_S8(buffer + 0x5E);
@@ -73,7 +73,7 @@ struct sGameStateA4
     s8 m56_battleCommandLoadout;
     s8 m58_attack;
     s8 m59_defence;
-    s8 m5A;
+    s8 m5A_agility;
     s8 m5B_ether;
     s8 m5C_etherDefence;
     s8 m5E_hitPercentage;
@@ -138,7 +138,7 @@ struct sGameStateSize20 {
 struct sGameState
 {
     void deserialize(std::vector<u8>& rawGameState) {
-        for (int i = 0; i < m26C_party.size(); i++) m26C_party[i].deserialize(rawGameState.begin() + 0x294 + i * 0xA4);
+        for (int i = 0; i < m26C_party.size(); i++) m26C_party[i].deserialize(rawGameState.begin() + 0x26C + i * 0xA4);
         for (int i = 0; i < m978_gears.size(); i++) m978_gears[i].deserialize(rawGameState.begin() + 0x978 + i * 0xA4);
         for (int i = 0; i < m16C0.size(); i++) m16C0[i].deserialize(rawGameState.begin() + 0x16C0 + i * 0x20);
         m1924_Gold = READ_LE_U32(rawGameState.begin() + 0x1924);
