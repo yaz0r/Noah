@@ -206,7 +206,13 @@ std::array<std::array<u8, 4>, 32> battleSlotLayout;
 
 u16 characterIdToTargetBitmask(uint param_1)
 {
-    return bitmaskCharacter[param_1 & 0xff];
+    if (param_1 == 0xFF) {
+        Hack("Prevented out of bound access");
+        return 0;
+    }
+    else {
+        return bitmaskCharacter[param_1 & 0xff];
+    }
 }
 
 std::array<s8, 11> battleMonsterMapping;

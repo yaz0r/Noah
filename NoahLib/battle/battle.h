@@ -63,9 +63,11 @@ enum eActiveBattleMenu : s8 {
 struct sBattleVar2 {
     std::array<sBattleVar2Sub, 11> m0;
     std::array<u8, 4> m2C0_circleMenuCommandsNames;
+    std::array<s8, 7> m2CC;
     u8 m2D3_currentEntityTurn;
     u8 m2D4_remainingAP;
     u8 m2D5_maxAP;
+    u8 m2D6;
     u8 m2DA_indexInBattleVar48;
     u8 m2DB;
     u8 m2DC;
@@ -78,6 +80,7 @@ struct sBattleVar2 {
     u8 m2E3;
     u8 m2E4;
     u8 m2E5;
+    u8 m2E7;
     u8 m2E8_currentTarget;
     u8 m2E9;
     u8 m2EA;
