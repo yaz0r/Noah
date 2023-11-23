@@ -9,6 +9,10 @@
 #include <bx/math.h>
 #include <bx/timer.h>
 
+#ifndef IMGUI_DEFINE_MATH_OPERATORS
+#define IMGUI_DEFINE_MATH_OPERATORS
+#endif
+
 //#include <../3rdparty/dear-imgui/imgui_user.h>
 #include "imguiBGFX.h"
 
@@ -16,9 +20,7 @@
 //#include <../3rdparty/dear-imgui/widgets/file_list.h>
 //#include <../3rdparty/dear-imgui/widgets/gizmo.h>
 
-#ifndef IMGUI_DEFINE_MATH_OPERATORS
-#define IMGUI_DEFINE_MATH_OPERATORS
-#endif
+
 #include <imgui_internal.h>
 #include <../3rdparty/dear-imgui/widgets/dock.inl>
 //#include <../3rdparty/dear-imgui/widgets/gizmo.inl>
@@ -448,7 +450,7 @@ struct OcornutImguiContext
         for (int i = 1; i < platform_io.Viewports.Size; i++)
         {
             ImGuiViewport* viewport = platform_io.Viewports[i];
-            if (viewport->Flags & ImGuiViewportFlags_Minimized)
+            if (viewport->Flags & ImGuiViewportFlags_IsMinimized)
                 continue;
             //if (platform_io.Platform_RenderWindow) platform_io.Platform_RenderWindow(viewport, platform_render_arg);
             //if (platform_io.Renderer_RenderWindow) platform_io.Renderer_RenderWindow(viewport, renderer_render_arg);
@@ -456,7 +458,7 @@ struct OcornutImguiContext
         for (int i = 1; i < platform_io.Viewports.Size; i++)
         {
             ImGuiViewport* viewport = platform_io.Viewports[i];
-            if (viewport->Flags & ImGuiViewportFlags_Minimized)
+            if (viewport->Flags & ImGuiViewportFlags_IsMinimized)
                 continue;
             //if (platform_io.Platform_SwapBuffers) platform_io.Platform_SwapBuffers(viewport, platform_render_arg);
             //if (platform_io.Renderer_SwapBuffers) platform_io.Renderer_SwapBuffers(viewport, renderer_render_arg);

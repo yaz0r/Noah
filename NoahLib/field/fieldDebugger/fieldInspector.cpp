@@ -1555,7 +1555,7 @@ void fieldInspector_frame()
 
         static int selectedField = 0;
         ImGui::SetNextItemWidth(500);
-        if (ImGui::ListBoxHeader("Field list"))
+        if (ImGui::BeginListBox("Field list"))
         {
             for (int i=0; i<visibleFields.size(); i++)
             {
@@ -1575,7 +1575,7 @@ void fieldInspector_frame()
                 }
 
             }
-            ImGui::ListBoxFooter();
+            ImGui::EndListBox();
         }
 
         if (ImGui::Button("Go!"))

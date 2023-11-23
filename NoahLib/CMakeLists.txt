@@ -33,7 +33,7 @@ set(SOURCES
  "${THIRD_PARTY}/imgui/imgui_draw.cpp"
  "${THIRD_PARTY}/imgui/imgui_tables.cpp"
  "${THIRD_PARTY}/imgui/imgui_widgets.cpp"
- "${THIRD_PARTY}/imgui/backends/imgui_impl_sdl.cpp"
+ "${THIRD_PARTY}/imgui/backends/imgui_impl_sdl2.cpp"
 
  "${THIRD_PARTY}/tinyxml2/tinyxml2.cpp"
  "${THIRD_PARTY}/tinyxml2/tinyxml2.h"
