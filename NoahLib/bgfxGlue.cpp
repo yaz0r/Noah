@@ -2,7 +2,7 @@
 #include <SDL_syswm.h>
 #include <bgfx/bgfx.h>
 #include <bx/platform.h>
-#include <backends/imgui_impl_sdl.h>
+#include <backends/imgui_impl_sdl2.h>
 #include "imguiBGFX.h"
 
 #include "noahLib.h"
