@@ -12,6 +12,8 @@
 #include "field/field.h"
 #include "field/mecha/mechaOverlay.h"
 
+#include <tgmath.h>
+
 int fieldDebugger_bgfxView = 1;
 
 bgfx::FrameBufferHandle fieldDebugger_FB = BGFX_INVALID_HANDLE;
