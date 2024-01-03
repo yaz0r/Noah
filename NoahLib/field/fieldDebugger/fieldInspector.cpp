@@ -101,18 +101,6 @@ public:
         ImGui::End();
     }
 
-    void dump(const std::vector<u8>& buffer, const char* outputName)
-    {
-        FILE* fHandle = nullptr;
-        fopen_s(&fHandle, outputName, "wb+");
-        if (fHandle)
-        {
-            fwrite(&buffer[0], 1, buffer.size(), fHandle);
-
-            fclose(fHandle);
-        }
-    }
-
     void fieldInspector_info()
     {
         ImGui::Text("Num image bundle 1 entries: %d", READ_LE_U32(rawFieldImageBundle.begin()));
