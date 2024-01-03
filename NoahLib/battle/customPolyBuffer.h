@@ -53,8 +53,7 @@ struct sCustomPolySubBuffer {
 
 struct sCustomPolyBuffer {
     sCustomPolyBuffer(u8* rawBuffer, u32 rawBufferSize) {
-        buffer.resize(rawBufferSize);
-        memcpy(&buffer[0], rawBuffer, rawBufferSize);
+        buffer.insert(buffer.begin(), rawBuffer, rawBuffer + rawBufferSize),
 
         m8_count = READ_LE_U16(buffer.begin() + 0x8);
         mC_buffers.resize(m8_count);
