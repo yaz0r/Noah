@@ -582,12 +582,6 @@ int battleSetupStringInPolyFT4Large(int character, std::array<POLY_FT4, 2>* poly
     return setupStringInPolyFT4(battleFont, character, polyArray, battleOddOrEven, x, y, 0x1000);
 }
 
-void battleSetupTextPolySub(POLY_FT4* param_1)
-{
-    SetSemiTrans(param_1, 1);
-    SetShadeTex(param_1, 0);
-}
-
 void battleSetupTextPoly(POLY_FT4* param_1) {
     battleSetupTextPolySub(param_1);
     param_1->r0 = '@';

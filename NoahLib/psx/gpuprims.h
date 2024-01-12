@@ -379,7 +379,7 @@ struct POLY_G4 : public sTag
         sVec2_s16 x3y3;
     };
 
-    void execute() {}
+    void execute();
 };
 
 struct LINE_F2 : public sTag

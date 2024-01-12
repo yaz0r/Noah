@@ -133,8 +133,8 @@ struct sBattleVar0 {
     std::array<std::array<std::array<POLY_FT4, 2>, 4>, 3> m6008;
     std::array<POLY_F4, 2> m63C8;
     std::array<DR_MODE, 2> m63F8;
-    s32 m6410 = 0;
-    u8 m6414 = 0;
+    s32 m6410;
+    u8 m6414;
     u8 m6415;
     u8 m6416;
     std::array<std::array<std::array<POLY_FT4, 2>, 50>, 2> m641C;
@@ -473,3 +473,4 @@ void performAttackSub2();
 void idleBattleDuringLoading(void);
 int battleRenderDebugAndMain(void);
 void initBattleG3Array(void);
+void battleSetupTextPolySub(POLY_FT4* param_1);

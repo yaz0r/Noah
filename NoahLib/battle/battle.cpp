@@ -1355,15 +1355,15 @@ void battleDrawAPBar() {
     for (int i = 0; i < 7; i++) {
         if (battleVar1->mB0_isDialogWindowInitialized[i]) {
             auto* pWindows = battleDialogWindows[i];
-            battleRenderPolyArray(&pWindows->m0[0], battleDialogWindows[i]->m5A0, pWindows->m5A4_oddOrEven);
-            AddPrim(&(*pCurrentBattleOT)[1], &pWindows->m280_poly3[0][pWindows->m5A4_oddOrEven]);
-            AddPrim(&(*pCurrentBattleOT)[1], &pWindows->m280_poly3[1][pWindows->m5A4_oddOrEven]);
-            AddPrim(&(*pCurrentBattleOT)[1], &pWindows->m320_poly4[0][pWindows->m5A4_oddOrEven]);
-            AddPrim(&(*pCurrentBattleOT)[1], &pWindows->m320_poly4[1][pWindows->m5A4_oddOrEven]);
-            AddPrim(&(*pCurrentBattleOT)[1], &pWindows->m140_poly1[0][pWindows->m5A4_oddOrEven]);
-            AddPrim(&(*pCurrentBattleOT)[1], &pWindows->m140_poly1[1][pWindows->m5A4_oddOrEven]);
-            AddPrim(&(*pCurrentBattleOT)[1], &pWindows->m1E0_poly2[0][pWindows->m5A4_oddOrEven]);
-            AddPrim(&(*pCurrentBattleOT)[1], &pWindows->m1E0_poly2[1][pWindows->m5A4_oddOrEven]);
+            battleRenderPolyArray(&pWindows->m0_corners[0], battleDialogWindows[i]->m5A0, pWindows->m5A4_oddOrEven);
+            AddPrim(&(*pCurrentBattleOT)[1], &pWindows->m280[0][pWindows->m5A4_oddOrEven]);
+            AddPrim(&(*pCurrentBattleOT)[1], &pWindows->m280[1][pWindows->m5A4_oddOrEven]);
+            AddPrim(&(*pCurrentBattleOT)[1], &pWindows->m320[0][pWindows->m5A4_oddOrEven]);
+            AddPrim(&(*pCurrentBattleOT)[1], &pWindows->m320[1][pWindows->m5A4_oddOrEven]);
+            AddPrim(&(*pCurrentBattleOT)[1], &pWindows->m140[0][pWindows->m5A4_oddOrEven]);
+            AddPrim(&(*pCurrentBattleOT)[1], &pWindows->m140[1][pWindows->m5A4_oddOrEven]);
+            AddPrim(&(*pCurrentBattleOT)[1], &pWindows->m1E0[0][pWindows->m5A4_oddOrEven]);
+            AddPrim(&(*pCurrentBattleOT)[1], &pWindows->m1E0[1][pWindows->m5A4_oddOrEven]);
             AddPrim(&(*pCurrentBattleOT)[1], &pWindows->m3C0_polyG4[pWindows->m5A4_oddOrEven]);
             AddPrim(&(*pCurrentBattleOT)[1], &pWindows->m408_drawMode[pWindows->m5A4_oddOrEven]);
         }
@@ -1662,7 +1662,7 @@ void updatePolyArray3A88() {
 
 void drawBattleMode1() {
     if (!drawBattleMode1Disabled) {
-        MissingCode();
+        drawBattleDialogWindows();
         updatePolyArray3A88();
         renderGearHP();
         updatePortraits();
@@ -1674,10 +1674,6 @@ void drawBattleMode1() {
         battleDrawAPBar();
         MissingCode();
     }
-}
-
-void drawBattleDialogWindows() {
-    MissingCode();
 }
 
 void battleResultDraw(void) {
@@ -5656,17 +5652,31 @@ void battleTickGameplay() {
     }
 }
 
+
+void computeMenuBorder(sFont& param_1, int param_2, int* param_3, int* param_4, int* param_5, int* param_6, int* param_7, int* param_8);
+
 void init8920() {
     MissingCode();
+    computeMenuBorder(battleFont, 0x4b, &battleVar0->mA234[1].m0, &battleVar0->mA234[1].m4_tpage_tp, &battleVar0->mA234[1].m8_clutX, &battleVar0->mA234[1].mC_clutY, &battleVar0->mA234[1].m10_tpage_X, &battleVar0->mA234[1].m14_tpage_Y);
+    computeMenuBorder(battleFont, 0x50, &battleVar0->mA234[2].m0, &battleVar0->mA234[2].m4_tpage_tp, &battleVar0->mA234[2].m8_clutX, &battleVar0->mA234[2].mC_clutY, &battleVar0->mA234[2].m10_tpage_X, &battleVar0->mA234[2].m14_tpage_Y);
+    computeMenuBorder(battleFont, 0x4d, &battleVar0->mA234[3].m0, &battleVar0->mA234[3].m4_tpage_tp, &battleVar0->mA234[3].m8_clutX, &battleVar0->mA234[3].mC_clutY, &battleVar0->mA234[3].m10_tpage_X, &battleVar0->mA234[3].m14_tpage_Y);
+    computeMenuBorder(battleFont, 0x4e, &battleVar0->mA234[4].m0, &battleVar0->mA234[4].m4_tpage_tp, &battleVar0->mA234[4].m8_clutX, &battleVar0->mA234[4].mC_clutY, &battleVar0->mA234[4].m10_tpage_X, &battleVar0->mA234[4].m14_tpage_Y);
+    battleVar1->m0.y = 0;
+    battleVar1->m0.x = 0;
+    battleVar1->m0.h = 0x100;
+    battleVar1->m0.w = 0x100;
 
-    (battleVar1->m0).y = 0;
-    (battleVar1->m0).x = 0;
-    (battleVar1->m0).h = 0x100;
-    (battleVar1->m0).w = 0x100;
+    battleVar1->m8.x = (battleVar0->mA234[0].m10_tpage_X & 0x3F) * 2;
+    battleVar1->m8.y = battleVar0->mA234[0].m14_tpage_Y;
+    battleVar1->m8.h = 0x100;
+    battleVar1->m8.w = 0x100;
 
     battleVar0->mA234[1].m10_tpage_X = 0x3c0;
+    battleVar0->mA234[2].m10_tpage_X = 0x3c8;
+
     MissingCode();
     battleVar0->mA234[1].m14_tpage_Y = 0x34;
+    battleVar0->mA234[2].m14_tpage_Y = 0x34;
     MissingCode();
 
     (battleVar1->m8).x = ((battleVar0->mA234[0].m10_tpage_X & 0x3f) << 1);
@@ -5692,7 +5702,7 @@ void battleMain() {
     battleVar1 = new sBattleVar1;
     battleVar2 = new sBattleVar2;
 
-    //memset(battleVar0, 0, sizeof(sBattleVar0));
+    memset(battleVar0, 0, sizeof(sBattleVar0));
     memset(battleVar1, 0, sizeof(sBattleVar1));
     memset(battleVar2, 0, sizeof(sBattleVar2));
 
@@ -5995,6 +6005,12 @@ void idleBattleDuringLoading(void)
         battleRenderDebugAndMain();
     }
     return;
+}
+
+void battleSetupTextPolySub(POLY_FT4* param_1)
+{
+    SetSemiTrans(param_1, 1);
+    SetShadeTex(param_1, 0);
 }
 
 void executeSpriteBytecode2_battle(sSpriteActorCore* param_1) {
