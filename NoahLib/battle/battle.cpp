@@ -19,6 +19,9 @@
 #include "battle/damageDisplay.h"
 #include "battle/damageDisplay2.h"
 #include "battle/enemyScript.h"
+#include "battle/battleDialogWindow.h"
+
+#include "battle/menu_chi.h"
 
 u16 allPlayerCharacterBitmask = 0;
 u8 battleInitVar0 = 0;
@@ -1351,7 +1354,18 @@ void battleDrawAPBar() {
 
     for (int i = 0; i < 7; i++) {
         if (battleVar1->mB0_isDialogWindowInitialized[i]) {
-            MissingCode();
+            auto* pWindows = battleDialogWindows[i];
+            battleRenderPolyArray(&pWindows->m0[0], battleDialogWindows[i]->m5A0, pWindows->m5A4_oddOrEven);
+            AddPrim(&(*pCurrentBattleOT)[1], &pWindows->m280_poly3[0][pWindows->m5A4_oddOrEven]);
+            AddPrim(&(*pCurrentBattleOT)[1], &pWindows->m280_poly3[1][pWindows->m5A4_oddOrEven]);
+            AddPrim(&(*pCurrentBattleOT)[1], &pWindows->m320_poly4[0][pWindows->m5A4_oddOrEven]);
+            AddPrim(&(*pCurrentBattleOT)[1], &pWindows->m320_poly4[1][pWindows->m5A4_oddOrEven]);
+            AddPrim(&(*pCurrentBattleOT)[1], &pWindows->m140_poly1[0][pWindows->m5A4_oddOrEven]);
+            AddPrim(&(*pCurrentBattleOT)[1], &pWindows->m140_poly1[1][pWindows->m5A4_oddOrEven]);
+            AddPrim(&(*pCurrentBattleOT)[1], &pWindows->m1E0_poly2[0][pWindows->m5A4_oddOrEven]);
+            AddPrim(&(*pCurrentBattleOT)[1], &pWindows->m1E0_poly2[1][pWindows->m5A4_oddOrEven]);
+            AddPrim(&(*pCurrentBattleOT)[1], &pWindows->m3C0_polyG4[pWindows->m5A4_oddOrEven]);
+            AddPrim(&(*pCurrentBattleOT)[1], &pWindows->m408_drawMode[pWindows->m5A4_oddOrEven]);
         }
     }
 }
@@ -1989,50 +2003,6 @@ void battleSoundEffect2(u32) {
     MissingCode();
 }
 
-void drawCircleMenuChi(int param_1) {
-    switch (battleInputButton) {
-    case 0:
-        if (battleVar2->m0[param_1].m1C_isCommandEnabled[9] == 0) {
-            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_AttackHighlighted;
-            return;
-        }
-        if ((battleVar2->m2F6 != 0) && (newBattleInputButton2 == '\0')) {
-            if (battleVar2->m0[param_1].m1C_isCommandEnabled[5] == 0) {
-                battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_ComboHighlighted;
-            }
-            else {
-                battleSoundEffect2(0x4f);
-            }
-            battleVar2->m2F6 = 0;
-            return;
-        }
-        battleVar2->m2F6 = 1;
-        battleSoundEffect2(0x4f);
-        return;
-    case 1:
-        if (battleVar2->m0[param_1].m1C_isCommandEnabled[0xb] == 0) {
-            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_ItemHighlighted;
-            return;
-        }
-        battleSoundEffect2(0x4f);
-        return;
-    case 2:
-        battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_DefendHighlighted;
-        return;
-    case 3:
-        if (battleVar2->m0[param_1].m1C_isCommandEnabled[7] == 0) {
-            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_CallGear;
-            return;
-        }
-        battleSoundEffect2(0x4f);
-        return;
-    case 8:
-        break;
-    default:
-        assert(0);
-    }
-}
-
 u8 updateTargetSelectionMarkerVar0 = 0;
 u8 battleGetSlotStatusSub_current28Index = 0;
 
@@ -2607,7 +2577,7 @@ void setBattleCameraParamX(short param_1)
 }
 
 void freeBattleVar1_AE() {
-    if (battleVar1->mAE) {
+    if (battleVar1->mAE_isChiMenuDataLoaded) {
         assert(0);
     }
 }
@@ -5606,7 +5576,6 @@ void battleTickMain(s8 param_1) {
             if (((battleVisualEntities[battleVar2->m2D3_currentEntityTurn].m3 & 0x80) == 0) &&
                 ((battleEntities[battleVar2->m2D3_currentEntityTurn].m0_base.m34 & 0x400U) == 0)) {
                 // Display the enemy's name
-                MissingCode();
                 /*battleVar1->mB0_isDialogWindowInitialized[5] = 1;
                 auto pString = getDialogParamPointer(battleStrings, battleMonsterMapping[battleVar2->m2D3_currentEntityTurn]);
                 currentMonsterNameStringWidth = renderString(pString, ramBufferFromMonsterName, 0x39, 0);
@@ -5695,19 +5664,22 @@ void init8920() {
     (battleVar1->m0).h = 0x100;
     (battleVar1->m0).w = 0x100;
 
+    battleVar0->mA234[1].m10_tpage_X = 0x3c0;
+    MissingCode();
+    battleVar0->mA234[1].m14_tpage_Y = 0x34;
     MissingCode();
 
-    (battleVar1->m8).x = ((battleVar0->mA244_X & 0x3f) << 1);
+    (battleVar1->m8).x = ((battleVar0->mA234[0].m10_tpage_X & 0x3f) << 1);
     (battleVar1->m8).w = 0x100;
     (battleVar1->m8).h = 0x100;
-    (battleVar1->m8).y = battleVar0->mA248_Y;
+    (battleVar1->m8).y = battleVar0->mA234[0].m14_tpage_Y;
 
     MissingCode();
 
-    SetDrawMode(&battleVar0->m8908_drMode[0], 0, 0, GetTPage(battleVar0->mA238, 0, battleVar0->mA244_X, battleVar0->mA248_Y), &battleVar1->m8);
-    SetDrawMode(&battleVar0->m8908_drMode[1], 0, 0, GetTPage(battleVar0->mA238, 0, battleVar0->mA244_X, battleVar0->mA248_Y), &battleVar1->m8);
-    SetDrawMode(&battleVar0->m8920[0], 0, 0, GetTPage(battleVar0->mA238, 0, battleVar0->mA244_X, battleVar0->mA248_Y), &battleVar1->m0);
-    SetDrawMode(&battleVar0->m8920[1], 0, 0, GetTPage(battleVar0->mA238, 0, battleVar0->mA244_X, battleVar0->mA248_Y), &battleVar1->m0);
+    SetDrawMode(&battleVar0->m8908_drMode[0], 0, 0, GetTPage(battleVar0->mA234[0].m4_tpage_tp, 0, battleVar0->mA234[0].m10_tpage_X, battleVar0->mA234[0].m14_tpage_Y), &battleVar1->m8);
+    SetDrawMode(&battleVar0->m8908_drMode[1], 0, 0, GetTPage(battleVar0->mA234[0].m4_tpage_tp, 0, battleVar0->mA234[0].m10_tpage_X, battleVar0->mA234[0].m14_tpage_Y), &battleVar1->m8);
+    SetDrawMode(&battleVar0->m8920[0], 0, 0, GetTPage(battleVar0->mA234[0].m4_tpage_tp, 0, battleVar0->mA234[0].m10_tpage_X, battleVar0->mA234[0].m14_tpage_Y), &battleVar1->m0);
+    SetDrawMode(&battleVar0->m8920[1], 0, 0, GetTPage(battleVar0->mA234[0].m4_tpage_tp, 0, battleVar0->mA234[0].m10_tpage_X, battleVar0->mA234[0].m14_tpage_Y), &battleVar1->m0);
 }
 
 void battleMain() {
@@ -6013,6 +5985,16 @@ void battleSpriteOp89(sSpriteActorCore* param_1) {
 
     battleSpriteOp89Sub3(param_1, -(short)angle);
     savePointCallback8Sub0Sub0(param_1);
+}
+
+void idleBattleDuringLoading(void)
+{
+    int iVar1;
+
+    while (iVar1 = isCDBusy(), iVar1 != 0) {
+        battleRenderDebugAndMain();
+    }
+    return;
 }
 
 void executeSpriteBytecode2_battle(sSpriteActorCore* param_1) {

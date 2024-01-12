@@ -16,6 +16,7 @@ std::array<std::array<DR_MODE, 16>,2> gDialogDrModes;
 std::array<RECT, 16> gDialogRects;
 
 std::array<u8, 3> dialogWindowColor;
+s32 dialogBattleWindowAbr = 0;
 
 u16 padButtonForDialogs = 0;
 u16 padButtonForDialogs2 = 0;

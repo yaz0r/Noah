@@ -101,13 +101,33 @@ struct sBattleVar0Sub {
     u8 m1E3;
 };
 
+struct sBattleVar0Sub_tpage {
+    s32 m0;
+    s32 m4_tpage_tp;
+    s32 m8_clutX;
+    s32 mC_clutY;
+    s32 m10_tpage_X;
+    s32 m14_tpage_Y;
+};
+
+struct sBattleVar0_a230 {
+    std::array<std::array<POLY_FT4, 2>, 0x12> m0_polys;
+    u8 m668_oddOrEven;
+    s8 m669;
+    s8 m66B;
+    s8 m66D;
+    //size 0x670
+};
+
 struct sBattleVar0 {
     std::array<std::array<std::array<POLY_FT4, 2>, 6>, 3> m0;
     std::array<std::array<POLY_GT4, 2>, 4> m5A0;
     std::array<std::array<POLY_G4, 2>, 3> m740_APOrFuelPoly;
     std::array<std::array<POLY_FT4, 2>, 3> m818; // unsure size
     std::array<std::array<LINE_F2, 2>, 12> m908;
-    std::array < std::array<POLY_FT4, 2>, 3> m9C8_APCounterDisplayPolys; // unsure size
+    std::array<std::array<POLY_FT4, 2>, 3> m9C8_APCounterDisplayPolys; // unsure size
+    std::array<std::array<POLY_FT4, 2>, 60> mBA8;
+    std::array<std::array<POLY_FT4, 2>, 20> m27C8; // unsure size
     std::array<std::array<std::array<POLY_FT4, 2>, 10>, 4> m2E08_timeBars;
     std::array<std::array<std::array<POLY_FT4, 2>, 40>, 3> m3A88;
     std::array<std::array<std::array<POLY_FT4, 2>, 4>, 3> m6008;
@@ -121,16 +141,12 @@ struct sBattleVar0 {
     std::array<DR_MODE, 2> m8908_drMode;
     std::array<DR_MODE, 2> m8920;
     std::array<sBattleVar0Sub, 3> m835C;
-    s32 mA234;
-    s32 mA238;
-    s32 mA23C;
-    s32 mA240;
-    s32 mA244_X;
-    s32 mA248_Y;
+    std::array<sBattleVar0Sub_tpage, 5> mA234; // size unsure
     u16 mA2AC;
     u16 mA2AE;
     u16 mA2B0;
     u16 mA2B2;
+    sBattleVar0_a230* mA230;
     // size 0xA2B4
 };
 extern sBattleVar0* battleVar0;
@@ -159,16 +175,22 @@ struct sBattleVar1 {
     u8 m97;
     u8 m98;
     std::array<u8, 3> m99_oddOrEven;
+    u8 m9C_renderBA8;
+    u8 m9E_render27C8;
     u8 mA2;
     u8 mA3;
     u8 mA4_oddOrEven7B;
+    u8 mA5_ba8OddOrEven;
+    u8 mA7_27C8OddOrEven;
     u8 mA8;
     u8 mA9_timeBarNumMoveSteps;
     u8 mAB_timeBarNumAnimationSteps;
     u8 mAD;
-    u8 mAE;
+    bool mAE_isChiMenuDataLoaded;
     u8 mAF;
     std::array<u8, 7> mB0_isDialogWindowInitialized;
+    std::array<u8, 7> mB8_isDialogWindowInitialized2;
+    std::array<u8, 7> mBF_isDialogWindowInitialized3;
     u8 mC6_isTargetSelectionCursorVisible;
     u8 mC7;
     u8 mCB;
@@ -177,6 +199,8 @@ struct sBattleVar1 {
     std::array<u8, 2> mD0_battleCommandLength;
     std::array<u8, 3> mE0;
     std::array<u8, 3> mEC;
+    s32 mF8_countOfBA8;
+    s32 m100_countOf27C8;
     s16 m104_timeBarAnimationScale;
     s16 m106_timeBarAnimationRotation;
     // size 0x10C
@@ -438,9 +462,14 @@ extern sBattle800D02C0 enemiesBattleStats;
 extern sGameStateA4* battleGetSlotStatusSub_currentBattleEntity;
 extern sGameStateA42* battleGetSlotStatusSub_currentBattleEntityGear;
 extern u16 jumpAnimationActiveActorBF;
+extern s8 newBattleInputButton2;
+extern u8 battleInitVar1;
 
 void setupBattleAnimationSpriteCore(sSpriteActorCore* param_1);
 void performMechaPlayAnimation(ushort param_1, short param_2, int param_3);
 int waitForMusic(uint param_1);
 void clearShapeTransferEntry(void*);
 void performAttackSub2();
+void idleBattleDuringLoading(void);
+int battleRenderDebugAndMain(void);
+void initBattleG3Array(void);

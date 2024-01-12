@@ -2,6 +2,7 @@
 #include "gameState.h"
 #include "filesystem.h"
 #include "field/dialogWindows.h"
+#include "battle/battle.h"
 
 sGameState gameState;
 sGameState* pKernelGameState = nullptr;
@@ -39,6 +40,7 @@ void loadInitialGameState()
 
 void initGameState()
 {
+    battleInitVar1 = 1;
     MissingCode();
 
     loadInitialGameState();
@@ -46,6 +48,5 @@ void initGameState()
 	dialogWindowColor[0] = 0x88;
 	dialogWindowColor[1] = 0x76;
 	dialogWindowColor[2] = 0x54;
-
-    MissingCode();
+    dialogBattleWindowAbr = 2;
 }

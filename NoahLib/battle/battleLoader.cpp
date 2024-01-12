@@ -543,11 +543,11 @@ void batteLoaderPhase3_0_sub0() {
     battleVar1->m7C[1] = 1;
     battleVar1->m7C[2] = 1;
 
-    computeMenuBorder(battleFont, 0x5C, &battleVar0->mA234, &battleVar0->mA238, &battleVar0->mA23C, &battleVar0->mA240, &battleVar0->mA244_X, &battleVar0->mA248_Y);
-    battleVar0->mA2AE = GetClut(battleVar0->mA23C, battleVar0->mA240);
-    battleVar0->mA2AC = GetClut(battleVar0->mA23C, battleVar0->mA240 - 1);
-    battleVar0->mA2B2 = GetClut(battleVar0->mA23C, battleVar0->mA240 - 2);
-    battleVar0->mA2B0 = GetClut(battleVar0->mA23C, battleVar0->mA240 - 3);
+    computeMenuBorder(battleFont, 0x5C, &battleVar0->mA234[0].m0, &battleVar0->mA234[0].m4_tpage_tp, &battleVar0->mA234[0].m8_clutX, &battleVar0->mA234[0].mC_clutY, &battleVar0->mA234[0].m10_tpage_X, &battleVar0->mA234[0].m14_tpage_Y);
+    battleVar0->mA2AE = GetClut(battleVar0->mA234[0].m8_clutX, battleVar0->mA234[0].mC_clutY);
+    battleVar0->mA2AC = GetClut(battleVar0->mA234[0].m8_clutX, battleVar0->mA234[0].mC_clutY - 1);
+    battleVar0->mA2B2 = GetClut(battleVar0->mA234[0].m8_clutX, battleVar0->mA234[0].mC_clutY - 2);
+    battleVar0->mA2B0 = GetClut(battleVar0->mA234[0].m8_clutX, battleVar0->mA234[0].mC_clutY - 3);
 
     // Original code might overflow m740_APOrFuelPoly by initializing 8 entries (while there is only 6)
     // Split in 2 loops to initialize at proper size
@@ -641,7 +641,7 @@ void setupBattleVar0Polys() {
         battleVar0->m63C8[i].g0 = 0xFF;
         battleVar0->m63C8[i].b0 = 0xFF;
         SetSemiTrans(&battleVar0->m63C8[i], 1);
-        SetDrawMode(&battleVar0->m63F8[i], 0, 0, GetTPage(0, 2, battleVar0->mA244_X, battleVar0->mA248_Y), &localRect);
+        SetDrawMode(&battleVar0->m63F8[i], 0, 0, GetTPage(0, 2, battleVar0->mA234[0].m10_tpage_X, battleVar0->mA234[0].m14_tpage_Y), &localRect);
     }
 
     battleVar0->m6415 = 0;

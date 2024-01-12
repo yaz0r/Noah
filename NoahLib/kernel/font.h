@@ -73,7 +73,7 @@ struct sFont {
         m0_numGlyphs = READ_LE_U32(input.begin() + 0);
         assert(READ_LE_U16(input.begin() + 4) == m0_numGlyphs * 2 + 4);
         m4.resize(m0_numGlyphs);
-        for (int i = 0; i < m0_numGlyphs; i++) {
+        for (u32 i = 0; i < m0_numGlyphs; i++) {
             m4[i].deserialize(input.cbegin() + READ_LE_U16(input.begin() + 4 + 2 * i));
         }
     }

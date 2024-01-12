@@ -106,6 +106,7 @@ extern u16 padButtonForDialogs2;
 extern std::array<std::array<DR_MODE, 16>, 2> gDialogDrModes;
 
 extern std::array<u8, 3> dialogWindowColor;
+extern s32 dialogBattleWindowAbr;
 
 extern u16 windowOpenBF;
 

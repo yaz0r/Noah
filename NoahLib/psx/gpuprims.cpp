@@ -2,6 +2,84 @@
 #include "psx/gpuprims.h"
 
 DR_MODE gCurrentDrawMode;
+void sTag::dummy() {
+
+}
+void sTag::execute() {
+    sColorAndCode colorAndCode = *(sColorAndCode*)(((u8*)this) + sizeof(sTag));
+
+    u8 code = colorAndCode.m3_code;
+    if (m3_size == 0) {
+
+    } else if ((code & 0xE0) == 0x20) {
+        //poly
+        switch (code & 0x3C)
+        {
+        case 0x20:
+            ((POLY_F3*)this)->execute();
+            break;
+        case 0x24:
+            ((POLY_FT3*)this)->execute();
+            break;
+        case 0x28:
+            ((POLY_F4*)this)->execute();
+            break;
+        case 0x2C:
+            ((POLY_FT4*)this)->execute();
+            break;
+        case 0x30:
+            ((POLY_G3*)this)->execute();
+            break;
+        case 0x38:
+            ((POLY_G4*)this)->execute();
+            break;
+        default:
+            assert(0);
+            break;
+        }
+    } else if ((code & 0xE0) == 0x40) {
+        // line
+        switch (code)
+        {
+        case 0x48:
+            ((LINE_F3*)this)->execute();
+            break;
+        default:
+            assert(0);
+            break;
+        }
+    }
+    else if ((code & 0xE0) == 0x60) {
+        // quad
+        switch (code & 0x7C)
+        {
+        case 0x60:
+            ((TILE*)this)->execute();
+            break;
+        case 0x64:
+            ((SPRT*)this)->execute();
+            break;
+        case 0x74:
+        case 0x7C:
+            ((SPRT_8*)this)->execute();
+            break;
+        default:
+            assert(0);
+            break;
+        }
+    }
+    else {
+        assert(code == 0xE1);
+        if (m3_size == 1) {
+            ((DR_TPAGE*)this)->execute();
+        }
+        else {
+            assert(m3_size == 2);
+            ((DR_MODE*)this)->execute();
+        }
+    }
+
+}
 
 void TermPrim(sTag* p) {
     p->m0_pNext = nullptr;

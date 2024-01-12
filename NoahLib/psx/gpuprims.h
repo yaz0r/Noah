@@ -27,7 +27,7 @@ struct sTag
     sTag* m0_pNext = nullptr;
     u8 m3_size = 0;
 
-    virtual void execute() {}
+    void execute();
 };
 
 typedef std::vector<sTag> OTTable;
@@ -48,7 +48,7 @@ struct TILE : public sTag
     s16 w;
     s16 h;
 
-    virtual void execute() override;
+    void execute();
 };
 
 struct SPRT_8 : public sTag
@@ -68,7 +68,7 @@ struct SPRT_8 : public sTag
     u8 v0;
     u16 clut;
 
-    virtual void execute() override;
+    void execute();
 };
 
 struct SPRT : public sTag
@@ -90,7 +90,7 @@ struct SPRT : public sTag
     s16 w;
     s16 h;
 
-    virtual void execute() override;
+    void execute();
 };
 
 struct RECT
@@ -115,28 +115,28 @@ struct DR_ENV : public sTag
 {
     u32 code[15];
 
-    virtual void execute() override;
+    void execute();
 };
 
 struct DR_MODE : public sTag
 {
     u32 code[2];
 
-    virtual void execute() override;
+    void execute();
 };
 
 struct DR_MOVE : public sTag
 {
     u32 code[5];
 
-    virtual void execute() override;
+    void execute();
 };
 
 struct DR_TPAGE : public sTag
 {
     u32 code[1];
 
-    virtual void execute() override;
+    void execute();
 };
 
 struct DRAWENV
@@ -176,7 +176,7 @@ struct POLY_F3 : public sTag
     sVec2_s16 x2y2;
     // size 4, code 0x20
 
-    virtual void execute() override;
+    void execute();
 };
 
 struct POLY_F4 : public sTag
@@ -196,7 +196,7 @@ struct POLY_F4 : public sTag
     sVec2_s16 x3y3;
     // size 5, code 0x28
 
-    virtual void execute() override;
+    void execute();
 };
 
 struct POLY_FT3 : public sTag
@@ -224,7 +224,7 @@ struct POLY_FT3 : public sTag
     u16 pad1;
     // size 7, code 0x24
 
-    virtual void execute() override;
+    void execute();
 };
 
 struct POLY_G3 : public sTag {
@@ -261,7 +261,7 @@ struct POLY_G3 : public sTag {
         sVec2_s16 x2y2;
     };
 
-    virtual void execute() override;
+    void execute();
 };
 
 void SetPolyG3(POLY_G3* p);
@@ -319,7 +319,7 @@ struct POLY_FT4 : public sTag
     u16 pad2;
     // size 9, code 0x2C
 
-    virtual void execute() override;
+    void execute();
 };
 
 struct POLY_G4 : public sTag
@@ -379,7 +379,7 @@ struct POLY_G4 : public sTag
         sVec2_s16 x3y3;
     };
 
-    virtual void execute() override {}
+    void execute() {}
 };
 
 struct LINE_F2 : public sTag
@@ -396,7 +396,7 @@ struct LINE_F2 : public sTag
     sVec2_s16 x0y0;
     sVec2_s16 x1y1; // 10
 
-    virtual void execute() override {}
+    void execute() {}
 };
 
 struct LINE_F3 : public sTag
@@ -415,7 +415,7 @@ struct LINE_F3 : public sTag
     sVec2_s16 x2y2;
     u32 pad;
 
-    virtual void execute() override {}
+    void execute() {}
 };
 
 struct POLY_GT3 : public sTag
@@ -460,7 +460,7 @@ struct POLY_GT3 : public sTag
     u16 pad1;
     // size 9, code 0x34
 
-    virtual void execute() override;
+    void execute();
 };
 
 struct POLY_GT4 : public sTag
@@ -516,7 +516,7 @@ struct POLY_GT4 : public sTag
     u16 pad3;
     // size 0xC, code 0x3C
 
-    virtual void execute() override;
+    void execute();
 };
 
 void SetPolyFT4(POLY_FT4* p);

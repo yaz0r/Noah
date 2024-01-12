@@ -18,7 +18,7 @@ void copyCustomPolySubBuffer(const sCustomPolySubBuffer* param_1, std::vector<sA
             sAnyPoly& newEntry = param_2.emplace_back();
             POLY_F3* poly = &newEntry.mF3;
             poly->m3_size = polySource->m0_runtimeSizeNeededInWords;
-            poly->m_colorAndCode.command = polySource->m3_polyType1;
+            poly->m_colorAndCode.m3_code = polySource->m3_polyType1;
             SetShadeTex(poly, isShaded);
             if (isTransparent) {
                 SetSemiTrans(poly, isTransparent);
@@ -33,7 +33,7 @@ void copyCustomPolySubBuffer(const sCustomPolySubBuffer* param_1, std::vector<sA
             sAnyPoly& newEntry = param_2.emplace_back();
             POLY_G3* poly = &newEntry.mG3;
             poly->m3_size = polySource->m0_runtimeSizeNeededInWords;
-            poly->m_colorAndCode.command = polySource->m3_polyType1;
+            poly->m_colorAndCode.m3_code = polySource->m3_polyType1;
             SetShadeTex(poly, isShaded);
             if (isTransparent) {
                 SetSemiTrans(poly, isTransparent);
