@@ -7,7 +7,7 @@
 std::array<sBattleDialogWindow*, 7> battleDialogWindows;
 std::array<sBattleDialogWindow2*, 7> battleDialogWindows2;
 
-void setupBattleDialogWindow_sub0(std::array<POLY_FT4, 2>* param_1, uint param_2) {
+void setupBattleDialogWindow_sub0(std::array<std::array<POLY_FT4, 2>, 2>& param_1, uint param_2) {
     for (int i = 0; i < 2; i++) {
         for (int j = 0; j < 2; j++) {
             POLY_FT4* p = &param_1[i][j];
@@ -46,10 +46,10 @@ void setupBattleDialogWindow(byte param_1) {
         uVar1 = GetTPage(0, dialogBattleWindowAbr, battleVar0->mA234[1].m10_tpage_X, battleVar0->mA234[1].m14_tpage_Y);
         SetDrawMode(&psVar2->m408_drawMode[i], 0, 0, (uint)uVar1, &battleVar1->m0);
     }
-    setupBattleDialogWindow_sub0(&psVar2->m140[0], 1);
-    setupBattleDialogWindow_sub0(&psVar2->m1E0[0], 2);
-    setupBattleDialogWindow_sub0(&psVar2->m280[0], 3);
-    setupBattleDialogWindow_sub0(&psVar2->m320[0], 4);
+    setupBattleDialogWindow_sub0(psVar2->m140, 1);
+    setupBattleDialogWindow_sub0(psVar2->m1E0, 2);
+    setupBattleDialogWindow_sub0(psVar2->m280, 3);
+    setupBattleDialogWindow_sub0(psVar2->m320, 4);
 }
 
 void drawBattleDialogWindow_sub0Sub(POLY_FT4* param_1)

@@ -112,7 +112,6 @@ void initIndividualDialogWindow(int windowIndex)
 		RECT localRect = dialogWindowsRectConfigs3[i];
 		
 		int alphaMode = 2;
-		alphaMode = 0; // TODO: hack
 		SetDrawMode(&gDialogWindows[windowIndex].mFC[0][i], 0, 0, GetTPage(0, alphaMode, 0x280, 0x1f0), &localRect);
 		SetDrawMode(&gDialogWindows[windowIndex].mFC[1][i], 0, 0, GetTPage(0, alphaMode, 0x280, 0x1f0), &localRect);
 

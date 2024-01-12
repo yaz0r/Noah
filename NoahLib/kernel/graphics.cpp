@@ -334,6 +334,11 @@ u32 getBlending(u32 code, u32 tpage, u64& State)
 	{
 		int abr = (tpage >> 5) & 3;
 
+        // hack
+        if (abr == 2) {
+            abr = 0;
+        }
+
 		switch (abr)
 		{
 		case 0: // 0.5 x B + 0.5 x F
