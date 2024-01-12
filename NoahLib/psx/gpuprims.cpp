@@ -2,9 +2,7 @@
 #include "psx/gpuprims.h"
 
 DR_MODE gCurrentDrawMode;
-void sTag::dummy() {
 
-}
 void sTag::execute() {
     sColorAndCode colorAndCode = *(sColorAndCode*)(((u8*)this) + sizeof(sTag));
 
