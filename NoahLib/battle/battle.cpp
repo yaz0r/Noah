@@ -1660,6 +1660,46 @@ void updatePolyArray3A88() {
     }
 }
 
+void renderOpenMenuSub0(void) {
+    if (battleVar0->mA230->m669 != '\0') {
+        AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->mA230->m0_polys[0][battleVar0->mA230->m66C]);
+        AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->mA230->m0_polys[1][battleVar0->mA230->m66C]);
+        AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->mA230->m0_polys[2][battleVar0->mA230->m66C]);
+        AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->mA230->m0_polys[3][battleVar0->mA230->m66C]);
+    }
+    return;
+}
+
+void renderOpenMenu() {
+    switch (battleVar1->mB7) {
+    case 0:
+        break;
+    case 1:
+        renderOpenMenuSub0();
+        if (battleVar0->mA230->m669 != '\0') {
+            AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->mA230->m0_polys[0xd][battleVar0->mA230->m66C]);
+            AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->mA230->m0_polys[0xe][battleVar0->mA230->m66C]);
+            AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->mA230->m0_polys[0xf][battleVar0->mA230->m66C]);
+            AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->mA230->m0_polys[0x10][battleVar0->mA230->m66C]);
+            AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->mA230->m0_polys[0x11][battleVar0->mA230->m66C]);
+            AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->mA230->m5A0[0][battleVar0->mA230->m66C]);
+        }
+        if (battleVar0->mA230->m66B == '\0') {
+            return;
+        }
+        if (battleVar0->mA230->m66E != '\0') {
+            AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->mA230->m0_polys[0xc][battleVar0->mA230->m66C]);
+        }
+        AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->mA230->m0_polys[4][battleVar0->mA230->m66A]);
+        //battleRenderPolyArray(battleVar0->mA230->m0_polys[5], battleVar0->mA230->field_0x66e, psVar1->field_0x66a);
+        MissingCode();
+        break;
+    default:
+        assert(0);
+        break;
+    }
+}
+
 void drawBattleMode1() {
     if (!drawBattleMode1Disabled) {
         drawBattleDialogWindows();
@@ -1670,6 +1710,7 @@ void drawBattleMode1() {
         battleRenderPlayerPortraits();
         battleRenderCommandRing();
         MissingCode();
+        renderOpenMenu();
         renderTargetSelectionCursor();
         battleDrawAPBar();
         MissingCode();

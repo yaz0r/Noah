@@ -146,10 +146,206 @@ void loadItemTargetsLabel() {
     }
 }
 
-void drawCircleMenuChi_updateSub0(int) {
+int initMenuTiles6Sub(sFont& param_1, int param_2, std::array<POLY_FT4, 2>* param_3, int param_4, short param_5, short param_6, ushort param_7, char param_8, char param_9) {
+    MissingCode();
+    return 0;
+}
+
+void drawCircleMenuChi_updateSub0Sub0(short param_1, short param_2, short param_3, short param_4, byte param_5) {
+    battleVar1->mFC_countOF1E68 = 0;
+    for (int i = 0; i < param_5; i++) {
+        battleVar1->mFC_countOF1E68 += battleSetupStringInPolyFT4Large(0x65, &battleVar0->m1E68[battleVar1->mFC_countOF1E68], param_1, param_4);
+    }
+    battleVar1->mFC_countOF1E68 += battleSetupStringInPolyFT4Large(100, &battleVar0->m1E68[battleVar1->mFC_countOF1E68], param_1, param_2);
+    battleVar1->mFC_countOF1E68 += initMenuTiles6Sub(battleFont, 100, &battleVar0->m1E68[battleVar1->mFC_countOF1E68], battleOddOrEven, param_1, param_3, 0x1000, 0, 1);
+    battleVar1->mA6_1E68OddOrEven = battleOddOrEven;
+    battleVar1->m9D_render1E68 = 1;
+}
+
+sRamTexture* tempRamTexture = nullptr;
+
+std::vector<u8>::iterator drawCircleMenuChi_updateSub0Sub1(int param_1)
+{
+    return getDialogParamPointer(printDialogTextVar[0x50 / 4], param_1);
+}
+
+std::vector<u8>::iterator drawCircleMenuChi_updateSub0Sub2(int param_1)
+{
+    return getDialogParamPointer(printDialogTextVar[0xC0 / 4], param_1);
+}
+
+void repositionTextRenderingPlanePrim(POLY_FT4* param_1, short x, short y, u8 u, u8 v, byte width)
+{
+    param_1->x0 = x;
+    param_1->y0 = y;
+    param_1->y1 = y;
+    param_1->x2 = x;
+    param_1->y2 = y + 0xd;
+    param_1->y3 = y + 0xd;
+    param_1->u0 = u;
+    param_1->u2 = u;
+    param_1->x1 = x + (ushort)width;
+    param_1->x3 = x + (ushort)width;
+    param_1->v0 = v;
+    param_1->u1 = u + width;
+    param_1->v1 = v;
+    param_1->v2 = v + '\r';
+    param_1->u3 = u + width;
+    param_1->v3 = v + '\r';
+    return;
+}
+
+void drawCircleMenuChi_updateSub0Sub3Sub0(uint param_1)
+{
+    ushort uVar1;
+    uint uVar2;
+
+    param_1 = param_1 & 0xff;
+    uVar2 = (ushort)battleEntities[param_1].m0_base.m50_MP / 10;
+    if (uVar2 != 0) {
+        repositionTextRenderingPlanePrim(&battleVar0->mA230->m0_polys[0xe][battleOddOrEven], 0x104, 0xc6, (char)uVar2 * '\b' + 'x', 0, 8);
+    }
+    uVar1 = battleEntities[param_1].m0_base.m50_MP;
+    repositionTextRenderingPlanePrim(&battleVar0->mA230->m0_polys[0xf][battleOddOrEven], 0x10c, 0xc6, ((char)uVar1 + (char)(uVar1 / 10) * -10) * '\b' + 'x', 0, 8);
+    uVar2 = (ushort)battleEntities[param_1].m0_base.m52_MaxMP / 10;
+    if (uVar2 != 0) {
+        repositionTextRenderingPlanePrim(&battleVar0->mA230->m0_polys[0x10][battleOddOrEven], 0x11c, 0xc6,(char)uVar2 * '\b' + 'x', 0, 8);
+    }
+    uVar1 = battleEntities[param_1].m0_base.m52_MaxMP;
+    repositionTextRenderingPlanePrim(&battleVar0->mA230->m5A0[0x11][battleOddOrEven], 0x124, 0xc6, ((char)uVar1 + (char)(uVar1 / 10) * -10) * '\b' + 'x', 0, 8);
+    return;
+}
+
+void drawCircleMenuChi_updateSub0Sub3(int param_1)
+{
+    repositionTextRenderingPlanePrim(&battleVar0->mA230->m0_polys[0xc][battleOddOrEven], 0xa8, 0xa6, ItemNameSpriteInfo[6].m2_U, ItemNameSpriteInfo[6].m3_V, ItemNameSpriteInfo[6].m0_width);
+    u16 uVar1 = textSpriteMode0;
+    if (ItemNameSpriteInfo[6].m1 != 0) {
+        uVar1 = textSpriteMode1;
+    }
+    battleVar0->mA230->m0_polys[0xc][battleOddOrEven].clut = uVar1;
+    repositionTextRenderingPlanePrim(&battleVar0->mA230->m0_polys[0xd][battleOddOrEven], 0xec, 0xc6, ItemNameSpriteInfo[5].m2_U, ItemNameSpriteInfo[5].m3_V, ItemNameSpriteInfo[5].m0_width);
+    uVar1 = textSpriteMode0;
+    if (ItemNameSpriteInfo[5].m1 != 0) {
+        uVar1 = textSpriteMode1;
+    }
+    battleVar0->mA230->m0_polys[0xd][battleOddOrEven].clut = uVar1;
+    drawCircleMenuChi_updateSub0Sub3Sub0(param_1);
+    battleSetupStringInPolyFT4Large(0x71, &battleVar0->mA230->m5A0[0], 0x118, 0xd1);
+    battleVar0->mA230->m66C = battleOddOrEven;
+    return;
+}
+
+void drawCircleMenuChi_updateSub0(byte param_1) {
     initBattleVar0_A230();
     loadItemTargetsLabel();
-    MissingCode();
+    drawCircleMenuChi_updateSub0Sub0(0x20, 0x30, 0x98, 0x38, 0xc);
+    tempRamTexture = allocateTextureRamForText(0x39);
+    // TODO: memset 0, but done in allocation function
+
+    RECT localRect;
+    localRect.x = 0x3C0;
+    localRect.w = 0x3C;
+    localRect.y = 0;
+    localRect.h = 0xD;
+    loadImageSync(&localRect, tempRamTexture->data());
+
+    std::array<u8, 16> flagArray;
+    std::array<u8, 16> flagArray2;
+
+    if (apConfigArray[param_1].m1 == 0) {
+        for (int entryIndex = 0; entryIndex < 0x10; entryIndex++) {
+            if (!bitmaskCharacterCheck(gameState.m16C0[battleCharacters[param_1]].m0_unlockedAbilitiesBitField[1], entryIndex & 0xff)) {
+                flagArray[entryIndex] = 0;
+                flagArray2[entryIndex] = 0;
+            }
+            else {
+                flagArray[entryIndex] = 1;
+                flagArray2[entryIndex] = partyBattleStats[param_1].m383;
+            }
+        }
+    }
+    else {
+        assert(0);
+    }
+
+    std::array<sRamTexture*, 16> allTextures;
+
+    for (int entryIndex = 0; entryIndex < 0x10; entryIndex++) {
+        allTextures[entryIndex] = allocateTextureRamForText(0x1B);
+        // TODO: memset but done in allocation
+
+        RECT localRect2;
+        localRect2.x = (short)((int)entryIndex % 2) * 0x1e + 0x380;
+        localRect2.y = (short)((int)entryIndex / 2) * 0x10 + 0x100;
+        localRect2.w = 0x1b;
+        localRect2.h = 0x10;
+        loadImageSync(&localRect2, tempRamTexture->data());
+        if (flagArray[entryIndex]) {
+            std::vector<u8>::iterator stringData;
+            if (apConfigArray[param_1].m1 == 0) {
+                stringData = drawCircleMenuChi_updateSub0Sub1((uint)battleEntities[param_1].m0_base.m56_battleCommandLoadout * 0x10 + entryIndex);
+            }
+            else {
+                stringData = drawCircleMenuChi_updateSub0Sub2((uint)(byte)battleEntities[param_1].m0_base.mA0_partyData_gearNum * 0x10 + entryIndex);
+            }
+            renderString(stringData, *allTextures[entryIndex], 0x1b, 0);
+            RECT local_b0;
+            local_b0.x = (short)((int)entryIndex % 2) * 0x1e + 0x380;
+            local_b0.y = (short)((int)entryIndex / 2) * 0x10 + 0x102;
+            local_b0.w = 0x1e;
+            local_b0.h = 0xd;
+            loadImageSync(&local_b0, allTextures[entryIndex]->data());
+        }
+        if ((entryIndex & 1) == 0) {
+            RECT local_90;
+            local_90.x = 0x3c0;
+            local_90.y = (short)((int)entryIndex / 2) * 0x10 + 0x100;
+            local_90.w = 0x1b;
+            local_90.h = 0x10;
+            loadImageSync(&local_90, tempRamTexture->data());
+        }
+
+        {
+            s16 sVar3 = (short)((int)entryIndex / 2);
+            RECT local_a8;
+            local_a8.x = ((short)entryIndex + sVar3 * -2) * 0x10 + 0x3c0;
+            local_a8.y = sVar3 * 0x10 + 0x102;
+            local_a8.w = 6;
+            local_a8.h = 0xd;
+            sRamTexture* psVar4 = tempRamTexture;
+            if (flagArray2[entryIndex] / 10 != 0) {
+                psVar4 = itemLabelsIds[flagArray2[entryIndex] / 10];
+            }
+            loadImageSync(&local_a8, psVar4->data());
+        }
+
+        {
+            s16 sVar3 = (short)((int)entryIndex / 2);
+            RECT local_a0;
+            local_a0.x = ((short)entryIndex + sVar3 * -2) * 0x10 + 0x3c2;
+            local_a0.y = sVar3 * 0x10 + 0x102;
+            local_a0.w = 6;
+            local_a0.h = 0xd;
+            sRamTexture* psVar4 = tempRamTexture;
+            if (flagArray[entryIndex] != '\0') {
+                psVar4 = itemLabelsIds[flagArray2[entryIndex] % 10];
+            }
+            loadImageSync(&local_a0, psVar4->data());
+        }
+    }
+
+    drawCircleMenuChi_updateSub0Sub3(param_1);
+
+    for (int i = 0; i < 0x10; i++) {
+        delete allTextures[i];
+    }
+    delete tempRamTexture;
+
+    battleVar0->mA230->m0_polys[4][0].clut = textSpriteMode0;
+    battleVar0->mA230->m0_polys[4][1].clut = textSpriteMode0;
+    battleVar0->mA230->m669 = 1;
+    battleVar1->mB7 = 1;
 }
 
 void drawCircleMenuChi_updateSub4(short param_1, short param_2, int* param_3, byte* param_4) {

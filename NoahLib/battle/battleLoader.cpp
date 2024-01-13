@@ -623,7 +623,7 @@ std::vector<u16>* allocateTextureRamForText(int param_1)
 {
     resetMemoryAllocStats(2, 0);
     std::vector<u16>* newRaw = new std::vector<u16>;
-    newRaw->resize(13 * (param_1 + 3));
+    newRaw->resize(13 * (param_1 + 3), 0);
     return newRaw;
 }
 

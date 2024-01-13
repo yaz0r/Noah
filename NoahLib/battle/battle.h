@@ -112,10 +112,14 @@ struct sBattleVar0Sub_tpage {
 
 struct sBattleVar0_a230 {
     std::array<std::array<POLY_FT4, 2>, 0x12> m0_polys;
+    std::array<std::array<POLY_FT4, 2>, 2> m5A0;
     u8 m668_oddOrEven;
     s8 m669;
+    s8 m66A;
     s8 m66B;
+    s8 m66C;
     s8 m66D;
+    s8 m66E;
     //size 0x670
 };
 
@@ -127,6 +131,7 @@ struct sBattleVar0 {
     std::array<std::array<LINE_F2, 2>, 12> m908;
     std::array<std::array<POLY_FT4, 2>, 3> m9C8_APCounterDisplayPolys; // unsure size
     std::array<std::array<POLY_FT4, 2>, 60> mBA8;
+    std::array<std::array<POLY_FT4, 2>, 30> m1E68;
     std::array<std::array<POLY_FT4, 2>, 20> m27C8; // unsure size
     std::array<std::array<std::array<POLY_FT4, 2>, 10>, 4> m2E08_timeBars;
     std::array<std::array<std::array<POLY_FT4, 2>, 40>, 3> m3A88;
@@ -176,11 +181,13 @@ struct sBattleVar1 {
     u8 m98;
     std::array<u8, 3> m99_oddOrEven;
     u8 m9C_renderBA8;
+    u8 m9D_render1E68;
     u8 m9E_render27C8;
     u8 mA2;
     u8 mA3;
     u8 mA4_oddOrEven7B;
     u8 mA5_ba8OddOrEven;
+    u8 mA6_1E68OddOrEven;
     u8 mA7_27C8OddOrEven;
     u8 mA8;
     u8 mA9_timeBarNumMoveSteps;
@@ -188,6 +195,7 @@ struct sBattleVar1 {
     u8 mAD;
     bool mAE_isChiMenuDataLoaded;
     u8 mAF;
+    u8 mB7;
     std::array<u8, 7> mB0_isDialogWindowInitialized;
     std::array<u8, 7> mB8_isDialogWindowInitialized2;
     std::array<u8, 7> mBF_isDialogWindowInitialized3;
@@ -200,6 +208,7 @@ struct sBattleVar1 {
     std::array<u8, 3> mE0;
     std::array<u8, 3> mEC;
     s32 mF8_countOfBA8;
+    s32 mFC_countOF1E68;
     s32 m100_countOf27C8;
     s16 m104_timeBarAnimationScale;
     s16 m106_timeBarAnimationRotation;
@@ -416,12 +425,14 @@ struct sBattle800CDD40Sub {
 struct sBattle800cdd40 {
     std::array<sBattle800CDD40Sub, 11> m0;
     sBattle800CDD40Sub m320;
+    u8 m383;
 
     void init(const std::vector<u8>& inputBuffer) {
         for (int i = 0; i < 11; i++) {
             m0[i].init(inputBuffer.cbegin() + 0x28 * i);
         }
         m320.init(inputBuffer.cbegin() + 0x320);
+        m383 = READ_LE_U8(inputBuffer.cbegin() + 0x383);
     }
 
     // size 0x5f0

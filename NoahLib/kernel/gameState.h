@@ -128,9 +128,13 @@ struct sGameStateA42
 
 struct sGameStateSize20 {
     void deserialize(std::vector<u8>::iterator buffer) {
+        for (int i = 0; i < 8; i++) {
+            m0_unlockedAbilitiesBitField[i] = READ_LE_U16(buffer + i * 2);
+        }
         m17_energyPerTurn = READ_LE_U8(buffer + 0x17);
     }
 
+    std::array<u16, 8> m0_unlockedAbilitiesBitField;
     u8 m17_energyPerTurn;
     //size 0x20
 };
