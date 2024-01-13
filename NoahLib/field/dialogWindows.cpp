@@ -421,6 +421,8 @@ s16 dialogWindowOpenAnimationNumFrames = 0;
 
 std::vector<u8>::iterator getDialogParamPointer(const std::vector<u8>::iterator& buffer, int param_2)
 {
+    u32 numEntries = READ_LE_U32(buffer);
+    assert(param_2 < numEntries);
 	return buffer + READ_LE_U16(buffer + param_2 * 2 + 4);
 }
 
@@ -974,6 +976,7 @@ void printDialogCharacter(ushort characterType, ushort characterId, ushort* outp
 
 	u16* pCharacterData = nullptr;
 	if (characterType == 0) {
+        assert(characterId >= dialogFontVar1);
 		pCharacterData = (ushort*)(dialogFontVarPtr2 + ((uint)characterId - dialogFontVar1) * 0x16);
 	}
 	else {
@@ -1248,8 +1251,6 @@ const std::array<u8, 8> dpadButtonMapping = { {
     0,1,2,3,4,5,6,7
 } };
 
-int printDialogTextVar = 0;
-
 std::array<s16, 10> dialogSpecialCase9AndATable;
 s16 dialogSpecialCase9AndAVar0;
 s16 dialogSpecialCase9AndAVar1;
@@ -1376,19 +1377,16 @@ void updateDialogTextImage(sDialogWindow18* param_1)
 
 	int bVar1 = param_1->m69;
 	int iVar13 = bVar1 - 1;
-	int iVar14 = printDialogTextVar;
 
 	while (1)
 	{
 		if (iVar13 == -1)
 		{
-			printDialogTextVar = iVar14;
 			return;
 		}
 
 		u8* pCharacterToPrint = &(*param_1->m1C_currentStringToPrint);
 		u8 characterToPrint = *pCharacterToPrint;
-		printDialogTextVar = iVar14;
 
 		switch (characterToPrint)
 		{
@@ -1402,7 +1400,6 @@ void updateDialogTextImage(sDialogWindow18* param_1)
 			param_1->m10_flags &= ~0x80;
 			param_1->m1C_currentStringToPrint = param_1->m20 + 1;
 			iVar13 = iVar13 + -1;
-			iVar14 = printDialogTextVar;
 			break;
 		case 1: // end of line
 			(param_1->m0).vx = 100;
@@ -1461,7 +1458,6 @@ void updateDialogTextImage(sDialogWindow18* param_1)
                     assert(0);
                     //dialogSpecialCase9AndA_2(param_1, getDialogParamPointer(printDialogTextVar->m68), 0);
                 }
-                iVar14 = printDialogTextVar;
                 continue;
             }
             case 0xA:
@@ -1517,7 +1513,6 @@ void updateDialogTextImage(sDialogWindow18* param_1)
 		}
 
 		iVar13--;
-		iVar14 = printDialogTextVar;
 	}
 
 	MissingCode();

@@ -4,6 +4,10 @@
 #include "battleRenderContext.h"
 #include "field/dialogWindows.h"
 #include "menus/menuHandler.h"
+#include "kernel/memory.h"
+#include "enemyScript.h"
+#include "kernel/TIM.h"
+#include "battleLoader.h"
 
 std::vector<u8> chiData;
 
@@ -90,9 +94,61 @@ void initBattleVar0_A230() {
     initBattleVar0_A230_content();
 }
 
+struct sItemNameSpriteInfo {
+    u8 m0_width;
+    u8 m1;
+    u8 m2_U;
+    u8 m3_V;
+    // size 4
+};
+
+std::array<sItemNameSpriteInfo, 22> ItemNameSpriteInfo;
+
+void loadImageSync(RECT* param_1, u16* param_2)
+{
+    LoadImage(param_1, (u8*)param_2);
+    DrawSync(0);
+    return;
+}
+
+void loadItemTargetsLabel() {
+    std::array<sRamTexture*, 12> ramTextureArray;
+    for (int currentEntry = 0; currentEntry < 11; currentEntry++) {
+        ramTextureArray[currentEntry] = allocateTextureRamForText(0x1B);
+        //memset(ramTextureArray[currentEntry], 0, sizeof(sRamTexture) * 0x1E); //TODO: can't do that because of the vector
+        u8 stringWidth = renderString(getItemLabelString(currentEntry + 10), *ramTextureArray[currentEntry], 0x1B, 0);
+
+        ItemNameSpriteInfo[11].m0_width = stringWidth;
+        ItemNameSpriteInfo[11].m2_U = 0x78;
+        ItemNameSpriteInfo[0].m2_U = 0x78;
+        ItemNameSpriteInfo[11].m3_V = 0xd + 0xd * currentEntry;
+        ItemNameSpriteInfo[0].m3_V = 0xd + 0xd * currentEntry;
+        ItemNameSpriteInfo[0].m1 = 0;
+        ItemNameSpriteInfo[11].m1 = 1;
+
+        RECT copyRect;
+        copyRect.y = 0x10d + currentEntry * 0xd;
+        copyRect.x = 0x3DE;
+        copyRect.w = 0x1E;
+        copyRect.h = 0xD;
+        loadImageSync(&copyRect, ramTextureArray[currentEntry]->data());
+    }
+    for (int currentEntry = 0; currentEntry < 11; currentEntry++) {
+        delete ramTextureArray[currentEntry];
+    }
+    for (int currentEntry = 0; currentEntry < 10; currentEntry++) {
+        RECT copyRect;
+        copyRect.x = 0x3DE + 2 * currentEntry;
+        copyRect.y = 0x100;
+        copyRect.w = 6;
+        copyRect.h = 0xD;
+        loadImageSync(&copyRect, itemLabelsIds[currentEntry]->data());
+    }
+}
+
 void drawCircleMenuChi_updateSub0(int) {
     initBattleVar0_A230();
-    //loadItemTargetsLabel();
+    loadItemTargetsLabel();
     MissingCode();
 }
 

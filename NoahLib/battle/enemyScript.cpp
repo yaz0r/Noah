@@ -4,15 +4,6 @@
 #include "enemyScript.h"
 
 std::array<sBattleScriptEntity, 8> monstersScriptsEntities;
-
-struct sBattleScriptContext {
-    u8 m0_attackType;
-    u8 m1;
-    s8 m2;
-    s16 m4;
-    u16 m6_mask;
-};
-
 std::array<sBattleScriptContext, 32> battleScriptContext;
 
 ushort bitmaskCharacterCheck(ushort bitmask, uint characterId);

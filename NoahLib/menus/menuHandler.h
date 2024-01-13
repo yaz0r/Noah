@@ -228,3 +228,4 @@ int setupStringInPolyFT4(struct sFont& font, int character, std::array<POLY_FT4,
 void setupMenuPolyFT4(POLY_FT4* param_1, short x, short y, u8 u, u8 v, short width, short height);
 void iniMenuContext364And380(byte param_1, short param_2, short param_3, ushort param_4, ushort param_5, char param_6, byte param_7, s32 param_8, byte param_9);
 void playMenuSoundEffect(uint param_1);
+u8 renderString(std::vector<u8>::iterator buffer, std::vector<u16>& param_2, ushort param_3, byte param_4);

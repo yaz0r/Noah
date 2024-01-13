@@ -12,6 +12,8 @@
 #include "battleRenderContext.h"
 #include "menus/menuHandler.h"
 #include "battle/enemyScript.h"
+#include "kernel/memory.h"
+#include "field/dialogWindows.h"
 
 void dummpyLoaderEnd() {
     // empty, probably an old logging code
@@ -617,8 +619,26 @@ void batteLoaderPhase3_0() {
     batteLoaderPhase3_0_sub1();
 }
 
+std::vector<u16>* allocateTextureRamForText(int param_1)
+{
+    resetMemoryAllocStats(2, 0);
+    std::vector<u16>* newRaw = new std::vector<u16>;
+    newRaw->resize(13 * (param_1 + 3));
+    return newRaw;
+}
+
+std::array<sRamTexture*, 10> itemLabelsIds;
+
+std::vector<u8>::iterator getItemLabelString(int param_1)
+{
+    return getDialogParamPointer(printDialogTextVar[18], param_1);
+}
+
 void renderItemTargetsLabels() {
-    MissingCode();
+    for (int i = 0; i < 10; i++) {
+        itemLabelsIds[i] = allocateTextureRamForText(4);
+        renderString(getItemLabelString(i), *itemLabelsIds[i], 2, 0);
+    }
 }
 
 void setupBattleVar0Polys() {
