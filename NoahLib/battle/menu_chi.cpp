@@ -903,6 +903,7 @@ int drawCircleMenuChi_update(int param_1) {
                 iVar5 = 1;
                 battleVar2->m2E6 = bVar3 + bVar4 * '\x02';
             }
+            break;
         case 5:
             iVar5 = 0;
             break;
@@ -949,9 +950,104 @@ int drawCircleMenuChi_update(int param_1) {
     } while (true);
 }
 
-void drawCircleMenuChi_sub2(int param_1) {
-    MissingCode();
+
+void executeAbilitySub0(ushort param_1, byte param_2)
+{
+    sBattleVar2* psVar1;
+    short sVar2;
+    ushort uVar3;
+    int iVar4;
+    uint uVar5;
+    int iVar6;
+
+    param_1 = param_1 & 0xfff8;
+    iVar4 = 0;
+    iVar6 = 0x450;
+    do {
+        uVar5 = iVar4 + 3U & 0xff;
+        sVar2 = bitmaskCharacterCheck(param_1, uVar5);
+        iVar4 = iVar4 + 1;
+        if ((sVar2 != 0) &&
+            (battleEntities[3 + iVar4].m0_base.m34 & 0x800) == 0) {
+            uVar3 = characterOdToInverseTargetBitmask(uVar5);
+            param_1 = param_1 & uVar3;
+        }
+        iVar6 = iVar6 + 0x170;
+    } while (iVar4 < 8);
+    if (param_1 != 0) {
+        battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m23_battleEntityIndex = param_2;
+        battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m47_battleAnimationToPlay = -0xd;
+        psVar1 = battleVar2;
+        battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m3A = param_1;
+        psVar1->m2DA_indexInBattleVar48 = psVar1->m2DA_indexInBattleVar48 + 1;
+    }
+    return;
 }
+
+
+void executeAbility(byte param_1)
+
+{
+    ushort uVar1;
+    ushort uVar2;
+    short sVar2;
+    int iVar3;
+    uint uVar4;
+    int facing;
+    uint actor;
+    uint uVar5;
+
+    startCharacterJumpToEnemyVar0 = 0;
+    updateCharacterBlinkingTask(0);
+    iVar3 = 0x8b8;
+    do {
+        battleCurrentDamages[0].m3C[iVar3 + 0xb] = 0xff;
+        iVar3 = iVar3 + -0x48;
+    } while (-1 < iVar3);
+    if (apConfigArray[param_1].m1 == 0) {
+        battleVar2->m2DC = battleVar2->m2E6 + '\x17';
+        uVar1 = partyBattleStats[param_1].m370[(byte)battleVar2->m2E6].m0;
+    }
+    else {
+        assert(0); // mecha
+        //battleVar2->m2DC = battleVar2->m2E6 + '\x16';
+        //uVar1 = battle800CEF10[param_1].m348[(byte)battleVar2->m2E6].m0 ? ;
+    }
+    uVar2 = abilityTargetBitmask;
+    if ((uVar1 & 7) == 0) {
+        uVar2 = characterIdToTargetBitmask(abilitySelectedTarget);
+    }
+    actor = (uint)param_1;
+    executeAbilitySub0(uVar2, actor);
+    uVar5 = 3;
+    performAttackSub2();
+    performAttackSub3(actor, uVar2, (byte)battleVar2->m2DC - 1);
+    performAttackSub6(battleVar2->m2DA_indexInBattleVar48);
+    uVar4 = characterIdToTargetBitmask(actor);
+    setCameraVisibleEntities((uint)entitiesHitInCurrentAttackBF | uVar4 & 0xffff);
+    facing = computeFacingForJump(actor);
+    startJumpAnimation(1, actor, (uint)battleVar2->m0[actor].m3C_currentTarget, facing);
+    battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m47_battleAnimationToPlay = performAttack_type;
+    battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m23_battleEntityIndex = param_1;
+    battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m16_targetBitMask =
+        entitiesHitInCurrentAttackBF;
+    do {
+        uVar4 = uVar5 & 0xff;
+        sVar2 = bitmaskCharacterCheck(entitiesHitInCurrentAttackBF, uVar4);
+        uVar5 = uVar5 + 1;
+        if (sVar2 != 0) {
+            updateMonsterScriptEntitiesVarByAtttack(param_1, uVar4);
+        }
+    } while ((int)uVar5 < 0xb);
+    battleVar2->m2DA_indexInBattleVar48 = battleVar2->m2DA_indexInBattleVar48 + 1;
+    handleMenuSelectEnemy_cancel_sub0(param_1);
+    while (battleVar2->m2DB == '\0') {
+        battleRenderDebugAndMain();
+    }
+    return;
+}
+
+
 
 void drawCircleMenuChi(int param_1) {
     switch (battleInputButton) {
@@ -998,7 +1094,7 @@ void drawCircleMenuChi(int param_1) {
             battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_ChiHighlighted;
         }
         else {
-            drawCircleMenuChi_sub2(param_1);
+            executeAbility(param_1);
         }
         battleSoundEffect2(0x4f);
         break;

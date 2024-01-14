@@ -39,8 +39,8 @@ struct sFieldEntitySub4_110_0 {
 struct sSpriteActorAnimationBundle : public sLoadableData
 {
     virtual void init(std::vector<u8>& inputData) override {
-        rawDataCopy = inputData;
-        init(rawDataCopy.begin());
+        m_rawData = inputData;
+        init(m_rawData.begin());
     }
 
     void init(std::vector<u8>::iterator inputData)
@@ -67,7 +67,7 @@ struct sSpriteActorAnimationBundle : public sLoadableData
         u32 end = READ_LE_U32(inputData + 0x10);
     }
 
-    std::vector<u8> rawDataCopy;
+    std::vector<u8> m_rawData;
     u8* rawData;
 
     u32 m4_offset;

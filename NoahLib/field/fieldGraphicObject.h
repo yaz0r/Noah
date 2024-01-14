@@ -289,6 +289,7 @@ void savePointCallback8Sub0Sub0(sSpriteActorCore* param_1);
 void savePointCallback8Sub0Sub0_battle(sSpriteActorCore* param_1);
 void updateAllSubsprites(sSpriteActorCore* param_1);
 void registerSpriteCallback2_2(sTaskHeader* param_1);
+void spriteBytecode2ExtendedE0(sSpriteActorCore* param_1, sPS1Pointer param_2, sFieldEntitySub4_110* param_3);
 
 extern const std::array<u8, 256> sizePerBytecodeTable;
 extern u32 allocateSavePointMeshDataSub0_var0;
@@ -321,3 +322,6 @@ void initFieldEntitySub4Sub5Sub0(sFieldEntitySub4_110* param_1, sSpriteActorAnim
 
 extern sFieldEntitySub4_110 createSavePointMeshData_mode5;
 int addAndClamp(int param_1, int param_2);
+
+extern int initFieldVar5;
+extern int initFieldVar4;

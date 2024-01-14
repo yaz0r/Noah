@@ -372,10 +372,6 @@ void executeBattleCode_C(uint param_1, byte param_2)
     return;
 }
 
-void performAttackSub3(s8 param_1, s16 param_2, s16 param_3);
-void performAttackSub6(s8 param_1);
-extern s16 entitiesHitInCurrentAttackBF;;
-
 void executeBattleCode_1(byte param_1, uint param_2)
 {
     int iVar1;

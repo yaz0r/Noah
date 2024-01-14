@@ -2270,10 +2270,31 @@ bool initJumpData(uint entity, uint target) {
     return battleCharacters[entity] == 4;
 }
 
-u32 computeFacingForJump(int) {
-    MissingCode();
-    return 0;
+
+uint computeFacingForJump(uint param_1)
+{
+    uint uVar1;
+    uint uVar2;
+    ushort uVar3;
+    uint in_t0;
+
+    uVar3 = 0xff;
+    uVar2 = (uint)currentEntryInRandomTurnOrder;
+    do {
+        uVar1 = (uint)randomTurnOrder[uVar2];
+        uVar2 = uVar2 + 1;
+        if ((numTicksBeforeReady[uVar1] < (short)uVar3) && (uVar1 != (param_1 & 0xff))) {
+            uVar3 = numTicksBeforeReady[uVar1];
+            in_t0 = uVar1;
+        }
+        if (uVar2 == 0xb) {
+            uVar2 = 0;
+        }
+    } while (uVar2 != currentEntryInRandomTurnOrder);
+    return in_t0;
 }
+
+
 
 u32 allocateJumpAnimationStructVar0;
 
@@ -2346,12 +2367,79 @@ void battleAnimationCallback_2(sSpriteActorCore* param_1, sSpriteActorCore* para
     return;
 }
 
-int needFxFragments = 0;
+sSpriteActorCore* needFxFragments = nullptr;
 int isInJumpAnimationCallbackCode = 0;
 std::array<sSpriteActorCore*, 11> pSpriteCoreListHead;
 
-void setRenderingInfoForItemUser(sSpriteActorCore*) {
+void setNeedFxFragments(sSpriteActorCore* param_1)
+{
+    needFxFragments = param_1;
+    return;
+}
+
+int abilityPlayAnimationVar0 = 0;
+
+void abilityPlayAnimationSub0(sSpriteActorCore*)
+{
+    abilityPlayAnimationVar0 = abilityPlayAnimationVar0 + 1;
+    return;
+}
+
+void clearBattleAnimationData() {
     MissingCode();
+    waitBattleAnimationSpriteLoading();
+}
+
+byte loadingFXFramentVar0 = 0;
+byte loadingFXFramentVar1 = 0;
+
+sSpriteActorAnimationBundle* FxFragmentSpecialAnimation = nullptr;
+sSpriteActorAnimationBundle* battleAnimationLoadingDest = nullptr;
+
+void abilityPlayAnimationSub1(int param_1) {
+    if (param_1 == 0xe3) {
+        MissingCode();
+    }
+    clearBattleAnimationData();
+    setCurrentDirectory(0xc, 2);
+    int iVar5 = param_1 * 2 + 0x22;
+    loadingFXFramentVar0 = 1;
+    int iVar6 = param_1 * 2 + 0x23;
+    loadingFXFramentVar1 = 1;
+    FxFragmentSpecialAnimation = new sSpriteActorAnimationBundle;
+    readFile(iVar5, *FxFragmentSpecialAnimation, 0, 0x80);
+    battleIdleDuringLoading();
+    MissingCode();
+    battleAnimationLoadingDest = FxFragmentSpecialAnimation;
+    MissingCode();
+}
+
+void abilityPlayAnimation(int param_1, sSpriteActorCore* param_2)
+{
+    if (param_2->m48_defaultAnimationbundle == nullptr) {
+        abilityPlayAnimationSub1(param_1);
+    }
+    else {
+        abilityPlayAnimationVar0 = 0;
+        if (param_2->mAC >> 24 != '\0') {
+            OP_INIT_ENTITY_SCRIPT_sub0Sub8(param_2, abilityPlayAnimationSub0);
+            spriteActorSetPlayingAnimation(param_2, param_2->mAC >> 24);
+        }
+        abilityPlayAnimationSub1(param_1);
+        if ((param_2->mAC >> 24) != '\0') {
+            while (abilityPlayAnimationVar0 == 0) {
+                battleRender();
+            }
+            OP_INIT_ENTITY_SCRIPT_sub0Sub8(param_2, 0);
+        }
+    }
+    return;
+}
+
+sSpriteActorCore* processBattleAnimationSub0_var1 = nullptr;
+
+void setRenderingInfoForItemUser(sSpriteActorCore* param_1) {
+    processBattleAnimationSub0_var1 = param_1;
 }
 
 sSpriteActorCore* getSpriteCoreForAnimation(int param_1) {
@@ -2385,7 +2473,6 @@ int countBattleActorCoresActiveForBitmask(uint bitmask, std::array<sSpriteActorC
 }
 
 s16 performAttackSub3_var0 = 0;
-sSpriteActorCore* processBattleAnimationSub0_var1 = nullptr;
 u8 needBattleAnimationDataLoading = 0;
 
 void updateBattleAnimationDataLoading(void) {
@@ -2472,17 +2559,6 @@ void battleIdleDuringLoading(void)
     return;
 }
 
-struct sBattleAnimationSpecial : public sSpriteActorAnimationBundle {
-    void init(std::vector<u8> inputData) {
-        m_rawData = inputData;
-        sSpriteActorAnimationBundle::init(m_rawData);
-    }
-
-    std::vector<u8> m_rawData;
-};
-
-std::optional<sBattleAnimationSpecial> battleAnimationLoadingDest;
-
 s8 fxFragmentLoaded = 0;
 s16 attackInProgress = 0;
 
@@ -2492,11 +2568,11 @@ void startSeq(std::vector<u8>::iterator param_1) {
     MissingCode();
 }
 
-void loadEffectFragmentsAndAudioModel(sBattleAnimationSpecial& buffer, u32 offset) {
+void loadEffectFragmentsAndAudioModel(sSpriteActorAnimationBundle& buffer, u32 offset) {
     MissingCode();
 }
 
-std::optional<std::vector<u8>::iterator> loadEffectFragmentsAndAudio(sBattleAnimationSpecial& buffer) {
+std::optional<std::vector<u8>::iterator> loadEffectFragmentsAndAudio(sSpriteActorAnimationBundle& buffer) {
     std::optional<std::vector<u8>::iterator> pWds;
     int numEntries = READ_LE_U32(buffer.m_rawData.begin());
     for (int i = 0; i< numEntries - 3; i++) {
@@ -2532,7 +2608,7 @@ std::optional<std::vector<u8>::iterator> loadEffectFragmentsAndAudio(sBattleAnim
 std::optional<std::vector<u8>::iterator> loadFragmentIsNotLoadedYet() {
     std::optional<std::vector<u8>::iterator> fragmentPtr;
     if (fxFragmentLoaded == 0) {
-        fragmentPtr = loadEffectFragmentsAndAudio(battleAnimationLoadingDest.value());
+        fragmentPtr = loadEffectFragmentsAndAudio(*battleAnimationLoadingDest);
         fxFragmentLoaded = 1;
     }
     return fragmentPtr;
@@ -2556,15 +2632,28 @@ void processBattleAnimation_subType(sSpriteActorCore* param_1, int param_2) {
     }
 }
 
+const std::array<s16, 12> abilityAnimationTable0 = { {
+     0x0, 0x16,    0x2F,    0x4A,
+    0x5E, 0x71,    0x7C,    0x8F,
+    0x97, 0x2F,    0x7C,     0x0
+} };
+
+const std::array<s16, 12> abilityAnimationTable1 = { {
+     0x6,    0x1A,    0x37,    0x4E,
+    0x61,    0x74,    0x83,    0x8F,
+    0x97,    0x37,    0x83,     0x0
+} };
+
 void processBattleAnimation(sSpriteActorCore* param_1) {
     if (delayBattleAnimationCounter != 0) {
         delayBattleAnimationCounter = delayBattleAnimationCounter + -1;
         return;
     }
 
-    switch (battleCurrentDamages[allocateJumpAnimationStructVar0].m47_battleAnimationToPlay) {
+    s32 battleAnimationToPlay = battleCurrentDamages[allocateJumpAnimationStructVar0].m47_battleAnimationToPlay;
+    switch (battleAnimationToPlay) {
     case -6:
-        processBattleAnimation_subType(param_1, battleCurrentDamages[allocateJumpAnimationStructVar0].m47_battleAnimationToPlay);
+        processBattleAnimation_subType(param_1, battleAnimationToPlay);
         break;
 
     case -1: // waiting for attack prompt
@@ -2614,6 +2703,7 @@ void processBattleAnimation(sSpriteActorCore* param_1) {
     case 4: // 1ap
     case 5: // 2ap
     case 6: // 3ap
+    case 0x16: // ability
     case 30:
     case 31:
         attackInProgress = 0;
@@ -2623,22 +2713,30 @@ void processBattleAnimation(sSpriteActorCore* param_1) {
             (uint)battleCurrentDamages[allocateJumpAnimationStructVar0].m18_damageType
             [(param_1->m74_pTargetEntitySprite->mAC & 3) << 2 | param_1->m74_pTargetEntitySprite->mA8.mx1E];
         if (!isVramPreBacked((param_1->m24_vramData)->m0_spriteData)) {
-            if (battleCurrentDamages[allocateJumpAnimationStructVar0].m47_battleAnimationToPlay < 0x10) {
-                if ((fxFragmentLoaded == '\0') && (battleAnimationLoadingDest.has_value() != 0)) {
+            if (battleAnimationToPlay < 0x10) {
+                if ((fxFragmentLoaded == '\0') && (battleAnimationLoadingDest != nullptr)) {
                     battleIdleDuringLoading();
                     (param_1)->m50 = loadFragmentIsNotLoadedYet();
-                    setupSpecialAnimation(param_1, &battleAnimationLoadingDest.value());
+                    setupSpecialAnimation(param_1, battleAnimationLoadingDest);
                 }
                 int expectActorId = (((param_1)->mAC & 3) << 2 | (uint)(param_1)->mA8.mx1E);
                 if (jumpAnimationControlStruct->m20_actor == expectActorId) {
-                    spriteActorSetPlayingAnimation(param_1, ~battleCurrentDamages[allocateJumpAnimationStructVar0].m47_battleAnimationToPlay);
+                    spriteActorSetPlayingAnimation(param_1, ~battleAnimationToPlay);
                 }
                 else {
-                    spriteActorSetPlayingAnimation(param_1, battleCurrentDamages[allocateJumpAnimationStructVar0].m47_battleAnimationToPlay);
+                    spriteActorSetPlayingAnimation(param_1, battleAnimationToPlay);
                 }
             }
             else {
-                assert(0);
+                // play ability animation
+                int iVar6 = (battleAnimationToPlay - 0x10) + abilityAnimationTable0[(uint)battleVisualEntities[(param_1->mAC & 3) << 2 | param_1->mA8.mx1E].m2 * 2];
+                int uVar3 = 0x1C;
+                if (abilityAnimationTable1[battleVisualEntities[(param_1->mAC & 3) << 2 | param_1->mA8.mx1E].m2 * 2] <= iVar6) {
+                    uVar3 = 0x11;
+                }
+                param_1->mAC = (param_1->mAC & 0xFFFFFF) | (uVar3 << 24);
+                abilityPlayAnimation(iVar6, param_1);
+                setNeedFxFragments(param_1);
             }
         }
         else {
@@ -2757,14 +2855,10 @@ void waitBattleAnimationSpriteLoading() {
         battleRender();
     }
     clearFxFragment();
-    if (battleAnimationLoadingDest.has_value()) {
-        battleAnimationLoadingDest.reset();
+    if (battleAnimationLoadingDest) {
+        delete battleAnimationLoadingDest;
+        battleAnimationLoadingDest = nullptr;
     }
-}
-
-void clearBattleAnimationData() {
-    MissingCode();
-    waitBattleAnimationSpriteLoading();
 }
 
 void deleteJumpAnimationControlStructEndOfAttack() {
@@ -2797,6 +2891,84 @@ void deleteJumpAnimationControlStructEndOfAttack() {
     }
 }
 
+byte currentFileFrom0xC = 0;
+std::vector<u8> fragmentFile;
+
+void battleLoadFileFrom0xC(void)
+{
+    uint uVar1;
+    int local_10;
+    int local_c;
+
+    uVar1 = (uint)initFieldVar5;
+    if (currentFileFrom0xC != uVar1) {
+        currentFileFrom0xC = initFieldVar5;
+        battleIdleDuringLoading();
+        getCurrentDirectory(&local_10, &local_c);
+        setCurrentDirectory(0xc, 2);
+        readFile(uVar1 + 2, fragmentFile, 0, 0x80);
+        battleIdleDuringLoading();
+        setCurrentDirectory(local_10, local_c);
+        DrawSync(0);
+        VSync(0);
+        //EnterCriticalSection();
+        //FlushCache();
+        //ExitCriticalSection();
+    }
+    initFieldVar4 = 1;
+    return;
+}
+
+bool initFxFragments(void)
+
+{
+    sSpriteActorCore* psVar1;
+    int iVar2;
+    sFieldEntitySub4_110* psVar3;
+    sSpriteActorCore* psVar4;
+    sTaskHeader sStack_60;
+    sVec2_s16 local_3c;
+    sVec2_s16 local_38;
+    byte* local_34;
+    byte* local_30;
+
+    psVar1 = processBattleAnimationSub0_var1;
+    allocateSavePointMeshDataSub0((sTaskHeader*)0x0, &sStack_60);
+    sStack_60.m8_updateCallback = 0;
+    battleIdleDuringLoading();
+    startJumpAnimationVar1 = 0;
+    initFieldEntitySub4Sub5Sub0(&sFieldEntitySub4_110_8005a474, FxFragmentSpecialAnimation, (sVec2_s16)0x1000380, (sVec2_s16)0x1f40000);
+    battleLoadFileFrom0xC();
+    iVar2 = isVramPreBacked(sFieldEntitySub4_110_8005a474.m0_spriteData);
+    psVar4 = processBattleAnimationSub0_var1;
+    if (iVar2 == 0) {
+        setupSpecialAnimation(processBattleAnimationSub0_var1, FxFragmentSpecialAnimation);
+        spriteActorSetPlayingAnimation(psVar4, 0xffffffff);
+    }
+    else {
+        psVar3 = processBattleAnimationSub0_var1->m24_vramData;
+        //auto local_40 = psVar3->m0_spriteData;
+        //local_3c = psVar3->m4_vramLocation;
+        //local_38 = psVar3->m8_clut;
+        //local_34 = psVar3->mC;
+        //local_30 = psVar3->m10_startOfAnimationContainer;
+        sPS1Pointer psVar4 = (*sFieldEntitySub4_110_8005a474.m10_startOfAnimationContainer)[startJumpAnimationVar2];
+        psVar4 = (*sFieldEntitySub4_110_8005a474.m10_startOfAnimationContainer)[READ_LE_U16(psVar4) / 2];
+        spriteBytecode2ExtendedE0(processBattleAnimationSub0_var1, psVar4, &sFieldEntitySub4_110_8005a474);
+    }
+    MissingCode();
+    //puVar5 = loadEffectFragmentsAndAudio(FxFragmentSpecialAnimation);
+    //psVar4->m50 = (int)puVar5;
+    //psVar1->m50 = (int)puVar5;
+    fxFragmentLoaded = 1;
+    //DAT_Battle__800c35d4 = 1;
+    //playBattleMusic(pCurrentBattleMusic, 0x60, 0x78);
+    MissingCode();
+    allocateSavePointMeshDataSub0_callback(&sStack_60);
+    return iVar2 == 0;
+}
+
+byte allocateJumpAnimationStructCallbackSpecial0 = 0;
 void allocateJumpAnimationStructCallback(sJumpAnimationControlStruct* param_1) {
     if (isInJumpAnimationCallbackCode) {
         return;
@@ -2805,7 +2977,26 @@ void allocateJumpAnimationStructCallback(sJumpAnimationControlStruct* param_1) {
     isInJumpAnimationCallbackCode = 1;
     jumpAnimationControlStruct = param_1;
     if (needFxFragments != 0) {
-        assert(0);
+        needFxFragments = nullptr;
+        if (!initFxFragments()) {
+            if (((param_1->m4->mAC & 3) << 2 | (param_1->m4->mA8.mx1E)) < 3) {
+                int uVar5;
+                if (allocateJumpAnimationStructCallbackSpecial0 == '\0') {
+                    uVar5 = 0x12;
+                }
+                else {
+                    uVar5 = 0x13;
+                }
+                spriteActorSetPlayingAnimation(param_1->m4, uVar5);
+                allocateJumpAnimationStructCallbackSpecial0 = '\0';
+            }
+            if (param_1->m4->m48_defaultAnimationbundle != nullptr) {
+                setupJumpAnimationStruct1C(7);
+            }
+;        }
+        else {
+            OP_INIT_ENTITY_SCRIPT_sub0Sub8(param_1->m4, startJumpAnimationCallback);
+        }
     }
 
     if (jumpAnimationControlStruct->m34 != 0) {
@@ -2886,6 +3077,13 @@ void allocateJumpAnimationStructCallback(sJumpAnimationControlStruct* param_1) {
         jumpAnimationControlStruct->m44_distanceToTarget = distance;
         break;
     }
+    case 7: // using ability
+        if (allocateSavePointMeshDataSub0_var0 == isDamageDisplayPolysTask2Running()) {
+            setupJumpAnimationStruct1C(4);
+            jumpAnimationControlStruct->m48 = 1;
+            updateBattleAnimationDataLoading();
+        }
+        break;
     case 10: // during attack
         if (allocateSavePointMeshDataSub0_var0 == isDamageDisplayPolysTask2Running()) {
             deleteJumpAnimationControlStructEndOfAttack();
@@ -2939,10 +3137,8 @@ void setupBattleAnimationSpriteCore(sSpriteActorCore* param_1) {
 void startReadingBattleJumpAnimation(sSpriteActorCore* param_1) {
     MissingCode();
     setCurrentDirectory(0x2c, 1);
-    battleAnimationLoadingDest.emplace();
-    battleAnimationLoadingDest->m_rawData.resize(getFileSizeAligned(param_1->m7C->m0));
-    readFile(param_1->m7C->m0, battleAnimationLoadingDest->m_rawData, 0, 0x80);
-    battleAnimationLoadingDest->init(battleAnimationLoadingDest->m_rawData);
+    battleAnimationLoadingDest = new sSpriteActorAnimationBundle;
+    readFile(param_1->m7C->m0, *battleAnimationLoadingDest, 0, 0x80);
     startReadingBattleJumpAnimationVar0 = (param_1->mAC & 3) << 2 | param_1->mA8.mx1E;
 }
 void jumpUpdatePosition(sSpriteActorCore* param_1);
@@ -3047,7 +3243,7 @@ void startJumpAnimation(int isBilly, uint actor, uint jumpTarget, uint facing) {
         int isPrebacked = isVramPreBacked(jumpAnimationControlStruct->m4->m24_vramData->m0_spriteData);
         if (isPrebacked == 0) {
             startJumpAnimationVar3 = 0;
-            if ((battleAnimationLoadingDest.has_value() == 0) ||
+            if ((battleAnimationLoadingDest == 0) ||
                 (((jumpAnimationControlStruct->m4->mAC & 3) << 2 | jumpAnimationControlStruct->m4->mA8.mx1E ) != startReadingBattleJumpAnimationVar0)) {
                 startReadingBattleJumpAnimation(jumpAnimationControlStruct->m4);
             }
@@ -4814,7 +5010,7 @@ u32 startBattleAttackAnimation() {
                     postComputeAttachDone();
                     if (initBattleAttackStatusArray0[startBattleAttackAnimationVar4] == 0) {
                         if ((currentEntityBattleStats->mA & 0x800) == 0) {
-                            assert(0);
+                            MissingCode();
                         }
                         else {
                             MissingCode();

@@ -260,6 +260,11 @@ do
         param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
         break;
     }
+    case 0xE3:
+        assert(0);
+        param_1->m74_pTargetEntitySprite->mAC = (param_1->m74_pTargetEntitySprite->mAC & 0xFFFFFF) | ((int)0x3F << 24);
+        setCurrentAnimationPtr(param_1->m74_pTargetEntitySprite, param_1->m64_spriteByteCode + READ_LE_S16(param_1->m64_spriteByteCode + 1));
+        break;
     case 0xE8: // Battle sprite effect
         MissingCode();
         param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];

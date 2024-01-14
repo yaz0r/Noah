@@ -77,6 +77,7 @@ int getFileSize(int fileIndex);
 int getFileSizeAligned(int fileIndex);
 int getFileStartSector(int fileIndex);
 void readFile(int fileIndex, std::vector<u8>& output, int, int);
+void readFile(int fileIndex, sLoadableData& output, int, int);
 int setCurrentDirectory(int directory, int offset);
 int isCDBusy();
 int waitReadCompletion(int);

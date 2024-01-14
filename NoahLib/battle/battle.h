@@ -363,6 +363,8 @@ ushort characterOdToInverseTargetBitmask(uint param_1);
 extern u8 numValidTarget;
 extern bool isTargetValid(uint param_1, uint param_2);
 void removeTargetSelectionCursors(void);
+void performAttackSub3(s8 param_1, s16 param_2, s16 param_3);
+void performAttackSub6(s8 param_1);
 
 enum battleInputDirection : u8 {
     BDIR_RIGHT = 0,
@@ -499,7 +501,14 @@ extern u8 battleInitVar1;
 extern s16 performAttackSub3_var0;
 extern std::vector<u8>::iterator currentBattleSpecificStrings;
 extern std::array<s8, 11> battleMonsterMapping;
+extern s16 entitiesHitInCurrentAttackBF;
+extern s16 performAttack_type;
+extern u8 startCharacterJumpToEnemyVar0;
 
+void handleMenuSelectEnemy_cancel_sub0(u8 param_1);
+void updateMonsterScriptEntitiesVarByAtttack(byte param_1, byte targetId);
+uint computeFacingForJump(uint param_1);
+void startJumpAnimation(int isBilly, uint actor, uint jumpTarget, uint facing);
 void setupBattleAnimationSpriteCore(sSpriteActorCore* param_1);
 void performMechaPlayAnimation(ushort param_1, short param_2, int param_3);
 int waitForMusic(uint param_1);
@@ -513,3 +522,5 @@ void loadImageSync(RECT* param_1, std::vector<u16>& param_2);
 void repositionTextRenderingPlanePrim(POLY_FT4* param_1, short x, short y, u8 u, u8 v, byte width);
 void setCameraVisibleEntities(uint playerBitmask);
 void updateCharacterBlinkingTask(u32 param_1);
+void battleIdleDuringLoading(void);
+void waitBattleAnimationSpriteLoading();

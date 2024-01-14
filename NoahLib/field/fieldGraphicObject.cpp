@@ -730,6 +730,9 @@ void spriteBytecode2ExtendedE0_Sub0(sSavePointMeshAbstract* param_1)
         param_1->m38_spriteActorCore.m28_colorAndCode.m3_code = 0x60;
         param_1->m38_spriteActorCore.m34_currentSpriteFrame = 1;
         break;
+    case 10:
+        MissingCode(); // Calls into fx overlay?
+        break;
     default:
         assert(0);
         break;
@@ -1181,6 +1184,11 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
                 local_70.vy = param_1->m74_pTargetEntitySprite->m0_position.vy.getIntegerPart();
                 local_70.vz = param_1->m74_pTargetEntitySprite->m0_position.vz.getIntegerPart();
                 break;
+            case 0x14:
+                local_70.vx = param_1->m74_pTargetEntitySprite->m0_position.vx.getIntegerPart();
+                local_70.vz = param_1->m74_pTargetEntitySprite->m0_position.vz.getIntegerPart();
+                local_70.vy = param_1->m74_pTargetEntitySprite->m0_position.vy.getIntegerPart() - (param_1->m74_pTargetEntitySprite->m38 - (param_1->m74_pTargetEntitySprite->m38 >> 1));
+                break;
             case 0x16:
                 local_70.vx = param_1->m70->m0_position.vx.getIntegerPart();
                 local_70.vy = param_1->m70->m0_position.vy.getIntegerPart();
@@ -1544,6 +1552,8 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
         customVramUploadPtr = param_3 + (READ_LE_U8(param_3) + READ_LE_U8(param_3 + 1) * 0x100 + READ_LE_U8(param_3 + 2) * 0x10000);
         customVramUpload();
 		break;
+    //case 0xEC:
+    //case 0xF9:
     case 0xFF:
         // BUG?
         break;
