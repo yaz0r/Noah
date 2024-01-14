@@ -179,16 +179,14 @@ void battleSpriteRender(sTaskHeader* param_1) {
         sVec2_s16 dummy;
         long dummy2;
         long flag;
-        s32 lVar1 = RotTransPers(&local_30, &dummy, &dummy2, &flag);
-
-        s32 iVar2 = (lVar1 >> (gDepthDivider & 0x1f)) + pSprite->m30;
-        if ((flag & 0x8000) != 0) {
-            iVar2 = 0;
+        int depth = RotTransPers(&local_30, &dummy, &dummy2, &flag);
+        int OTIndex = (depth >> (gDepthDivider & 0x1f)) + pSprite->m30;
+        if (flag & 0x8000) {
+            OTIndex = 0;
         }
-        pSprite->m2E = iVar2;
-        iVar2 = 1;
-        if (iVar2 - 1U < 0xfff) {
-            renderSpriteActor(pSprite, &(*characterRenderingOT)[iVar2]);
+        pSprite->m2E = OTIndex;
+        if (OTIndex - 1U < 0xfff) {
+            renderSpriteActor(pSprite, &(*characterRenderingOT)[OTIndex]);
         }
     }
 }
