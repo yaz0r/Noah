@@ -80,6 +80,7 @@ struct sBattleVar2 {
     u8 m2E3;
     u8 m2E4;
     u8 m2E5;
+    u8 m2E6;
     u8 m2E7;
     u8 m2E8_currentTarget;
     u8 m2E9;
@@ -114,8 +115,8 @@ struct sBattleVar0_a230 {
     std::array<std::array<POLY_FT4, 2>, 0x12> m0_polys;
     std::array<std::array<POLY_FT4, 2>, 2> m5A0;
     u8 m668_oddOrEven;
-    s8 m669;
-    s8 m66A;
+    s8 m669_drawEPCost;
+    s8 m66A_oddOrEven;
     s8 m66B;
     s8 m66C;
     s8 m66D;
@@ -357,6 +358,19 @@ extern s8 currentEntryInRandomTurnOrder;
 extern std::array<s8, 11> isBattleSlotFilled;
 void mechaInitEnvironmentMechaMesh(int entryId, ushort flags, sMechaDataTable2* pData2, sMechaDataTable1* pData1, ushort tpageX, ushort tpageY, ushort clutX, short clutY, SFP_VEC3* param_9);
 u16 characterIdToTargetBitmask(uint param_1);
+extern std::array<s8, 12> targetsPerPriority;
+ushort characterOdToInverseTargetBitmask(uint param_1);
+extern u8 numValidTarget;
+extern bool isTargetValid(uint param_1, uint param_2);
+void removeTargetSelectionCursors(void);
+
+enum battleInputDirection : u8 {
+    BDIR_RIGHT = 0,
+    BDIR_DOWN = 1,
+    BDIR_LEFT = 2,
+    BDIR_UP = 3,
+};
+u8 selectNewSlotByDirection(byte inputSlot, battleInputDirection direction);
 
 struct sBattleEntity {
     sGameStateA4 m0_base;
@@ -396,10 +410,12 @@ struct sUnkMonsterStatus {
 extern std::array<sUnkMonsterStatus, 8> unknownMonsterStatus0;
 
 struct sBattle800CDD40Sub {
+    s16 m0;
     s16 m2;
     s16 mA;
     s8 m10;
     s8 m11;
+    s8 m13_cost;
     s8 m15;
     s8 m16;
     s8 m1A;
@@ -408,10 +424,12 @@ struct sBattle800CDD40Sub {
     s8 m27;
 
     void init(std::vector<u8>::const_iterator inputBuffer) {
+        m0 = READ_LE_S16(inputBuffer + 0);
         m2 = READ_LE_S16(inputBuffer + 2);
         mA = READ_LE_S16(inputBuffer + 0xA);
         m10 = READ_LE_S8(inputBuffer + 0x10);
         m11 = READ_LE_S8(inputBuffer + 0x11);
+        m13_cost = READ_LE_S8(inputBuffer + 0x13);
         m15 = READ_LE_S8(inputBuffer + 0x15);
         m16 = READ_LE_S8(inputBuffer + 0x16);
         m1A = READ_LE_S8(inputBuffer + 0x1A);
@@ -422,17 +440,20 @@ struct sBattle800CDD40Sub {
 
     //size 0x28
 };
+
 struct sBattle800cdd40 {
     std::array<sBattle800CDD40Sub, 11> m0;
     sBattle800CDD40Sub m320;
-    u8 m383;
+    std::array<sBattle800CDD40Sub, 16> m370;
 
     void init(const std::vector<u8>& inputBuffer) {
         for (int i = 0; i < 11; i++) {
             m0[i].init(inputBuffer.cbegin() + 0x28 * i);
         }
         m320.init(inputBuffer.cbegin() + 0x320);
-        m383 = READ_LE_U8(inputBuffer.cbegin() + 0x383);
+        for (int i = 0; i < 16; i++) {
+            m370[i].init(inputBuffer.cbegin() + 0x370 + 0x28 * i);
+        }
     }
 
     // size 0x5f0
@@ -475,6 +496,9 @@ extern sGameStateA42* battleGetSlotStatusSub_currentBattleEntityGear;
 extern u16 jumpAnimationActiveActorBF;
 extern s8 newBattleInputButton2;
 extern u8 battleInitVar1;
+extern s16 performAttackSub3_var0;
+extern std::vector<u8>::iterator currentBattleSpecificStrings;
+extern std::array<s8, 11> battleMonsterMapping;
 
 void setupBattleAnimationSpriteCore(sSpriteActorCore* param_1);
 void performMechaPlayAnimation(ushort param_1, short param_2, int param_3);
@@ -485,3 +509,7 @@ void idleBattleDuringLoading(void);
 int battleRenderDebugAndMain(void);
 void initBattleG3Array(void);
 void battleSetupTextPolySub(POLY_FT4* param_1);
+void loadImageSync(RECT* param_1, std::vector<u16>& param_2);
+void repositionTextRenderingPlanePrim(POLY_FT4* param_1, short x, short y, u8 u, u8 v, byte width);
+void setCameraVisibleEntities(uint playerBitmask);
+void updateCharacterBlinkingTask(u32 param_1);

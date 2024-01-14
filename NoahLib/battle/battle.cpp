@@ -20,6 +20,9 @@
 #include "battle/damageDisplay2.h"
 #include "battle/enemyScript.h"
 #include "battle/battleDialogWindow.h"
+#include "field/dialogWindows.h"
+#include "menus/menuHandler.h"
+#include "kernel/TIM.h"
 
 #include "battle/menu_chi.h"
 
@@ -38,13 +41,6 @@ s8 previousNewBattleInputButton;
 u8 startCharacterJumpToEnemyVar0;
 u8 startCharacterJumpToEnemyVar1;
 u8 numValidTarget = 0;
-
-enum battleInputDirection : u8 {
-    BDIR_RIGHT = 0,
-    BDIR_DOWN = 1,
-    BDIR_LEFT = 2,
-    BDIR_UP = 3,
-};
 
 std::array<s8, 12> targetsPerPriority;
 
@@ -93,6 +89,8 @@ void jumpUpdatePositionSub0(sSpriteActorCore* param_1, sSpriteActorCore* param_2
 void jumpUpdatePosition(sSpriteActorCore* param_1);
 
 extern int spriteCallback2Var4;
+
+std::array<s8, 11> battleMonsterMapping;
 
 ushort characterOdToInverseTargetBitmask(uint param_1)
 {
@@ -1661,13 +1659,18 @@ void updatePolyArray3A88() {
 }
 
 void renderOpenMenuSub0(void) {
-    if (battleVar0->mA230->m669 != '\0') {
+    if (battleVar0->mA230->m669_drawEPCost) {
         AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->mA230->m0_polys[0][battleVar0->mA230->m66C]);
         AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->mA230->m0_polys[1][battleVar0->mA230->m66C]);
         AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->mA230->m0_polys[2][battleVar0->mA230->m66C]);
         AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->mA230->m0_polys[3][battleVar0->mA230->m66C]);
     }
-    return;
+}
+
+void drawDescriptionText(void)
+{
+    AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->mA230->m0_polys[8][battleVar0->mA230->m66A_oddOrEven]);
+    AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->mA230->m0_polys[9][battleVar0->mA230->m66A_oddOrEven]);
 }
 
 void renderOpenMenu() {
@@ -1676,7 +1679,7 @@ void renderOpenMenu() {
         break;
     case 1:
         renderOpenMenuSub0();
-        if (battleVar0->mA230->m669 != '\0') {
+        if (battleVar0->mA230->m669_drawEPCost) {
             AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->mA230->m0_polys[0xd][battleVar0->mA230->m66C]);
             AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->mA230->m0_polys[0xe][battleVar0->mA230->m66C]);
             AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->mA230->m0_polys[0xf][battleVar0->mA230->m66C]);
@@ -1684,20 +1687,89 @@ void renderOpenMenu() {
             AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->mA230->m0_polys[0x11][battleVar0->mA230->m66C]);
             AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->mA230->m5A0[0][battleVar0->mA230->m66C]);
         }
-        if (battleVar0->mA230->m66B == '\0') {
-            return;
+        if (battleVar0->mA230->m66B) {
+            if (battleVar0->mA230->m66E) {
+                AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->mA230->m0_polys[0xc][battleVar0->mA230->m66C]);
+            }
+            AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->mA230->m0_polys[4][battleVar0->mA230->m66A_oddOrEven]);
+            battleRenderPolyArray(&battleVar0->mA230->m0_polys[5], battleVar0->mA230->m66E, battleVar0->mA230->m66A_oddOrEven);
+            drawDescriptionText();
+            drawDescriptionText();
         }
-        if (battleVar0->mA230->m66E != '\0') {
-            AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->mA230->m0_polys[0xc][battleVar0->mA230->m66C]);
-        }
-        AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->mA230->m0_polys[4][battleVar0->mA230->m66A]);
-        //battleRenderPolyArray(battleVar0->mA230->m0_polys[5], battleVar0->mA230->field_0x66e, psVar1->field_0x66a);
-        MissingCode();
         break;
     default:
         assert(0);
         break;
     }
+}
+
+void repositionTextRenderingPlanePrim(POLY_FT4* param_1, short x, short y, u8 u, u8 v, byte width)
+{
+    param_1->x0 = x;
+    param_1->y0 = y;
+    param_1->y1 = y;
+    param_1->x2 = x;
+    param_1->y2 = y + 0xd;
+    param_1->y3 = y + 0xd;
+    param_1->u0 = u;
+    param_1->u2 = u;
+    param_1->x1 = x + (ushort)width;
+    param_1->x3 = x + (ushort)width;
+    param_1->v0 = v;
+    param_1->u1 = u + width;
+    param_1->v1 = v;
+    param_1->v2 = v + '\r';
+    param_1->u3 = u + width;
+    param_1->v3 = v + '\r';
+    return;
+}
+
+struct sMonsterTurnSub {
+    std::array<POLY_FT4, 2> m0_polys;
+    RECT m50_monsterNameVRamRect;
+    sRamTexture* m58_ramBufferFromMonsterName;
+    s8 m5C;
+    s8 m5D_monsterNameIsDisplayed;
+    s8 m5E_currentMonsterNameStringWidth;
+    // size 0x60
+};
+
+struct sMonsterTurnDisplay {
+    s8 m0;
+    std::array<sMonsterTurnSub, 8> m8;
+    // size 0x300
+};
+
+sMonsterTurnDisplay previousEntityTurn;
+
+void drawMonsterNames() {
+    for (int i = 0; i < 8; i++) {
+        if (previousEntityTurn.m8[i].m5D_monsterNameIsDisplayed) {
+            if (i == 0) {
+                int x = 0x40 - (ushort)(previousEntityTurn.m8[i].m5E_currentMonsterNameStringWidth >> 1);
+                repositionTextRenderingPlanePrim(&previousEntityTurn.m8[i].m0_polys[battleOddOrEven], x, 0x2C, 0, 0, previousEntityTurn.m8[i].m5E_currentMonsterNameStringWidth);
+            }
+            else {
+                int x = 0x9A - (ushort)(previousEntityTurn.m8[i].m5E_currentMonsterNameStringWidth >> 1);
+                repositionTextRenderingPlanePrim(&previousEntityTurn.m8[i].m0_polys[battleOddOrEven], x, 0xCA, 0, (i / 2) * 0xD , previousEntityTurn.m8[i].m5E_currentMonsterNameStringWidth);
+            }
+            AddPrim(&(*pCurrentBattleOT)[1], &previousEntityTurn.m8[i].m0_polys[battleOddOrEven]);
+        }
+    }
+}
+
+void render_BA8_27C8_1E68(void)
+{
+    if (battleVar1->m9C_renderBA8 != '\0') {
+        battleRenderPolyArray(&battleVar0->mBA8[0], battleVar1->mF8_countOfBA8, battleVar1->mA5_ba8OddOrEven);
+    }
+    if (battleVar1->m9E_render27C8 != '\0') {
+        battleRenderPolyArray(&battleVar0->m27C8[0], battleVar1->m100_countOf27C8, battleVar1->mA7_27C8OddOrEven);
+    }
+    if (battleVar1->m9D_render1E68 != '\0') {
+        battleRenderPolyArray(&battleVar0->m1E68[0], battleVar1->mFC_countOF1E68, battleVar1->mA6_1E68OddOrEven);
+    }
+    return;
 }
 
 void drawBattleMode1() {
@@ -1709,6 +1781,8 @@ void drawBattleMode1() {
         battleRenderPortraitSelection();
         battleRenderPlayerPortraits();
         battleRenderCommandRing();
+        render_BA8_27C8_1E68();
+        drawMonsterNames();
         MissingCode();
         renderOpenMenu();
         renderTargetSelectionCursor();
@@ -1962,15 +2036,34 @@ void resetBattleCameraMode() {
     setBattleCameraMode(0);
 }
 
+int JumpAnimationStuffVar0;
+s16 processBattleAnimationSub0_var0 = 0;
+void initJumpAnimationStuff(void)
+{
+    JumpAnimationStuffVar0 = 0;
+    jumpAnimationControlStruct = (sJumpAnimationControlStruct*)0x0;
+    processBattleAnimationSub0_var0 = 0;
+    return;
+}
+s16 updateTargetSelectionMarkerSub0_var0;
+
+void initUpdateTargetSelectionMarkerSub0_var0(void)
+{
+    updateTargetSelectionMarkerSub0_var0 = 0;
+    return;
+}
+
 void initBattleSpriteSystem() {
     isBattleOverlayLoaded = 1;
     allocateSavePointMeshDataSub0_var0 = 0;
     spriteBytecode2ExtendedE0_Var0 = 0;
-    MissingCode();
+    battleDefaultEntityScale = 0x2000;
+    initJumpAnimationStuff();
     initBattleUnkData0();
     resetSpriteCallbacks();
     resetBattleCameraMode();
     allocateShapeTransfert(0x5000);
+    initUpdateTargetSelectionMarkerSub0_var0();
     MissingCode();
     objectClippingMask = 0;
 }
@@ -2292,7 +2385,6 @@ int countBattleActorCoresActiveForBitmask(uint bitmask, std::array<sSpriteActorC
 }
 
 s16 performAttackSub3_var0 = 0;
-s16 processBattleAnimationSub0_var0 = 0;
 sSpriteActorCore* processBattleAnimationSub0_var1 = nullptr;
 u8 needBattleAnimationDataLoading = 0;
 
@@ -2446,16 +2538,9 @@ std::optional<std::vector<u8>::iterator> loadFragmentIsNotLoadedYet() {
     return fragmentPtr;
 }
 
-struct sMonsterTurnDisplay {
-    s8 m0;
-    s8 m65_monsterNameIsDisplayed;
-};
-
-std::array<sMonsterTurnDisplay, 4> previousEntityTurn;
-
 void processBattleAnimation_subType_minus6(uint param_1) {
     battleVar1->mB0_isDialogWindowInitialized[4] = 1;
-    previousEntityTurn[param_1].m65_monsterNameIsDisplayed = 1;
+    previousEntityTurn.m8[param_1].m5D_monsterNameIsDisplayed = 1;
 }
 
 void processBattleAnimation_subType(sSpriteActorCore* param_1, int param_2) {
@@ -2611,12 +2696,6 @@ void setBattleCameraParamX(short param_1)
 {
     battleCameraParamsVar0.vx = param_1;
     return;
-}
-
-void freeBattleVar1_AE() {
-    if (battleVar1->mAE_isChiMenuDataLoaded) {
-        assert(0);
-    }
 }
 
 void freeBattleVar1_96() {
@@ -3600,8 +3679,6 @@ u32 handleMenuSelectEnemySub(u32, u32) {
 }
 
 sBattle800c3e24* battleG3 = nullptr;
-
-s16 updateTargetSelectionMarkerSub0_var0;
 
 void updateTargetSelectionMarkerSub0Sub1() {
     MissingCode();
@@ -5535,6 +5612,13 @@ void clearAnimationsEndOfTurn(int param_1) {
     setBattleCameraParamX(0xc0);
 }
 
+void loadImageSync(RECT* param_1, std::vector<u16>& param_2)
+{
+    LoadImage(param_1, (u8*)param_2.data());
+    DrawSync(0);
+    return;
+}
+
 void battleTickMain(s8 param_1) {
     battleTickMain_var0 = 1;
     battleTickMain_var1 = 0;
@@ -5587,7 +5671,7 @@ void battleTickMain(s8 param_1) {
                 if (battleVar2->m2EA != 0) {
                     assert(0);
                 }
-                previousEntityTurn[0].m0 = battleVar2->m2D3_currentEntityTurn;
+                previousEntityTurn.m0 = battleVar2->m2D3_currentEntityTurn;
                 battleVar1->m97 = 0;
                 updateCharacterBlinkingTask(0);
             }
@@ -5613,10 +5697,11 @@ void battleTickMain(s8 param_1) {
             if (((battleVisualEntities[battleVar2->m2D3_currentEntityTurn].m3 & 0x80) == 0) &&
                 ((battleEntities[battleVar2->m2D3_currentEntityTurn].m0_base.m34 & 0x400U) == 0)) {
                 // Display the enemy's name
-                /*battleVar1->mB0_isDialogWindowInitialized[5] = 1;
-                auto pString = getDialogParamPointer(battleStrings, battleMonsterMapping[battleVar2->m2D3_currentEntityTurn]);
-                currentMonsterNameStringWidth = renderString(pString, ramBufferFromMonsterName, 0x39, 0);
-                monsterNameIsDisplayed = 1;*/
+                battleVar1->mB0_isDialogWindowInitialized[5] = 1;
+                std::vector<u8>::iterator pString = getDialogParamPointer(currentBattleSpecificStrings, battleMonsterMapping[battleVar2->m2D3_currentEntityTurn]);
+                previousEntityTurn.m8[0].m5E_currentMonsterNameStringWidth = renderString(pString, *previousEntityTurn.m8[0].m58_ramBufferFromMonsterName, 0x39, 0);
+                loadImageSync(&previousEntityTurn.m8[0].m50_monsterNameVRamRect, *previousEntityTurn.m8[0].m58_ramBufferFromMonsterName);
+                previousEntityTurn.m8[0].m5D_monsterNameIsDisplayed = 1;
             }
         }
         if (((battleEntities[battleVar2->m2D3_currentEntityTurn].m0_base.m7C & 0x2080) == 0) &&
@@ -5733,6 +5818,45 @@ void init8920() {
     SetDrawMode(&battleVar0->m8920[1], 0, 0, GetTPage(battleVar0->mA234[0].m4_tpage_tp, 0, battleVar0->mA234[0].m10_tpage_X, battleVar0->mA234[0].m14_tpage_Y), &battleVar1->m0);
 }
 
+void initPolyMonsterName(sMonsterTurnSub* param_1, int index) {
+    for (int i = 0; i < 2; i++) {
+        POLY_FT4* p = &param_1->m0_polys[i];
+        SetPolyFT4(p);
+        p->r0 = 0x80;
+        p->g0 = 0x80;
+        p->b0 = 0x80;
+        SetSemiTrans(p, 0);
+        SetShadeTex(p, 1);
+        param_1->m5C = index & 1;
+        p->clut = param_1->m5C ? textSpriteMode1 : textSpriteMode0;
+        p->tpage = GetTPage(0, 0, 0x3c0, (index / 2) * 0xd);
+    }
+    param_1->m5D_monsterNameIsDisplayed = 0;
+}
+
+void setupStringsForMonsterNames() {
+    allocateAndSetupBattleDialogWindow(5, 8, 0x2a, 0x70, 0x12, 0, 0);
+    battleVar1->mB0_isDialogWindowInitialized[5] = 0;
+
+    allocateAndSetupBattleDialogWindow(4, 0x20, 200, 0xf4, 0x12, 0, 0);
+    battleVar1->mB0_isDialogWindowInitialized[4] = 0;
+
+    for (int i = 0; i < 8; i+=2) {
+        sRamTexture* pRamTexture = allocateTextureRamForText(0x39);
+        previousEntityTurn.m8[i].m58_ramBufferFromMonsterName = pRamTexture;
+        previousEntityTurn.m8[i+1].m58_ramBufferFromMonsterName = previousEntityTurn.m8[i].m58_ramBufferFromMonsterName;
+
+        previousEntityTurn.m8[i].m50_monsterNameVRamRect.x = 0x3C0;
+        previousEntityTurn.m8[i].m50_monsterNameVRamRect.y = (i / 2) * 0xD;
+        previousEntityTurn.m8[i].m50_monsterNameVRamRect.w = 0x3C;
+        previousEntityTurn.m8[i].m50_monsterNameVRamRect.h = 0xD;
+        previousEntityTurn.m8[i+1].m50_monsterNameVRamRect = previousEntityTurn.m8[i].m50_monsterNameVRamRect;
+
+        initPolyMonsterName(&previousEntityTurn.m8[i], i);
+        initPolyMonsterName(&previousEntityTurn.m8[i+1], i+1);
+    }
+}
+
 void battleMain() {
 
 #if 0
@@ -5776,9 +5900,7 @@ void battleMain() {
     makeBattleTimeProgress = 1;
     setCameraVisibleEntities(allPlayerCharacterBitmask);
     battleRenderDebugAndMain();
-
-    MissingCode();
-    
+    setupStringsForMonsterNames();
     // Wait for battle intro to finish and battle time to start
     while (battleTimeEnabled == '\0') {
         battleRenderDebugAndMain();

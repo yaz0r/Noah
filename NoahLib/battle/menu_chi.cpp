@@ -6,7 +6,6 @@
 #include "menus/menuHandler.h"
 #include "kernel/memory.h"
 #include "enemyScript.h"
-#include "kernel/TIM.h"
 #include "battleLoader.h"
 
 std::vector<u8> chiData;
@@ -65,7 +64,7 @@ void battleInitPoly4(std::array<POLY_FT4, 2>& param_1, char param_2, byte param_
 }
 
 void initBattleVar0_A230_content() {
-    battleVar0->mA230->m669 = 0;
+    battleVar0->mA230->m669_drawEPCost = 0;
     battleVar0->mA230->m66B = 0;
     battleVar0->mA230->m66D = 0;
     battleInitPoly4(battleVar0->mA230->m0_polys[0], 0, 1);
@@ -104,13 +103,6 @@ struct sItemNameSpriteInfo {
 
 std::array<sItemNameSpriteInfo, 22> ItemNameSpriteInfo;
 
-void loadImageSync(RECT* param_1, u16* param_2)
-{
-    LoadImage(param_1, (u8*)param_2);
-    DrawSync(0);
-    return;
-}
-
 void loadItemTargetsLabel() {
     std::array<sRamTexture*, 12> ramTextureArray;
     for (int currentEntry = 0; currentEntry < 11; currentEntry++) {
@@ -131,7 +123,7 @@ void loadItemTargetsLabel() {
         copyRect.x = 0x3DE;
         copyRect.w = 0x1E;
         copyRect.h = 0xD;
-        loadImageSync(&copyRect, ramTextureArray[currentEntry]->data());
+        loadImageSync(&copyRect, *ramTextureArray[currentEntry]);
     }
     for (int currentEntry = 0; currentEntry < 11; currentEntry++) {
         delete ramTextureArray[currentEntry];
@@ -142,7 +134,7 @@ void loadItemTargetsLabel() {
         copyRect.y = 0x100;
         copyRect.w = 6;
         copyRect.h = 0xD;
-        loadImageSync(&copyRect, itemLabelsIds[currentEntry]->data());
+        loadImageSync(&copyRect, *itemLabelsIds[currentEntry]);
     }
 }
 
@@ -174,27 +166,6 @@ std::vector<u8>::iterator drawCircleMenuChi_updateSub0Sub2(int param_1)
     return getDialogParamPointer(printDialogTextVar[0xC0 / 4], param_1);
 }
 
-void repositionTextRenderingPlanePrim(POLY_FT4* param_1, short x, short y, u8 u, u8 v, byte width)
-{
-    param_1->x0 = x;
-    param_1->y0 = y;
-    param_1->y1 = y;
-    param_1->x2 = x;
-    param_1->y2 = y + 0xd;
-    param_1->y3 = y + 0xd;
-    param_1->u0 = u;
-    param_1->u2 = u;
-    param_1->x1 = x + (ushort)width;
-    param_1->x3 = x + (ushort)width;
-    param_1->v0 = v;
-    param_1->u1 = u + width;
-    param_1->v1 = v;
-    param_1->v2 = v + '\r';
-    param_1->u3 = u + width;
-    param_1->v3 = v + '\r';
-    return;
-}
-
 void drawCircleMenuChi_updateSub0Sub3Sub0(uint param_1)
 {
     ushort uVar1;
@@ -212,7 +183,7 @@ void drawCircleMenuChi_updateSub0Sub3Sub0(uint param_1)
         repositionTextRenderingPlanePrim(&battleVar0->mA230->m0_polys[0x10][battleOddOrEven], 0x11c, 0xc6,(char)uVar2 * '\b' + 'x', 0, 8);
     }
     uVar1 = battleEntities[param_1].m0_base.m52_MaxMP;
-    repositionTextRenderingPlanePrim(&battleVar0->mA230->m5A0[0x11][battleOddOrEven], 0x124, 0xc6, ((char)uVar1 + (char)(uVar1 / 10) * -10) * '\b' + 'x', 0, 8);
+    repositionTextRenderingPlanePrim(&battleVar0->mA230->m0_polys[0x11][battleOddOrEven], 0x124, 0xc6, ((char)uVar1 + (char)(uVar1 / 10) * -10) * '\b' + 'x', 0, 8);
     return;
 }
 
@@ -248,7 +219,7 @@ void drawCircleMenuChi_updateSub0(byte param_1) {
     localRect.w = 0x3C;
     localRect.y = 0;
     localRect.h = 0xD;
-    loadImageSync(&localRect, tempRamTexture->data());
+    loadImageSync(&localRect, *tempRamTexture);
 
     std::array<u8, 16> flagArray;
     std::array<u8, 16> flagArray2;
@@ -261,7 +232,7 @@ void drawCircleMenuChi_updateSub0(byte param_1) {
             }
             else {
                 flagArray[entryIndex] = 1;
-                flagArray2[entryIndex] = partyBattleStats[param_1].m383;
+                flagArray2[entryIndex] = partyBattleStats[param_1].m370[0].m13_cost;
             }
         }
     }
@@ -280,7 +251,7 @@ void drawCircleMenuChi_updateSub0(byte param_1) {
         localRect2.y = (short)((int)entryIndex / 2) * 0x10 + 0x100;
         localRect2.w = 0x1b;
         localRect2.h = 0x10;
-        loadImageSync(&localRect2, tempRamTexture->data());
+        loadImageSync(&localRect2, *tempRamTexture);
         if (flagArray[entryIndex]) {
             std::vector<u8>::iterator stringData;
             if (apConfigArray[param_1].m1 == 0) {
@@ -295,7 +266,7 @@ void drawCircleMenuChi_updateSub0(byte param_1) {
             local_b0.y = (short)((int)entryIndex / 2) * 0x10 + 0x102;
             local_b0.w = 0x1e;
             local_b0.h = 0xd;
-            loadImageSync(&local_b0, allTextures[entryIndex]->data());
+            loadImageSync(&local_b0, *allTextures[entryIndex]);
         }
         if ((entryIndex & 1) == 0) {
             RECT local_90;
@@ -303,7 +274,7 @@ void drawCircleMenuChi_updateSub0(byte param_1) {
             local_90.y = (short)((int)entryIndex / 2) * 0x10 + 0x100;
             local_90.w = 0x1b;
             local_90.h = 0x10;
-            loadImageSync(&local_90, tempRamTexture->data());
+            loadImageSync(&local_90, *tempRamTexture);
         }
 
         {
@@ -317,7 +288,7 @@ void drawCircleMenuChi_updateSub0(byte param_1) {
             if (flagArray2[entryIndex] / 10 != 0) {
                 psVar4 = itemLabelsIds[flagArray2[entryIndex] / 10];
             }
-            loadImageSync(&local_a8, psVar4->data());
+            loadImageSync(&local_a8, *psVar4);
         }
 
         {
@@ -331,7 +302,7 @@ void drawCircleMenuChi_updateSub0(byte param_1) {
             if (flagArray[entryIndex] != '\0') {
                 psVar4 = itemLabelsIds[flagArray2[entryIndex] % 10];
             }
-            loadImageSync(&local_a0, psVar4->data());
+            loadImageSync(&local_a0, *psVar4);
         }
     }
 
@@ -344,7 +315,7 @@ void drawCircleMenuChi_updateSub0(byte param_1) {
 
     battleVar0->mA230->m0_polys[4][0].clut = textSpriteMode0;
     battleVar0->mA230->m0_polys[4][1].clut = textSpriteMode0;
-    battleVar0->mA230->m669 = 1;
+    battleVar0->mA230->m669_drawEPCost = 1;
     battleVar1->mB7 = 1;
 }
 
@@ -392,6 +363,456 @@ void drawCircleMenuChi_updateSub3(int param_1)
     battleVar0->mA230->m668_oddOrEven = battleOddOrEven;
 }
 
+void drawCircleMenuChi_updateSub5(char param_1)
+{
+    auto pmVar1 = battleVar1;
+    battleVar1->m9E_render27C8 = 0;
+    pmVar1->m9D_render1E68 = 0;
+    pmVar1->m9C_renderBA8 = 0;
+    pmVar1 = battleVar1;
+    battleVar1->mB0_isDialogWindowInitialized[3] = 0;
+    pmVar1->mB0_isDialogWindowInitialized[2] = 0;
+    pmVar1->mB0_isDialogWindowInitialized[1] = 0;
+    pmVar1->mB0_isDialogWindowInitialized[0] = 0;
+    battleVar1->mB7 = 0;
+    if (param_1 == '\0') {
+        battleVar1->mCB = 1;
+    }
+    return;
+}
+
+void abilityCancelSelection(uint param_1)
+{
+    u16 uVar2;
+    uint uVar3;
+    uint uVar4;
+
+    auto pmVar1 = battleVar1;
+    battleVar1->m9E_render27C8 = 1;
+    pmVar1->m9D_render1E68 = 1;
+    pmVar1->m9C_renderBA8 = 1;
+    pmVar1 = battleVar1;
+    param_1 = param_1 & 0xff;
+    battleVar1->mB0_isDialogWindowInitialized[3] = 1;
+    pmVar1->mB0_isDialogWindowInitialized[2] = 1;
+    pmVar1->mB0_isDialogWindowInitialized[1] = 1;
+    pmVar1->mB0_isDialogWindowInitialized[0] = 1;
+    battleVar1->mB7 = 1;
+    uVar3 = characterIdToTargetBitmask(param_1);
+    uVar4 = characterIdToTargetBitmask(battleVar2->m0[param_1].m3C_currentTarget);
+    setCameraVisibleEntities((uVar3 | uVar4) & 0xffff);
+    uVar2 = characterIdToTargetBitmask(battleVar2->m0[param_1].m3C_currentTarget);
+    updateCharacterBlinkingTask(uVar2);
+    return;
+}
+
+byte abilitySelectedTarget;
+u16 abilityTargetBitmask;
+
+byte abilityTargetSelectionInitSub1(byte param_1)
+
+{
+    char cVar1;
+    ushort uVar2;
+    byte bVar4;
+    int iVar5;
+    int iVar6;
+
+    iVar5 = 0xb;
+    auto pbVar3 = targetsPerPriority.begin() +0xb;
+    do {
+        *pbVar3 = 0xff;
+        iVar5 = iVar5 + -1;
+        pbVar3 = pbVar3 + -1;
+    } while (-1 < iVar5);
+    iVar6 = 0;
+    iVar5 = 7;
+    numValidTarget = '\0';
+    abilityTargetBitmask = 0;
+    bVar4 = 3;
+    if (true) {
+        do {
+            cVar1 = isTargetValid(param_1, bVar4);
+            if (cVar1 != '\0') {
+                targetsPerPriority[iVar6] = bVar4;
+                uVar2 = characterIdToTargetBitmask(bVar4);
+                iVar6 = iVar6 + 1;
+                numValidTarget = numValidTarget + '\x01';
+                abilityTargetBitmask = abilityTargetBitmask | uVar2;
+            }
+            iVar5 = iVar5 + -1;
+            bVar4 = bVar4 + 1;
+        } while (-1 < iVar5);
+    }
+    return targetsPerPriority[0];
+}
+
+bool abilityTargetSelectionInitSub0Sub0(uint param_1, char param_2)
+{
+    bool bVar1;
+
+    param_1 = param_1 & 0xff;
+    bVar1 = false;
+    if ((isBattleSlotFilled[param_1] != 0) && (battleVisualEntities[param_1].m3 == 0)) {
+        if (apConfigArray[param_1].m1 == 0) {
+            bVar1 = true;
+            if (param_2 == '\0') {
+                bVar1 = (battleEntities[param_1].m0_base.m7C & 0xc001) == 0;
+            }
+        }
+        else if ((param_2 != '\0') || ((battleEntities[param_1].mA4_gear.m7C & 0xc001) == 0)) {
+            bVar1 = true;
+        }
+    }
+    return bVar1;
+}
+
+byte abilityTargetSelectionInitSub0(byte param_1, byte param_2, char param_3, byte param_4)
+{
+    byte bVar1;
+    char cVar2;
+    ushort uVar3;
+    int iVar5;
+    int unaff_s4;
+    int iVar6;
+    byte unaff_s7;
+
+    iVar6 = 0;
+    iVar5 = 0xb;
+    auto pbVar4 = targetsPerPriority.begin() + 0xb;
+    do {
+        *pbVar4 = 0xff;
+        iVar5 = iVar5 + -1;
+        pbVar4 = pbVar4 + -1;
+    } while (-1 < iVar5);
+    if (param_1 == 1) {
+        param_4 = 0;
+        unaff_s4 = 3;
+    }
+    else if (param_1 < 2) {
+        if (param_1 == 0) {
+            param_4 = 3;
+            unaff_s4 = 8;
+        }
+    }
+    else if (param_1 == 2) {
+        param_4 = 0;
+        if (param_3 == '\0') {
+            param_4 = 3;
+            unaff_s4 = 8;
+            unaff_s7 = 0;
+            iVar6 = 3;
+        }
+        else {
+            unaff_s4 = 3;
+            unaff_s7 = 3;
+            iVar6 = 8;
+        }
+    }
+    iVar5 = 0;
+    numValidTarget = '\0';
+    abilityTargetBitmask = 0;
+    while (bVar1 = param_4, unaff_s4 = unaff_s4 + -1, -1 < unaff_s4) {
+        cVar2 = abilityTargetSelectionInitSub0Sub0(bVar1, param_2);
+        param_4 = bVar1 + 1;
+        if (cVar2 != '\0') {
+            targetsPerPriority[iVar5] = bVar1;
+            uVar3 = characterIdToTargetBitmask(bVar1);
+            iVar5 = iVar5 + 1;
+            numValidTarget = numValidTarget + '\x01';
+            abilityTargetBitmask = abilityTargetBitmask | uVar3;
+        }
+    }
+    while (bVar1 = unaff_s7, iVar6 = iVar6 + -1, -1 < iVar6) {
+        cVar2 = abilityTargetSelectionInitSub0Sub0(bVar1, param_2);
+        unaff_s7 = bVar1 + 1;
+        if (cVar2 != '\0') {
+            targetsPerPriority[iVar5] = bVar1;
+            uVar3 = characterIdToTargetBitmask(bVar1);
+            iVar5 = iVar5 + 1;
+            numValidTarget = numValidTarget + '\x01';
+            abilityTargetBitmask = abilityTargetBitmask | uVar3;
+        }
+    }
+    return targetsPerPriority[0];
+}
+
+ushort abilityTargetSelectionInit(ushort param_1, ushort param_2, byte param_3, byte param_4, char param_5)
+
+{
+    bool bVar1;
+    short sVar2;
+    ushort uVar3;
+    byte* pbVar4;
+    byte uVar5;
+    ushort uVar6;
+    int iVar7;
+    int iVar8;
+    uint uVar9;
+    int iVar10;
+
+    if (param_4 == 1) {
+        param_2 = 0x3000;
+    }
+    else if (param_4 < 2) {
+        uVar3 = param_1 & 0x8000;
+        if (param_4 != 0) goto LAB_Battle__80084e6c;
+    }
+    else {
+        uVar3 = param_1 & 0x8000;
+        if (param_4 != 2) goto LAB_Battle__80084e6c;
+        param_2 = 0x2001;
+    }
+    param_1 = param_2;
+    uVar3 = param_1 & 0x8000;
+LAB_Battle__80084e6c:
+    bVar1 = (param_1 & 0x1000) == 0;
+    if (bVar1) {
+        uVar6 = 7;
+    }
+    else {
+        uVar6 = 0xfff8;
+    }
+    uVar5 = bVar1;
+    if ((param_1 & 0x2000) != 0) {
+        uVar5 = 2;
+        uVar6 = 0xffff;
+    }
+    if (param_5 == '\0') {
+        abilitySelectedTarget = abilityTargetSelectionInitSub0(uVar5, uVar3 != 0, bVar1, param_4);
+    }
+    else {
+        abilitySelectedTarget = abilityTargetSelectionInitSub1(param_3);
+    }
+    abilityTargetBitmask = uVar6 & abilityTargetBitmask;
+    if ((param_1 & 0x8000) == 0) {
+        if ((param_1 & 0x4000) != 0) {
+            abilitySelectedTarget = param_3;
+            abilityTargetBitmask = characterIdToTargetBitmask(param_3);
+            iVar7 = 10;
+            auto pbVar4 = targetsPerPriority.begin() + 10;
+            do {
+                *pbVar4 = 0xff;
+                iVar7 = iVar7 + -1;
+                pbVar4 = pbVar4 + -1;
+            } while (-1 < iVar7);
+        }
+    }
+    else {
+        iVar7 = 0;
+        abilitySelectedTarget = 0xff;
+        uVar9 = 0;
+        do {
+            sVar2 = bitmaskCharacterCheck(abilityTargetBitmask, uVar9 & 0xff);
+            if (sVar2 != 0) {
+                if ((&apConfigArray[uVar9].m1)[iVar10] == 0) {
+                    uVar3 = (battleEntities[uVar9].m0_base.m7C);
+                }
+                else {
+                    uVar3 = (battleEntities[uVar9].mA4_gear.m7C);
+                }
+                if ((uVar3 & 0x8000) == 0) {
+                    uVar3 = characterOdToInverseTargetBitmask(uVar9 & 0xff);
+                    abilityTargetBitmask = abilityTargetBitmask & uVar3;
+                }
+                else {
+                    abilitySelectedTarget = (byte)uVar9;
+                    targetsPerPriority[iVar7] = abilitySelectedTarget;
+                    iVar7 = iVar7 + 1;
+                }
+            }
+            uVar9 = uVar9 + 1;
+        } while ((int)uVar9 < 0xb);
+        for (; iVar7 < 0xb; iVar7 = iVar7 + 1) {
+            targetsPerPriority[iVar7] = 0xff;
+        }
+    }
+    return param_1;
+}
+
+
+ushort abilitySelectTargetSub0(void)
+
+{
+    short sVar1;
+    ushort uVar2;
+    uint uVar3;
+    uint uVar4;
+    int iVar5;
+    ushort uVar6;
+
+    uVar6 = 0;
+    uVar3 = 0;
+    iVar5 = 0;
+    do {
+        uVar4 = uVar3 & 0xff;
+        sVar1 = bitmaskCharacterCheck(abilityTargetBitmask, uVar4);
+        uVar3 = uVar3 + 1;
+        if ((sVar1 != 0) &&
+            (battleVisualEntities[abilitySelectedTarget].m0_positionSlot ==
+                (&battleVisualEntities[0].m0_positionSlot)[iVar5])) {
+            uVar2 = characterIdToTargetBitmask(uVar4);
+            uVar6 = uVar6 | uVar2;
+        }
+        iVar5 = iVar5 + 0x1c;
+    } while ((int)uVar3 < 0xb);
+    return uVar6;
+}
+
+
+
+char abilitySelectTarget(ushort param_1, byte param_2, byte param_3)
+
+{
+    byte bVar1;
+    char cVar2;
+    ushort uVar3;
+    ushort uVar4;
+    short sVar5;
+    ushort uVar6;    
+    uint uVar7;
+    char selectedTarget;
+    byte bVar8;
+
+    bVar8 = 0xfe;
+    abilityTargetSelectionInit(param_1, param_1, param_2, 0, param_3);
+    selectedTarget = abilitySelectedTarget == -1;
+    uVar4 = abilityTargetBitmask;
+    if (!(bool)selectedTarget) {
+        do {
+            battleRenderDebugAndMain();
+            uVar6 = param_1 & 0xf;
+            if (uVar6 == 1) {
+                updateCharacterBlinkingTask(abilityTargetBitmask);
+                uVar7 = (uint)abilityTargetBitmask;
+            LAB_Battle__800851a4:
+                setCameraVisibleEntities(uVar7);
+            }
+            else if (uVar6 < 2) {
+                if ((param_1 & 0xf) == 0) {
+                    uVar3 = characterIdToTargetBitmask(abilitySelectedTarget);
+                    updateCharacterBlinkingTask(uVar3);
+                    uVar7 = characterIdToTargetBitmask(abilitySelectedTarget);
+                    uVar7 = uVar7 & 0xffff;
+                    goto LAB_Battle__800851a4;
+                }
+            }
+            else if (uVar6 == 2) {
+                uVar4 = abilitySelectTargetSub0();
+                uVar7 = (uint)uVar4;
+                updateCharacterBlinkingTask(uVar7);
+                goto LAB_Battle__800851a4;
+            }
+            if (false) goto switchD_Battle_800851d4_caseD_6;
+            battleInputDirection direction;
+            switch (battleInputButton) {
+            case 0:
+                direction = BDIR_RIGHT;
+                break;
+            case 1:
+                direction = BDIR_DOWN;
+                break;
+            case 2:
+                direction = BDIR_LEFT;
+                break;
+            case 3:
+                direction = BDIR_UP;
+                break;
+            case 4:
+                selectedTarget = '\x02';
+                abilityTargetBitmask = uVar4;
+                goto switchD_Battle_800851d4_caseD_6;
+            case 5:
+                selectedTarget = '\x01';
+            default:
+                goto switchD_Battle_800851d4_caseD_6;
+            }
+            cVar2 = selectNewSlotByDirection(abilitySelectedTarget, direction);
+            sVar5 = bitmaskCharacterCheck(abilityTargetBitmask, cVar2);
+            if (sVar5 != 0) {
+                abilitySelectedTarget = cVar2;
+            }
+        switchD_Battle_800851d4_caseD_6:
+            bVar1 = battleInputButton;
+            if (battleInputButton != bVar8) {
+                uVar7 = 0;
+                do {
+                    cVar2 = selectNewSlotByDirection(abilitySelectedTarget, (battleInputDirection)uVar7);
+                    if (cVar2 == abilitySelectedTarget) {
+                        battleG3->mE6_isDirectionEnabled[uVar7] = 0;
+                    }
+                    else {
+                        battleG3->mE6_isDirectionEnabled[uVar7] = 1;
+                    }
+                    uVar7 = uVar7 + 1;
+                    bVar8 = bVar1;
+                } while ((int)uVar7 < 4);
+            }
+        } while (selectedTarget == '\0');
+    }
+    return selectedTarget + -1;
+}
+
+
+bool useAbility(uint param_1, uint param_2, uint param_3) {
+    int sVar9;
+    int abilityCost;
+    int bVar1 = 0;
+    if (apConfigArray[param_1].m1 == 0) {
+        sVar9 = partyBattleStats[param_1].m370[param_3 * 2 + param_2].m0;
+        abilityCost = partyBattleStats[param_1].m370[param_3 * 2 + param_2].m13_cost;
+        bVar1 = bitmaskCharacterCheck(gameState.m16C0[battleCharacters[param_1]].m0_unlockedAbilitiesBitField[1], param_2 + (param_3 * 2)) != 0;
+    }
+    else {
+        // mecha
+        assert(0);
+    }
+
+    int bVar2 = 1;
+    int bVar10 = 0;
+    if (abilityCost <= battleEntities[param_1].m0_base.m50_MP) {
+        bVar2 = 1;
+        int targetSelected;
+        if (bVar1) {
+            drawCircleMenuChi_updateSub5(1);
+            battleVar1->mC6_isTargetSelectionCursorVisible = 1;
+            targetSelected = abilitySelectTarget(sVar9, param_1, 0);
+            if (targetSelected == 0) {
+                battleVar1->mC6_isTargetSelectionCursorVisible = 0;
+                abilityCancelSelection(param_1);
+            }
+            else {
+                battleEntities[param_1].m0_base.m50_MP -= abilityCost;
+            }
+        }
+        bVar10 = targetSelected != '\0';
+        bVar2 = false;
+    }
+    if (bVar2) {
+        battleSoundEffect2(0x4f);
+    }
+    return bVar10;
+}
+
+void freeBattleVar0_A230(void)
+{
+    battleRenderDebugAndMain();
+    delete battleVar0->mA230;
+    battleVar0->mA230 = nullptr;
+    return;
+}
+
+void drawCircleMenuChi_updateSub6(uint param_1)
+{
+    param_1 = param_1 & 0xff;
+    battleVar1->mB0_isDialogWindowInitialized[param_1] = 0;
+    battleVar1->mB8_isDialogWindowInitialized2[param_1] = 0;
+    battleRenderDebugAndMain();
+    delete battleDialogWindows[param_1];
+    delete battleDialogWindows2[param_1];
+    return;
+}
+
 int drawCircleMenuChi_update(int param_1) {
     char cVar1;
     int iVar2;
@@ -437,6 +858,54 @@ int drawCircleMenuChi_update(int param_1) {
         drawCircleMenuChi_updateSub4((bVar3 & 1) * 0x84 + 0x2a, (uint)(bVar3 >> 1) * 0x10 + 0x38, &local_30, &local_2c);
         battleRenderDebugAndMain();
         switch (battleInputButton) {
+        case 0:
+            if ((uint)bVar4 * 2 + (uint)bVar3 != 0xf) {
+                if (bVar3 == 0xb) {
+                    battleChiMenuVar1 = 1;
+                }
+                else {
+                    bVar3 = bVar3 + 1;
+                }
+            }
+            break;
+        case 1:
+            if ((uint)bVar4 * 2 + (uint)bVar3 < 0xe) {
+                if (bVar3 + 2 < 0xc) {
+                    bVar3 = bVar3 + 2;
+                }
+                else {
+                    battleChiMenuVar1 = 3;
+                }
+            }
+            break;
+        case 2:
+            if ((uint)bVar4 * 2 + (uint)bVar3 != 0) {
+                if ((bVar3 == 0) && (bVar4 != 0)) {
+                    battleChiMenuVar1 = 2;
+                }
+                else {
+                    bVar3 = bVar3 - 1;
+                }
+            }
+            break;
+        case 3:
+            if (1 < (uint)bVar4 * 2 + (uint)bVar3) {
+                if ((bVar3 < 2) && (bVar4 != 0)) {
+                    battleChiMenuVar1 = 4;
+                }
+                else {
+                    bVar3 = bVar3 - 2;
+                }
+            }
+            break;
+        case 4:
+            if (useAbility(param_1, bVar3, bVar4)) {
+                iVar5 = 1;
+                battleVar2->m2E6 = bVar3 + bVar4 * '\x02';
+            }
+        case 5:
+            iVar5 = 0;
+            break;
         case 8:
             break;
         default:
@@ -446,12 +915,36 @@ int drawCircleMenuChi_update(int param_1) {
         switch (battleChiMenuVar1) {
         case 0:
             break;
+        case 1:
+            iVar2 = (bVar4 + 1) * 0x10;
+            if (iVar2 <= battleChiMenuVar0) {
+                bVar4 = bVar4 + 1;
+                bVar3 = bVar3 - 1;
+                battleChiMenuVar1 = 0;
+                battleChiMenuVar0 = iVar2;
+            }
+            break;
+        case 3: // scroll the list up
+            iVar2 = (bVar4 + 1) * 0x10;
+            if (iVar2 <= battleChiMenuVar0) {
+                bVar4 = bVar4 + 1;
+                battleChiMenuVar1 = 0;
+                battleChiMenuVar0 = iVar2;
+            }
+            break;
         default:
             assert(0);
         }
 
         if (iVar5 != 2) {
-            assert(0);
+            drawCircleMenuChi_updateSub5(iVar5);
+            freeBattleVar0_A230();
+            removeTargetSelectionCursors();
+            drawCircleMenuChi_updateSub6(0);
+            drawCircleMenuChi_updateSub6(1);
+            drawCircleMenuChi_updateSub6(2);
+            drawCircleMenuChi_updateSub6(3);
+            return iVar5;
         }
     } while (true);
 }
@@ -507,10 +1000,20 @@ void drawCircleMenuChi(int param_1) {
         else {
             drawCircleMenuChi_sub2(param_1);
         }
+        battleSoundEffect2(0x4f);
+        break;
+    case 5:
         break;
     case 8:
         break;
     default:
         assert(0);
+    }
+}
+
+void freeBattleVar1_AE() {
+    if (battleVar1->mAE_isChiMenuDataLoaded) {
+        chiData.clear();
+        battleVar1->mAE_isChiMenuDataLoaded = false;
     }
 }

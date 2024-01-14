@@ -74,6 +74,7 @@ std::array<sLoadingBatchCommands, 3> playerLoadingCommands;
 
 struct sBattleEnemyInitialStats : public sLoadableData {
     std::array<std::array<s16, 4>, 4> m0_scriptsOffsets;
+    std::vector<u8>::iterator m30_strings;
     std::array<sBattleEntity,8> m32;
 
     virtual void init(std::vector<u8>& data) override {
@@ -83,6 +84,7 @@ struct sBattleEnemyInitialStats : public sLoadableData {
                 m0_scriptsOffsets[i][j] = READ_LE_S16(data.begin() + 0 + 4 * 2 * i + 2 * j);
             }
         }
+        m30_strings = m_rawData.begin() + READ_LE_U16(m_rawData.begin() + 0x30);
         for (int i = 0; i < 8; i++) {
             m32[i].deserialize(data.begin() + 0x32 + 0x170 * i);
         }
@@ -216,8 +218,6 @@ u16 characterIdToTargetBitmask(uint param_1)
         return bitmaskCharacter[param_1 & 0xff];
     }
 }
-
-std::array<s8, 11> battleMonsterMapping;
 
 void batteLoaderPhase1_1() {
     battlePartyLayoutType = 0;  
@@ -698,7 +698,11 @@ void batteLoaderPhase1_3() {
     MissingCode();
 }
 
+std::vector<u8>::iterator currentBattleSpecificStrings;
+
 void loadEnemies() {
+    performAttackSub3_var0 = 0;
+    currentBattleSpecificStrings = battleConfigFile2.m30_strings;
     for (int i = 3; i < 11; i++) {
         unknownMonsterStatus0[i - 3].m3 = 0;
         if (battleVisualEntities[3].m2 == 0x7F) {

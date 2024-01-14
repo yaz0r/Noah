@@ -6,6 +6,7 @@
 #include "kernel/taskLists.h"
 
 extern s8 isBattleOverlayLoaded;
+extern int battleDefaultEntityScale;
 
 struct sFieldEntitySub4_124
 {
