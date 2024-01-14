@@ -6922,9 +6922,6 @@ int checkCameraCollision(FP_VEC4* param_1, std::array<SFP_VEC4, 2>& param_2, std
 
         if (((*walkMeshVar1)[pCollisionTriangles[triangleId].mC_indexInWalkmeshData1] & 0x800000) == 0) {
             triangleId = -1;
-            if ((triangleId != -1) && (iterationCount != 0xF0)) {
-                return 0;
-            }
             break;
         }
 
@@ -6935,10 +6932,12 @@ int checkCameraCollision(FP_VEC4* param_1, std::array<SFP_VEC4, 2>& param_2, std
         }
     }
 
+    if ((triangleId != -1) && (iterationCount != 0xF0)) {
+        return 0;
+    }
+
     switch (collisionFlag)
     {
-    case 0:
-        break;
     case 1:
         param_2[0] = pVertices[pCollisionTriangles[lastTriangle].m0_verticeIndex[1]];
         param_2[1] = pVertices[pCollisionTriangles[lastTriangle].m0_verticeIndex[2]];
@@ -7000,7 +6999,8 @@ void updateCameraInterpolationSub1Sub0(std::array<s16, 4>& param_1, std::array<s
     local_28.vx = (int)param_2[2] - (int)param_2[0];
     local_28.vz = (int)param_2[3] - (int)param_2[1];
     VectorNormal(&local_28, &local_38);
-    iVar1 = local_38.vx * local_48.vz - local_38.vz * local_48.vx >> 0xc;
+
+    iVar1 = (local_38.vx * local_48.vz - local_38.vz * local_48.vx) >> 0xc;
     if (iVar1 == 0) {
         iVar1 = 0;
     }
@@ -7148,6 +7148,7 @@ void updateCameraInterpolation(void)
     localPosition.vx = (psVar2->m4C_scriptEntity->m20_position).vx;
     localPosition.vy = (psVar2->m4C_scriptEntity->m20_position).vy;
     localPosition.vz = (psVar2->m4C_scriptEntity->m20_position).vz;
+
     updateCameraInterpolationSub1(&localPosition, (int)psVar2->m4C_scriptEntity->m72_elevation);
     if ((op99Var7 & 0x4000) == 0) {
         SFP_VEC4 walkmeshOutput1;
