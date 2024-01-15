@@ -708,6 +708,7 @@ const std::vector<void (*)(sTaskHeader*)> spriteBytecode2ExtendedE0_Sub0Sub0_cal
         spriteCallback_render2,
         spriteCallback_render8,
         spriteCallback_render9,
+        nullptr,
 } };
 
 void spriteBytecode2ExtendedE0_Sub0Sub0(sTaskHeader* param_1, int param_2)
@@ -2083,9 +2084,8 @@ sSpriteActor* initializeSpriteActor(sSpriteActor* param_1, sSpriteActorAnimation
 
 	setAnimationBundle(param_1, pSetup);
 
-    //sPS1Pointer pAnim = (*param_1->m24_vramData->m10_startOfAnimationContainer)[0];
-    //param_1->m60_endOfAnimationContainer = pAnim + ((READ_LE_U16(pAnim) & 0x3F) + 1) * 2;
-    MissingCode();
+    sPS1Pointer pAnim = param_1->m24_vramData->m10_startOfAnimationContainer->at(0).begin();
+    param_1->m60_endOfAnimationContainer = pAnim + ((READ_LE_U16(pAnim) & 0x3F) + 1) * 2;
 	spriteActorSetPlayingAnimation(param_1, 0);
 
 	return param_1;
@@ -2093,37 +2093,33 @@ sSpriteActor* initializeSpriteActor(sSpriteActor* param_1, sSpriteActorAnimation
 
 void OP_INIT_ENTITY_SCRIPT_sub0Sub4(sSpriteActor* param_1, int param_2, int* param_3, int* param_4, int* param_5)
 {
-	byte bVar1;
-	sPS1Pointer pbVar2;
-	int iVar3;
-	int iVar4;
-	uint uVar5;
+    auto startOfAnimation = param_1->m24_vramData->m10_startOfAnimationContainer->at(0).begin();
+    u16 offset2 = READ_LE_U16(startOfAnimation + 4);
+    byte bVar1 = READ_LE_U8(startOfAnimation + offset2 + 4);
+    uint uVar5 = (uint)bVar1;
 
-	pbVar2 = param_1->m24_vramData->m10_startOfAnimationContainer->at(0).begin();
-	bVar1 = READ_LE_U8(pbVar2 + READ_LE_U16(pbVar2 + 4) + 4);
-	uVar5 = (uint)bVar1;
-	pbVar2 = param_1->m24_vramData->m0_spriteData->rawPointer;
-	iVar3 = uVar5 << 1;
+    sPS1Pointer spriteRawData = param_1->m24_vramData->m0_spriteData->rawPointer;
+    int iVar3 = uVar5 << 1;
 	if (bVar1 != 0) {
 		uVar5 = uVar5 - 1;
 		iVar3 = uVar5 * 2;
 	}
-	iVar4 = uVar5 << 1;
-	if (READ_LE_U16(pbVar2 + iVar3) < (int)uVar5) {
+    int iVar4 = uVar5 << 1;
+	if (READ_LE_U16(spriteRawData + iVar3) < (int)uVar5) {
 		iVar4 = 0;
 	}
-	pbVar2 = pbVar2 + READ_LE_U16(pbVar2 + iVar4 + 2);
-	iVar3 = READ_LE_U8(pbVar2 + 3) * param_1->m2C_scale;
+	spriteRawData = spriteRawData + READ_LE_U16(spriteRawData + iVar4 + 2);
+	iVar3 = READ_LE_U8(spriteRawData + 3) * param_1->m2C_scale;
 	if (iVar3 < 0) {
 		iVar3 = iVar3 + 0xfff;
 	}
 	*param_4 = iVar3 >> 0xc;
-	iVar3 = READ_LE_U8(pbVar2 + 1) * param_1->m2C_scale;
+	iVar3 = READ_LE_U8(spriteRawData + 1) * param_1->m2C_scale;
 	if (iVar3 < 0) {
 		iVar3 = iVar3 + 0xfff;
 	}
 	*param_5 = iVar3 >> 0xc;
-	iVar3 = READ_LE_U8(pbVar2 + 2) * param_1->m2C_scale;
+	iVar3 = READ_LE_U8(spriteRawData + 2) * param_1->m2C_scale;
 	if (iVar3 < 0) {
 		iVar3 = iVar3 + 0xfff;
 	}

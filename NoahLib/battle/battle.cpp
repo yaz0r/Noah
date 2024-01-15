@@ -2701,7 +2701,7 @@ void processBattleAnimation(sSpriteActorCore* param_1) {
     case 4: // 1ap
     case 5: // 2ap
     case 6: // 3ap
-    case 22: // ability
+    case 24: // healing ability?
     case 30:
     case 31:
         attackInProgress = 0;
@@ -4641,6 +4641,29 @@ LAB_Battle__80096724:
     return;
 }
 
+void startBattleAttackAnimationVar8_1() { // healing (used in Citan's Sazanami)
+    ushort uVar1;
+    short sVar2;
+
+    sVar2 = (ushort)battleGetSlotStatusSub_currentBattleEntity->m5B_ether *
+        (ushort)(byte)currentEntityBattleStats->m11;
+    if ((battleGetSlotStatusSub_currentBattleEntity->m8A & 0x2000) != 0) {
+        sVar2 = sVar2 * 2;
+    }
+    uVar1 = startBattleAttackAnimationVar5->m8C | startBattleAttackAnimationVar5->m8E;
+    if ((uVar1 & 0x100) != 0) {
+        sVar2 = (short)((sVar2 * 7) / 10);
+    }
+    if ((uVar1 & 0x200) != 0) {
+        sVar2 = (short)((sVar2 * 0xd) / 10);
+    }
+    if ((battleEntities[startBattleAttackAnimationVar4].m15A_flags & 0x80) != 0) {
+        sVar2 = 0;
+    }
+    initBattleAttackStatusArray0[startBattleAttackAnimationVar4] = 2;
+    damageDonePerAttack[startBattleAttackAnimationVar4] = (int)sVar2;
+}
+
 void startBattleAttackAnimationVar8_0() {
     u32 uVar5 = currentEntityBattleStats->m11;
 
@@ -4803,7 +4826,7 @@ void startBattleAttackAnimationVar8_0() {
 typedef void(*startBattleAttackAnimationVar8Type)();
 const std::array<startBattleAttackAnimationVar8Type, 8> startBattleAttackAnimationVar8 = { {
      startBattleAttackAnimationVar8_0,
-     startBattleAttackAnimationVar8Unimplemented,
+     startBattleAttackAnimationVar8_1,
      startBattleAttackAnimationVar8Unimplemented,
      startBattleAttackAnimationVar8Unimplemented,
      startBattleAttackAnimationVar8Unimplemented,
@@ -4946,7 +4969,7 @@ void onPlayerAttackedByEnemy() {
                 startBattleAttackAnimationVar5 = battleGetSlotStatusSub_currentBattleEntity;
                 startBattleAttackAnimationVar4 = bVar1;
                 battleGetSlotStatusSub_currentBattleEntity = psVar2;
-                currentEntityBattleStats = &partyBattleStats[uVar4].m320;
+                currentEntityBattleStats = &partyBattleStats[uVar4].m0[20];
                 initBattleAttackStatusArray0[uVar4] = 7;
                 damageDonePerAttack[startBattleAttackAnimationVar2] = 0;
                 battleTickMain_var1 = 0x34;
@@ -5089,6 +5112,16 @@ void setDamageDone(uint param_1)
                 break;
             }
             break;
+        case 2:
+            switch (battleTickMainSub0Var1[i]) {
+            case -1:
+                battleTickMainSub0Var0[i] = damageDonePerAttack[i];
+                battleTickMainSub0Var1[i] = initBattleAttackStatusArray0[i];
+                break;
+            default:
+                assert(0);
+            }
+            break;
         case 4:
             break; // TODO: is this correct?
         case 5:
@@ -5127,6 +5160,7 @@ void markEnemyDead(uint param_1)
     return;
 }
 
+bool healWhileOnGear = false;
 
 void applyChangeToHpOrMp(uint param_1) {
     for (int i = 0; i < 11; i++) {
@@ -5159,6 +5193,17 @@ void applyChangeToHpOrMp(uint param_1) {
                 assert(0);
             }
             battleVar2->m2EB[i] = 1;
+            break;
+        case 2: // healing
+            if (!battleVisualEntities[i].m4_isGear || healWhileOnGear) {
+                battleEntities[i].m0_base.m4C_HP += battleCurrentDamages[param_1].m0_damageValue[0];
+                if (battleEntities[i].m0_base.m4E_MaxHP < battleEntities[i].m0_base.m4C_HP) {
+                    battleEntities[i].m0_base.m4C_HP = battleEntities[i].m0_base.m4E_MaxHP;
+                }
+            }
+            else {
+                assert(0);
+            }
             break;
         case 4:
         case -1:
@@ -6361,6 +6406,48 @@ void battleSetupTextPolySub(POLY_FT4* param_1)
 {
     SetSemiTrans(param_1, 1);
     SetShadeTex(param_1, 0);
+}
+
+void battleSpriteEffect(sSpriteActorCore* param_1, s8 param_2, std::span<u8>::iterator endOfOpcode) {
+    switch (param_2) {
+    case 7:
+        setCameraVisibleEntities(1 << ((param_1->m74_pTargetEntitySprite->mAC.mx0_entityIdUpper2bit) << 2 | (uint)param_1->m74_pTargetEntitySprite->mA8.mx1E_entityId_bottom2bit));
+        break;
+    case 0x56:
+        MissingCode(); // sound related
+        break;
+    case 0x64:
+        param_1->mB0.mx9 = 1;
+        if (battleCameraVar1 < 0x201) {
+            return;
+        }
+        param_1->m3A = battleCameraVar1;
+        param_1->m40 = param_1->m40 & 0xffffe0ff | 0x300;
+        param_1->m3C |= 0x10000000;
+        break;
+    case 0x67:
+    {
+        param_1->m9E_wait++;
+        VECTOR local_30;
+        local_30.vx = (int)battleCameraEyeTarget.vx - (int)battleCameraEye.vx;
+        local_30.vy = (int)battleCameraEyeTarget.vy - (int)battleCameraEye.vy;
+        local_30.vz = (int)battleCameraEyeTarget.vz - (int)battleCameraEye.vz;
+        Square0(&local_30, &local_30);
+        VECTOR local_20;
+        local_20.vx = (int)battleCameraAtTarget.vx - (int)battleCameraAt.vx;
+        local_20.vy = (int)battleCameraAtTarget.vy - (int)battleCameraAt.vy;
+        local_20.vz = (int)battleCameraAtTarget.vz - (int)battleCameraAt.vz;
+        Square0(&local_20, &local_20);
+        int lVar2 = SquareRoot0(local_30.vx + local_30.vy + local_30.vz);
+        if ((lVar2 < 4) && (lVar2 = SquareRoot0(local_20.vx + local_20.vy + local_20.vz), lVar2 < 4)) {
+            return;
+        }
+        param_1->m64_spriteByteCode.value() -= 2;
+        return;
+    }
+    default:
+        assert(0);
+    }
 }
 
 void executeSpriteBytecode2_battle(sSpriteActorCore* param_1) {

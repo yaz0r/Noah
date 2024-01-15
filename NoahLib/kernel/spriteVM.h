@@ -211,6 +211,10 @@ do
     case 0x8E:
         param_1->m64_spriteByteCode.reset();
         return;
+    case 0x8F:
+        param_1->m64_spriteByteCode.reset();
+        param_1->mA8.mx1C = 0;
+        return;
     case 0x89:
         battleSpriteOp89(param_1);
         param_1->m64_spriteByteCode.value() += sizePerBytecodeTable[bytecode];
@@ -251,7 +255,9 @@ do
         break;
     }
     case 0xC3:
-        MissingCode(); // battle sprite effect
+    case 0xEC:
+    case 0xF9:
+        battleSpriteEffect(param_1, READ_LE_S8(pEndOfOpcode), startOfOpcode + 2);
         param_1->m64_spriteByteCode.value() += sizePerBytecodeTable[bytecode];
         break;
     case 0xC8:

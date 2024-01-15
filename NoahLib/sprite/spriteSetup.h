@@ -67,13 +67,20 @@ struct sSpriteActorAnimationBundle : public sLoadableData
             m4_animations.reserve(numAnimations);
             for (int i=0; i< numAnimations; i++)
             {
-                std::span<u8>::iterator start = animationIt + READ_LE_U16(animationIt + 2 + i * 2);
-                int length = bundle.end() - start;
-                // this doesn't quite work because animations are not in order. Could post-process after load and shorten the spans
-                /*if (i != numAnimations - 1) {
-                    length = READ_LE_U16(animationIt + 2 + (i + 1) * 2) - READ_LE_U16(animationIt + 2 + i * 2);
-                }*/
-                m4_animations.push_back(std::span<u8>(start, length));
+                u16 offset = READ_LE_U16(animationIt + 2 + i * 2);
+                int length = bundle.size() - offset; //TODO: do we need the +1?
+                if(length > 0)
+                {
+                    std::span<u8>::iterator start = animationIt + offset;
+                    // this doesn't quite work because animations are not in order. Could post-process after load and shorten the spans
+                    /*if (i != numAnimations - 1) {
+                        length = READ_LE_U16(animationIt + 2 + (i + 1) * 2) - READ_LE_U16(animationIt + 2 + i * 2);
+                    }*/
+                    m4_animations.push_back(std::span<u8>(start, length));
+                }
+                else {
+                    assert(i == numAnimations - 1);
+                }
             }
         }
         m8_pData.init(inputData + READ_LE_U32(inputData + 8));

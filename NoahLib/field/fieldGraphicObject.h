@@ -141,7 +141,7 @@ struct sSpriteActorCore {
     std::span<u8>::iterator m54;
     std::span<u8>::iterator m58_startOfCurrentAnimation;
     std::span<u8>::iterator m5C;
-    //sPS1Pointer m60_endOfAnimationContainer; weird thing, skipped its init for now
+    std::optional<std::span<u8>::iterator> m60_endOfAnimationContainer;
     std::optional<std::span<u8>::iterator> m64_spriteByteCode;
     void(*m68)(sSpriteActorCore*);
     union {

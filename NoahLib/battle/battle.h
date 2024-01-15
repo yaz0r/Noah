@@ -412,7 +412,7 @@ struct sUnkMonsterStatus {
 extern std::array<sUnkMonsterStatus, 8> unknownMonsterStatus0;
 
 struct sBattle800CDD40Sub {
-    s16 m0;
+    u16 m0_flags;
     s16 m2;
     s16 mA;
     s8 m10;
@@ -426,7 +426,7 @@ struct sBattle800CDD40Sub {
     s8 m27;
 
     void init(std::vector<u8>::const_iterator inputBuffer) {
-        m0 = READ_LE_S16(inputBuffer + 0);
+        m0_flags = READ_LE_U16(inputBuffer + 0);
         m2 = READ_LE_S16(inputBuffer + 2);
         mA = READ_LE_S16(inputBuffer + 0xA);
         m10 = READ_LE_S8(inputBuffer + 0x10);
@@ -444,17 +444,11 @@ struct sBattle800CDD40Sub {
 };
 
 struct sBattle800cdd40 {
-    std::array<sBattle800CDD40Sub, 11> m0;
-    sBattle800CDD40Sub m320;
-    std::array<sBattle800CDD40Sub, 16> m370;
+    std::array<sBattle800CDD40Sub, 38> m0;
 
     void init(const std::vector<u8>& inputBuffer) {
-        for (int i = 0; i < 11; i++) {
+        for (int i = 0; i < m0.size(); i++) {
             m0[i].init(inputBuffer.cbegin() + 0x28 * i);
-        }
-        m320.init(inputBuffer.cbegin() + 0x320);
-        for (int i = 0; i < 16; i++) {
-            m370[i].init(inputBuffer.cbegin() + 0x370 + 0x28 * i);
         }
     }
 

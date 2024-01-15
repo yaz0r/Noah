@@ -221,18 +221,18 @@ void drawCircleMenuChi_updateSub0(byte param_1) {
     localRect.h = 0xD;
     loadImageSync(&localRect, *tempRamTexture);
 
-    std::array<u8, 16> flagArray;
-    std::array<u8, 16> flagArray2;
+    std::array<u8, 16> isAbilityEnabled;
+    std::array<u8, 16> abilityCost;
 
     if (apConfigArray[param_1].m1 == 0) {
         for (int entryIndex = 0; entryIndex < 0x10; entryIndex++) {
-            if (!bitmaskCharacterCheck(gameState.m16C0[battleCharacters[param_1]].m0_unlockedAbilitiesBitField[1], entryIndex & 0xff)) {
-                flagArray[entryIndex] = 0;
-                flagArray2[entryIndex] = 0;
+            if (!bitmaskCharacterCheckReverse(gameState.m16C0[battleCharacters[param_1]].m0_unlockedAbilitiesBitField[1], entryIndex & 0xff)) {
+                isAbilityEnabled[entryIndex] = 0;
+                abilityCost[entryIndex] = 0;
             }
             else {
-                flagArray[entryIndex] = 1;
-                flagArray2[entryIndex] = partyBattleStats[param_1].m370[0].m13_cost;
+                isAbilityEnabled[entryIndex] = 1;
+                abilityCost[entryIndex] = partyBattleStats[param_1].m0[22 + entryIndex].m13_cost;
             }
         }
     }
@@ -252,7 +252,7 @@ void drawCircleMenuChi_updateSub0(byte param_1) {
         localRect2.w = 0x1b;
         localRect2.h = 0x10;
         loadImageSync(&localRect2, *tempRamTexture);
-        if (flagArray[entryIndex]) {
+        if (isAbilityEnabled[entryIndex]) {
             std::vector<u8>::iterator stringData;
             if (apConfigArray[param_1].m1 == 0) {
                 stringData = drawCircleMenuChi_updateSub0Sub1((uint)battleEntities[param_1].m0_base.m56_battleCommandLoadout * 0x10 + entryIndex);
@@ -285,8 +285,8 @@ void drawCircleMenuChi_updateSub0(byte param_1) {
             local_a8.w = 6;
             local_a8.h = 0xd;
             sRamTexture* psVar4 = tempRamTexture;
-            if (flagArray2[entryIndex] / 10 != 0) {
-                psVar4 = itemLabelsIds[flagArray2[entryIndex] / 10];
+            if (abilityCost[entryIndex] / 10 != 0) {
+                psVar4 = itemLabelsIds[abilityCost[entryIndex] / 10];
             }
             loadImageSync(&local_a8, *psVar4);
         }
@@ -299,8 +299,8 @@ void drawCircleMenuChi_updateSub0(byte param_1) {
             local_a0.w = 6;
             local_a0.h = 0xd;
             sRamTexture* psVar4 = tempRamTexture;
-            if (flagArray[entryIndex] != '\0') {
-                psVar4 = itemLabelsIds[flagArray2[entryIndex] % 10];
+            if (isAbilityEnabled[entryIndex] != '\0') {
+                psVar4 = itemLabelsIds[abilityCost[entryIndex] % 10];
             }
             loadImageSync(&local_a0, *psVar4);
         }
@@ -418,13 +418,7 @@ byte abilityTargetSelectionInitSub1(byte param_1)
     int iVar5;
     int iVar6;
 
-    iVar5 = 0xb;
-    auto pbVar3 = targetsPerPriority.begin() +0xb;
-    do {
-        *pbVar3 = 0xff;
-        iVar5 = iVar5 + -1;
-        pbVar3 = pbVar3 + -1;
-    } while (-1 < iVar5);
+    targetsPerPriority.fill(-1);
     iVar6 = 0;
     iVar5 = 7;
     numValidTarget = '\0';
@@ -456,84 +450,70 @@ bool abilityTargetSelectionInitSub0Sub0(uint param_1, char param_2)
     if ((isBattleSlotFilled[param_1] != 0) && (battleVisualEntities[param_1].m3 == 0)) {
         if (apConfigArray[param_1].m1 == 0) {
             bVar1 = true;
-            if (param_2 == '\0') {
+            if (param_2 == 0) {
                 bVar1 = (battleEntities[param_1].m0_base.m7C & 0xc001) == 0;
             }
         }
-        else if ((param_2 != '\0') || ((battleEntities[param_1].mA4_gear.m7C & 0xc001) == 0)) {
+        else if ((param_2 != 0) || ((battleEntities[param_1].mA4_gear.m7C & 0xc001) == 0)) {
             bVar1 = true;
         }
     }
     return bVar1;
 }
 
-byte abilityTargetSelectionInitSub0(byte param_1, byte param_2, char param_3, byte param_4)
+byte abilityTargetSelectionInitSub0(byte targetMode, byte param_2, char partyPriotiry)
 {
-    byte bVar1;
-    char cVar2;
-    ushort uVar3;
-    int iVar5;
-    int unaff_s4;
-    int iVar6;
-    byte unaff_s7;
+    int range1Count = 0;
+    int range1Start = 0;
+    int range2Count = 0;
+    int range2Start = 0;
 
-    iVar6 = 0;
-    iVar5 = 0xb;
-    auto pbVar4 = targetsPerPriority.begin() + 0xb;
-    do {
-        *pbVar4 = 0xff;
-        iVar5 = iVar5 + -1;
-        pbVar4 = pbVar4 + -1;
-    } while (-1 < iVar5);
-    if (param_1 == 1) {
-        param_4 = 0;
-        unaff_s4 = 3;
-    }
-    else if (param_1 < 2) {
-        if (param_1 == 0) {
-            param_4 = 3;
-            unaff_s4 = 8;
+    targetsPerPriority.fill(-1);
+
+    switch (targetMode) {
+    case 0: // enemies only
+        range1Start = 3;
+        range1Count = 8;
+        break;
+    case 1: // party only
+        range1Start = 0;
+        range1Count = 3;
+        break;
+    case 2: // party and enemies
+        if (partyPriotiry == 0) { // enemies first
+            range1Start = 3;
+            range1Count = 8;
+            range2Start = 0;
+            range2Count = 3;
         }
-    }
-    else if (param_1 == 2) {
-        param_4 = 0;
-        if (param_3 == '\0') {
-            param_4 = 3;
-            unaff_s4 = 8;
-            unaff_s7 = 0;
-            iVar6 = 3;
+        else { // party first
+            range1Start = 0;
+            range1Count = 3;
+            range2Start = 3;
+            range2Count = 8;
         }
-        else {
-            unaff_s4 = 3;
-            unaff_s7 = 3;
-            iVar6 = 8;
-        }
+        break;
+    default:
+        assert(0);
     }
-    iVar5 = 0;
-    numValidTarget = '\0';
+
+    numValidTarget = 0;
     abilityTargetBitmask = 0;
-    while (bVar1 = param_4, unaff_s4 = unaff_s4 + -1, -1 < unaff_s4) {
-        cVar2 = abilityTargetSelectionInitSub0Sub0(bVar1, param_2);
-        param_4 = bVar1 + 1;
-        if (cVar2 != '\0') {
-            targetsPerPriority[iVar5] = bVar1;
-            uVar3 = characterIdToTargetBitmask(bVar1);
-            iVar5 = iVar5 + 1;
-            numValidTarget = numValidTarget + '\x01';
-            abilityTargetBitmask = abilityTargetBitmask | uVar3;
+
+    for (int i = range1Start; i < range1Start + range1Count; i++) {
+        if (abilityTargetSelectionInitSub0Sub0(i, param_2)) {
+            targetsPerPriority[numValidTarget++] = i;
+            abilityTargetBitmask |= characterIdToTargetBitmask(i);
         }
     }
-    while (bVar1 = unaff_s7, iVar6 = iVar6 + -1, -1 < iVar6) {
-        cVar2 = abilityTargetSelectionInitSub0Sub0(bVar1, param_2);
-        unaff_s7 = bVar1 + 1;
-        if (cVar2 != '\0') {
-            targetsPerPriority[iVar5] = bVar1;
-            uVar3 = characterIdToTargetBitmask(bVar1);
-            iVar5 = iVar5 + 1;
-            numValidTarget = numValidTarget + '\x01';
-            abilityTargetBitmask = abilityTargetBitmask | uVar3;
+
+    for (int i = range2Start; i < range2Start + range2Count; i++) {
+        if (abilityTargetSelectionInitSub0Sub0(i, param_2)) {
+            targetsPerPriority[numValidTarget++] = i;
+            abilityTargetBitmask |= characterIdToTargetBitmask(i);
         }
     }
+
     return targetsPerPriority[0];
 }
 
@@ -579,7 +559,7 @@ LAB_Battle__80084e6c:
         uVar6 = 0xffff;
     }
     if (param_5 == '\0') {
-        abilitySelectedTarget = abilityTargetSelectionInitSub0(uVar5, uVar3 != 0, bVar1, param_4);
+        abilitySelectedTarget = abilityTargetSelectionInitSub0(uVar5, uVar3 != 0, bVar1);
     }
     else {
         abilitySelectedTarget = abilityTargetSelectionInitSub1(param_3);
@@ -589,13 +569,7 @@ LAB_Battle__80084e6c:
         if ((param_1 & 0x4000) != 0) {
             abilitySelectedTarget = param_3;
             abilityTargetBitmask = characterIdToTargetBitmask(param_3);
-            iVar7 = 10;
-            auto pbVar4 = targetsPerPriority.begin() + 10;
-            do {
-                *pbVar4 = 0xff;
-                iVar7 = iVar7 + -1;
-                pbVar4 = pbVar4 + -1;
-            } while (-1 < iVar7);
+            targetsPerPriority.fill(-1);
         }
     }
     else {
@@ -662,7 +636,6 @@ ushort abilitySelectTargetSub0(void)
 
 
 char abilitySelectTarget(ushort param_1, byte param_2, byte param_3)
-
 {
     byte bVar1;
     char cVar2;
@@ -759,9 +732,9 @@ bool useAbility(uint param_1, uint param_2, uint param_3) {
     int abilityCost;
     int bVar1 = 0;
     if (apConfigArray[param_1].m1 == 0) {
-        sVar9 = partyBattleStats[param_1].m370[param_3 * 2 + param_2].m0;
-        abilityCost = partyBattleStats[param_1].m370[param_3 * 2 + param_2].m13_cost;
-        bVar1 = bitmaskCharacterCheck(gameState.m16C0[battleCharacters[param_1]].m0_unlockedAbilitiesBitField[1], param_2 + (param_3 * 2)) != 0;
+        sVar9 = partyBattleStats[param_1].m0[22 + param_3 * 2 + param_2].m0_flags;
+        abilityCost = partyBattleStats[param_1].m0[22 + param_3 * 2 + param_2].m13_cost;
+        bVar1 = bitmaskCharacterCheckReverse(gameState.m16C0[battleCharacters[param_1]].m0_unlockedAbilitiesBitField[1], param_2 + (param_3 * 2)) != 0;
     }
     else {
         // mecha
@@ -991,7 +964,6 @@ void executeAbility(byte param_1)
     ushort uVar1;
     ushort uVar2;
     short sVar2;
-    int iVar3;
     uint uVar4;
     int facing;
     uint actor;
@@ -999,14 +971,14 @@ void executeAbility(byte param_1)
 
     startCharacterJumpToEnemyVar0 = 0;
     updateCharacterBlinkingTask(0);
-    iVar3 = 0x8b8;
-    do {
-        battleCurrentDamages[0].m3C[iVar3 + 0xb] = 0xff;
-        iVar3 = iVar3 + -0x48;
-    } while (-1 < iVar3);
+
+    for (auto it = battleCurrentDamages.begin(); it != battleCurrentDamages.end(); it++) {
+        it->m47_battleAnimationToPlay = -1;
+    }
+
     if (apConfigArray[param_1].m1 == 0) {
         battleVar2->m2DC = battleVar2->m2E6 + '\x17';
-        uVar1 = partyBattleStats[param_1].m370[(byte)battleVar2->m2E6].m0;
+        uVar1 = partyBattleStats[param_1].m0[22 + battleVar2->m2E6].m0_flags;
     }
     else {
         assert(0); // mecha
