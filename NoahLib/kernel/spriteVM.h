@@ -5,9 +5,9 @@ do
         return;
     }
 
-    sPS1Pointer startOfOpcode = param_1->m64_spriteByteCode;
-    u8 bytecode = READ_LE_U8(param_1->m64_spriteByteCode);
-    sPS1Pointer pEndOfOpcode = param_1->m64_spriteByteCode + 1;
+    std::span<u8>::iterator startOfOpcode = param_1->m64_spriteByteCode.value();
+    u8 bytecode = READ_LE_U8(startOfOpcode);
+    std::span<u8>::iterator pEndOfOpcode = startOfOpcode + 1;
     if (bytecode < 0x80)
     {
         param_1->m64_spriteByteCode = pEndOfOpcode;
@@ -115,7 +115,7 @@ do
             param_1->m34_currentSpriteFrame = (short)_uVar13;
         }
         param_1->m9E_wait += sVar12;
-        param_1->m64_spriteByteCode += 3;
+        param_1->m64_spriteByteCode.value() += 3;
         return;
     }
     case 0x81:
@@ -151,7 +151,7 @@ do
             param_1->m9E_wait = 1;
             return;
         }
-        param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
+        param_1->m64_spriteByteCode.value() += sizePerBytecodeTable[bytecode];
         break;
     case 0x87: // Happen when Fei jumps in cutscene after lahan battle. (or when jumping during gameplay)
         if ((param_1->m0_position.vy.getIntegerPart()) < param_1->m84_maxY)
@@ -159,10 +159,10 @@ do
             param_1->m9E_wait = 1;
             return;
         }
-        param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
+        param_1->m64_spriteByteCode.value() += sizePerBytecodeTable[bytecode];
         break;
     case 0xA7:
-        param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
+        param_1->m64_spriteByteCode.value() += sizePerBytecodeTable[bytecode];
         if ((READ_LE_U8(pEndOfOpcode) & 0x80) != 0) {
             spritesCallback2Delay = (READ_LE_U8(pEndOfOpcode) & 0x7f) + 1;
             param_1->m9E_wait = param_1->m9E_wait + 1;
@@ -182,26 +182,26 @@ do
         return;
     case 0xCA:
         MissingCode();
-        param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
+        param_1->m64_spriteByteCode.value() += sizePerBytecodeTable[bytecode];
         break;
     case 0xE1: // jump in bytecode
-        param_1->m64_spriteByteCode += READ_LE_S16(pEndOfOpcode);
+        param_1->m64_spriteByteCode.value() += READ_LE_S16(pEndOfOpcode);
         break;
     case 0xE2: // Looks like a call
-        pushBytecodePointerOnAnimationStack(param_1, param_1->m64_spriteByteCode + 3);
-        param_1->m64_spriteByteCode += READ_LE_S16(pEndOfOpcode);
+        pushBytecodePointerOnAnimationStack(param_1, param_1->m64_spriteByteCode.value() + 3);
+        param_1->m64_spriteByteCode.value() += READ_LE_S16(pEndOfOpcode);
         break;
     case 0xe4: // loop number of time the last byte on the stack is
     {
         s8 cVar4 = popByteFromAnimationStack(param_1);
         if (cVar4 != 0) {
             pushByteOnAnimationStack(param_1, cVar4 - 1);
-            param_1->m64_spriteByteCode += READ_LE_S16(pEndOfOpcode);
+            param_1->m64_spriteByteCode.value() += READ_LE_S16(pEndOfOpcode);
         }
         else
         {
             // end of loop
-            param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
+            param_1->m64_spriteByteCode.value() += sizePerBytecodeTable[bytecode];
         }
     }
     break;
@@ -209,19 +209,19 @@ do
     // BATTLE SPECIFIC!
 #ifdef IMPLEMENT_BATTLE_SPECIFIC_CASES
     case 0x8E:
-        param_1->m64_spriteByteCode.makeNull();
+        param_1->m64_spriteByteCode.reset();
         return;
     case 0x89:
         battleSpriteOp89(param_1);
-        param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
+        param_1->m64_spriteByteCode.value() += sizePerBytecodeTable[bytecode];
         break;
     case 0x8B:
         createAllDamageDisplays();
-        param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
+        param_1->m64_spriteByteCode.value() += sizePerBytecodeTable[bytecode];
         break;
     case 0x97:
         MissingCode();
-        param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
+        param_1->m64_spriteByteCode.value() += sizePerBytecodeTable[bytecode];
         break;
     case 0xA4:
         if (param_1->m74_pTargetEntitySprite->m48_defaultAnimationbundle == nullptr) {
@@ -230,7 +230,7 @@ do
         else {
             spriteActorSetPlayingAnimation(param_1->m74_pTargetEntitySprite, READ_LE_S8(pEndOfOpcode));
         }
-        param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
+        param_1->m64_spriteByteCode.value() += sizePerBytecodeTable[bytecode];
         break;
     case 0xC2:
     {
@@ -247,27 +247,27 @@ do
         param_1->mA0.vy = 0;
         param_1->mA0.vz = param_1->m74_pTargetEntitySprite->m0_position.vx.getIntegerPart();
         battleSpriteOp89(param_1);
-        param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
+        param_1->m64_spriteByteCode.value() += sizePerBytecodeTable[bytecode];
         break;
     }
     case 0xC3:
         MissingCode(); // battle sprite effect
-        param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
+        param_1->m64_spriteByteCode.value() += sizePerBytecodeTable[bytecode];
         break;
     case 0xC8:
     {
         MissingCode();
-        param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
+        param_1->m64_spriteByteCode.value() += sizePerBytecodeTable[bytecode];
         break;
     }
     case 0xE3:
         assert(0);
         param_1->m74_pTargetEntitySprite->mAC.mx18 = 0x3F;
-        setCurrentAnimationPtr(param_1->m74_pTargetEntitySprite, param_1->m64_spriteByteCode + READ_LE_S16(param_1->m64_spriteByteCode + 1));
+        setCurrentAnimationPtr(param_1->m74_pTargetEntitySprite, param_1->m64_spriteByteCode.value() + READ_LE_S16(param_1->m64_spriteByteCode.value() + 1));
         break;
     case 0xE8: // Battle sprite effect
         MissingCode();
-        param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
+        param_1->m64_spriteByteCode.value() += sizePerBytecodeTable[bytecode];
         break;
     case 0xF8: // switch for battle
     {
@@ -295,10 +295,10 @@ do
             bVar6 = !bVar6;
         }
         if (bVar6) {
-            param_1->m64_spriteByteCode += READ_LE_S16(pEndOfOpcode);
+            param_1->m64_spriteByteCode.value() += READ_LE_S16(pEndOfOpcode);
         }
         else {
-            param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
+            param_1->m64_spriteByteCode.value() += sizePerBytecodeTable[bytecode];
         }
         break;
     }
@@ -306,7 +306,7 @@ do
 
     default:
         executeSpriteBytecode2Extended(param_1, bytecode, pEndOfOpcode);
-        param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
+        param_1->m64_spriteByteCode.value() += sizePerBytecodeTable[bytecode];
         break;
     }
 } while (1);

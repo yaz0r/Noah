@@ -3,16 +3,16 @@
 #include "kernel/filesystem.h"
 
 struct sFieldEntitySub4_110_0_frame {
-    void init(std::vector<u8>::iterator data) {
-        rawPointer.setPointer(&data[0]);
+    void init(std::span<u8>::iterator data) {
+        rawPointer = data;
     }
 
     sPS1Pointer rawPointer;
 };
 
 struct sFieldEntitySub4_110_0 {
-    void init(std::vector<u8>::iterator data) {
-        rawPointer.setPointer(&data[0]);
+    void init(std::span<u8>::iterator data) {
+        rawPointer = data;
 
         m0_header.rawValue = READ_LE_U16(data);
 
@@ -40,43 +40,55 @@ struct sSpriteActorAnimationBundle : public sLoadableData
 {
     virtual void init(std::vector<u8>& inputData) override {
         m_rawData = inputData;
-        init(m_rawData.begin());
+        std::span<u8> dataSpan(m_rawData.begin(), m_rawData.size());
+        init(dataSpan.begin());
     }
 
-    void init(std::vector<u8>::iterator inputData)
+    void init(std::span<u8>::iterator inputData)
     {
-        rawData = &inputData[0];
+        rawData = inputData;
 
-        m4_offset = READ_LE_U32(inputData + 4);
-        m4_pData.setPointer(&(*(inputData + m4_offset)));
+        m0_numEntries = READ_LE_U32(inputData + 0);
+        assert(m0_numEntries >= 3);
 
-        {
-            m4_animations.resize(READ_LE_U16(m4_pData) & 0x3F);
-            for (int i=0; i< m4_animations.size(); i++)
-            {
-                m4_animations[i] = m4_pData + READ_LE_U16(m4_pData + 2 + i * 2);
-            }
+        m4_entries.reserve(m0_numEntries);
+        for (int i = 0; i < m0_numEntries; i++) {
+            u32 start = READ_LE_U32(inputData + 4 + i * 4);
+            u32 end = READ_LE_U32(inputData + 4 + (i+1) * 4);
+            m4_entries.push_back(std::span<u8>(inputData + start, end - start));
         }
 
-        m8_offset = READ_LE_U32(inputData + 8);
-        m8_pData.init(inputData + m8_offset);
-
-        mC_offset = READ_LE_U32(inputData + 0xC);
-        mC_pData.setPointer(&(*(inputData + mC_offset)));
-
-        u32 end = READ_LE_U32(inputData + 0x10);
+        {
+            auto& bundle = m4_entries[0];
+            auto animationIt = bundle.begin();
+            u16 header = READ_LE_U16(animationIt);
+            u16 numAnimations = header & 0x3F;
+            u16 unk = (header >> 6) & 0x3F; // not sure what that is yet
+            m4_animations.reserve(numAnimations);
+            for (int i=0; i< numAnimations; i++)
+            {
+                std::span<u8>::iterator start = animationIt + READ_LE_U16(animationIt + 2 + i * 2);
+                int length = bundle.end() - start;
+                // this doesn't quite work because animations are not in order. Could post-process after load and shorten the spans
+                /*if (i != numAnimations - 1) {
+                    length = READ_LE_U16(animationIt + 2 + (i + 1) * 2) - READ_LE_U16(animationIt + 2 + i * 2);
+                }*/
+                m4_animations.push_back(std::span<u8>(start, length));
+            }
+        }
+        m8_pData.init(inputData + READ_LE_U32(inputData + 8));
+        mC_pData = m4_entries[2];
     }
 
     std::vector<u8> m_rawData;
-    u8* rawData;
+    std::span<u8>::iterator rawData;
 
-    u32 m4_offset;
-    sPS1Pointer m4_pData;
-    std::vector<sPS1Pointer> m4_animations;
-    u32 m8_offset;
+    u32 m0_numEntries;
+    std::vector<std::span<u8>> m4_entries;
+
+    std::vector<std::span<u8>> m4_animations;
     sFieldEntitySub4_110_0 m8_pData;
-    u32 mC_offset;
-    sPS1Pointer mC_pData;
+    std::span<u8> mC_pData;
 
 };
 

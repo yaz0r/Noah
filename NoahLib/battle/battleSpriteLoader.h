@@ -4,7 +4,7 @@
 #include "field/mecha/mechaOverlay.h"
 
 struct sBattleSpriteConfigsSub {
-    void init(std::vector<u8>::iterator data) {
+    void init(std::span<u8>::iterator data) {
         m0_spriteControlOffset = READ_LE_U32(data + 0);
         m4_spriteDataOffset = READ_LE_U32(data + 4);
         m8_isMecha = READ_LE_U8(data + 8);
@@ -34,7 +34,7 @@ struct sBattleSpriteConfigs : public sLoadableDataRaw {
 
         m8.resize(m0_numEntities);
         for (int i = 0; i < m0_numEntities; i++) {
-            m8[i].init(begin() + 8 + i * 0xC);
+            m8[i].init(beginSpan() + 8 + i * 0xC);
         }
 
         for (int i = 0; i < m0_numEntities; i++) {

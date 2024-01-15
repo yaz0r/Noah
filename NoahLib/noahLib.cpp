@@ -218,36 +218,6 @@ void noahExit()
     deleteBgfxGlue();
 }
 
-u32 READ_LE_U32(const sPS1Pointer& ptr)
-{
-    return READ_LE_U32(ptr.getPointer());
-}
-
-s32 READ_LE_S32(const sPS1Pointer& ptr)
-{
-    return READ_LE_S32(ptr.getPointer());
-}
-
-u16 READ_LE_U16(const sPS1Pointer& ptr)
-{
-    return READ_LE_U16(ptr.getPointer());
-}
-
-s16 READ_LE_S16(const sPS1Pointer& ptr)
-{
-	return READ_LE_S16(ptr.getPointer());
-}
-
-u8 READ_LE_U8(const sPS1Pointer& ptr)
-{
-    return *(u8*)(ptr.getPointer());
-}
-
-s8 READ_LE_S8(const sPS1Pointer& ptr)
-{
-    return *(s8*)(ptr.getPointer());
-}
-
 u8 READ_LE_U8(const void* ptr)
 {
     return *(u8*)ptr;
@@ -304,6 +274,36 @@ u32 READ_LE_U32(const std::vector<u8>::const_iterator& inputStream)
 }
 
 s32 READ_LE_S32(const std::vector<u8>::const_iterator& inputStream)
+{
+    return READ_LE_S32(&inputStream[0]);
+}
+
+u8 READ_LE_U8(const std::span<u8>::iterator& inputStream)
+{
+    return *inputStream;
+}
+
+s8 READ_LE_S8(const std::span<u8>::iterator& inputStream)
+{
+    return *(s8*)&inputStream[0];
+}
+
+u16 READ_LE_U16(const std::span<u8>::iterator& inputStream)
+{
+    return READ_LE_U16(&inputStream[0]);
+}
+
+s16 READ_LE_S16(const std::span<u8>::iterator& inputStream)
+{
+    return READ_LE_S16(&inputStream[0]);
+}
+
+u32 READ_LE_U32(const std::span<u8>::iterator& inputStream)
+{
+    return READ_LE_U32(&inputStream[0]);
+}
+
+s32 READ_LE_S32(const std::span<u8>::iterator& inputStream)
 {
     return READ_LE_S32(&inputStream[0]);
 }

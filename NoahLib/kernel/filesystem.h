@@ -55,6 +55,10 @@ struct sLoadableDataRaw : public sLoadableData {
     std::vector<u8>::iterator begin() {
         return mData.begin();
     }
+    std::span<u8>::iterator beginSpan() {
+        std::span<u8> temp(mData.begin(), mData.end());
+        return temp.begin();
+    }
     size_t size() {
         return mData.size();
     }

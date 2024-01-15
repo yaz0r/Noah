@@ -116,7 +116,7 @@ void LoadImage(RECT* pRect, const u8* data)
 	}
 }
 
-void LoadImage(RECT* pRect, sPS1Pointer data)
+void LoadImage(RECT* pRect, std::span<u8>::iterator data)
 {
 	for (int y = 0; y < pRect->h; y++)
 	{

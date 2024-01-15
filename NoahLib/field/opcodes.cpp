@@ -490,7 +490,8 @@ void OP_FINALIZE_PARTY_CHARACTER_LOADING()
         waitReadCompletion(0);
         decompress(asyncPartyCharacterLoadingBuffer.begin(), partyCharacterBuffersRaw[asyncPartyCharacterLoadingIndex].mData);
         asyncPartyCharacterLoadingBuffer.clear();
-        partyCharacterBuffers[asyncPartyCharacterLoadingIndex].init(partyCharacterBuffersRaw[asyncPartyCharacterLoadingIndex].mData.begin());
+        std::span<u8> tempSpan(partyCharacterBuffersRaw[asyncPartyCharacterLoadingIndex].mData.begin(), partyCharacterBuffersRaw[asyncPartyCharacterLoadingIndex].mData.end());
+        partyCharacterBuffers[asyncPartyCharacterLoadingIndex].init(tempSpan.begin());
         runInitScriptForNewlyLoadedPC(asyncPartyCharacterLoadingCharacterIndex);
         asyncLoadingVar1 = 0xff;
         breakCurrentScript = 1;
@@ -2634,7 +2635,7 @@ void OP_LOAD_SPECIAL_2D_ANIMATION()
         pCurrentFieldScriptActor->m120_special2dAnimationRaw.resize(iVar2 + 8);
         readFile(iVar1, pCurrentFieldScriptActor->m120_special2dAnimationRaw, 0, 0x80);
 
-        std::vector<u8>::iterator it = pCurrentFieldScriptActor->m120_special2dAnimationRaw.begin();
+        std::span<u8>::iterator it = std::span<u8>(pCurrentFieldScriptActor->m120_special2dAnimationRaw.begin(), pCurrentFieldScriptActor->m120_special2dAnimationRaw.end()).begin();
         pCurrentFieldScriptActor->m120_special2dAnimation->init(it);
 
         if (fieldExecuteVar1 == 0) {

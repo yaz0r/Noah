@@ -22,46 +22,7 @@ typedef u8 byte;
 typedef u16 ushort;
 typedef u32 uint;
 
-struct sPS1Pointer
-{
-public:
-
-    sPS1Pointer(u8* p=nullptr) {
-        setPointer(p);
-    }
-
-    void setPointer(u8* pointer)
-    {
-        m_pointer = pointer;
-    }
-    u8* getPointer() const
-    {
-        return m_pointer;
-    }
-
-    bool operator == (const sPS1Pointer& other) const {
-        return (other.m_pointer == m_pointer);
-    }
-
-    sPS1Pointer operator + (size_t i) const
-    {
-        sPS1Pointer newPtr = *this;
-        newPtr.m_pointer += i;
-        return newPtr;
-    }
-	sPS1Pointer& operator += (size_t i)
-	{
-		m_pointer += i;
-		return *this;
-	}
-
-    void makeNull()
-    {
-        m_pointer = nullptr;
-    }
-private:
-    u8* m_pointer = nullptr;
-};
+typedef std::span<u8>::iterator sPS1Pointer;
 
 u8 READ_LE_U8(const sPS1Pointer&);
 s8 READ_LE_S8(const sPS1Pointer&);
@@ -83,6 +44,13 @@ u16 READ_LE_U16(const std::vector<u8>::const_iterator& inputStream);
 s16 READ_LE_S16(const std::vector<u8>::const_iterator& inputStream);
 u32 READ_LE_U32(const std::vector<u8>::const_iterator& inputStream);
 s32 READ_LE_S32(const std::vector<u8>::const_iterator& inputStream);
+
+u8 READ_LE_U8(const std::span<u8>::iterator& inputStream);
+s8 READ_LE_S8(const std::span<u8>::iterator& inputStream);
+u16 READ_LE_U16(const std::span<u8>::iterator& inputStream);
+s16 READ_LE_S16(const std::span<u8>::iterator& inputStream);
+u32 READ_LE_U32(const std::span<u8>::iterator& inputStream);
+s32 READ_LE_S32(const std::span<u8>::iterator& inputStream);
 
 void noahFrame_start();
 bool noahFrame_end();

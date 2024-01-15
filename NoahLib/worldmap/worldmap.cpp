@@ -616,7 +616,7 @@ void worldmapMode0_update(void) {
         if(worldmapPartySpritesRaw[i].size())
         {
             worldmapPartySprites[i] = new sSpriteActorAnimationBundle();
-            worldmapPartySprites[i]->init(worldmapPartySpritesRaw[i].begin());
+            worldmapPartySprites[i]->init(std::span<u8>(worldmapPartySpritesRaw[i].begin(), worldmapPartySpritesRaw[i].size()).begin());
         }
         else {
             worldmapPartySprites[i] = nullptr;
@@ -625,7 +625,7 @@ void worldmapMode0_update(void) {
         if (worldmapPartyGearSpritesRaw[i].size())
         {
             worldmapPartyGearSprites[i] = new sSpriteActorAnimationBundle();
-            worldmapPartyGearSprites[i]->init(worldmapPartyGearSpritesRaw[i].begin());
+            worldmapPartyGearSprites[i]->init(std::span<u8>(worldmapPartyGearSpritesRaw[i].begin(), worldmapPartyGearSpritesRaw[i].size()).begin());
         }
         else {
             worldmapPartyGearSprites[i] = nullptr;

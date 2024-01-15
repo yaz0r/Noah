@@ -294,9 +294,8 @@ void mechaInitEnvironmentMechaMesh(int entryId, ushort flags, sMechaDataTable2* 
         }
 
         // TODO: convert that properly
-        sPS1Pointer temp;
-        temp.setPointer(&pData1->m4_textures.m_raw[0]);
-        uploadTextureToVram(temp, uVar29, tpageX, tpageY, uVar29, clutX, clutY);
+        std::span<u8> temp(pData1->m4_textures.m_raw.begin(), pData1->m4_textures.m_raw.size());
+        uploadTextureToVram(temp.begin(), uVar29, tpageX, tpageY, uVar29, clutX, clutY);
         battleMechaModelBlocksBufferForLoading = pData1->m8_modelBlocks;
 
         int iVar2;
@@ -2702,7 +2701,7 @@ void processBattleAnimation(sSpriteActorCore* param_1) {
     case 4: // 1ap
     case 5: // 2ap
     case 6: // 3ap
-    case 0x16: // ability
+    case 22: // ability
     case 30:
     case 31:
         attackInProgress = 0;
@@ -2919,30 +2918,25 @@ void battleLoadFileFrom0xC(void)
 }
 
 bool initFxFragments(void)
-
 {
-    sSpriteActorCore* psVar1;
     int iVar2;
     sFieldEntitySub4_110* psVar3;
-    sSpriteActorCore* psVar4;
     sTaskHeader sStack_60;
     sVec2_s16 local_3c;
     sVec2_s16 local_38;
     byte* local_34;
     byte* local_30;
 
-    psVar1 = processBattleAnimationSub0_var1;
-    allocateSavePointMeshDataSub0((sTaskHeader*)0x0, &sStack_60);
+    allocateSavePointMeshDataSub0(nullptr, &sStack_60); // TODO: missing custom task initFxFragmentTask here, but seems unused?
     sStack_60.m8_updateCallback = 0;
     battleIdleDuringLoading();
     startJumpAnimationVar1 = 0;
-    initFieldEntitySub4Sub5Sub0(&sFieldEntitySub4_110_8005a474, FxFragmentSpecialAnimation, (sVec2_s16)0x1000380, (sVec2_s16)0x1f40000);
+    initFieldEntitySub4Sub5Sub0(&sFieldEntitySub4_110_8005a474, FxFragmentSpecialAnimation, sVec2_s16::fromValue(0x380, 0x100), sVec2_s16::fromValue(0x0, 0x1F4));
     battleLoadFileFrom0xC();
-    iVar2 = isVramPreBacked(sFieldEntitySub4_110_8005a474.m0_spriteData);
-    psVar4 = processBattleAnimationSub0_var1;
-    if (iVar2 == 0) {
+    bool isVramPrebacked = isVramPreBacked(sFieldEntitySub4_110_8005a474.m0_spriteData);
+    if (!isVramPrebacked) {
         setupSpecialAnimation(processBattleAnimationSub0_var1, FxFragmentSpecialAnimation);
-        spriteActorSetPlayingAnimation(psVar4, 0xffffffff);
+        spriteActorSetPlayingAnimation(processBattleAnimationSub0_var1, -1);
     }
     else {
         psVar3 = processBattleAnimationSub0_var1->m24_vramData;
@@ -2951,8 +2945,7 @@ bool initFxFragments(void)
         //local_38 = psVar3->m8_clut;
         //local_34 = psVar3->mC;
         //local_30 = psVar3->m10_startOfAnimationContainer;
-        sPS1Pointer psVar4 = (*sFieldEntitySub4_110_8005a474.m10_startOfAnimationContainer)[startJumpAnimationVar2];
-        psVar4 = (*sFieldEntitySub4_110_8005a474.m10_startOfAnimationContainer)[READ_LE_U16(psVar4) / 2];
+        std::span<u8>::iterator psVar4 = sFieldEntitySub4_110_8005a474.m10_startOfAnimationContainer->at(startJumpAnimationVar2).begin();
         spriteBytecode2ExtendedE0(processBattleAnimationSub0_var1, psVar4, &sFieldEntitySub4_110_8005a474);
     }
     MissingCode();
@@ -2964,7 +2957,7 @@ bool initFxFragments(void)
     //playBattleMusic(pCurrentBattleMusic, 0x60, 0x78);
     MissingCode();
     allocateSavePointMeshDataSub0_callback(&sStack_60);
-    return iVar2 == 0;
+    return !isVramPrebacked;
 }
 
 byte allocateJumpAnimationStructCallbackSpecial0 = 0;
@@ -2972,7 +2965,6 @@ void allocateJumpAnimationStructCallback(sJumpAnimationControlStruct* param_1) {
     if (isInJumpAnimationCallbackCode) {
         return;
     }
-
     isInJumpAnimationCallbackCode = 1;
     jumpAnimationControlStruct = param_1;
     if (needFxFragments != 0) {
@@ -5128,7 +5120,7 @@ void markEnemyDead(uint param_1)
         uVar2 = uVar2 | 0x10;
     }
 
-    auto slot = battleSlotLayout[battleVisualEntities[param_1].m0_positionSlot + uVar2];
+    auto& slot = battleSlotLayout[battleVisualEntities[param_1].m0_positionSlot + uVar2];
 
     slot[0]--;
     slot[1] &= characterOdToInverseTargetBitmask(battleVisualEntities[param_1].m1);

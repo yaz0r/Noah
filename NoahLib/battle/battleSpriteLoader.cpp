@@ -81,7 +81,7 @@ void loadBattleSpriteVram(sBattleSpriteConfigs* param_1) {
             }
 
             battleVisualBuffers[3 + spriteSlot].m6_vramY = 0x100;
-            battleVisualBuffers[3 + spriteSlot].m0_spriteData = param_1->begin() + param_1->m8[currentSpriteEntityId++].m0_spriteControlOffset;
+            battleVisualBuffers[3 + spriteSlot].m0_spriteData = param_1->beginSpan() + param_1->m8[currentSpriteEntityId++].m0_spriteControlOffset;
             battleVisualBuffers[3 + spriteSlot].m4_vramX = spriteIndicies.m0[spriteSlot];
             battleVisualBuffers[3 + spriteSlot].m8 = param_1->m8[numCurrentEntity].mB;
             local_3c++;
@@ -229,7 +229,7 @@ void setSpriteActorCoreXZ(sSpriteActorCore* param_1, int X, int Z) {
 }
 
 void createBattleSpriteActor(uint entityIndex, int visualBufferIndex, short animationId) {
-    battleVisualBuffers[visualBufferIndex].bundle.init(*battleVisualBuffers[visualBufferIndex].m0_spriteData);
+    battleVisualBuffers[visualBufferIndex].bundle.init(battleVisualBuffers[visualBufferIndex].m0_spriteData.value());
     sBattleSpriteActor* pSprite = allocateBattleSpriteActor(&battleVisualBuffers[visualBufferIndex].bundle, 0, entityIndex + 0x1C0, battleVisualBuffers[visualBufferIndex].m4_vramX, battleVisualBuffers[visualBufferIndex].m6_vramY, 0x20, 0, 0, 0, animationId, 0, 0, 0, battleVisualBuffers[visualBufferIndex].m8);
 
     sSpriteActorCore* pSpriteCore = ((sSpriteActorCore*)pSprite->m4);
@@ -411,7 +411,7 @@ void setupPlayerSpriteLoadingCommands(std::array<sLoadingBatchCommands, 4>::iter
             sLoadableDataRaw* pNewLoadable = new sLoadableDataRaw(getFileSizeAligned(param_1->m0_fileIndex));
             param_1->m4_loadPtr = pNewLoadable;
 
-            battleVisualBuffers[i].m0_spriteData = pNewLoadable->mData.begin();
+            battleVisualBuffers[i].m0_spriteData = std::span<u8>(pNewLoadable->mData.begin(), pNewLoadable->mData.size()).begin();
             battleVisualBuffers[i].m8 = 0;
 
             param_1++;

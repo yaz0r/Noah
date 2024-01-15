@@ -206,7 +206,7 @@ void pushByteOnAnimationStack(sSpriteActorCore* param_1, u8 param)
 	param_1->m8E_stack[--param_1->m8C_stackPosition].asU8 = param;
 }
 
-u16 getSavePointCreationMode1(sPS1Pointer param_1)
+u16 getSavePointCreationMode1(std::span<u8>::iterator param_1)
 {
     u16 uVar1;
 
@@ -438,14 +438,14 @@ void savePointCallback8(sTaskHeader* param_1) {
     OP_INIT_ENTITY_SCRIPT_sub0Sub9(pSpriteActor);
     savePointCallback8Sub0(pSpriteActor);
 
-    if (pSpriteActor->m64_spriteByteCode.getPointer()) {
+    if (pSpriteActor->m64_spriteByteCode.has_value()) {
         if (pSpriteActor->mAC.mx6 == 0) {
             return;
         }
 
         OP_INIT_ENTITY_SCRIPT_sub0Sub9(pSpriteActor);
         savePointCallback8Sub0(pSpriteActor);
-        if (pSpriteActor->m64_spriteByteCode.getPointer()) {
+        if (pSpriteActor->m64_spriteByteCode.has_value()) {
             return;
         }
     }
@@ -532,7 +532,7 @@ void initFieldEntitySub4Sub1(sSpriteActorCore* param_1)
         iVar1 = iVar1 + 0xfff;
     }
     param_1->m1C_gravity = iVar1 >> 0xc;
-    param_1->m64_spriteByteCode.makeNull();
+    param_1->m64_spriteByteCode.reset();
     param_1->m70 = 0;
     param_1->m44_currentAnimationBundle = 0;
     param_1->m68 = 0;
@@ -740,7 +740,7 @@ void spriteBytecode2ExtendedE0_Sub0(sSavePointMeshAbstract* param_1)
     spriteBytecode2ExtendedE0_Sub0Sub0(&param_1->m1C, mode);
 }
 
-void spriteBytecode2ExtendedE0(sSpriteActorCore* param_1, sPS1Pointer param_2, sFieldEntitySub4_110* param_3)
+void spriteBytecode2ExtendedE0(sSpriteActorCore* param_1, std::span<u8>::iterator param_2, sFieldEntitySub4_110* param_3)
 {
     u8 oldSpriteBytecode2ExtendedE0_Var0 = spriteBytecode2ExtendedE0_Var0;
     auto b0_flag = param_1->mB0;
@@ -885,12 +885,12 @@ void setupOverrideClut(uint x, uint y)
 
 u16 customVramUploadX;
 u16 customVramUploadY;
-sPS1Pointer customVramUploadPtr;
+std::span<u8>::iterator customVramUploadPtr;
 
-void uploadTextureToVram(sPS1Pointer param_1, short param_2, short tpageX, short tpageY, short param_5, short clutX, short clutY)
+void uploadTextureToVram(std::span<u8>::iterator param_1, short param_2, short tpageX, short tpageY, short param_5, short clutX, short clutY)
 {
     int textureCount = READ_LE_U8(param_1);
-    sPS1Pointer psVar2 = param_1 + textureCount * 4 + 4;
+    std::span<u8>::iterator psVar2 = param_1 + textureCount * 4 + 4;
     for (int i = 0; i < textureCount; i++) {
         RECT uploadRect[2];
         switch (READ_LE_U32(psVar2)) {
@@ -1021,7 +1021,7 @@ void initPerSubgroupTransforms(sSpriteActorCore* param_1) {
     }
 }
 
-void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS1Pointer param_3)
+void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, std::span<u8>::iterator param_3)
 {
 	switch (bytecode & 0xff) {
 	case 0x84:
@@ -1239,7 +1239,7 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
             break;
         }
     case 0xBD:
-        spriteBytecode2ExtendedE0(param_1, (*createSavePointMeshData_mode5.m10_startOfAnimationContainer)[READ_LE_U8(param_3)], param_1->m24_vramData);
+        spriteBytecode2ExtendedE0(param_1, createSavePointMeshData_mode5.m10_startOfAnimationContainer->at(READ_LE_U8(param_3)).begin(), param_1->m24_vramData);
         break;
 	case 0xA0: // set the move speed for the character
 		{
@@ -1317,7 +1317,7 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
 		}
 		break;
     case 0xCC:
-        param_1->m88_stack2 = param_1->m64_spriteByteCode + READ_LE_S16(param_3);
+        param_1->m88_stack2 = param_1->m64_spriteByteCode.value() + READ_LE_S16(param_3);
         break;
     case 0xCD: // Spin on X axis
     {
@@ -1526,10 +1526,10 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
     case 0xF5:
     {
         s32 offsetToMesh = READ_LE_U8(param_3) + READ_LE_U8(param_3 + 1) * 0x100 + READ_LE_U8(param_3 + 2) * 0x10000;
-        sPS1Pointer meshBlock = param_3 + offsetToMesh;
+        std::span<u8>::iterator meshBlock = param_3 + offsetToMesh;
         sModelBlock* pNewModelBlock = new sModelBlock;
-        pNewModelBlock->init(meshBlock.getPointer());
-        pNewModelBlock->m_baseItForRelocation = meshBlock.getPointer();
+        pNewModelBlock->init(&meshBlock[0]);
+        pNewModelBlock->m_baseItForRelocation = &meshBlock[0];
         if (param_1->m20->getAsObject()->m2C[0].size()) {
             param_1->m20->getAsObject()->m2C[0].clear();
             param_1->m20->getAsObject()->m2C[1].clear();
@@ -1643,12 +1643,12 @@ u8 popByteFromAnimationStack(sSpriteActorCore* param_1)
 	return param_1->m8E_stack[param_1->m8C_stackPosition++].asU8;
 }
 
-void pushBytecodePointerOnAnimationStack(sSpriteActorCore* param_1, sPS1Pointer param_2)
+void pushBytecodePointerOnAnimationStack(sSpriteActorCore* param_1, std::span<u8>::iterator param_2)
 {
 	param_1->m8E_stack[--param_1->m8C_stackPosition].asPs1Pointer = param_2;
 }
 
-sPS1Pointer popPointerFromAnimationStack(sSpriteActorCore* param_1)
+std::span<u8>::iterator popPointerFromAnimationStack(sSpriteActorCore* param_1)
 {
     return param_1->m8E_stack[param_1->m8C_stackPosition++].asPs1Pointer;
 }
@@ -1673,10 +1673,11 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub9(sSpriteActorCore* param_1)
 	iVar2 = 0;
 	if (fieldDrawEnvsInitialized != -1) {
 		do {
-			sVar1 = param_1->m9E_wait;
-			if ((param_1->m9E_wait != 0) && (param_1->m9E_wait = sVar1 + -1, sVar1 == 1)) {
-				executeSpriteBytecode2(param_1);
-			}
+            if (param_1->m9E_wait) {
+                if (--param_1->m9E_wait == 0) {
+                    executeSpriteBytecode2(param_1);
+                }
+            }
 			iVar2 = iVar2 + 1;
 		} while (iVar2 != fieldDrawEnvsInitialized + 1);
 	}
@@ -1688,7 +1689,7 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub9(sSpriteActorCore* param_1)
 //u16 m2: offset to byte code
 //u16 m4: offset to?
 
-void setCurrentAnimationPtr(sSpriteActorCore* param_1, const sPS1Pointer startOfAnimation)
+void setCurrentAnimationPtr(sSpriteActorCore* param_1, std::span<u8>::iterator startOfAnimation)
 {
 	sFieldEntitySub4_B4* psVar2;
 	sFieldEntitySub4_F4* psVar3;
@@ -1777,13 +1778,13 @@ void setCurrentAnimationPtr(sSpriteActorCore* param_1, const sPS1Pointer startOf
 	return;
 }
 
-void executeSpriteBytecode(sSpriteActorCore* param_1, sPS1Pointer param_2, uint param_3)
+void executeSpriteBytecode(sSpriteActorCore* param_1, std::span<u8>::iterator param_2, uint param_3)
 {
 	int unaff_s3;
 
 	while (true)
 	{
-		sPS1Pointer pBytecode = param_1->m64_spriteByteCode;
+        std::span<u8>::iterator pBytecode = param_1->m64_spriteByteCode.value();
 		if ((pBytecode == param_2) && (param_1->mA8.mx16 == param_3)) {
 			return;
 		}
@@ -1847,7 +1848,7 @@ void executeSpriteBytecode(sSpriteActorCore* param_1, sPS1Pointer param_2, uint 
 				assert(0);
 			}
 
-			param_1->m64_spriteByteCode += sizePerBytecodeTable[bytecode];
+			param_1->m64_spriteByteCode.value() += sizePerBytecodeTable[bytecode];
 		}
 	}
 }
@@ -1926,7 +1927,7 @@ void setSpriteActorAngle(sSpriteActorCore* param_1, short angle)
 	if (originalM17 != param_1->mA8.mx11) {
 		sVar1 = param_1->m9E_wait;
 		uVar2 = READ_LE_U16(param_1->m58_startOfCurrentAnimation + 2);
-		sPS1Pointer puVar5 = param_1->m64_spriteByteCode;
+        std::span<u8>::iterator puVar5 = param_1->m64_spriteByteCode.value();
 		param_1->mA8.mx16 = 0;
 		param_1->mA8.mxB = 0x3F;
 		param_1->m64_spriteByteCode = param_1->m58_startOfCurrentAnimation + uVar2 + 2;
@@ -1941,16 +1942,17 @@ void initFieldEntitySub4Sub5Sub0(sFieldEntitySub4_110* param_1, sSpriteActorAnim
 {
 	param_1->m4_vramLocation = param_3_vramLocation;
 	param_1->m8_clut = clut;
-	param_1->mC = param_2->mC_pData;
+	param_1->mC = &param_2->mC_pData;
 	param_1->m0_spriteData = &param_2->m8_pData;
 	initFieldVar4 = 0;
 	param_1->m10_startOfAnimationContainer = &param_2->m4_animations;
 
 	if (isBattleOverlayLoaded)
 	{
-		u8 temp = (READ_LE_U16(param_2->m4_pData) >> 6) & 0x3F;
+		u8 temp = (READ_LE_U16(param_2->m4_entries[0].begin()) >> 6) & 0x3F;
 		if (temp)
 		{
+            assert(0);
 			initFieldVar5 = temp;
 		}
 	}
@@ -1990,7 +1992,7 @@ void spriteActorSetPlayingAnimation(sSpriteActorCore* param_1, int animationId)
 	ushort uVar1;
 
 	if (param_1->m48_defaultAnimationbundle == nullptr) {
-		param_1->m64_spriteByteCode.makeNull();
+		param_1->m64_spriteByteCode.reset();
 	}
 	else {
 		if (param_1->m44_currentAnimationBundle == param_1->m48_defaultAnimationbundle) {
@@ -2021,14 +2023,14 @@ void spriteActorSetPlayingAnimation(sSpriteActorCore* param_1, int animationId)
 
         // HACK: should not be required
         {
-            if (animationId >= (*param_1->m24_vramData->m10_startOfAnimationContainer).size()) {
+            if (animationId >= param_1->m24_vramData->m10_startOfAnimationContainer->size()) {
                 Hack("Out of bound animation id");
                 animationId = 0;
             }
         }
 
 		param_1->m40 = param_1->m40 | 0x100000;
-		param_1->m58_startOfCurrentAnimation = (*param_1->m24_vramData->m10_startOfAnimationContainer)[animationId];
+		param_1->m58_startOfCurrentAnimation = param_1->m24_vramData->m10_startOfAnimationContainer->at(animationId).begin();
 		setCurrentAnimationPtr(param_1, param_1->m58_startOfCurrentAnimation);
 		setSpriteActorAngle(param_1, param_1->m80);
 	}
@@ -2056,7 +2058,7 @@ sSpriteActor* initializeSpriteActor(sSpriteActor* param_1, sSpriteActorAnimation
 	if (isBattleOverlayLoaded == 0)
 	{
 		param_1->mA8.mx0 = 1;
-		param_1->m7C->m18.makeNull();
+		param_1->m7C->m18.reset();
 	}
 	else
 	{
@@ -2097,7 +2099,7 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub4(sSpriteActor* param_1, int param_2, int* par
 	int iVar4;
 	uint uVar5;
 
-	pbVar2 = (*param_1->m24_vramData->m10_startOfAnimationContainer)[0];
+	pbVar2 = param_1->m24_vramData->m10_startOfAnimationContainer->at(0).begin();
 	bVar1 = READ_LE_U8(pbVar2 + READ_LE_U16(pbVar2 + 4) + 4);
 	uVar5 = (uint)bVar1;
 	pbVar2 = param_1->m24_vramData->m0_spriteData->rawPointer;

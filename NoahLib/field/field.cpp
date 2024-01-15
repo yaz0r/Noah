@@ -2971,7 +2971,7 @@ void startAllEntityScripts()
 struct sShapeTransfert
 {
     RECT m0_rect;
-    sPS1Pointer m8_pData;
+    std::optional<std::span<u8>::iterator> m8_pData;
     sShapeTransfert* mC_pNext;
     // size 0x10
 };
@@ -3003,7 +3003,7 @@ void allocateShapeTransfert(int param_1)
     return;
 }
 
-void addToShapeTransfertTable(sPS1Pointer pData, short x, short y, short w, short h)
+void addToShapeTransfertTable(std::optional<std::span<u8>::iterator> pData, short x, short y, short w, short h)
 {
     sShapeTransfert** ppsVar1;
     int iVar2;
@@ -3719,7 +3719,8 @@ void initFieldData()
         fieldActorSetupParams.resize(count);
         for (int i = 0; i < count; i++)
         {
-            fieldActorSetupParams[i].init(rawFieldActorSetupParams.begin() + READ_LE_U32(4 + rawFieldActorSetupParams.begin() + 4 * i));
+            std::span<u8> tempSpan(rawFieldActorSetupParams.begin(), rawFieldActorSetupParams.size());
+            fieldActorSetupParams[i].init(tempSpan.begin() + READ_LE_U32(4 + rawFieldActorSetupParams.begin() + 4 * i));
         }
     }
 
@@ -4197,7 +4198,8 @@ void finalizeLoadPlayableCharacters()
                 decompress(partyCharacterBuffersCompressed[i].mData.begin(), partyCharacterBuffersRaw[i].mData);
                 partyCharacterBuffersCompressed[i].mData.clear();
 
-                partyCharacterBuffers[i].init(partyCharacterBuffersRaw[i].mData.begin());
+                std::span<u8> tempSpan(partyCharacterBuffersRaw[i].mData.begin(), partyCharacterBuffersRaw[i].mData.size());
+                partyCharacterBuffers[i].init(tempSpan.begin());
             }
         }
 
@@ -7738,9 +7740,9 @@ void uploadCharacterSpriteSub1(sSpriteActorCore* param_1, int param_2, sFieldEnt
                 psVar13->m10_colorAndCode.m3_code |= 2;
             }
             if (((int)uVar17 >> 4 & 1U) == 0) {
-                sPS1Pointer iVar12;
-                if (((param_1->mA8.mx0) == 1) && (iVar12 = param_1->m7C->m18, iVar12.getPointer() != 0)) {
-                    sPS1Pointer puVar11 = iVar12 + ((uVar17 & 0xe) * 2);
+                std::optional<sPS1Pointer> iVar12;
+                if (((param_1->mA8.mx0) == 1) && (iVar12 = param_1->m7C->m18, iVar12.has_value() != 0)) {
+                    sPS1Pointer puVar11 = iVar12.value() + ((uVar17 & 0xe) * 2);
                     u16 uVar6 = READ_LE_U16(puVar11 + 2);
                     u16 uVar14 = READ_LE_U16(puVar11);
                     texcoordStartY = uVar6 & 0xff;
@@ -7812,12 +7814,12 @@ void uploadCharacterSprite(sSpriteActorCore* param_1, int spriteFrame, sFieldEnt
     if (spriteFrame < param_3->m0_spriteData->m0_header.mx01FF_frameCount + 1) {
         if ((param_1->m3C >> 0x1e & 1) != 0) {
             param_1->m3C &= ~0x40000000;
-            sPS1Pointer puVar10 = param_3->mC;
+            std::span<u8>::iterator puVar10 = param_3->mC->begin();
             if (READ_LE_U16(puVar10) != 0) {
                 // Transfer the clut
-                sPS1Pointer clutData = puVar10 + (uint)READ_LE_U16(puVar10) * ((param_1->m3C >> 16) & 0xf0) * 2 + 4;
+                auto clutIt = puVar10 + (uint)READ_LE_U16(puVar10) * ((param_1->m3C >> 16) & 0xf0) * 2 + 4;
                 int clutSize = READ_LE_U16(puVar10) * 16;
-                addToShapeTransfertTable(clutData, param_3->m8_clut.vx, param_3->m8_clut.vy, clutSize, 1);
+                addToShapeTransfertTable(clutIt, param_3->m8_clut.vx, param_3->m8_clut.vy, clutSize, 1);
             }
         }
         if (!param_3->m0_spriteData->m0_header.mx8000_isVramPrebacked) {
@@ -7865,7 +7867,7 @@ void uploadCharacterSprite(sSpriteActorCore* param_1, int spriteFrame, sFieldEnt
                             break;
 
                         if ((bVar3 & 0x40) == 0) {
-                            sPS1Pointer pbVar17 = pSubSprite + 1;
+                            auto pbVar17 = pSubSprite + 1;
                             if ((bVar3 & 4) != 0) {
                                 pFieldEntitySub4_B4_sub->m14.m0x20_tileFlipY = 1;
                             }
@@ -7967,8 +7969,7 @@ void uploadCharacterSprite(sSpriteActorCore* param_1, int spriteFrame, sFieldEnt
                 } while (uVar20 != (frameHeader & 0x3f));
             }
             param_1->m40 = param_1->m40 & 0xffffff03 | (uVar20 & 0x3f) << 2;
-            sPS1Pointer pointer;
-            pointer.makeNull();
+            std::optional<std::span<u8>::iterator> pointer;
             addToShapeTransfertTable(pointer, vramLocation.vx, vramLocation.vy, READ_LE_U8(framePtr + 4), READ_LE_U8(framePtr + 5));
         }
         else
@@ -8598,11 +8599,11 @@ void shapeTransfert()
 
     rect = (sShapeTransfert*)shapeTransfertTable[shapeTransfertDoubleBufferIndex];
     while (rect != (sShapeTransfert*)0x0) {
-        if (rect->m8_pData.getPointer() == nullptr) {
+        if (!rect->m8_pData.has_value()) {
             ClearImage(&rect->m0_rect, 0, 0, 0);
         }
         else {
-            LoadImage(&rect->m0_rect, rect->m8_pData);
+            LoadImage(&rect->m0_rect, rect->m8_pData.value());
         }
         rect = rect->mC_pNext;
     }

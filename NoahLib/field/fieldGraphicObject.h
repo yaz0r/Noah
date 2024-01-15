@@ -26,7 +26,7 @@ struct sFieldEntitySub4_F4
     s16 mC;
     sVec2_s16 mE_vramLocation;
     s16 m14_actorId;
-    sPS1Pointer m18;
+    std::optional<sPS1Pointer> m18;
     //size ???
 };
 
@@ -98,8 +98,8 @@ struct sFieldEntitySub4_110
     struct sFieldEntitySub4_110_0* m0_spriteData;
 	sVec2_s16 m4_vramLocation;
 	sVec2_s16 m8_clut;
-	sPS1Pointer mC;
-	std::vector<sPS1Pointer>* m10_startOfAnimationContainer;
+	std::span<u8>* mC;
+	std::vector<std::span<u8>>* m10_startOfAnimationContainer;
 	// size 0x14 (guessed, but seems to make sense)
 };
 
@@ -107,7 +107,7 @@ struct sStackElement
 {
 	u8 asU8;
 	u16 asU16;
-	sPS1Pointer asPs1Pointer;
+    std::span<u8>::iterator asPs1Pointer;
 };
 
 struct sSpriteActorCore {
@@ -138,11 +138,11 @@ struct sSpriteActorCore {
     struct sSpriteActorAnimationBundle* m48_defaultAnimationbundle;
     struct sSpriteActorAnimationBundle* m4C_specialAnimation = nullptr;
     std::optional<std::vector<u8>::iterator> m50;
-    sPS1Pointer m54;
-    sPS1Pointer m58_startOfCurrentAnimation;
-    sPS1Pointer m5C;
+    std::span<u8>::iterator m54;
+    std::span<u8>::iterator m58_startOfCurrentAnimation;
+    std::span<u8>::iterator m5C;
     //sPS1Pointer m60_endOfAnimationContainer; weird thing, skipped its init for now
-    sPS1Pointer m64_spriteByteCode;
+    std::optional<std::span<u8>::iterator> m64_spriteByteCode;
     void(*m68)(sSpriteActorCore*);
     union {
         struct sTaskHeader* m6C_pointerToOwnerStructure;
@@ -275,9 +275,9 @@ void setSpriteActorAngle(sSpriteActorCore* param_1, short param_2);
 void resetPerSubgroupTransforms(sSpriteActorCore* param_1);
 
 void setTransparencyMode(sSpriteActorCore* param_1, u32 mode);
-void setCurrentAnimationPtr(sSpriteActorCore* param_1, const sPS1Pointer startOfAnimation);
+void setCurrentAnimationPtr(sSpriteActorCore* param_1, std::span<u8>::iterator startOfAnimation);
 
-void uploadTextureToVram(sPS1Pointer param_1, short param_2, short tpageX, short tpageY, short param_5, short clutX, short clutY);
+void uploadTextureToVram(std::span<u8>::iterator param_1, short param_2, short tpageX, short tpageY, short param_5, short clutX, short clutY);
 void setupOverrideTPage(uint x, uint y);
 void setupOverrideClut(uint x, uint y);
 
@@ -293,16 +293,16 @@ void allocateSavePointMeshDataSub0(sTaskHeader* param_1, sTaskHeader* param_2);
 int isVramPreBacked(const sFieldEntitySub4_110_0* param_1);
 void addToSpriteTransferList(sSpriteActorCore* param_1, short param_2);
 void executeSpriteBytecode2Sub1(sSpriteActorCore* param_1);
-sPS1Pointer popPointerFromAnimationStack(sSpriteActorCore* param_1);
-void pushBytecodePointerOnAnimationStack(sSpriteActorCore* param_1, sPS1Pointer param_2);
-void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS1Pointer param_3);
+std::span<u8>::iterator popPointerFromAnimationStack(sSpriteActorCore* param_1);
+void pushBytecodePointerOnAnimationStack(sSpriteActorCore* param_1, std::span<u8>::iterator param_2);
+void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, std::span<u8>::iterator param_3);
 u8 popByteFromAnimationStack(sSpriteActorCore* param_1);
 void pushByteOnAnimationStack(sSpriteActorCore* param_1, u8 param);
 void savePointCallback8Sub0Sub0(sSpriteActorCore* param_1);
 void savePointCallback8Sub0Sub0_battle(sSpriteActorCore* param_1);
 void updateAllSubsprites(sSpriteActorCore* param_1);
 void registerSpriteCallback2_2(sTaskHeader* param_1);
-void spriteBytecode2ExtendedE0(sSpriteActorCore* param_1, sPS1Pointer param_2, sFieldEntitySub4_110* param_3);
+void spriteBytecode2ExtendedE0(sSpriteActorCore* param_1, std::span<u8>::iterator param_2, sFieldEntitySub4_110* param_3);
 
 extern const std::array<u8, 256> sizePerBytecodeTable;
 extern u32 allocateSavePointMeshDataSub0_var0;

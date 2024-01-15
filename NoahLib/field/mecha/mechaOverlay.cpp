@@ -1121,9 +1121,8 @@ void mechaInitNewMecha(int entryId, ushort flags, sMechaDataTable2* pData2, sMec
         }
 
         // TODO: convert that properly
-        sPS1Pointer temp;
-        temp.setPointer(&pData1->m4_textures.m_raw[0]);
-        uploadTextureToVram(temp, uVar29, tpageX, tpageY, uVar29, clutX, clutY);
+        std::span<u8> tempSpan(pData1->m4_textures.m_raw.begin(), pData1->m4_textures.m_raw.size());
+        uploadTextureToVram(tempSpan.begin(), uVar29, tpageX, tpageY, uVar29, clutX, clutY);
         mechaModelBlocksBufferForLoading = pData1->m8_modelBlocks;
 
         int iVar2;

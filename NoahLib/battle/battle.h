@@ -317,7 +317,7 @@ extern s8 battleTransitionEffect;
 extern s8 currentBattleLoaderTransitionEffect;
 
 struct sBattleVisualBuffer {
-    std::optional<std::vector<u8>::iterator> m0_spriteData;
+    std::optional<std::span<u8>::iterator> m0_spriteData;
     s16 m4_vramX;
     s16 m6_vramY;
     u32 m8 = 0;
