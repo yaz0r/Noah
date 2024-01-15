@@ -170,14 +170,27 @@ struct sSpriteActorCore {
         u32 mx14 : 2;
         u32 mx16 : 6;
         u32 mx1C : 2;
-        u32 mx1E : 2;
+        u32 mx1E_entityId_bottom2bit : 2;
 
         void clear()
         {
             memset(this, 0, sizeof(*this));
         }
     } mA8;
-    u32 mAC; // animation speed >> 7 & 0xFFF
+    union {
+        struct {
+            u32 mx0_entityIdUpper2bit : 2;
+            u32 mx2_facing : 1;
+            u32 mx3 : 1;
+            u32 mx4_dummy : 1;
+            u32 mx5 : 1;
+            u32 mx6 : 1;
+            u32 mx7_timeScale : 12;
+            u32 mx13_dummy : 5;
+            u32 mx18 : 8;
+        };
+        u32 mRaw;
+    } mAC;
     union {
         struct {
             s32 mx0_animationId : 8;

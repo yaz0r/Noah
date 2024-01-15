@@ -19,7 +19,7 @@ sFieldEntitySub4_110 sFieldEntitySub4_110_8006be10;
 
 void SetTimeScale(sSpriteActor* param_1, int param_2)
 {
-	param_1->mAC = param_1->mAC & 0xfff8007f | (param_2 & 0xfff) << 7;
+    param_1->mAC.mx7_timeScale = param_2;
 }
 
 void resetPerSubgroupTransforms(sSpriteActorCore* param_1)
@@ -191,12 +191,12 @@ void executeSpriteBytecode2Sub1(sSpriteActorCore* param_1)
 	}
 	uVar1 = READ_LE_U16(param_1->m54 + uVar2 * 2);
 	if ((uVar1 & 0x200) == 0) {
-		param_1->mAC &= ~8;
+		param_1->mAC.mx3 = 0;
 	}
 	else {
-		param_1->mAC |= 8;
+        param_1->mAC.mx3 = 1;
 	}
-	param_1->m3C = param_1->m3C & ~8 | (param_1->mAC >> 3 & 1 ^ param_1->mAC >> 2 & 1) << 3;
+	param_1->m3C = param_1->m3C & ~8 | (param_1->mAC.mx3 ^ param_1->mAC.mx2_facing) << 3;
 	addToSpriteTransferList(param_1, uVar1 & 0x1ff);
 	return;
 }
@@ -439,7 +439,7 @@ void savePointCallback8(sTaskHeader* param_1) {
     savePointCallback8Sub0(pSpriteActor);
 
     if (pSpriteActor->m64_spriteByteCode.getPointer()) {
-        if (((pSpriteActor->mAC >> 6) & 1) == 0) {
+        if (pSpriteActor->mAC.mx6 == 0) {
             return;
         }
 
@@ -494,7 +494,7 @@ void savePointCallbackC(sTaskHeader* param_1) {
         }
     }
 
-    if ((pSpriteActor->mAC >> 5) & 1) {
+    if (pSpriteActor->mAC.mx5) {
         registerSpriteCallback2_2(param_1);
     }
 
@@ -523,10 +523,10 @@ void initFieldEntitySub4Sub1(sSpriteActorCore* param_1)
     param_1->mA8.clear();
     param_1->m3C = param_1->m3C & 0xfe00ffe3;
     param_1->m40 = param_1->m40 & 0xfffe0003;
-    param_1->mAC = 0;
+    param_1->mAC.mRaw = 0;
     param_1->mB0.mRaw = 0;
     int iVar1 = (fieldDrawEnvsInitialized + 1) * (fieldDrawEnvsInitialized + 1) * 0x4000 * param_1->m82;
-    param_1->mAC = param_1->mAC & 0xfff8007f | 0x8000;
+    param_1->mAC.mx7_timeScale = 0x100;
     param_1->mA8.mx11 = 0;
     if (iVar1 < 0) {
         iVar1 = iVar1 + 0xfff;
@@ -781,13 +781,13 @@ void spriteBytecode2ExtendedE0(sSpriteActorCore* param_1, sPS1Pointer param_2, s
         pSavePointMesh->m38_spriteActorCore.m40 = pSavePointMesh->m38_spriteActorCore.m40 & 0xffffe0ff | 0x300;
     }
 
-    pSavePointMesh->m38_spriteActorCore.mA8.mx1E = param_1->mA8.mx1E;
-    pSavePointMesh->m38_spriteActorCore.mAC = pSavePointMesh->m38_spriteActorCore.mAC & 0xfffffffc | param_1->mAC & 3;
+    pSavePointMesh->m38_spriteActorCore.mA8.mx1E_entityId_bottom2bit = param_1->mA8.mx1E_entityId_bottom2bit;
+    pSavePointMesh->m38_spriteActorCore.mAC.mx0_entityIdUpper2bit = pSavePointMesh->m38_spriteActorCore.mAC.mx0_entityIdUpper2bit;
     pSavePointMesh->m38_spriteActorCore.mB0.mx8 = param_1->mB0.mx8;
-    pSavePointMesh->m38_spriteActorCore.mAC = pSavePointMesh->m38_spriteActorCore.mAC & 0xffffffbf | param_1->mAC & 0x40;
-    pSavePointMesh->m38_spriteActorCore.mAC = pSavePointMesh->m38_spriteActorCore.mAC & 0xfff8003f | param_1->mAC & 0x40 | param_1->mAC & 0x7ff80;
+    pSavePointMesh->m38_spriteActorCore.mAC.mx6 = pSavePointMesh->m38_spriteActorCore.mAC.mx6;
+    pSavePointMesh->m38_spriteActorCore.mAC.mx7_timeScale = pSavePointMesh->m38_spriteActorCore.mAC.mx7_timeScale;
     pSavePointMesh->m38_spriteActorCore.mA8.mx0 = 0;
-    pSavePointMesh->m38_spriteActorCore.mAC = pSavePointMesh->m38_spriteActorCore.mAC & 0xfff8003b | param_1->mAC & 0x40 | param_1->mAC & 0x7ff80 | param_1->mAC & 4;
+    pSavePointMesh->m38_spriteActorCore.mAC.mx2_facing = pSavePointMesh->m38_spriteActorCore.mAC.mx2_facing;
 
     if (param_1->mA8.mx0 == 0) {
         pSavePointMesh->m38_spriteActorCore.m7C = param_1->m7C;
@@ -802,7 +802,7 @@ void spriteBytecode2ExtendedE0(sSpriteActorCore* param_1, sPS1Pointer param_2, s
     pSavePointMesh->m38_spriteActorCore.m74_pTargetEntitySprite = param_1->m74_pTargetEntitySprite;
     pSavePointMesh->m38_spriteActorCore.m82 = param_1->m82;
     pSavePointMesh->m38_spriteActorCore.m50 = param_1->m50;
-    pSavePointMesh->m38_spriteActorCore.m8D = (param_1->mAC >> 24) & 0xFF;
+    pSavePointMesh->m38_spriteActorCore.m8D = param_1->mAC.mx18;
     pSavePointMesh->m38_spriteActorCore.m78 = param_1->m78;
     pSavePointMesh->m38_spriteActorCore.m0_position.vx = param_1->m0_position.vx;
     pSavePointMesh->m38_spriteActorCore.m0_position.vy = param_1->m0_position.vy;
@@ -850,7 +850,7 @@ void computeStepFromMoveSpeed(sSpriteActorCore* param1)
 	int iVar1;
 	int iVar2;
 
-	iVar2 = ((param1->m18_moveSpeed >> 4) << 8) / (int)(param1->mAC >> 7 & 0xfff);
+	iVar2 = ((param1->m18_moveSpeed >> 4) << 8) / (int)(param1->mAC.mx7_timeScale);
 	param1->mC_step.vx = (getAngleSin((int)param1->m32_direction) >> 2) * iVar2 >> 6;
 	param1->mC_step.vz = -((getAngleCos((int)param1->m32_direction) >> 2) * iVar2) >> 6;
 }
@@ -1093,7 +1093,7 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
             magnitude += 0xFFF;
         }
         s32 offset;
-        if ((param_1->mAC >> 2) & 1) { // switch based on facing
+        if (param_1->mAC.mx2_facing) { // switch based on facing
             offset = modulateSpeed(param_1, magnitude >> 0xC) * -0x10000;
         }
         else {
@@ -1262,7 +1262,7 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
                 }
                 tempNewAltitude = (newValue >> 0xc) << 8;
             }
-            param_1->mC_step.vy = (tempNewAltitude << 8) / (int)(param_1->mAC >> 7 & 0xfff);
+            param_1->mC_step.vy = (tempNewAltitude << 8) / (int)(param_1->mAC.mx7_timeScale);
         }
         break;
     case 0xA3:
@@ -1274,7 +1274,7 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
             if (iVar13 < 0) {
                 iVar13 = iVar13 + 0xfff;
             }
-            (param_1->mC_step).vy = (param_1->mC_step).vy + ((iVar13 >> 0xc) << 0x10) / (int)(param_1->mAC >> 7 & 0xfff);
+            (param_1->mC_step).vy = (param_1->mC_step).vy + ((iVar13 >> 0xc) << 0x10) / (int)(param_1->mAC.mx7_timeScale);
         }
         break;
     case 0xA8:
@@ -1329,7 +1329,7 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
         u32 sVar14 = uVar1 * 8;
         u16 uVar16 = (int)(READ_LE_U8(param_3 + 1) << 0x18) >> 0x10 & 0xffff;
         s32 uVar15 = uVar16 >> 9 & 7;
-        if ((param_1->mAC >> 2 & 1) != 0) {
+        if (param_1->mAC.mx2_facing) {
             sVar14 = uVar1 * -8;
         }
         if ((uVar16 >> 0xc & 1) == 0) {
@@ -1370,7 +1370,7 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
             u32 sVar14 = uVar1 * 8;
             u16 uVar16 = (int)(READ_LE_U8(param_3+1) << 0x18) >> 0x10 & 0xffff;
             s32 uVar15 = uVar16 >> 9 & 7;
-            if ((param_1->mAC >> 2 & 1) != 0) {
+            if (param_1->mAC.mx2_facing) {
                 sVar14 = uVar1 * -8;
             }
             if ((uVar16 >> 0xc & 1) == 0) {
@@ -1410,7 +1410,7 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, sPS
         u32 sVar14 = uVar1 * 8;
         u16 uVar16 = (int)(READ_LE_U8(param_3 + 1) << 0x18) >> 0x10 & 0xffff;
         s32 uVar15 = uVar16 >> 9 & 7;
-        if ((param_1->mAC >> 2 & 1) != 0) {
+        if (param_1->mAC.mx2_facing) {
             sVar14 = uVar1 * -8;
         }
         if ((uVar16 >> 0xc & 1) == 0) {
@@ -1716,7 +1716,7 @@ void setCurrentAnimationPtr(sSpriteActorCore* param_1, const sPS1Pointer startOf
 	iVar4 = gravityFactor * 0x400 * (iVar4 >> 0xc);
 	param_1->m1C_gravity = iVar4;
 
-	iVar5 = 0x10000 / (int)(param_1->mAC >> 7 & 0xfff);
+	iVar5 = 0x10000 / (int)(param_1->mAC.mx7_timeScale);
 	iVar5 = iVar5 * iVar5;
 	if (iVar5 < 0) {
 		iVar5 = iVar5 + 0xff;
@@ -1861,10 +1861,10 @@ void setSpriteActorAngle(sSpriteActorCore* param_1, short angle)
 	param_1->m80 = angle;
 	originalM17 = param_1->mA8.mx11;
 	if (((int)angle + 0x400U & 1) == 0) {
-		param_1->mAC &= ~4;
+		param_1->mAC.mx2_facing = 0;
 	}
 	else {
-		param_1->mAC |= 4;
+		param_1->mAC.mx2_facing = 1;
 	}
 
 	if (param_1->m48_defaultAnimationbundle == nullptr) {
@@ -1877,10 +1877,10 @@ void setSpriteActorAngle(sSpriteActorCore* param_1, short angle)
 	{
 	case 0:
 		if ((angle + 0x400U & 0xfff) < 0x801) {
-			param_1->mAC &= ~4;
+			param_1->mAC.mx2_facing = 0;
 		}
 		else {
-			param_1->mAC |= 4;
+			param_1->mAC.mx2_facing = 1;
 		}
 		param_1->mA8.mx11 = 0;
 		param_1->m5C = param_1->m58_startOfCurrentAnimation + 6;
@@ -1890,12 +1890,12 @@ void setSpriteActorAngle(sSpriteActorCore* param_1, short angle)
         newAngle = angle + 0x600 >> 10 & 3;
         if (newAngle < 3) {
             uVar2 = READ_LE_U16(param_1->m58_startOfCurrentAnimation + newAngle * 2 + 4);
-            param_1->mAC = param_1->mAC & 0xfffffffb;
+            param_1->mAC.mx2_facing = 0;
             param_1->m54 = param_1->m58_startOfCurrentAnimation + (uint)uVar2 + newAngle * 2 + 4;
         }
         else {
             uVar2 = READ_LE_U16(param_1->m58_startOfCurrentAnimation + 6);
-            param_1->mAC = param_1->mAC | 4;
+            param_1->mAC.mx2_facing = 1;
             param_1->m54 = param_1->m58_startOfCurrentAnimation + uVar2 + 6;
         }
         break;
@@ -1906,13 +1906,13 @@ void setSpriteActorAngle(sSpriteActorCore* param_1, short angle)
 		{
 			newAngle = newAngle - 5 ^ 3;
 			uVar2 = READ_LE_U16(param_1->m58_startOfCurrentAnimation + newAngle * 2 + 4);
-			param_1->mAC |= 4;
+			param_1->mAC.mx2_facing = 1;
 			param_1->m54 = param_1->m58_startOfCurrentAnimation + (uint)uVar2 + newAngle * 2 + 4;
 		}
 		else
 		{
 			uVar2 = READ_LE_U16(param_1->m58_startOfCurrentAnimation + newAngle * 2 + 4);
-			param_1->mAC &= ~4;
+			param_1->mAC.mx2_facing = 0;
 			param_1->m54 = param_1->m58_startOfCurrentAnimation + (uint)uVar2 + newAngle * 2 + 4;
 		}
 		param_1->mA8.mx11 = newAngle;
@@ -1934,7 +1934,7 @@ void setSpriteActorAngle(sSpriteActorCore* param_1, short angle)
 		param_1->m9E_wait = sVar1;
 	}
 
-	param_1->m3C = param_1->m3C & 0xfffffff7 | (param_1->mAC >> 3 & 1 ^ param_1->mAC >> 2 & 1) << 3;
+	param_1->m3C = param_1->m3C & 0xfffffff7 | (param_1->mAC.mx3 ^ param_1->mAC.mx2_facing) << 3;
 }
 
 void initFieldEntitySub4Sub5Sub0(sFieldEntitySub4_110* param_1, sSpriteActorAnimationBundle* param_2, sVec2_s16 param_3_vramLocation, sVec2_s16 clut)
@@ -2014,7 +2014,7 @@ void spriteActorSetPlayingAnimation(sSpriteActorCore* param_1, int animationId)
 				param_1->m24_vramData->m4_vramLocation = param_1->m7C->mE_vramLocation;
 			}
 		}
-		param_1->mAC = (param_1->mAC & 0x00FFFFFF) | (((char)animationId) << 24);
+        param_1->mAC.mx18 = animationId;
 		if ((int)animationId < 0) {
 			animationId = ~animationId;
 		}

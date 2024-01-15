@@ -8047,7 +8047,7 @@ void setupSpriteActorTransform(sSpriteActorCore* pSpriteSheet)
 
     uVar1 = pSpriteSheet->m40 >> 8 & 0x1f;
     iVar3 = (int)(char)pSpriteSheet->m20->getAsSprite()->m3C << uVar1;
-    if ((pSpriteSheet->mAC >> 2 & 1) != 0) {
+    if ((pSpriteSheet->mAC.mx2_facing) != 0) {
         iVar3 = -iVar3;
     }
     iVar4 = ((int)(char)pSpriteSheet->m20->getAsSprite()->m3D << uVar1) * (int)pSpriteSheet->m2C_scale;
@@ -8082,7 +8082,7 @@ void submitSpriteActorToRendering(sSpriteActorCore* pSpriteSheet, sTag* pTag)
     u32 uVar9 = pSpriteSheet->m40 >> 8 & 0x1f;
     s8 bVar1 = psVar7->m3D;
     s16 spriteWidth = (short)((int)(char)psVar7->m3C << uVar9);
-    if ((pSpriteSheet->mAC >> 2 & 1) != 0) {
+    if ((pSpriteSheet->mAC.mx2_facing) != 0) {
         spriteWidth = -spriteWidth;
     }
     u32 numPolyInSprite = pSpriteSheet->m40 >> 2 & 0x3f;

@@ -132,13 +132,13 @@ s32 worldmapMode0_task_partyGear_update(s32 param_1) {
             uint followDataIndex = (worldmapFollowLeaderDataIndex - psVar8->m58) & 0x1f;
             if (((psVar8->m28_position).vx == worldmapFollowLeaderData[followDataIndex].m0_position.vx && (psVar8->m28_position).vy == worldmapFollowLeaderData[followDataIndex].m0_position.vy) &&
                 (psVar8->m28_position).vz == worldmapFollowLeaderData[followDataIndex].m0_position.vz) {
-                if (((psVar8->m4C->m0_spriteActorCore).mAC >> 24) != '\0') {
+                if (psVar8->m4C->m0_spriteActorCore.mAC.mx18 != 0) {
                     spriteActorSetPlayingAnimation(psVar8->m4C, 0);
                     clearWorldmapParticles(param_1 + 0x28);
                 }
             }
             else {
-                if (((psVar8->m4C->m0_spriteActorCore).mAC >> 24) != '\x01') {
+                if (psVar8->m4C->m0_spriteActorCore.mAC.mx18 != 1) {
                     spriteActorSetPlayingAnimation(psVar8->m4C, 1);
                 }
                 std::array<short, 1> temp;
@@ -149,7 +149,7 @@ s32 worldmapMode0_task_partyGear_update(s32 param_1) {
             (psVar8->m28_position).vz = worldmapFollowLeaderData[followDataIndex].m0_position.vz;
             psVar8->m48 = worldmapFollowLeaderData[followDataIndex].m10;
         }
-        else if (((psVar8->m4C->m0_spriteActorCore).mAC >> 24) != '\x03') {
+        else if (psVar8->m4C->m0_spriteActorCore.mAC.mx18 != 3) {
             spriteActorSetPlayingAnimation(psVar8->m4C, 3);
             clearWorldmapParticles(param_1 + 0x28);
         }

@@ -941,13 +941,13 @@ s32 worldmapMode0_taskPlayer_update(int param_1)
                 break;
             default:
                 if ((pEntry->m38_step.vx == 0 && pEntry->m38_step.vy == 0) && pEntry->m38_step.vz == 0) {
-                    if ((pEntry->m4C->m0_spriteActorCore.mAC >> 24) != '\0') {
+                    if ((pEntry->m4C->m0_spriteActorCore.mAC.mx18) != '\0') {
                         spriteActorSetPlayingAnimation(pEntry->m4C, 0);
                         MissingCode();
                     }
                 }
                 else {
-                    if ((pEntry->m4C->m0_spriteActorCore.mAC >> 24) != '\x01') {
+                    if ((pEntry->m4C->m0_spriteActorCore.mAC.mx18) != '\x01') {
                         spriteActorSetPlayingAnimation(pEntry->m4C, 1);
                     }
                     MissingCode();

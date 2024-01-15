@@ -37,7 +37,7 @@ do
             waitDelay = (bytecode & 0xf) + 1;
         }
 
-        int iVar12 = waitDelay * (param_1->mAC >> 7 & 0xfff);
+        int iVar12 = waitDelay * param_1->mAC.mx7_timeScale;
         if (iVar12 < 0) {
             iVar12 = iVar12 + 0xff;
         }
@@ -82,7 +82,7 @@ do
     case 0xBE:
     {
         bytecode = READ_LE_U8(pEndOfOpcode);
-        int iVar15 = (((int)bytecode >> 0xb & 0xfU) + 1) * (param_1->mAC >> 7 & 0xfff);
+        int iVar15 = (((int)bytecode >> 0xb & 0xfU) + 1) * (param_1->mAC.mx7_timeScale);
         int _uVar13 = bytecode & 0x1ff;
         if (false) {
             iVar15 = iVar15 + 0xff;
@@ -96,11 +96,11 @@ do
                 //_uVar13 = (uint) * (byte*)((int)param_1->m60 + (_uVar13 - 1));
                 assert(0);
             }
-            int uVar5 = (int)bytecode >> 6 & 8;
+            int uVar5 = (int)bytecode >> 9 & 1;
             int uVar10 = param_1->m3C;
-            int uVar6 = (uVar5 >> 3 ^ (param_1->mAC & 4) >> 2) << 3;
+            int uVar6 = ((uVar5) ^ (param_1->mAC.mx2_facing)) << 3;
             int uVar14 = uVar10 & 0xfffffff7 | uVar6;
-            param_1->mAC = param_1->mAC & 0xfffffff7 | uVar5;
+            param_1->mAC.mx3 = uVar5;
             param_1->m3C = uVar14;
             if (((int)bytecode >> 10 & 1U) == 0) {
                 uVar14 = uVar10 & 0xffffffe7 | uVar6;
@@ -119,7 +119,7 @@ do
         return;
     }
     case 0x81:
-        if (((param_1->mAC >> 24) & 0xFF) == 0x3F)
+        if (((param_1->mAC.mx18) & 0xFF) == 0x3F)
         {
             assert(0);
         }
@@ -135,7 +135,7 @@ do
         }
         {
             int iVar15 = (param_1->mC_step).vy;
-            spriteActorSetPlayingAnimation(param_1, (s8)((param_1->mAC >> 24) & 0xFF));
+            spriteActorSetPlayingAnimation(param_1, param_1->mAC.mx18);
             (param_1->mC_step).vy = iVar15;
         }
         param_1->m9E_wait = 0;
@@ -169,7 +169,7 @@ do
             return;
         }
         {
-            int iVar13 = READ_LE_U8(pEndOfOpcode + 2) * (param_1->mAC >> 7 & 0xfff);
+            int iVar13 = READ_LE_U8(pEndOfOpcode + 2) * (param_1->mAC.mx7_timeScale);
             if (false) {
                 iVar13 = iVar13 + 0xff;
             }
@@ -240,7 +240,7 @@ do
             scale += 0xFFF;
         }
         scale >>= 0xC;
-        if (((param_1->mAC >> 2) & 1) == 0) {
+        if ((param_1->mAC.mx2_facing) == 0) {
             scale = -scale;
         }
         param_1->mA0.vx = param_1->m74_pTargetEntitySprite->m0_position.vx.getIntegerPart() + scale;
@@ -262,7 +262,7 @@ do
     }
     case 0xE3:
         assert(0);
-        param_1->m74_pTargetEntitySprite->mAC = (param_1->m74_pTargetEntitySprite->mAC & 0xFFFFFF) | ((int)0x3F << 24);
+        param_1->m74_pTargetEntitySprite->mAC.mx18 = 0x3F;
         setCurrentAnimationPtr(param_1->m74_pTargetEntitySprite, param_1->m64_spriteByteCode + READ_LE_S16(param_1->m64_spriteByteCode + 1));
         break;
     case 0xE8: // Battle sprite effect
@@ -272,8 +272,8 @@ do
     case 0xF8: // switch for battle
     {
         u8 attack = battleCurrentDamages[allocateJumpAnimationStructVar0 + -1].m18_damageType
-            [(param_1->m74_pTargetEntitySprite->mAC & 3) << 2 |
-            param_1->m74_pTargetEntitySprite->mA8.mx1E];
+            [(param_1->m74_pTargetEntitySprite->mAC.mx0_entityIdUpper2bit) << 2 |
+            param_1->m74_pTargetEntitySprite->mA8.mx1E_entityId_bottom2bit];
 
         bool bVar6;
         u8 attackType = READ_LE_U8(pEndOfOpcode + 2) & 0x7F;

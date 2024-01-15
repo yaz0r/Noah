@@ -422,7 +422,7 @@ s16 dialogWindowOpenAnimationNumFrames = 0;
 std::vector<u8>::iterator getDialogParamPointer(const std::vector<u8>::iterator& buffer, int param_2)
 {
     u32 numEntries = READ_LE_U32(buffer);
-    assert(param_2 < numEntries);
+    assert(param_2 <= numEntries);
 	return buffer + READ_LE_U16(buffer + param_2 * 2 + 4);
 }
 

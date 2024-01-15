@@ -309,7 +309,7 @@ void createDamageDisplay(sSpriteActorCore* param_1, int damageValue, int damageT
     (pNewDamageTask->m80_colorAndCode).m2_b = 0x80;
     (pNewDamageTask->m80_colorAndCode).m3_code = 0x2d;
     pNewDamageTask->m8C_damageStringLength = 0;
-    pNewDamageTask->m7C_direction = (param_1->mAC >> 2) & 1;
+    pNewDamageTask->m7C_direction = param_1->mAC.mx2_facing;
 
     sDamageString damageString;
     int displayOffset;

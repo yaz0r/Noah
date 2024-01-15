@@ -28,6 +28,9 @@ void sTag::execute() {
         case 0x30:
             ((POLY_G3*)this)->execute();
             break;
+        case 0x34:
+            ((POLY_GT3*)this)->execute();
+            break;
         case 0x38:
             ((POLY_G4*)this)->execute();
             break;

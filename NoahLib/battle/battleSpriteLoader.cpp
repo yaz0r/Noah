@@ -157,7 +157,7 @@ void battleSpriteUpdate(sTaskHeader* param_1) {
     if (battleSpritesDisabled == 0) {
         OP_INIT_ENTITY_SCRIPT_sub0Sub9(pSprite);
         savePointCallback8Sub0(pSprite);
-        if ((pSprite->mAC >> 6 & 1) != 0) {
+        if (pSprite->mAC.mx6) {
             OP_INIT_ENTITY_SCRIPT_sub0Sub9(pSprite);
             savePointCallback8Sub0(pSprite);
         }
@@ -241,8 +241,8 @@ void createBattleSpriteActor(uint entityIndex, int visualBufferIndex, short anim
     battleSpriteActorCores[entityIndex] = pSpriteCore;
     battleSpriteActors[entityIndex] = pSprite;
 
-    pSpriteCore->mA8.mx1E = entityIndex;
-    pSpriteCore->mAC = (pSpriteCore->mAC & ~3) | ((entityIndex >> 2) & 3);
+    pSpriteCore->mA8.mx1E_entityId_bottom2bit = entityIndex;
+    pSpriteCore->mAC.mx0_entityIdUpper2bit = entityIndex >> 2;
 
     setSpriteActorCoreXZ(pSpriteCore, battleVisualEntities[entityIndex].mA_X, battleVisualEntities[entityIndex].mC_Z);
 

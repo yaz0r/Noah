@@ -204,13 +204,13 @@ s32 worldmapMode0_task_partyMember_update(s32 param_1) {
             s32 uVar7 = (int)worldmapFollowLeaderDataIndex - pEntry->m58 & 0x1f;
             if (((pEntry->m28_position).vx == worldmapFollowLeaderData[uVar7].m0_position.vx && (pEntry->m28_position).vy == worldmapFollowLeaderData[uVar7].m0_position.vy) &&
                 (pEntry->m28_position).vz == worldmapFollowLeaderData[uVar7].m0_position.vz) {
-                if (((pEntry->m4C->m0_spriteActorCore).mAC >> 24) != '\x00') {
+                if (((pEntry->m4C->m0_spriteActorCore).mAC.mx18) != '\x00') {
                     spriteActorSetPlayingAnimation(pEntry->m4C, 0);
                     clearWorldmapParticles(param_1 + 0x2e);
                 }
             }
             else {
-                if (((pEntry->m4C->m0_spriteActorCore).mAC >> 24) != '\x01') {
+                if (((pEntry->m4C->m0_spriteActorCore).mAC.mx18) != '\x01') {
                     spriteActorSetPlayingAnimation(pEntry->m4C, 1);
                 }
                 std::array<short, 1> temp;

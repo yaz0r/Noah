@@ -280,7 +280,7 @@ s32 worldmapMode0_taskPlayerGear_update(int param_1) {
     case 0:
     case 1: // normal mode
         if (gameState.m22B1_isOnGear[0] != 1) {
-            if ((pEntry->m4C->m0_spriteActorCore.mAC >> 24) != '\x03') {
+            if ((pEntry->m4C->m0_spriteActorCore.mAC.mx18) != '\x03') {
                 spriteActorSetPlayingAnimation(pEntry->m4C, 3);
                 clearWorldmapParticles(0x2c);
             }
@@ -298,13 +298,13 @@ s32 worldmapMode0_taskPlayerGear_update(int param_1) {
             else {
             LAB_worldmap__8008ca04:
                 if (((pEntry->m38_step).vx == 0 && (pEntry->m38_step).vy == 0) && (pEntry->m38_step).vz == 0) {
-                    if (((pEntry->m4C->m0_spriteActorCore).mAC >> 24) != '\0') {
+                    if (pEntry->m4C->m0_spriteActorCore.mAC.mx18 != 0) {
                         spriteActorSetPlayingAnimation(pEntry->m4C, 0);
                         clearWorldmapParticles(0x2c);
                     }
                 }
                 else {
-                    if (((pEntry->m4C->m0_spriteActorCore).mAC >> 24) != '\x01') {
+                    if (pEntry->m4C->m0_spriteActorCore.mAC.mx18 != 1) {
                         spriteActorSetPlayingAnimation(pEntry->m4C, 1);
                     }
                     std::array<short, 1> temp;

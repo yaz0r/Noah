@@ -2343,7 +2343,7 @@ void battleAnimationCallback_2Sub0(sSpriteActorCore* param_1, sSpriteActorCore* 
         setSpriteActorAngle(param_1, sVar1);
         sVar1 = spriteActorCoreRatan2(param_1, param_2);
         OP_INIT_ENTITY_SCRIPT_sub0Sub7(param_1, sVar1);
-        if ((param_2->mAC >> 24) != '\x15') {
+        if ((param_2->mAC.mx18) != '\x15') {
             sVar1 = spriteActorCoreRatan2(param_2, param_1);
             setSpriteActorAngle(param_2, sVar1);
             sVar1 = spriteActorCoreRatan2(param_2, param_1);
@@ -2421,12 +2421,12 @@ void abilityPlayAnimation(int param_1, sSpriteActorCore* param_2)
     }
     else {
         abilityPlayAnimationVar0 = 0;
-        if (param_2->mAC >> 24 != '\0') {
+        if (param_2->mAC.mx18 != '\0') {
             OP_INIT_ENTITY_SCRIPT_sub0Sub8(param_2, abilityPlayAnimationSub0);
-            spriteActorSetPlayingAnimation(param_2, param_2->mAC >> 24);
+            spriteActorSetPlayingAnimation(param_2, param_2->mAC.mx18);
         }
         abilityPlayAnimationSub1(param_1);
-        if ((param_2->mAC >> 24) != '\0') {
+        if ((param_2->mAC.mx18) != '\0') {
             while (abilityPlayAnimationVar0 == 0) {
                 battleRender();
             }
@@ -2443,7 +2443,7 @@ void setRenderingInfoForItemUser(sSpriteActorCore* param_1) {
 }
 
 sSpriteActorCore* getSpriteCoreForAnimation(int param_1) {
-    if (jumpAnimationControlStruct->m4 && (jumpAnimationControlStruct->m24 != param_1) && (battleVisualEntities[(jumpAnimationControlStruct->m4->mAC & 3) << 2 | jumpAnimationControlStruct->m4->mA8.mx1E].m3 == 0)) {
+    if (jumpAnimationControlStruct->m4 && (jumpAnimationControlStruct->m24 != param_1) && (battleVisualEntities[(jumpAnimationControlStruct->m4->mAC.mx0_entityIdUpper2bit) << 2 | jumpAnimationControlStruct->m4->mA8.mx1E_entityId_bottom2bit].m3 == 0)) {
         spriteActorSetPlayingAnimation(jumpAnimationControlStruct->m4, jumpAnimationControlStruct->m4->mB0.mx0_animationId);
     }
     jumpAnimationControlStruct->m24 = param_1;
@@ -2490,25 +2490,25 @@ int processBattleAnimationSub0(void) {
     if (slot != 0) {
         for (int i = slot - 1; i > -1; i--) {
             sSpriteActorCore* pSlotEntry = local_50[i];
-            if ((jumpAnimationActiveActorBF >> ((pSlotEntry->mAC & 3) << 2 | (uint)pSlotEntry->mA8.mx1E) & 1U) == 0) {
+            if ((jumpAnimationActiveActorBF >> ((pSlotEntry->mAC.mx0_entityIdUpper2bit) << 2 | (uint)pSlotEntry->mA8.mx1E_entityId_bottom2bit) & 1U) == 0) {
 
                 // start playing death animation
 
                 pSlotEntry->m9E_wait = 0;
-                int entityId = (pSlotEntry->mAC & 3) << 2 | (uint)pSlotEntry->mA8.mx1E;
+                int entityId = (pSlotEntry->mAC.mx0_entityIdUpper2bit) << 2 | (uint)pSlotEntry->mA8.mx1E_entityId_bottom2bit;
                 if (battleVisualEntities[entityId].m4_isGear == 0) {
-                    if (((int)pSlotEntry->mAC>>24) != '\x15') {
+                    if (((int)pSlotEntry->mAC.mx18) != '\x15') {
                         spriteActorSetPlayingAnimation(pSlotEntry, 0x15); // death animation
                     }
                 }
                 else {
                     hasPlayedAnimationOnMecha = true;
                     battleMechas[entityId]->m38 = 1;
-                    entityId = (pSlotEntry->mAC & 3) << 2 | (uint)pSlotEntry->mA8.mx1E;
+                    entityId = (pSlotEntry->mAC.mx0_entityIdUpper2bit) << 2 | (uint)pSlotEntry->mA8.mx1E_entityId_bottom2bit;
                     performMechaPlayAnimation(entityId, entityId, 0x15);
                 }
                 count++;
-                processBattleAnimationSub0_var0 |= 1 << ((pSlotEntry->mAC & 3) << 2 | (uint)pSlotEntry->mA8.mx1E);
+                processBattleAnimationSub0_var0 |= 1 << ((pSlotEntry->mAC.mx0_entityIdUpper2bit) << 2 | (uint)pSlotEntry->mA8.mx1E_entityId_bottom2bit);
             }
             else {
                 local_50[i] = nullptr;
@@ -2575,8 +2575,8 @@ void loadEffectFragmentsAndAudioModel(sSpriteActorAnimationBundle& buffer, u32 o
 std::optional<std::vector<u8>::iterator> loadEffectFragmentsAndAudio(sSpriteActorAnimationBundle& buffer) {
     std::optional<std::vector<u8>::iterator> pWds;
     int numEntries = READ_LE_U32(buffer.m_rawData.begin());
-    for (int i = 0; i< numEntries - 3; i++) {
-        u32 offset = READ_LE_U32(buffer.m_rawData.begin() + 0x10 + 4 * i);
+    for (int i = 3; i< numEntries; i++) {
+        u32 offset = READ_LE_U32(buffer.m_rawData.begin() + 0x4 + 4 * i);
         std::vector<u8>::iterator entry = buffer.m_rawData.begin() + offset;
         u32 magic = READ_LE_U32(entry);
         if (magic == ' sdw') {
@@ -2663,8 +2663,7 @@ void processBattleAnimation(sSpriteActorCore* param_1) {
             if (param_1->mA8.mx1C != 0) {
                 return;
             }
-            if (battleVisualEntities[(param_1->mAC & 3) << 2 | param_1->mA8.mx1E].
-                m3 != 0) {
+            if (battleVisualEntities[(param_1->mAC.mx0_entityIdUpper2bit) << 2 | param_1->mA8.mx1E_entityId_bottom2bit].m3 != 0) {
                 return;
             }
             spriteActorSetPlayingAnimation(param_1, param_1->mB0.mx0_animationId);
@@ -2711,7 +2710,7 @@ void processBattleAnimation(sSpriteActorCore* param_1) {
         OP_INIT_ENTITY_SCRIPT_sub0Sub8(param_1, startJumpAnimationCallback);
         (param_1->m7C)->m8 =
             (uint)battleCurrentDamages[allocateJumpAnimationStructVar0].m18_damageType
-            [(param_1->m74_pTargetEntitySprite->mAC & 3) << 2 | param_1->m74_pTargetEntitySprite->mA8.mx1E];
+            [(param_1->m74_pTargetEntitySprite->mAC.mx0_entityIdUpper2bit) << 2 | param_1->m74_pTargetEntitySprite->mA8.mx1E_entityId_bottom2bit];
         if (!isVramPreBacked((param_1->m24_vramData)->m0_spriteData)) {
             if (battleAnimationToPlay < 0x10) {
                 if ((fxFragmentLoaded == '\0') && (battleAnimationLoadingDest != nullptr)) {
@@ -2719,7 +2718,7 @@ void processBattleAnimation(sSpriteActorCore* param_1) {
                     (param_1)->m50 = loadFragmentIsNotLoadedYet();
                     setupSpecialAnimation(param_1, battleAnimationLoadingDest);
                 }
-                int expectActorId = (((param_1)->mAC & 3) << 2 | (uint)(param_1)->mA8.mx1E);
+                int expectActorId = (((param_1)->mAC.mx0_entityIdUpper2bit) << 2 | (uint)(param_1)->mA8.mx1E_entityId_bottom2bit);
                 if (jumpAnimationControlStruct->m20_actor == expectActorId) {
                     spriteActorSetPlayingAnimation(param_1, ~battleAnimationToPlay);
                 }
@@ -2729,12 +2728,12 @@ void processBattleAnimation(sSpriteActorCore* param_1) {
             }
             else {
                 // play ability animation
-                int iVar6 = (battleAnimationToPlay - 0x10) + abilityAnimationTable0[(uint)battleVisualEntities[(param_1->mAC & 3) << 2 | param_1->mA8.mx1E].m2 * 2];
+                int iVar6 = (battleAnimationToPlay - 0x10) + abilityAnimationTable0[(uint)battleVisualEntities[(param_1->mAC.mx0_entityIdUpper2bit) << 2 | param_1->mA8.mx1E_entityId_bottom2bit].m2 * 2];
                 int uVar3 = 0x1C;
-                if (abilityAnimationTable1[battleVisualEntities[(param_1->mAC & 3) << 2 | param_1->mA8.mx1E].m2 * 2] <= iVar6) {
+                if (abilityAnimationTable1[battleVisualEntities[(param_1->mAC.mx0_entityIdUpper2bit) << 2 | param_1->mA8.mx1E_entityId_bottom2bit].m2 * 2] <= iVar6) {
                     uVar3 = 0x11;
                 }
-                param_1->mAC = (param_1->mAC & 0xFFFFFF) | (uVar3 << 24);
+                param_1->mAC.mx18 = uVar3;
                 abilityPlayAnimation(iVar6, param_1);
                 setNeedFxFragments(param_1);
             }
@@ -2743,9 +2742,9 @@ void processBattleAnimation(sSpriteActorCore* param_1) {
             spriteActorSetPlayingAnimation(param_1, battleCurrentDamages[allocateJumpAnimationStructVar0].m47_battleAnimationToPlay);
             sSpriteActorCore* psVar10 = param_1->m74_pTargetEntitySprite;
             computeBattleCameraParams
-            (1 << ((param_1->mAC & 3) << 2 |
-                (uint)param_1->mA8.mx1E) |
-                1 << ((psVar10->mAC & 3) << 2 | (uint)psVar10->mA8.mx1E));
+            (1 << ((param_1->mAC.mx0_entityIdUpper2bit) << 2 |
+                (uint)param_1->mA8.mx1E_entityId_bottom2bit) |
+                1 << ((psVar10->mAC.mx0_entityIdUpper2bit) << 2 | (uint)psVar10->mA8.mx1E_entityId_bottom2bit));
         }
         jumpAnimationControlStruct->m48 = 0;
         break;
@@ -2774,7 +2773,7 @@ void battleAnimationCallback_5(int param_1) {
     sSpriteActorCore* psVar2;
 
     psVar2 = battleSpriteActorCores[param_1];
-    if ((psVar2->mAC >> 24) != '\x15') {
+    if ((psVar2->mAC.mx18) != '\x15') {
         sVar1 = (ushort)(battleVisualEntities[param_1].m6_direction != 0) << 0xb;
         setSpriteActorAngle(psVar2, sVar1);
         OP_INIT_ENTITY_SCRIPT_sub0Sub7(psVar2, sVar1);
@@ -2979,7 +2978,7 @@ void allocateJumpAnimationStructCallback(sJumpAnimationControlStruct* param_1) {
     if (needFxFragments != 0) {
         needFxFragments = nullptr;
         if (!initFxFragments()) {
-            if (((param_1->m4->mAC & 3) << 2 | (param_1->m4->mA8.mx1E)) < 3) {
+            if (((param_1->m4->mAC.mx0_entityIdUpper2bit) << 2 | (param_1->m4->mA8.mx1E_entityId_bottom2bit)) < 3) {
                 int uVar5;
                 if (allocateJumpAnimationStructCallbackSpecial0 == '\0') {
                     uVar5 = 0x12;
@@ -3013,18 +3012,18 @@ void allocateJumpAnimationStructCallback(sJumpAnimationControlStruct* param_1) {
             break;
         case 4:
         {
-            int index = (pSpriteCoreListHead[0]->mAC & 3) << 2 | (uint)pSpriteCoreListHead[0]->mA8.mx1E;
+            int index = (pSpriteCoreListHead[0]->mAC.mx0_entityIdUpper2bit) << 2 | (uint)pSpriteCoreListHead[0]->mA8.mx1E_entityId_bottom2bit;
             if ((index < 3) && (battleVisualEntities[index].m4_isGear == 0) && (battleCurrentDamages[allocateJumpAnimationStructVar0 + -1].m18_damageType[index] == 7)) {
                 setRenderingInfoForItemUser(pSpriteCoreListHead[0]);
                 spriteActorSetPlayingAnimation(pSpriteCoreListHead[0], 0x1B);
-                while (pSpriteCoreListHead[0]->mAC >> 24 == 0x1B) {
+                while (pSpriteCoreListHead[0]->mAC.mx18 == 0x1B) {
                     battleRender();
                 }
             }
             break;
         }
         case 5: // end of attack
-            if (battleVisualEntities[(param_1->m4->mAC & 3) << 2 | (uint)param_1->m4->mA8.mx1E].m3 == 0) {
+            if (battleVisualEntities[(param_1->m4->mAC.mx0_entityIdUpper2bit) << 2 | (uint)param_1->m4->mA8.mx1E_entityId_bottom2bit].m3 == 0) {
                 spriteActorSetPlayingAnimation(param_1->m4, param_1->m4->mB0.mx0_animationId);
             }
             battleAnimationCallback_5(jumpAnimationControlStruct->m24);
@@ -3127,9 +3126,9 @@ void setupBattleAnimationSpriteCore(sSpriteActorCore* param_1) {
     param_1->m74_pTargetEntitySprite = pSpriteCoreListHead[0];
     pSpriteCoreListHead[0]->m74_pTargetEntitySprite = param_1;
     jumpAnimationControlStruct->m4C = pSpriteCoreListHead[0];
-    jumpAnimationControlStruct->m28 = (pSpriteCoreListHead[0]->mAC & 3) << 2 | pSpriteCoreListHead[0]->mA8.mx1E;
+    jumpAnimationControlStruct->m28 = (pSpriteCoreListHead[0]->mAC.mx0_entityIdUpper2bit) << 2 | pSpriteCoreListHead[0]->mA8.mx1E_entityId_bottom2bit;
     setSpriteActorAngle(param_1, spriteActorCoreRatan2(param_1, param_1->m74_pTargetEntitySprite));
-    if ((pSpriteCoreListHead[0]->mAC >> 24) != 0x15) {
+    if ((pSpriteCoreListHead[0]->mAC.mx18) != 0x15) {
         setSpriteActorAngle(pSpriteCoreListHead[0], spriteActorCoreRatan2(param_1->m74_pTargetEntitySprite, param_1));
     }
 }
@@ -3139,7 +3138,7 @@ void startReadingBattleJumpAnimation(sSpriteActorCore* param_1) {
     setCurrentDirectory(0x2c, 1);
     battleAnimationLoadingDest = new sSpriteActorAnimationBundle;
     readFile(param_1->m7C->m0, *battleAnimationLoadingDest, 0, 0x80);
-    startReadingBattleJumpAnimationVar0 = (param_1->mAC & 3) << 2 | param_1->mA8.mx1E;
+    startReadingBattleJumpAnimationVar0 = (param_1->mAC.mx0_entityIdUpper2bit) << 2 | param_1->mA8.mx1E_entityId_bottom2bit;
 }
 void jumpUpdatePosition(sSpriteActorCore* param_1);
 
@@ -3244,7 +3243,7 @@ void startJumpAnimation(int isBilly, uint actor, uint jumpTarget, uint facing) {
         if (isPrebacked == 0) {
             startJumpAnimationVar3 = 0;
             if ((battleAnimationLoadingDest == 0) ||
-                (((jumpAnimationControlStruct->m4->mAC & 3) << 2 | jumpAnimationControlStruct->m4->mA8.mx1E ) != startReadingBattleJumpAnimationVar0)) {
+                (((jumpAnimationControlStruct->m4->mAC.mx0_entityIdUpper2bit) << 2 | jumpAnimationControlStruct->m4->mA8.mx1E_entityId_bottom2bit ) != startReadingBattleJumpAnimationVar0)) {
                 startReadingBattleJumpAnimation(jumpAnimationControlStruct->m4);
             }
         }
@@ -4113,7 +4112,7 @@ void cancelJumpAnim(void)
         getSpriteCoreForAnimation(jumpAnimationControlStruct->m20_actor);
         psVar2 = jumpAnimationControlStruct;
         psVar4 = jumpAnimationControlStruct->m4;
-        uVar3 = (psVar4->mAC & 3) << 2 | psVar4->mA8.mx1E;
+        uVar3 = (psVar4->mAC.mx0_entityIdUpper2bit) << 2 | psVar4->mA8.mx1E_entityId_bottom2bit;
         if (battleVisualEntities[uVar3].m4_isGear == 0) {
             (psVar4->m0_position).vx = (uint)(ushort)battleVisualEntities[jumpAnimationControlStruct->m24].mA_X << 0x10;
             (psVar4->m0_position).vz = (uint)(ushort)battleVisualEntities[jumpAnimationControlStruct->m24].mC_Z << 0x10;
