@@ -308,6 +308,10 @@ do
         }
         break;
     }
+    case 0xfb:
+        battleSpriteOpcode_FB(param_1, param_1->m64_spriteByteCode.value()[3] << 1, param_1->m64_spriteByteCode.value() + READ_LE_S16(pEndOfOpcode));
+        param_1->m64_spriteByteCode.value() += sizePerBytecodeTable[bytecode];
+        break;
 #endif
 
     default:

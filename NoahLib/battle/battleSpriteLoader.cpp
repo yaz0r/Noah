@@ -26,18 +26,6 @@ void defaultBattleSpriteDeleteCallback(sTaskHeader* param_1) {
     delete param_1;
 }
 
-template <typename T>
-T* battleLoaderAllocateMainBattleSprite(sSavePointMesh1* param_1, int param_2)
-{
-    T* psVar1;
-
-    psVar1 = new T;
-    allocateSavePointMeshDataSub0(param_1, psVar1);
-    psVar1->mC_deleteCallback = defaultBattleSpriteDeleteCallback;
-    psVar1->m4 = nullptr;
-    return psVar1;
-}
-
 std::vector<u8> battleSpriteLoadTempBuffer;
 
 struct sBattleUploadSprite {

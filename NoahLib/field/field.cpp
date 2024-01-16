@@ -3059,10 +3059,10 @@ void resetRGBFaderToBlack(int index)
     TILE* p = &screenEffects[index].m18_tile[0];
     SetTile(p);
     SetSemiTrans(p, 1);
-    screenEffects[index].m18_tile[0].w = 0x140;
-    screenEffects[index].m18_tile[0].h = 0xe0;
-    screenEffects[index].m18_tile[0].x0 = 0;
-    screenEffects[index].m18_tile[0].y0 = 0;
+    screenEffects[index].m18_tile[0].wh.vx = 0x140;
+    screenEffects[index].m18_tile[0].wh.vy = 0xe0;
+    screenEffects[index].m18_tile[0].x0y0.vx = 0;
+    screenEffects[index].m18_tile[0].x0y0.vy = 0;
     screenEffects[index].m18_tile[1] = screenEffects[index].m18_tile[0];
 
     screenEffects[index].m52_isActive = 0;
@@ -7621,7 +7621,7 @@ void renderObjects()
     }
 }
 
-std::array<sVec2_s16, 16> tpageLocationTable = { {
+const std::array<sVec2_s16, 8> tpageLocationTable = { {
     {0x300, 0x0},
     {0x340, 0x0},
     {0x380, 0x0},
@@ -7631,18 +7631,9 @@ std::array<sVec2_s16, 16> tpageLocationTable = { {
     {0x340, 0x100},
     {0x380, 0x100},
     {0x3C0, 0x100},
-
-    // Those are dynamicaly setup
-    {0x0, 0x0},
-    {0x0, 0x0},
-    {0x0, 0x0},
-    {0x0, 0x0},
-
-    {0x0, 0x0},
-    {0x0, 0x0},
-    {0x0, 0x0},
-    {0x0, 0x0},
 } };
+
+std::array<SFP_VEC4, 4> shadowProjectionWorkArea;
 
 void uploadCharacterSpriteSub1(sSpriteActorCore* param_1, int param_2, sFieldEntitySub4_110* param_3)
 {
@@ -7760,7 +7751,8 @@ void uploadCharacterSpriteSub1(sSpriteActorCore* param_1, int param_2, sFieldEnt
             else {
                 pbVar19 = pbVar19 + 1;
                 uVar17 = (READ_LE_U8(pbVar19) << 8) | bVar4;
-                psVar13->mA_tpage = GetTPage(uVar17 & 1, (int)(short)uVar15, (int)tpageLocationTable[uVar17 & 0xe].vx, (int)tpageLocationTable[uVar17 & 0xe].vy);
+                int tpageLocationIndex = (uVar17 >> 1) & 7;
+                psVar13->mA_tpage = GetTPage(uVar17 & 1, (int)(short)uVar15, (int)tpageLocationTable[tpageLocationIndex].vx, (int)tpageLocationTable[tpageLocationIndex].vy);
                 psVar13->mC_clut = GetClut((int)uVar17 >> 1 & 0xf0, ((int)uVar17 >> 9 & 0xfU) + 0x1cc);
                                 
             }
@@ -8240,9 +8232,118 @@ void submitSpriteActorToRendering(sSpriteActorCore* pSpriteSheet, sTag* pTag)
     }
 }
 
-void renderFieldCharacterSpritesSub0Sub2(sSpriteActorCore* pSpriteSheet, sTag* pTag)
+void renderSpriteSquishedShadow(sSpriteActorCore* pSpriteSheet, sTag* pTag)
 {
-    MissingCode();
+    MATRIX tempMatrix = currentRenderingMatrix;
+    SVECTOR tempSVector1;
+    tempSVector1.vx = pSpriteSheet->m0_position.vx.getIntegerPart();
+    tempSVector1.vy = pSpriteSheet->m0_position.vy.getIntegerPart();
+    tempSVector1.vz = pSpriteSheet->m0_position.vz.getIntegerPart();
+    VECTOR tempVector2;
+    tempVector2.vx = pSpriteSheet->m2C_scale;
+    tempVector2.vz = 0;
+    s32 scale = pSpriteSheet->m2C_scale << 0x10;
+    tempVector2.vy = (scale >> 0x10) - (scale >> 0x1f) >> 1;
+    ScaleMatrixL(&tempMatrix, &tempVector2);
+    tempSVector1.vy = pSpriteSheet->m84_maxY;
+    VECTOR tempVector3;
+    ApplyMatrix(&currentRenderingMatrix, &tempSVector1, &tempVector3);
+    tempMatrix.t[0] = tempMatrix.t[0] + tempVector3.vx;
+    tempMatrix.t[1] = tempMatrix.t[1] + tempVector3.vy;
+    tempMatrix.t[2] = tempMatrix.t[2] + tempVector3.vz;
+    SetRotMatrix(&tempMatrix);
+    SetTransMatrix(&tempMatrix);
+
+    auto uVar5 = (pSpriteSheet->m40 & 0xFF) >> 2;
+    auto* sprite = pSpriteSheet->m20->getAsSprite();
+    auto psVar4 = sprite->m30->begin();
+    s32 uVar11 = -1;
+    s32 uVar10;
+    s32 unaff_s6;
+    if ((shapeTransfertTableCurrentEntry + uVar5 * sizeof(POLY_FT4) < shapeTransfertTableEnd) &&
+        (uVar10 = 0, uVar5 != 0)) {
+        do {
+            POLY_FT4* pbVar2 = (POLY_FT4*)shapeTransfertTableCurrentEntry;
+            auto uVar9 = psVar4->m14.raw;
+            uVar5 = uVar9 & 7;
+            if (uVar11 != uVar5) {
+                unaff_s6 = (ushort)(spriteMatrixTable[uVar5] &
+                    (ushort) ((int)&(*pSpriteSheet).m3C>>8)) == 0;
+                uVar11 = uVar5;
+            }
+            if (unaff_s6 != '\0') {
+                uVar5 = (*pSpriteSheet).m40 >> 8 & 0x1f;
+                auto sVar7 = (short)(((int)(((uint)psVar4->m6_width + (int)(char)psVar4->m8) * 0x10000) >> 0x10) << uVar5);
+                auto sVar8 = (short)(((int)(((uint)psVar4->m7_height + (int)(char)psVar4->m9) * 0x10000) >> 0x10) << uVar5);
+                auto sVar6 = (short)((int)psVar4->m0 << uVar5);
+                shadowProjectionWorkArea[3].vz = (short)((int)psVar4->m2 << uVar5);
+                uVar5 = (*pSpriteSheet).m3C;
+                if ((uVar5 >> 3 & 1) != 0) {
+                    sVar7 = -sVar7;
+                    sVar6 = -sVar6;
+                }
+                if ((uVar5 >> 4 & 1) != (uVar9 >> 5 & 1)) {
+                    sVar8 = -sVar8;
+                    shadowProjectionWorkArea[3].vz = -shadowProjectionWorkArea[3].vz;
+                }
+                shadowProjectionWorkArea[3].vx = sVar6 + sVar7;
+                shadowProjectionWorkArea[2].vx = sVar6;
+                if ((uVar9 >> 4 & 1) == 0) {
+                    shadowProjectionWorkArea[2].vx = shadowProjectionWorkArea[3].vx;
+                    shadowProjectionWorkArea[3].vx = sVar6;
+                }
+                shadowProjectionWorkArea[1].vz = shadowProjectionWorkArea[3].vz + sVar8;
+                if (psVar4->m14.m0x10_tileFlipX) {
+                    shadowProjectionWorkArea[1].vz = shadowProjectionWorkArea[3].vz;
+                    shadowProjectionWorkArea[3].vz = shadowProjectionWorkArea[3].vz + sVar8;
+                }
+                shadowProjectionWorkArea[0].vx = shadowProjectionWorkArea[3].vx;
+                shadowProjectionWorkArea[0].vz = shadowProjectionWorkArea[1].vz;
+                shadowProjectionWorkArea[1].vx = shadowProjectionWorkArea[2].vx;
+                shadowProjectionWorkArea[2].vz = shadowProjectionWorkArea[3].vz;
+                shapeTransfertTableCurrentEntry = shapeTransfertTableCurrentEntry + sizeof(POLY_FT4);
+                pbVar2->m3_size = 9;
+                pbVar2->code = 0x2C;
+                pbVar2->r0 = 0;
+                pbVar2->g0 = 0;
+                pbVar2->b0 = 0;
+                long lStack_30;
+                long lStack_2c;
+
+                RotAverage4(&shadowProjectionWorkArea[0], &shadowProjectionWorkArea[1], &shadowProjectionWorkArea[2], &shadowProjectionWorkArea[3],
+                    &pbVar2->x0y0, &pbVar2->x1y1, &pbVar2->x2y2, &pbVar2->x3y3, &lStack_30, &lStack_2c);
+
+                scale = ((uint)pbVar2->x0y0.vy + (uint)pbVar2->x1y1.vy) * 0x10000;
+                auto uVar3 = (s16)((scale >> 0x10) - (scale >> 0x1f) >> 1);
+
+                pbVar2->x1y1.vy = uVar3;
+                pbVar2->x0y0.vy = uVar3;
+
+                scale = ((uint)pbVar2->x2y2.vy + (uint)pbVar2->x3y3.vy) * 0x10000;
+                uVar3 = (s16)((scale >> 0x10) - (scale >> 0x1f) >> 1);
+
+                pbVar2->x3y3.vy = uVar3;
+                pbVar2->x2y2.vy = uVar3;
+
+                pbVar2->tpage = psVar4->mA_tpage;
+                pbVar2->clut = psVar4->mC_clut;
+
+                pbVar2->u0 = psVar4->m4_texcoordX;
+                pbVar2->v0 = psVar4->m5_texcoordY;
+                pbVar2->u1 = psVar4->m6_width + psVar4->m4_texcoordX + -1;
+                pbVar2->v1 = psVar4->m5_texcoordY;
+                pbVar2->u2 = psVar4->m4_texcoordX;
+                pbVar2->v2 = psVar4->m7_height + psVar4->m5_texcoordY + -1;
+                pbVar2->u0 = psVar4->m6_width + psVar4->m4_texcoordX + -1;
+                pbVar2->v0 = psVar4->m7_height + psVar4->m5_texcoordY + -1;
+
+                pbVar2->m0_pNext = pTag->m0_pNext;
+                pTag->m0_pNext = pbVar2;
+            }
+            uVar10 = uVar10 + 1;
+            psVar4 = psVar4 + 1;
+        } while (uVar10 != (pSpriteSheet->m40 & 0xFF) >> 2);
+    }
 }
 
 void renderSpriteActor(sSpriteActorCore* pSpriteSheet, sTag* pTag)
@@ -8250,7 +8351,7 @@ void renderSpriteActor(sSpriteActorCore* pSpriteSheet, sTag* pTag)
     setupSpriteActorTransform(pSpriteSheet);
     submitSpriteActorToRendering(pSpriteSheet, pTag);
     if ((pSpriteSheet->m3C >> 2 & 1) != 0) {
-        renderFieldCharacterSpritesSub0Sub2(pSpriteSheet, pTag);
+        renderSpriteSquishedShadow(pSpriteSheet, pTag);
     }
 }
 

@@ -45,6 +45,9 @@ void sTag::execute() {
         case 0x48:
             ((LINE_F3*)this)->execute();
             break;
+        case 0x42:
+            MissingCode();
+            break;
         default:
             assert(0);
             break;

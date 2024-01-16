@@ -118,8 +118,8 @@ void initWorldmapMinimap()
         for (int j = 0; j < 32; j++) {
             SetTile(&worldmapMinimapPOIsPolys[i][j]);
 
-            worldmapMinimapPOIsPolys[i][j].h = 2;
-            worldmapMinimapPOIsPolys[i][j].w = 2;
+            worldmapMinimapPOIsPolys[i][j].wh.vx = 2;
+            worldmapMinimapPOIsPolys[i][j].wh.vy= 2;
 
             worldmapMinimapPOIsPolys[i][j].r0 = 0x80;
             worldmapMinimapPOIsPolys[i][j].g0 = 0x80;
@@ -166,20 +166,20 @@ void worldmapRenderMinimap() {
             switch (i)
             {
             case 0x18:
-                p.x0 = (((gameState.m182C.vx * 0x1A01A01A1) >> 0x21) >> 8) + 0xCF;
-                p.y0 = (((gameState.m182C.vz * 0x180601807) >> 0x21) >> 8) + 0x77;
+                p.x0y0.vx = (((gameState.m182C.vx * 0x1A01A01A1) >> 0x21) >> 8) + 0xCF;
+                p.x0y0.vy = (((gameState.m182C.vz * 0x180601807) >> 0x21) >> 8) + 0x77;
                 break;
             case 0x19:
-                p.x0 = (((gameState.m184E.vx * 0x1A01A01A1) >> 0x21) >> 8) + 0xCF;
-                p.y0 = (((gameState.m184E.vz * 0x180601807) >> 0x21) >> 8) + 0x77;
+                p.x0y0.vx = (((gameState.m184E.vx * 0x1A01A01A1) >> 0x21) >> 8) + 0xCF;
+                p.x0y0.vy = (((gameState.m184E.vz * 0x180601807) >> 0x21) >> 8) + 0x77;
                 break;
             case 0x1A:
-                p.x0 = (((gameState.m1844[0] * 0x1A01A01A1) >> 0x21) >> 8) + 0xCF;
-                p.y0 = (((gameState.m1844[1] * 0x180601807) >> 0x21) >> 8) + 0x77;
+                p.x0y0.vx = (((gameState.m1844[0] * 0x1A01A01A1) >> 0x21) >> 8) + 0xCF;
+                p.x0y0.vy = (((gameState.m1844[1] * 0x180601807) >> 0x21) >> 8) + 0x77;
                 break;
             default:
-                p.x0 = worldmapMinimapPOIsCoordinates[i][0] + 0xD0;
-                p.y0 = worldmapMinimapPOIsCoordinates[i][1] + 0x78;
+                p.x0y0.vx = worldmapMinimapPOIsCoordinates[i][0] + 0xD0;
+                p.x0y0.vy = worldmapMinimapPOIsCoordinates[i][1] + 0x78;
                 break;
             }
 

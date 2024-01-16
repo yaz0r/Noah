@@ -336,10 +336,10 @@ void setupWindowSize2(sDialogWindow18* param_1, int x1, int y1, short x2, short 
 	param_1->m48_textTile[0].g0 = 0;
 	param_1->m48_textTile[0].b0 = 0;
 	param_1->m48_textTile[0].code = 0x60;
-	param_1->m48_textTile[0].x0 = param_1->m4.vx - 7;
-	param_1->m48_textTile[0].y0 = param_1->m4.vy - 5;
-	param_1->m48_textTile[0].w = param_1->mA_width1 * 0xD;
-	param_1->m48_textTile[0].h = param_1->mC_height * (param_1->m14).vx + 10;
+	param_1->m48_textTile[0].x0y0.vx = param_1->m4.vx - 7;
+	param_1->m48_textTile[0].x0y0.vy = param_1->m4.vy - 5;
+	param_1->m48_textTile[0].wh.vx = param_1->mA_width1 * 0xD;
+	param_1->m48_textTile[0].wh.vy = param_1->mC_height * (param_1->m14).vx + 10;
 	SetSemiTrans(&param_1->m48_textTile[0], 1);
 	param_1->m48_textTile[1] = param_1->m48_textTile[0];
 
@@ -838,10 +838,10 @@ void dialogWindowSetupForRendering(sTag* OT, int oddOrEven, int windowIndex)
             OT->m0_pNext = &gDialogWindows[windowIndex].m384[oddOrEven];
 		}
 
-		gDialogWindows[windowIndex].mDC_backgroundTile[oddOrEven].x0 = (short)windowX;
-		gDialogWindows[windowIndex].mDC_backgroundTile[oddOrEven].y0 = (short)windowY + 1;
-		gDialogWindows[windowIndex].mDC_backgroundTile[oddOrEven].w = (short)windowWidth;
-		gDialogWindows[windowIndex].mDC_backgroundTile[oddOrEven].h = (short)windowHeight + -2;
+		gDialogWindows[windowIndex].mDC_backgroundTile[oddOrEven].x0y0.vx = (short)windowX;
+		gDialogWindows[windowIndex].mDC_backgroundTile[oddOrEven].x0y0.vy = (short)windowY + 1;
+		gDialogWindows[windowIndex].mDC_backgroundTile[oddOrEven].wh.vx = (short)windowWidth;
+		gDialogWindows[windowIndex].mDC_backgroundTile[oddOrEven].wh.vy = (short)windowHeight + -2;
 
 		if ((gDialogWindows[windowIndex].m40C_flags & 0x40U) == 0) {
 			gDialogWindows[windowIndex].mDC_backgroundTile[oddOrEven].m0_pNext = OT->m0_pNext;

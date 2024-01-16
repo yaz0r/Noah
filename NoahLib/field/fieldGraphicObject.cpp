@@ -640,13 +640,13 @@ sSavePointMeshAbstract* createSavePointMeshData(int mode1, int mode2, sFieldEnti
             break;
         }
     case 2: // this is used by field 3d objects like save points
-        {
-            // todo: this is a different struct without the last F4 array
-            sSavePointMesh2* pNewSavePoint2 = new sSavePointMesh2;
-            pNewSavePoint = allocateSavePointMeshData(pNewSavePoint2, param_5);
-            createSavePointMeshDataMode2(pNewSavePoint2);
-        }
-        break;
+    {
+        // todo: this is a different struct without the last F4 array
+        sSavePointMesh2* pNewSavePoint2 = new sSavePointMesh2;
+        pNewSavePoint = allocateSavePointMeshData(pNewSavePoint2, param_5);
+        createSavePointMeshDataMode2(pNewSavePoint2);
+    }
+    break;
     default:
         assert(0);
     }
@@ -724,6 +724,7 @@ void spriteBytecode2ExtendedE0_Sub0(sSavePointMeshAbstract* param_1)
     {
     case 0:
     case 2:
+    case 4:
     case 5:
         break;
     case 9:
@@ -732,7 +733,11 @@ void spriteBytecode2ExtendedE0_Sub0(sSavePointMeshAbstract* param_1)
         param_1->m38_spriteActorCore.m34_currentSpriteFrame = 1;
         break;
     case 10:
-        MissingCode(); // Calls into fx overlay?
+        param_1->m38_spriteActorCore.m34_currentSpriteFrame = 0;
+        spriteBytecode2ExtendedE0_Sub0_10_battle(param_1);
+        param_1->m38_spriteActorCore.m0_position.vx = previousCameraEye2.vx;
+        param_1->m38_spriteActorCore.m0_position.vy = previousCameraEye2.vy;
+        param_1->m38_spriteActorCore.m0_position.vz = previousCameraEye2.vz;
         break;
     default:
         assert(0);
@@ -1202,6 +1207,12 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, std
                 local_70.vz = param_1->m0_position.vz.getIntegerPart();
                 applyToMatrix = 0;
                 break;
+            case 0x22:
+                assert(isBattleOverlayLoaded);
+                local_70.vx = processBattleAnimationSub0_var1->m0_position.vx.getIntegerPart();
+                local_70.vy = processBattleAnimationSub0_var1->m0_position.vy.getIntegerPart() - processBattleAnimationSub0_var1->m38;
+                local_70.vz = processBattleAnimationSub0_var1->m0_position.vz.getIntegerPart();
+                break;
             case 0x24:
                 // TODO: type-check that
                 param_1->m6C_pointerToOwnerStructure->m14 |= 0x40000000;
@@ -1240,7 +1251,7 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, std
             break;
         }
     case 0xBD:
-        spriteBytecode2ExtendedE0(param_1, createSavePointMeshData_mode5.m10_startOfAnimationContainer->at(READ_LE_U8(param_3)).begin(), param_1->m24_vramData);
+        spriteBytecode2ExtendedE0(param_1, createSavePointMeshData_mode5.m10_startOfAnimationContainer->at(READ_LE_U8(param_3)), param_1->m24_vramData);
         break;
 	case 0xA0: // set the move speed for the character
 		{
@@ -2031,7 +2042,7 @@ void spriteActorSetPlayingAnimation(sSpriteActorCore* param_1, int animationId)
         }
 
 		param_1->m40 = param_1->m40 | 0x100000;
-		param_1->m58_startOfCurrentAnimation = param_1->m24_vramData->m10_startOfAnimationContainer->at(animationId).begin();
+		param_1->m58_startOfCurrentAnimation = param_1->m24_vramData->m10_startOfAnimationContainer->at(animationId);
 		setCurrentAnimationPtr(param_1, param_1->m58_startOfCurrentAnimation);
 		setSpriteActorAngle(param_1, param_1->m80);
 	}
@@ -2084,7 +2095,7 @@ sSpriteActor* initializeSpriteActor(sSpriteActor* param_1, sSpriteActorAnimation
 
 	setAnimationBundle(param_1, pSetup);
 
-    sPS1Pointer pAnim = param_1->m24_vramData->m10_startOfAnimationContainer->at(0).begin();
+    sPS1Pointer pAnim = param_1->m24_vramData->m10_startOfAnimationContainer->at(0);
     param_1->m60_endOfAnimationContainer = pAnim + ((READ_LE_U16(pAnim) & 0x3F) + 1) * 2;
 	spriteActorSetPlayingAnimation(param_1, 0);
 
@@ -2093,7 +2104,7 @@ sSpriteActor* initializeSpriteActor(sSpriteActor* param_1, sSpriteActorAnimation
 
 void OP_INIT_ENTITY_SCRIPT_sub0Sub4(sSpriteActor* param_1, int param_2, int* param_3, int* param_4, int* param_5)
 {
-    auto startOfAnimation = param_1->m24_vramData->m10_startOfAnimationContainer->at(0).begin();
+    auto startOfAnimation = param_1->m24_vramData->m10_startOfAnimationContainer->at(0);
     u16 offset2 = READ_LE_U16(startOfAnimation + 4);
     byte bVar1 = READ_LE_U8(startOfAnimation + offset2 + 4);
     uint uVar5 = (uint)bVar1;

@@ -99,7 +99,7 @@ struct sFieldEntitySub4_110
 	sVec2_s16 m4_vramLocation;
 	sVec2_s16 m8_clut;
 	std::span<u8>* mC;
-	std::vector<std::span<u8>>* m10_startOfAnimationContainer;
+	std::vector<std::span<u8>::iterator>* m10_startOfAnimationContainer;
 	// size 0x14 (guessed, but seems to make sense)
 };
 
@@ -146,6 +146,7 @@ struct sSpriteActorCore {
     void(*m68)(sSpriteActorCore*);
     union {
         struct sTaskHeader* m6C_pointerToOwnerStructure;
+        struct sTaskHeaderPair* m6C_pointerToOwnerStructurePair;
         struct sSpriteActor* m6C_pointerToOwnerStructureSpriteActor;
     };
     sSpriteActorCore* m70;
@@ -289,7 +290,6 @@ void resetSpriteCallbacks(void);
 
 void setTaskUpdateFunction(sTaskHeader* param_1, void (*param_2)(sTaskHeader*));
 void setTaskDeleteFunction(sTaskHeader* param_1, void (*param_2)(sTaskHeader*));
-void allocateSavePointMeshDataSub0(sTaskHeader* param_1, sTaskHeader* param_2);
 int isVramPreBacked(const sFieldEntitySub4_110_0* param_1);
 void addToSpriteTransferList(sSpriteActorCore* param_1, short param_2);
 void executeSpriteBytecode2Sub1(sSpriteActorCore* param_1);
@@ -335,6 +335,7 @@ void initFieldEntitySub4Sub5Sub0(sFieldEntitySub4_110* param_1, sSpriteActorAnim
 
 extern sFieldEntitySub4_110 createSavePointMeshData_mode5;
 int addAndClamp(int param_1, int param_2);
+int modulateSpeed(sSpriteActorCore* param_1, int param_2);
 
 extern int initFieldVar5;
 extern int initFieldVar4;

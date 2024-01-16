@@ -58,3 +58,16 @@ struct sBattleSpriteConfigs : public sLoadableDataRaw {
 extern sBattleSpriteConfigs battleConfigFile3;
 
 void createBattleSpriteLoadingTask(sBattleSpriteConfigs* param_1);
+void defaultBattleSpriteDeleteCallback(struct sTaskHeader* param_1);
+
+template <typename T>
+T* battleLoaderAllocateMainBattleSprite(sTaskHeader* param_1, int param_2)
+{
+    T* psVar1;
+
+    psVar1 = new T;
+    allocateSavePointMeshDataSub0(param_1, psVar1);
+    psVar1->mC_deleteCallback = defaultBattleSpriteDeleteCallback;
+    psVar1->m4 = nullptr;
+    return psVar1;
+}

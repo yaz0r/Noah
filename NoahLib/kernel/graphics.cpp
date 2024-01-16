@@ -651,20 +651,20 @@ void TILE::execute()
             pVertices[i].gpuCode = code;
 		}
 
-		pVertices[0].v[0] = x0;
-		pVertices[0].v[1] = y0;
+		pVertices[0].v[0] = x0y0.vx;
+		pVertices[0].v[1] = x0y0.vy;
 		pVertices[0].v[2] = 0;
 
-		pVertices[1].v[0] = x0 + w;
-		pVertices[1].v[1] = y0;
+		pVertices[1].v[0] = x0y0.vx + wh.vx;
+		pVertices[1].v[1] = x0y0.vy;
 		pVertices[1].v[2] = 0;
 
-		pVertices[2].v[0] = x0 + w;
-		pVertices[2].v[1] = y0 + h;
+		pVertices[2].v[0] = x0y0.vx + wh.vx;
+		pVertices[2].v[1] = x0y0.vy + wh.vy;
 		pVertices[2].v[2] = 0;
 
-		pVertices[3].v[0] = x0;
-		pVertices[3].v[1] = y0 + h;
+		pVertices[3].v[0] = x0y0.vx;
+		pVertices[3].v[1] = x0y0.vy + wh.vy;
 		pVertices[3].v[2] = 0;
 
 		pIndices[0] = 0;

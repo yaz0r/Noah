@@ -43,10 +43,8 @@ struct TILE : public sTag
         };
         sColorAndCode m_colorAndCode;
     };
-    s16 x0;
-    s16 y0;
-    s16 w;
-    s16 h;
+    sVec2_s16 x0y0;
+    sVec2_s16 wh;
 
     void execute();
 };

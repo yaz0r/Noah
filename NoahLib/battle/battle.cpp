@@ -83,6 +83,8 @@ std::array<sBattleEntity, 11> battleEntities;
 sGameStateA4* startBattleAttackAnimationVar5;
 sGameStateA42* startBattleAttackAnimationVar6;
 
+s32 backupCameraMode = 1;
+
 bool battleSpritesDisabled = false;
 
 void jumpUpdatePositionSub0(sSpriteActorCore* param_1, sSpriteActorCore* param_2);
@@ -824,8 +826,18 @@ SVECTOR battleCameraSpriteOrientation;
 
 void updateBattleCamera() {
     switch (battleCameraMode) {
+    case 0:
+        break;
     case 1:
         computeBattleCameraParams(allEntitiesToFitInView);
+        break;
+    case 2:
+        battleCameraEyeTarget.vy = previousCameraEye2.vy.getIntegerPart();
+        battleCameraEyeTarget.vx = previousCameraEye2.vx.getIntegerPart();
+        battleCameraEyeTarget.vz = previousCameraEye2.vz.getIntegerPart();
+        battleCameraAtTarget.vy = previousCameraAt2.vy.getIntegerPart();
+        battleCameraAtTarget.vx = previousCameraAt2.vx.getIntegerPart();
+        battleCameraAtTarget.vz = previousCameraAt2.vz.getIntegerPart();
         break;
     default:
         assert(0);
@@ -2004,8 +2016,8 @@ void initBattle3dRendering(void) {
     MissingCode();
 }
 
-void (*battleCameraModeCallback1)() = nullptr;
-void (*battleCameraModeCallback2)() = nullptr;
+sSavePointMeshAbstract* battleCameraModeCallback1 = nullptr;
+sSavePointMeshAbstract* battleCameraModeCallback2 = nullptr;
 
 void setBattleCameraMode(int param_1) {
     battleCameraModeInterpolation = 1;
@@ -2014,6 +2026,13 @@ void setBattleCameraMode(int param_1) {
     switch (param_1)
     {
     case 2:
+        previousCameraEye2.vx = (int)battleCameraEyeTarget.vx << 0x10;
+        previousCameraEye2.vy = (int)battleCameraEyeTarget.vy << 0x10;
+        previousCameraEye2.vz = (int)battleCameraEyeTarget.vz << 0x10;
+        previousCameraAt2.vx = (int)battleCameraAtTarget.vx << 0x10;
+        previousCameraAt2.vy = (int)battleCameraAtTarget.vy << 0x10;
+        previousCameraAt2.vz = (int)battleCameraAtTarget.vz << 0x10;
+        break;
     case 4:
         assert(0);
     default:
@@ -2394,6 +2413,7 @@ byte loadingFXFramentVar1 = 0;
 
 sSpriteActorAnimationBundle* FxFragmentSpecialAnimation = nullptr;
 sSpriteActorAnimationBundle* battleAnimationLoadingDest = nullptr;
+void* fxUploadBuffer = nullptr;
 
 void abilityPlayAnimationSub1(int param_1) {
     if (param_1 == 0xe3) {
@@ -2408,9 +2428,19 @@ void abilityPlayAnimationSub1(int param_1) {
     FxFragmentSpecialAnimation = new sSpriteActorAnimationBundle;
     readFile(iVar5, *FxFragmentSpecialAnimation, 0, 0x80);
     battleIdleDuringLoading();
-    MissingCode();
+
+    int hasExtraData = (READ_LE_U16(FxFragmentSpecialAnimation->m_rawData.begin() + READ_LE_U32(FxFragmentSpecialAnimation->m_rawData.begin() + 4)) >> 0xC) & 3;
+    if (hasExtraData) {
+        assert(0);
+    }
+    fxUploadBuffer = allocateBufferForVramUpload(8);
+    if (getFileSizeAligned(iVar6) > 0x10) {
+        loadImageFileToVram(iVar6, fxUploadBuffer, 0, 0, 0, 0, 0, 0, 0, 0);
+    }
+    battleIdleDuringLoading();
+    DrawSync(0);
     battleAnimationLoadingDest = FxFragmentSpecialAnimation;
-    MissingCode();
+    delete[] fxUploadBuffer;
 }
 
 void abilityPlayAnimation(int param_1, sSpriteActorCore* param_2)
@@ -2859,6 +2889,12 @@ void waitBattleAnimationSpriteLoading() {
     }
 }
 
+void startJumpAnimationSub0(int param_1)
+{
+    backupCameraMode = param_1;
+}
+
+
 void deleteJumpAnimationControlStructEndOfAttack() {
     if (jumpAnimationControlStruct != nullptr) {
         startJumpAnimationVar1 = 0;
@@ -2876,7 +2912,7 @@ void deleteJumpAnimationControlStructEndOfAttack() {
 
         MissingCode();
         clearBattleAnimationData();
-        //startJumpAnimationSub0(1);
+        startJumpAnimationSub0(1);
         MissingCode();
         freeDamageDisplayPolysTask2();
         updateBattleAnimationDataLoading();
@@ -2945,7 +2981,7 @@ bool initFxFragments(void)
         //local_38 = psVar3->m8_clut;
         //local_34 = psVar3->mC;
         //local_30 = psVar3->m10_startOfAnimationContainer;
-        std::span<u8>::iterator psVar4 = sFieldEntitySub4_110_8005a474.m10_startOfAnimationContainer->at(startJumpAnimationVar2).begin();
+        std::span<u8>::iterator psVar4 = sFieldEntitySub4_110_8005a474.m10_startOfAnimationContainer->at(startJumpAnimationVar2);
         spriteBytecode2ExtendedE0(processBattleAnimationSub0_var1, psVar4, &sFieldEntitySub4_110_8005a474);
     }
     MissingCode();
@@ -3206,12 +3242,6 @@ void jumpUpdatePosition(sSpriteActorCore* param_1) {
         jumpAnimationControlStruct->m2C++;;
     }
 
-}
-
-void startJumpAnimationSub0(int param_1)
-{
-    static int JumpAnimationSub0Var0 = 1;
-    JumpAnimationSub0Var0 = param_1;
 }
 
 void startJumpAnimation(int isBilly, uint actor, uint jumpTarget, uint facing) {
@@ -4408,7 +4438,23 @@ int computeBattleDamageSub1() {
         }
     }
     else {
-        assert(0);
+        uVar3 = 4;
+        if (((battleGetSlotStatusSub_currentBattleEntity->m88 |
+            battleGetSlotStatusSub_currentBattleEntity->m8A) & 0x8000) != 0) {
+            uVar3 = 5;
+        }
+        if ((battleGetSlotStatusSub_currentBattleEntity->m80 & 0x400) != 0) {
+            uVar3 = uVar3 - 1;
+        }
+        uVar6 = uVar6 * (uVar3 & 0xff);
+        if (false) {
+            uVar6 = uVar6 + 3;
+        }
+        uVar6 = uVar6 >> 2;
+        if (((battleGetSlotStatusSub_currentBattleEntity->m88 |
+            battleGetSlotStatusSub_currentBattleEntity->m8A) & 0x2000) != 0) {
+            uVar6 = uVar6 << 1;
+        }
     }
 
     ushort local_28 = 0;
@@ -4418,6 +4464,9 @@ int computeBattleDamageSub1() {
     }
 
     switch (currentEntityBattleStats->m1A) {
+    case 1:
+        local_28 = (ushort)uVar6;
+        break;
     case 0:
         uVar1 = (short)uVar5 + (short)uVar2;
         local_28 = uVar1;
@@ -4475,8 +4524,10 @@ u16 computeBattleDamageSub2() {
         }
     }
     else {
-        assert(0);
-
+        if (((startBattleAttackAnimationVar5->m88 | startBattleAttackAnimationVar5->m8A) & 0x4000) != 0)
+        {
+            uVar2 = uVar2 * 3 >> 1;
+        }
     LAB_Battle__80097730:
         if ((battleEntities[startBattleAttackAnimationVar4].m15A_flags & 0x80) == 0)
             goto LAB_Battle__80097774;
@@ -4485,6 +4536,8 @@ u16 computeBattleDamageSub2() {
     in_a2 = 0;
 LAB_Battle__80097774:
     switch (currentEntityBattleStats->m1B) {
+    case 1:
+        break;
     case 0:
         uVar2 = uVar5 + in_a2;
         break;
@@ -6402,17 +6455,336 @@ void idleBattleDuringLoading(void)
     return;
 }
 
+void battleSpriteEffect_20_update(sTaskHeader* param_1)
+{
+    MATRIX MStack_50;
+    SVECTOR local_30;
+    SVECTOR local_28;
+    VECTOR local_20;
+
+    sSpriteActorCore* psVar2 = (sSpriteActorCore*)param_1->m4;
+    OP_INIT_ENTITY_SCRIPT_sub0Sub9(psVar2);
+    local_28.vy = (short)((psVar2->mC_step).vy >> 0xd);
+    local_28.vx = 0;
+    local_28.vz = (short)((psVar2->mC_step).vz >> 0xd);
+    local_30.vx = modulateSpeed(psVar2, (psVar2->mC_step).vx >> 0xd);
+    local_30.vy = 0;
+    local_30.vz = 0;
+    createRotationMatrix(&local_28, &MStack_50);
+    ApplyMatrix(&MStack_50, &local_30, &local_20);
+    local_20.vx = local_20.vx + (psVar2->mA0).vx;
+    local_20.vy = local_20.vy + (psVar2->mA0).vy;
+    local_20.vz = local_20.vz + (psVar2->mA0).vz;
+    (psVar2->m0_position).vx = local_20.vx * 0x10000;
+    (psVar2->m0_position).vy = local_20.vy * 0x10000;
+    auto puVar1 = psVar2->m64_spriteByteCode;
+    (psVar2->m0_position).vz = local_20.vz * 0x10000;
+    if (puVar1.has_value()) {
+        param_1->mC_deleteCallback(param_1);
+    }
+    return;
+}
+
 void battleSetupTextPolySub(POLY_FT4* param_1)
 {
     SetSemiTrans(param_1, 1);
     SetShadeTex(param_1, 0);
 }
 
+void battleSpriteEffect_20(sSpriteActorCore* param_1)
+{
+    param_1->m34_currentSpriteFrame = 1;
+    setTaskUpdateFunction(param_1->m6C_pointerToOwnerStructure, battleSpriteEffect_20_update);
+    return;
+}
+
+struct sBattleSpriteEffect_3A_sub_entity : public sTaskHeaderPair {
+    s32 m38;
+    s32 m3C;
+    s16 m40;
+    s16 m42;
+    s16 m44;
+    s16 m46;
+    s16 m48;
+    s16 m4A;
+    s16 m4C;
+    s16 m4E;
+};
+
+sBattleSpriteEffect_3A_sub_entity* battleSpriteEffect_3A_sub_entity = nullptr;
+
+void sBattleSpriteEffect_3A_sub_entity_update(sTaskHeader* param_1_)
+{
+    sBattleSpriteEffect_3A_sub_entity* param_1 = (sBattleSpriteEffect_3A_sub_entity*)param_1_;
+    int iVar1;
+    int iVar2;
+
+    if (param_1->m3C == 0) {
+        if (param_1->m46 == 0) {
+            param_1->mC_deleteCallback(param_1);
+        }
+    }
+    else {
+        iVar1 = param_1->m3C + -1;
+        iVar2 = ((int)param_1->m42 - (int)param_1->m40) * ((iVar1 * 0x20) / param_1->m38);
+        param_1->m3C = iVar1;
+        if (iVar2 < 0) {
+            iVar2 = iVar2 + 0x1f;
+        }
+        param_1->m46 = param_1->m42 - (short)(iVar2 >> 5);
+    }
+    return;
+}
+
+void sBattleSpriteEffect_3A_sub_entity_delete(sTaskHeader* param_1_)
+{
+    sBattleSpriteEffect_3A_sub_entity* param_1 = (sBattleSpriteEffect_3A_sub_entity*)param_1_;
+    registerSpriteCallback2Sub0(&param_1->m1C);
+    allocateSavePointMeshDataSub0_callback(param_1);
+    delete param_1;
+    battleSpriteEffect_3A_sub_entity = nullptr;
+    //FUN_Battle__800a6f98();
+    MissingCode();
+    return;
+}
+
+void sBattleSpriteEffect_3A_sub_entity_draw(sTaskHeader* param_1_)
+{
+    sBattleSpriteEffect_3A_sub_entity* param_1 = (sBattleSpriteEffect_3A_sub_entity*)param_1_;
+    MissingCode();
+}
+
+void battleSpriteEffect_3A_sub(short param_1, int param_2, short param_3, short param_4, short param_5, short param_6) {
+    if (battleSpriteEffect_3A_sub_entity == nullptr) {
+        battleSpriteEffect_3A_sub_entity = createCustomRenderableEntity<sBattleSpriteEffect_3A_sub_entity>(0x50, nullptr,
+            sBattleSpriteEffect_3A_sub_entity_update,
+            sBattleSpriteEffect_3A_sub_entity_draw,
+            sBattleSpriteEffect_3A_sub_entity_delete);
+
+        MissingCode();
+
+        battleSpriteEffect_3A_sub_entity->m40 = 0;
+        battleSpriteEffect_3A_sub_entity->m44 = 0;
+        battleSpriteEffect_3A_sub_entity->m46 = 0;
+    }
+    else {
+        battleSpriteEffect_3A_sub_entity->m40 = battleSpriteEffect_3A_sub_entity->m46;
+    }
+    battleSpriteEffect_3A_sub_entity->m42 = param_1;
+    battleSpriteEffect_3A_sub_entity->m38 = param_2 << 1;
+    battleSpriteEffect_3A_sub_entity->m3C = param_2 << 1;
+    battleSpriteEffect_3A_sub_entity->m4A = param_4;
+    battleSpriteEffect_3A_sub_entity->m4C = param_5;
+    battleSpriteEffect_3A_sub_entity->m4E = param_6;
+    battleSpriteEffect_3A_sub_entity->m48 = param_3;
+    sBattleSpriteEffect_3A_sub_entity_update(battleSpriteEffect_3A_sub_entity);
+}
+
+
+void battleSpriteEffect_3A(sSpriteActorCore* param_1, std::span<u8>::iterator param_2) {
+    std::span<u8>::iterator dataLocation = param_2 + READ_LE_S16(param_2);
+    battleSpriteEffect_3A_sub(dataLocation[5], dataLocation[3], dataLocation[4], (int)*dataLocation, (int)dataLocation[1], (int)dataLocation[2]);
+}
+
+void battleSpriteEffect_40(sSpriteActorCore* param_1, std::span<u8>::iterator param_2) {
+    VECTOR local_80;
+    local_80.vx = param_1->mA0.vx - param_1->m0_position.vx.getIntegerPart();
+    local_80.vy = param_1->mA0.vy - param_1->m0_position.vy.getIntegerPart();
+    local_80.vz = param_1->mA0.vz - param_1->m0_position.vz.getIntegerPart();
+
+    VECTOR local_70;
+    Square0(&local_80, &local_70);
+
+    int sqRoot = SquareRoot0(local_70.vx + local_70.vz);
+    int atanVal1 = ratan2(local_80.vz, local_80.vx);
+    int atanVal2 = ratan2(local_80.vy, (int)(short)sqRoot);
+
+    VECTOR local_60;
+    local_60.vx = (param_1->mC_step).vx >> 7;
+    local_60.vy = (param_1->mC_step).vy >> 7;
+    local_60.vz = (param_1->mC_step).vz >> 7;
+    Square0(&local_60, &local_70);
+
+    sqRoot = SquareRoot0(local_70.vy + local_70.vx + local_70.vz);
+    int sqRoot2 = SquareRoot0(local_70.vx + local_70.vz);
+    int atanVal3 = ratan2(local_60.vz, local_60.vx);
+
+    SVECTOR local_88;
+    local_88.vy = -(short)atanVal3;
+    int atanVal4 = ratan2(local_60.vy, (int)(short)sqRoot2);
+    local_88.vx = 0;
+
+    byte extraArg = (uint)*param_2;
+    int iVar2 = (int)(((uint)(ushort)-(short)atanVal1 - (uint)(ushort)local_88.vy) * 0x100000) >> 0x14;
+    int iVar3 = extraArg * 4;
+    int iVar1 = iVar2;
+    if (iVar2 < 0) {
+        iVar1 = -iVar2;
+    }
+    int iVar4 = iVar2;
+    if ((iVar3 < iVar1) && (iVar4 = iVar3, iVar2 < 0)) {
+        iVar4 = extraArg * -4;
+    }
+    local_88.vy = local_88.vy + (short)iVar4;
+    iVar2 = (int)(((atanVal2 & 0xffff) - (atanVal4 & 0xffff)) * 0x100000) >> 0x14;
+    iVar1 = iVar2;
+    if (iVar2 < 0) {
+        iVar1 = -iVar2;
+    }
+    iVar4 = iVar2;
+    if ((iVar3 < iVar1) && (iVar4 = iVar3, iVar2 < 0)) {
+        iVar4 = extraArg * -4;
+    }
+    local_88.vz = (short)atanVal4 + (short)iVar4;
+    SVECTOR SStack_50;
+    setupSVector(&SStack_50, (short)sqRoot, 0, 0);
+    MATRIX MStack_48;
+    createRotationMatrix(&local_88, &MStack_48);
+    VECTOR local_28;
+    ApplyMatrix(&MStack_48, &SStack_50, &local_28);
+    (param_1->mC_step).vx = local_28.vx << 7;
+    (param_1->mC_step).vy = local_28.vy << 7;
+    (param_1->mC_step).vz = local_28.vz << 7;
+}
+
+
+void battleSpriteEffect_5_draw(sTaskHeader* param_1) {
+    sSpriteActorCore* pSprite = (sSpriteActorCore*)param_1->m4;
+    if (pSprite->m34_currentSpriteFrame == 0) {
+        if ((shapeTransfertTableCurrentEntry + sizeof(TILE) < shapeTransfertTableEnd)) {
+            TILE* pDestTile = (TILE*)shapeTransfertTableCurrentEntry;
+            shapeTransfertTableCurrentEntry += sizeof(TILE);
+
+            SVECTOR tempVector;
+            tempVector.vx = pSprite->m0_position.vx.getIntegerPart();
+            tempVector.vy = pSprite->m0_position.vy.getIntegerPart();
+            tempVector.vz = pSprite->m0_position.vz.getIntegerPart();
+            
+
+            MATRIX* m;
+            if (((pSprite->m3C >> 24) & 1) == 0) {
+                m = &currentRenderingMatrix;
+            }
+            else {
+                assert(0);
+            }
+
+            SetRotMatrix(m);
+            SetTransMatrix(m);
+            long dummy;
+            s32 depth = RotTransPers(&tempVector, &pDestTile->x0y0, &dummy, &dummy);
+            int otDepth = depth >> (gDepthDivider & 0x1f);
+            pSprite->m2E = otDepth;
+            tempVector.vx -= pSprite->mC_step.vx >> ((pSprite->m36 + 4) & 0x1F);
+            tempVector.vy -= pSprite->mC_step.vy >> ((pSprite->m36 + 4) & 0x1F);
+            tempVector.vz -= pSprite->mC_step.vz >> ((pSprite->m36 + 4) & 0x1F);
+
+            RotTransPers(&tempVector, &pDestTile->wh, &dummy, &dummy);
+            pDestTile->m3_size = 3;
+            pDestTile->m_colorAndCode = pSprite->m28_colorAndCode;
+            AddPrim(&(*characterRenderingOT)[otDepth], pDestTile);
+
+            if ((shapeTransfertTableCurrentEntry + sizeof(DR_TPAGE) < shapeTransfertTableEnd)) {
+                int transparency = ((pSprite->m3C& 0xFF) >> 5); // TODO: correct?
+                if (transparency) {
+                    DR_TPAGE* pDestRdTPage = (DR_TPAGE*)shapeTransfertTableCurrentEntry;
+                    shapeTransfertTableCurrentEntry += sizeof(DR_TPAGE);
+
+                    pDestRdTPage->m3_size = 1;
+                    pDestRdTPage->code[0] = (transparency - 1 & 3) << 5 | 0xe1000000;
+                    AddPrim(&(*characterRenderingOT)[otDepth], pDestRdTPage);
+                }
+            }
+        }
+    }
+}
+
+void battleSpriteEffect_5(sSpriteActorCore* param_1) {
+    param_1->m34_currentSpriteFrame = 1;
+    setTaskDrawFunction(&param_1->m6C_pointerToOwnerStructurePair->m1C, battleSpriteEffect_5_draw);
+    param_1->m28_colorAndCode.m3_code = 0x40;
+}
+
+void battleSpriteEffect_23(sSpriteActorCore* param_1)
+{
+    short sVar1;
+    sVec2_s16 sVar2;
+    sVec2_s16 local_20;
+
+    sVar2.vy = param_1->m0_position.vz.getIntegerPart();
+    sVar2.vx = param_1->m0_position.vx.getIntegerPart();
+    local_20.vy = (param_1->mA0).vz;
+    local_20.vx = (param_1->mA0).vx;
+    sVar1 = vec2dRatan2(local_20, sVar2);
+    OP_INIT_ENTITY_SCRIPT_sub0Sub7(param_1, sVar1);
+    setSpriteActorAngle(param_1, sVar1);
+}
+
 void battleSpriteEffect(sSpriteActorCore* param_1, s8 param_2, std::span<u8>::iterator endOfOpcode) {
     switch (param_2) {
+    case 5:
+        battleSpriteEffect_5(param_1);
+        return;
     case 7:
         setCameraVisibleEntities(1 << ((param_1->m74_pTargetEntitySprite->mAC.mx0_entityIdUpper2bit) << 2 | (uint)param_1->m74_pTargetEntitySprite->mA8.mx1E_entityId_bottom2bit));
         break;
+    case 9:
+        param_1->m32_direction += 0x800;
+        param_1->mC_step.vx -= param_1->mC_step.vx;
+        param_1->mC_step.vy -= param_1->mC_step.vy;
+        param_1->mC_step.vz -= param_1->mC_step.vz;
+        return;
+    case 0xe:
+        OP_INIT_ENTITY_SCRIPT_sub0Sub7(param_1, (*endOfOpcode) << 4);
+        return;
+    case 0x17:
+    {
+        int iVar3 = (char)*endOfOpcode * 4;
+        int iVar11 = param_1->mC_step.vx * iVar3;
+        if (iVar11 < 0) {
+            iVar11 = iVar11 + 0xff;
+        }
+        int iVar12 = param_1->mC_step.vy * iVar3;
+        param_1->mC_step.vx = iVar11 >> 8;
+        if (iVar12 < 0) {
+            iVar12 = iVar12 + 0xff;
+        }
+        iVar3 = param_1->mC_step.vz * iVar3;
+        param_1->mC_step.vy = iVar12 >> 8;
+        if (iVar3 < 0) {
+            iVar3 = iVar3 + 0xff;
+        }
+        param_1->mC_step.vz = iVar3 >> 8;
+        return;
+    }
+    case 0x1f:
+        param_1->m3C = param_1->m3C & 0xfbffffff;
+        savePointCallback8Sub0Sub0_battle(param_1);
+        return;
+    case 0x20:
+        battleSpriteEffect_20(param_1);
+        return;
+    case 0x23:
+        battleSpriteEffect_23(param_1);
+        return;
+    case 0x28:
+    {
+        int iVar11 = (char)*endOfOpcode * 0x10 * param_1->m82;
+        if (iVar11 < 0) {
+            iVar11 = iVar11 + 0xfff;
+        }
+        param_1->mC_step.vx = (iVar11 >> 0xc) << 8;
+        return;
+    }
+    case 0x3a:
+        battleSpriteEffect_3A(param_1, endOfOpcode);
+        return;
+    case 0x40:
+        battleSpriteEffect_40(param_1, endOfOpcode);
+        return;
+    case 0x55:
+        setCameraVisibleEntities(1 << ((processBattleAnimationSub0_var1->mAC.mx0_entityIdUpper2bit) << 2 |(uint)processBattleAnimationSub0_var1->mA8.mx1E_entityId_bottom2bit) | (uint)currentJumpAnimationBitMask);
+        return;
     case 0x56:
         MissingCode(); // sound related
         break;
@@ -6448,6 +6820,167 @@ void battleSpriteEffect(sSpriteActorCore* param_1, s8 param_2, std::span<u8>::it
     default:
         assert(0);
     }
+}
+
+FP_VEC3 previousCameraEye2;
+FP_VEC3 previousCameraAt2;
+SVECTOR battleCameraEyeTarget_backup;
+SVECTOR battleCameraAtTarget_backup;
+byte spriteBytecode2ExtendedE0_Sub0_10_battle_var0 = 0;
+
+void spriteBytecode2ExtendedE0_Sub0_10_battle_delete(sTaskHeader* param_1) {
+    sSpriteActorCore* pSpriteCore = (sSpriteActorCore*)param_1->m4;
+    if ((pSpriteCore->m40 >> 0xd & 0xf) == 10) {
+        if (battleCameraModeCallback1 != param_1)
+            goto LAB_Battle__800bbfa0;
+        battleCameraModeCallback1 = nullptr;
+        if (battleCameraVar0)
+            goto LAB_Battle__800bbfa0;
+        battleCameraEyeTarget = battleCameraEyeTarget_backup;
+    }
+    else {
+        if (battleCameraModeCallback1 != param_1)
+            goto LAB_Battle__800bbfa0;
+        battleCameraModeCallback1 = nullptr;
+        if (battleCameraVar0)
+            goto LAB_Battle__800bbfa0;
+        battleCameraAtTarget = battleCameraAtTarget_backup;
+    }
+
+LAB_Battle__800bbfa0:
+    if ((pSpriteCore->mAC.mx5) != 0) {
+        registerSpriteCallback2_2(param_1);
+    }
+    allocateSavePointMeshDataSub0_callback(param_1);
+    registerSpriteCallback2Sub0(&((sTaskHeaderPair*)param_1)->m1C);
+    delete param_1;
+    spriteBytecode2ExtendedE0_Sub0_10_battle_var0--;
+    if (spriteBytecode2ExtendedE0_Sub0_10_battle_var0 == 0) {
+        setBattleCameraMode(backupCameraMode);
+    }
+}
+
+void spriteBytecode2ExtendedE0_Sub0_10_battle_update(sTaskHeader* param_1) {
+    sSpriteActorCore* pSpriteCore = (sSpriteActorCore*)param_1->m4;
+    OP_INIT_ENTITY_SCRIPT_sub0Sub9(pSpriteCore);
+    savePointCallback8Sub0(pSpriteCore);
+    if ((pSpriteCore->m40 >> 0xd & 0xf) == 10) {
+        previousCameraEye2 = pSpriteCore->m0_position;
+    }
+    else {
+        previousCameraAt2 = pSpriteCore->m0_position;
+    }
+    if (pSpriteCore->m64_spriteByteCode.has_value()) {
+        if (pSpriteCore->mAC.mx6 == 0) {
+            return;
+        }
+        OP_INIT_ENTITY_SCRIPT_sub0Sub9(pSpriteCore);
+        savePointCallback8Sub0(pSpriteCore);
+        if ((pSpriteCore->m40 >> 0xd & 0xf) == 10) {
+            previousCameraEye2 = pSpriteCore->m0_position;
+        }
+        else {
+            previousCameraAt2 = pSpriteCore->m0_position;
+        }
+        if (pSpriteCore->m64_spriteByteCode.has_value()) {
+            return;
+        }
+    }
+    param_1->mC_deleteCallback(param_1);
+}
+
+void spriteBytecode2ExtendedE0_Sub0_10_battle(sSavePointMeshAbstract* param_1) {
+    assert(isBattleOverlayLoaded);
+    if (((param_1->m38_spriteActorCore.m40 >> 0xD) & 0xF) == 10) {
+        if (battleCameraModeCallback1 == nullptr) {
+            battleCameraEyeTarget_backup = battleCameraEyeTarget;
+            battleCameraModeCallback1 = param_1;
+            goto LAB_Battle__800bc27c;
+        }
+        if ((battleCameraModeCallback1->m38_spriteActorCore.m34_currentSpriteFrame != 1) && (param_1->m38_spriteActorCore.m34_currentSpriteFrame == 1)) {
+            battleCameraModeCallback1->mC_deleteCallback(battleCameraModeCallback1);
+            battleCameraModeCallback1 = param_1;
+            goto LAB_Battle__800bc27c;
+        }
+        assert(0);
+    }
+    else {
+        assert(0);
+    }
+    assert(0);
+
+LAB_Battle__800bc27c:
+    spriteBytecode2ExtendedE0_Sub0_10_battle_var0++;
+    if (((param_1->m38_spriteActorCore).mAC.mx2_facing) == 0) {
+        (param_1->m38_spriteActorCore).m32_direction = 0;
+    }
+    else {
+        (param_1->m38_spriteActorCore).m32_direction = 0x800;
+    }
+    setTaskDeleteFunction(param_1, spriteBytecode2ExtendedE0_Sub0_10_battle_delete);
+    setTaskUpdateFunction(param_1, spriteBytecode2ExtendedE0_Sub0_10_battle_update);
+    setBattleCameraMode(2);
+}
+
+struct sBattleSpriteOpcode_FB_Task : public sTaskHeader {
+    // size: 0x1C + 0x18
+    sSpriteActorCore* m1C;
+    s32 m24;
+    s32 m28;
+    s32 m2C;
+    std::span<u8>::iterator m30;
+};
+
+s32 battleSpriteOpcode_FB_sub0(sSpriteActorCore* param_1)
+{
+    VECTOR local_28;
+    VECTOR local_18;
+
+    local_28.vx = (int)(param_1->mA0).vx - (int)(param_1->m0_position).vx.getIntegerPart();
+    local_28.vy = (int)(param_1->mA0).vy - (int)(param_1->m0_position).vy.getIntegerPart();
+    local_28.vz = (int)(param_1->mA0).vz - (int)(param_1->m0_position).vz.getIntegerPart();
+    Square0(&local_28, &local_18);
+    return SquareRoot0(local_18.vx + local_18.vz + local_18.vy);
+}
+
+void battleSpriteOpcode_FB_taskUpdate(sTaskHeader* param_1_) {
+    bool bVar1;
+    int iVar2;
+    int iVar4;
+    sSpriteActorCore* psVar5;
+    sBattleSpriteOpcode_FB_Task* param_1 = (sBattleSpriteOpcode_FB_Task*)param_1_;
+    bVar1 = false;
+    psVar5 = param_1->m1C;
+    iVar4 = param_1->m28;
+    iVar2 = battleSpriteOpcode_FB_sub0(psVar5);
+    param_1->m28 = iVar2;
+    if ((iVar4 < iVar2) || (iVar2 < param_1->m2C)) {
+        bVar1 = true;
+        auto puVar3 = param_1->m30;
+        psVar5->m9E_wait = 1;
+        psVar5->m64_spriteByteCode = puVar3;
+    }
+    if (psVar5->m9E_wait == 0) {
+        bVar1 = true;
+    }
+    if (psVar5->mAC.mx18 != param_1->m24) {
+        bVar1 = true;
+    }
+    if (bVar1) {
+        param_1->mC_deleteCallback(param_1);
+    }
+}
+
+void battleSpriteOpcode_FB(sSpriteActorCore* param_1, int param_2, std::span<u8>::iterator param_3) {
+    sBattleSpriteOpcode_FB_Task* pTask = battleLoaderAllocateMainBattleSprite<sBattleSpriteOpcode_FB_Task>(param_1->m6C_pointerToOwnerStructure, 0x18);
+    setTaskUpdateFunction(pTask, battleSpriteOpcode_FB_taskUpdate);
+
+    pTask->m1C = param_1;
+    pTask->m28 = battleSpriteOpcode_FB_sub0(param_1);
+    pTask->m2C = param_2;
+    pTask->m30 = param_3;
+    pTask->m24 = param_1->mAC.mx18;
+    param_1->mAC.mx5 = 1;
 }
 
 void executeSpriteBytecode2_battle(sSpriteActorCore* param_1) {

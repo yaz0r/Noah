@@ -68,19 +68,15 @@ struct sSpriteActorAnimationBundle : public sLoadableData
             for (int i=0; i< numAnimations; i++)
             {
                 u16 offset = READ_LE_U16(animationIt + 2 + i * 2);
-                int length = bundle.size() - offset; //TODO: do we need the +1?
-                if(length > 0)
-                {
-                    std::span<u8>::iterator start = animationIt + offset;
-                    // this doesn't quite work because animations are not in order. Could post-process after load and shorten the spans
-                    /*if (i != numAnimations - 1) {
-                        length = READ_LE_U16(animationIt + 2 + (i + 1) * 2) - READ_LE_U16(animationIt + 2 + i * 2);
-                    }*/
-                    m4_animations.push_back(std::span<u8>(start, length));
-                }
-                else {
+                /*if (offset > bundle.size()) {
                     assert(i == numAnimations - 1);
+                    // sometimes, the last animation go out of bound. just ignore it (happens when selecting new game)
                 }
+                else*/ {
+                    // iterators need to access fall range of animation bundle because it can be used to call sub-functions
+                    m4_animations.push_back(animationIt + offset);
+                }
+                
             }
         }
         m8_pData.init(inputData + READ_LE_U32(inputData + 8));
@@ -93,7 +89,7 @@ struct sSpriteActorAnimationBundle : public sLoadableData
     u32 m0_numEntries;
     std::vector<std::span<u8>> m4_entries;
 
-    std::vector<std::span<u8>> m4_animations;
+    std::vector<std::span<u8>::iterator> m4_animations;
     sFieldEntitySub4_110_0 m8_pData;
     std::span<u8> mC_pData;
 

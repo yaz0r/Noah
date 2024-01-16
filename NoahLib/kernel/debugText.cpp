@@ -180,10 +180,10 @@ sDebugText* initDebugFont(uint x, ushort y, uint w, ushort h, int bufferSize, us
     pNewDebugText->m44_tiles[0].r0 = 0;
     pNewDebugText->m44_tiles[0].g0 = 0;
     pNewDebugText->m44_tiles[0].b0 = 0;
-    pNewDebugText->m44_tiles[0].x0 = x;
-    pNewDebugText->m44_tiles[0].y0 = y;
-    pNewDebugText->m44_tiles[0].w = w;
-    pNewDebugText->m44_tiles[0].h = h;
+    pNewDebugText->m44_tiles[0].x0y0.vx = x;
+    pNewDebugText->m44_tiles[0].x0y0.vy = y;
+    pNewDebugText->m44_tiles[0].wh.vx = w;
+    pNewDebugText->m44_tiles[0].wh.vy = h;
     SetSemiTrans(&pNewDebugText->m44_tiles[0], 1);
     pNewDebugText->m44_tiles[1] = pNewDebugText->m44_tiles[0];
     debugFontRam = pNewDebugText;

@@ -498,6 +498,9 @@ extern std::array<s8, 11> battleMonsterMapping;
 extern s16 entitiesHitInCurrentAttackBF;
 extern s16 performAttack_type;
 extern u8 startCharacterJumpToEnemyVar0;
+extern FP_VEC3 previousCameraEye2;
+extern FP_VEC3 previousCameraAt2;
+extern sSpriteActorCore* processBattleAnimationSub0_var1;
 
 void handleMenuSelectEnemy_cancel_sub0(u8 param_1);
 void updateMonsterScriptEntitiesVarByAtttack(byte param_1, byte targetId);
@@ -518,3 +521,4 @@ void setCameraVisibleEntities(uint playerBitmask);
 void updateCharacterBlinkingTask(u32 param_1);
 void battleIdleDuringLoading(void);
 void waitBattleAnimationSpriteLoading();
+void spriteBytecode2ExtendedE0_Sub0_10_battle(sSavePointMeshAbstract* param_1);

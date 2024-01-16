@@ -501,8 +501,13 @@ void decompressPauseSignToVram(short param_1, short param_2);
 void pauseMusic();
 void resumeMusic();
 int getInputOverflowed();
+void* allocateBufferForVramUpload(int);
+void loadImageFileToVram(int fileId, void* allocation, int, int, int, int, int, int, int, int);
 
 extern std::array<sGameController, 2> newPadButtonForScripts;
 
 extern SFP_VEC4 computeProjectionMatrixAngles;
 extern s32 objectClippingMask;
+
+extern u8* shapeTransfertTableCurrentEntry;
+extern u8* shapeTransfertTableEnd;
