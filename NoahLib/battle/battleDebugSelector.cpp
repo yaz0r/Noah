@@ -379,7 +379,7 @@ void battleDebugSelector()
         gameState.m26C_party[i].m50_MP = 99;
         gameState.m26C_party[i].m52_MaxMP = 99;
 
-        //gameState.m16C0[i].m0_unlockedAbilitiesBitField[1] = 0xFFFF; // TODO: added to debug abilities
+        gameState.m16C0[i].m0_unlockedAbilitiesBitField[1] = 0xFFFF; // TODO: added to debug abilities
     }
 
     gameState.m1D30_partyMemberBitField = 0xffff;

@@ -143,6 +143,20 @@ struct SFP_VEC4 : public SFP_VEC3
         return temp;
     }
 
+    SFP_VEC4& operator+=(const SFP_VEC4& rhs) {
+        vx += rhs.vx;
+        vy += rhs.vy;
+        vz += rhs.vz;
+        return *this;
+    }
+
+    SFP_VEC4& operator-=(const SFP_VEC4& rhs) {
+        vx -= rhs.vx;
+        vy -= rhs.vy;
+        vz -= rhs.vz;
+        return *this;
+    }
+
     s16 operator[](size_t idx) const
     {
         switch (idx)

@@ -4694,6 +4694,99 @@ LAB_Battle__80096724:
     return;
 }
 
+int startBattleAttackAnimationVar8_2Sub0(uint param_1, byte param_2, ushort param_3)
+{
+    char cVar1;
+    ushort uVar2;
+    int iVar3;
+    sGameStateA4* psVar4;
+
+    if ((battleEntities[startBattleAttackAnimationVar4].m15A_flags & 0x80) != 0) {
+        return 0;
+    }
+    iVar3 = xenoRand();
+    if ((int)(param_1 & 0xff) < iVar3 % 100) {
+        return 0;
+    }
+    if (true) {
+        switch (param_2)
+        {
+        case 9:
+            if ((param_3 & 0xf000) != 0) {
+                if ((startBattleAttackAnimationVar5->m8E & 0xf000) != 0) {
+                    battleTickMain_var1 = 0x39;
+                    return 0;
+                }
+                startBattleAttackAnimationVar5->m8C = startBattleAttackAnimationVar5->m8C & 0xfff;
+            }
+            if ((param_3 & 0xf00) != 0) {
+                if ((startBattleAttackAnimationVar5->m8E & 0xf00) != 0) {
+                    battleTickMain_var1 = 0x39;
+                    return 0;
+                }
+                startBattleAttackAnimationVar5->m8C = startBattleAttackAnimationVar5->m8C & 0xf0ff;
+            }
+            break;
+        default:
+            assert(0);
+            break;
+        }
+    }
+    psVar4 = startBattleAttackAnimationVar5;
+
+    if (true) {
+        switch (param_2) {
+        case 9:
+            //psVar4 = (sGameStateA4*)((int)startBattleAttackAnimationVar5->m4 + (uint)param_2 * 2 + -4);
+            assert(0);
+            uVar2 = param_3 | psVar4->m7A_commandEnabledBF;
+        default:
+            assert(0);
+            break;
+        }
+        psVar4->m7A_commandEnabledBF = uVar2;
+    }
+    assert(0);
+    return 1;
+}
+
+void startBattleAttackAnimationVar8_2Sub1(uint param_1, byte param_2, ushort param_3, uint param_4) {
+    ushort uVar1;
+    byte uVar2;
+    uint uVar3;
+
+    uVar3 = 0xf;
+    if ((battleEntities[startBattleAttackAnimationVar2].m0_base.m8A & 0x2000) != 0) {
+        param_4 = (param_4 & 0xff) << 1;
+    }
+    switch (param_2) {
+    default:
+        assert(0);
+    }
+    assert(0);
+}
+
+void startBattleAttackAnimationVar8_2() {
+    char cVar1;
+
+    cVar1 = startBattleAttackAnimationVar8_2Sub0
+    (currentEntityBattleStats->m1C, currentEntityBattleStats->m1D,
+        currentEntityBattleStats->m1E);
+    if ((currentEntityBattleStats->mA & 0x4000) == 0) {
+        startBattleAttackAnimationVar8_2Sub1
+        (startBattleAttackAnimationVar4, currentEntityBattleStats->m1D,
+            currentEntityBattleStats->m1E, currentEntityBattleStats->m11);
+        if (cVar1 != '\x01') {
+            initBattleAttackStatusArray0[startBattleAttackAnimationVar4] = 6;
+        }
+    }
+    else {
+        startBattleAttackAnimationVar8_2Sub1
+        (startBattleAttackAnimationVar4, currentEntityBattleStats->m1D,
+            currentEntityBattleStats->m1E, 5);
+    }
+}
+
 void startBattleAttackAnimationVar8_1() { // healing (used in Citan's Sazanami)
     ushort uVar1;
     short sVar2;
@@ -4880,7 +4973,7 @@ typedef void(*startBattleAttackAnimationVar8Type)();
 const std::array<startBattleAttackAnimationVar8Type, 8> startBattleAttackAnimationVar8 = { {
      startBattleAttackAnimationVar8_0,
      startBattleAttackAnimationVar8_1,
-     startBattleAttackAnimationVar8Unimplemented,
+     startBattleAttackAnimationVar8_2,
      startBattleAttackAnimationVar8Unimplemented,
      startBattleAttackAnimationVar8Unimplemented,
      startBattleAttackAnimationVar8Unimplemented,

@@ -27,11 +27,12 @@ struct sMenuContext_33C {
     u8 m6_drawPlayTime = 0;
     u8 m9_drawMainMenu = 0;
     u8 mA_354Enabled = 0;
-    std::array<u8, 8> mC = { 0,0,0,0,0,0,0,0 };
+    u8 mB = 0;
+    std::array<s8, 8> mC = { 0,0,0,0,0,0,0,0 };
     std::array<u8, 7> m20_menuBoxEnabled = { 0,0,0,0,0,0,0 };
     std::array<u8, 7> m27 = { 0,0,0,0,0,0,0 };
     std::array<s8, 3> m30 = { 0,0,0 };
-    std::array<s8, 3> m60 = { 0,0,0 };
+    std::array<s8, 7> m5C = { 0,0,0,0, 0,0,0 };
 };
 
 struct sMenuContext_348 {
@@ -60,6 +61,12 @@ struct sMenuContext_350 {
 };
 
 struct sMenuContext_354 {
+    std::array<std::array<POLY_FT4, 2>, 16> m0_polys;
+    std::array<std::array<POLY_FT4, 2>, 48> m500_polys;
+    s32 m1400_0Length;
+    s32 m1404_500Length;
+    s8 m1408_0OddOrEven;
+    s8 m1409_500OddOrEven;
 };
 
 struct sMenuContext_428 {
@@ -70,6 +77,7 @@ struct sMenuContext_4E0 {
     std::vector<u16> m78_imageData;
     RECT m70_rect;
     u8 m7C_colorMode;
+    u8 m7D;
     u8 m7E_stringWidth;
     u8 m7F;
 };
@@ -200,19 +208,23 @@ struct sMenuContext {
     s8 m337_previousMenuSelectedEntry = 0;
     s8 m338_currentSaveState = 2;
     s8 m339;
+    s8 m33A_354_poly0Length;
     s8 m33B = 0;
     sMenuContext_33C* m33C;
     struct sMenuContext_340_goldOwned* m340_gold;
     sMenuContext_344_playTime* m344_playTime;
     sMenuContext_348* m348_cursor;
+    struct sMenuContext_34C* m34C;
     sMenuContext_350* m350_mainMenu;
     sMenuContext_354* m354;
     std::array<sMenuContext_364*, 7> m364_menuBoxes;
     std::array<sMenuContext_380*, 7> m380;
     std::array<sMenuContext_39C*, 3> m39C;
+    std::array<struct sMenuContext_3A8*, 0x20> m3A8_memoryCardTiles;
     sMenuContext_428* m428;
     std::array<sMenuContextMenuTile, 4> m46C_menuBorders;
     std::array<sMenuContext_4E0, 50> m4E0;
+    s8 m4D8;
     u8 m1E94;
     u8 m1E95;
 };
@@ -229,3 +241,5 @@ void setupMenuPolyFT4(POLY_FT4* param_1, short x, short y, u8 u, u8 v, short wid
 void iniMenuContext364And380(byte param_1, short param_2, short param_3, ushort param_4, ushort param_5, char param_6, byte param_7, s32 param_8, byte param_9);
 void playMenuSoundEffect(uint param_1);
 u8 renderString(std::vector<u8>::iterator buffer, std::vector<u16>& param_2, ushort param_3, byte param_4);
+void processLoadSaveMenuSub2(bool show, bool hideGold);
+void initMemoryCardTransparentPoly(POLY_FT4* param_1);

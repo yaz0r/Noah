@@ -80,6 +80,7 @@ void initMenuContext33C(char param_1)
     }
     else {
         gMenuContext->m33C = new sMenuContext_33C;
+        memset(gMenuContext->m33C, 0, sizeof(sMenuContext_33C));
     }
 }
 
@@ -280,7 +281,7 @@ void initMenuGlobals() {
 
     MissingCode();
     for (int i = 0; i < 3; i++) {
-        gMenuContext->m33C->m60[i] = 0;
+        gMenuContext->m33C->m5C[i + 4] = 0;
         s32 partyMemberIndex = gameState.m1D34_currentParty[i];
         if ((partyMemberIndex == 0xff) || (gMenuContext->m30C[partyMemberIndex] == 0)) {
             gMenuContext->m33C->m30[i] = -1;
@@ -289,7 +290,7 @@ void initMenuGlobals() {
             gMenuContext->m33C->m30[i] = partyMemberIndex;
             gMenuContext->m32B++;
             if (gameState.m26C_party[gMenuContext->m33C->m30[i]].mA0_partyData_gearNum != -1) {
-                gMenuContext->m33C->m60[i] = 1;
+                gMenuContext->m33C->m5C[i + 4] = 1;
                 gMenuContext->m33B++;
             }
         }
@@ -1007,6 +1008,12 @@ std::vector<std::array<u32, 2>> saveGameMainMenuConfig = { {
     {{0x10A, 0x124}},
     {{0x10B, 0x123}},
     {{0x110, 0x142}},
+    {{0x111, 0x141}},
+    {{0x112, 0x140}},
+    {{0xFFFF, 0xFFFF}},
+    {{0x110, 0x12A}},
+    {{0x111, 0x129}},
+    {{0x112, 0x127}},
 } };
 
 void setupMainMenuWithConfig(int count, std::vector<std::array<u32, 2>>::iterator config) {
@@ -1050,12 +1057,15 @@ std::vector<std::array<u8, 2>> saveGameMainMenuConfig2 = { {
     {{0x10, 0x13}},
 } };
 
-std::array<s32, 7> cursorPosXTable = { {
-        0x49, 0x48, 0x43, 0x3C, 0x34, 0x26, 0x17
+std::array<s32, 11> cursorPosXTable = { {
+        0x49, 0x48, 0x43, 0x3C, 0x34, 0x26, 0x17,
+        0x25, 0x24, 0x1F, 0x18
 } };
 
-std::array<s32, 7> cursorPosYTable = { {
-        0xC9, 0xB5, 0xA2, 0x90, 0x7E, 0x6F, 0x61
+std::array<s32, 11> cursorPosYTable = { {
+        0xC9, 0xB5, 0xA2, 0x90, 0x7E, 0x6F, 0x61,
+        0xC9, 0xB5, 0xA2, 0x90
+
 } };
 
 void updateCursorPolysLocation(int param_1, char param_2) {
@@ -1121,7 +1131,7 @@ void resetCursorState(void)
     return;
 }
 
-void countField33C_C(u8 count, std::array<u8, 8>& array)
+void countField33C_C(u8 count, std::span<s8>::iterator array)
 {
     for(int i=0; i<count; i++) {
         array[i] = 0;
@@ -1131,12 +1141,465 @@ void countField33C_C(u8 count, std::array<u8, 8>& array)
 u8 menuVarUnk0 = 1;
 u8 menuVarUnk1 = 1;
 
+std::vector<std::array<u8, 2>> menuConfig2 = { {
+    {0x1b, 0x1A},
+    {0x18, 0x19},
+    {0x16, 0x17},
+} };
+
+std::vector<std::array<u8, 2>> menuConfigDefault = { {
+    {0x1b, 0x1A},
+    {0x19, 0x18},
+    {0x16, 0x17},
+} };
+
+
+void processLoadSaveMenuSub0(void)
+{
+    std::vector<std::array<u8, 2>>::iterator pbVar1;
+
+    if (menuToEnter == '\x02') {
+        pbVar1 = menuConfig2.begin();
+    }
+    else {
+        pbVar1 = menuConfigDefault.begin();
+    }
+    j_setupMenuContext4E0(6, &gMenuContext->m4E0[0x12], pbVar1);
+    return;
+}
+
+
 int processLoadSaveMenu(char param_1, byte param_2)
 {
-    MissingCode();
+    bool bVar1;
+    char cVar2;
+    char cVar3;
+    byte bVar4;
+    int uVar5;
+    int iVar5;
+    int uVar6;
 
+    cVar3 = '\x01';
+    bVar1 = true;
+    iVar5 = 1;
+    menuVarUnk0 = 0;
+    gMenuContext->m338_currentSaveState = 2;
+    uVar6 = 0;
+    if ((menuToEnter == 0) && (menuOpenArg == 0)) {
+        gMenuContext->m338_currentSaveState = 1;
+    }
+    gMenuContext->m339 = -1;
+    processLoadSaveMenuSub0();
+    menuDraw();
+#if 0
+    if (true) {
+        do {
+            gMenuContext->m33C->mB = 0;
+            gMenuContext->m4D8 = 1;
+            if (bVar1) {
+                initMenuContext34C();
+                initMenuContext3A8_memoryCardDisplay();
+                gMenuContext->m32C_memoryCardContext->field_0x4fe4 = 1;
+                gMenuContext->m32C_memoryCardContext->field_0x4fe5 = 1;
+                processLoadSaveMenuSub1();
+                if (menuToEnter == 2) {
+                    uVar6 = 7;
+                }
+                else if (((menuToEnter < 3) && (menuToEnter == 0)) &&
+                    (processLoadSaveMenuSub2(0, 0), menuOpenArg == 0)) {
+                    uVar6 = 9;
+                }
+                processLoadSaveMenuSub3(uVar6);
+                gMenuContext->m33C->m6_drawPlayTime = 0;
+                bVar1 = false;
+                gMenuContext->m33C->m20_menuBoxEnabled[1] = 0;
+                cVar2 = processLoadSaveMenuSub4();
+                if (cVar2 != '\0') {
+                    if (menuToEnter != 0) {
+                        iVar5 = 0;
+                    }
+                    break;
+                }
+                gMenuContext->m33C->field_0x68 = 1;
+            }
+            if (DAT_Menu2__801e9778 != '\0') {
+                processLoadSaveMenuSub5(0x20);
+            }
+            cVar2 = processLoadSaveMenuSub6();
+            if (cVar2 != '\0') {
+                cVar3 = '\0';
+            }
+            if (DAT_Menu2__801e9778 != '\0') {
+                processLoadSaveMenuSub7();
+                DAT_Menu2__801e9778 = '\0';
+            }
+            if (cVar3 == '\0') break;
+            if (gMenuContext->m338_currentSaveState != gMenuContext->m339) {
+                updateMenuSelection2
+                (6, gMenuContext->m4E0 + 0x12, (int*)&menuConfig2, (int*)&DAT_Menu2__801e9ea0,
+                    &gMenuContext->m33C->field_0x1a, gMenuContext->m338_currentSaveState, 7, 0);
+                uVar5 = 7;
+                if (menuToEnter != 2) {
+                    uVar5 = 0;
+                }
+                processLoadSaveMenuSub8(uVar5);
+                gMenuContext->m339 = gMenuContext->m338_currentSaveState;
+            }
+            bVar4 = gMenuContext->m325_menuButton;
+            if (bVar4 == 3) {
+                bVar4 = gMenuContext->m338_currentSaveState + 1;
+                gMenuContext->m338_currentSaveState = bVar4;
+                if (gMenuContext->m33A_354_poly0Length <= bVar4) {
+                    gMenuContext->m338_currentSaveState = 0;
+                }
+            }
+            else if (bVar4 < 4) {
+                if (bVar4 == 1) {
+                    if (gMenuContext->m338_currentSaveState == '\0') {
+                        gMenuContext->m338_currentSaveState = gMenuContext->m33A_354_poly0Length - 1;
+                    }
+                    else {
+                        gMenuContext->m338_currentSaveState = gMenuContext->m338_currentSaveState + -1;
+                    }
+                }
+            }
+            else if (bVar4 == 4) {
+                resetCursorState();
+                countField33C_C(6, &gMenuContext->m33C->field_0x1a);
+                cVar3 = updateSaveState(param_2);
+                gMenuContext->m339 = -1;
+                processLoadSaveMenuSub0();
+                if (menuToEnter != 2) goto LAB_Menu2__801da330;
+            }
+            else if (bVar4 == 5) {
+            LAB_Menu2__801da330:
+                cVar3 = '\0';
+                if (param_1 != '\0') {
+                    iVar5 = 0;
+                }
+            }
+        } while (cVar3 != '\0');
+    }
+    if ((*(short*)&gMenuContext->m32C_memoryCardContext->field_0x4fe4 == 0) && (menuToEnter != 0)) {
+        iVar5 = 0;
+    }
+    gMenuContext->m33C->field_0x68 = 0;
+    gMenuContext->m33C->field_0xb = 0;
+    gMenuContext->m33C->m4_drawCursor = 0;
+    gMenuContext->m33C->m3 = 0;
+    countField33C_C(6, &gMenuContext->m33C->field_0x1a);
+    processLoadSaveMenuSub9();
+    return iVar5;
+#endif
     return 0;
 }
+
+void processLoadSaveMenuSub1(void)
+{
+    gMenuContext->m329 = 4;
+    playMenuSoundEffect(0x5c);
+    return;
+}
+
+
+void processLoadSaveMenuSub3(uint param_1)
+{
+    bool bVar1;
+    sMenuContext* psVar2;
+    int iVar3;
+    int iVar4;
+    int iVar5;
+    int iVar6;
+
+    psVar2 = gMenuContext;
+    bVar1 = true;
+    iVar6 = 1;
+    gMenuContext->m354->m1400_0Length = 0;
+    psVar2->m354->m1404_500Length = 0;
+    psVar2->m33C->mA_354Enabled = 1;
+    do {
+        psVar2 = gMenuContext;
+        iVar4 = 0;
+        gMenuContext->m354->m1400_0Length = 0;
+        psVar2->m33A_354_poly0Length = 0;
+        if (0 < iVar6) {
+            do {
+                if (saveGameMainMenuConfig
+                    [((param_1 & 0xff) + (uint)(byte)gMenuContext->m336_menuSelectedEntry) * 4 + iVar4 + 3]
+                    [0] == 0xffff) {
+                    bVar1 = false;
+                }
+                else {
+                    iVar3 = setupStringInPolyFT4
+                    (gMenuContext->m2DC_font,
+                        saveGameMainMenuConfig
+                        [((param_1 & 0xff) + (uint)(byte)gMenuContext->m336_menuSelectedEntry)
+                        * 4 + iVar4 + 3][0],
+                        &gMenuContext->m354->m0_polys[gMenuContext->m354->m1400_0Length],
+                        gMenuContext->m308_oddOrEven, 0xa0, 0x96, 0x1000);
+                    psVar2 = gMenuContext;
+                    gMenuContext->m354->m1400_0Length = iVar3 + gMenuContext->m354->m1400_0Length;
+                    psVar2->m33A_354_poly0Length = psVar2->m33A_354_poly0Length + 1;
+                }
+                iVar4 = iVar4 + 1;
+            } while (iVar4 < iVar6);
+        }
+        gMenuContext->m354->m1408_0OddOrEven = gMenuContext->m308_oddOrEven;
+        if (bVar1) {
+            iVar4 = 0;
+            do {
+                iVar4 = iVar4 + 1;
+                menuDraw();
+            } while (iVar4 < 2);
+        }
+        gMenuContext->m354->m1404_500Length = 0;
+        iVar4 = 0;
+        if (0 < iVar6) {
+            do {
+                iVar3 = (param_1 & 0xff) + (uint)(byte)gMenuContext->m336_menuSelectedEntry;
+                iVar5 = iVar4 + 1;
+                if (saveGameMainMenuConfig[iVar3 * 4 + iVar4 + 3][0] != 0xffff) {
+                    iVar4 = setupStringInPolyFT4
+                    (gMenuContext->m2DC_font,
+                        saveGameMainMenuConfig[iVar3 * 4 + iVar4 + 3][1],
+                        &gMenuContext->m354->m500_polys[gMenuContext->m354->m1404_500Length],
+                        gMenuContext->m308_oddOrEven, 0xa0, 0x96, 0x1000);
+                    gMenuContext->m354->m1404_500Length = iVar4 + gMenuContext->m354->m1404_500Length;
+                }
+                iVar4 = iVar5;
+            } while (iVar5 < iVar6);
+        }
+        gMenuContext->m354->m1409_500OddOrEven = gMenuContext->m308_oddOrEven;
+        if (bVar1) {
+            iVar4 = 0;
+            do {
+                iVar4 = iVar4 + 1;
+                menuDraw();
+            } while (iVar4 < 2);
+        }
+        iVar6 = iVar6 + 1;
+    } while (iVar6 < 5);
+    return;
+}
+
+
+
+std::vector<std::array<u8, 2>> soundMenuConfig = { {
+    {0x9B, 0x9C},
+    {0x9D, 0x7B}
+} };
+
+u16 musicStatusFlag = 0;
+
+int processSoundMenuSub0(void)
+{
+    int uVar1;
+
+    if ((musicStatusFlag & 0x700) == 0) {
+        uVar1 = 0;
+    }
+    else {
+        uVar1 = 1;
+        if ((musicStatusFlag & 0x600) != 0) {
+            uVar1 = 2;
+        }
+    }
+    return uVar1;
+}
+
+void processLoadSaveMenuSub8(uint param_1)
+{
+    sMenuContext* psVar1;
+    int iVar2;
+    int iVar3;
+    uint uVar4;
+
+    psVar1 = gMenuContext;
+    gMenuContext->m354->m1400_0Length = 0;
+    psVar1->m354->m1404_500Length = 0;
+    uVar4 = 0;
+    if (psVar1->m33A_354_poly0Length != 0) {
+        param_1 = param_1 & 0xff;
+        iVar3 = 0;
+        do {
+            if (uVar4 == (byte)gMenuContext->m338_currentSaveState) {
+                iVar2 = saveGameMainMenuConfig
+                    [(param_1 + (byte)gMenuContext->m336_menuSelectedEntry) * 4 + 3 + iVar3][0] + 0xd;
+            }
+            else {
+                iVar2 = saveGameMainMenuConfig
+                    [(param_1 + (byte)gMenuContext->m336_menuSelectedEntry) * 4 + 3 + iVar3][0];
+            }
+            iVar2 = setupStringInPolyFT4
+            (gMenuContext->m2DC_font, iVar2,
+                &gMenuContext->m354->m0_polys[gMenuContext->m354->m1400_0Length]
+                , gMenuContext->m308_oddOrEven, 0xa0, 0x96, 0x1000);
+            psVar1 = gMenuContext;
+            gMenuContext->m354->m1400_0Length = iVar2 + gMenuContext->m354->m1400_0Length;
+            iVar2 = setupStringInPolyFT4
+            (psVar1->m2DC_font,
+                saveGameMainMenuConfig
+                [(param_1 + (byte)psVar1->m336_menuSelectedEntry) * 4 + 3 + iVar3][1],
+                &psVar1->m354->m500_polys[psVar1->m354->m1404_500Length],
+                psVar1->m308_oddOrEven, 0xa0, 0x96, 0x1000);
+            psVar1 = gMenuContext;
+            uVar4 = uVar4 + 1;
+            gMenuContext->m354->m1404_500Length = iVar2 + gMenuContext->m354->m1404_500Length;
+            iVar3++;
+        } while ((int)uVar4 < (int)(uint)psVar1->m33A_354_poly0Length);
+    }
+    gMenuContext->m354->m1408_0OddOrEven = gMenuContext->m308_oddOrEven;
+    gMenuContext->m354->m1409_500OddOrEven = gMenuContext->m308_oddOrEven;
+    updateCursorPolysLocation((byte)gMenuContext->m338_currentSaveState + 7, 1);
+    gMenuContext->m33C->m4_drawCursor = 1;
+    return;
+}
+
+void changeSoundOption(int) {
+    MissingCode();
+}
+
+void updateMenuSelection2(int param_1, sMenuContext_4E0* param_2, std::array<u32, 19>::const_iterator param_3, std::array<int, 4>::iterator param_4, std::span<s8>::iterator param_5, byte param_6, byte param_7, int param_8)
+{
+    byte bVar1;
+    sMenuContext* psVar2;
+    SFP_VEC4* pSVar3;
+    short sVar4;
+    int iVar5;
+    short sVar6;
+    int* piVar7;
+    int* piVar8;
+    int* piVar9;
+    uint uVar10;
+    uint uVar11;
+
+    psVar2 = gMenuContext;
+    uVar11 = (uint)param_6;
+    uVar10 = (uint)param_7;
+    iVar5 = 0;
+
+    switch (param_8 & 0xff) {
+    case 0:
+        countField33C_C(param_1 & 0xff, param_5);
+        psVar2 = gMenuContext;
+        piVar9 = &cursorPosXTable[uVar10 + uVar11];
+        piVar7 = &param_4[uVar11];
+        param_2[uVar11].m0_polys[gMenuContext->m308_oddOrEven].x0 = *piVar9 + *piVar7 + 0x16;
+        piVar8 = &cursorPosYTable[uVar10 + uVar11];
+        param_2[uVar11].m0_polys[psVar2->m308_oddOrEven].y0 = *piVar8 + -0x22;
+        param_2[uVar11].m0_polys[psVar2->m308_oddOrEven].x1 = param_2[uVar11].m7E_stringWidth + *piVar9 + 0x16 + *piVar7;
+        param_2[uVar11].m0_polys[psVar2->m308_oddOrEven].y1 = *piVar8 + -0x22;
+        param_2[uVar11].m0_polys[psVar2->m308_oddOrEven].x2 = *piVar9 + *piVar7 + 0x16;
+        param_2[uVar11].m0_polys[psVar2->m308_oddOrEven].y2 = *piVar8 + -0x15;
+        param_2[uVar11].m0_polys[psVar2->m308_oddOrEven].x3 = param_2[uVar11].m7E_stringWidth + *piVar9 + 0x16 + *piVar7;
+        param_2[uVar11].m0_polys[psVar2->m308_oddOrEven].y3 = *piVar8 + -0x15;
+        param_2[uVar11].m7D = gMenuContext->m308_oddOrEven;
+        param_5[uVar11] = 1;
+        break;
+    default:
+        assert(0);
+    }
+}
+
+std::array<int, 4> soundMenuTable0 = { {
+    0x6, 0xC, 0x6, 0x0
+} };
+
+static const std::array<u32, 19> infocardNameU = { {0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18} };
+static const std::array<u32, 19> infocardNameV = { {0x3B,0x48,0x48,0x55,0x55,0x62,0x62,0x6F,0x6F,0x7C,0x7C,0x89,0x89,0x96,0x96,0xA3,0xA3,0xB0,0xB0} };
+
+
+int processSoundMenu(void)
+{
+    bool bVar1;
+    bool bVar2;
+    bool bVar3;
+    byte bVar4;
+    int iVar5;
+    int unaff_s0;
+
+    bVar2 = true;
+    bVar1 = true;
+    bVar3 = false;
+    do {
+        menuDraw();
+        if (bVar1) {
+            j_setupMenuContext4E0(4, &gMenuContext->m4E0[0x2e], soundMenuConfig.begin());
+            processLoadSaveMenuSub3(0);
+            gMenuContext->m339 = -1;
+            iVar5 = processSoundMenuSub0();
+            if (iVar5 == 1) {
+                unaff_s0 = 2;
+            }
+            else if (iVar5 < 2) {
+                if (iVar5 == 0) {
+                    unaff_s0 = 0;
+                }
+            }
+            else if (iVar5 == 2) {
+                unaff_s0 = 1;
+            }
+            bVar1 = false;
+            gMenuContext->m338_currentSaveState = (char)unaff_s0;
+        }
+        if (gMenuContext->m338_currentSaveState != gMenuContext->m339) {
+            updateMenuSelection2
+            (6, &gMenuContext->m4E0[0x2e], infocardNameU.begin(), soundMenuTable0.begin(),
+                std::span<s8>(gMenuContext->m33C->m5C.begin(), gMenuContext->m33C->m5C.end()).begin(), gMenuContext->m338_currentSaveState, 7, 0);
+            processLoadSaveMenuSub8(0);
+            gMenuContext->m339 = gMenuContext->m338_currentSaveState;
+        }
+        bVar4 = gMenuContext->m325_menuButton;
+        if (bVar4 == 3) {
+            bVar4 = gMenuContext->m338_currentSaveState + 1;
+            gMenuContext->m338_currentSaveState = bVar4;
+            if (gMenuContext->m33A_354_poly0Length <= bVar4) {
+                gMenuContext->m338_currentSaveState = 0;
+            }
+        }
+        else if (bVar4 < 4) {
+            if (bVar4 == 1) {
+                if (gMenuContext->m338_currentSaveState == '\0') {
+                    gMenuContext->m338_currentSaveState = gMenuContext->m33A_354_poly0Length - 1;
+                }
+                else {
+                    gMenuContext->m338_currentSaveState = gMenuContext->m338_currentSaveState + -1;
+                }
+            }
+        }
+        else {
+            if (bVar4 == 4) {
+                bVar3 = true;
+            }
+            else if (bVar4 != 5) goto LAB_Menu2__801d9a24;
+            bVar2 = false;
+        }
+    LAB_Menu2__801d9a24:
+        if (!bVar2) {
+            if (bVar3) {
+                bVar4 = gMenuContext->m338_currentSaveState;
+                if (bVar4 == 1) {
+                    unaff_s0 = 2;
+                }
+                else if (bVar4 < 2) {
+                    if (bVar4 == 0) {
+                        unaff_s0 = 0;
+                    }
+                }
+                else if (bVar4 == 2) {
+                    unaff_s0 = 1;
+                }
+                changeSoundOption(unaff_s0);
+            }
+            countField33C_C(4, std::span<s8>(gMenuContext->m33C->m5C.begin(), gMenuContext->m33C->m5C.end()).begin());
+            gMenuContext->m33C->m4_drawCursor = 0;
+            gMenuContext->m33C->m3 = 0;
+            return 1;
+        }
+    } while (true);
+}
+
+
 
 int menu2_executeMainMenuSelection(byte param_1) {
     
@@ -1148,9 +1611,12 @@ int menu2_executeMainMenuSelection(byte param_1) {
     case 0: // exit
         flag1 = 0;
         flag0 = 0;
-        break;        
+        break;
     case 6:
         flag1 = openStatusMenu();
+        break;
+    case 7:
+        flag1 = processSoundMenu();
         break;
     case 8:
         if (processLoadSaveMenu(1, 0)) {
@@ -1169,7 +1635,14 @@ int menu2_executeMainMenuSelection(byte param_1) {
 
     gMenuContext->m32C_memoryCardContext->m4FE6 = 0;
     if (flag1 != 0) {
-        assert(0);
+        processLoadSaveMenuSub1();
+        if (menuToEnter == '\0') {
+            processLoadSaveMenuSub2(1, 0);
+        }
+        else if (menuToEnter == '\x02') {
+            j_setupMenuContext4E0(8, &gMenuContext->m4E0[4], saveGameMainMenuConfig2.begin());
+            gMenuContext->m348_cursor->m15B = 0x4c;
+        }
     }
 
     MissingCode();
@@ -1214,7 +1687,7 @@ void loadSaveGameMenuExecute() {
         case 4:
             gMenuContext->m350_mainMenu->m1192 = 1;
             resetCursorState();
-            countField33C_C(8, gMenuContext->m33C->mC);
+            countField33C_C(8, std::span<s8>(gMenuContext->m33C->mC.begin(), gMenuContext->m33C->mC.end()).begin());
             gMenuContext->m348_cursor->m15B = 0x40;
             cVar1 = menu2_executeMainMenuSelection(7);
             menuVarUnk0 = 0;
@@ -1235,7 +1708,7 @@ void loadSaveGameMenuExecute() {
             menuReturnState0 = 1;
         }
         if (cVar1 == '\0') {
-            countField33C_C(8, gMenuContext->m33C->mC);
+            countField33C_C(8, std::span<s8>(gMenuContext->m33C->mC.begin(), gMenuContext->m33C->mC.end()).begin());
             return;
         }
     } while (true);
@@ -1278,11 +1751,15 @@ void mainMenuExecute() {
         case 4: // select
         {
             bool bVar1 = true;
-            MissingCode();
+            if ((gMenuContext->m336_menuSelectedEntry == '\x02') &&
+                (bVar1 = true, gMenuContext->m33B == '\0')) {
+                bVar1 = false;
+                playMenuSoundEffect(4);
+            }
             if (bVar1) {
                 gMenuContext->m350_mainMenu->m1192 = 1;
                 resetCursorState();
-                countField33C_C(8, gMenuContext->m33C->mC);
+                countField33C_C(8, std::span<s8>(gMenuContext->m33C->mC.begin(), gMenuContext->m33C->mC.end()).begin());
                 continueMenu = menu2_executeMainMenuSelection(0);
             }
             break;
@@ -1724,9 +2201,6 @@ void setupMenuPolyFT4(POLY_FT4* param_1, short x, short y, u8 u, u8 v, short wid
     param_1->v3 = v1;
 }
 
-static const std::array<u32, 19> infocardNameU = { {0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18} };
-static const std::array<u32, 19> infocardNameV = { {0x3B,0x48,0x48,0x55,0x55,0x62,0x62,0x6F,0x6F,0x7C,0x7C,0x89,0x89,0x96,0x96,0xA3,0xA3,0xB0,0xB0} };
-
 void updateCharacterPortraitAndName(s8 slot, uint characterId, short param_3, short param_4)
 {
     setupStringInPolyFT4(gMenuContext->m2DC_font, slot + 0x14b, &gMenuContext->m39C[slot]->m0_portraitPoly, gMenuContext->m308_oddOrEven, param_3, param_4, 0x1000);
@@ -2021,7 +2495,7 @@ std::vector<std::array<u8, 2>> mainMenuConfig2 = { {
 void processLoadSaveMenuSub2(bool show, bool hideGold)
 {
     if (!show) {
-        countField33C_C(8, gMenuContext->m33C->mC);
+        countField33C_C(8, std::span<s8>(gMenuContext->m33C->mC.begin(), gMenuContext->m33C->mC.end()).begin());
         setupInfoCardAnimation(0x60, 6, 0x100, 0x86, 8, 0);
         setupInfoCardAnimation(0x68, 0x3e, 0x108, 0x3e, 8, 1);
         setupInfoCardAnimation(0x70, 0x76, 0x110, -10, 8, 2);

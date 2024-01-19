@@ -422,6 +422,9 @@ struct sBattle800CDD40Sub {
     s8 m16;
     s8 m1A;
     s8 m1B;
+    s8 m1C;
+    s8 m1D;
+    s8 m1E;
     s8 m22;
     s8 m27;
 
@@ -436,6 +439,9 @@ struct sBattle800CDD40Sub {
         m16 = READ_LE_S8(inputBuffer + 0x16);
         m1A = READ_LE_S8(inputBuffer + 0x1A);
         m1B = READ_LE_S8(inputBuffer + 0x1B);
+        m1C = READ_LE_S8(inputBuffer + 0x1C);
+        m1D = READ_LE_S8(inputBuffer + 0x1D);
+        m1E = READ_LE_S8(inputBuffer + 0x1E);
         m22 = READ_LE_S8(inputBuffer + 0x22);
         m27 = READ_LE_S8(inputBuffer + 0x27);
     }
