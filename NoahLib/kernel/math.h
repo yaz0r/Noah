@@ -114,3 +114,5 @@ VECTOR* ApplyRotMatrixLV(VECTOR* $2, VECTOR* $3);
 VECTOR* ApplyRotMatrix(SVECTOR* $2, VECTOR* $3);
 void setupVector(VECTOR* param_1, long param_2, long param_3, long param_4);
 void setupSVector(SVECTOR* param_1, short param_2, short param_3, short param_4);
+
+s32  RotTransPers3(const SVECTOR* v0, const SVECTOR* v1, const SVECTOR* v2, sVec2_s16* p0, sVec2_s16* p1, sVec2_s16* p2, s32* p, s32* flag);

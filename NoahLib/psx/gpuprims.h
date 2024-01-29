@@ -413,7 +413,7 @@ struct LINE_F3 : public sTag
     sVec2_s16 x2y2;
     u32 pad;
 
-    void execute() {}
+    void execute();
 };
 
 struct POLY_GT3 : public sTag

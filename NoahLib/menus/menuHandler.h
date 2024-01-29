@@ -12,8 +12,43 @@ struct sMenuContext_1D4 {
     std::array<sTag, 16> m70_OT;
 };
 
+struct sMenuContext_32C_5C {
+    int m0;
+    int m4;
+    int m8;
+    int mC;
+    int m10;
+    int m14;
+    std::array<char, 0xC> m18_name;
+    s8 m58;
+    //size 0x5C
+};
+
+// First few blocks of a save, containing basic info + icons
+struct sMenuContext_32C_B94 {
+    u8 m2_IconDisplayFlag;
+    s8 m3_blockNumber;
+    std::array<u16, 16> m60_iconsPalette;
+    std::array<std::array<u8, 128>, 3> m80_icons;
+    //size 0x200
+};
+
 struct sMenuContext_32C {
-    u8 m4FE6;
+    std::array<sMenuContext_32C_5C, 32> m0;
+    std::array<sMenuContext_32C_B94, 32> mB94;
+    std::array<s32, 2> m4F74;
+    s32 m4F7C;
+    s32 m4F80;
+    s32 m4F84;
+    std::array<u8, 2> m4F88;
+    std::array<u8, 2> m4F8A;
+    std::array<u8, 2> m4F8C;
+    std::array<s8, 32> m4F8E;
+    std::array<s8, 32> m4FAE;
+    std::array<s8, 12> m4FCE;
+    std::array<u8, 4> m4FE4;
+    std::array<s8, 4> m4FE8;
+    std::array<u32, 4> m4FEC_events;
 };
 
 struct sMenuContext_330 {
@@ -29,10 +64,14 @@ struct sMenuContext_33C {
     u8 mA_354Enabled = 0;
     u8 mB = 0;
     std::array<s8, 8> mC = { 0,0,0,0,0,0,0,0 };
+    std::array<s8, 6> m1A;
     std::array<u8, 7> m20_menuBoxEnabled = { 0,0,0,0,0,0,0 };
     std::array<u8, 7> m27 = { 0,0,0,0,0,0,0 };
-    std::array<s8, 3> m30 = { 0,0,0 };
+    u8 m2E_drawCheckingMemorycardText;
+    u8 m2F_draw428;
+    std::array<s8, 7> m30 = { 0,0,0 };
     std::array<s8, 7> m5C = { 0,0,0,0, 0,0,0 };
+    u8 m68;
 };
 
 struct sMenuContext_348 {
@@ -70,16 +109,19 @@ struct sMenuContext_354 {
 };
 
 struct sMenuContext_428 {
+    u8 m144;
 };
 
 struct sMenuContext_4E0 {
     std::array<POLY_FT4, 2> m0_polys;
+    std::array<SFP_VEC4, 4> m50_vertex;
     std::vector<u16> m78_imageData;
     RECT m70_rect;
     u8 m7C_colorMode;
     u8 m7D;
     u8 m7E_stringWidth;
     u8 m7F;
+    // size 0x80
 };
 
 struct sMenuContext_344_playTime {
@@ -152,6 +194,7 @@ struct sMenuContext_380 {
     s8 m10;
     s8 m11_draw380;
     s8 m12;
+    s8 m13;
 };
 
 struct sMenuContextMenuTile {
@@ -184,6 +227,7 @@ struct sMenuContext {
     sMenuContext_1D4* m1D4_currentDrawContext = nullptr;
     SFP_VEC4 m1D8_menuRotation = { 0,0,0,0 };
     FP_VEC4 m1E0_menuTranslation = { 0,0,0,0 };
+    MATRIX m1F0_menuMatrix;
     SFP_VEC4 m218_menuRotation2 = { 0,0,0,0 };
     FP_VEC4 m220_menuTranslation2 = { 0,0,0,0 };
     sFont m2DC_font;
@@ -225,6 +269,7 @@ struct sMenuContext {
     std::array<sMenuContextMenuTile, 4> m46C_menuBorders;
     std::array<sMenuContext_4E0, 50> m4E0;
     s8 m4D8;
+    std::array<sMenuContext_4E0*, 4> m1DE0;
     u8 m1E94;
     u8 m1E95;
 };
@@ -243,3 +288,4 @@ void playMenuSoundEffect(uint param_1);
 u8 renderString(std::vector<u8>::iterator buffer, std::vector<u16>& param_2, ushort param_3, byte param_4);
 void processLoadSaveMenuSub2(bool show, bool hideGold);
 void initMemoryCardTransparentPoly(POLY_FT4* param_1);
+void initMemoryCardPolyVerts(std::array<SFP_VEC4, 4>& param_1, short param_2, short param_3, short param_4, short param_5);

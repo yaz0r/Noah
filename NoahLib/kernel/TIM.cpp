@@ -116,6 +116,11 @@ void LoadImage(RECT* pRect, const u8* data)
 	}
 }
 
+void LoadImage(RECT* pRect, std::span<u16>::iterator data)
+{
+    LoadImage(pRect, (u8*)&data[0]);
+}
+
 void LoadImage(RECT* pRect, std::span<u8>::iterator data)
 {
 	for (int y = 0; y < pRect->h; y++)

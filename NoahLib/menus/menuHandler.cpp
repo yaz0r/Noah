@@ -12,11 +12,13 @@
 
 #include "menus/menuGold.h"
 #include "menus/statusMenu.h"
+#include "menus/memoryCardMenu.h"
+#include "menus/memoryCardTiles.h"
 
 sMenuContext *gMenuContext = nullptr;
 
-void updateMenuSelection(u8 count, u8 selectedEntry, std::vector<std::array<u32, 2>>::iterator config);
-
+void updateMenuSelection(u8 count, u8 selectedEntry, std::span<std::array<u32, 2>>::iterator config);
+void updateMenuSelection2(int param_1, sMenuContext_4E0* param_2, void* param_3_unused, std::span<int>::iterator param_4, std::span<s8>::iterator param_5, byte param_6, byte param_7, int param_8);
 s32 menuIdToOpen = 0xFF;
 s32 menuOpenCount;
 
@@ -25,6 +27,30 @@ u8 menuToEnter = 0;
 
 sLoadableDataRaw menuSharedResources;
 sLoadableDataRaw menuOverlay;
+
+void processLoadSaveMenuSub1(void);
+void processLoadSaveMenuSub3(uint param_1);
+int processLoadSaveMenuSub6(void);
+void processLoadSaveMenuSub8(uint param_1);
+void draw380(uint param_1, short param_2, short param_3, short param_4, short param_5, byte param_6, s32 param_7, char param_8);
+
+std::array<int, 4> soundMenuTable0 = { {
+    0x6, 0xC, 0x6, 0x0
+} };
+
+std::array<int, 4> saveGameMainMenuConfig4 = { {
+    0x0, 0x6, 0x0, 0x0
+} };
+
+std::array<int, 9> saveGameMainMenuConfig5 = { {
+    0x12, 0xC, 0xC, 0xB0,
+    0x80, 0xB0, 0x76, 0x92,
+    0xAE
+} };
+
+static std::array<int, 19> infocardNameU = { {0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18} };
+static std::array<int, 19> infocardNameV = { {0x3B,0x48,0x48,0x55,0x55,0x62,0x62,0x6F,0x6F,0x7C,0x7C,0x89,0x89,0x96,0x96,0xA3,0xA3,0xB0,0xB0} };
+
 
 void setupMenuContext1D4(sMenuContext_1D4* param_1)
 {
@@ -398,7 +424,7 @@ void initMenuContext_1DE0(sMenuContext_4E0* param_1, int param_2, int param_3, b
     param_1->m7F = 0;
 }
 
-void setupMenuContext4E0(sMenuContext_4E0* param_1, const std::vector<std::array<u8,2>>::iterator& param_2, int startY, int count) {
+void setupMenuContext4E0(sMenuContext_4E0* param_1, const std::span<std::array<u8,2>>::iterator& param_2, int startY, int count) {
     for (int i = 0; i < count; i +=2) {
         sMenuContext_4E0* pEntry = &param_1[i];
         sMenuContext_4E0* pEntry2 = &param_1[i+1];
@@ -430,7 +456,7 @@ void initMenuContext4E0(void)
 {
     initFontPalettes(0, 0x1d1);
     gMenuContext->m4E0[0].m78_imageData.resize(0x1C7);
-    setupMenuContext4E0(&gMenuContext->m4E0[0], DAT_Menu2__801ea524.begin(), 0, 4);
+    setupMenuContext4E0(&gMenuContext->m4E0[0], std::span(DAT_Menu2__801ea524.begin(), DAT_Menu2__801ea524.end()).begin(), 0, 4);
     loadBlankImage();
 }
 
@@ -702,11 +728,43 @@ void drawCharacterInfoCards() {
     }
 }
 
+void drawMenu_380() {
+    for (int i = 0; i < 7; i++) {
+        if ((gMenuContext->m33C->m27[i] != 0) && (gMenuContext->m380[i]->m11_draw380 == 0)) {
+            auto psVar4 = gMenuContext->m380[i];
+            auto bVar1 = psVar4->m8 + 0x20 < (uint)psVar4->m4;
+            int uVar2;
+            if (bVar1) {
+                uVar2 = psVar4->m8 + 0x20;
+            }
+            else {
+                uVar2 = psVar4->m4;
+            }
+            int cVar3 = !bVar1;
+            psVar4->m8 = uVar2;
+            if (psVar4->mA + 0x20 < (uint)psVar4->m6) {
+                uVar2 = psVar4->mA + 0x20;
+            }
+            else {
+                uVar2 = psVar4->m6;
+                cVar3 = cVar3 + '\x01';
+            }
+            psVar4->mA = uVar2;
+            if (cVar3 == '\x02') {
+                psVar4->m11_draw380 = 1;
+            }
+            draw380(psVar4->m10, (psVar4->m0 + (psVar4->m4 >> 1)) - (psVar4->m8 >> 1),
+                (psVar4->m2 + (psVar4->m6 >> 1)) - (psVar4->mA >> 1), psVar4->m8, psVar4->mA, psVar4->m12
+                , psVar4->mC, psVar4->m13);
+        }
+    }
+}
+
 void drawMenu0(void)
 {
     MissingCode();
-    /*drawMenu_380();
-    drawMenu2_sub();
+    drawMenu_380();
+    /*drawMenu2_sub();
     drawMenu_428();*/
     drawMenu_348_cursor();
     MissingCode();
@@ -732,16 +790,48 @@ void drawMenu0(void)
     return;
 }
 
+void drawMenu_34C(void) {
+    if (gMenuContext->m33C->mB != '\0') {
+        assert(0);
+    }
+}
+
+void drawMenu_428() {
+    if (gMenuContext->m33C->m2F_draw428 != '\0') {
+        assert(0);
+    }
+}
+
+void drawMenu_4D8_is_2() {
+    if (gMenuContext->m4D8 == 2) {
+        assert(0);
+    }
+}
+
+void drawMenuMemoryCard_sub0(int param_1, int param_2, int param_3) {
+    for(int i=param_1; i<param_3; i++) {
+        if (gMenuContext->m32C_memoryCardContext->m0[i].m58) {
+            assert(0);
+        }
+    }
+}
+
+void drawMenuMemoryCard() {
+    drawMenu_4D8_is_2();
+    drawMenuMemoryCard_sub0(0, 0, 0x10);
+    drawMenuMemoryCard_sub0(0x10, 0x10, 0x20);
+    drawMenu_memoycard_tilesLines();
+    MissingCode();
+}
+
 void drawMenu2(void)
 {
-    MissingCode();
-    //drawMenu_380();
+    drawMenu_380();
     //drawMenu2_sub();
-    //drawMenu_428();
+    drawMenu_428();
     drawMenu_348_cursor();
-    MissingCode();
-    //drawMenu_34C();
-    //drawMenuMemoryCard();
+    drawMenu_34C();
+    drawMenuMemoryCard();
     drawMainMenu();
     //drawMenuContext354();
     drawMenuBoxes();
@@ -977,6 +1067,69 @@ void drawMenuPlayTime(void)
     return;
 }
 
+
+void updateMenuTransforms(void)
+{
+    short sVar1;
+    sMenuContext* psVar2;
+    byte bVar3;
+    int iVar4;
+
+    psVar2 = gMenuContext;
+    bVar3 = gMenuContext->m329;
+    if (bVar3 == 2) {
+        sVar1 = (gMenuContext->m1D8_menuRotation).vy;
+        iVar4 = (gMenuContext->m1E0_menuTranslation).vz + 0x40;
+        (gMenuContext->m1E0_menuTranslation).vz = iVar4;
+        (psVar2->m1D8_menuRotation).vy = sVar1 + -0x60;
+        if (0xdff < iVar4) {
+            psVar2->m329 = 0;
+        }
+    }
+    else if (bVar3 < 3) {
+        if (bVar3 == 1) {
+            sVar1 = (gMenuContext->m1D8_menuRotation).vx;
+            iVar4 = (gMenuContext->m1E0_menuTranslation).vz + -0x30;
+            (gMenuContext->m1E0_menuTranslation).vz = iVar4;
+            (psVar2->m1D8_menuRotation).vx = sVar1 + 0x7c;
+            if (iVar4 < 0x200) {
+                (psVar2->m1E0_menuTranslation).vz = 0x200;
+                (psVar2->m1D8_menuRotation).vz = 0;
+                (psVar2->m1D8_menuRotation).vx = 0;
+                (psVar2->m1D8_menuRotation).vy = 0;
+                psVar2->m329 = 0;
+            }
+        }
+    }
+    else {
+        if (bVar3 == 3) {
+            (gMenuContext->m1E0_menuTranslation).vz = 0x800;
+            bVar3 = 1;
+        }
+        else {
+            if (bVar3 != 4) goto LAB_Menu2__801d1e20;
+            (gMenuContext->m1E0_menuTranslation).vz = 0x200;
+            bVar3 = 2;
+        }
+        (psVar2->m1D8_menuRotation).vz = 0;
+        (psVar2->m1D8_menuRotation).vy = 0;
+        (psVar2->m1D8_menuRotation).vx = 0;
+        (psVar2->m1E0_menuTranslation).vy = 0;
+        (psVar2->m1E0_menuTranslation).vx = 0;
+        psVar2->m329 = bVar3;
+    }
+LAB_Menu2__801d1e20:
+    createRotationMatrix(&gMenuContext->m1D8_menuRotation, &gMenuContext->m1F0_menuMatrix);
+    TransMatrix(&gMenuContext->m1F0_menuMatrix, (VECTOR*)&gMenuContext->m1E0_menuTranslation);
+    SetRotMatrix(&gMenuContext->m1F0_menuMatrix);
+    SetTransMatrix(&gMenuContext->m1F0_menuMatrix);
+    return;
+}
+
+
+
+u32 getRandomValueInRange(u32 param_1, u32 param_2);
+
 void menuDraw() {
     MissingCode();
 
@@ -986,7 +1139,8 @@ void menuDraw() {
 
     ClearOTagR(&gMenuContext->m1D4_currentDrawContext->m70_OT[0], 0x10);
 
-    MissingCode();
+    getRandomValueInRange(0, 0xff);
+    updateMenuTransforms();
 
     gMenuContext->m2D8_frameCounter = gMenuContext->m2D8_frameCounter + 1;
     updatePlayTimeString(playTimeInVsync);
@@ -1003,20 +1157,82 @@ void menuDraw() {
     MissingCode();
 }
 
-std::vector<std::array<u32, 2>> saveGameMainMenuConfig = { {
-    {{0x109, 0x125}},
-    {{0x10A, 0x124}},
-    {{0x10B, 0x123}},
-    {{0x110, 0x142}},
-    {{0x111, 0x141}},
-    {{0x112, 0x140}},
-    {{0xFFFF, 0xFFFF}},
-    {{0x110, 0x12A}},
-    {{0x111, 0x129}},
-    {{0x112, 0x127}},
+std::array<std::array<u32, 2>, 3> saveGameMainMenuConfig = { {
+    { {0x109, 0x125} },
+    { {0x10A, 0x124} },
+    { {0x10B, 0x123} },
 } };
 
-void setupMainMenuWithConfig(int count, std::vector<std::array<u32, 2>>::iterator config) {
+std::array<std::array<std::array<u32, 2>, 4>, 11> saveGameMainMenuConfig3 = { {
+    {{
+        {{0x110, 0x142}},
+        {{0x111, 0x141}},
+        {{0x112, 0x140}},
+        {{0xFFFF, 0xFFFF}},
+    }},
+    {{
+        {{0x110, 0x12A}},
+        {{0x111, 0x129}},
+        {{0x112, 0x127}},
+        {{0xFFFF, 0xFFFF}},
+    }},
+    {{
+        {{0x110, 0x13E}},
+        {{0x111, 0x13D}},
+        {{0x112, 0x13C}},
+        {{0x113, 0x13F}},
+    }},
+    {{
+        {{0x110, 0x126}},
+        {{0xFFFF, 0xFFFF}},
+        {{0xFFFF, 0xFFFF}},
+        {{0xFFFF, 0xFFFF}},
+    }},
+    {{
+        {{0x110, 0x126}},
+        {{0xFFFF, 0xFFFF}},
+        {{0xFFFF, 0xFFFF}},
+        {{0xFFFF, 0xFFFF}},
+    }},
+    {{
+        {{0x110, 0x126}},
+        {{0xFFFF, 0xFFFF}},
+        {{0xFFFF, 0xFFFF}},
+        {{0xFFFF, 0xFFFF}},
+    }},
+    {{
+        {{0x110, 0x134}},
+        {{0x111, 0x133}},
+        {{0x112, 0x132}},
+        {{0xFFFF, 0xFFFF}},
+    }},
+    {{
+        {{0x110, 0x131}},
+        {{0x111, 0x126}},
+        {{0xFFFF, 0xFFFF}},
+        {{0xFFFF, 0xFFFF}},
+    }},
+    {{
+        {{0x110, 0x12A}},
+        {{0x111, 0x129}},
+        {{0x112, 0x128}},
+        {{0xFFFF, 0xFFFF}},
+    }},
+    {{
+        {{0x110, 0x126}},
+        {{0xFFFF, 0xFFFF}},
+        {{0xFFFF, 0xFFFF}},
+        {{0xFFFF, 0xFFFF}},
+    }},
+    {{
+        {{0x110, 0x12A}},
+        {{0x111, 0x129}},
+        {{0xFFFF, 0xFFFF}},
+        {{0xFFFF, 0xFFFF}},
+    }},
+} };
+
+void setupMainMenuWithConfig(int count, std::span<std::array<u32, 2>>::iterator config) {
     gMenuContext->m350_mainMenu->m1192 = 0;
     gMenuContext->m350_mainMenu->m1193 = 0;
     gMenuContext->m33C->m9_drawMainMenu = 1;
@@ -1044,13 +1260,13 @@ void setupMainMenuWithConfig(int count, std::vector<std::array<u32, 2>>::iterato
     }
 }
 
-void j_setupMenuContext4E0(uint param_1, sMenuContext_4E0* param_2, const std::vector<std::array<u8, 2>>::iterator& param_3)
+void j_setupMenuContext4E0(uint param_1, sMenuContext_4E0* param_2, const std::span<std::array<u8, 2>>::iterator& param_3)
 {
     setupMenuContext4E0(param_2, param_3, 4, param_1 & 0xff);
     return;
 }
 
-std::vector<std::array<u8, 2>> saveGameMainMenuConfig2 = { {
+std::array<std::array<u8, 2>, 4> saveGameMainMenuConfig2 = { {
     {{0x8, 0x1}},
     {{0x0, 0x0}},
     {{0x12, 0x11}},
@@ -1101,7 +1317,7 @@ void updateCursorPolysLocation(int param_1, char param_2) {
     }
 }
 
-void updateMenuSelection(u8 count, u8 selectedEntry, std::vector<std::array<u32, 2>>::iterator config) {
+void updateMenuSelection(u8 count, u8 selectedEntry, std::span<std::array<u32, 2>>::iterator config) {
     gMenuContext->m350_mainMenu->m1188_numEntries2 = 0;
     gMenuContext->m350_mainMenu->m118C_numEntries = 0;
 
@@ -1156,18 +1372,652 @@ std::vector<std::array<u8, 2>> menuConfigDefault = { {
 
 void processLoadSaveMenuSub0(void)
 {
-    std::vector<std::array<u8, 2>>::iterator pbVar1;
+    std::span<std::array<u8, 2>>::iterator pbVar1;
 
     if (menuToEnter == '\x02') {
-        pbVar1 = menuConfig2.begin();
+        pbVar1 = std::span(menuConfig2.begin(), menuConfig2.end()).begin();
     }
     else {
-        pbVar1 = menuConfigDefault.begin();
+        pbVar1 = std::span(menuConfigDefault.begin(), menuConfigDefault.end()).begin();
     }
     j_setupMenuContext4E0(6, &gMenuContext->m4E0[0x12], pbVar1);
     return;
 }
 
+typedef void(*cdCallbackType)(int status, u8* result);
+
+cdCallbackType memoryCard_backupSyncCallback = nullptr;
+cdCallbackType memoryCard_backupReadyCallback = nullptr;
+cdCallbackType memoryCard_backupReadCallback = nullptr;
+
+cdCallbackType CdSyncCallback(cdCallbackType newCallback) {
+    static cdCallbackType currentCallback = nullptr;
+    cdCallbackType temp = currentCallback;
+    currentCallback = newCallback;
+    MissingCode();
+    return currentCallback;
+}
+
+cdCallbackType CdReadyCallback(cdCallbackType newCallback) {
+    static cdCallbackType currentCallback = nullptr;
+    cdCallbackType temp = currentCallback;
+    currentCallback = newCallback;
+    MissingCode();
+    return currentCallback;
+}
+
+cdCallbackType CdReadCallback(cdCallbackType newCallback) {
+    static cdCallbackType currentCallback = nullptr;
+    cdCallbackType temp = currentCallback;
+    currentCallback = newCallback;
+    MissingCode();
+    return currentCallback;
+}
+
+void EnterCriticalSection() {
+    MissingCode();
+}
+
+void ExitCriticalSection() {
+    MissingCode();
+}
+
+u32 OpenEvent(u32 desc, u32 spec, u32 mode, void(*func)()) {
+    MissingCode();
+    return 0;
+}
+
+u32 CloseEvent(u32 event) {
+    MissingCode();
+    return 1;
+}
+
+u32 EnableEvent(u32 event) {
+    MissingCode();
+    return 1;
+}
+
+void closeMemoryCardsEvents(void)
+{
+    menuDraw();
+    EnterCriticalSection();
+    CloseEvent(gMenuContext->m32C_memoryCardContext->m4FEC_events[0]);
+    CloseEvent(gMenuContext->m32C_memoryCardContext->m4FEC_events[1]);
+    CloseEvent(gMenuContext->m32C_memoryCardContext->m4FEC_events[2]);
+    CloseEvent(gMenuContext->m32C_memoryCardContext->m4FEC_events[3]);
+    ExitCriticalSection();
+    return;
+}
+
+void initMemoryCardsAndSpu(u32) {
+    MissingCode();
+}
+
+void startCardsLib() {
+    MissingCode();
+}
+
+void _bu_init() {
+    MissingCode();
+}
+
+void startMemoryCard(void)
+{
+    sMenuContext* psVar1;
+    uint uVar2;
+
+    closeMemoryCardsEvents();
+    VSync(0);
+    initMemoryCardsAndSpu(1);
+    startCardsLib();
+    _bu_init();
+    DrawSync(0);
+    VSync(0);
+    EnterCriticalSection();
+    uVar2 = OpenEvent(0xf4000001, 4, 0x2000, 0);
+    gMenuContext->m32C_memoryCardContext->m4FEC_events[0] = uVar2;
+    uVar2 = OpenEvent(0xf4000001, 0x8000, 0x2000, 0);
+    gMenuContext->m32C_memoryCardContext->m4FEC_events[1] = uVar2;
+    uVar2 = OpenEvent(0xf4000001, 0x100, 0x2000, 0);
+    gMenuContext->m32C_memoryCardContext->m4FEC_events[2] = uVar2;
+    uVar2 = OpenEvent(0xf4000001, 0x2000, 0x2000, 0);
+    psVar1 = gMenuContext;
+    gMenuContext->m32C_memoryCardContext->m4FEC_events[3] = uVar2;
+    EnableEvent(psVar1->m32C_memoryCardContext->m4FEC_events[0]);
+    EnableEvent(gMenuContext->m32C_memoryCardContext->m4FEC_events[1]);
+    EnableEvent(gMenuContext->m32C_memoryCardContext->m4FEC_events[2]);
+    EnableEvent(gMenuContext->m32C_memoryCardContext->m4FEC_events[3]);
+    ExitCriticalSection();
+    return;
+}
+
+
+void processLoadSaveMenuSub5(uint param_1)
+{
+    char cVar1;
+    u8 uVar2;
+    short sVar3;
+    sMenuContext* psVar4;
+    sMenuContext_4E0* psVar5;
+    u8* puVar6;
+    int iVar8;
+    sMenuContext_380* psVar9;
+    uint uVar10;
+    int iVar11;
+
+    iniMenuContext364And380(2, 0x7a, 0x96, 0xbc, 0x40, 1, 1, 4, 0);
+    psVar9 = gMenuContext->m380[2];
+    cVar1 = psVar9->m11_draw380;
+    while (cVar1 == '\0') {
+        menuDraw();
+        cVar1 = psVar9->m11_draw380;
+    }
+    uVar10 = 0;
+    do {
+        psVar5 = new sMenuContext_4E0;
+        gMenuContext->m1DE0[uVar10] = psVar5;
+        memset(psVar5, sizeof(sMenuContext_4E0), 0);
+        if ((uVar10 & 1) == 0) {
+            psVar4 = gMenuContext;
+            gMenuContext->m1DE0[uVar10]->m78_imageData.resize(741);
+            (psVar4->m1DE0[uVar10]->m70_rect).x = 0x140;
+            (psVar4->m1DE0[uVar10]->m70_rect).y = (short)((int)uVar10 / 2) * 0xd + 0x4e;
+            (psVar4->m1DE0[uVar10]->m70_rect).w = 0x3a;
+            (psVar4->m1DE0[uVar10]->m70_rect).h = 0xd;
+        }
+        else {
+            gMenuContext->m1DE0[uVar10]->m78_imageData = gMenuContext->m1DE0[uVar10 - 1]->m78_imageData;
+        }
+        uVar10 = uVar10 + 1;
+    } while ((int)uVar10 < 4);
+    iVar11 = 0;
+    do {
+        psVar5 = gMenuContext->m1DE0[iVar11];
+        auto pcVar7 = getDialogParamPointer(gMenuContext->m2E0_textBundle.begin(), (param_1 & 0xff) + iVar11);
+        cVar1 = (char)(iVar11 / 2);
+        iVar8 = renderString(pcVar7, psVar5->m78_imageData, 0x36, (char)iVar11 + cVar1 * -2);
+        psVar5->m7E_stringWidth = (byte)iVar8;
+        initMenuContext_1DE0(psVar5, iVar11, 0, 0);
+        sVar3 = (short)iVar11 * 0x10 + 0xa0;
+        setupMenuPolyFT4(&psVar5->m0_polys[gMenuContext->m308_oddOrEven], 0x84, sVar3, 0, cVar1 * '\r' + 'N', (ushort)psVar5->m7E_stringWidth, 0xd);
+        initMemoryCardPolyVerts(psVar5->m50_vertex, 0x84, sVar3, (ushort)psVar5->m7E_stringWidth, 0xd);
+        iVar11 = iVar11 + 1;
+        uVar2 = gMenuContext->m308_oddOrEven;
+        psVar5->m7F = 1;
+        psVar5->m7D = uVar2;
+    } while (iVar11 < 3);
+    LoadImage(&gMenuContext->m1DE0[0]->m70_rect, std::span<u16>(gMenuContext->m1DE0[0]->m78_imageData.begin(), gMenuContext->m1DE0[0]->m78_imageData.end()).begin());
+    LoadImage(&gMenuContext->m1DE0[2]->m70_rect, std::span<u16>(gMenuContext->m1DE0[2]->m78_imageData.begin(), gMenuContext->m1DE0[2]->m78_imageData.end()).begin());
+    DrawSync(0);
+    gMenuContext->m33C->m2E_drawCheckingMemorycardText = 1;
+    gMenuContext->m1DE0[0]->m78_imageData.clear();
+    gMenuContext->m1DE0[2]->m78_imageData.clear();
+    menuDraw();
+    menuDraw();
+    return;
+}
+
+void processLoadSaveMenuSub7Sub0(uint param_1)
+{
+    param_1 = param_1 & 0xff;
+    gMenuContext->m33C->m20_menuBoxEnabled[param_1] = 0;
+    gMenuContext->m33C->m27[param_1] = 0;
+    delete gMenuContext->m364_menuBoxes[param_1];
+    delete gMenuContext->m380[param_1];
+    return;
+}
+
+void processLoadSaveMenuSub7(void)
+{
+    sMenuContext_4E0** ppsVar1;
+
+    if (gMenuContext->m33C->m20_menuBoxEnabled[2] != 0) {
+        processLoadSaveMenuSub7Sub0(2);
+        gMenuContext->m33C->m2E_drawCheckingMemorycardText = 0;
+        for (int i = 0; i < 4; i++) {
+            delete gMenuContext->m1DE0[i];
+        }
+    }
+    menuDraw();
+    return;
+}
+
+
+int processLoadSaveMenuSub4() {
+    char cVar1;
+    int uVar2;
+    sMenuContext_32C* psVar3;
+
+    processLoadSaveMenuSub5(0x20);
+    gMenuContext->m33C->m30[3] = 1;
+    while (gMenuContext->m329 != 0) {
+        menuDraw();
+    }
+    gMenuContext->m32C_memoryCardContext->m4FE4[3] = 1;
+    menuDraw();
+    startMemoryCard();
+    DrawSync(0);
+    VSync(0);
+    EnterCriticalSection();
+    memoryCard_backupSyncCallback = CdSyncCallback(nullptr);
+    memoryCard_backupReadyCallback = CdReadyCallback(nullptr);
+    memoryCard_backupReadCallback = CdReadCallback(nullptr);
+    ExitCriticalSection();
+    psVar3 = gMenuContext->m32C_memoryCardContext;
+    psVar3->m4FE8[1] = -1;
+    psVar3->m4FE8[0] = -1;
+    gMenuContext->m32C_memoryCardContext->m4F88[0] = 0;
+    gMenuContext->m32C_memoryCardContext->m4F88[1] = 0;
+    gMenuContext->m32C_memoryCardContext->m4FE4[2] = 2;
+    gMenuContext->m326 = 0x3c;
+    menuDraw();
+    menuDraw();
+    cVar1 = processLoadSaveMenuSub6();
+    uVar2 = 1;
+    if (cVar1 == '\0') {
+        if (gMenuContext->m33C->m30[3] != 0) {
+            processLoadSaveMenuSub7();
+            gMenuContext->m33C->m30[3] = 0;
+        }
+        uVar2 = 0;
+    }
+    return uVar2;
+}
+
+u8 processLoadSaveMenuSub6Var0 = 0;
+u8 processLoadSaveMenuSub6Var1 = 0x1E;
+
+std::array<u32, 2> processLoadSaveMenuSub6Var2;
+
+void erase(const char* name) {
+    MissingCode();
+}
+
+FILE* open(const char* name, int mode) {
+    assert(0);
+    return nullptr;
+}
+
+int read(FILE* fHandle, void* dest, int size) {
+    assert(0);
+    return 0;
+}
+
+void close(FILE* fHandle) {
+    assert(0);
+}
+
+int readSaveTitleFrame(char* param_1, sMenuContext_32C_B94* param_2)
+{
+    FILE* __fd;
+    int iVar1;
+    int sVar2;
+
+    __fd = open(param_1, 3);
+    iVar1 = -1;
+    if (__fd != nullptr) {
+        sVar2 = read(__fd, param_2, 0x200);
+        if (sVar2 == 0x200) {
+            close(__fd);
+            iVar1 = 0;
+        }
+        else {
+            close(__fd);
+            iVar1 = -1;
+        }
+    }
+    return iVar1;
+}
+
+void makeSaveBlockDisplay(uint param_1)
+{
+    int iVar1;
+
+    if (gMenuContext->m32C_memoryCardContext->m4F74[param_1 & 0xff] != -2) {
+        gMenuContext->m32C_memoryCardContext->m4FE4[2] = 2;
+        iVar1 = 0x3b;
+        do {
+            iVar1 = iVar1 + -1;
+            menuDraw();
+        } while (iVar1 != 0);
+        gMenuContext->m32C_memoryCardContext->m4FE4[2] = 0;
+    }
+    return;
+}
+
+void loadSaveMinimalData(byte param_1, byte param_2)
+{
+    uint uVar1;
+    int iVar2;
+    sMenuContext* psVar3;
+    int iVar4;
+    byte fileName[6];
+    char tempString[72];
+
+    iVar4 = 1;
+    if (param_1 == 0) {
+        fileName[0] = 'b';
+        fileName[1] = 'u';
+        fileName[2] = '0';
+        fileName[3] = '0';
+    }
+    else {
+        fileName[0] = 'b';
+        fileName[1] = 'u';
+        fileName[2] = '1';
+        fileName[3] = '0';
+    }
+    fileName[4] = ':';
+    fileName[5] = '\0';
+    strcpy(tempString, (char*)fileName);
+    uVar1 = (uint)param_1;
+    strcat(tempString, gMenuContext->m32C_memoryCardContext->m0[param_1 * 0x10 + param_2].m18_name.data());
+    while (true) {
+        iVar2 = readSaveTitleFrame(tempString, &gMenuContext->m32C_memoryCardContext->mB94[param_1 * 0x10 + param_2]);
+        iVar4 = iVar4 + -1;
+        if ((iVar2 != -1) || (iVar4 == 0)) break;
+        makeSaveBlockDisplay(uVar1);
+    }
+    iVar4 = 0;
+    psVar3 = gMenuContext;
+    if (gMenuContext->m32C_memoryCardContext->mB94[param_1 * 0x10 + param_2].m3_blockNumber != 0) {
+        do {
+            psVar3->m32C_memoryCardContext->m4FAE[param_1 * 0x10 +gMenuContext->m32C_memoryCardContext->m4F84] =
+                param_2 + param_1 * '\x10';
+            psVar3 = gMenuContext;
+            gMenuContext->m32C_memoryCardContext->m4F84 = gMenuContext->m32C_memoryCardContext->m4F84 + 1;
+            iVar4 = iVar4 + 1;
+        } while (iVar4 < (int)(uint)psVar3->m32C_memoryCardContext->mB94[param_1 * 0x10 +param_2].
+            m3_blockNumber);
+    }
+    return;
+}
+
+RECT tempRectForMemoryCardIconLoading;
+RECT tempRectForMemoryCardIconPaletteLoading;
+std::array<u16, 16> memoryCardIconPaletteStaging;
+
+void loadMemoryCardIconToVram(int param_1)
+
+{
+    byte bVar1;
+    short sVar2;
+    bool isIconInvalid;
+    int iVar8;
+
+    isIconInvalid = true;
+    int iVar6 = param_1;
+    if (param_1 < 0) {
+        iVar6 = param_1 + 0xf;
+    }
+    
+    sVar2 = (short)(iVar6 >> 4);
+    tempRectForMemoryCardIconLoading.x = (short)param_1 * 4 - (sVar2 * 0x40 + -0x140);
+    tempRectForMemoryCardIconLoading.w = 4;
+    tempRectForMemoryCardIconLoading.h = 0x10;
+    tempRectForMemoryCardIconPaletteLoading.y = sVar2 + 0x1c1;
+    tempRectForMemoryCardIconPaletteLoading.x = (short)(param_1 << 4);
+    tempRectForMemoryCardIconPaletteLoading.w = 0x10;
+    tempRectForMemoryCardIconPaletteLoading.h = 1;
+    memoryCardIconPaletteStaging = gMenuContext->m32C_memoryCardContext->mB94[param_1].m60_iconsPalette;
+    LoadImage(&tempRectForMemoryCardIconPaletteLoading, std::span<u16>(memoryCardIconPaletteStaging.begin(), memoryCardIconPaletteStaging.end()).begin());
+    DrawSync(0);
+
+    // upload the 3 icons
+    int iVar5;
+    for(int iconFrameIndex = 0; iconFrameIndex < 3; iconFrameIndex++) {
+        iVar5 = param_1;
+        if (param_1 < 0) {
+            iVar5 = param_1 + 0xf;
+        }
+        iVar5 = (iVar5 >> 4) * 0x10;
+        iVar8 = iVar5 + 0x80;
+        tempRectForMemoryCardIconLoading.y = iconFrameIndex * 0x20 + iVar8;
+        std::array<u8, 128>& icon = gMenuContext->m32C_memoryCardContext->mB94[param_1].m80_icons[iconFrameIndex];
+
+        LoadImage(&tempRectForMemoryCardIconLoading, std::span<u8>(icon.begin(), icon.end()).begin());
+        DrawSync(0);
+    };
+
+    switch (gMenuContext->m32C_memoryCardContext->mB94[param_1].m2_IconDisplayFlag) {
+    case 0x11: //single frame (static)
+        gMenuContext->m32C_memoryCardContext->m0[param_1].m0 = iVar8;
+        gMenuContext->m32C_memoryCardContext->m0[param_1].m4 = iVar8;
+        gMenuContext->m32C_memoryCardContext->m0[param_1].m8 = iVar8;
+        gMenuContext->m32C_memoryCardContext->m0[param_1].mC = iVar8;
+        gMenuContext->m32C_memoryCardContext->m0[param_1].m10 = iVar8;
+        gMenuContext->m32C_memoryCardContext->m0[param_1].m14 = iVar8;
+        isIconInvalid = false;
+        break;
+    case 0x12: // 2 frames (changes ever 16 PAL frames)
+        iVar5 = iVar5 + 0xa0;
+        gMenuContext->m32C_memoryCardContext->m0[param_1].m0 = iVar8;
+        gMenuContext->m32C_memoryCardContext->m0[param_1].m4 = iVar5;
+        gMenuContext->m32C_memoryCardContext->m0[param_1].m8 = iVar8;
+        gMenuContext->m32C_memoryCardContext->m0[param_1].mC = iVar5;
+        gMenuContext->m32C_memoryCardContext->m0[param_1].m10 = iVar8;
+        gMenuContext->m32C_memoryCardContext->m0[param_1].m14 = iVar5;
+        isIconInvalid = false;
+        break;
+    case 0x13: // 3 frames (changes ever 11 PAL frames)
+        gMenuContext->m32C_memoryCardContext->m0[param_1].m0 = iVar8;
+        gMenuContext->m32C_memoryCardContext->m0[param_1].m4 = iVar5 + 0xa0;
+        gMenuContext->m32C_memoryCardContext->m0[param_1].m8 = iVar5 + 0xc0;
+        gMenuContext->m32C_memoryCardContext->m0[param_1].mC = iVar8;
+        gMenuContext->m32C_memoryCardContext->m0[param_1].m10 = iVar5 + 0xa0;
+        gMenuContext->m32C_memoryCardContext->m0[param_1].m14 = iVar5 + 0xc0;
+        isIconInvalid = false;
+        break;
+    default:
+        assert(0);
+    }
+
+    iVar6 = param_1;
+    if (param_1 < 0) {
+        iVar6 = param_1 + 0xf;
+    }
+    processLoadSaveMenuSub6Var2[iVar6 >> 4] += gMenuContext->m32C_memoryCardContext->mB94[param_1].m3_blockNumber;
+    if (isIconInvalid) {
+        gMenuContext->m32C_memoryCardContext->m0[param_1].m58 = 0;
+    }
+    return;
+}
+
+std::array<u8, 128>::iterator processLoadSaveMenuSub6Sub2Var0;
+std::array<u8, 31> processLoadSaveMenuSub6Sub2Var1;
+
+void processLoadSaveMenuSub6Sub2(int param_1) {
+    for (int i = 0; i < 0x10; i++) {
+        gMenuContext->m32C_memoryCardContext->m4F8E[param_1 * 0x10 + i] = 0;
+    }
+
+    for (int i = param_1 * 0x10; i < param_1 * 0x10 + 0xF; i++) {
+        bool bValid = true;
+        for (int j = 0; j < 0xC; j++) {
+            sMenuContext_32C_5C* slot = &gMenuContext->m32C_memoryCardContext->m0[gMenuContext->m32C_memoryCardContext->m4FAE[i]];
+            if (slot->m18_name[j] != gMenuContext->m32C_memoryCardContext->m4FCE[j]) {
+                bValid = false;
+            }
+        }
+        if (bValid) {
+            gMenuContext->m32C_memoryCardContext->m4F8E[i] = 1;
+            processLoadSaveMenuSub6Sub2Var0 = gMenuContext->m32C_memoryCardContext->mB94[gMenuContext->m32C_memoryCardContext->m4FAE[i]].m80_icons[1].begin();
+            processLoadSaveMenuSub6Sub2Var1[param_1 + gMenuContext->m32C_memoryCardContext->mB94[gMenuContext->m32C_memoryCardContext->m4FAE[i]].m80_icons[1][0x23]] = 1;
+        }
+    }
+}
+
+
+int processLoadSaveMenuSub6(void)
+
+{
+    byte bVar1;
+    byte bVar2;
+    byte bVar3;
+    bool bVar4;
+    sMenuContext* psVar5;
+    uint uVar6;
+    uint uVar7;
+    sMenuContext_32C* psVar8;
+    sMenuContext_428* psVar9;
+    int iVar10;
+    int iVar11;
+    uint uVar12;
+    uint unaff_s3 = 0;
+    int iVar13;
+    char local_d8[15];
+
+    processLoadSaveMenuSub6Var0 = 0;
+    gMenuContext->m32C_memoryCardContext->m4FE4[2] = 2;
+    menuDraw();
+    iVar13 = 0;
+    if ((gMenuContext->m32C_memoryCardContext->m4FE4[0] | gMenuContext->m32C_memoryCardContext->m4FE4[1]) == 0) {
+        processLoadSaveMenuSub7();
+        gMenuContext->m33C->m30[3] = 0;
+        gMenuContext->m33C->mB = 0;
+        menuDraw();
+        processLoadSaveMenuSub5(0x23);
+        gMenuContext->m4D8 = 1;
+        gMenuContext->m33C->m2F_draw428 = 0;
+        psVar5 = gMenuContext;
+        gMenuContext->m32C_memoryCardContext->m4F80 = 0xff;
+        psVar5->m32C_memoryCardContext->m4F7C = 0;
+        psVar8 = psVar5->m32C_memoryCardContext;
+        bVar4 = false;
+        if ((psVar8->m4FE4[0] | psVar8->m4FE4[1]) == 0) {
+            psVar8->m4F8C[1] = 0xff;
+            psVar8->m4F8C[0] = 0xff;
+            menuDraw();
+            iVar13 = 0x3b;
+            do {
+                VSync(0);
+                iVar13 = iVar13 + -1;
+            } while (iVar13 != 0);
+            iVar13 = 1;
+            bVar4 = true;
+        }
+        if (!bVar4) {
+            startMemoryCard();
+            psVar8 = gMenuContext->m32C_memoryCardContext;
+            psVar8->m4FE8[1] = -1;
+            psVar8->m4FE8[0] = -1;
+            gMenuContext->m32C_memoryCardContext->m4F88[0] = 0;
+            gMenuContext->m32C_memoryCardContext->m4F88[1] = 0;
+            gMenuContext->m326 = 0x3c;
+            menuDraw();
+            processLoadSaveMenuSub6Var0 = 1;
+        }
+        processLoadSaveMenuSub7();
+    }
+    processLoadSaveMenuSub6Var1 = 1;
+    bVar1 = gMenuContext->m32C_memoryCardContext->m4FE4[0];
+    bVar2 = gMenuContext->m32C_memoryCardContext->m4FE4[1];
+    uVar6 = unaff_s3 & 0xff;
+    if (iVar13 == 0) {
+        gMenuContext->m32A = 0;
+        uVar12 = 0;
+        do {
+            bVar3 = gMenuContext->m32C_memoryCardContext->m4F8A[uVar12];
+            uVar6 = 0;
+            if (bVar3 == gMenuContext->m32C_memoryCardContext->m4F8C[uVar12]) {
+            LAB_Menu2__801c9820:
+                uVar7 = uVar6 & 0xff;
+            LAB_Menu2__801c9824:
+                if ((uVar7 == 0) && (gMenuContext->m32C_memoryCardContext->m4F8A[uVar12] == 0)) {
+                    iVar11 = 0;
+                    do {
+                        iVar10 = iVar11 + 1;
+                        gMenuContext->m32C_memoryCardContext->m0[uVar12 * 0x10 + iVar11].m58 = 0;
+                        iVar11 = iVar10;
+                    } while (iVar10 < 0x10);
+                    gMenuContext->m32C_memoryCardContext->m4F8C[uVar12] = 0xff;
+                }
+            }
+            else {
+                uVar7 = 0;
+                if (bVar3 == 0) goto LAB_Menu2__801c9824;
+                startMemoryCard();
+                iVar11 = 0;
+                do {
+                    iVar10 = iVar11 + 1;
+                    gMenuContext->m32C_memoryCardContext->m4FAE[uVar12 * 0x10 + iVar11] = -1;
+                    iVar11 = iVar10;
+                } while (iVar10 < 0x10);
+                if (uVar12 == 0) {
+                    local_d8[0] = 'b';
+                    local_d8[1] = 'u';
+                    local_d8[2] = '0';
+                    local_d8[3] = '0';
+                }
+                else {
+                    local_d8[0] = 'b';
+                    local_d8[1] = 'u';
+                    local_d8[2] = '1';
+                    local_d8[3] = '0';
+                }
+                local_d8[4] = ':';
+                local_d8[5] = '\0';
+                strcat(local_d8, "__tmp_file");
+                erase(local_d8);
+                psVar5 = gMenuContext;
+                gMenuContext->m32C_memoryCardContext->m4F84 = 0;
+                processLoadSaveMenuSub6Var2[uVar12] = 0;
+                uVar7 = 0;
+                if (psVar5->m32C_memoryCardContext->m4F8A[uVar12] != 0) {
+                    do {
+                        psVar8 = gMenuContext->m32C_memoryCardContext;
+                        if (((psVar8->m4FE4[uVar12] == 0) || (bVar1 != psVar8->m4FE4[0])) ||
+                            (bVar2 != psVar8->m4FE4[1])) {
+                            uVar6 = 2;
+                        LAB_Menu2__801c978c:
+                            uVar12 = 2;
+                            iVar13 = 0;
+                            break;
+                        }
+                        loadSaveMinimalData(uVar12 & 0xff, uVar7 & 0xff);
+                        loadMemoryCardIconToVram(uVar12 * 0x10 + uVar7);
+                        gMenuContext->m32C_memoryCardContext->m0[uVar12 * 0x10 + uVar7].m58 = 1;
+                        menuDraw();
+                        if (gMenuContext->m32C_memoryCardContext->m4F88[uVar12] == 0) {
+                            uVar6 = uVar12 + 1;
+                            goto LAB_Menu2__801c978c;
+                        }
+                        uVar7 = uVar7 + 1;
+                    } while ((int)uVar7 < (int)(uint)gMenuContext->m32C_memoryCardContext->m4F8A[uVar12]);
+                }
+                if ((uVar6 & 0xff) == 0) {
+                    for (; (int)uVar7 < 0x10; uVar7 = uVar7 + 1) {
+                        gMenuContext->m32C_memoryCardContext->m0[uVar12 * 0x10 + uVar7].m58 = 0;
+                    }
+                    gMenuContext->m32C_memoryCardContext->m4F8C[uVar12] =
+                        gMenuContext->m32C_memoryCardContext->m4F8A[uVar12];
+                    goto LAB_Menu2__801c9820;
+                }
+            }
+            uVar12 = uVar12 + 1;
+        } while ((int)uVar12 < 2);
+        if ((uVar6 & 0xff) != 0) goto LAB_Menu2__801c9b84;
+        processLoadSaveMenuSub6Sub2(0);
+        processLoadSaveMenuSub6Sub2(1);
+        uVar6 = uVar6 & 0xff;
+    }
+    if (uVar6 == 0) {
+        if (false) {
+            gMenuContext->m33C->mB = 1;
+        }
+        psVar5 = gMenuContext;
+        if ((gMenuContext->m33C->m2F_draw428 != '\0') &&
+            (psVar9 = gMenuContext->m428, psVar9->m144 != 0)) {
+            assert(0);
+        }
+    }
+LAB_Menu2__801c9b84:
+    gMenuContext->m32A = 1;
+    processLoadSaveMenuSub6Var1 = 0x1e;
+    return iVar13;
+}
+
+bool needProcessLoadSaveMenuSub7 = false;
 
 int processLoadSaveMenu(char param_1, byte param_2)
 {
@@ -1191,7 +2041,7 @@ int processLoadSaveMenu(char param_1, byte param_2)
     gMenuContext->m339 = -1;
     processLoadSaveMenuSub0();
     menuDraw();
-#if 0
+
     if (true) {
         do {
             gMenuContext->m33C->mB = 0;
@@ -1199,8 +2049,8 @@ int processLoadSaveMenu(char param_1, byte param_2)
             if (bVar1) {
                 initMenuContext34C();
                 initMenuContext3A8_memoryCardDisplay();
-                gMenuContext->m32C_memoryCardContext->field_0x4fe4 = 1;
-                gMenuContext->m32C_memoryCardContext->field_0x4fe5 = 1;
+                gMenuContext->m32C_memoryCardContext->m4FE4[0] = 1;
+                gMenuContext->m32C_memoryCardContext->m4FE4[1] = 1;
                 processLoadSaveMenuSub1();
                 if (menuToEnter == 2) {
                     uVar6 = 7;
@@ -1220,24 +2070,27 @@ int processLoadSaveMenu(char param_1, byte param_2)
                     }
                     break;
                 }
-                gMenuContext->m33C->field_0x68 = 1;
+                gMenuContext->m33C->m68 = 1;
             }
-            if (DAT_Menu2__801e9778 != '\0') {
+            if (needProcessLoadSaveMenuSub7 != '\0') {
                 processLoadSaveMenuSub5(0x20);
             }
             cVar2 = processLoadSaveMenuSub6();
             if (cVar2 != '\0') {
                 cVar3 = '\0';
             }
-            if (DAT_Menu2__801e9778 != '\0') {
+            if (needProcessLoadSaveMenuSub7 != '\0') {
                 processLoadSaveMenuSub7();
-                DAT_Menu2__801e9778 = '\0';
+                needProcessLoadSaveMenuSub7 = '\0';
             }
             if (cVar3 == '\0') break;
             if (gMenuContext->m338_currentSaveState != gMenuContext->m339) {
                 updateMenuSelection2
-                (6, gMenuContext->m4E0 + 0x12, (int*)&menuConfig2, (int*)&DAT_Menu2__801e9ea0,
-                    &gMenuContext->m33C->field_0x1a, gMenuContext->m338_currentSaveState, 7, 0);
+                (6, &gMenuContext->m4E0[0x12], 
+                    menuConfig2.data(),
+                    std::span(saveGameMainMenuConfig5.begin(), saveGameMainMenuConfig5.end()).begin(),
+                    std::span(gMenuContext->m33C->m1A.begin(), gMenuContext->m33C->m1A.end()).begin(),
+                    gMenuContext->m338_currentSaveState, 7, 0);
                 uVar5 = 7;
                 if (menuToEnter != 2) {
                     uVar5 = 0;
@@ -1265,8 +2118,9 @@ int processLoadSaveMenu(char param_1, byte param_2)
             }
             else if (bVar4 == 4) {
                 resetCursorState();
-                countField33C_C(6, &gMenuContext->m33C->field_0x1a);
-                cVar3 = updateSaveState(param_2);
+                assert(0);
+                //countField33C_C(6, &gMenuContext->m33C->m1A);
+                //cVar3 = updateSaveState(param_2);
                 gMenuContext->m339 = -1;
                 processLoadSaveMenuSub0();
                 if (menuToEnter != 2) goto LAB_Menu2__801da330;
@@ -1280,27 +2134,31 @@ int processLoadSaveMenu(char param_1, byte param_2)
             }
         } while (cVar3 != '\0');
     }
-    if ((*(short*)&gMenuContext->m32C_memoryCardContext->field_0x4fe4 == 0) && (menuToEnter != 0)) {
+    if (((gMenuContext->m32C_memoryCardContext->m4FE4[0] | gMenuContext->m32C_memoryCardContext->m4FE4[1]) == 0) && (menuToEnter != 0)) {
         iVar5 = 0;
     }
-    gMenuContext->m33C->field_0x68 = 0;
-    gMenuContext->m33C->field_0xb = 0;
+    gMenuContext->m33C->m68 = 0;
+    gMenuContext->m33C->mB = 0;
     gMenuContext->m33C->m4_drawCursor = 0;
     gMenuContext->m33C->m3 = 0;
-    countField33C_C(6, &gMenuContext->m33C->field_0x1a);
-    processLoadSaveMenuSub9();
+    countField33C_C(6, std::span<s8>(gMenuContext->m33C->m1A.begin(), gMenuContext->m33C->m1A.end()).begin());
+    closeMemoryCardsEvents();
     return iVar5;
-#endif
-    return 0;
 }
 
 void processLoadSaveMenuSub1(void)
+{
+    gMenuContext->m329 = 3;
+    playMenuSoundEffect(0x5b);
+    return;
+}
+
+void processLoadSaveMenuSub1Alt2(void)
 {
     gMenuContext->m329 = 4;
     playMenuSoundEffect(0x5c);
     return;
 }
-
 
 void processLoadSaveMenuSub3(uint param_1)
 {
@@ -1324,17 +2182,16 @@ void processLoadSaveMenuSub3(uint param_1)
         psVar2->m33A_354_poly0Length = 0;
         if (0 < iVar6) {
             do {
-                if (saveGameMainMenuConfig
-                    [((param_1 & 0xff) + (uint)(byte)gMenuContext->m336_menuSelectedEntry) * 4 + iVar4 + 3]
-                    [0] == 0xffff) {
+                if (saveGameMainMenuConfig3
+                    [(param_1 & 0xff) + (uint)(byte)gMenuContext->m336_menuSelectedEntry][iVar4][0] ==
+                    0xffff) {
                     bVar1 = false;
                 }
                 else {
                     iVar3 = setupStringInPolyFT4
                     (gMenuContext->m2DC_font,
-                        saveGameMainMenuConfig
-                        [((param_1 & 0xff) + (uint)(byte)gMenuContext->m336_menuSelectedEntry)
-                        * 4 + iVar4 + 3][0],
+                        saveGameMainMenuConfig3
+                        [(param_1 & 0xff) + (uint)(byte)gMenuContext->m336_menuSelectedEntry][iVar4][0],
                         &gMenuContext->m354->m0_polys[gMenuContext->m354->m1400_0Length],
                         gMenuContext->m308_oddOrEven, 0xa0, 0x96, 0x1000);
                     psVar2 = gMenuContext;
@@ -1358,10 +2215,10 @@ void processLoadSaveMenuSub3(uint param_1)
             do {
                 iVar3 = (param_1 & 0xff) + (uint)(byte)gMenuContext->m336_menuSelectedEntry;
                 iVar5 = iVar4 + 1;
-                if (saveGameMainMenuConfig[iVar3 * 4 + iVar4 + 3][0] != 0xffff) {
+                if (saveGameMainMenuConfig3[iVar3][iVar4][0] != 0xffff) {
                     iVar4 = setupStringInPolyFT4
                     (gMenuContext->m2DC_font,
-                        saveGameMainMenuConfig[iVar3 * 4 + iVar4 + 3][1],
+                        saveGameMainMenuConfig3[iVar3][iVar4][1],
                         &gMenuContext->m354->m500_polys[gMenuContext->m354->m1404_500Length],
                         gMenuContext->m308_oddOrEven, 0xa0, 0x96, 0x1000);
                     gMenuContext->m354->m1404_500Length = iVar4 + gMenuContext->m354->m1404_500Length;
@@ -1423,12 +2280,11 @@ void processLoadSaveMenuSub8(uint param_1)
         iVar3 = 0;
         do {
             if (uVar4 == (byte)gMenuContext->m338_currentSaveState) {
-                iVar2 = saveGameMainMenuConfig
-                    [(param_1 + (byte)gMenuContext->m336_menuSelectedEntry) * 4 + 3 + iVar3][0] + 0xd;
+                iVar2 = saveGameMainMenuConfig3[param_1 + (byte)gMenuContext->m336_menuSelectedEntry][iVar3][0]
+                    + 0xd;
             }
             else {
-                iVar2 = saveGameMainMenuConfig
-                    [(param_1 + (byte)gMenuContext->m336_menuSelectedEntry) * 4 + 3 + iVar3][0];
+                iVar2 = saveGameMainMenuConfig3[param_1 + (byte)gMenuContext->m336_menuSelectedEntry][iVar3][0];
             }
             iVar2 = setupStringInPolyFT4
             (gMenuContext->m2DC_font, iVar2,
@@ -1438,8 +2294,8 @@ void processLoadSaveMenuSub8(uint param_1)
             gMenuContext->m354->m1400_0Length = iVar2 + gMenuContext->m354->m1400_0Length;
             iVar2 = setupStringInPolyFT4
             (psVar1->m2DC_font,
-                saveGameMainMenuConfig
-                [(param_1 + (byte)psVar1->m336_menuSelectedEntry) * 4 + 3 + iVar3][1],
+                saveGameMainMenuConfig3[param_1 + (byte)psVar1->m336_menuSelectedEntry]
+                [iVar3][1],
                 &psVar1->m354->m500_polys[psVar1->m354->m1404_500Length],
                 psVar1->m308_oddOrEven, 0xa0, 0x96, 0x1000);
             psVar1 = gMenuContext;
@@ -1459,7 +2315,7 @@ void changeSoundOption(int) {
     MissingCode();
 }
 
-void updateMenuSelection2(int param_1, sMenuContext_4E0* param_2, std::array<u32, 19>::const_iterator param_3, std::array<int, 4>::iterator param_4, std::span<s8>::iterator param_5, byte param_6, byte param_7, int param_8)
+void updateMenuSelection2(int param_1, sMenuContext_4E0* param_2, void* param_3_unused, std::span<int>::iterator param_4, std::span<s8>::iterator param_5, byte param_6, byte param_7, int param_8)
 {
     byte bVar1;
     sMenuContext* psVar2;
@@ -1501,14 +2357,6 @@ void updateMenuSelection2(int param_1, sMenuContext_4E0* param_2, std::array<u32
     }
 }
 
-std::array<int, 4> soundMenuTable0 = { {
-    0x6, 0xC, 0x6, 0x0
-} };
-
-static const std::array<u32, 19> infocardNameU = { {0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18} };
-static const std::array<u32, 19> infocardNameV = { {0x3B,0x48,0x48,0x55,0x55,0x62,0x62,0x6F,0x6F,0x7C,0x7C,0x89,0x89,0x96,0x96,0xA3,0xA3,0xB0,0xB0} };
-
-
 int processSoundMenu(void)
 {
     bool bVar1;
@@ -1524,7 +2372,7 @@ int processSoundMenu(void)
     do {
         menuDraw();
         if (bVar1) {
-            j_setupMenuContext4E0(4, &gMenuContext->m4E0[0x2e], soundMenuConfig.begin());
+            j_setupMenuContext4E0(4, &gMenuContext->m4E0[0x2e], std::span(soundMenuConfig.begin(), soundMenuConfig.end()).begin());
             processLoadSaveMenuSub3(0);
             gMenuContext->m339 = -1;
             iVar5 = processSoundMenuSub0();
@@ -1544,8 +2392,11 @@ int processSoundMenu(void)
         }
         if (gMenuContext->m338_currentSaveState != gMenuContext->m339) {
             updateMenuSelection2
-            (6, &gMenuContext->m4E0[0x2e], infocardNameU.begin(), soundMenuTable0.begin(),
-                std::span<s8>(gMenuContext->m33C->m5C.begin(), gMenuContext->m33C->m5C.end()).begin(), gMenuContext->m338_currentSaveState, 7, 0);
+            (6, &gMenuContext->m4E0[0x2e],
+                infocardNameU.data(),
+                std::span(soundMenuTable0.begin(), soundMenuTable0.end()).begin(),
+                std::span(gMenuContext->m33C->m5C.begin(), gMenuContext->m33C->m5C.end()).begin(),
+                gMenuContext->m338_currentSaveState, 7, 0);
             processLoadSaveMenuSub8(0);
             gMenuContext->m339 = gMenuContext->m338_currentSaveState;
         }
@@ -1633,14 +2484,15 @@ int menu2_executeMainMenuSelection(byte param_1) {
         assert(0);
     }
 
-    gMenuContext->m32C_memoryCardContext->m4FE6 = 0;
+    gMenuContext->m32C_memoryCardContext->m4FE4[2] = 0;
     if (flag1 != 0) {
-        processLoadSaveMenuSub1();
+        processLoadSaveMenuSub1Alt2();
         if (menuToEnter == '\0') {
             processLoadSaveMenuSub2(1, 0);
         }
         else if (menuToEnter == '\x02') {
-            j_setupMenuContext4E0(8, &gMenuContext->m4E0[4], saveGameMainMenuConfig2.begin());
+            j_setupMenuContext4E0(8, &gMenuContext->m4E0[4],
+                std::span<std::array<u8, 2>>(saveGameMainMenuConfig2.begin(), saveGameMainMenuConfig2.end()).begin());
             gMenuContext->m348_cursor->m15B = 0x4c;
         }
     }
@@ -1660,8 +2512,9 @@ int menu2_executeMainMenuSelection(byte param_1) {
 void loadSaveGameMenuExecute() {
     u8 cVar1 = 1;
 
-    setupMainMenuWithConfig(4, saveGameMainMenuConfig.begin());
-    j_setupMenuContext4E0(8, &gMenuContext->m4E0[4], saveGameMainMenuConfig2.begin());
+    setupMainMenuWithConfig(4, std::span<std::array<u32, 2>>(saveGameMainMenuConfig.begin(), saveGameMainMenuConfig.end()).begin());
+    j_setupMenuContext4E0(8, &gMenuContext->m4E0[4],
+        std::span(saveGameMainMenuConfig2.begin(), saveGameMainMenuConfig2.end()).begin());
     gMenuContext->m2D8_frameCounter = 0;
 
     do {
@@ -1698,8 +2551,12 @@ void loadSaveGameMenuExecute() {
         }
 
         if (gMenuContext->m336_menuSelectedEntry != gMenuContext->m337_previousMenuSelectedEntry) {
-            updateMenuSelection(3, gMenuContext->m336_menuSelectedEntry, saveGameMainMenuConfig.begin());
-            //updateMenuSelection2(8, gMenuContext->m4E0 + 4, saveGameMainMenuConfig2, &saveGameMainMenuConfig3, &gMenuContext->m33C->field_0xc, gMenuContext->m336_menuSelectedEntry, 0, 0);
+            updateMenuSelection(3, gMenuContext->m336_menuSelectedEntry, std::span<std::array<u32, 2>>(saveGameMainMenuConfig.begin(), saveGameMainMenuConfig.end()).begin());
+            updateMenuSelection2(8, &gMenuContext->m4E0[4],
+                saveGameMainMenuConfig2.data(),
+                std::span(saveGameMainMenuConfig4.begin(), saveGameMainMenuConfig4.end()).begin(),
+                std::span(gMenuContext->m33C->mC.begin(), gMenuContext->m33C->mC.end()).begin(),
+                gMenuContext->m336_menuSelectedEntry, 0, 0);
             gMenuContext->m337_previousMenuSelectedEntry = gMenuContext->m336_menuSelectedEntry;
         }
 
@@ -1776,7 +2633,8 @@ void mainMenuExecute() {
 
         if (gMenuContext->m336_menuSelectedEntry != gMenuContext->m337_previousMenuSelectedEntry) {
             MissingCode();
-            updateMenuSelection(7, gMenuContext->m336_menuSelectedEntry, mainMenuConfig.begin());
+            updateMenuSelection(7, gMenuContext->m336_menuSelectedEntry, std::span(mainMenuConfig.begin(), mainMenuConfig.end()).begin());
+            assert(0);
             //updateMenuSelection2(8, gMenuContext->m4E0 + 4, &DAT_Menu2__801ea528, &DAT_Menu2__801e9e64, &gMenuContext->m33C->mC, gMenuContext->m336_menuSelectedEntry, 0, 0);
             gMenuContext->m337_previousMenuSelectedEntry = gMenuContext->m336_menuSelectedEntry;
         }
@@ -2495,21 +3353,19 @@ std::vector<std::array<u8, 2>> mainMenuConfig2 = { {
 void processLoadSaveMenuSub2(bool show, bool hideGold)
 {
     if (!show) {
-        countField33C_C(8, std::span<s8>(gMenuContext->m33C->mC.begin(), gMenuContext->m33C->mC.end()).begin());
+        countField33C_C(8, std::span(gMenuContext->m33C->mC.begin(), gMenuContext->m33C->mC.end()).begin());
         setupInfoCardAnimation(0x60, 6, 0x100, 0x86, 8, 0);
         setupInfoCardAnimation(0x68, 0x3e, 0x108, 0x3e, 8, 1);
         setupInfoCardAnimation(0x70, 0x76, 0x110, -10, 8, 2);
     }
     else {
-        j_setupMenuContext4E0(8, &gMenuContext->m4E0[1], mainMenuConfig2.begin());
+        j_setupMenuContext4E0(8, &gMenuContext->m4E0[1], std::span(mainMenuConfig2.begin(), mainMenuConfig2.end()).begin());
         setupInfoCardAnimation(0x100, 0x86, 0x60, 6, 8, 0);
         setupInfoCardAnimation(0x108, 0x3e, 0x68, 0x3e, 8, 1);
         setupInfoCardAnimation(0x110, -10, 0x70, 0x76, 8, 2);
     }
 
-    MissingCode();
-
-    while ((gMenuContext->m0[0].m23 == 0) || (gMenuContext->m0[1].m23 == 0) || (gMenuContext->m0[1].m23 == 0)) {
+    while ((gMenuContext->m0[0].m23 == 0) && (gMenuContext->m0[1].m23 == 0) && (gMenuContext->m0[2].m23 == 0)) {
         for (int i = 0; i < 3; i++) {
             if (gMenuContext->m33C->m30[i] != -1) {
                 updateCharacterInfoCard(i, gMenuContext->m33C->m30[i]);
@@ -2522,8 +3378,6 @@ void processLoadSaveMenuSub2(bool show, bool hideGold)
             }
         }
     }
-
-    MissingCode();
 
     if (!show) {
         gMenuContext->m33C->m0_isInfoCardEnabled[2] = 0;
@@ -2611,9 +3465,62 @@ void setupMenu0()
             }
         }
     }
-    setupMainMenuWithConfig(8, mainMenuConfig.begin());
+    setupMainMenuWithConfig(8, std::span(mainMenuConfig.begin(), mainMenuConfig.end()).begin());
     processLoadSaveMenuSub2(true, false);
     initMenuForPlaytime();
+}
+
+void menu2_mainLoop(void)
+{
+    if (((menuToEnter != 2) && (menuToEnter < 3)) && (menuToEnter == 0)) {
+        resetCursorState();
+        processLoadSaveMenuSub2(0, 0);
+        gMenuContext->m33C->m6_drawPlayTime = 0;
+        gMenuContext->m33C->m5_drawGold = 0;
+        if (menuOpenArg == 0) {
+            defaultSelectedMenuEntry = gMenuContext->m336_menuSelectedEntry;
+        }
+    }
+    menuDraw();
+    menuDraw();
+    gMenuContext->m327 = 0;
+    menuDraw();
+    do {
+        menuDraw();
+    } while (gMenuContext->m308_oddOrEven != 0);
+    initMenuContext33C(0);
+    initMenuContext350MainMenu(0);
+    initMenuContext354(0);
+    initMenuContext330(0);
+    initMenuContext348(0);
+    delete gMenuContext->m428;
+    //delete gMenuContext->m2DC_font;
+    MissingCode();
+    gMenuContext->m2E0_textBundle.clear();
+    gMenuContext->m4E0[0].m78_imageData.clear();
+    if (useDebugMenuList != '\0') {
+        assert(0);
+    }
+    if (menuToEnter != 2) {
+        if (menuToEnter < 3) {
+            if (menuToEnter == 0) {
+                initMenuContext32C(0);
+                initMenuContext340_goldOwned(0);
+                initMenuContext344_playTime(0);
+                initMenuContext39C(0);
+                delete (gMenuContext->m364_menuBoxes[0]);
+                delete (gMenuContext->m380[0]);
+                delete (gMenuContext->m364_menuBoxes[1]);
+                delete (gMenuContext->m380[1]);
+            }
+            goto LAB_Menu2__801c6288;
+        }
+        if (menuToEnter != 6) goto LAB_Menu2__801c6288;
+    }
+    initMenuContext32C(0);
+LAB_Menu2__801c6288:
+    free(gMenuContext);
+    return;
 }
 
 void menu2_loadGame_entryPoint() {
@@ -2644,8 +3551,7 @@ void menu2_loadGame_entryPoint() {
         assert(0);
         break;
     }
-    MissingCode();
-    //menu2_mainLoop();
+    menu2_mainLoop();
 }
 
 void processDebugMenuForMenuList(void) {

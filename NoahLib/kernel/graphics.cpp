@@ -755,6 +755,67 @@ void POLY_F3::execute()
     }
 }
 
+void LINE_F3::execute()
+{
+    float matrix[16];
+    bx::mtxIdentity(matrix);
+
+    bgfx::setTransform(matrix);
+    if (1)
+    {
+        bgfx::TransientVertexBuffer vertexBuffer;
+        bgfx::TransientIndexBuffer indexBuffer;
+        bgfx::allocTransientBuffers(&vertexBuffer, GetLayout(), 3, &indexBuffer, 3);
+
+        sVertice* pVertices = (sVertice*)vertexBuffer.data;
+        u16* pIndices = (u16*)indexBuffer.data;
+
+        for (int i = 0; i < 3; i++)
+        {
+            pVertices[i].color[0] = r0;
+            pVertices[i].color[1] = g0;
+            pVertices[i].color[2] = b0;
+            pVertices[i].gpuCode = code;
+        }
+
+        pVertices[0].v[0] = x0y0.vx;
+        pVertices[0].v[1] = x0y0.vy;
+        pVertices[0].v[2] = 0;
+
+        pVertices[1].v[0] = x1y1.vx;
+        pVertices[1].v[1] = x1y1.vy;
+        pVertices[1].v[2] = 0;
+
+        pVertices[2].v[0] = x2y2.vx;
+        pVertices[2].v[1] = x2y2.vy;
+        pVertices[2].v[2] = 0;
+
+        pIndices[0] = 0;
+        pIndices[1] = 1;
+        pIndices[2] = 2;
+
+        u64 State = BGFX_STATE_WRITE_RGB
+            | BGFX_STATE_DEPTH_TEST_ALWAYS
+            | BGFX_STATE_MSAA
+            | BGFX_STATE_PT_LINESTRIP;
+
+        u32 blendRGBA = getBlending(code, gCurrentDrawMode.code[0], State);
+
+        bgfx::setState(State, blendRGBA);
+
+        bgfx::setVertexBuffer(0, &vertexBuffer);
+        bgfx::setIndexBuffer(&indexBuffer);
+
+        static bgfx::UniformHandle s_PSXVramUniformHandle = BGFX_INVALID_HANDLE;
+        if (!bgfx::isValid(s_PSXVramUniformHandle))
+        {
+            s_PSXVramUniformHandle = bgfx::createUniform("s_PSXVram", bgfx::UniformType::Sampler);
+        }
+        bgfx::setTexture(0, s_PSXVramUniformHandle, m_vramTextureHandle);
+        bgfx::submit(PSXOutput_bgfxView, getSPRTShader());
+    }
+}
+
 void POLY_F4::execute()
 {
     float matrix[16];
