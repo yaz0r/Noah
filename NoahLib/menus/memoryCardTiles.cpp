@@ -36,10 +36,6 @@ std::array<s32, 32> memoryCardTilesPositionY = { {
 } };
 
 void initMenuContext3A8_Lines(int param_1) {
-    int iVar3;
-    int iVar4;
-    int iVar5;
-
     auto pX = memoryCardTilesPositionX.begin() + param_1;
     auto pY = memoryCardTilesPositionY.begin() + param_1;
     auto pTile = gMenuContext->m3A8_memoryCardTiles[param_1];
@@ -123,13 +119,91 @@ void drawMenu_memoycard_tilesLines(void) {
     }
 }
 
+void drawMenu_4D8_text() {
+
+    std::array<u8, 2> memoryCardHasData;
+    memoryCardHasData[1] = 0;
+    memoryCardHasData[0] = 0;
+
+    if (gMenuContext->m4D8 != 0) {
+        int x = 0x1e;
+        for (int i = 0; i < 2; i++) {
+            if ((gMenuContext->m32C_memoryCardContext->m4FE4[i] != 0) && (gMenuContext->m33C->m68 != 0)) {
+                bool bIsValid = true;
+                if (gMenuContext->m33C->m2F_draw428 != 0) {
+                    int iVar1 = memoryCardTilesPosition2[gMenuContext->m32C_memoryCardContext->m4F7C];
+                    if (iVar1 < 0) {
+                        iVar1 = iVar1 + 0xf;
+                    }
+                    bIsValid = true;
+                    if (i == iVar1 >> 4) {
+                        bIsValid = false;
+                    }
+                    iVar1 = 0x115;
+                    if (!bIsValid) {
+                        iVar1 = 0x122;
+                    }
+                    setupStringInPolyFT4(gMenuContext->m2DC_font, iVar1, &gMenuContext->m32C_memoryCardContext->m4D94, gMenuContext->m308_oddOrEven, x, 0x36, 0x1000);
+                    assert(0);
+                    memoryCardHasData[i] = 1;
+                }
+            }
+            if (memoryCardHasData[i] != 0) {
+                assert(0);
+            }
+        }
+    }
+}
+
+void initMenuContext3A8_MemoryCardPolys(int param_1) {
+    auto pX = memoryCardTilesPositionX.begin() + param_1;
+    auto pY = memoryCardTilesPositionY.begin() + param_1;
+    auto pTile = gMenuContext->m3A8_memoryCardTiles[param_1];
+    for (int i = 0; i < 2; i++) {
+        initMemoryCardTransparentPoly(&pTile->m0_memoryCardTransparentPolys[i]);
+        pTile->m0_memoryCardTransparentPolys[i].x0 = *pX;
+        pTile->m0_memoryCardTransparentPolys[i].y0 = *pY;
+        pTile->m0_memoryCardTransparentPolys[i].x1 = *pX + 0x10;
+        pTile->m0_memoryCardTransparentPolys[i].y1 = *pY;
+        pTile->m0_memoryCardTransparentPolys[i].x2 = *pX;
+        pTile->m0_memoryCardTransparentPolys[i].y2 = *pY + 0x10;
+        pTile->m0_memoryCardTransparentPolys[i].x3 = *pX + 0x10;
+        pTile->m0_memoryCardTransparentPolys[i].y3 = *pY + 0x10;
+        pTile->m0_memoryCardTransparentPolys[i].tpage = GetTPage(0, 0, 0x140, 0x80);
+        SetPolyF4(&pTile->mB0_memoryCardOpaquePolys[i]);
+        pTile->mB0_memoryCardOpaquePolys[i].r0 = 0x80;
+        pTile->mB0_memoryCardOpaquePolys[i].g0 = 0x80;
+        pTile->mB0_memoryCardOpaquePolys[i].b0 = 0x80;
+        SetSemiTrans(&pTile->mB0_memoryCardOpaquePolys[i], 1);
+        pTile->mB0_memoryCardOpaquePolys[i].x0y0.vx = *pX;
+        pTile->mB0_memoryCardOpaquePolys[i].x0y0.vy = *pY;
+        pTile->mB0_memoryCardOpaquePolys[i].x1y1.vx = *pX + 0x10;
+        pTile->mB0_memoryCardOpaquePolys[i].x1y1.vy = *pY;
+        pTile->mB0_memoryCardOpaquePolys[i].x2y2.vx = *pX;
+        pTile->mB0_memoryCardOpaquePolys[i].x2y2.vy = *pY + 0x10;
+        pTile->mB0_memoryCardOpaquePolys[i].x3y3.vx = *pX + 0x10;
+        pTile->mB0_memoryCardOpaquePolys[i].x3y3.vy = *pY + 0x10;
+        initMemoryCardPolyVerts(pTile->mE0_vertices, *pX, *pY, 0x10, 0x10);
+    }
+
+    RECT tempRect;
+    tempRect.y = 0;
+    tempRect.x = 0;
+    tempRect.h = 0x100;
+    tempRect.w = 0x100;
+
+    u16 tPage = GetTPage(0, 2, 0x140, 0x80);
+    SetDrawMode(&pTile->m140[0], 0, 0, tPage, &tempRect);
+    tPage = GetTPage(0, 2, 0x140, 0x80);
+    SetDrawMode(&pTile->m140[1], 0, 0, tPage, &tempRect);
+}
+
 void initMenuContext3A8_memoryCardDisplay(void)
 {
     for(int i=0; i<0x20; i++) {
         gMenuContext->m3A8_memoryCardTiles[i] = new sMenuContext_3A8;
         memset(gMenuContext->m3A8_memoryCardTiles[i], 0, sizeof(sMenuContext_3A8));
-        //initMenuContext3A8_MemoryCardPolys(i);
+        initMenuContext3A8_MemoryCardPolys(i);
         initMenuContext3A8_Lines(i);
-        MissingCode();
     }
 }

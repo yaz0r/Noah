@@ -36,6 +36,7 @@ struct sMenuContext_32C_B94 {
 struct sMenuContext_32C {
     std::array<sMenuContext_32C_5C, 32> m0;
     std::array<sMenuContext_32C_B94, 32> mB94;
+    std::array<POLY_FT4, 2> m4D94;
     std::array<s32, 2> m4F74;
     s32 m4F7C;
     s32 m4F80;
@@ -64,12 +65,19 @@ struct sMenuContext_33C {
     u8 mA_354Enabled = 0;
     u8 mB = 0;
     std::array<s8, 8> mC = { 0,0,0,0,0,0,0,0 };
+    std::array<s8, 6> m14;
     std::array<s8, 6> m1A;
     std::array<u8, 7> m20_menuBoxEnabled = { 0,0,0,0,0,0,0 };
     std::array<u8, 7> m27 = { 0,0,0,0,0,0,0 };
     u8 m2E_drawCheckingMemorycardText;
     u8 m2F_draw428;
-    std::array<s8, 7> m30 = { 0,0,0 };
+    std::array<s8, 4> m30;
+    std::array<s8, 4> m34;
+    std::array<s8, 8> m38;
+    std::array<s8, 6> m40;
+    s8 m4E;
+    s8 m52;
+    std::array<s8, 6> m54;
     std::array<s8, 7> m5C = { 0,0,0,0, 0,0,0 };
     u8 m68;
 };
@@ -267,8 +275,12 @@ struct sMenuContext {
     std::array<struct sMenuContext_3A8*, 0x20> m3A8_memoryCardTiles;
     sMenuContext_428* m428;
     std::array<sMenuContextMenuTile, 4> m46C_menuBorders;
+    s32 m4CC;
+    s32 m4D0;
+    s32 m4D4_fadeColor;
     std::array<sMenuContext_4E0, 50> m4E0;
     s8 m4D8;
+    s8 m4D9;
     std::array<sMenuContext_4E0*, 4> m1DE0;
     u8 m1E94;
     u8 m1E95;

@@ -816,26 +816,233 @@ void drawMenuMemoryCard_sub0(int param_1, int param_2, int param_3) {
     }
 }
 
+void drawMenuMemoryCard_52() {
+    if (gMenuContext->m33C->m52 != 0) {
+        assert(0);
+    }
+}
+
 void drawMenuMemoryCard() {
     drawMenu_4D8_is_2();
     drawMenuMemoryCard_sub0(0, 0, 0x10);
     drawMenuMemoryCard_sub0(0x10, 0x10, 0x20);
     drawMenu_memoycard_tilesLines();
-    MissingCode();
+    drawMenu_4D8_text();
+    drawMenuMemoryCard_52();
+    if (gMenuContext->m4D0++ == 0xF) {
+        gMenuContext->m4D0 = 0;
+        if (gMenuContext->m4CC++ == 6) {
+            gMenuContext->m4CC = 0;
+        }
+    }
+
+    if (gMenuContext->m4D9 == 0) {
+        gMenuContext->m4D4_fadeColor += 4;
+        if (gMenuContext->m4D4_fadeColor >= 0x81) {
+            gMenuContext->m4D9 = 1;
+            gMenuContext->m4D4_fadeColor = 0x7C;
+        }
+    }
+    else {
+        gMenuContext->m4D4_fadeColor -= 4;
+        if (gMenuContext->m4D4_fadeColor <= -1) {
+            gMenuContext->m4D9 = 0;
+            gMenuContext->m4D4_fadeColor = 4;
+        }
+    }
+}
+
+void drawMenu2_sub_sub0(void)
+{
+    int iVar1;
+    int iVar2;
+
+    iVar1 = 0;
+    iVar2 = 0x4e0;
+    do {
+        if (gMenuContext->m33C->m34[iVar1] != 0) {
+            assert(0);
+        }
+        iVar1 = iVar1 + 1;
+        iVar2 = iVar2 + 0x80;
+    } while (iVar1 < 4);
+    return;
+}
+
+// That doesn't do anything
+int drawMenu2_sub_sub1(void)
+{
+    int iVar1;
+    int iVar2;
+
+    iVar1 = 6;
+    do {
+        iVar2 = iVar1;
+        iVar1 = iVar2 + -1;
+    } while (-1 < iVar2);
+    return iVar2;
+}
+
+void drawMenu2_sub_sub2(void)
+
+{
+    int iVar1;
+
+    iVar1 = 0;
+    do {
+        if (gMenuContext->m33C->m14[iVar1] != 0) {
+            assert(0);
+        }
+        iVar1 = iVar1 + 1;
+    } while (iVar1 < 6);
+    return;
+}
+
+int drawMenu2_sub_sub3(void)
+{
+    int iVar1;
+    int iVar2;
+
+    iVar1 = 4;
+    do {
+        iVar2 = iVar1;
+        iVar1 = iVar2 + -1;
+    } while (-1 < iVar2);
+    return iVar2;
+}
+
+void drawMenu2_sub_sub4(void)
+{
+    int iVar1;
+
+    iVar1 = 0;
+    do {
+        if (gMenuContext->m33C->m54[iVar1] != 0) {
+            assert(0);
+        }
+        iVar1 = iVar1 + 1;
+    } while (iVar1 < 6);
+    return;
+}
+
+void drawMenu2_sub_sub5(void)
+{
+    int iVar1;
+    int iVar2;
+
+    iVar1 = 0;
+    iVar2 = 0x1be0;
+    do {
+        if (gMenuContext->m33C->m5C[iVar1] != 0) {
+            assert(0);
+        }
+        iVar1 = iVar1 + 1;
+        iVar2 = iVar2 + 0x80;
+    } while (iVar1 < 4);
+    return;
+}
+
+void drawMenu2_sub_sub6(void)
+{
+    POLY_FT4* pPVar1;
+    int iVar2;
+    int iVar3;
+
+    iVar2 = 0;
+    iVar3 = 0x10e0;
+    do {
+        if (gMenuContext->m33C->m38[iVar2] != 0) {
+            assert(0);
+        }
+        iVar2 = iVar2 + 1;
+        iVar3 = iVar3 + 0x80;
+    } while (iVar2 < 8);
+    return;
+}
+
+void drawMenu2_sub_sub7(void)
+{
+    POLY_FT4* pPVar1;
+    int iVar2;
+    int iVar3;
+
+    iVar2 = 0;
+    iVar3 = 0x14e0;
+    do {
+        if (gMenuContext->m33C->m40[iVar2] != 0) {
+            assert(0);
+        }
+        iVar2 = iVar2 + 1;
+        iVar3 = iVar3 + 0x80;
+    } while (iVar2 < 6);
+    return;
+}
+
+void drawMenu2_sub_sub8(void)
+{
+    if (gMenuContext->m33C->m4E != 0) {
+        assert(0);
+    }
+    return;
+}
+
+void transformAndAddPrim(int param_1, std::array<SFP_VEC4, 4>& param_2, std::array<POLY_FT4, 2>* param_3, int param_4) {
+    for (int i = 0; i < param_1; i++) {
+        POLY_FT4* p = &param_3[i][param_4];
+        long dummy1, dummy2;
+        RotTransPers4(&param_2[0], &param_2[1], &param_2[2], &param_2[3], &p->x0y0, &p->x1y1, &p->x2y2, &p->x3y3, &dummy1, &dummy2);
+        AddPrim(&gMenuContext->m1D4_currentDrawContext->m70_OT[4], p);
+    }
+}
+
+void drawMenu2_drawCheckingMemoryCard(void)
+{
+    if (gMenuContext->m33C->m2E_drawCheckingMemorycardText != 0) {
+        for (int i = 0; i < 3; i++) {
+            auto pContext = gMenuContext->m1DE0[i];
+            if (pContext->m7F == 0) {
+                AddPrim(&gMenuContext->m1D4_currentDrawContext->m70_OT[4], &pContext->m0_polys[pContext->m7D]);
+            }
+            else {
+                transformAndAddPrim(1, pContext->m50_vertex, &pContext->m0_polys, pContext->m7D);
+            }
+        }
+    }
+}
+
+void drawMenu2_sub(void)
+{
+    drawMenu2_sub_sub0();
+    drawMenu2_sub_sub1();
+    drawMenu2_sub_sub2();
+    drawMenu2_sub_sub3();
+    drawMenu2_sub_sub4();
+    drawMenu2_sub_sub5();
+    drawMenu2_sub_sub6();
+    drawMenu2_sub_sub7();
+    drawMenu2_sub_sub8();
+    drawMenu2_drawCheckingMemoryCard();
+    return;
+}
+
+void drawMenuContext354() {
+    if (gMenuContext->m33C->mA_354Enabled) {
+        drawMultiPolys(gMenuContext->m354->m1404_500Length, &gMenuContext->m354->m500_polys[0], gMenuContext->m354->m1409_500OddOrEven);
+        drawMultiPolys(gMenuContext->m354->m1400_0Length, &gMenuContext->m354->m0_polys[0], gMenuContext->m354->m1408_0OddOrEven);
+    }
 }
 
 void drawMenu2(void)
 {
     drawMenu_380();
-    //drawMenu2_sub();
+    drawMenu2_sub();
     drawMenu_428();
     drawMenu_348_cursor();
     drawMenu_34C();
     drawMenuMemoryCard();
     drawMainMenu();
-    //drawMenuContext354();
+    drawMenuContext354();
     drawMenuBoxes();
-    MissingCode();
 }
 
 void drawMenuSpecificElements(void)
@@ -2019,6 +2226,11 @@ LAB_Menu2__801c9b84:
 
 bool needProcessLoadSaveMenuSub7 = false;
 
+int updateSaveState(s8 param_1) {
+    MissingCode();
+    return 0;
+}
+
 int processLoadSaveMenu(char param_1, byte param_2)
 {
     bool bVar1;
@@ -2118,9 +2330,8 @@ int processLoadSaveMenu(char param_1, byte param_2)
             }
             else if (bVar4 == 4) {
                 resetCursorState();
-                assert(0);
-                //countField33C_C(6, &gMenuContext->m33C->m1A);
-                //cVar3 = updateSaveState(param_2);
+                countField33C_C(6, std::span(gMenuContext->m33C->m1A.begin(), gMenuContext->m33C->m1A.end()).begin());
+                cVar3 = updateSaveState(param_2);
                 gMenuContext->m339 = -1;
                 processLoadSaveMenuSub0();
                 if (menuToEnter != 2) goto LAB_Menu2__801da330;
@@ -3540,11 +3751,11 @@ void menu2_loadGame_entryPoint() {
         gMenuContext->m33C->m9_drawMainMenu = 0;
         gMenuContext->m33C->m4_drawCursor = 0;
         gMenuContext->m33C->m3 = 0;
-        if (menuReturnState0 == '\0') {
+        if (menuReturnState0 == 0) {
             checkCurrentDiscNumber(0);
         }
-        else if (menuReturnState0 == '\x02') {
-            assert(0);
+        else if (menuReturnState0 == 2) {
+            checkCurrentDiscNumber(gameState.m1930_fieldVarsBackup[82]);
         }
         break;
     default:
