@@ -1251,7 +1251,7 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, std
             break;
         }
     case 0xBD:
-        spriteBytecode2ExtendedE0(param_1, createSavePointMeshData_mode5.m10_startOfAnimationContainer->at(READ_LE_U8(param_3)), param_1->m24_vramData);
+        spriteBytecode2ExtendedE0(param_1, createSavePointMeshData_mode5.m10_startOfAnimationContainer->getAnimation(READ_LE_U8(param_3)), param_1->m24_vramData);
         break;
 	case 0xA0: // set the move speed for the character
 		{
@@ -1957,7 +1957,7 @@ void initFieldEntitySub4Sub5Sub0(sFieldEntitySub4_110* param_1, sSpriteActorAnim
 	param_1->mC = &param_2->mC_pData;
 	param_1->m0_spriteData = &param_2->m8_pData;
 	initFieldVar4 = 0;
-	param_1->m10_startOfAnimationContainer = &param_2->m4_animations;
+	param_1->m10_startOfAnimationContainer = &param_2->m4_animBundle;
 
 	if (isBattleOverlayLoaded)
 	{
@@ -2033,16 +2033,8 @@ void spriteActorSetPlayingAnimation(sSpriteActorCore* param_1, int animationId)
 			animationId = ~animationId;
 		}
 
-        // HACK: should not be required
-        {
-            if (animationId >= param_1->m24_vramData->m10_startOfAnimationContainer->size()) {
-                Hack("Out of bound animation id");
-                animationId = 0;
-            }
-        }
-
 		param_1->m40 = param_1->m40 | 0x100000;
-		param_1->m58_startOfCurrentAnimation = param_1->m24_vramData->m10_startOfAnimationContainer->at(animationId);
+		param_1->m58_startOfCurrentAnimation = param_1->m24_vramData->m10_startOfAnimationContainer->getAnimation(animationId);
 		setCurrentAnimationPtr(param_1, param_1->m58_startOfCurrentAnimation);
 		setSpriteActorAngle(param_1, param_1->m80);
 	}
@@ -2095,7 +2087,7 @@ sSpriteActor* initializeSpriteActor(sSpriteActor* param_1, sSpriteActorAnimation
 
 	setAnimationBundle(param_1, pSetup);
 
-    sPS1Pointer pAnim = param_1->m24_vramData->m10_startOfAnimationContainer->at(0);
+    sPS1Pointer pAnim = param_1->m24_vramData->m10_startOfAnimationContainer->getAnimation(0);
     param_1->m60_endOfAnimationContainer = pAnim + ((READ_LE_U16(pAnim) & 0x3F) + 1) * 2;
 	spriteActorSetPlayingAnimation(param_1, 0);
 
@@ -2104,7 +2096,7 @@ sSpriteActor* initializeSpriteActor(sSpriteActor* param_1, sSpriteActorAnimation
 
 void OP_INIT_ENTITY_SCRIPT_sub0Sub4(sSpriteActor* param_1, int param_2, int* param_3, int* param_4, int* param_5)
 {
-    auto startOfAnimation = param_1->m24_vramData->m10_startOfAnimationContainer->at(0);
+    auto startOfAnimation = param_1->m24_vramData->m10_startOfAnimationContainer->getAnimation(0);
     u16 offset2 = READ_LE_U16(startOfAnimation + 4);
     byte bVar1 = READ_LE_U8(startOfAnimation + offset2 + 4);
     uint uVar5 = (uint)bVar1;

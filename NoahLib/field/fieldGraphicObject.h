@@ -5,6 +5,8 @@
 
 #include "kernel/taskLists.h"
 
+#include "sprite/spriteSetup.h"
+
 extern s8 isBattleOverlayLoaded;
 extern int battleDefaultEntityScale;
 
@@ -99,7 +101,7 @@ struct sFieldEntitySub4_110
 	sVec2_s16 m4_vramLocation;
 	sVec2_s16 m8_clut;
 	std::span<u8>* mC;
-	std::vector<std::span<u8>::iterator>* m10_startOfAnimationContainer;
+    sSpriteActorAnimationBundle::sAnimationBundle* m10_startOfAnimationContainer;
 	// size 0x14 (guessed, but seems to make sense)
 };
 

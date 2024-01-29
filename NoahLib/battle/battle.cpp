@@ -2981,7 +2981,7 @@ bool initFxFragments(void)
         //local_38 = psVar3->m8_clut;
         //local_34 = psVar3->mC;
         //local_30 = psVar3->m10_startOfAnimationContainer;
-        std::span<u8>::iterator psVar4 = sFieldEntitySub4_110_8005a474.m10_startOfAnimationContainer->at(startJumpAnimationVar2);
+        std::span<u8>::iterator psVar4 = sFieldEntitySub4_110_8005a474.m10_startOfAnimationContainer->getAnimation(startJumpAnimationVar2);
         spriteBytecode2ExtendedE0(processBattleAnimationSub0_var1, psVar4, &sFieldEntitySub4_110_8005a474);
     }
     MissingCode();

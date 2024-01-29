@@ -58,6 +58,8 @@ struct sSpriteActorAnimationBundle : public sLoadableData
             m4_entries.push_back(std::span<u8>(inputData + start, end - start));
         }
 
+        m4_animBundle.bundle = m4_entries[0];
+#if 0
         {
             auto& bundle = m4_entries[0];
             auto animationIt = bundle.begin();
@@ -79,6 +81,7 @@ struct sSpriteActorAnimationBundle : public sLoadableData
                 
             }
         }
+#endif
         m8_pData.init(inputData + READ_LE_U32(inputData + 8));
         mC_pData = m4_entries[2];
     }
@@ -89,7 +92,16 @@ struct sSpriteActorAnimationBundle : public sLoadableData
     u32 m0_numEntries;
     std::vector<std::span<u8>> m4_entries;
 
-    std::vector<std::span<u8>::iterator> m4_animations;
+    struct sAnimationBundle {
+        std::span<u8> bundle;
+        std::span<u8>::iterator getAnimation(int index) {
+            auto animationIt = bundle.begin();
+            u16 offset = READ_LE_U16(animationIt + 2 + index * 2);
+            return animationIt + offset;
+        }
+    } m4_animBundle;
+
+
     sFieldEntitySub4_110_0 m8_pData;
     std::span<u8> mC_pData;
 
