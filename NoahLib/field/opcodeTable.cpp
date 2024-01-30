@@ -129,7 +129,7 @@ void initOpcodes()
     fieldScriptOpcodes[0xB7] = OP_B7;
     fieldScriptOpcodes[0xB8] = OP_ENABLE_CAMERA_HEIGHT_CHECK;
     fieldScriptOpcodes[0xB9] = OP_IF_CHARACTER_IN_AVAILABLE_PARTY;
-    fieldScriptOpcodes[0xBA] = OP_ADD_FROM_AVAILABLE_PARTY;
+    fieldScriptOpcodes[0xBA] = OP_ADD_TO_AVAILABLE_PARTY;
     fieldScriptOpcodes[0xBB] = OP_REMOVE_FROM_AVAILABLE_PARTY;
     fieldScriptOpcodes[0xBC] = OP_INIT_ENTITY_SCRIPT;
     fieldScriptOpcodes[0xBE] = OP_ROTATION_3D_YAW_SUBSTRACT;

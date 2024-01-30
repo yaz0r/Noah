@@ -71,7 +71,7 @@ struct sMenuContext_33C {
     std::array<u8, 7> m27 = { 0,0,0,0,0,0,0 };
     u8 m2E_drawCheckingMemorycardText;
     u8 m2F_draw428;
-    std::array<s8, 4> m30;
+    std::array<s8, 4> m30_partyMemberId;
     std::array<s8, 4> m34;
     std::array<s8, 8> m38;
     std::array<s8, 6> m40;
@@ -226,7 +226,7 @@ struct sMenuContextSub0 {
     s8 m20_XReversed;
     s8 m21_YReversed;
     s8 m22_numSteps;
-    s8 m23;
+    s8 m23_isAnimationDone;
 };
 
 struct sMenuContext {

@@ -145,11 +145,25 @@ struct sGameState
         for (int i = 0; i < m26C_party.size(); i++) m26C_party[i].deserialize(rawGameState.begin() + 0x26C + i * 0xA4);
         for (int i = 0; i < m978_gears.size(); i++) m978_gears[i].deserialize(rawGameState.begin() + 0x978 + i * 0xA4);
         for (int i = 0; i < m16C0.size(); i++) m16C0[i].deserialize(rawGameState.begin() + 0x16C0 + i * 0x20);
+        for (int i = 0; i < m1820_worldmapPosition.size(); i++) m1820_worldmapPosition[i] = READ_LE_U16(rawGameState.begin() + 0x1820 + i * 2);
+        m182C = SVECTOR::FromIt(rawGameState.begin() + 0x182C);
+        m1834 = READ_LE_U16(rawGameState.begin() + 0x1834);
+        m1836 = READ_LE_U16(rawGameState.begin() + 0x1836);
+        m1842_disableWorldmapMinimap = READ_LE_S16(rawGameState.begin() + 0x1842);
+        for (int i = 0; i < m1844.size(); i++) m1844[i] = READ_LE_S16(rawGameState.begin() + 0x1844 + i * 2);
+        m1848 = READ_LE_S16(rawGameState.begin() + 0x1848);
+        m184E = SVECTOR::FromIt(rawGameState.begin() + 0x184E);
         m1924_Gold = READ_LE_U32(rawGameState.begin() + 0x1924);
+        for (int i = 0; i < m1930_fieldVarsBackup.size(); i++)  m1930_fieldVarsBackup[i] = READ_LE_U16(rawGameState.begin() + 0x1930 + i * 2);
+        m1D30_partyMemberBitField = READ_LE_U16(rawGameState.begin() + 0x1D30);
+        m1D32_partyFrameMask = READ_LE_U16(rawGameState.begin() + 0x1D32);
         for (int i = 0; i < 3; i++) m1D34_currentParty[i] = READ_LE_U8(rawGameState.begin() + 0x1D34 + i);
+        for (int i = 0; i < m22B1_isOnGear.size(); i++) m22B1_isOnGear[i] = READ_LE_U8(rawGameState.begin() + 0x22b1 + i);
+        m2318_partyFrameLock = READ_LE_U16(rawGameState.begin() + 0x2318);
         m231A_fieldID = READ_LE_U16(rawGameState.begin() + 0x231A);
+        m231C_CameraYaw = READ_LE_S16(rawGameState.begin() + 0x231C);
+        m231E_worldmapInitialPositionIndex = READ_LE_S16(rawGameState.begin() + 0x231E);
         m2320_worldmapMode = READ_LE_U16(rawGameState.begin() + 0x2320);
-        //m231A_fieldID = 0; // override to boot in debug room
     }
 
     std::array<std::vector<u8>, 31> m0_names;

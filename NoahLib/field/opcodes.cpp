@@ -3827,7 +3827,7 @@ void OP_IF_CHARACTER_IN_AVAILABLE_PARTY()
     }
 }
 
-void OP_ADD_FROM_AVAILABLE_PARTY()
+void OP_ADD_TO_AVAILABLE_PARTY()
 {
     sFieldScriptEntity* psVar1;
 

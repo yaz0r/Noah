@@ -272,8 +272,8 @@ void loadMenuSharedResources() {
 
     std::vector<u8> portraits = mallocAndDecompress(relocatedPtr[4]);
     for (int i = 0; i < 3; i++) {
-        if (gMenuContext->m33C->m30[i] != -1) {
-            OpenTIM(portraits.begin() + gMenuContext->m33C->m30[i] * 0xB20);
+        if (gMenuContext->m33C->m30_partyMemberId[i] != -1) {
+            OpenTIM(portraits.begin() + gMenuContext->m33C->m30_partyMemberId[i] * 0xB20);
 
             TIM_IMAGE portraitTim;
             ReadTIM(&portraitTim);
@@ -292,6 +292,17 @@ void loadMenuSharedResources() {
 u8 menuOpenArg = 0;
 u8 defaultSelectedMenuEntry = 0;
 
+ushort menu2CheckBitmask(ushort param_1, uint param_2)
+{
+    static const std::array<u16, 16> menu2Bitmask = { {
+        0x1, 0x2, 0x4, 0x8,
+        0x10, 0x20, 0x40, 0x80,
+        0x100, 0x200, 0x400, 0x800,
+        0x1000, 0x2000, 0x4000, 0x8000
+    } };
+    return menu2Bitmask[param_2 & 0xff] & param_1;
+}
+
 void initMenuGlobals() {
 
     if ((menuToEnter == '\0') && (menuOpenArg == '\0')) {
@@ -304,18 +315,27 @@ void initMenuGlobals() {
     gMenuContext->m326 = 0x3c;
     gMenuContext->m334 = 0;
     gMenuContext->m335 = 0;
+    gMenuContext->m32B = 0;
 
-    MissingCode();
+    for (int i = 0; i < 0x10; i++) {
+        if (!menu2CheckBitmask(gameState.m1D30_partyMemberBitField & gameState.m1D32_partyFrameMask, i)) {
+            gMenuContext->m30C[i] = 0;
+        }
+        else {
+            gMenuContext->m30C[i] = 1;
+        }
+    }
+
     for (int i = 0; i < 3; i++) {
         gMenuContext->m33C->m5C[i + 4] = 0;
         s32 partyMemberIndex = gameState.m1D34_currentParty[i];
         if ((partyMemberIndex == 0xff) || (gMenuContext->m30C[partyMemberIndex] == 0)) {
-            gMenuContext->m33C->m30[i] = -1;
+            gMenuContext->m33C->m30_partyMemberId[i] = -1;
         }
         else {
-            gMenuContext->m33C->m30[i] = partyMemberIndex;
+            gMenuContext->m33C->m30_partyMemberId[i] = partyMemberIndex;
             gMenuContext->m32B++;
-            if (gameState.m26C_party[gMenuContext->m33C->m30[i]].mA0_partyData_gearNum != -1) {
+            if (gameState.m26C_party[gMenuContext->m33C->m30_partyMemberId[i]].mA0_partyData_gearNum != -1) {
                 gMenuContext->m33C->m5C[i + 4] = 1;
                 gMenuContext->m33B++;
             }
@@ -1796,7 +1816,7 @@ int processLoadSaveMenuSub4() {
     sMenuContext_32C* psVar3;
 
     processLoadSaveMenuSub5(0x20);
-    gMenuContext->m33C->m30[3] = 1;
+    gMenuContext->m33C->m30_partyMemberId[3] = 1;
     while (gMenuContext->m329 != 0) {
         menuDraw();
     }
@@ -1822,9 +1842,9 @@ int processLoadSaveMenuSub4() {
     cVar1 = processLoadSaveMenuSub6();
     uVar2 = 1;
     if (cVar1 == '\0') {
-        if (gMenuContext->m33C->m30[3] != 0) {
+        if (gMenuContext->m33C->m30_partyMemberId[3] != 0) {
             processLoadSaveMenuSub7();
-            gMenuContext->m33C->m30[3] = 0;
+            gMenuContext->m33C->m30_partyMemberId[3] = 0;
         }
         uVar2 = 0;
     }
@@ -2080,7 +2100,7 @@ int processLoadSaveMenuSub6(void)
     iVar13 = 0;
     if ((gMenuContext->m32C_memoryCardContext->m4FE4[0] | gMenuContext->m32C_memoryCardContext->m4FE4[1]) == 0) {
         processLoadSaveMenuSub7();
-        gMenuContext->m33C->m30[3] = 0;
+        gMenuContext->m33C->m30_partyMemberId[3] = 0;
         gMenuContext->m33C->mB = 0;
         menuDraw();
         processLoadSaveMenuSub5(0x23);
@@ -2227,7 +2247,7 @@ LAB_Menu2__801c9b84:
 bool needProcessLoadSaveMenuSub7 = false;
 
 int updateSaveState(s8 param_1) {
-    MissingCode();
+    assert(0);
     return 0;
 }
 
@@ -2661,7 +2681,7 @@ int processSoundMenu(void)
     } while (true);
 }
 
-
+s8 processLoadSaveMenuVar0 = 0;
 
 int menu2_executeMainMenuSelection(byte param_1) {
     
@@ -2673,6 +2693,9 @@ int menu2_executeMainMenuSelection(byte param_1) {
     case 0: // exit
         flag1 = 0;
         flag0 = 0;
+        break;
+    case 1:
+        flag1 = processLoadSaveMenu(0, processLoadSaveMenuVar0);
         break;
     case 6:
         flag1 = openStatusMenu();
@@ -2796,6 +2819,19 @@ std::vector<std::array<u32, 2>> mainMenuConfig = { {
     {{0x10F, 0x12B}},
 } };
 
+std::array<int, 8> mainMenuConfig3 = { {
+    0x12, 0x6, 0x12, 0x6,
+    0x6, 0x12, 0x0, 0x0
+} };
+
+std::vector<std::array<u8, 2>> mainMenuConfig2 = { {
+    {{0xA, 0x7}},
+    {{0x6, 0x5}},
+    {{0x4, 0x3}},
+    {{0x2, 0x2}},
+} };
+
+
 void mainMenuExecute() {
     int continueMenu = 1;
     do {
@@ -2843,10 +2879,11 @@ void mainMenuExecute() {
         }
 
         if (gMenuContext->m336_menuSelectedEntry != gMenuContext->m337_previousMenuSelectedEntry) {
-            MissingCode();
             updateMenuSelection(7, gMenuContext->m336_menuSelectedEntry, std::span(mainMenuConfig.begin(), mainMenuConfig.end()).begin());
-            assert(0);
-            //updateMenuSelection2(8, gMenuContext->m4E0 + 4, &DAT_Menu2__801ea528, &DAT_Menu2__801e9e64, &gMenuContext->m33C->mC, gMenuContext->m336_menuSelectedEntry, 0, 0);
+            updateMenuSelection2(8, &gMenuContext->m4E0[4], mainMenuConfig2.data(),
+                std::span(mainMenuConfig3.begin(), mainMenuConfig3.end()).begin(),
+                std::span(gMenuContext->m33C->mC.begin(), gMenuContext->m33C->mC.end()).begin(),
+                gMenuContext->m336_menuSelectedEntry, 0, 0);
             gMenuContext->m337_previousMenuSelectedEntry = gMenuContext->m336_menuSelectedEntry;
         }
 
@@ -3275,7 +3312,7 @@ void updateCharacterPortraitAndName(s8 slot, uint characterId, short param_3, sh
     setupStringInPolyFT4(gMenuContext->m2DC_font, slot + 0x14b, &gMenuContext->m39C[slot]->m0_portraitPoly, gMenuContext->m308_oddOrEven, param_3, param_4, 0x1000);
     initMemoryCardTransparentPoly(&gMenuContext->m39C[slot]->m50_NamePoly[gMenuContext->m308_oddOrEven]);
     gMenuContext->m39C[slot]->m50_NamePoly[gMenuContext->m308_oddOrEven].tpage = GetTPage(0, 0, 0x180, 0);
-    if ((gMenuContext->m33C->m30[slot] & 1U) == 0) {
+    if ((gMenuContext->m33C->m30_partyMemberId[slot] & 1U) == 0) {
         gMenuContext->m39C[slot]->m50_NamePoly[gMenuContext->m308_oddOrEven].clut = textSpriteMode0;
     }
     else {
@@ -3508,7 +3545,7 @@ void infocardAnimationStep(s8 slot) {
         return;
     }
 LAB_Menu2__801c850c:
-    psVar6->m23 = 1;
+    psVar6->m23_isAnimationDone = 1;
     return;
 }
 
@@ -3551,15 +3588,8 @@ void setupInfoCardAnimation(int X1, int X2, int Y1, int Y2, byte numSteps, byte 
     gMenuContext->m0[slot].m22_numSteps = numSteps;
     gMenuContext->m0[slot].m18_XOffset = 0;
     gMenuContext->m0[slot].m1C_YOffset = 0;
-    gMenuContext->m0[slot].m23 = 0;
+    gMenuContext->m0[slot].m23_isAnimationDone = 0;
 }
-
-std::vector<std::array<u8, 2>> mainMenuConfig2 = { {
-    {{0xA, 0x7}},
-    {{0x6, 0x5}},
-    {{0x4, 0x3}},
-    {{0x2, 0x2}},
-} };
 
 void processLoadSaveMenuSub2(bool show, bool hideGold)
 {
@@ -3576,15 +3606,15 @@ void processLoadSaveMenuSub2(bool show, bool hideGold)
         setupInfoCardAnimation(0x110, -10, 0x70, 0x76, 8, 2);
     }
 
-    while ((gMenuContext->m0[0].m23 == 0) && (gMenuContext->m0[1].m23 == 0) && (gMenuContext->m0[2].m23 == 0)) {
+    while ((gMenuContext->m0[0].m23_isAnimationDone == 0) && (gMenuContext->m0[1].m23_isAnimationDone == 0) && (gMenuContext->m0[2].m23_isAnimationDone == 0)) {
         for (int i = 0; i < 3; i++) {
-            if (gMenuContext->m33C->m30[i] != -1) {
-                updateCharacterInfoCard(i, gMenuContext->m33C->m30[i]);
+            if (gMenuContext->m33C->m30_partyMemberId[i] != -1) {
+                updateCharacterInfoCard(i, gMenuContext->m33C->m30_partyMemberId[i]);
             }
         }
         menuDraw();
         for (int i = 0; i < 3; i++) {
-            if (gMenuContext->m33C->m30[i] != -1) {
+            if (gMenuContext->m33C->m30_partyMemberId[i] != -1) {
                 infocardAnimationStep(i);
             }
         }
@@ -3613,8 +3643,8 @@ void processLoadSaveMenuSub2(bool show, bool hideGold)
         gMenuContext->m0[2].m1C_YOffset = 0;
         gMenuContext->m0[2].m18_XOffset = 0;
         for (int i = 0; i < 3; i++) {
-            if (gMenuContext->m33C->m30[i] != -1) {
-                updateCharacterInfoCard(i, gMenuContext->m33C->m30[i]);
+            if (gMenuContext->m33C->m30_partyMemberId[i] != -1) {
+                updateCharacterInfoCard(i, gMenuContext->m33C->m30_partyMemberId[i]);
             }
         }
         playMenuSoundEffect(0x5d);
@@ -3664,9 +3694,9 @@ void setupMenu0()
         MissingCode();
     }
     for (int i = 0; i < 3; i++) {
-        if (gMenuContext->m33C->m30[i] != -1) {
-            renderCharacterNameInVram(gMenuContext->m33C->m30[i], i * 2);
-            s8 gearIndex = gameState.m26C_party[(byte)gMenuContext->m33C->m30[i]].mA0_partyData_gearNum;
+        if (gMenuContext->m33C->m30_partyMemberId[i] != -1) {
+            renderCharacterNameInVram(gMenuContext->m33C->m30_partyMemberId[i], i * 2);
+            s8 gearIndex = gameState.m26C_party[(byte)gMenuContext->m33C->m30_partyMemberId[i]].mA0_partyData_gearNum;
             if (gearIndex == -1)
             {
                 renderCharacterNameInVram(-1, 6 + 2 * i);
