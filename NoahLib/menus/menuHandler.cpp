@@ -28,10 +28,7 @@ u8 menuToEnter = 0;
 sLoadableDataRaw menuSharedResources;
 sLoadableDataRaw menuOverlay;
 
-void processLoadSaveMenuSub1(void);
-void processLoadSaveMenuSub3(uint param_1);
 int processLoadSaveMenuSub6(void);
-void processLoadSaveMenuSub8(uint param_1);
 void draw380(uint param_1, short param_2, short param_3, short param_4, short param_5, byte param_6, s32 param_7, char param_8);
 
 std::array<int, 4> soundMenuTable0 = { {
@@ -48,8 +45,8 @@ std::array<int, 9> saveGameMainMenuConfig5 = { {
     0xAE
 } };
 
-static std::array<int, 19> infocardNameU = { {0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18} };
-static std::array<int, 19> infocardNameV = { {0x3B,0x48,0x48,0x55,0x55,0x62,0x62,0x6F,0x6F,0x7C,0x7C,0x89,0x89,0x96,0x96,0xA3,0xA3,0xB0,0xB0} };
+std::array<int, 19> infocardNameU = { {0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18,0x00,0x18} };
+std::array<int, 19> infocardNameV = { {0x3B,0x48,0x48,0x55,0x55,0x62,0x62,0x6F,0x6F,0x7C,0x7C,0x89,0x89,0x96,0x96,0xA3,0xA3,0xB0,0xB0} };
 
 
 void setupMenuContext1D4(sMenuContext_1D4* param_1)
@@ -342,7 +339,12 @@ void initMenuGlobals() {
         }
     }
 
-    MissingCode();
+    for (int i = 0; i < 3; i++) {
+        if (gMenuContext->m33C->m30_partyMemberId[i] != -1) {
+            gMenuContext->m4DC_currentlySelectedCharacter = i;
+            break;
+        }
+    }
     loadMenuSharedResources();
 }
 
@@ -782,16 +784,16 @@ void drawMenu_380() {
 
 void drawMenu0(void)
 {
-    MissingCode();
     drawMenu_380();
-    /*drawMenu2_sub();
-    drawMenu_428();*/
+    drawMenu2_sub();
+    drawMenu_428();
     drawMenu_348_cursor();
-    MissingCode();
-    /*drawMenu_34C();
-    drawMenuMemoryCard();*/
+    drawMenu_34C();
+    drawMenuMemoryCard();
     drawCharacterInfoCards();
-    /*FUN_Menu2__801ce660();
+    drawCharacterInfoCardExtended();
+    MissingCode();
+    /*
     drawMenu_35C();
     drawMenu_360();*/
     displayGoldAndPlayTime();
@@ -911,7 +913,9 @@ void drawMenu2_sub_sub2(void)
     iVar1 = 0;
     do {
         if (gMenuContext->m33C->m14[iVar1] != 0) {
-            assert(0);
+            if (gMenuContext->m4E0[iVar1 + 0xC].m7F) {
+                transformAndAddPrim(1, &gMenuContext->m4E0[iVar1 + 0xC].m50_vertex, &gMenuContext->m4E0[iVar1 + 0xC].m0_polys, gMenuContext->m4E0[iVar1 + 0xC].m7D);
+            }
         }
         iVar1 = iVar1 + 1;
     } while (iVar1 < 6);
@@ -1006,11 +1010,11 @@ void drawMenu2_sub_sub8(void)
     return;
 }
 
-void transformAndAddPrim(int param_1, std::array<SFP_VEC4, 4>& param_2, std::array<POLY_FT4, 2>* param_3, int param_4) {
+void transformAndAddPrim(int param_1, std::array<SFP_VEC4, 4>* param_2, std::array<POLY_FT4, 2>* param_3, int param_4) {
     for (int i = 0; i < param_1; i++) {
         POLY_FT4* p = &param_3[i][param_4];
         long dummy1, dummy2;
-        RotTransPers4(&param_2[0], &param_2[1], &param_2[2], &param_2[3], &p->x0y0, &p->x1y1, &p->x2y2, &p->x3y3, &dummy1, &dummy2);
+        RotTransPers4(&param_2[i][0], &param_2[i][1], &param_2[i][2], &param_2[i][3], &p->x0y0, &p->x1y1, &p->x2y2, &p->x3y3, &dummy1, &dummy2);
         AddPrim(&gMenuContext->m1D4_currentDrawContext->m70_OT[4], p);
     }
 }
@@ -1024,7 +1028,7 @@ void drawMenu2_drawCheckingMemoryCard(void)
                 AddPrim(&gMenuContext->m1D4_currentDrawContext->m70_OT[4], &pContext->m0_polys[pContext->m7D]);
             }
             else {
-                transformAndAddPrim(1, pContext->m50_vertex, &pContext->m0_polys, pContext->m7D);
+                transformAndAddPrim(1, &pContext->m50_vertex, &pContext->m0_polys, pContext->m7D);
             }
         }
     }
@@ -1493,22 +1497,17 @@ void j_setupMenuContext4E0(uint param_1, sMenuContext_4E0* param_2, const std::s
     return;
 }
 
-std::array<std::array<u8, 2>, 4> saveGameMainMenuConfig2 = { {
+std::array<std::array<u8, 2>, 2> saveGameMainMenuConfig2 = { {
     {{0x8, 0x1}},
     {{0x0, 0x0}},
-    {{0x12, 0x11}},
-    {{0x10, 0x13}},
 } };
 
 std::array<s32, 11> cursorPosXTable = { {
-        0x49, 0x48, 0x43, 0x3C, 0x34, 0x26, 0x17,
-        0x25, 0x24, 0x1F, 0x18
+        0x49, 0x48, 0x43, 0x3C, 0x34, 0x26, 0x17, 0xC9, 0xB5, 0xA2, 0x90
 } };
 
 std::array<s32, 11> cursorPosYTable = { {
-        0xC9, 0xB5, 0xA2, 0x90, 0x7E, 0x6F, 0x61,
-        0xC9, 0xB5, 0xA2, 0x90
-
+        0xC9, 0xB5, 0xA2, 0x90, 0x7E, 0x6F, 0x61, 0x25, 0x24, 0x1F, 0x18
 } };
 
 void updateCursorPolysLocation(int param_1, char param_2) {

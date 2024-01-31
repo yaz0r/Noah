@@ -52,7 +52,66 @@ struct sMenuContext_32C {
     std::array<u32, 4> m4FEC_events;
 };
 
+struct sWeaponStats {
+    void init(std::vector<u8>::const_iterator it) {
+        m8 = READ_LE_S16(it + 0x8);
+        mA = READ_LE_S8(it + 0xA);
+        mB = READ_LE_S8(it + 0xB);
+        mC = READ_LE_S8(it + 0xC);
+    }
+    s16 m8;
+    s8 mA;
+    s8 mB;
+    s8 mC;
+};
+
+
+struct sAccessoryStats {
+    void init(std::vector<u8>::const_iterator it) {
+        m8 = READ_LE_S8(it + 0x8);
+        m9_type = READ_LE_S8(it + 0x9);
+        mC_flags = READ_LE_U16(it + 0xC);
+    }
+    s8 m8;
+    s8 m9_type;
+    u16 mC_flags;
+};
+
 struct sMenuContext_330 {
+    std::vector<sWeaponStats> m0_weaponStats;
+    std::vector<sAccessoryStats> m4_accessoryData;
+    std::vector<u8> m14;
+    std::vector<u8> m18;
+    u16 mB8_attackTotal;
+    u16 mBA_hitTotal;
+    u16 mBC_defenceTotal;
+    u16 mBE_evadeTotal;
+    u16 mC0_etherTotal;
+    u16 mC2_etherDefenceTotal;
+    u16 mC4_agilityTotal;
+    // size 0xCC
+
+    static std::vector<sWeaponStats> readWeaponStats(const std::vector<u8>& data) {
+        std::vector<sWeaponStats> result;
+        int numStats = data.size() / 0x10;
+        //assert(numStats * 0x10 == data.size());
+        result.resize(numStats);
+        for (int i = 0; i < numStats; i++) {
+            result[i].init(data.begin() + 0x10 * i);
+        }
+        return result;
+    }
+
+    static std::vector<sAccessoryStats> readAccesoryStats(const std::vector<u8>& data) {
+        std::vector<sAccessoryStats> result;
+        int numStats = data.size() / 0x10;
+        //assert(numStats * 0x10 == data.size());
+        result.resize(numStats);
+        for (int i = 0; i < numStats; i++) {
+            result[i].init(data.begin() + 0x10 * i);
+        }
+        return result;
+    }
 };
 
 struct sMenuContext_33C {
@@ -61,6 +120,7 @@ struct sMenuContext_33C {
     u8 m4_drawCursor = 0;
     u8 m5_drawGold = 0;
     u8 m6_drawPlayTime = 0;
+    u8 m7_drawCurrentSelectedCharacterInfoCard;
     u8 m9_drawMainMenu = 0;
     u8 mA_354Enabled = 0;
     u8 mB = 0;
@@ -77,8 +137,10 @@ struct sMenuContext_33C {
     std::array<s8, 6> m40;
     s8 m4E;
     s8 m52;
+    u8 m53;
     std::array<s8, 6> m54;
     std::array<s8, 7> m5C = { 0,0,0,0, 0,0,0 };
+    u8 m67;
     u8 m68;
 };
 
@@ -269,11 +331,15 @@ struct sMenuContext {
     struct sMenuContext_34C* m34C;
     sMenuContext_350* m350_mainMenu;
     sMenuContext_354* m354;
+    struct sMenuContext_358* m358;
+    struct sMenuContext_35C* m35C;
+    struct sMenuContext_360* m360;
     std::array<sMenuContext_364*, 7> m364_menuBoxes;
     std::array<sMenuContext_380*, 7> m380;
     std::array<sMenuContext_39C*, 3> m39C;
     std::array<struct sMenuContext_3A8*, 0x20> m3A8_memoryCardTiles;
     sMenuContext_428* m428;
+    struct sMenuContext_440* m440;
     std::array<sMenuContextMenuTile, 4> m46C_menuBorders;
     s32 m4CC;
     s32 m4D0;
@@ -281,6 +347,7 @@ struct sMenuContext {
     std::array<sMenuContext_4E0, 50> m4E0;
     s8 m4D8;
     s8 m4D9;
+    s8 m4DC_currentlySelectedCharacter;
     std::array<sMenuContext_4E0*, 4> m1DE0;
     u8 m1E94;
     u8 m1E95;
@@ -288,10 +355,24 @@ struct sMenuContext {
 
 extern sMenuContext *gMenuContext;
 
+extern std::array<s32, 11> cursorPosXTable;
+extern std::array<s32, 11> cursorPosYTable;
+
+extern std::array<int, 19> infocardNameU;
+extern std::array<int, 19> infocardNameV;
+
+
 void enterMenu(void);
 
+void drawMenu2_sub(void);
+void drawMenuMemoryCard();
+void drawMenu_34C(void);
+void drawMenu_428();
 void loadAndOpenMenu(void);
-
+void menuDraw();
+void processLoadSaveMenuSub1(void);
+void processLoadSaveMenuSub3(uint param_1);
+void processLoadSaveMenuSub8(uint param_1);
 void fillStringDisplayBuffer(uint param_1);
 int setupStringInPolyFT4(struct sFont& font, int character, std::array<POLY_FT4, 2>* polyArray, int oddOrEven, short x, short y, ushort scale);
 void setupMenuPolyFT4(POLY_FT4* param_1, short x, short y, u8 u, u8 v, short width, short height);
@@ -301,3 +382,6 @@ u8 renderString(std::vector<u8>::iterator buffer, std::vector<u16>& param_2, ush
 void processLoadSaveMenuSub2(bool show, bool hideGold);
 void initMemoryCardTransparentPoly(POLY_FT4* param_1);
 void initMemoryCardPolyVerts(std::array<SFP_VEC4, 4>& param_1, short param_2, short param_3, short param_4, short param_5);
+void setupMenuContext4E0(sMenuContext_4E0* param_1, const std::span<std::array<u8, 2>>::iterator& param_2, int startY, int count);
+void transformAndAddPrim(int param_1, std::array<SFP_VEC4, 4>* param_2, std::array<POLY_FT4, 2>* param_3, int param_4);
+void initMenuTiles1Sub(POLY_FT4* param_1);

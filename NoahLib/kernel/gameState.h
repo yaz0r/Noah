@@ -13,9 +13,20 @@ struct sGameStateA4
     };
 
     void deserialize(std::vector<u8>::iterator buffer) {
+        m2 = READ_LE_S8(buffer + 0x2);
+        m3 = READ_LE_S8(buffer + 0x3);
         for (int i = 0; i < m4.size(); i++) {
             m4[i].deserialize(buffer + 4 + 8 * i);
         }
+        m28 = READ_LE_S8(buffer + 0x28);
+        m29 = READ_LE_S8(buffer + 0x29);
+        m2A = READ_LE_S8(buffer + 0x2A);
+        m2B = READ_LE_S8(buffer + 0x2B);
+        m2C = READ_LE_S8(buffer + 0x2C);
+        m2E = READ_LE_S8(buffer + 0x2E);
+        m2F = READ_LE_S8(buffer + 0x2F);
+        m30 = READ_LE_S8(buffer + 0x30);
+        m31 = READ_LE_S8(buffer + 0x31);
         m2D = READ_LE_S8(buffer + 0x2D);
         m32 = READ_LE_U16(buffer + 0x32);
         m34 = READ_LE_S16(buffer + 0x34);
@@ -39,9 +50,14 @@ struct sGameStateA4
         m5F_evadePercentage = READ_LE_S8(buffer + 0x5F);
         m62_Level = READ_LE_S8(buffer + 0x62);
         m63_Level2 = READ_LE_S8(buffer + 0x63);
+        m6A_weaponModifier = READ_LE_S8(buffer + 0x6A);
         mA0_partyData_gearNum = READ_LE_S8(buffer + 0xA0);
+        for (int i = 0; i < m74_accessorySlots.size(); i++) {
+            m74_accessorySlots[i] = READ_LE_U8(buffer + 0x74 + i);
+        }
         m7A_commandEnabledBF = READ_LE_U16(buffer + 0x7A);
         m7C = READ_LE_U16(buffer + 0x7C);
+        m7E = READ_LE_U16(buffer + 0x7E);
         m80 = READ_LE_U16(buffer + 0x80);
         m82 = READ_LE_U16(buffer + 0x82);
         m84 = READ_LE_U16(buffer + 0x84);
@@ -56,8 +72,19 @@ struct sGameStateA4
         mA1 = READ_LE_S8(buffer + 0xA1);
     }
 
+    s8 m2;
+    s8 m3;
     std::array<sGameStateA4Sub4, 4> m4;
     s8 m2D;
+    s8 m28;
+    s8 m29;
+    s8 m2A;
+    s8 m2B;
+    s8 m2C;
+    s8 m2E;
+    s8 m2F;
+    s8 m30;
+    s8 m31;
     u16 m32;
     s16 m34;
     u16 m36;
@@ -80,9 +107,12 @@ struct sGameStateA4
     s8 m5F_evadePercentage;
     s8 m62_Level;
     s8 m63_Level2;
+    s8 m6A_weaponModifier;
     s8 mA0_partyData_gearNum;
+    std::array<s8, 3> m74_accessorySlots;
     u16 m7A_commandEnabledBF;
     u16 m7C;
+    u16 m7E;
     u16 m80;
     u16 m82;
     u16 m84;
