@@ -82,13 +82,7 @@ struct sMenuContext_330 {
     std::vector<sAccessoryStats> m4_accessoryData;
     std::vector<u8> m14;
     std::vector<u8> m18;
-    u16 mB8_attackTotal;
-    u16 mBA_hitTotal;
-    u16 mBC_defenceTotal;
-    u16 mBE_evadeTotal;
-    u16 mC0_etherTotal;
-    u16 mC2_etherDefenceTotal;
-    u16 mC4_agilityTotal;
+    std::array<u16, 7> mB8_computedStats; // order is Attack, Hit, Defense, Evade, Ether, EtherDef, Agility
     // size 0xCC
 
     static std::vector<sWeaponStats> readWeaponStats(const std::vector<u8>& data) {
@@ -121,6 +115,7 @@ struct sMenuContext_33C {
     u8 m5_drawGold = 0;
     u8 m6_drawPlayTime = 0;
     u8 m7_drawCurrentSelectedCharacterInfoCard;
+    u8 m8_drawCurrentSelectedCharacterStats;
     u8 m9_drawMainMenu = 0;
     u8 mA_354Enabled = 0;
     u8 mB = 0;
@@ -135,6 +130,7 @@ struct sMenuContext_33C {
     std::array<s8, 4> m34;
     std::array<s8, 8> m38;
     std::array<s8, 6> m40;
+    u8 m4B_draw360;
     s8 m4E;
     s8 m52;
     u8 m53;
@@ -364,6 +360,9 @@ extern std::array<int, 19> infocardNameV;
 
 void enterMenu(void);
 
+void resetCursorState(void);
+void updateCursorPolysLocation(int param_1, char param_2);
+void drawMenuContext354();
 void drawMenu2_sub(void);
 void drawMenuMemoryCard();
 void drawMenu_34C(void);
@@ -385,3 +384,4 @@ void initMemoryCardPolyVerts(std::array<SFP_VEC4, 4>& param_1, short param_2, sh
 void setupMenuContext4E0(sMenuContext_4E0* param_1, const std::span<std::array<u8, 2>>::iterator& param_2, int startY, int count);
 void transformAndAddPrim(int param_1, std::array<SFP_VEC4, 4>* param_2, std::array<POLY_FT4, 2>* param_3, int param_4);
 void initMenuTiles1Sub(POLY_FT4* param_1);
+void computeMenuBorder(sFont& font, int param_2, int* param_3, int* param_4, int* param_5, int* param_6, int* param_7, int* param_8);

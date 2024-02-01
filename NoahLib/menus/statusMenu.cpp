@@ -20,6 +20,23 @@ struct sMenuContext_358 {
 };
 
 struct sMenuContext_35C {
+    std::array<std::array<POLY_FT4, 2>, 47> m0;
+    std::array<std::array<std::array<POLY_FT4, 2>, 4>, 7> mEB0;
+    std::array<std::array<std::array<POLY_FT4, 2>, 4>, 7> m1770;
+    std::array<std::array<POLY_G4, 2>, 7> m2030;
+    std::array<std::array<SFP_VEC4, 4>, 47> m2420;
+    std::array<std::array<std::array<SFP_VEC4, 4>, 4>, 7> m2A00;
+    std::array<std::array<std::array<SFP_VEC4, 4>, 4>, 7> m2D80;
+    std::array<std::array<SFP_VEC4, 4>, 7> m3100;
+    std::array<s8, 7> m32C0;
+    std::array<s8, 7> m32C7;
+    std::array<s8, 7> m32CE;
+    std::array<s8, 7> m32D5;
+    std::array<s8, 7> m32DC;
+    std::array<s8, 7> m32EA;
+    u8 m32F1;
+    u8 m32F2;
+    u8 m32F3;
     //size 0x32F4
 };
 
@@ -146,38 +163,38 @@ void setupStatusMenuForCharacter2(sMenuContext_330* param_1, int param_2) {
         assert(0);
     }
     else {
-        param_1->mB8_attackTotal = (ushort)gameState.m26C_party[param_2].m4[0].m0 +
+        param_1->mB8_computedStats[0] = (ushort)gameState.m26C_party[param_2].m4[0].m0 +
             (ushort)gameState.m26C_party[param_2].m58_attack +
             (ushort)gameState.m26C_party[param_2].m28;
     }
 
-    param_1->mBA_hitTotal = gameState.m26C_party[param_2].m5E_hitPercentage + gameState.m26C_party[param_2].m2E;
-    param_1->mBC_defenceTotal = gameState.m26C_party[param_2].m2D + gameState.m26C_party[param_2].m59_defence + gameState.m26C_party[param_2].m29;
-    param_1->mBE_evadeTotal = gameState.m26C_party[param_2].m5F_evadePercentage + gameState.m26C_party[param_2].m2F;
-    param_1->mC0_etherTotal = gameState.m26C_party[param_2].m5B_ether + gameState.m26C_party[param_2].m2B;
-    param_1->mC2_etherDefenceTotal = gameState.m26C_party[param_2].m5C_etherDefence + gameState.m26C_party[param_2].m2C;
-    param_1->mC4_agilityTotal = gameState.m26C_party[param_2].m5A_agility + gameState.m26C_party[param_2].m2A;
+    param_1->mB8_computedStats[1] = gameState.m26C_party[param_2].m5E_hitPercentage + gameState.m26C_party[param_2].m2E;
+    param_1->mB8_computedStats[2] = gameState.m26C_party[param_2].m2D + gameState.m26C_party[param_2].m59_defence + gameState.m26C_party[param_2].m29;
+    param_1->mB8_computedStats[3] = gameState.m26C_party[param_2].m5F_evadePercentage + gameState.m26C_party[param_2].m2F;
+    param_1->mB8_computedStats[4] = gameState.m26C_party[param_2].m5B_ether + gameState.m26C_party[param_2].m2B;
+    param_1->mB8_computedStats[5] = gameState.m26C_party[param_2].m5C_etherDefence + gameState.m26C_party[param_2].m2C;
+    param_1->mB8_computedStats[6] = gameState.m26C_party[param_2].m5A_agility + gameState.m26C_party[param_2].m2A;
 
-    if (0xfa < param_1->mB8_attackTotal) {
-        param_1->mB8_attackTotal = 0xfa;
+    if (250 < param_1->mB8_computedStats[0]) {
+        param_1->mB8_computedStats[0] = 250;
     }
-    if (99 < param_1->mBA_hitTotal) {
-        param_1->mBA_hitTotal = 99;
+    if (99 < param_1->mB8_computedStats[1]) {
+        param_1->mB8_computedStats[1] = 99;
     }
-    if (0xfa < param_1->mBC_defenceTotal) {
-        param_1->mBC_defenceTotal = 0xfa;
+    if (250 < param_1->mB8_computedStats[2]) {
+        param_1->mB8_computedStats[2] = 250;
     }
-    if (99 < param_1->mBE_evadeTotal) {
-        param_1->mBE_evadeTotal = 99;
+    if (99 < param_1->mB8_computedStats[3]) {
+        param_1->mB8_computedStats[3] = 99;
     }
-    if (0xfa < param_1->mC0_etherTotal) {
-        param_1->mC0_etherTotal = 0xfa;
+    if (250 < param_1->mB8_computedStats[4]) {
+        param_1->mB8_computedStats[4] = 250;
     }
-    if (0xfa < param_1->mC2_etherDefenceTotal) {
-        param_1->mC2_etherDefenceTotal = 0xfa;
+    if (250 < param_1->mB8_computedStats[5]) {
+        param_1->mB8_computedStats[5] = 250;
     }
-    if (0x14 < param_1->mC4_agilityTotal) {
-        param_1->mC4_agilityTotal = 0x10;
+    if (20 < param_1->mB8_computedStats[6]) {
+        param_1->mB8_computedStats[6] = 16;
     }
 }
 
@@ -250,9 +267,214 @@ void setupStatusMenuForCharacter3Sub1(int param_1, char param_2, char param_3) {
     }
 }
 
+static const std::array<std::array<s32, 7>, 2> setupStatusMenuForCharacter3Sub2Sub0String = { {
+    {{0xDE, 0xDF, 0xE0, 0xE1, 0xE2, 0xE4, 0xEB}},
+    {{0xDE, 0xF3, 0xF4, 0xF6, 0xEB, 0xF7, 0xF7}},
+} };
+
+static const std::array<std::array<s32, 7>, 2> setupStatusMenuForCharacter3Sub2Sub0Pos = { {
+    {{8,8,8,8,8,8,8}},
+    {{0,8,0x10,0x18,0x20,0x28,0x30}},
+} };
+
+// This prepare the poly for the name of the 7 stats
+void setupStatusMenuForCharacter3Sub2Sub0(short param_1, short param_2, uint param_3) {
+    int numPoly;
+    int tp;
+    int clutX;
+    int clutY;
+    int tpageX;
+    int tpageY;
+    computeMenuBorder(gMenuContext->m2DC_font, 0xe0, &numPoly, &tp, &clutX, &clutY, &tpageX, &tpageY);
+    gMenuContext->m35C->m32F3 = 0;
+    for (int i = 0; i < 7 - param_3; i++) {
+        int startOfString = gMenuContext->m35C->m32F3;
+        gMenuContext->m35C->m32F3 += setupStringInPolyFT4(gMenuContext->m2DC_font, setupStatusMenuForCharacter3Sub2Sub0String[param_3][i],
+            &gMenuContext->m35C->m0[gMenuContext->m35C->m32F3], gMenuContext->m308_oddOrEven,
+            param_1 + setupStatusMenuForCharacter3Sub2Sub0Pos[0][i],
+            param_2 + setupStatusMenuForCharacter3Sub2Sub0Pos[1][i],
+            0x1000);
+        // Alternate shading
+        if (i & 1) {
+            for (int j = startOfString; j < gMenuContext->m35C->m32F3; j++) {
+                SetShadeTex(&gMenuContext->m35C->m0[j][gMenuContext->m308_oddOrEven], 0);
+                gMenuContext->m35C->m0[j][gMenuContext->m308_oddOrEven].r0 = 0x40;
+                gMenuContext->m35C->m0[j][gMenuContext->m308_oddOrEven].g0 = 0x40;
+                gMenuContext->m35C->m0[j][gMenuContext->m308_oddOrEven].b0 = 0x40;
+            }
+        }
+    }
+    for (int i = 0; i < gMenuContext->m35C->m32F3; i++) {
+        auto& p = gMenuContext->m35C->m0[i][gMenuContext->m308_oddOrEven];
+        initMemoryCardPolyVerts(gMenuContext->m35C->m2420[i], p.x0, p.y0, p.x1 - p.x0, p.y3 - p.y0);
+    }
+}
+
+s32 scaledStatsVar0;
+s32 scaledStatsVar1;
+s32 scaledStatsVar2;
+s32 scaledStatsVar3;
+s32 scaledStatsVar4;
+s8 scaledStatsVar5;
+s8 scaledStatsVar6;
+
+void scaleStatsForMax(uint param_1, uint param_2, int param_3)
+{
+    scaledStatsVar0 = param_1 & 0xffff;
+    scaledStatsVar1 = param_2 & 0xffff;
+    scaledStatsVar2 = scaledStatsVar1 - scaledStatsVar0;
+    scaledStatsVar3 = (((int)(scaledStatsVar0 * 100) / param_3) * 0x1900) / 10000;
+    if (scaledStatsVar2 < 0) {
+        scaledStatsVar5 = 3;
+        scaledStatsVar6 = 0xe5;
+        scaledStatsVar2 = scaledStatsVar0 - scaledStatsVar1;
+    }
+    else {
+        scaledStatsVar5 = 2;
+        scaledStatsVar6 = 0xe3;
+    }
+    scaledStatsVar4 = (((scaledStatsVar2 * 100) / param_3) * 0x1900) / 10000;
+    return;
+}
+
+ushort computeStatsMax(s32 param_1, std::array<u16, 7>::iterator param_2, std::array<u16, 7>::iterator param_3)
+{
+    int iVar1;
+    ushort uVar2;
+
+    uVar2 = 0;
+    iVar1 = 0;
+    do {
+        iVar1 = iVar1 + 1;
+        if (uVar2 < *param_2) {
+            uVar2 = *param_2;
+        }
+        param_2 = param_2 + 1;
+    } while (iVar1 < 7);
+    iVar1 = 0;
+    do {
+        iVar1 = iVar1 + 1;
+        if (uVar2 < *param_3) {
+            uVar2 = *param_3;
+        }
+        param_3 = param_3 + 1;
+    } while (iVar1 < 7);
+    return uVar2;
+}
+
+void setupStatsPolyG4(std::array<POLY_G4, 2>& param_1, byte param_2) {
+    int iVar1;
+    u8 local_18;
+    u8 local_17;
+    u8 local_16;
+
+    if (param_2 == 1) {
+        local_18 = 0x80;
+        local_17 = 0xff;
+        local_16 = 0x80;
+    }
+    else if (param_2 < 2) {
+        if (param_2 == 0) {
+            local_18 = 0xff;
+            local_17 = 0x80;
+            local_16 = 0x80;
+        }
+    }
+    else if (param_2 == 2) {
+        local_18 = 0xff;
+        local_17 = '\0';
+        local_16 = '\0';
+    }
+    else if (param_2 == 3) {
+        local_18 = '\0';
+        local_17 = '\0';
+        local_16 = 0xff;
+    }
+    for (int i = 0; i < 2; i++) {
+        SetPolyG4(&param_1[i]);
+        param_1[i].r0 = local_18;
+        param_1[i].g0 = local_17;
+        param_1[i].b0 = local_16;
+        param_1[i].r1 = local_18;
+        param_1[i].g1 = local_17;
+        param_1[i].r2 = '\0';
+        param_1[i].g2 = '\0';
+        param_1[i].b2 = '\0';
+        param_1[i].r3 = '\0';
+        param_1[i].g3 = '\0';
+        param_1[i].b3 = '\0';
+        param_1[i].b1 = local_16;
+    }
+}
+
+// setup the values of stats + bars
+void setupStatusMenuForCharacter3Sub2Sub1(int param_1, short param_2, short param_3, char param_4, byte param_5) {
+    std::array<u16, 7>* stats1;
+    std::array<u16, 7>* stats2;
+
+    if (param_4 == 0) {
+        stats1 = stats2 = &gMenuContext->m330->mB8_computedStats;
+    }
+    else {
+        assert(0);
+    }
+
+    s32 statsMax = computeStatsMax(0, stats1->begin(), stats2->begin());
+
+    for (int i = 0; i < 7 - param_5; i++) {
+        gMenuContext->m35C->m32C0[i] = 0;
+        gMenuContext->m35C->m32CE[i] = 0;
+        // setup the rendering of the scaled bar for the stat
+        scaleStatsForMax(stats1->at(i), stats2->at(i), statsMax);
+        setupStatsPolyG4(gMenuContext->m35C->m2030[i], 0);
+        initMemoryCardPolyVerts(gMenuContext->m35C->m3100[i], param_2 + 0x28, param_3 + 2 + i * 8, scaledStatsVar3, 6);
+        gMenuContext->m35C->m32DC[i] = gMenuContext->m308_oddOrEven;
+        // setup the stat numerical value display:
+        fillStringDisplayBuffer(scaledStatsVar0);
+        for (int j = 0; j < 4; j++) {
+            if (gMenuContext->m31C_stringDisplayBuffer[j + 5] != 0xFF) {
+                gMenuContext->m35C->m32C0[i] += setupStringInPolyFT4(gMenuContext->m2DC_font, gMenuContext->m31C_stringDisplayBuffer[j + 5],
+                    &gMenuContext->m35C->mEB0[i][gMenuContext->m35C->m32C0[i]], gMenuContext->m308_oddOrEven, param_2 + 0x68 + j * 8
+                    , param_3 + i * 8, 0x1000);
+            }
+        }
+        for (int j = 0; j < gMenuContext->m35C->m32C0[i]; j++) {
+            auto& p = gMenuContext->m35C->mEB0[i][j][gMenuContext->m308_oddOrEven];
+            initMemoryCardPolyVerts(gMenuContext->m35C->m2A00[i][j], p.x0, p.y0, p.x1 - p.x0, p.y3 - p.y0);
+        }
+        if (i & 1) {
+            MissingCode(); // shading
+        }
+        gMenuContext->m35C->m32C7[i] = gMenuContext->m308_oddOrEven;
+        if (param_4) {
+            assert(0); // compute the stats difference bars
+        }
+        gMenuContext->m35C->m32EA[i] = 1;
+    }
+}
+
+void setupStatusMenuForCharacter3Sub2(s8 param_1, char param_2, s8 param_3, s8 param_4) {
+    int uVar1;
+    int uVar2;
+
+    uVar2 = 0x98;
+    uVar1 = 0x26;
+    if (param_2) {
+        uVar2 = 0x80;
+        uVar1 = 0x90;
+    }
+    setupStatusMenuForCharacter3Sub2Sub0(uVar2, uVar1, param_4);
+    setupStatusMenuForCharacter3Sub2Sub1(param_1, uVar2, uVar1, param_3, param_4);
+    gMenuContext->m33C->m8_drawCurrentSelectedCharacterStats = 1;
+    gMenuContext->m35C->m32F1 = gMenuContext->m308_oddOrEven;
+}
+
 void setupStatusMenuForCharacter3(uint param_1, s8 param_2) {
     setupStatusMenuForCharacter3Sub0(param_1, param_2);
     setupStatusMenuForCharacter3Sub1(param_1, param_2, gameState.m22B1_isOnGear[param_1]);
+    menuDraw();
+    setupStatusMenuForCharacter3Sub2(param_1, 0, 0, param_2);
+    menuDraw();
     MissingCode();
 }
 
@@ -391,6 +613,52 @@ int openStatusMenu(void) {
             gMenuContext->m339 = gMenuContext->m338_currentSaveState;
         }
         switch (gMenuContext->m325_menuButton) {
+        case 1:
+            if (gMenuContext->m338_currentSaveState == '\0') {
+                gMenuContext->m338_currentSaveState = gMenuContext->m33A_354_poly0Length - 1;
+            }
+            else {
+                gMenuContext->m338_currentSaveState = gMenuContext->m338_currentSaveState + -1;
+            }
+            break;
+        case 3:
+            gMenuContext->m338_currentSaveState = gMenuContext->m338_currentSaveState + 1;
+            if (gMenuContext->m33A_354_poly0Length <= gMenuContext->m338_currentSaveState) {
+                gMenuContext->m338_currentSaveState = 0;
+            }
+            break;
+        case 4: // enter sub-menu
+            resetCursorState();
+            MissingCode();
+            gMenuContext->m33C->m7_drawCurrentSelectedCharacterInfoCard = 0;
+            gMenuContext->m33C->m8_drawCurrentSelectedCharacterStats = 0;
+            gMenuContext->m33C->m4B_draw360 = 0;
+            switch (gMenuContext->m338_currentSaveState) {
+            case 0: // Equip
+                MissingCode();
+                break;
+            case 1: // Abilities
+                MissingCode();
+                break;
+            case 2: // Skills
+                MissingCode();
+                break;
+            default:
+                assert(0);
+            }
+            initStatusMenuSub0(1);
+            gMenuContext->m33C->m7_drawCurrentSelectedCharacterInfoCard = 1;
+            gMenuContext->m33C->m8_drawCurrentSelectedCharacterStats = 1;
+            gMenuContext->m33C->m4B_draw360 = 1;
+            updateCursorPolysLocation((byte)gMenuContext->m338_currentSaveState + 7, 1);
+            gMenuContext->m33C->m4_drawCursor = 1;
+            gMenuContext->m339 = -1;
+            initStatusMenuSub1(0, 0);
+            break;
+        case 5:
+            stayOnMenu = false;
+            break;
+        case 7:
         case 8:
             break;
         default:
@@ -412,5 +680,31 @@ void drawCharacterInfoCardExtended() {
         transformAndAddPrim(1, &gMenuContext->m358->m1EC0, &gMenuContext->m358->m50_name, gMenuContext->m358->m2AE0); // character name
         transformAndAddPrim(gMenuContext->m358->m2AED, &gMenuContext->m358->m2AA0[0], &gMenuContext->m358->m1E00_polys[0], gMenuContext->m358->m2AEE);
         MissingCode();
+    }
+}
+
+void drawMenu_35CSub0() {
+    for (int i = 0; i < 7; i++) {
+        if (gMenuContext->m35C->m32EA[i]) {
+            if (gMenuContext->m35C->m32F2) {
+                assert(0);
+            }
+            long dummy1, dummy2;
+            RotTransPers4(&gMenuContext->m35C->m3100[i][0], &gMenuContext->m35C->m3100[i][1], &gMenuContext->m35C->m3100[i][2], &gMenuContext->m35C->m3100[i][3],
+                &gMenuContext->m35C->m2030[i][gMenuContext->m35C->m32DC[i]].x0y0,
+                &gMenuContext->m35C->m2030[i][gMenuContext->m35C->m32DC[i]].x1y1,
+                &gMenuContext->m35C->m2030[i][gMenuContext->m35C->m32DC[i]].x2y2,
+                &gMenuContext->m35C->m2030[i][gMenuContext->m35C->m32DC[i]].x3y3,
+                &dummy1, &dummy2);
+            AddPrim(&gMenuContext->m1D4_currentDrawContext->m70_OT[4], &gMenuContext->m35C->m2030[i][gMenuContext->m35C->m32DC[i]]);
+            transformAndAddPrim(gMenuContext->m35C->m32C0[i], &gMenuContext->m35C->m2A00[i][0], &gMenuContext->m35C->mEB0[i][0], gMenuContext->m35C->m32C7[i]);
+        }
+    }
+}
+
+void drawMenu_35C() {
+    if (gMenuContext->m33C->m8_drawCurrentSelectedCharacterStats) {
+        transformAndAddPrim(gMenuContext->m35C->m32F3, &gMenuContext->m35C->m2420[0], &gMenuContext->m35C->m0[0], gMenuContext->m35C->m32F1);
+        drawMenu_35CSub0();
     }
 }

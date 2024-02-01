@@ -792,10 +792,8 @@ void drawMenu0(void)
     drawMenuMemoryCard();
     drawCharacterInfoCards();
     drawCharacterInfoCardExtended();
-    MissingCode();
-    /*
     drawMenu_35C();
-    drawMenu_360();*/
+    //drawMenu_360();
     displayGoldAndPlayTime();
     /*drawMenu_1E08();
     FUN_Menu2__801d1aac();
@@ -808,7 +806,7 @@ void drawMenu0(void)
     drawMenuBoxes();
     drawMainMenu();
     MissingCode();
-    //drawMenuContext354();
+    drawMenuContext354();
     return;
 }
 
@@ -1503,11 +1501,11 @@ std::array<std::array<u8, 2>, 2> saveGameMainMenuConfig2 = { {
 } };
 
 std::array<s32, 11> cursorPosXTable = { {
-        0x49, 0x48, 0x43, 0x3C, 0x34, 0x26, 0x17, 0xC9, 0xB5, 0xA2, 0x90
+        0x49, 0x48, 0x43, 0x3C, 0x34, 0x26, 0x17, 0x25, 0x24, 0x1F, 0x18
 } };
 
 std::array<s32, 11> cursorPosYTable = { {
-        0xC9, 0xB5, 0xA2, 0x90, 0x7E, 0x6F, 0x61, 0x25, 0x24, 0x1F, 0x18
+        0xC9, 0xB5, 0xA2, 0x90, 0x7E, 0x6F, 0x61, 0xC9, 0xB5, 0xA2, 0x90
 } };
 
 void updateCursorPolysLocation(int param_1, char param_2) {
