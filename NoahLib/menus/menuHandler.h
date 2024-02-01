@@ -176,6 +176,7 @@ struct sMenuContext_354 {
 
 struct sMenuContext_428 {
     u8 m144;
+    u8 m145;
 };
 
 struct sMenuContext_4E0 {
@@ -316,9 +317,9 @@ struct sMenuContext {
     s8 m335;
     s8 m336_menuSelectedEntry = 0;
     s8 m337_previousMenuSelectedEntry = 0;
-    s8 m338_currentSaveState = 2;
-    s8 m339;
-    s8 m33A_354_poly0Length;
+    s8 m338_currentSelectedSubMenuEntry = 2;
+    s8 m339_previousSelectedSubMenuEntry;
+    s8 m33A_numMenuEntries;
     s8 m33B = 0;
     sMenuContext_33C* m33C;
     struct sMenuContext_340_goldOwned* m340_gold;

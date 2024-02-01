@@ -486,22 +486,22 @@ std::array<s32, 3> setupStatusMenuForCharacter4PolyOffset = { {
 void setupStatusMenuForCharacter4() {
     initStatusMenuSub0(0);
 
-    auto& p = gMenuContext->m4E0[gMenuContext->m338_currentSaveState + 0xC].m0_polys[gMenuContext->m308_oddOrEven];
+    auto& p = gMenuContext->m4E0[gMenuContext->m338_currentSelectedSubMenuEntry + 0xC].m0_polys[gMenuContext->m308_oddOrEven];
 
-    p.x0 = cursorPosXTable[7 + gMenuContext->m338_currentSaveState] + setupStatusMenuForCharacter4PolyOffset[gMenuContext->m338_currentSaveState] + 0x16;
-    p.y0 = cursorPosYTable[7 + gMenuContext->m338_currentSaveState] - 0x22;
+    p.x0 = cursorPosXTable[7 + gMenuContext->m338_currentSelectedSubMenuEntry] + setupStatusMenuForCharacter4PolyOffset[gMenuContext->m338_currentSelectedSubMenuEntry] + 0x16;
+    p.y0 = cursorPosYTable[7 + gMenuContext->m338_currentSelectedSubMenuEntry] - 0x22;
 
-    p.x1 = p.x0 + gMenuContext->m4E0[gMenuContext->m338_currentSaveState + 0xC].m7E_stringWidth;
+    p.x1 = p.x0 + gMenuContext->m4E0[gMenuContext->m338_currentSelectedSubMenuEntry + 0xC].m7E_stringWidth;
     p.y1 = p.y0;
 
     p.x2 = p.x0;
-    p.y2 = cursorPosYTable[7 + gMenuContext->m338_currentSaveState] - 0x15;
+    p.y2 = cursorPosYTable[7 + gMenuContext->m338_currentSelectedSubMenuEntry] - 0x15;
 
-    p.x3 = p.x0 + gMenuContext->m4E0[gMenuContext->m338_currentSaveState + 0xC].m7E_stringWidth;
-    p.y3 = cursorPosYTable[7 + gMenuContext->m338_currentSaveState] - 0x15;
+    p.x3 = p.x0 + gMenuContext->m4E0[gMenuContext->m338_currentSelectedSubMenuEntry + 0xC].m7E_stringWidth;
+    p.y3 = cursorPosYTable[7 + gMenuContext->m338_currentSelectedSubMenuEntry] - 0x15;
 
-    gMenuContext->m4E0[gMenuContext->m338_currentSaveState + 0xc].m7D = gMenuContext->m308_oddOrEven;
-    gMenuContext->m33C->m14[gMenuContext->m338_currentSaveState] = 1;
+    gMenuContext->m4E0[gMenuContext->m338_currentSelectedSubMenuEntry + 0xc].m7D = gMenuContext->m308_oddOrEven;
+    gMenuContext->m33C->m14[gMenuContext->m338_currentSelectedSubMenuEntry] = 1;
 }
 
 void setupStatusMenuForCharacter1(sMenuContext_330* param_1, int param_2) {
@@ -582,8 +582,8 @@ int openStatusMenu(void) {
     bool firstTime = true;
     bool stayOnMenu = true;
 
-    gMenuContext->m338_currentSaveState = 2;
-    gMenuContext->m339 = -1;
+    gMenuContext->m338_currentSelectedSubMenuEntry = 2;
+    gMenuContext->m339_previousSelectedSubMenuEntry = -1;
     initStatusMenu();
 
     int currentSelectedCharacter = 0;
@@ -607,24 +607,24 @@ int openStatusMenu(void) {
                 processLoadSaveMenuSub3(0);
             }
         }
-        if (gMenuContext->m338_currentSaveState != gMenuContext->m339) {
+        if (gMenuContext->m338_currentSelectedSubMenuEntry != gMenuContext->m339_previousSelectedSubMenuEntry) {
             setupStatusMenuForCharacter4();
             processLoadSaveMenuSub8(0);
-            gMenuContext->m339 = gMenuContext->m338_currentSaveState;
+            gMenuContext->m339_previousSelectedSubMenuEntry = gMenuContext->m338_currentSelectedSubMenuEntry;
         }
         switch (gMenuContext->m325_menuButton) {
         case 1:
-            if (gMenuContext->m338_currentSaveState == '\0') {
-                gMenuContext->m338_currentSaveState = gMenuContext->m33A_354_poly0Length - 1;
+            if (gMenuContext->m338_currentSelectedSubMenuEntry == 0) {
+                gMenuContext->m338_currentSelectedSubMenuEntry = gMenuContext->m33A_numMenuEntries - 1;
             }
             else {
-                gMenuContext->m338_currentSaveState = gMenuContext->m338_currentSaveState + -1;
+                gMenuContext->m338_currentSelectedSubMenuEntry--;
             }
             break;
         case 3:
-            gMenuContext->m338_currentSaveState = gMenuContext->m338_currentSaveState + 1;
-            if (gMenuContext->m33A_354_poly0Length <= gMenuContext->m338_currentSaveState) {
-                gMenuContext->m338_currentSaveState = 0;
+            gMenuContext->m338_currentSelectedSubMenuEntry++;
+            if (gMenuContext->m33A_numMenuEntries <= gMenuContext->m338_currentSelectedSubMenuEntry) {
+                gMenuContext->m338_currentSelectedSubMenuEntry = 0;
             }
             break;
         case 4: // enter sub-menu
@@ -633,7 +633,7 @@ int openStatusMenu(void) {
             gMenuContext->m33C->m7_drawCurrentSelectedCharacterInfoCard = 0;
             gMenuContext->m33C->m8_drawCurrentSelectedCharacterStats = 0;
             gMenuContext->m33C->m4B_draw360 = 0;
-            switch (gMenuContext->m338_currentSaveState) {
+            switch (gMenuContext->m338_currentSelectedSubMenuEntry) {
             case 0: // Equip
                 MissingCode();
                 break;
@@ -650,9 +650,9 @@ int openStatusMenu(void) {
             gMenuContext->m33C->m7_drawCurrentSelectedCharacterInfoCard = 1;
             gMenuContext->m33C->m8_drawCurrentSelectedCharacterStats = 1;
             gMenuContext->m33C->m4B_draw360 = 1;
-            updateCursorPolysLocation((byte)gMenuContext->m338_currentSaveState + 7, 1);
+            updateCursorPolysLocation(gMenuContext->m338_currentSelectedSubMenuEntry + 7, 1);
             gMenuContext->m33C->m4_drawCursor = 1;
-            gMenuContext->m339 = -1;
+            gMenuContext->m339_previousSelectedSubMenuEntry = -1;
             initStatusMenuSub1(0, 0);
             break;
         case 5:

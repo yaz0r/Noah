@@ -1598,7 +1598,7 @@ void processLoadSaveMenuSub0(void)
 {
     std::span<std::array<u8, 2>>::iterator pbVar1;
 
-    if (menuToEnter == '\x02') {
+    if (menuToEnter == 2) {
         pbVar1 = std::span(menuConfig2.begin(), menuConfig2.end()).begin();
     }
     else {
@@ -2243,127 +2243,171 @@ LAB_Menu2__801c9b84:
 
 bool needProcessLoadSaveMenuSub7 = false;
 
-int updateSaveState(s8 param_1) {
-    assert(0);
-    return 0;
+void setupDraw428(byte param_1) {
+    gMenuContext->m33C->m2F_draw428 = 0;
+    switch (param_1) {
+    case 0:
+        gMenuContext->m33C->m2F_draw428 = 1;
+        gMenuContext->m428->m144 = 1;
+        gMenuContext->m428->m145 = 1;
+        break;
+    default:
+        assert(0);
+    }
+
+    MissingCode();
 }
 
-int processLoadSaveMenu(char param_1, byte param_2)
+void disableDraw428(void)
 {
-    bool bVar1;
+    gMenuContext->m33C->m2F_draw428 = 0;
+    return;
+}
+
+bool updateSaveState(s8 param_1) {
+    setupDraw428(0);
+    gMenuContext->m33C->m2F_draw428 = 0;
+    bool success = true;
+    switch (gMenuContext->m338_currentSelectedSubMenuEntry) {
+    case 1:
+        MissingCode();
+        success = false;
+        break;
+    case 0:
+        MissingCode();
+        success = false;
+        break;
+    case 2:
+        MissingCode();
+        success = false;
+        break;
+    }
+
+    disableDraw428();
+    return success;
+}
+
+bool processLoadSaveMenu(char param_1, byte param_2)
+{
     char cVar2;
-    char cVar3;
+    
     byte bVar4;
     int uVar5;
-    int iVar5;
     int uVar6;
 
-    cVar3 = '\x01';
-    bVar1 = true;
-    iVar5 = 1;
+    bool success = true;
     menuVarUnk0 = 0;
-    gMenuContext->m338_currentSaveState = 2;
+    gMenuContext->m338_currentSelectedSubMenuEntry = 2;
     uVar6 = 0;
     if ((menuToEnter == 0) && (menuOpenArg == 0)) {
-        gMenuContext->m338_currentSaveState = 1;
+        gMenuContext->m338_currentSelectedSubMenuEntry = 1;
     }
-    gMenuContext->m339 = -1;
+    gMenuContext->m339_previousSelectedSubMenuEntry = -1;
     processLoadSaveMenuSub0();
     menuDraw();
 
-    if (true) {
-        do {
-            gMenuContext->m33C->mB = 0;
-            gMenuContext->m4D8 = 1;
-            if (bVar1) {
-                initMenuContext34C();
-                initMenuContext3A8_memoryCardDisplay();
-                gMenuContext->m32C_memoryCardContext->m4FE4[0] = 1;
-                gMenuContext->m32C_memoryCardContext->m4FE4[1] = 1;
-                processLoadSaveMenuSub1();
-                if (menuToEnter == 2) {
-                    uVar6 = 7;
-                }
-                else if (((menuToEnter < 3) && (menuToEnter == 0)) &&
-                    (processLoadSaveMenuSub2(0, 0), menuOpenArg == 0)) {
-                    uVar6 = 9;
-                }
-                processLoadSaveMenuSub3(uVar6);
-                gMenuContext->m33C->m6_drawPlayTime = 0;
-                bVar1 = false;
-                gMenuContext->m33C->m20_menuBoxEnabled[1] = 0;
-                cVar2 = processLoadSaveMenuSub4();
-                if (cVar2 != '\0') {
-                    if (menuToEnter != 0) {
-                        iVar5 = 0;
-                    }
-                    break;
-                }
-                gMenuContext->m33C->m68 = 1;
+    bool keepMenuOpen = true;
+    bool firstIteration = true;
+    while(keepMenuOpen) {
+        gMenuContext->m33C->mB = 0;
+        gMenuContext->m4D8 = 1;
+        if (firstIteration) {
+            initMenuContext34C();
+            initMenuContext3A8_memoryCardDisplay();
+            gMenuContext->m32C_memoryCardContext->m4FE4[0] = 1;
+            gMenuContext->m32C_memoryCardContext->m4FE4[1] = 1;
+            processLoadSaveMenuSub1();
+            if (menuToEnter == 2) {
+                uVar6 = 7;
             }
-            if (needProcessLoadSaveMenuSub7 != '\0') {
-                processLoadSaveMenuSub5(0x20);
+            else if (((menuToEnter < 3) && (menuToEnter == 0)) &&
+                (processLoadSaveMenuSub2(0, 0), menuOpenArg == 0)) {
+                uVar6 = 9;
             }
-            cVar2 = processLoadSaveMenuSub6();
+            processLoadSaveMenuSub3(uVar6);
+            gMenuContext->m33C->m6_drawPlayTime = 0;
+            firstIteration = false;
+            gMenuContext->m33C->m20_menuBoxEnabled[1] = 0;
+            cVar2 = processLoadSaveMenuSub4();
             if (cVar2 != '\0') {
-                cVar3 = '\0';
-            }
-            if (needProcessLoadSaveMenuSub7 != '\0') {
-                processLoadSaveMenuSub7();
-                needProcessLoadSaveMenuSub7 = '\0';
-            }
-            if (cVar3 == '\0') break;
-            if (gMenuContext->m338_currentSaveState != gMenuContext->m339) {
-                updateMenuSelection2
-                (6, &gMenuContext->m4E0[0x12], 
-                    menuConfig2.data(),
-                    std::span(saveGameMainMenuConfig5.begin(), saveGameMainMenuConfig5.end()).begin(),
-                    std::span(gMenuContext->m33C->m1A.begin(), gMenuContext->m33C->m1A.end()).begin(),
-                    gMenuContext->m338_currentSaveState, 7, 0);
-                uVar5 = 7;
-                if (menuToEnter != 2) {
-                    uVar5 = 0;
+                if (menuToEnter != 0) {
+                    success = false;
                 }
-                processLoadSaveMenuSub8(uVar5);
-                gMenuContext->m339 = gMenuContext->m338_currentSaveState;
+                break;
             }
-            bVar4 = gMenuContext->m325_menuButton;
-            if (bVar4 == 3) {
-                bVar4 = gMenuContext->m338_currentSaveState + 1;
-                gMenuContext->m338_currentSaveState = bVar4;
-                if (gMenuContext->m33A_354_poly0Length <= bVar4) {
-                    gMenuContext->m338_currentSaveState = 0;
+            gMenuContext->m33C->m68 = 1;
+        }
+        if (needProcessLoadSaveMenuSub7 != '\0') {
+            processLoadSaveMenuSub5(0x20);
+        }
+        cVar2 = processLoadSaveMenuSub6();
+        if (cVar2 != '\0') {
+            keepMenuOpen = false;
+        }
+        if (needProcessLoadSaveMenuSub7) {
+            processLoadSaveMenuSub7();
+            needProcessLoadSaveMenuSub7 = 0;
+        }
+
+        if (!keepMenuOpen)
+            break;
+
+        if (gMenuContext->m338_currentSelectedSubMenuEntry != gMenuContext->m339_previousSelectedSubMenuEntry) {
+            updateMenuSelection2
+            (6, &gMenuContext->m4E0[0x12],
+                menuConfig2.data(),
+                std::span(saveGameMainMenuConfig5.begin(), saveGameMainMenuConfig5.end()).begin(),
+                std::span(gMenuContext->m33C->m1A.begin(), gMenuContext->m33C->m1A.end()).begin(),
+                gMenuContext->m338_currentSelectedSubMenuEntry, 7, 0);
+            uVar5 = 7;
+            if (menuToEnter != 2) {
+                uVar5 = 0;
+            }
+            processLoadSaveMenuSub8(uVar5);
+            gMenuContext->m339_previousSelectedSubMenuEntry = gMenuContext->m338_currentSelectedSubMenuEntry;
+        }
+
+        switch (gMenuContext->m325_menuButton) {
+        case 3:
+            gMenuContext->m338_currentSelectedSubMenuEntry++;
+            if (gMenuContext->m33A_numMenuEntries <= gMenuContext->m338_currentSelectedSubMenuEntry) {
+                gMenuContext->m338_currentSelectedSubMenuEntry = 0;
+            }
+            break;
+        case 1:
+            if (gMenuContext->m338_currentSelectedSubMenuEntry == 0) {
+                gMenuContext->m338_currentSelectedSubMenuEntry = gMenuContext->m33A_numMenuEntries - 1;
+            }
+            else {
+                gMenuContext->m338_currentSelectedSubMenuEntry--;
+            }
+            break;
+        case 4: // validate
+            resetCursorState();
+            countField33C_C(6, std::span(gMenuContext->m33C->m1A.begin(), gMenuContext->m33C->m1A.end()).begin());
+            keepMenuOpen = updateSaveState(param_2);
+            gMenuContext->m339_previousSelectedSubMenuEntry = -1;
+            processLoadSaveMenuSub0();
+            if (menuToEnter != 2) {
+                keepMenuOpen = false;
+                if (param_1 != 0) {
+                    success = false;
                 }
             }
-            else if (bVar4 < 4) {
-                if (bVar4 == 1) {
-                    if (gMenuContext->m338_currentSaveState == '\0') {
-                        gMenuContext->m338_currentSaveState = gMenuContext->m33A_354_poly0Length - 1;
-                    }
-                    else {
-                        gMenuContext->m338_currentSaveState = gMenuContext->m338_currentSaveState + -1;
-                    }
-                }
+            break;
+        case 5: //quit menu
+            keepMenuOpen = false;
+            if (param_1 != 0) {
+                success = false;
             }
-            else if (bVar4 == 4) {
-                resetCursorState();
-                countField33C_C(6, std::span(gMenuContext->m33C->m1A.begin(), gMenuContext->m33C->m1A.end()).begin());
-                cVar3 = updateSaveState(param_2);
-                gMenuContext->m339 = -1;
-                processLoadSaveMenuSub0();
-                if (menuToEnter != 2) goto LAB_Menu2__801da330;
-            }
-            else if (bVar4 == 5) {
-            LAB_Menu2__801da330:
-                cVar3 = '\0';
-                if (param_1 != '\0') {
-                    iVar5 = 0;
-                }
-            }
-        } while (cVar3 != '\0');
+            break;
+        default:
+            break;
+        }
     }
+
     if (((gMenuContext->m32C_memoryCardContext->m4FE4[0] | gMenuContext->m32C_memoryCardContext->m4FE4[1]) == 0) && (menuToEnter != 0)) {
-        iVar5 = 0;
+        success = false;
     }
     gMenuContext->m33C->m68 = 0;
     gMenuContext->m33C->mB = 0;
@@ -2371,7 +2415,7 @@ int processLoadSaveMenu(char param_1, byte param_2)
     gMenuContext->m33C->m3 = 0;
     countField33C_C(6, std::span<s8>(gMenuContext->m33C->m1A.begin(), gMenuContext->m33C->m1A.end()).begin());
     closeMemoryCardsEvents();
-    return iVar5;
+    return success;
 }
 
 void processLoadSaveMenuSub1(void)
@@ -2407,7 +2451,7 @@ void processLoadSaveMenuSub3(uint param_1)
         psVar2 = gMenuContext;
         iVar4 = 0;
         gMenuContext->m354->m1400_0Length = 0;
-        psVar2->m33A_354_poly0Length = 0;
+        psVar2->m33A_numMenuEntries = 0;
         if (0 < iVar6) {
             do {
                 if (saveGameMainMenuConfig3
@@ -2424,7 +2468,7 @@ void processLoadSaveMenuSub3(uint param_1)
                         gMenuContext->m308_oddOrEven, 0xa0, 0x96, 0x1000);
                     psVar2 = gMenuContext;
                     gMenuContext->m354->m1400_0Length = iVar3 + gMenuContext->m354->m1400_0Length;
-                    psVar2->m33A_354_poly0Length = psVar2->m33A_354_poly0Length + 1;
+                    psVar2->m33A_numMenuEntries = psVar2->m33A_numMenuEntries + 1;
                 }
                 iVar4 = iVar4 + 1;
             } while (iVar4 < iVar6);
@@ -2503,11 +2547,11 @@ void processLoadSaveMenuSub8(uint param_1)
     gMenuContext->m354->m1400_0Length = 0;
     psVar1->m354->m1404_500Length = 0;
     uVar4 = 0;
-    if (psVar1->m33A_354_poly0Length != 0) {
+    if (psVar1->m33A_numMenuEntries != 0) {
         param_1 = param_1 & 0xff;
         iVar3 = 0;
         do {
-            if (uVar4 == (byte)gMenuContext->m338_currentSaveState) {
+            if (uVar4 == (byte)gMenuContext->m338_currentSelectedSubMenuEntry) {
                 iVar2 = saveGameMainMenuConfig3[param_1 + (byte)gMenuContext->m336_menuSelectedEntry][iVar3][0]
                     + 0xd;
             }
@@ -2530,11 +2574,11 @@ void processLoadSaveMenuSub8(uint param_1)
             uVar4 = uVar4 + 1;
             gMenuContext->m354->m1404_500Length = iVar2 + gMenuContext->m354->m1404_500Length;
             iVar3++;
-        } while ((int)uVar4 < (int)(uint)psVar1->m33A_354_poly0Length);
+        } while ((int)uVar4 < (int)(uint)psVar1->m33A_numMenuEntries);
     }
     gMenuContext->m354->m1408_0OddOrEven = gMenuContext->m308_oddOrEven;
     gMenuContext->m354->m1409_500OddOrEven = gMenuContext->m308_oddOrEven;
-    updateCursorPolysLocation((byte)gMenuContext->m338_currentSaveState + 7, 1);
+    updateCursorPolysLocation((byte)gMenuContext->m338_currentSelectedSubMenuEntry + 7, 1);
     gMenuContext->m33C->m4_drawCursor = 1;
     return;
 }
@@ -2602,7 +2646,7 @@ int processSoundMenu(void)
         if (bVar1) {
             j_setupMenuContext4E0(4, &gMenuContext->m4E0[0x2e], std::span(soundMenuConfig.begin(), soundMenuConfig.end()).begin());
             processLoadSaveMenuSub3(0);
-            gMenuContext->m339 = -1;
+            gMenuContext->m339_previousSelectedSubMenuEntry = -1;
             iVar5 = processSoundMenuSub0();
             if (iVar5 == 1) {
                 unaff_s0 = 2;
@@ -2616,33 +2660,33 @@ int processSoundMenu(void)
                 unaff_s0 = 1;
             }
             bVar1 = false;
-            gMenuContext->m338_currentSaveState = (char)unaff_s0;
+            gMenuContext->m338_currentSelectedSubMenuEntry = (char)unaff_s0;
         }
-        if (gMenuContext->m338_currentSaveState != gMenuContext->m339) {
+        if (gMenuContext->m338_currentSelectedSubMenuEntry != gMenuContext->m339_previousSelectedSubMenuEntry) {
             updateMenuSelection2
             (6, &gMenuContext->m4E0[0x2e],
                 infocardNameU.data(),
                 std::span(soundMenuTable0.begin(), soundMenuTable0.end()).begin(),
                 std::span(gMenuContext->m33C->m5C.begin(), gMenuContext->m33C->m5C.end()).begin(),
-                gMenuContext->m338_currentSaveState, 7, 0);
+                gMenuContext->m338_currentSelectedSubMenuEntry, 7, 0);
             processLoadSaveMenuSub8(0);
-            gMenuContext->m339 = gMenuContext->m338_currentSaveState;
+            gMenuContext->m339_previousSelectedSubMenuEntry = gMenuContext->m338_currentSelectedSubMenuEntry;
         }
         bVar4 = gMenuContext->m325_menuButton;
         if (bVar4 == 3) {
-            bVar4 = gMenuContext->m338_currentSaveState + 1;
-            gMenuContext->m338_currentSaveState = bVar4;
-            if (gMenuContext->m33A_354_poly0Length <= bVar4) {
-                gMenuContext->m338_currentSaveState = 0;
+            bVar4 = gMenuContext->m338_currentSelectedSubMenuEntry + 1;
+            gMenuContext->m338_currentSelectedSubMenuEntry = bVar4;
+            if (gMenuContext->m33A_numMenuEntries <= bVar4) {
+                gMenuContext->m338_currentSelectedSubMenuEntry = 0;
             }
         }
         else if (bVar4 < 4) {
             if (bVar4 == 1) {
-                if (gMenuContext->m338_currentSaveState == '\0') {
-                    gMenuContext->m338_currentSaveState = gMenuContext->m33A_354_poly0Length - 1;
+                if (gMenuContext->m338_currentSelectedSubMenuEntry == '\0') {
+                    gMenuContext->m338_currentSelectedSubMenuEntry = gMenuContext->m33A_numMenuEntries - 1;
                 }
                 else {
-                    gMenuContext->m338_currentSaveState = gMenuContext->m338_currentSaveState + -1;
+                    gMenuContext->m338_currentSelectedSubMenuEntry = gMenuContext->m338_currentSelectedSubMenuEntry + -1;
                 }
             }
         }
@@ -2656,7 +2700,7 @@ int processSoundMenu(void)
     LAB_Menu2__801d9a24:
         if (!bVar2) {
             if (bVar3) {
-                bVar4 = gMenuContext->m338_currentSaveState;
+                bVar4 = gMenuContext->m338_currentSelectedSubMenuEntry;
                 if (bVar4 == 1) {
                     unaff_s0 = 2;
                 }
