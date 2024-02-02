@@ -2289,8 +2289,6 @@ bool updateSaveState(s8 param_1) {
 
 bool processLoadSaveMenu(char param_1, byte param_2)
 {
-    char cVar2;
-    
     byte bVar4;
     int uVar5;
     int uVar6;
@@ -2317,19 +2315,22 @@ bool processLoadSaveMenu(char param_1, byte param_2)
             gMenuContext->m32C_memoryCardContext->m4FE4[0] = 1;
             gMenuContext->m32C_memoryCardContext->m4FE4[1] = 1;
             processLoadSaveMenuSub1();
-            if (menuToEnter == 2) {
+            switch (menuToEnter) {
+            case 2:
                 uVar6 = 7;
-            }
-            else if (((menuToEnter < 3) && (menuToEnter == 0)) &&
-                (processLoadSaveMenuSub2(0, 0), menuOpenArg == 0)) {
-                uVar6 = 9;
+                break;
+            case 0:
+                processLoadSaveMenuSub2(0, 0);
+                if (menuOpenArg == 0) {
+                    uVar6 = 9;
+                }
+                break;
             }
             processLoadSaveMenuSub3(uVar6);
             gMenuContext->m33C->m6_drawPlayTime = 0;
             firstIteration = false;
             gMenuContext->m33C->m20_menuBoxEnabled[1] = 0;
-            cVar2 = processLoadSaveMenuSub4();
-            if (cVar2 != '\0') {
+            if (processLoadSaveMenuSub4()) {
                 if (menuToEnter != 0) {
                     success = false;
                 }
@@ -2337,11 +2338,10 @@ bool processLoadSaveMenu(char param_1, byte param_2)
             }
             gMenuContext->m33C->m68 = 1;
         }
-        if (needProcessLoadSaveMenuSub7 != '\0') {
+        if (needProcessLoadSaveMenuSub7) {
             processLoadSaveMenuSub5(0x20);
         }
-        cVar2 = processLoadSaveMenuSub6();
-        if (cVar2 != '\0') {
+        if (processLoadSaveMenuSub6()) {
             keepMenuOpen = false;
         }
         if (needProcessLoadSaveMenuSub7) {

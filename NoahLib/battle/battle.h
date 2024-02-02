@@ -129,7 +129,7 @@ struct sBattleVar0 {
     std::array<std::array<POLY_GT4, 2>, 4> m5A0;
     std::array<std::array<POLY_G4, 2>, 3> m740_APOrFuelPoly;
     std::array<std::array<POLY_FT4, 2>, 3> m818; // unsure size
-    std::array<std::array<LINE_F2, 2>, 12> m908;
+    std::array<std::array<LINE_F2, 2>, 6> m908;
     std::array<std::array<POLY_FT4, 2>, 3> m9C8_APCounterDisplayPolys; // unsure size
     std::array<std::array<POLY_FT4, 2>, 60> mBA8;
     std::array<std::array<POLY_FT4, 2>, 30> m1E68;
@@ -274,7 +274,7 @@ struct sBattleMechaInitData {
         m482_eye.vz = READ_LE_S16(it + 0x482 + 4);
     }
     std::array<std::array<sVec2_s16, 8>, 4> m4;
-    std::array<std::array<sVec2_s16, 2>, 2> m100;
+    std::array<std::array<sVec2_s16, 2>, 8> m100;
     std::array<std::array<std::array<u8, 8>, 8>, 8> m140;
     s16 m348;
     s16 m34A;
@@ -461,6 +461,19 @@ struct sBattle800cdd40 {
     // size 0x5f0
 };
 
+
+struct sBattle800CEF10 {
+    std::array<sBattle800CDD40Sub, 41> m0; // TODO: this should be 42, but the last one would be garbage data
+
+    void init(const std::vector<u8>& inputBuffer) {
+        for (int i = 0; i < m0.size(); i++) {
+            m0[i].init(inputBuffer.cbegin() + 0x28 * i);
+        }
+    }
+
+    // size 0x690
+};
+
 struct sBattle800D02C0 {
     std::array<sBattle800CDD40Sub, 11> m0;
 
@@ -492,6 +505,7 @@ extern struct sJumpAnimationControlStruct* jumpAnimationControlStruct;
 extern sBattle800CDD40Sub* currentEntityBattleStats;
 
 extern std::array<sBattle800cdd40, 3> partyBattleStats;
+extern std::array<sBattle800CEF10, 3> mechaBattleStats;
 extern sBattle800D02C0 enemiesBattleStats;
 extern sGameStateA4* battleGetSlotStatusSub_currentBattleEntity;
 extern sGameStateA42* battleGetSlotStatusSub_currentBattleEntityGear;
@@ -507,6 +521,8 @@ extern u8 startCharacterJumpToEnemyVar0;
 extern FP_VEC3 previousCameraEye2;
 extern FP_VEC3 previousCameraAt2;
 extern sSpriteActorCore* processBattleAnimationSub0_var1;
+
+extern std::array<sLoadedMechas*, 32> battleMechas;
 
 void handleMenuSelectEnemy_cancel_sub0(u8 param_1);
 void updateMonsterScriptEntitiesVarByAtttack(byte param_1, byte targetId);
@@ -528,3 +544,6 @@ void updateCharacterBlinkingTask(u32 param_1);
 void battleIdleDuringLoading(void);
 void waitBattleAnimationSpriteLoading();
 void spriteBytecode2ExtendedE0_Sub0_10_battle(sSavePointMeshAbstract* param_1);
+void createMechaLoadingTask(int param_1);
+int battleGetMechaBitfieldForAnim(sLoadedMechas* param_1, int target, u16* result);
+int getBattleSlotLayout(int index);

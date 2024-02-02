@@ -48,6 +48,9 @@ void sTag::execute() {
         case 0x42:
             MissingCode();
             break;
+        case 0x40:
+            MissingCode();
+            break;
         default:
             assert(0);
             break;
@@ -143,10 +146,24 @@ void SetPolyG4(POLY_G4* p)
     return;
 }
 
+void SetPolyGT4(POLY_GT4* p)
+{
+    p->m3_size = 0xC;
+    p->code = 0x3C;
+    return;
+}
+
 void SetSprt(SPRT* p)
 {
     p->m3_size = 4;
     p->code = 0x64;
+}
+
+void SetLineF2(LINE_F2* p)
+{
+    p->m3_size = 3;
+    p->code = 0x40;
+    return;
 }
 
 void SetLineF3(LINE_F3* p)

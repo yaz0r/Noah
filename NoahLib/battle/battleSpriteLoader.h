@@ -71,3 +71,6 @@ T* battleLoaderAllocateMainBattleSprite(sTaskHeader* param_1, int param_2)
     psVar1->m4 = nullptr;
     return psVar1;
 }
+
+extern bool battleScriptLoaderTaskCreationInProgress;
+extern int mainBattleSpriteCallback_phase5Var;

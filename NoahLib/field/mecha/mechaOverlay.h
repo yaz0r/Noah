@@ -83,7 +83,11 @@ struct sMechaDataTable2_8 {
     std::vector<u8> m_raw;
 };
 
-struct sMechaDataTable2 {
+struct sMechaDataTable2 : public sLoadableData {
+    virtual void init(std::vector<u8>& input) override {
+        init(input.begin());
+    }
+
     void init(const std::vector<u8>::iterator& input) {
         //m_raw = input;
         std::vector<std::vector<u8>> relocatedData = doPointerRelocationAndSplit(input);
@@ -155,7 +159,10 @@ struct sMechaDataTable1_10 {
     std::vector<u8> m_raw;
 };
 
-struct sMechaDataTable1 {
+struct sMechaDataTable1 : public sLoadableData {
+    virtual void init(std::vector<u8>& input) override {
+        init(input.begin());
+    }
     void init(const std::vector<u8>::iterator& input) {
         //m_raw = input;
         std::vector<std::vector<u8>> relocatedData = doPointerRelocationAndSplit(input);
@@ -349,6 +356,7 @@ struct sMechaInitVar2 {
     s16 m4;
     s16 m6;
 };
+extern sMechaInitVar2 mechaInitVar2;
 
 void initMechaInitVar2(sMechaInitVar2* param_1, int count);
 
@@ -365,4 +373,6 @@ struct sMechaInitVar3 {
     s16 m6;
 };
 
+void initMechaAnimation(sLoadedMechas* param_1, sLoadedMechas* param_2, sMechaInitVar2* param_3, int animationId);
 void initMechaInitVar3(sMechaInitVar3* param_1, int param_2);
+void initMechaTransforms1(sLoadedMechas* param_1, sMechaInitVar2* param_2, std::vector<std::vector<sMechaDataTable2_4_8>>* param_3, sMechaDataTable2_4::sMechaDataTable2_4_4_array* param_4);

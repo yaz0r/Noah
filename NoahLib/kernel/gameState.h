@@ -133,6 +133,7 @@ struct sGameStateA42
         m12_maxEther = READ_LE_S16(buffer + 0x12);
         m38_fuel = READ_LE_S32(buffer + 0x38);
         m3C_maxFuel = READ_LE_S32(buffer + 0x3C);
+        m5C_extraFileIndex = READ_LE_U8(buffer + 0x5C);
         m60_hp = READ_LE_S32(buffer + 0x60);
         m64 = READ_LE_S32(buffer + 0x64);
         m70 = READ_LE_U16(buffer + 0x70);
@@ -140,12 +141,14 @@ struct sGameStateA42
         m82 = READ_LE_U16(buffer + 0x82);
         m84 = READ_LE_U16(buffer + 0x84);
         m86 = READ_LE_U16(buffer + 0x86);
+        m98 = READ_LE_U8(buffer + 0x98);
     }
 
     s16 m10_ether;
     s16 m12_maxEther;
     s32 m38_fuel;
     s32 m3C_maxFuel;
+    u8 m5C_extraFileIndex;
     s32 m60_hp;
     s32 m64;
     u16 m70;
@@ -153,6 +156,7 @@ struct sGameStateA42
     u16 m82;
     u16 m84;
     u16 m86;
+    u8 m98;
     //size 0xA4
 };
 

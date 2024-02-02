@@ -347,7 +347,7 @@ void mainBattleSpriteCallback_phase5(sTaskHeader* param_1) {
 void startPlayableCharactersJumpToPosition() {
     for (int i = 0; i < 3; i++) {
         if ((battleVisualEntities[i].m2 < 0x11) && (battleVisualEntities[i].m4_isGear)) {
-            assert(0);
+            createMechaLoadingTask(i);
         }
     }
 }

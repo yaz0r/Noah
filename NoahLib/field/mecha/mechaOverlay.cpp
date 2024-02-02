@@ -6,6 +6,7 @@
 #include "bx/math.h"
 #include "field/fieldGraphicObject.h"
 #include "kernel/memory.h"
+#include "battle/battle.h"
 
 u32 NumMechas;
 std::array<s16, 4> mechaList;
@@ -951,6 +952,10 @@ void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int pa
                 mechaOP_19(pMecha);
             }
             break;
+        case 0x14:
+            MissingCode();
+            pNextBytecode++;
+            break;
         case 0x19:
             mechaOP_19(pMecha);
             break;
@@ -977,11 +982,44 @@ void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int pa
             break;
         case 0x32:
             _currentByteCode = *pNextBytecode;
-            pNextBytecode = pCurrentByteCodePtr + _currentByteCode;
+            pNextBytecode = pCurrentByteCodePtr + _currentByteCode / 2;
+            break;
+        case 0x42:
+        case 0x43:
+            MissingCode("Mecha angle");
             break;
         case 0x48:
             pMecha->m36 = bytecodeHigher;
             break;
+        case 0x4A:
+            if (bytecodeHigher == 0xFB) {
+                assert(0); // this exist in field
+            }
+            else {
+                // battle only
+                u16 output;
+                int index = battleGetMechaBitfieldForAnim(pMecha, bytecodeHigher, &output);
+                (*pMecha->m4_bones)[0].m5C_translation[0] = battleVisualEntities[index].mA_X;
+                (*pMecha->m4_bones)[0].m5C_translation[2] = battleVisualEntities[index].mC_Z;
+            }
+            break;
+        case 0x5A:
+            MissingCode();
+            break;
+        case 0x60:
+            pMecha->m88[0] = (battleMechaInitData->m100[battleVisualEntities[pMecha->m20_mechaEntryId].m0_positionSlot][0].vx + battleMechaInitData->m100[battleVisualEntities[pMecha->m20_mechaEntryId].m0_positionSlot][1].vx) / 2;
+            pMecha->m88[1] = 0;
+            pMecha->m88[2] = (battleMechaInitData->m100[battleVisualEntities[pMecha->m20_mechaEntryId].m0_positionSlot][0].vy + battleMechaInitData->m100[battleVisualEntities[pMecha->m20_mechaEntryId].m0_positionSlot][1].vy) / 2;
+            break;
+        case 0x61:
+        {
+            u16 nextValue = *pNextBytecode;
+            pNextBytecode++;
+            if (getBattleSlotLayout(pMecha->m20_mechaEntryId)) {
+                assert(0);
+            }
+            break;
+        }
         case 0x62:
             mechaOp_62(pMecha, &(*pMecha->m4_bones)[*pNextBytecode], bytecodeHigher,
                 (int)(short)pCurrentByteCodePtr[2], (int)(short)pCurrentByteCodePtr[3],

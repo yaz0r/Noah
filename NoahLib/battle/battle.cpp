@@ -397,10 +397,10 @@ void mechaInitEnvironmentMechaMesh(int entryId, ushort flags, sMechaDataTable2* 
     pLoadedMecha->m20_mechaEntryId = entryId;
 
     if ((flags & 0x40) == 0) {
-     //   pLoadedMecha->mB0 = &pData2->m8;
-     //   initMechaTransforms1(pLoadedMecha, &mechaInitVar2, &pData2->m4.m8, &pData2->m4.m4);
-     //   initMechaAnimation(pLoadedMecha, pLoadedMecha, &mechaInitVar2, 0);
-        assert(0);
+        pLoadedMecha->mB0 = &pData2->m8;
+        initMechaTransforms1(pLoadedMecha, &mechaInitVar2, &pData2->m4.m8, &pData2->m4.m4);
+        initMechaAnimation(pLoadedMecha, pLoadedMecha, &mechaInitVar2, 0);
+        MissingCode();
     }
 
     if ((flags & 2) == 0) {
@@ -1966,8 +1966,8 @@ void checkWinConditions() {
                     }
                 }
                 else {
-                    if ((battleVisualEntities[i + 3].m3) || (unknownMonsterStatus0[i + 3].m3)) {
-                        // nothing
+                    if ((battleVisualEntities[i + 3].m3) || (unknownMonsterStatus0[i].m3)) {
+                        continue;
                     }
                     else {
                         allPlayerCharacterBitmask |= characterIdToTargetBitmask(i + 3);
@@ -1975,7 +1975,23 @@ void checkWinConditions() {
                 }
             }
             else {
-                assert(0);
+                if (battleEntities[i].mA4_gear.m7C & 0xC000) {
+                    if (bitmaskCharacterCheck(jumpAnimationActiveActorBF, i + 3)) {
+                        allPlayerCharacterBitmask |= characterIdToTargetBitmask(i + 3);
+                    }
+                    else {
+                        battleEntities[i + 3].mA4_gear.m60_hp = 0;
+                        isEntityReadyForBattle[i + 3] = -1;
+                    }
+                }
+                else {
+                    if (battleVisualEntities[i + 3].m3 || unknownMonsterStatus0[i].m3) {
+                        continue;
+                    }
+                    else {
+                        allPlayerCharacterBitmask |= characterIdToTargetBitmask(i + 3);
+                    }
+                }
             }
         }
     }
@@ -2650,6 +2666,18 @@ void processBattleAnimation_subType_minus6(uint param_1) {
 
 void processBattleAnimation_subType(sSpriteActorCore* param_1, int param_2) {
     switch (param_2) {
+    case -13:
+        jumpAnimationControlStruct->m48 = 1;
+        jumpAnimationActiveActorBF |= battleCurrentDamages[allocateJumpAnimationStructVar0].m3A;
+        break;
+    case -10:
+        setCameraVisibleEntities(battleCurrentDamages[allocateJumpAnimationStructVar0].m16_targetBitMask);
+        break;
+    case -9:
+        jumpAnimationControlStruct->m48 = 1;
+        OP_INIT_ENTITY_SCRIPT_sub0Sub8(param_1, 0);
+        delayBattleAnimationCounter = battleCurrentDamages[allocateJumpAnimationStructVar0].m3A;
+        break;
     case -6:
         jumpAnimationControlStruct->m48 = 1;
         OP_INIT_ENTITY_SCRIPT_sub0Sub8(param_1, 0);
@@ -2681,6 +2709,9 @@ void processBattleAnimation(sSpriteActorCore* param_1) {
 
     s32 battleAnimationToPlay = battleCurrentDamages[allocateJumpAnimationStructVar0].m47_battleAnimationToPlay;
     switch (battleAnimationToPlay) {
+    case -13:
+    case -10:
+    case -9:
     case -6:
         processBattleAnimation_subType(param_1, battleAnimationToPlay);
         break;
@@ -2731,7 +2762,9 @@ void processBattleAnimation(sSpriteActorCore* param_1) {
     case 4: // 1ap
     case 5: // 2ap
     case 6: // 3ap
+    case 17:
     case 24: // healing ability?
+    case 29:
     case 30:
     case 31:
         attackInProgress = 0;
@@ -3562,6 +3595,11 @@ void drawCircleMenuItemSecondaryActive(int param_1) {
     }
 }
 
+bool useCombo(s8 param_1) {
+    MissingCode();
+    return false;
+}
+
 void drawCircleMenuCombo(int param_1) {
     switch (battleInputButton) {
     case 0:
@@ -3607,6 +3645,19 @@ void drawCircleMenuCombo(int param_1) {
         battleVar2->m2F6 = 1;
         battleSoundEffect2(0x4f);
         return;
+    case 4:
+    case 6:
+    case 7:
+        if (battleVar2->m0[param_1].m3C_currentTarget != -1) {
+            if (useCombo(param_1)) {
+                battleVar2->m2E1_waitBeforeNextAttackInput = 1;
+                return;
+            }
+            battleVar2->m2DD_currentActiveBattleMenu = eActiveBattleMenu::Menu_ComboHighlighted;
+            battleVar2->m2E2_previousActiveBattleMenu = eActiveBattleMenu::Undefined;
+            return;
+        }
+        break;
     case 8:
     case 0xE:
         return;
@@ -4249,6 +4300,7 @@ void initBattleAttackStatus() {
 
 sBattle800CDD40Sub* currentEntityBattleStats;
 std::array<sBattle800cdd40, 3> partyBattleStats;
+std::array<sBattle800CEF10, 3> mechaBattleStats;
 sBattle800D02C0 enemiesBattleStats;
 sGameStateA4* battleGetSlotStatusSub_currentBattleEntity;
 sGameStateA42* battleGetSlotStatusSub_currentBattleEntityGear;
@@ -5394,7 +5446,10 @@ int performAttack(byte param_1, uint numAPUsed) {
         battleVar2->m2DC++;
     }
     if ((battleEntities[battleVar2->m0[param_1].m3C_currentTarget].m0_base.m34 & 0x800U) != 0) {
-        assert(0);
+        battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m23_battleEntityIndex = param_1;
+        battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m47_battleAnimationToPlay = -0xd;
+        battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m3A = characterIdToTargetBitmask(battleVar2->m0[param_1].m3C_currentTarget);
+        battleVar2->m2DA_indexInBattleVar48++;
     }
     performAttackSub3(param_1, characterIdToTargetBitmask(battleVar2->m0[param_1].m3C_currentTarget), battleVar2->m2DC - 1);
     int oldVar48 = battleVar2->m2DA_indexInBattleVar48;
@@ -7074,6 +7129,25 @@ void battleSpriteOpcode_FB(sSpriteActorCore* param_1, int param_2, std::span<u8>
     pTask->m30 = param_3;
     pTask->m24 = param_1->mAC.mx18;
     param_1->mAC.mx5 = 1;
+}
+
+int battleGetMechaBitfieldForAnim(sLoadedMechas* param_1, int target, u16* result) {
+    int index;
+    switch (target) {
+    case 0xFD:
+    case 0xF9:
+        index = param_1->m20_mechaEntryId;
+        break;
+    default:
+        assert(0);
+    }
+
+    *result = 1 << (index& 0x1F);
+    return index;
+}
+
+int getBattleSlotLayout(int index) {
+    return battleSlotLayout[battleVisualEntities[index].m0_positionSlot + 0x18][0];
 }
 
 void executeSpriteBytecode2_battle(sSpriteActorCore* param_1) {

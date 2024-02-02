@@ -128,8 +128,6 @@ sBattleEnemyInitialStats battleConfigFile2;
 void loadPartyMembers() {
     battleForceOnGear = (battleVar8006f9dd & 0x10) != 0;
     u16 partyMembersBitmask = gameState.m1D30_partyMemberBitField & gameState.m1D32_partyFrameMask;
-    Hack("force battle team");
-    partyMembersBitmask = 0x7FF;
     if (battleForceOnGear) {
         battleCharacters[1] = 10;
         battleCharacters[2] = 10;
@@ -167,8 +165,7 @@ void loadPartyMembers() {
             battleEntities[i].mA4_gear = gameState.m978_gears[gearId];
 
             partyBattleStats[i].init(mallocAndDecompress(relocatedPointer[4 + battleCharacters[i]]));
-            mallocAndDecompress(relocatedPointer[17 + gearId]);
-            Noah_MissingCode("battle800CEF10");
+            mechaBattleStats[i].init(mallocAndDecompress(relocatedPointer[16 + gearId]));
         }
     }
 
@@ -381,9 +378,11 @@ std::array<std::array<u8, 8>, 16> battleCommandsSetups = { {
     {0x1E, 0x1C, 0x22, 0x25, 0x2C, 0x1C, 0x1A, 0x2E},
 } };
 
+u8 needToLoadBattleOverlay801E5000 = 0;
+
 void batteLoaderPhase2_2() {
     if (currentBattleConfig.m1_flags & 0x20) {
-        assert(0);
+        needToLoadBattleOverlay801E5000 = 1;
     }
 
     for (int i = 0; i < 3; i++) {
@@ -495,7 +494,16 @@ u32 battleGetSlotStatusSub(u32 param_1) {
             }
         }
         else {
-            assert(0);
+            currentEntityBattleStats = &mechaBattleStats[entityIndex].m0[battleGetSlotStatusSub_current28Index];
+            s32 index3 = (uint)(byte)battleEntities[entityIndex].mA4_gear.m98;
+            s32 result = index3 - (int)(char)currentEntityBattleStats->m27;
+            if ((int)(char)currentEntityBattleStats->m27 < (int)index3) {
+                s32 randVar2 = result * 8;
+                result2 = randVar2 + result;
+            }
+            else {
+                result2 = 9;
+            }
         }
         
     }
@@ -590,7 +598,20 @@ void batteLoaderPhase3_0_sub0() {
     for (int i = 0; i < 4; i++) {
         for (int j = 0; j < 2; j++) {
             POLY_GT4& pGT4 = battleVar0->m5A0[i][j];
-            MissingCode();
+            SetPolyGT4(&pGT4);
+            pGT4.r0 = 0x80;
+            pGT4.g0 = 0x80;
+            pGT4.b0 = 0x80;
+            pGT4.r1 = 0x80;
+            pGT4.g1 = 0x80;
+            pGT4.b1 = 0x80;
+            pGT4.r2 = 0x00;
+            pGT4.g2 = 0x00;
+            pGT4.b2 = 0x00;
+            pGT4.r3 = 0x00;
+            pGT4.g3 = 0x00;
+            pGT4.b3 = 0x00;
+            pGT4.tpage = GetTPage(battleVar0->mA234[0].m4_tpage_tp, 0, battleVar0->mA234[0].m10_tpage_X, battleVar0->mA234[0].m14_tpage_Y);
         }
     }
 
@@ -607,7 +628,15 @@ void batteLoaderPhase3_0_sub0() {
         }
     }
 
-    MissingCode();
+    for (int i = 0; i < 6; i++) {
+        for( int j=0; j<2; j++) {
+            LINE_F2& pF2 = battleVar0->m908[i][j];
+            SetLineF2(&pF2);
+            pF2.r0 = 0xFF;
+            pF2.g0 = 0xFF;
+            pF2.b0 = 0xFF;
+        }
+    }
 }
 
 int battleSetupStringInPolyFT4Small(int character, std::array<POLY_FT4, 2>* polyArray, short x, short y) {
@@ -620,9 +649,9 @@ int battleSetupStringInPolyFT4Large(int character, std::array<POLY_FT4, 2>* poly
 
 void battleSetupTextPoly(POLY_FT4* param_1) {
     battleSetupTextPolySub(param_1);
-    param_1->r0 = '@';
-    param_1->g0 = '@';
-    param_1->b0 = '@';
+    param_1->r0 = 0x40;
+    param_1->g0 = 0x40;
+    param_1->b0 = 0x40;
     param_1->tpage = param_1->tpage | 0x40;
 }
 

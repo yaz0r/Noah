@@ -519,6 +519,8 @@ struct POLY_GT4 : public sTag
 
 void SetPolyFT4(POLY_FT4* p);
 void SetPolyG4(POLY_G4* p);
+void SetPolyGT4(POLY_GT4* p);
+void SetLineF2(LINE_F2* p);
 void SetLineF3(LINE_F3* p);
 void SetPolyF4(POLY_F4* p);
 void SetPolyF3(POLY_F3* p);

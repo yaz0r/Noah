@@ -290,8 +290,6 @@ void setGraphicEntityScale(sSpriteActorCore* param_1, int param_2);
 
 void resetSpriteCallbacks(void);
 
-void setTaskUpdateFunction(sTaskHeader* param_1, void (*param_2)(sTaskHeader*));
-void setTaskDeleteFunction(sTaskHeader* param_1, void (*param_2)(sTaskHeader*));
 int isVramPreBacked(const sFieldEntitySub4_110_0* param_1);
 void addToSpriteTransferList(sSpriteActorCore* param_1, short param_2);
 void executeSpriteBytecode2Sub1(sSpriteActorCore* param_1);
