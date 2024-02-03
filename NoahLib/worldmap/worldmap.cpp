@@ -14,6 +14,9 @@
 #include "kernel/TIM.h"
 #include "worldmapWorldStreaming.h"
 #include "worldmapExit.h"
+#include "kernel/audio/wds.h"
+#include "kernel/audio/soundSystem.h"
+#include "kernel/audio/seq.h"
 
 VECTOR worldmapPosition;
 u32 worldmapGamestate1824;
@@ -600,6 +603,46 @@ void worldmapInitAllModels() {
     worldmapModels[4].m0_hidden = 1;
 }
 
+int worldmapSoundFilesPendingCount = 0;
+sWdsFile* worldmapWds;
+sLoadableDataRaw worldmapSound1;
+sLoadableDataRaw worldmapSound2;
+sLoadableDataRaw worldmapSound3;
+sSeqFile* fieldSeq;
+
+void startLoadingWorldmapSoundFiles() {
+    worldmapSoundFilesPendingCount++;
+
+    auto it = worldmapLoadingCommands.begin();
+
+    it->m0_fileIndex = worldmapFile4;
+    it->m4_loadPtr = worldmapWds = new sWdsFile;
+    it++;
+
+    it->m0_fileIndex = worldmapFile5;
+    it->m4_loadPtr = &worldmapSound1;
+    it++;
+
+    it->m0_fileIndex = worldmapFile6;
+    it->m4_loadPtr = fieldSeq = new sSeqFile;
+    it++;
+
+    it->m0_fileIndex = worldmapFile7;
+    it->m4_loadPtr = &worldmapSound2;
+    it++;
+
+    it->m0_fileIndex = currentBattleMusicId;
+    it->m4_loadPtr = &worldmapSound3;
+    it++;
+
+    it->m0_fileIndex = 0;
+    it->m4_loadPtr = nullptr;
+
+    batchStartLoadingFiles(worldmapLoadingCommands.data(), 0);
+}
+
+sWdsFile* worldmapWdsResult;
+
 void worldmapMode0_update(void) {
     initWorldmapGraphics();
 
@@ -665,6 +708,7 @@ void worldmapMode0_update(void) {
     loadWorldmapTextureFromFile3();
     loadWorldmapTextureFromFile2();
     worldmapInitAllModels();
+    startLoadingWorldmapSoundFiles();
 
     MissingCode();
     initWorldmapMinimap();
@@ -673,7 +717,7 @@ void worldmapMode0_update(void) {
     MissingCode();
 
     if (isWorldmapModeFlagSet == 0) {
-        Noah_MissingCode("Start worldmap music");
+        worldmapWdsResult = loadWds(*worldmapWds, 0);
     }
     else {
         assert(0);
@@ -690,6 +734,22 @@ void worldmapMode0_update(void) {
     else {
         assert(0);
     }
+
+    if (isWorldmapModeFlagSet == 0) {
+        // Missing code
+        /*
+        do {
+        } while ((musicStatusFlag & 0x10) != 0);
+        */
+        delete worldmapWds;
+        loadSequence(*fieldSeq);
+        MissingCode();
+    }
+    else {
+        assert(0);
+    }
+
+    MissingCode();
 
     if (isWorldmapModeFlagSet == 0) {
         for (int i = 0; i < worldmapMode0_tasks.size(); i++) {

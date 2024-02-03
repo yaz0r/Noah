@@ -26,6 +26,7 @@
 #include "kernel/gameMode.h"
 #include "worldmap/worldmap.h"
 #include "battle/battleConfig.h"
+#include "battle/battle.h" // todo: waitFormusic
 
 #include "SDL_gamecontroller.h"
 #include "SDL_keyboard.h"
@@ -2727,9 +2728,74 @@ int isLoadCompleted()
     return 0;
 }
 
-void playMusic(int musicId, int)
+std::array<std::array<s8, 2>, 0x11> musicLookupTable = { { // incomplete
+    {0, 0},
+    {1, 0},
+    {2, 0},
+    {3, 0},
+    {4, 0},
+    {5, 0},
+    {6, 0},
+    {7, 0},
+    {8, 0},
+    {9, 0},
+    {0xA, 1},
+    {0xFF, 0},
+    {0xFF, 0},
+    {0xFF, 0},
+    {0xFF, 0},
+    {0xF, 0},
+    {0x10, 0},
+} };
+
+int isMusicLoadingStartPending = 0;
+int currentlyLoadedWave = -1;
+int playMusicVar3 = 0;
+
+std::vector<u8> musicLoadBuffer;
+
+void loadMusicPhase0UploadData(void* param_1) {
+    assert(0);
+}
+
+std::vector<u8> musicLoadBuffer2;
+
+void (*musicLoadedCallback)(void*) = nullptr;
+
+void loadMusicPhase0(int param_1, int param_2, void(*param_3)(void*))
 {
-    MissingCode();
+    loadCompleted = 1;
+    musicLoadBuffer2 = allocateBufferForVramUpload(8);
+    readFile(param_1, musicLoadBuffer2, 0, 0x100);
+    musicLoadedCallback = param_3;
+    return;
+}
+
+void playMusic(int musicId)
+{
+    waitReadCompletion(0);
+    clearMusic();
+
+    if (musicId == 0xFF) {
+        fieldMusicLoadPending = 0;
+    }
+    else {
+        setCurrentDirectory(0x1C, 0);
+        if (musicLookupTable[musicId][1] == 1) {
+            assert(0);
+        }
+
+        if ((musicLookupTable[musicId][0] != 0xFF) && (musicLookupTable[musicId][0] != currentlyLoadedWave)) {
+            loadMusicPhase0(musicLookupTable[musicId][0] * 2 + 0x13, 1, loadMusicPhase0UploadData);
+            musicVar2 = 1;
+            playMusicVar3 = 0;
+            musicLoadBuffer.resize(0x2000);
+        }
+
+        setCurrentDirectory(4, 0);
+        fieldMusicLoadPending = -1;
+        isMusicLoadingStartPending = 1;
+    }
 }
 
 s32 fieldExecuteVar2 = 0;
@@ -3924,10 +3990,10 @@ void loadInitialField()
 }
 
 
-void* allocateBufferForVramUpload(int)
+std::vector<u8> allocateBufferForVramUpload(int numEntries)
 {
     MissingCode();
-    return nullptr;
+    return std::vector<u8>();
 }
 
 std::array<u8, 2048 * 512> gVram;
@@ -3980,8 +4046,8 @@ void loadFieldGraphics()
     if (!fieldGraphicsUploaded)
     {
         fieldGraphicsUploaded = 1;
-        void* fieldGraphicsAllocation = allocateBufferForVramUpload(4);
-        loadImageFileToVram((fieldMapNumber & 0xfff) * 2 + 0xb9, fieldGraphicsAllocation, 0, 0, 0, 0, 0, 0, 0, 0);
+        std::vector<u8> fieldGraphicsAllocation = allocateBufferForVramUpload(4);
+        loadImageFileToVram((fieldMapNumber & 0xfff) * 2 + 0xb9, fieldGraphicsAllocation.data(), 0, 0, 0, 0, 0, 0, 0, 0);
     }
 }
 
@@ -4396,7 +4462,7 @@ void transitionFields()
             fieldTransitionMode = fieldTransitionModeBackup;
         }
         if (fieldMusicLoadPending == -1) {
-            playMusic(currentlyPlayingMusic, 0);
+            playMusic(currentlyPlayingMusic);
         }
         setupRGBFaderSlot0_fadeIn(fieldTransitionFadeInLength);
         break;
@@ -4434,7 +4500,7 @@ void transitionFields()
             fieldTransitionMode = fieldTransitionModeBackup;
         }
         if (fieldMusicLoadPending == -1) {
-            playMusic(currentlyPlayingMusic, 0);
+            playMusic(currentlyPlayingMusic);
         }
         setupRGBFaderSlot0_fadeIn(fieldTransitionFadeInLength);
         break;
@@ -9116,10 +9182,70 @@ void fieldPerFrameReset()
     syncKernelAndFieldStates();
 }
 
+int loadMusicPhase0Update() {
+    MissingCode();
+    musicLoadedCallback(0); // TODO: what argument are we expecting here?
+    return 0;
+}
+
+int updateMusicLoadingState() {
+    int iVar1;
+    int iVar2;
+
+    iVar2 = 0;
+    do {
+        iVar1 = loadMusicPhase0Update();
+        iVar2 = iVar2 + 1;
+        if (iVar1 == -1) {
+            return 0;
+        }
+    } while (iVar2 < 5);
+    return -1;
+}
+
+int currentlyLoadedMusic = -1;
+int updateMusicState2Var1 = 0;
+int updateMusicState2Var3 = 0;
+std::vector<u8> battleMusic = std::vector<u8>(0x3200); // TODO: make that array and migrate readFile to span
+
 int updateMusicState2(int param_1)
 {
-    MissingCode();
-    return 0;
+    int oldMusicVar2 = musicVar2;
+    if (musicVar2 == 1) {
+        if (updateMusicLoadingState() == -1)
+            return -1;
+        waitForMusic(0x10);
+        musicLoadBuffer.clear();
+        musicVar2 = 0;
+        assert(0);
+        currentlyLoadedWave = musicLookupTable[param_1][0];
+    }
+
+    if (musicLookupTable[param_1][1] == 0) {
+        MissingCode();
+    }
+    if (isMusicLoadingStartPending == 1) {
+        if (currentlyLoadedMusic != param_1) {
+            setCurrentDirectory(0x1c, 0);
+            readFile(param_1 * 2 + 0x14, battleMusic, 0, 0x80);
+            updateMusicState2Var1 = 1;
+            setCurrentDirectory(4, 0);
+        }
+        isMusicLoadingStartPending = 0;
+        oldMusicVar2 = -1;
+    }
+    else {
+        if (!isCDBusy()) {
+            if (updateMusicState2Var1 == 1) {
+                assert(0);
+            }
+            oldMusicVar2 = 0;
+            musicVar1 = -1;
+            updateMusicState2Var3 = 1;
+        }
+    }
+    
+    return oldMusicVar2;
 }
 
 void updateMusicState()

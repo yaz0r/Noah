@@ -9,6 +9,8 @@
 #include "kernel/memory.h"
 #include "kernel/gameMode.h"
 #include "kernel/font.h"
+#include "kernel/audio/soundSystem.h"
+#include "kernel/criticalSection.h"
 
 #include "menus/menuGold.h"
 #include "menus/statusMenu.h"
@@ -1638,14 +1640,6 @@ cdCallbackType CdReadCallback(cdCallbackType newCallback) {
     return currentCallback;
 }
 
-void EnterCriticalSection() {
-    MissingCode();
-}
-
-void ExitCriticalSection() {
-    MissingCode();
-}
-
 u32 OpenEvent(u32 desc, u32 spec, u32 mode, void(*func)()) {
     MissingCode();
     return 0;
@@ -2517,24 +2511,6 @@ std::vector<std::array<u8, 2>> soundMenuConfig = { {
     {0x9B, 0x9C},
     {0x9D, 0x7B}
 } };
-
-u16 musicStatusFlag = 0;
-
-int processSoundMenuSub0(void)
-{
-    int uVar1;
-
-    if ((musicStatusFlag & 0x700) == 0) {
-        uVar1 = 0;
-    }
-    else {
-        uVar1 = 1;
-        if ((musicStatusFlag & 0x600) != 0) {
-            uVar1 = 2;
-        }
-    }
-    return uVar1;
-}
 
 void processLoadSaveMenuSub8(uint param_1)
 {

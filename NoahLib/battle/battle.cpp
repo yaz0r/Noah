@@ -23,6 +23,8 @@
 #include "field/dialogWindows.h"
 #include "menus/menuHandler.h"
 #include "kernel/TIM.h"
+#include "kernel/audio/wds.h"
+#include "kernel/audio/seq.h"
 
 #include "battle/menu_chi.h"
 
@@ -227,10 +229,6 @@ void sMechaModel_init(sModel& modelBlock, sMechaInitVar4* param_2);
 std::vector<sMechaBone>* processMechaMesh(sMechaInitVar4* param_1, std::vector<sMechaDataTable1_C>& param_2, u32 param_3, int useTpageAndClut, short tpageX, short tpageY, short clutX, short clutY);
 void initMechSub110(sLoadedMechas* param_1);
 
-void* sendWds(std::vector<u8>::iterator buffer, u32 param_2) {
-    return nullptr;
-}
-
 int waitForMusic(uint param_1) {
     return 0;
 }
@@ -266,7 +264,7 @@ void mechaInitEnvironmentMechaMesh(int entryId, ushort flags, sMechaDataTable2* 
 #if 0
         MissingCode();
         psVar9 = pData2->m8;
-        if ((psVar9->mC != psVar9->m8_seq) && (iVar3 = isSeqValid(psVar9->m8_seq, 0), iVar3 == 0)) {
+        if ((psVar9->mC != psVar9->m8_seq) && (iVar3 = findSequenceInLoadedList(psVar9->m8_seq, 0), iVar3 == 0)) {
             startSeq(psVar9->m8_seq);
             pLoadedMecha->m62 = 1;
         }
@@ -2429,7 +2427,7 @@ byte loadingFXFramentVar1 = 0;
 
 sSpriteActorAnimationBundle* FxFragmentSpecialAnimation = nullptr;
 sSpriteActorAnimationBundle* battleAnimationLoadingDest = nullptr;
-void* fxUploadBuffer = nullptr;
+std::vector<u8> fxUploadBuffer;
 
 void abilityPlayAnimationSub1(int param_1) {
     if (param_1 == 0xe3) {
@@ -2451,12 +2449,12 @@ void abilityPlayAnimationSub1(int param_1) {
     }
     fxUploadBuffer = allocateBufferForVramUpload(8);
     if (getFileSizeAligned(iVar6) > 0x10) {
-        loadImageFileToVram(iVar6, fxUploadBuffer, 0, 0, 0, 0, 0, 0, 0, 0);
+        loadImageFileToVram(iVar6, fxUploadBuffer.data(), 0, 0, 0, 0, 0, 0, 0, 0);
     }
     battleIdleDuringLoading();
     DrawSync(0);
     battleAnimationLoadingDest = FxFragmentSpecialAnimation;
-    delete[] fxUploadBuffer;
+    fxUploadBuffer.clear();
 }
 
 void abilityPlayAnimation(int param_1, sSpriteActorCore* param_2)
@@ -2609,10 +2607,6 @@ s16 attackInProgress = 0;
 
 s16 delayBattleAnimationCounter = 0;
 
-void startSeq(std::vector<u8>::iterator param_1) {
-    MissingCode();
-}
-
 void loadEffectFragmentsAndAudioModel(sSpriteActorAnimationBundle& buffer, u32 offset) {
     MissingCode();
 }
@@ -2628,7 +2622,9 @@ std::optional<std::vector<u8>::iterator> loadEffectFragmentsAndAudio(sSpriteActo
             loadWdsDataIfNeeded();
             battleAnimationSoundLoaded = 0;
             startJumpAnimationVar3 = 0;
-            loadWdsDataNeeded = sendWds(entry, 0);
+            sWdsFile tempWds;
+            tempWds.init(entry, buffer.m_rawData.size() - offset);
+            loadWdsDataNeeded = loadWds(tempWds, 0);
             while (waitForMusic(0)) {
                 if (runningOnDTL != -1) {
                     trap(0x400);
@@ -2639,7 +2635,9 @@ std::optional<std::vector<u8>::iterator> loadEffectFragmentsAndAudio(sSpriteActo
             }
         }
         else if (magic == 'sdes') {
-            startSeq(entry);
+            sSeqFile tempSeq;
+            tempSeq.init(entry, buffer.m_rawData.size() - offset);
+            loadSequence(tempSeq);
             pWds = entry;
         }
         else {
@@ -3306,12 +3304,11 @@ void startJumpAnimation(int isBilly, uint actor, uint jumpTarget, uint facing) {
             if (startJumpAnimationVar3 == 0) {
                 battleIdleDuringLoading();
                 setCurrentDirectory(0x2c, 0);
-                std::vector<u8> buffer;
-                buffer.resize(getFileSizeAligned(7));
+                sWdsFile buffer;
                 readFile(7, buffer, 0, 0x80);
                 battleIdleDuringLoading();
                 loadWdsDataIfNeeded();
-                loadWdsDataNeeded = sendWds(buffer.begin(), 0);
+                loadWdsDataNeeded = loadWds(buffer, 0);
                 while (waitForMusic(0)) {
                     battleRender();
                 }

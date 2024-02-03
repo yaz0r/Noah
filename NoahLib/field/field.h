@@ -442,7 +442,7 @@ void LogMissingOpcode(int actorId, u16 scriptOffset, u16 opcode);
 
 void initFieldScriptEntityValues(int index);
 
-void playMusic(int musicId, int);
+void playMusic(int musicId);
 void setupRGBCalcMode(int, int, int, int, int, int);
 u16 getScriptEntryPoint(int entityId, int scriptIndex);
 int isScriptAlreadyRunning(sFieldScriptEntity* pEntity, int scriptIndex);
@@ -501,7 +501,7 @@ void decompressPauseSignToVram(short param_1, short param_2);
 void pauseMusic();
 void resumeMusic();
 int getInputOverflowed();
-void* allocateBufferForVramUpload(int);
+std::vector<u8> allocateBufferForVramUpload(int);
 void loadImageFileToVram(int fileId, void* allocation, int, int, int, int, int, int, int, int);
 
 extern std::array<sGameController, 2> newPadButtonForScripts;

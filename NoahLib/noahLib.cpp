@@ -13,6 +13,7 @@
 #include "field/fieldDebugger/fieldInspector.h"
 #include "field/fieldDebugger/fieldViewDebug.h"
 #include "battle/battleDebug.h"
+#include "kernel/audio/soundSystem.h"
 
 ImLogger Noah_Logger[eLogCategories::log_max];
 
@@ -29,6 +30,7 @@ bool noahInit(int argc, char* argv[])
     MissingCode();
 
     initCDAndFileSystem(&fatFileTableBuffer, &fatDirectoryTableBuffer, -1);
+    initSoundSystem(0);
 
     MissingCode();
 

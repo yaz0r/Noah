@@ -1129,7 +1129,7 @@ void mechaInitNewMecha(int entryId, ushort flags, sMechaDataTable2* pData2, sMec
 #if 0
         MissingCode();
         psVar9 = pData2->m8;
-        if ((psVar9->mC != psVar9->m8_seq) && (iVar3 = isSeqValid(psVar9->m8_seq, 0), iVar3 == 0)) {
+        if ((psVar9->mC != psVar9->m8_seq) && (iVar3 = findSequenceInLoadedList(psVar9->m8_seq, 0), iVar3 == 0)) {
             startSeq(psVar9->m8_seq);
             pLoadedMecha->m62 = 1;
         }

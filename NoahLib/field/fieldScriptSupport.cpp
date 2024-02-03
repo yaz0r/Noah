@@ -271,7 +271,7 @@ void playMusicFromScript()
             clearMusic();
             fieldMusicLoadPending = -1;
             currentlyPlayingMusic = iVar2;
-            playMusic(iVar2, 0);
+            playMusic(iVar2);
         }
         uVar1 = pCurrentFieldScriptActor->mCC_scriptPC;
     }
