@@ -1,6 +1,8 @@
 #include "noahLib.h"
 #include "spu.h"
 
+s32 spuUpdateCounter = 0;
+
 void SpuSetTransferMode(int) {
     MissingCode();
 }
@@ -25,7 +27,7 @@ spuDmaCompletionCallbackType SpuSetTransferCallback(spuDmaCompletionCallbackType
     return previousCallback;
 }
 
-s32 spuEvent = 0;
+s32 audioTickEvent = 0;
 void DisableEvent(s32) {
     MissingCode();
 }

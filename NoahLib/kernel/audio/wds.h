@@ -19,6 +19,7 @@ struct sWdsFile : sLoadableData {
         m10_headerSize1 = READ_LE_U32(it + 0x10);
         m14_ADPCMSize = READ_LE_U32(it + 0x14);
         m18_headerSize2 = READ_LE_U32(it + 0x18);
+        m20_bankNumber = READ_LE_U16(it + 0x20);
         m28 = READ_LE_U32(it + 0x28);
         assert(READ_LE_U32(it + 0x2C) == 0);
         m2C_pNext = nullptr;
@@ -28,6 +29,7 @@ struct sWdsFile : sLoadableData {
     s32 m10_headerSize1;
     s32 m14_ADPCMSize;
     s32 m18_headerSize2;
+    u16 m20_bankNumber;
     s32 m28;
     sWdsFile* m2C_pNext;
 
@@ -44,7 +46,9 @@ struct sLoadWdsSub0SubVar0 {
 };
 
 extern std::vector<sLoadWdsSub0SubVar0> loadWdsSub0SubVar1;
+extern sWdsFile* pLoadedWdsLinkedList;
 
 void spuDmaCompletionCallback(void);
 void initLoadedSampleTable();
 sWdsFile* loadWds(sWdsFile& wdsFile, s32 param_2);
+sWdsFile* findInWdsLinkedList(u32 bankId);

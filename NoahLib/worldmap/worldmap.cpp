@@ -742,7 +742,7 @@ void worldmapMode0_update(void) {
         } while ((musicStatusFlag & 0x10) != 0);
         */
         delete worldmapWds;
-        loadSequence(*fieldSeq);
+        loadSequence(fieldSeq);
         MissingCode();
     }
     else {

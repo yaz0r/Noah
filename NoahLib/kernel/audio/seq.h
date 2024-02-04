@@ -18,6 +18,11 @@ struct sSeqFile : sLoadableData {
         m0_magic = READ_LE_U32(it + 0x0);
         m8 = READ_LE_U32(it + 0x8);
         mC = READ_LE_U32(it + 0xC);
+        m10 = READ_LE_U16(it + 0x10);
+        m14 = READ_LE_U16(it + 0x14);
+        m16_sampleBank = READ_LE_U16(it + 0x16);
+        m18 = READ_LE_U16(it + 0x18);
+        m20_drumKitOffset = READ_LE_U16(it + 0x20);
         assert(READ_LE_U32(it + 0x1C) == 0);
         m1C_pNext = nullptr;
     }
@@ -25,9 +30,20 @@ struct sSeqFile : sLoadableData {
     u32 m0_magic;
     u32 m8;
     u32 mC;
+    u16 m10;
+    u16 m14;
+    u16 m16_sampleBank;
+    u16 m18;
     sSeqFile* m1C_pNext;
+    u16 m20_drumKitOffset;
 
     std::vector<u8> m_rawData;
 };
 
-void loadSequence(sSeqFile& param_1);
+extern sSeqFile* pLoadedSequencesLinkedList;
+
+void loadSequence(sSeqFile* param_1);
+void stopSequence(sSeqFile* param_1);
+void unloadSequence(sSeqFile* param_1);
+
+void playSoundEffect(u32 param_1);

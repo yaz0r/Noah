@@ -11,12 +11,16 @@
 #include "kernel/font.h"
 #include "kernel/audio/soundSystem.h"
 #include "kernel/criticalSection.h"
+#include "kernel/audio/seq.h"
+#include "kernel/debugText.h"
+#include "kernel/events.h"
 
 #include "menus/menuGold.h"
 #include "menus/statusMenu.h"
 #include "menus/memoryCardMenu.h"
 #include "menus/memoryCardTiles.h"
 
+extern sSeqFile* fieldSeq;
 sMenuContext *gMenuContext = nullptr;
 
 void updateMenuSelection(u8 count, u8 selectedEntry, std::span<std::array<u32, 2>>::iterator config);
@@ -284,8 +288,17 @@ void loadMenuSharedResources() {
             LoadImage(portraitTim.prect, (u8*)portraitTim.paddr);
         }
     }
+    DrawSync(0);
 
-    MissingCode();
+    if (useDebugMenuList) {
+        setCurrentDirectory(0x10, 2);
+        fieldSeq = new sSeqFile;
+        readFile(5, *fieldSeq, 0, 0x80);
+        waitReadCompletion(0);
+        setCurrentDirectory(0x10, 0);
+        loadSequence(fieldSeq);
+    }
+    gMenuContext->m2E4_musicSequence = fieldSeq;
 }
 
 u8 menuOpenArg = 0;
@@ -1638,21 +1651,6 @@ cdCallbackType CdReadCallback(cdCallbackType newCallback) {
     currentCallback = newCallback;
     MissingCode();
     return currentCallback;
-}
-
-u32 OpenEvent(u32 desc, u32 spec, u32 mode, void(*func)()) {
-    MissingCode();
-    return 0;
-}
-
-u32 CloseEvent(u32 event) {
-    MissingCode();
-    return 1;
-}
-
-u32 EnableEvent(u32 event) {
-    MissingCode();
-    return 1;
 }
 
 void closeMemoryCardsEvents(void)
@@ -3757,7 +3755,11 @@ void menu2_mainLoop(void)
     gMenuContext->m2E0_textBundle.clear();
     gMenuContext->m4E0[0].m78_imageData.clear();
     if (useDebugMenuList != '\0') {
-        assert(0);
+        stopSequence(gMenuContext->m2E4_musicSequence);
+        menuDraw();
+        unloadSequence(gMenuContext->m2E4_musicSequence);
+        menuDraw();
+        delete gMenuContext->m2E4_musicSequence;
     }
     if (menuToEnter != 2) {
         if (menuToEnter < 3) {
@@ -3812,13 +3814,202 @@ void menu2_loadGame_entryPoint() {
     menu2_mainLoop();
 }
 
+void drawMenuDebugUpdateInputs(void)
+{
+    char cVar1;
+    int iVar2;
+    byte uVar3;
+
+    uVar3 = 8;
+    iVar2 = getInputOverflowed();
+    if (iVar2 == 0) {
+        do {
+            iVar2 = loadInputFromVSyncBuffer();
+            if (iVar2 == 0) goto LAB_8001c050;
+            if ((newPadButtonForField & 0x2000) != 0) {
+                uVar3 = 0;
+                goto LAB_8001c050;
+            }
+            if ((newPadButtonForField & 0x4000) != 0) {
+                uVar3 = 1;
+                goto LAB_8001c050;
+            }
+            if ((newPadButtonForField & 0x8000) != 0) {
+                uVar3 = 2;
+                goto LAB_8001c050;
+            }
+            if ((newPadButtonForField & 0x1000) != 0) {
+                uVar3 = 3;
+                goto LAB_8001c050;
+            }
+            if ((newPadButtonForField & 0x20) != 0) {
+                uVar3 = 4;
+                goto LAB_8001c050;
+            }
+            if ((newPadButtonForField & 0x100) != 0) {
+                uVar3 = 0xc;
+                gMenuContext->m1E94 = gMenuContext->m1E94 == '\0';
+                goto LAB_8001c050;
+            }
+            if ((newPadButtonForField & 4) != 0) {
+                if (gMenuContext->m1E95 == '\0') goto LAB_8001c050;
+                cVar1 = gMenuContext->m1E95 + -1;
+                goto LAB_8001c04c;
+            }
+        } while ((newPadButtonForField & 1) == 0);
+        cVar1 = gMenuContext->m1E95 + '\x01';
+    LAB_8001c04c:
+        gMenuContext->m1E95 = cVar1;
+    }
+    else {
+        resetInputs();
+    }
+LAB_8001c050:
+    gMenuContext->m325_menuButton = uVar3;
+    return;
+}
+
+void drawMenuDebug(void)
+{
+    drawMenuDebugUpdateInputs();
+    if (gMenuContext->m1D4_currentDrawContext == &gMenuContext->m6C_drawContexts[0]) {
+        gMenuContext->m1D4_currentDrawContext = &gMenuContext->m6C_drawContexts[1];
+    }
+    else {
+        gMenuContext->m1D4_currentDrawContext = &gMenuContext->m6C_drawContexts[0];
+    }
+    gMenuContext->m308_oddOrEven = (gMenuContext->m308_oddOrEven == 0);
+    ClearOTagR(&gMenuContext->m1D4_currentDrawContext->m70_OT[0], 0x10);
+    /*if (*pRunningOnDTL != -1)*/ {
+        if (gMenuContext->m1E94 != '\0') {
+            //writeMCBLog(3, gMenuContext->m1E95, 0xf, 0x80ac);
+            assert(0);
+        }
+        /*if (*pRunningOnDTL != -1)*/ {
+            printDebugTextOnScreen(&gMenuContext->m1D4_currentDrawContext->m70_OT[0]);
+        }
+    }
+    DrawSync(0);
+    VSync(0);
+    PutDrawEnv(&gMenuContext->m1D4_currentDrawContext->m0_DrawEnv);
+    PutDispEnv(&gMenuContext->m1D4_currentDrawContext->m5C_DispEnv);
+    DrawOTag(&gMenuContext->m1D4_currentDrawContext->m70_OT[0xf]);
+    return;
+}
+
+
 void processDebugMenuForMenuList(void) {
     if (useDebugMenuList) {
-        assert(0);
+        bool stayInDebugMenu = true;
+        int currentDebugMenu = 0;
+        int currentDebugSubMenu = 0;
+        while (stayInDebugMenu) {
+            static const std::array<const char*, 7> debugMenuNames = { {
+                "Normal Menu",
+                "Member Change",
+                "Load Game",
+                "Enter Name",
+                "Shop",
+                "Robo",
+                "CD Change",
+            } };
+            logToScreen("\n\n     Menu=(%d)%s\n", currentDebugMenu, debugMenuNames[currentDebugMenu]);
+            switch (currentDebugMenu) {
+            case 0:
+            case 1:
+            case 2:
+            case 3:
+                if ((int)currentDebugSubMenu < 0xb) {
+                    logToScreen("\n\n     Chr =(%d)\n", currentDebugSubMenu);
+                }
+                else {
+                    logToScreen("\n\n     Robo =(%d)\n", currentDebugSubMenu - 0xB);
+                }
+                break;
+            case 4:
+            case 5:
+                logToScreen("\n\n     ShopNo =(%d)\n", currentDebugSubMenu);
+                break;
+            case 6:
+                logToScreen("\n\n     CdNo =(%d)\n", currentDebugSubMenu);
+                break;
+            default:
+                assert(0);
+            }
+            switch (gMenuContext->m325_menuButton) {
+            case 0:
+                currentDebugMenu = currentDebugMenu + 1;
+                currentDebugSubMenu = 0;
+                if (6 < currentDebugMenu) {
+                    currentDebugMenu = 0;
+                }
+                break;
+            case 1:
+                currentDebugSubMenu = currentDebugSubMenu - 1;
+                if ((int)currentDebugSubMenu < 0) {
+                    if (currentDebugMenu < 4) {
+                        currentDebugSubMenu = 0x1e;
+                    }
+                    else {
+                        currentDebugSubMenu = (uint)(currentDebugSubMenu == 0);
+                        if (currentDebugMenu != 6) {
+                            currentDebugSubMenu = 0xff;
+                        }
+                    }
+                }
+                break;
+            case 2:
+                currentDebugMenu = currentDebugMenu + -1;
+                currentDebugSubMenu = 0;
+                if (currentDebugMenu < 0) {
+                    currentDebugMenu = 6;
+                }
+                break;
+            case 3:
+                if (currentDebugMenu < 4) {
+                    currentDebugSubMenu = currentDebugSubMenu + 1;
+                    if (0x1e < (int)currentDebugSubMenu) {
+                        currentDebugSubMenu = 0;
+                    }
+                }
+                else if (currentDebugMenu == 6) {
+                    currentDebugSubMenu = (uint)(currentDebugSubMenu == 0);
+                }
+                else {
+                    currentDebugSubMenu = currentDebugSubMenu + 1;
+                }
+                break;
+            case 4:
+                stayInDebugMenu = false;
+                break;
+            default:
+                break;
+            }
+            drawMenuDebug();
+        }
+        menuToEnter = (byte)currentDebugMenu;
+        menuOpenArg = (byte)currentDebugSubMenu;
+        gMenuContext->m6C_drawContexts[0].m0_DrawEnv.isbg = '\0';
+        gMenuContext->m6C_drawContexts[1].m0_DrawEnv.isbg = '\0';
+        SetDispMask(0);
+        gMenuContext->m1D4_currentDrawContext = &gMenuContext->m6C_drawContexts[1];
+        SetDispMask(1);
     }
     setCurrentDirectory(0x10, 0);
     if (useDebugMenuList) {
-        assert(0);
+        gameState.m1924_Gold = 999999999;
+        resetMemoryAllocStats(2, 0);
+        readFile(1, menuSharedResources, 0, 0x80);
+        waitReadCompletion(0);
+        if (menuToEnter == 5) {
+            assert(0);
+        }
+        // Read menu2 overlay
+        /*
+        unaff_s4 = malloc(4);
+        unaff_s5 = malloc((int)unaff_s4 + 0x7fe3b000);
+        readFile(menuToEnter + 5, &DAT_801c5000, 0, 0x80);*/
+        waitReadCompletion(0);
     }
     setCurrentDirectory(0x10, 0);
 
@@ -3942,5 +4133,5 @@ void loadAndOpenMenu(void)
 }
 
 void playMenuSoundEffect(uint param_1) {
-    MissingCode();
+    playSoundEffect(gMenuContext->m2E4_musicSequence->m14 << 0x10 | param_1 & 0xff);
 }

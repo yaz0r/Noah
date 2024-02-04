@@ -2,6 +2,8 @@
 #include "seq.h"
 #include "soundSystem.h"
 #include "spu.h"
+#include "wds.h"
+#include "soundInstance.h"
 
 sSeqFile* pLoadedSequencesLinkedList = nullptr;
 
@@ -26,23 +28,39 @@ int checkHeader(sSeqFile* param_1, u32 magic, int param_3) {
     return 2;
 }
 
-void loadSequence(sSeqFile& param_1) {
+void loadSequence(sSeqFile* param_1) {
     if (((musicStatusFlag & 0x80) == 0) && (pLoadedSequencesLinkedList != 0)) {
         assert(0);
     }
 
-    int error = checkHeader(&param_1, 0x73646573, 0x101);
+    int error = checkHeader(param_1, 0x73646573, 0x101);
     if (error) {
         setSoundError(error);
         return;
     }
 
-    DisableEvent(spuEvent);
+    DisableEvent(audioTickEvent);
     sSeqFile** ppSeq = &pLoadedSequencesLinkedList;
     while (*ppSeq) {
         ppSeq = &(*ppSeq)->m1C_pNext;
     }
-    *ppSeq = &param_1;
-    param_1.m1C_pNext = nullptr;
-    EnableEvent(spuEvent);
+    *ppSeq = param_1;
+    param_1->m1C_pNext = nullptr;
+    EnableEvent(audioTickEvent);
+}
+
+void stopSequence(sSeqFile* param_1) {
+    MissingCode();
+}
+void unloadSequence(sSeqFile* param_1) {
+    MissingCode();
+}
+
+void playSoundEffect(u32 param_1)
+{
+    if ((musicStatusFlag & 0x800) != 0) {
+        playSoundEffectVar0 = 2;
+        playSoundEffectSub((int)(short)((short)numMaxSoundEffectInstances - 2U | 0x8000), param_1, 0x6000, 0x4000);
+    }
+    return;
 }

@@ -2518,7 +2518,7 @@ void OP_C4SubSub1(int param_1, short param_2, short param_3, uint param_4)
 }
 
 int OP_C4SubVar0 = 0;
-void playSoundEffect(int param_1, uint param_2)
+void playFieldSoundEffect(int param_1, uint param_2)
 {
     if (param_1 == 0) {
         OP_C4SubSub0((param_2 & 7) << 1);
@@ -2531,7 +2531,7 @@ void playSoundEffect(int param_1, uint param_2)
 
 void OP_PLAY_SOUND_EFFECT()
 {
-    playSoundEffect(getImmediateOrVariableUnsigned(1), 3);
+    playFieldSoundEffect(getImmediateOrVariableUnsigned(1), 3);
     ADVANCE_VM(0x3);
 }
 
@@ -4521,7 +4521,7 @@ void OP_OPEN_DOOR()
         if ((pCurrentFieldScriptActor->m12C_flags & 0x20) == 0) {
             pCurrentFieldScriptActor->m12C_flags = pCurrentFieldScriptActor->m12C_flags | 0x20;
             psVar2->mE2 = 0;
-            playSoundEffect(8, 3);
+            playFieldSoundEffect(8, 3);
         }
         else {
             pCurrentFieldScriptActor->mE2 = pCurrentFieldScriptActor->mE2 + 1;
@@ -4563,7 +4563,7 @@ void OP_CLOSE_DOOR(void)
         if ((pCurrentFieldScriptActor->m12C_flags & 0x20) == 0) {
             pCurrentFieldScriptActor->m12C_flags = pCurrentFieldScriptActor->m12C_flags | 0x20;
             psVar2->mE2 = 0;
-            playSoundEffect(8, 3);
+            playFieldSoundEffect(8, 3);
         }
         else {
             pCurrentFieldScriptActor->mE2 = pCurrentFieldScriptActor->mE2 + 1;

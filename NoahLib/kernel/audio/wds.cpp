@@ -204,7 +204,7 @@ sWdsFile* loadWds(sWdsFile& wdsFile, s32 param_2) {
     wdsCopy->init(wdsFile.m_rawData.begin(), wdsFile.m10_headerSize1);
     wdsCopy->m28 = sampleEntry;
 
-    DisableEvent(spuEvent);
+    DisableEvent(audioTickEvent);
     sWdsFile** ppWdsList = &pLoadedWdsLinkedList;
     while (*ppWdsList) {
         ppWdsList = &(*ppWdsList)->m2C_pNext;
@@ -212,6 +212,21 @@ sWdsFile* loadWds(sWdsFile& wdsFile, s32 param_2) {
     *ppWdsList = wdsCopy;
     wdsCopy->m2C_pNext = nullptr;
 
-    EnableEvent(spuEvent);
+    EnableEvent(audioTickEvent);
     return wdsCopy;
+}
+
+sWdsFile* findInWdsLinkedList(u32 bankId) {
+    sWdsFile* psVar1;
+
+    psVar1 = pLoadedWdsLinkedList;
+    if (pLoadedWdsLinkedList != nullptr) {
+        do {
+            if (psVar1->m20_bankNumber == bankId) {
+                return psVar1;
+            }
+            psVar1 = psVar1->m2C_pNext;
+        } while (psVar1 != nullptr);
+    }
+    return psVar1;
 }

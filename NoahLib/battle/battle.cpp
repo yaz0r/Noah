@@ -2637,7 +2637,7 @@ std::optional<std::vector<u8>::iterator> loadEffectFragmentsAndAudio(sSpriteActo
         else if (magic == 'sdes') {
             sSeqFile tempSeq;
             tempSeq.init(entry, buffer.m_rawData.size() - offset);
-            loadSequence(tempSeq);
+            loadSequence(&tempSeq);
             pWds = entry;
         }
         else {

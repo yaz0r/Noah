@@ -14,8 +14,12 @@
 #include "field/fieldDebugger/fieldViewDebug.h"
 #include "battle/battleDebug.h"
 #include "kernel/audio/soundSystem.h"
+#include "kernel/audio/wds.h"
 
 ImLogger Noah_Logger[eLogCategories::log_max];
+
+sWdsFile* wdsFile3 = nullptr;
+sWdsFile* wdsFile5 = nullptr;
 
 bool noahInit(int argc, char* argv[])
 {
@@ -36,6 +40,23 @@ bool noahInit(int argc, char* argv[])
 
     setCurrentDirectory(0, 1);
 
+    MissingCode();
+
+    sWdsFile file2;
+    sWdsFile file3;
+    sWdsFile file4;
+    sWdsFile file5;
+
+    readFile(2, file2, 0, 0);
+    readFile(3, file3, 0, 0);
+    readFile(4, file4, 0, 0);
+    readFile(5, file5, 0, 0);
+    waitReadCompletion(0);
+
+    loadWds(file2, 0);
+    wdsFile3 = loadWds(file3, 0);
+    loadWds(file4, 0);
+    wdsFile5 = loadWds(file5, 0);
     MissingCode();
 
     // load and init font

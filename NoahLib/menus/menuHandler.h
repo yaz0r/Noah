@@ -299,6 +299,7 @@ struct sMenuContext {
     FP_VEC4 m220_menuTranslation2 = { 0,0,0,0 };
     sFont m2DC_font;
     std::vector<u8> m2E0_textBundle;
+    struct sSeqFile* m2E4_musicSequence;
     u32 m2E8;
     u8 m325_menuButton;
     u8 m326;
