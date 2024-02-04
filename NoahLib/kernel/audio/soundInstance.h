@@ -20,10 +20,11 @@ struct sSoundInstanceEventD8 {
 };
 
 struct sSoundInstanceEventCallstack {
-    u8 m0;
+    u8 m0_loopCount;
     u8 m2;
-    std::vector<u8>::iterator m4;
-    std::vector<u8>::iterator m8;
+    u8 m3;
+    std::vector<u8>::iterator m4_loopStartIt;
+    std::vector<u8>::iterator m8_loopEndIt;
     // size 0xC
 };
 
@@ -42,6 +43,7 @@ struct sSoundInstanceEvent {
     s32 m1C;
     s16 m20;
     s8 m22;
+    s8 m23;
     s8 m25;
     s8 m26;
     u8 m27;
@@ -74,8 +76,10 @@ struct sSoundInstanceEvent {
     s16 m72_callstackDepth;
     s16 m74;
     s16 m76;
-    s32 m78;
-    std::array<sSoundInstanceEventCallstack, 4> m90_callstack;
+    s32 m78_volume;
+    s32 m88_volumeSlideDelta;
+    u16 m96_volumeSlideDuration;
+    std::array<sSoundInstanceEventCallstack, 4> m9C_callstack;
     s16 mCE;
     s16 mD0;
     s16 mD2;
@@ -148,3 +152,5 @@ void addActiveSoundInstance(sSoundInstance* pSoundInstance);
 void initSoundInstanceDefaults(sSoundInstance* pSoundInstance);
 void playSoundEffectSub(uint param_1, uint param_2, short param_3, u16 param_4);
 void setupAdsr(int param_1, sSoundInstanceEvent* param_2);
+
+void playSoundEffectSubSub0(sSoundInstanceEvent30* param_1, int param_2);

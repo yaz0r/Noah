@@ -35,10 +35,15 @@ void executeSequenceEvents2(sSoundInstance* param_1, std::vector<sSoundInstanceE
 
         if (instanceEvent.m0) {
             u16 flags = instanceEvent.m2;
-            if (instanceEvent.m5C_deltaTime & 0xFFFF) {
+            if (instanceEvent.m5C_deltaTime) {
                 s16 var4 = instanceEvent.m4;
-                if (var4 & 8) {
-                    assert(0);
+                if (var4 & 8) { // volume slide
+                    instanceEvent.m96_volumeSlideDuration--;
+                    flags |= 0x100; // update volume
+                    if (instanceEvent.m96_volumeSlideDuration == 0) {
+                        var4 &= ~8;
+                    }
+                    instanceEvent.m78_volume += instanceEvent.m88_volumeSlideDelta;
                 }
                 if (var4 & 1) {
                     assert(0);
@@ -51,11 +56,13 @@ void executeSequenceEvents2(sSoundInstance* param_1, std::vector<sSoundInstanceE
                 }
                 instanceEvent.m4 = var4;
 
-                if ((((instanceEvent.m5C_deltaTime & 0xFFFF) - 1) == 1) && (instanceEvent.m0 & 0x1000)) {
-                    instanceEvent.m5A = 6;
-                    instanceEvent.m30.m6 |= 0x80;
+                if (--instanceEvent.m5C_deltaTime == 1) {
+                    if (instanceEvent.m0 & 0x1000) {
+                        instanceEvent.m5A = 6;
+                        instanceEvent.m30.m6 |= 0x80;
+                    }
                 }
-                if ((instanceEvent.m5C_deltaTime >> 16) - 1 == 0) {
+                if (--instanceEvent.m5E == 0) {
                     flags |= 2;
                     instanceEvent.m0 |= 0x400;
                 }
@@ -143,18 +150,18 @@ void executeSequenceEvents(sSoundInstance* param_1, std::vector<sSoundInstanceEv
                                         // as in that case, we should never access the stack
                                         std::optional<std::array<sSoundInstanceEventCallstack, 4>::iterator> pCallstackEntry;
                                         if (instanceEvent.m72_callstackDepth >= 0) {
-                                            pCallstackEntry = instanceEvent.m90_callstack.begin() + instanceEvent.m72_callstackDepth;
+                                            pCallstackEntry = instanceEvent.m9C_callstack.begin() + instanceEvent.m72_callstackDepth;
                                         }
                                         if (byteCode2 == 0x99) {
                                             
-                                            if (pCallstackEntry.value()->m0) {
-                                                byteCodeIt = pCallstackEntry.value()->m4;
+                                            if (pCallstackEntry.value()->m0_loopCount) {
+                                                byteCodeIt = pCallstackEntry.value()->m4_loopStartIt;
                                                 goto LAB_8003ca48;
                                             }
                                             pCallstackEntry.value()--;
                                         }
-                                        if ((byteCode2 == 0x9a) && (pCallstackEntry.value()->m0 == 0)) {
-                                            byteCodeIt = pCallstackEntry.value()->m8;
+                                        if ((byteCode2 == 0x9a) && (pCallstackEntry.value()->m0_loopCount == 0)) {
+                                            byteCodeIt = pCallstackEntry.value()->m8_loopEndIt;
                                             pCallstackEntry.value()--;
                                         }
                                         else {

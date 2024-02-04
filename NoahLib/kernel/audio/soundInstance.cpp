@@ -110,6 +110,15 @@ u32 playSoundEffectSubSub1BF2 = 0;
 
 std::array<sSoundInstanceEvent30*, 0x18> playSoundEffectSubSub1Var0;
 
+void playSoundEffectSubSub0(sSoundInstanceEvent30* param_1, int param_2) {
+    if ((param_2 < 0x18) && (playSoundEffectSubSub1Var0[param_2] == param_1)) {
+        playSoundEffectSubSub1Var0[param_2] = nullptr;
+        u32 uVar1 = 1 << (param_2 & 0x1f);
+        playSoundEffectSubSub1BF1 = uVar1 | playSoundEffectSubSub1BF1;
+        playSoundEffectSubSub1BF2 = ~uVar1 & playSoundEffectSubSub1BF2;
+    }
+}
+
 void playSoundEffectSubSub1(sSoundInstanceEvent30* param_1, u32 param_2) {
     if (param_2 < 0x18) {
         if (playSoundEffectSubSub1Var0[param_2] == param_1) {
@@ -153,8 +162,7 @@ void playSoundEffectSub(uint param_1, uint param_2, short param_3, u16 param_4) 
                 if (READ_LE_U16(pDrumData) == 0) {
                     pSoundInstance->m48 = ~(1 << (pSoundEvent->m6 & 0x1f)) & pSoundInstance->m48;
                     pSoundEvent->m0 = 0;
-                    //playSoundEffectSubSub0(&pSoundEvent->m30, pSoundEvent->m27);
-                    assert(0);
+                    playSoundEffectSubSub0(&pSoundEvent->m30, pSoundEvent->m27);
                 }
                 else {
                     pSoundInstance->m48 = 1 << (pSoundEvent->m6 & 0x1f) | pSoundInstance->m48;
@@ -177,7 +185,7 @@ void playSoundEffectSub(uint param_1, uint param_2, short param_3, u16 param_4) 
                     pSoundEvent->m6E = 0;
                     pSoundEvent->m64 = 0;
                     pSoundEvent->m76 = uVar8;
-                    pSoundEvent->m78 = 0x7f000000;
+                    pSoundEvent->m78_volume = 0x7f000000;
 
                     pSoundEvent->m70 = 0;
                     pSoundEvent->mD0 = 0;
