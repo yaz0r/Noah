@@ -39,11 +39,11 @@ struct sSoundInstanceEvent {
     u32 mC;
     std::vector<u8>::iterator m10;
     std::vector<u8>::iterator m14;
-    std::optional<std::vector<u8>::iterator> m18;
+    std::optional<std::vector<u8>::iterator> m18_infinitLoopStart;
     s32 m1C;
     s16 m20;
     s8 m22;
-    s8 m23;
+    s8 m23_infiniteLoopOctave;
     s8 m25;
     s8 m26;
     u8 m27;
@@ -68,13 +68,13 @@ struct sSoundInstanceEvent {
     s16 m62;
     s8 m64;
     s8 m65;
-    s16 m66;
+    s16 m66_octave;
     s32 m68;
     s16 m6C;
     s16 m6E;
     s16 m70;
     s16 m72_callstackDepth;
-    s16 m74;
+    s16 m74_pan;
     s16 m76;
     s32 m78_volume;
     s32 m88_volumeSlideDelta;
@@ -89,14 +89,27 @@ struct sSoundInstanceEvent {
     // size 0x158
 };
 
+struct sPercussionEntry {
+    u8 m0_adsr;
+    u8 m1;
+    u8 m2;
+    u8 m3_pan;
+};
+
+struct sPercussionData {
+    std::array<sPercussionEntry, 0x60> data;
+    // size 0x180
+};
+
 struct sSoundInstance {
-    sSoundInstance(int numEvents) {
+    sSoundInstance(int numEvents, bool allocateExtra) {
         m94_events.resize(numEvents);
     }
 
     sSoundInstance* m0_pNext = nullptr;
     void* m4 = nullptr;
     struct sSeqFile* m8_pSeq = nullptr;
+    sPercussionData* mC_pPercussionData = nullptr;
     u16 m10_flags;
     s16 m12;
     u8 m14_count;
@@ -117,7 +130,11 @@ struct sSoundInstance {
     s16 m3A;
     s16 m3C;
     s16 m3E;
-    s32 m48;
+    u8 m41;
+    u8 m42;
+    u8 m43;
+    s16 m44;
+    s32 m48_activeVoicesBF;
     s32 m4C;
     s32 m50;
     s32 m54;
@@ -139,7 +156,10 @@ struct sSoundInstance {
     s16 m90;
 
     std::vector<sSoundInstanceEvent> m94_events;
-    // size 0x94 + events
+
+    sPercussionData mPercussionData; // this is located after all the voices data
+
+    // size 0x94 + events + optional percussionData
 };
 
 extern int numMaxSoundEffectInstances;
@@ -152,5 +172,8 @@ void addActiveSoundInstance(sSoundInstance* pSoundInstance);
 void initSoundInstanceDefaults(sSoundInstance* pSoundInstance);
 void playSoundEffectSub(uint param_1, uint param_2, short param_3, u16 param_4);
 void setupAdsr(int param_1, sSoundInstanceEvent* param_2);
+sSoundInstance* createMusicInstance(sSeqFile* param_1);
 
 void playSoundEffectSubSub0(sSoundInstanceEvent30* param_1, int param_2);
+
+void startMusicInstance(sSoundInstance* param_1, int, int);

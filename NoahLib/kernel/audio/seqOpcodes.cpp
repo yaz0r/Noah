@@ -1,7 +1,15 @@
 #include "noahLib.h"
 #include "seqOpcodes.h"
 #include "soundInstance.h"
+#include "soundSystem.h"
 #include "wds.h"
+
+std::vector<u8>::iterator seqOP_0_restAndNoteOff(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+    pChannel->m5C_deltaTime = it[0];
+    pChannel->m2 |= 2;
+    pChannel->m0 |= 0x400;
+    return it + 1;
+}
 
 std::vector<u8>::iterator seqOP_1_hold(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pChannel->m0 = pChannel->m0 | 0x100;
@@ -10,23 +18,46 @@ std::vector<u8>::iterator seqOP_1_hold(std::vector<u8>::iterator it, sSoundInsta
 }
 
 std::vector<u8>::iterator seqOP_10_end(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
-    if (!pChannel->m18.has_value()) {
+    if (!pChannel->m18_infinitLoopStart.has_value()) {
         pChannel->m2 &= 0xFFFC;
         playSoundEffectSubSub0(&pChannel->m30, pChannel->m27);
         pChannel->m0 = 0;
     }
     else {
         pChannel->m20++;
-        pChannel->m66 = pChannel->m23;
-        it = pChannel->m18.value();
+        pChannel->m66_octave = pChannel->m23_infiniteLoopOctave;
+        it = pChannel->m18_infinitLoopStart.value();
     }
 
     return it;
 }
 
+std::vector<u8>::iterator seqOP_11_infiniteLoop(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+    pChannel->m18_infinitLoopStart = it;
+    pChannel->m23_infiniteLoopOctave = pChannel->m66_octave & 0xFF;
+
+    return it;
+}
+
 std::vector<u8>::iterator seqOP_14_setOctave(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
-    pChannel->m66 = it[0] * 0xc;
+    pChannel->m66_octave = it[0] * 0xc;
     return it + 1;
+}
+
+std::vector<u8>::iterator seqOP_15_incOctave(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+    pChannel->m66_octave += 0xc;
+    return it;
+}
+
+std::vector<u8>::iterator seqOP_17_timeSignature(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+    int numerator = it[0];
+    int denominator = it[1];
+    pInstance->m3A = (short)(0xc0 / denominator);
+    pInstance->m3C = (ushort)denominator;
+    pInstance->m38 = (ushort)numerator;
+    pInstance->m3E = (ushort)numerator;
+    pInstance->m36 = pInstance->m3A;
+    return it + 2;
 }
 
 std::vector<u8>::iterator seqOP_18_loopStart(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
@@ -34,7 +65,7 @@ std::vector<u8>::iterator seqOP_18_loopStart(std::vector<u8>::iterator it, sSoun
     auto& pCallstack = pChannel->m9C_callstack[pChannel->m72_callstackDepth];
     pCallstack.m0_loopCount = *it - 1;
     pCallstack.m4_loopStartIt = it + 1;
-    pCallstack.m2 = pChannel->m66;
+    pCallstack.m2 = pChannel->m66_octave;
     return it + 1;
 }
 
@@ -46,14 +77,26 @@ std::vector<u8>::iterator seqOP_19_loopEnd(std::vector<u8>::iterator it, sSoundI
     else {
         pCallstack.m8_loopEndIt = it;
         it = pCallstack.m4_loopStartIt;
-        pCallstack.m3 = pChannel->m66;
-        pChannel->m66 = pCallstack.m2;
+        pCallstack.m3 = pChannel->m66_octave;
+        pChannel->m66_octave = pCallstack.m2;
     }
     return it;
 }
 
+std::vector<u8>::iterator seqOP_20_setTempo(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+    pInstance->m58 = (int)it[0] << 0x10;
+    pInstance->m54 = (int)it[0] * (int)(pInstance->m64 >> 8);
+    return it + 1;
+}
+
+
 std::vector<u8>::iterator seqOP_29(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pChannel->m62 = it[0];
+    return it + 1;
+}
+
+std::vector<u8>::iterator seqOP_2C_setAdsr(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+    setupAdsr(it[0], pChannel);
     return it + 1;
 }
 
@@ -65,6 +108,22 @@ std::vector<u8>::iterator seqOP_2D(std::vector<u8>::iterator it, sSoundInstance*
         pChannel->m60 += it[0];
     }
     return it + 1;
+}
+
+std::vector<u8>::iterator seqOP_2E_percussionOn(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+    if (pInstance->mC_pPercussionData) {
+        pChannel->m0 |= 0x10;
+    }
+    return it;
+}
+
+std::vector<u8>::iterator seqOP_3A(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+    if (((pInstance->m10_flags & 6) == 0) ||
+        (((musicStatusFlag & 0x2000) != 0 && ((pChannel->m0 & 2) == 0)))) {
+        pChannel->m30.m6 |= 0x4000;
+        pChannel->m30.m2 |= 0x40;
+    }
+    return it;
 }
 
 std::vector<u8>::iterator seqOP_44(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
@@ -91,7 +150,13 @@ std::vector<u8>::iterator seqOP_62_volumeSlide(std::vector<u8>::iterator it, sSo
     return it + 2;
 }
 
-std::vector<u8>::iterator seqOP_7C_changeWds(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::iterator seqOP_68_pan(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+    pChannel->m74_pan = (ushort)it[0] << 8;
+    pChannel->m2 = pChannel->m2 | 0x100;
+    return it + 1;
+}
+
+std::vector<u8>::iterator seqOP_7C_changeWdsAndADSR(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pChannel->m25 = it[0];
     sWdsFile* pWds = findInWdsLinkedList(it[1]);
     if (pWds == nullptr) {
@@ -102,10 +167,20 @@ std::vector<u8>::iterator seqOP_7C_changeWds(std::vector<u8>::iterator it, sSoun
     return it + 2;
 }
 
+std::vector<u8>::iterator seqOP_7E_changeBank(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+    pChannel->m25 = it[0];
+    sWdsFile* pWds = findInWdsLinkedList(it[1]);
+    if (pWds == nullptr) {
+        pWds = pLoadedWdsLinkedList;
+    }
+    pChannel->m2C_pWds = pWds;
+    return it + 1;
+}
+
 
 const std::array<seqFunction, 0x80> seqOpcodes = { {
     //0x00
-    nullptr,
+    seqOP_0_restAndNoteOff,
     seqOP_1_hold,
     nullptr,
     nullptr,
@@ -124,13 +199,13 @@ const std::array<seqFunction, 0x80> seqOpcodes = { {
 
     //0x10
     seqOP_10_end,
-    nullptr,
+    seqOP_11_infiniteLoop,
     nullptr,
     nullptr,
     seqOP_14_setOctave,
+    seqOP_15_incOctave,
     nullptr,
-    nullptr,
-    nullptr,
+    seqOP_17_timeSignature,
     seqOP_18_loopStart,
     seqOP_19_loopEnd,
     nullptr,
@@ -141,7 +216,7 @@ const std::array<seqFunction, 0x80> seqOpcodes = { {
     nullptr,
 
     //0x20
-    nullptr,
+    seqOP_20_setTempo,
     nullptr,
     nullptr,
     nullptr,
@@ -153,9 +228,9 @@ const std::array<seqFunction, 0x80> seqOpcodes = { {
     seqOP_29,
     nullptr,
     nullptr,
-    nullptr,
+    seqOP_2C_setAdsr,
     seqOP_2D,
-    nullptr,
+    seqOP_2E_percussionOn,
     nullptr,
 
     //0x30
@@ -169,7 +244,7 @@ const std::array<seqFunction, 0x80> seqOpcodes = { {
     nullptr,
     nullptr,
     nullptr,
-    nullptr,
+    seqOP_3A,
     nullptr,
     nullptr,
     nullptr,
@@ -221,7 +296,7 @@ const std::array<seqFunction, 0x80> seqOpcodes = { {
     nullptr,
     nullptr,
     nullptr,
-    nullptr,
+    seqOP_68_pan,
     nullptr,
     nullptr,
     nullptr,
@@ -243,9 +318,9 @@ const std::array<seqFunction, 0x80> seqOpcodes = { {
     nullptr,
     nullptr,
     nullptr,
-    seqOP_7C_changeWds,
+    seqOP_7C_changeWdsAndADSR,
     nullptr,
-    nullptr,
+    seqOP_7E_changeBank,
     nullptr,
 } };
 

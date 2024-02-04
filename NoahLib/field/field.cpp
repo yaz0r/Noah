@@ -27,6 +27,7 @@
 #include "worldmap/worldmap.h"
 #include "battle/battleConfig.h"
 #include "battle/battle.h" // todo: waitFormusic
+#include "kernel/audio/seq.h"
 
 #include "SDL_gamecontroller.h"
 #include "SDL_keyboard.h"
@@ -9263,7 +9264,7 @@ int updateMusicLoadingState() {
 int currentlyLoadedMusic = -1;
 int updateMusicState2Var1 = 0;
 int updateMusicState2Var3 = 0;
-std::vector<u8> battleMusic = std::vector<u8>(0x3200); // TODO: make that array and migrate readFile to span
+sSeqFile battleMusic;
 
 int updateMusicState2(int param_1)
 {

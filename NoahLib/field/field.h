@@ -398,6 +398,8 @@ extern int linkOTIndex;
 extern int runningOnDTL;
 extern int* pRunningOnDTL;
 
+extern struct sSeqFile battleMusic;
+
 void setCurrentRenderingMatrix(MATRIX* pMatrix);
 void renderSpriteActor(struct sSpriteActorCore* pSpriteSheet, sTag* pTag);
 

@@ -17,6 +17,7 @@
 #include "kernel/audio/wds.h"
 #include "kernel/audio/soundSystem.h"
 #include "kernel/audio/seq.h"
+#include "kernel/audio/soundInstance.h"
 
 VECTOR worldmapPosition;
 u32 worldmapGamestate1824;
@@ -605,8 +606,8 @@ void worldmapInitAllModels() {
 
 int worldmapSoundFilesPendingCount = 0;
 sWdsFile* worldmapWds;
-sLoadableDataRaw worldmapSound1;
-sLoadableDataRaw worldmapSound2;
+sSeqFile worldmapSound1;
+sSeqFile worldmapSound2;
 sLoadableDataRaw worldmapSound3;
 sSeqFile* fieldSeq;
 
@@ -642,6 +643,7 @@ void startLoadingWorldmapSoundFiles() {
 }
 
 sWdsFile* worldmapWdsResult;
+sSoundInstance* pMusic;
 
 void worldmapMode0_update(void) {
     initWorldmapGraphics();
@@ -743,9 +745,17 @@ void worldmapMode0_update(void) {
         */
         delete worldmapWds;
         loadSequence(fieldSeq);
-        MissingCode();
+        if (worldMapGearMode == 7) {
+            battleMusic = worldmapSound2;
+        }
+        else {
+            battleMusic = worldmapSound1;
+        }
+        pMusic = createMusicInstance(&battleMusic);
+        startMusicInstance(pMusic, 0x7f, 0);
     }
     else {
+        // resume music from half-way to prevent petition?
         assert(0);
     }
 

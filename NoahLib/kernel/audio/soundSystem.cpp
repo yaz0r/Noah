@@ -74,6 +74,14 @@ void executeSequenceEvents2(sSoundInstance* param_1, std::vector<sSoundInstanceE
 
 static const std::array<u8, 19> deltaTimeTable = { { 0, 192, 144, 96, 72, 64, 48, 36, 32, 24, 18, 16, 12, 9, 8, 6, 4, 3, 2 } };
 
+void processPercussions(sSoundInstance* param_1, sSoundInstanceEvent* param_2, u32 param_3) {
+    auto& percussionData = param_1->mC_pPercussionData->data[param_3];
+    setupAdsr(percussionData.m0_adsr, param_2);
+    param_2->m68 = ((uint)percussionData.m1 * 0x100 + (int)param_2->m6E + (int)param_2->m6C) * 0x10000;
+    param_2->m2 |= 0x100;
+    param_2->m74_pan = percussionData.m3_pan << 8;
+}
+
 void executeSequenceEvents(sSoundInstance* param_1, std::vector<sSoundInstanceEvent>& param_2, short param_3) {
     for (int i = 0; i < param_3; i++) {
         sSoundInstanceEvent& instanceEvent = param_2[i];
@@ -103,11 +111,14 @@ void executeSequenceEvents(sSoundInstance* param_1, std::vector<sSoundInstanceEv
                         instanceEvent.m5C_deltaTime = deltaTime;
                         instanceEvent.m5A = instanceEvent.m28;
                         instanceEvent.m30.m6 |= 0x80;
+
                         if ((instanceEvent.m0 & 0x10) == 0) {
-                            instanceEvent.m68 = ((s32)instanceEvent.m6C * 0x10000) + ((s32)instanceEvent.m66 * 0x100) + ((s32)instanceEvent.m6E);
+                            // no percussion
+                            instanceEvent.m68 = ((s32)instanceEvent.m6C * 0x10000) + ((s32)instanceEvent.m66_octave * 0x100) + ((s32)instanceEvent.m6E);
                         }
                         else {
-                            assert(0);
+                            // with percussion
+                            processPercussions(param_1, &instanceEvent, relativeKey);
                         }
                         instanceEvent.m2 |= 0x200;
                         instanceEvent.m0 |= 0x180;
@@ -123,8 +134,8 @@ void executeSequenceEvents(sSoundInstance* param_1, std::vector<sSoundInstanceEv
                     }
                     else {
                         byteCodeIt = seqOpcodes[byteCode - 0x80](byteCodeIt + 1, param_1, &instanceEvent);
-                        if (instanceEvent.m0 == 0) {
-                            param_1->m48 = ~(1 << (instanceEvent.m6 & 0x1f)) & param_1->m48;
+                        if (instanceEvent.m0 == 0) { // disable the voice
+                            param_1->m48_activeVoicesBF &= ~(1 << (instanceEvent.m6 & 0x1f));
                             break;
                         }
                     }
@@ -175,7 +186,7 @@ void executeSequenceEvents(sSoundInstance* param_1, std::vector<sSoundInstanceEv
                             }
 
                             bIsKeyOn = byteCode2 < 0x80;
-                            if (!instanceEvent.m18.has_value()) {
+                            if (!instanceEvent.m18_infinitLoopStart.has_value()) {
                                 goto LAB_8003ca60;
                             }
                         LAB_8003ca48:
@@ -248,7 +259,7 @@ void audioTick() {
 
         sSoundInstance* pSoundInstance = pPlayingSoundsLinkedList;
         while (pSoundInstance) {
-            if ((short)pSoundInstance->m10_flags < 0) {
+            if (pSoundInstance->m10_flags & 0x8000) {
                 if ((pSoundInstance->m2C != 0) && ((uint)pSoundInstance->m2C <= (uint)pSoundInstance->m24)) {
                     assert(0);
                 }
@@ -283,7 +294,9 @@ void audioTick() {
                         executeSequenceEvents2(pSoundInstance, pSoundInstance->m94_events, pSoundInstance->m14_count);
                         executeSequenceEvents(pSoundInstance, pSoundInstance->m94_events, pSoundInstance->m14_count);
                     }
-                    if (pSoundInstance->m48 == 0) {
+
+                    // if not voices are left active, disable the instance
+                    if (pSoundInstance->m48_activeVoicesBF == 0) {
                         pSoundInstance->m10_flags &= 0x7fff;
                         break;
                     }
