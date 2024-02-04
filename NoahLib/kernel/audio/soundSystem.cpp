@@ -9,13 +9,93 @@
 #include "seqOpcodes.h"
 
 u16 musicStatusFlag = 0;
+std::array<sSoundInstanceEvent30*, 0x18> playSoundEffectSubSub1Var0;
 
 void setSoundError(u16 errorCode) {
-    //assert(0);
+    assert(0);
 }
 
+std::array<u16, 24> pSPUVoiceVolumeLeft;
+std::array<u16, 24> pSPUVoiceVolumeRight;
+std::array<u16, 24> pSPUVoiceADPCMSampleRate;
+std::array<u32, 24> pSPUVoiceADPCMStartAddr;
+std::array<u32, 24> pSPUVoiceADPCMRepeatAddr;
+
+struct sADSR {
+    u16 m0_lower;
+    u16 m2_high;
+};
+std::array<sADSR, 24> pSPUVoiceADSR;
+
+u32 pSPUPitchModulationUpdateFlag;
+u32 pSPUNoiseModeFlag;
+u32 pSPUReverbFlag;
+u32 pSPUKeyOn;
+u32 pSPUKeyOff;
+
 void sendAdsrToSpu() {
-    MissingCode();
+    u16 postUpdateFlag = 0;
+    u32 pitchModulationFlag = 0;
+    u32 noiseGenerationFlag = 0;
+    u32 reverbFlag = 0;
+    for (int i = 0; i < 24; i++) {
+        sSoundInstanceEvent30* voiceState = playSoundEffectSubSub1Var0[i];
+        if(voiceState == nullptr)
+            continue;
+        u16 dirtyFlag = voiceState->m6;
+        if (voiceState) {
+            if (dirtyFlag & 1) {
+                pSPUVoiceVolumeLeft[i] = voiceState->m8_volumeLeft;
+                pSPUVoiceVolumeRight[i] = voiceState->mA_volumeRight;
+            }
+            if (dirtyFlag & 4) {
+                pSPUVoiceADPCMSampleRate[i] = voiceState->m14_ADPCM_SampleRate;
+            }
+            if (dirtyFlag & 8) {
+                pSPUVoiceADPCMStartAddr[i] = voiceState->m1C_ADPCM_StartAddress >> 3;
+                pSPUVoiceADPCMRepeatAddr[i] = voiceState->m20_ADPCM_RepeatAddress >> 3;
+            }
+            if (dirtyFlag & 0x10) { // update attack
+                pSPUVoiceADSR[i].m0_lower = (pSPUVoiceADSR[i].m0_lower & 0xFF) + (u16)voiceState->m27 * 0x100 + (ushort)(voiceState->m24 >> 2) * -0x8000;
+            }
+            if (dirtyFlag & 0x20) { // update decay
+                pSPUVoiceADSR[i].m0_lower = (pSPUVoiceADSR[i].m0_lower & 0xFF0F) + (u16)voiceState->m28 * 0x10;
+            }
+            if (dirtyFlag & 0x40) { // update release
+                pSPUVoiceADSR[i].m2_high = (pSPUVoiceADSR[i].m2_high & 0x3F) + (u16)voiceState->m29 * 0x40 + (ushort)(voiceState->m25 >> 1) * 0x4000;
+            }
+            if (dirtyFlag & 0x80) { // update sustain
+                pSPUVoiceADSR[i].m2_high = (pSPUVoiceADSR[i].m2_high & 0xFFC0) + (u16)voiceState->m2A + (ushort)(voiceState->m26 >> 2) * 0x20;
+            }
+            if (dirtyFlag & 0x100) { // update sustain level
+                pSPUVoiceADSR[i].m0_lower = (pSPUVoiceADSR[i].m0_lower & 0xFFF0) + (u16)voiceState->m2B;
+            }
+            postUpdateFlag = postUpdateFlag | dirtyFlag & 0x7000;
+            voiceState->m6 = 0;
+        }
+        dirtyFlag = voiceState->m2;
+        pitchModulationFlag = pitchModulationFlag | (dirtyFlag >> 4 & 1) << (i & 0x1f);
+        noiseGenerationFlag = noiseGenerationFlag | (dirtyFlag >> 5 & 1) << (i & 0x1f);
+        reverbFlag = reverbFlag | (dirtyFlag >> 6 & 1) << (i & 0x1f);
+    }
+
+    if (postUpdateFlag != 0) {
+        if (postUpdateFlag & 0x1000) {
+            pSPUPitchModulationUpdateFlag = pitchModulationFlag;
+        }
+        if (postUpdateFlag & 0x2000) {
+            pSPUNoiseModeFlag = noiseGenerationFlag;
+        }
+        if (postUpdateFlag & 0x4000) {
+            pSPUReverbFlag = reverbFlag;
+        }
+    }
+
+    if (playSoundEffectSubSub1BF2 != 0) {
+        pSPUKeyOn = playSoundEffectSubSub1BF2 & 0xFFFF;
+        pSPUKeyOff = (playSoundEffectSubSub1BF2 >> 16) & 0xFFFF;
+        playSoundEffectSubSub1BF2 = 0;
+    }
 }
 
 void executeSequenceEvents2(sSoundInstance* param_1, std::vector<sSoundInstanceEvent>& param_2, short param_3) {
@@ -58,7 +138,7 @@ void executeSequenceEvents2(sSoundInstance* param_1, std::vector<sSoundInstanceE
 
                 if (--instanceEvent.m5C_deltaTime == 1) {
                     if (instanceEvent.m0 & 0x1000) {
-                        instanceEvent.m5A = 6;
+                        instanceEvent.m30.m2A = 6;
                         instanceEvent.m30.m6 |= 0x80;
                     }
                 }
@@ -109,7 +189,7 @@ void executeSequenceEvents(sSoundInstance* param_1, std::vector<sSoundInstanceEv
                             byteCodeIt++;
                         }
                         instanceEvent.m5C_deltaTime = deltaTime;
-                        instanceEvent.m5A = instanceEvent.m28;
+                        instanceEvent.m30.m2A = instanceEvent.m28;
                         instanceEvent.m30.m6 |= 0x80;
 
                         if ((instanceEvent.m0 & 0x10) == 0) {
@@ -159,7 +239,7 @@ void executeSequenceEvents(sSoundInstance* param_1, std::vector<sSoundInstanceEv
                                     if (1 < byteCode2 - 0xb0) {
                                         // We need to do an optional here to account for the fact that we can have a negative index
                                         // as in that case, we should never access the stack
-                                        std::optional<std::array<sSoundInstanceEventCallstack, 4>::iterator> pCallstackEntry;
+                                        std::optional<std::array<sSoundInstanceEventCallstack, 3>::iterator> pCallstackEntry;
                                         if (instanceEvent.m72_callstackDepth >= 0) {
                                             pCallstackEntry = instanceEvent.m9C_callstack.begin() + instanceEvent.m72_callstackDepth;
                                         }
@@ -185,8 +265,9 @@ void executeSequenceEvents(sSoundInstance* param_1, std::vector<sSoundInstanceEv
                                 break;
                             }
 
+                            byteCodeIt = instanceEvent.m18_infiniteLoopStart.value();
                             bIsKeyOn = byteCode2 < 0x80;
-                            if (!instanceEvent.m18_infinitLoopStart.has_value()) {
+                            if (!instanceEvent.m18_infiniteLoopStart.has_value()) {
                                 goto LAB_8003ca60;
                             }
                         LAB_8003ca48:
@@ -232,7 +313,10 @@ void executeSequenceEvents(sSoundInstance* param_1, std::vector<sSoundInstanceEv
                         }
                         instanceEvent.m64 = instanceEvent.m65;
                         if (instanceEvent.m4 & 0x100) {
-                            assert(0);
+                            instanceEvent.m96_volumeSlideDuration = instanceEvent.m80;
+                            instanceEvent.m88_volumeSlideDelta = instanceEvent.m7C;
+                            instanceEvent.m78_volume = (u32)instanceEvent.m82 << 0x10;
+                            instanceEvent.m4 |= 8;
                         }
                         for (int i = 0; i < 4; i++) {
                             instanceEvent.mD8[i].m4 = 0;
@@ -382,4 +466,8 @@ int processSoundMenuSub0(void)
         }
     }
     return uVar1;
+}
+
+void setupReverb(uint param_1, s16 param_2, long param_3, long param_4) {
+    MissingCode();
 }

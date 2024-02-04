@@ -1,12 +1,6 @@
 #pragma once
 
-struct sSoundInstanceEvent30 {
-    s16 m0;
-    s16 m2;
-    s16 m4;
-    s16 m6;
-};
-
+#include "soundSystem.h"
 
 struct sSoundInstanceEventD8 {
     u32 m4;
@@ -39,29 +33,17 @@ struct sSoundInstanceEvent {
     u32 mC;
     std::vector<u8>::iterator m10;
     std::vector<u8>::iterator m14;
-    std::optional<std::vector<u8>::iterator> m18_infinitLoopStart;
+    std::optional<std::vector<u8>::iterator> m18_infiniteLoopStart;
     s32 m1C;
     s16 m20;
     s8 m22;
     s8 m23_infiniteLoopOctave;
     s8 m25;
-    s8 m26;
+    s8 m26_ADSRIndex;
     u8 m27;
     s8 m28;
     struct sWdsFile* m2C_pWds;
     sSoundInstanceEvent30 m30;
-    s16 m3C;
-    s16 m3E;
-    s32 m4C;
-    s32 m50;
-    s8 m54;
-    s8 m55;
-    s8 m56;
-    s8 m57;
-    s8 m58;
-    s8 m59;
-    s8 m5A;
-    s8 m5B;
     u16 m5C_deltaTime;
     u16 m5E;
     s8 m60;
@@ -77,9 +59,13 @@ struct sSoundInstanceEvent {
     s16 m74_pan;
     s16 m76;
     s32 m78_volume;
+    s32 m7C;
+    u16 m80;
+    s16 m82;
     s32 m88_volumeSlideDelta;
     u16 m96_volumeSlideDuration;
-    std::array<sSoundInstanceEventCallstack, 4> m9C_callstack;
+    std::array<sSoundInstanceEventCallstack, 3> m9C_callstack;
+    u16 mCA;
     s16 mCE;
     s16 mD0;
     s16 mD2;
@@ -90,10 +76,10 @@ struct sSoundInstanceEvent {
 };
 
 struct sPercussionEntry {
-    u8 m0_adsr;
-    u8 m1;
-    u8 m2;
-    u8 m3_pan;
+    u8 m0_adsr = 0;
+    u8 m1 = 0;
+    u8 m2 = 0;
+    u8 m3_pan = 0;
 };
 
 struct sPercussionData {
@@ -166,6 +152,7 @@ extern int numMaxSoundEffectInstances;
 extern sSoundInstance* pPlayingSoundsLinkedList;
 extern sSoundInstance* pSoundEffectsInstances;
 extern int playSoundEffectVar0;
+extern u32 playSoundEffectSubSub1BF2;
 
 sSoundInstance* initSoundEffectInstances(uint param_1);
 void addActiveSoundInstance(sSoundInstance* pSoundInstance);

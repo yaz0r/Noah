@@ -81,25 +81,25 @@ sSoundInstance* initSoundEffectInstances(uint param_1) {
 }
 
 void setupAdsr(int param_1, sSoundInstanceEvent* param_2) {
-    param_2->m26 = (char)param_1;
-    auto pbVar5 = param_2->m2C_pWds->m_rawData.begin() + 0x30 + ((param_1 << 0x10) >> 0xc);
+    param_2->m26_ADSRIndex = (char)param_1;
+    auto pbVar5 = param_2->m2C_pWds->m_rawData.begin() + 0x30 + param_1 * 4;
     u32 iVar4 = READ_LE_U32(pbVar5);
-    param_2->m4C = iVar4 * 8 + param_2->m2C_pWds->m28;
-    param_2->m50 = iVar4 * 8 + READ_LE_U16(pbVar5 + 4) * 8;
+    param_2->m30.m14_ADPCM_SampleRate = iVar4 * 8 + param_2->m2C_pWds->m28;
+    param_2->m30.m20_ADPCM_RepeatAddress = iVar4 * 8 + READ_LE_U16(pbVar5 + 4) * 8;
 
     u16 uVar1 = READ_LE_U16(pbVar5 + 0xC);
-    param_2->m54 = (byte)uVar1 & 7;
-    param_2->m55 = (byte)(uVar1 >> 4) & 7;
-    param_2->m56 = (byte)(uVar1 >> 8) & 7;
+    param_2->m30.m24 = (byte)uVar1 & 7;
+    param_2->m30.m25 = (byte)(uVar1 >> 4) & 7;
+    param_2->m30.m26 = (byte)(uVar1 >> 8) & 7;
 
     u32 uVar6 = READ_LE_U32(pbVar5 + 8);
-    param_2->m57 = (byte)uVar6 & 0x7f;
-    param_2->m58 = (byte)(uVar6 >> 8) & 0xf;
-    param_2->m59 = (byte)(uVar6 >> 0x10) & 0x7f;
-    param_2->m5B = (byte)(uVar6 >> 0xc) & 0xf;
+    param_2->m30.m27 = (byte)uVar6 & 0x7f;
+    param_2->m30.m28 = (byte)(uVar6 >> 8) & 0xf;
+    param_2->m30.m29 = (byte)(uVar6 >> 0x10) & 0x7f;
+    param_2->m30.m2B = (byte)(uVar6 >> 0xc) & 0xf;
     byte bVar3 = (byte)(uVar6 >> 0x18) & 0x1f;
     param_2->m28 = bVar3;
-    param_2->m5A = bVar3;
+    param_2->m30.m2A = bVar3;
 
     u16 sVar2 = READ_LE_U16(pbVar5 + 0x6);
     param_2->m0 = param_2->m0 | 0x8000;
@@ -108,8 +108,6 @@ void setupAdsr(int param_1, sSoundInstanceEvent* param_2) {
 
 u32 playSoundEffectSubSub1BF1 = 0;
 u32 playSoundEffectSubSub1BF2 = 0;
-
-std::array<sSoundInstanceEvent30*, 0x18> playSoundEffectSubSub1Var0;
 
 void playSoundEffectSubSub0(sSoundInstanceEvent30* param_1, int param_2) {
     if ((param_2 < 0x18) && (playSoundEffectSubSub1Var0[param_2] == param_1)) {
@@ -176,7 +174,7 @@ void playSoundEffectSub(uint param_1, uint param_2, short param_3, u16 param_4) 
                     pSoundEvent->m66_octave = 0x3C;
                     pSoundEvent->m62 = 0xF;
                     pSoundEvent->m72_callstackDepth = -1;
-                    pSoundEvent->m18_infinitLoopStart.reset();
+                    pSoundEvent->m18_infiniteLoopStart.reset();
                     pSoundEvent->m1C = 0;
                     pSoundEvent->m20 = 0;
                     pSoundEvent->m22 = 0;
@@ -192,8 +190,8 @@ void playSoundEffectSub(uint param_1, uint param_2, short param_3, u16 param_4) 
                     pSoundEvent->mD0 = 0;
                     pSoundEvent->mD2 = 0;
                     pSoundEvent->mD4 = 0;
-                    pSoundEvent->m3C = 0;
-                    pSoundEvent->m3E = 0;
+                    pSoundEvent->m30.mC = 0;
+                    pSoundEvent->m30.mE = 0;
                     pSoundEvent->mCE = 0;
                     pSoundEvent->m74_pan = param_4;
                     pSoundEvent->m10 = pCurrentSeq->m_rawData.begin() + READ_LE_U16(pDrumData);
@@ -237,7 +235,7 @@ void initSoundInstance(sSoundInstance* param_1) {
     param_1->m42 = pSeq->m1C_Original;
     param_1->m43 = pSeq->m1D_Original;
     if ((musicStatusFlag & 0x1000) != 0) {
-        MissingCode();
+        setupReverb(param_1->m41, param_1->m44, param_1->m42, param_1->m43);
     }
     initSoundInstanceDefaults(param_1);
 }
@@ -282,7 +280,7 @@ void initSoundInstanceTracks(sSoundInstance* param_1) {
                 pSoundEvent->m76 = 0x6000;
                 pSoundEvent->m78_volume = 0x7f000000;
 
-                pSoundEvent->m18_infinitLoopStart.reset();
+                pSoundEvent->m18_infiniteLoopStart.reset();
                 pSoundEvent->m1C = 0;
                 pSoundEvent->m20 = 0;
                 pSoundEvent->m22 = 0;
@@ -297,8 +295,8 @@ void initSoundInstanceTracks(sSoundInstance* param_1) {
                 pSoundEvent->mD2 = 0;
                 pSoundEvent->mD4 = 0;
 
-                pSoundEvent->m3C = 0;
-                pSoundEvent->m3E = 0;
+                pSoundEvent->m30.mC = 0;
+                pSoundEvent->m30.mE = 0;
                 pSoundEvent->mCE = 0;
                 pSoundEvent->m10 = param_1->m8_pSeq->m_rawData.begin() + READ_LE_U16(pDrumData);
                 pSoundEvent->m14 = param_1->m8_pSeq->m_rawData.begin() + READ_LE_U16(pDrumData);
@@ -377,12 +375,31 @@ void applyFlagToAllVoices(ushort param_1, sSoundInstance* param_2) {
     }
 }
 
+void playBattleMusicSub1Sub0(sSoundInstance* param_1, ushort param_2) {
+    for (int i = 0; i < param_1->m14_count; i++) {
+        if (param_1->m94_events[i].m0) {
+            param_1->m94_events[i].mCA |= param_2;
+        }
+    }
+}
+
+void playBattleMusicSub1Sub1(sSoundInstance* param_1) {
+    for (int i = 0; i < param_1->m14_count; i++) {
+        if ((param_1->m94_events[i].m0 & 0x101) == 0x101) {
+            if ((param_1->m94_events[i].m0 & 0x30) == 0) {
+                param_1->m94_events[i].m2 |= 1;
+            }
+        }
+    }
+}
+
 void playBattleMusicSub1(sSoundInstance* param_1) {
     DisableEvent(audioTickEvent);
     if ((musicStatusFlag & 0x1000) != 0) {
-        assert(0);
+        setupReverb(param_1->m41, param_1->m44, param_1->m42, param_1->m43);
     }
-    assert(0);
+    playBattleMusicSub1Sub0(param_1, 0xffff);
+    playBattleMusicSub1Sub1(param_1);
     param_1->m10_flags = param_1->m10_flags & 0xfeff | 0x8000;
     EnableEvent(audioTickEvent);
 }

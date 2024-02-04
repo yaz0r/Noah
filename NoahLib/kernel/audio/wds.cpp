@@ -12,75 +12,70 @@ struct structsLoadedSample {
     s32 m8_adpcmSize;
 };
 
-std::array<structsLoadedSample, 0xC> loadedSamples;
+std::array<structsLoadedSample, 0xC> spuAllocatedBlocks;
 
 void startTransfert();
 
 void initLoadedSampleTable() {
     for (int i = 0; i < 0xC; i++) {
-        loadedSamples[i].m0 = 0;
+        spuAllocatedBlocks[i].m0 = 0;
     }
 
-    loadedSamples[0].m0 = 0x81;
-    loadedSamples[0].m1 = 5;
-    loadedSamples[0].m4 = 0;
-    loadedSamples[0].m8_adpcmSize = 0x1010;
-    loadedSamples[0].m2 = 0;
+    spuAllocatedBlocks[0].m0 = 0x81;
+    spuAllocatedBlocks[0].m1 = 5;
+    spuAllocatedBlocks[0].m4 = 0;
+    spuAllocatedBlocks[0].m8_adpcmSize = 0x1010;
+    spuAllocatedBlocks[0].m2 = 0;
 }
 
 int findFreeSlotInLoadedSamples(void)
 {
-    int iVar1;
-
-    iVar1 = 0;
-    do {
-        if (loadedSamples[iVar1].m0){
-            return iVar1;
+    for (int i = 0; i < 12; i++) {
+        if (spuAllocatedBlocks[i].m0 == 0) {
+            return i;
         }
-        iVar1 = iVar1 + 1;
-    } while (iVar1 < 0xc);
+    }
     return 0;
 }
 
-int getSamplesPtrSub(int param_1, int param_2)
-
+int allocateSPUSpaceForSamples(int sampleSizes, int param_2)
 {
     int iVar1;
     int iVar2;
     int iVar3;
     int iVar4;
 
-    auto psVar5 = loadedSamples.begin();
+    auto psVar5 = spuAllocatedBlocks.begin();
     iVar4 = 0;
-    iVar3 = loadedSamples[0].m4 + loadedSamples[0].m8_adpcmSize;
-    if (loadedSamples[0].m4 < param_2) {
+    iVar3 = spuAllocatedBlocks[0].m4 + spuAllocatedBlocks[0].m8_adpcmSize;
+    if (spuAllocatedBlocks[0].m4 < param_2) {
         do {
             iVar1 = (int)psVar5->m2;
             if (iVar1 == 0) {
                 iVar4 = 0x80000 - iVar3;
                 break;
             }
-            iVar2 = loadedSamples[iVar1].m4;
-            if (param_2 + param_1 <= iVar2) {
+            iVar2 = spuAllocatedBlocks[iVar1].m4;
+            if (param_2 + sampleSizes <= iVar2) {
                 iVar4 = iVar2 - iVar3;
                 break;
             }
-            iVar3 = iVar2 + loadedSamples[iVar1].m8_adpcmSize;
-            psVar5 = loadedSamples.begin() + iVar1;
+            iVar3 = iVar2 + spuAllocatedBlocks[iVar1].m8_adpcmSize;
+            psVar5 = spuAllocatedBlocks.begin() + iVar1;
         } while (iVar2 < param_2);
     }
     iVar1 = 0;
-    if ((param_1 <= iVar4) && (iVar1 = 0, iVar3 <= param_2)) {
+    if ((sampleSizes <= iVar4) && (iVar1 = 0, iVar3 <= param_2)) {
         iVar3 = findFreeSlotInLoadedSamples();
         if (iVar3 < 0) {
             iVar1 = 0;
         }
         else {
-            loadedSamples[iVar3].m0 = 0x80;
-            loadedSamples[iVar3].m1 = 0;
-            loadedSamples[iVar3].m4 = param_2;
-            loadedSamples[iVar3].m8_adpcmSize = param_1;
-            loadedSamples[iVar3].m2 = psVar5->m2;
+            spuAllocatedBlocks[iVar3].m0 = 0x80;
+            spuAllocatedBlocks[iVar3].m1 = 0;
+            spuAllocatedBlocks[iVar3].m4 = param_2;
+            spuAllocatedBlocks[iVar3].m8_adpcmSize = sampleSizes;
+            spuAllocatedBlocks[iVar3].m2 = psVar5->m2;
             psVar5->m2 = (short)iVar3;
             iVar1 = param_2;
         }
@@ -99,7 +94,7 @@ int getSamplePtr(sWdsFile* param_1, s32 param_2) {
         assert(0);
     }
     else {
-        return getSamplesPtrSub(param_1->m14_ADPCMSize, param_1->m28);
+        return allocateSPUSpaceForSamples(param_1->m14_ADPCMSize, param_1->m28);
     }
 }
 
@@ -192,17 +187,17 @@ void loadWdsSub0(int sampleEntry, std::vector<u8>::iterator data, int adpcmSize,
 sWdsFile* pLoadedWdsLinkedList = nullptr;
 
 sWdsFile* loadWds(sWdsFile& wdsFile, s32 param_2) {
-    int sampleEntry = getSamplePtr(&wdsFile, param_2);
-    if (sampleEntry == 0) {
+    int samplePtrToLoad = getSamplePtr(&wdsFile, param_2);
+    if (samplePtrToLoad == 0) {
         setSoundError(0x1F);
         return nullptr;
     }
 
-    loadWdsSub0(sampleEntry, wdsFile.m_rawData.begin() + wdsFile.m18_headerSize2 , wdsFile.m14_ADPCMSize, nullptr);
+    loadWdsSub0(samplePtrToLoad, wdsFile.m_rawData.begin() + wdsFile.m18_headerSize2 , wdsFile.m14_ADPCMSize, nullptr);
 
     sWdsFile* wdsCopy = new sWdsFile; // TODO: this was allocated from the sound arena
     wdsCopy->init(wdsFile.m_rawData.begin(), wdsFile.m10_headerSize1);
-    wdsCopy->m28 = sampleEntry;
+    wdsCopy->m28 = samplePtrToLoad;
 
     DisableEvent(audioTickEvent);
     sWdsFile** ppWdsList = &pLoadedWdsLinkedList;
