@@ -82,10 +82,11 @@ sSoundInstance* initSoundEffectInstances(uint param_1) {
 
 void setupAdsr(int param_1, sSoundInstanceEvent* param_2) {
     param_2->m26_ADSRIndex = (char)param_1;
-    auto pbVar5 = param_2->m2C_pWds->m_rawData.begin() + 0x30 + param_1 * 4;
-    u32 iVar4 = READ_LE_U32(pbVar5);
-    param_2->m30.m14_ADPCM_SampleRate = iVar4 * 8 + param_2->m2C_pWds->m28;
-    param_2->m30.m20_ADPCM_RepeatAddress = iVar4 * 8 + READ_LE_U16(pbVar5 + 4) * 8;
+    auto pbVar5 = param_2->m2C_pWds->m_rawData.begin() + 0x30 + param_1 * 0x10;
+    u32 adpcmAddressOffset = READ_LE_U32(pbVar5) * 8;
+    u32 adpcmSampleSize = READ_LE_U16(pbVar5 + 4) * 8;
+    param_2->m30.m1C_ADPCM_StartAddress = param_2->m2C_pWds->m28_adpcmAddress + adpcmAddressOffset;
+    param_2->m30.m20_ADPCM_RepeatAddress = adpcmAddressOffset + adpcmSampleSize;
 
     u16 uVar1 = READ_LE_U16(pbVar5 + 0xC);
     param_2->m30.m24 = (byte)uVar1 & 7;

@@ -7,6 +7,7 @@
 #include "kernel/criticalSection.h"
 #include "kernel/events.h"
 #include "seqOpcodes.h"
+#include "spuEmu/spu.h"
 
 u16 musicStatusFlag = 0;
 std::array<sSoundInstanceEvent30*, 0x18> playSoundEffectSubSub1Var0;
@@ -27,12 +28,6 @@ struct sADSR {
 };
 std::array<sADSR, 24> pSPUVoiceADSR;
 
-u32 pSPUPitchModulationUpdateFlag;
-u32 pSPUNoiseModeFlag;
-u32 pSPUReverbFlag;
-u32 pSPUKeyOn;
-u32 pSPUKeyOff;
-
 void sendAdsrToSpu() {
     u16 postUpdateFlag = 0;
     u32 pitchModulationFlag = 0;
@@ -45,30 +40,40 @@ void sendAdsrToSpu() {
         u16 dirtyFlag = voiceState->m6;
         if (voiceState) {
             if (dirtyFlag & 1) {
+                emulatedSpuDevice.write(0 + i * 8, voiceState->m8_volumeLeft);
+                emulatedSpuDevice.write(1 + i * 8, voiceState->mA_volumeRight);
                 pSPUVoiceVolumeLeft[i] = voiceState->m8_volumeLeft;
                 pSPUVoiceVolumeRight[i] = voiceState->mA_volumeRight;
             }
             if (dirtyFlag & 4) {
+                emulatedSpuDevice.write(2 + i * 8, voiceState->m14_ADPCM_SampleRate);
                 pSPUVoiceADPCMSampleRate[i] = voiceState->m14_ADPCM_SampleRate;
             }
             if (dirtyFlag & 8) {
+                emulatedSpuDevice.write(3 + i * 8, voiceState->m1C_ADPCM_StartAddress >> 3);
+                emulatedSpuDevice.write(7 + i * 8, voiceState->m20_ADPCM_RepeatAddress >> 3);
                 pSPUVoiceADPCMStartAddr[i] = voiceState->m1C_ADPCM_StartAddress >> 3;
                 pSPUVoiceADPCMRepeatAddr[i] = voiceState->m20_ADPCM_RepeatAddress >> 3;
             }
             if (dirtyFlag & 0x10) { // update attack
                 pSPUVoiceADSR[i].m0_lower = (pSPUVoiceADSR[i].m0_lower & 0xFF) + (u16)voiceState->m27 * 0x100 + (ushort)(voiceState->m24 >> 2) * -0x8000;
+                emulatedSpuDevice.write(4 + i * 8, pSPUVoiceADSR[i].m0_lower);
             }
             if (dirtyFlag & 0x20) { // update decay
                 pSPUVoiceADSR[i].m0_lower = (pSPUVoiceADSR[i].m0_lower & 0xFF0F) + (u16)voiceState->m28 * 0x10;
+                emulatedSpuDevice.write(4 + i * 8, pSPUVoiceADSR[i].m0_lower);
             }
             if (dirtyFlag & 0x40) { // update release
                 pSPUVoiceADSR[i].m2_high = (pSPUVoiceADSR[i].m2_high & 0x3F) + (u16)voiceState->m29 * 0x40 + (ushort)(voiceState->m25 >> 1) * 0x4000;
+                emulatedSpuDevice.write(5 + i * 8, pSPUVoiceADSR[i].m2_high);
             }
             if (dirtyFlag & 0x80) { // update sustain
                 pSPUVoiceADSR[i].m2_high = (pSPUVoiceADSR[i].m2_high & 0xFFC0) + (u16)voiceState->m2A + (ushort)(voiceState->m26 >> 2) * 0x20;
+                emulatedSpuDevice.write(5 + i * 8, pSPUVoiceADSR[i].m2_high);
             }
             if (dirtyFlag & 0x100) { // update sustain level
                 pSPUVoiceADSR[i].m0_lower = (pSPUVoiceADSR[i].m0_lower & 0xFFF0) + (u16)voiceState->m2B;
+                emulatedSpuDevice.write(4 + i * 8, pSPUVoiceADSR[i].m0_lower);
             }
             postUpdateFlag = postUpdateFlag | dirtyFlag & 0x7000;
             voiceState->m6 = 0;
@@ -81,19 +86,22 @@ void sendAdsrToSpu() {
 
     if (postUpdateFlag != 0) {
         if (postUpdateFlag & 0x1000) {
-            pSPUPitchModulationUpdateFlag = pitchModulationFlag;
+            emulatedSpuDevice.write(200, pitchModulationFlag);
+            emulatedSpuDevice.write(201, pitchModulationFlag >> 16);
         }
         if (postUpdateFlag & 0x2000) {
-            pSPUNoiseModeFlag = noiseGenerationFlag;
+            emulatedSpuDevice.write(202, noiseGenerationFlag);
+            emulatedSpuDevice.write(203, noiseGenerationFlag >> 16);
         }
         if (postUpdateFlag & 0x4000) {
-            pSPUReverbFlag = reverbFlag;
+            emulatedSpuDevice.write(204, reverbFlag);
+            emulatedSpuDevice.write(205, reverbFlag >> 16);
         }
     }
 
     if (playSoundEffectSubSub1BF2 != 0) {
-        pSPUKeyOn = playSoundEffectSubSub1BF2 & 0xFFFF;
-        pSPUKeyOff = (playSoundEffectSubSub1BF2 >> 16) & 0xFFFF;
+        emulatedSpuDevice.write(196, playSoundEffectSubSub1BF2);
+        emulatedSpuDevice.write(197, playSoundEffectSubSub1BF2 >> 16);
         playSoundEffectSubSub1BF2 = 0;
     }
 }
@@ -331,13 +339,167 @@ void executeSequenceEvents(sSoundInstance* param_1, std::vector<sSoundInstanceEv
     }
 }
 
+void voicePostUpdate1(sSoundInstance* pSoundInstance, std::vector<sSoundInstanceEvent>& voices, int voicesCount) {
+    for (int i = 0; i < voicesCount; i++) {
+        sSoundInstanceEvent* pVoice = &voices[i];
+
+        if (pVoice->m0 != 0) {
+            pVoice->mD4 = 0;
+            pVoice->mD2 = 0;
+            pVoice->mD0 = 0;
+            if (pVoice->mCE) {
+                assert(0);
+            }
+        }
+    }
+}
+
+u32 voiceStatusBF3 = 0;
+extern u32 playSoundEffectSubSub1BF1;
+
+void voicePostUpdate2Sub0(sSoundInstanceEvent30* param_1, uint param_2)
+{
+    sSoundInstanceEvent30* psVar1;
+
+    if (param_2 < 0x18) {
+        psVar1 = playSoundEffectSubSub1Var0[param_2];
+        if (psVar1 != param_1) {
+            if ((psVar1 != (sSoundInstanceEvent30*)0x0) && (param_1->m4 < psVar1->m4)) {
+                return;
+            }
+            param_1->m6 = -1;
+            param_1->m0 = (short)param_2;
+            playSoundEffectSubSub1Var0[param_2] = param_1;
+            playSoundEffectSubSub1BF1 = 1 << (param_2 & 0x1f) | playSoundEffectSubSub1BF1;
+        }
+        playSoundEffectSubSub1BF2 = 1 << (param_2 & 0x1f) | playSoundEffectSubSub1BF2;
+    }
+    return;
+}
+
+void voicePostUpdate2Sub1(sSoundInstanceEvent30* param_1, uint param_2)
+{
+    if ((param_2 < 0x18) && (playSoundEffectSubSub1Var0[param_2] == param_1)) {
+        voiceStatusBF3 = 1 << (param_2 & 0x1f) | voiceStatusBF3;
+    }
+    return;
+}
+
+int computeSampleRate(int pitch) {
+    MissingCode();
+    return 0x1000; // this is the value for 44100hz
+}
+
+void voicePostUpdate2(sSoundInstance* pSoundInstance, std::vector<sSoundInstanceEvent>& voices, int voicesCount) {
+    if ((pSoundInstance->m10_flags & 0x20) == 0) {
+        for (int i = 0; i < voicesCount; i++) {
+            sSoundInstanceEvent* pVoice = &voices[i];
+
+            if (pVoice->m0 != 0) {
+                if (pVoice->m2 & 0x100) { // volume update
+                    s32 volumeTarget = (pVoice->m78_volume & 0xFFFF) - (((pVoice->m78_volume & 0xFFFF) * pVoice->mD2) >> 0xF);
+                    volumeTarget = 0x7FFF;
+                    if (volumeTarget > 0x7FFF) {
+                        volumeTarget = 0x7FFF;
+                    }
+                    if (volumeTarget < 0) {
+                        volumeTarget = 0;
+                    }
+                    s32 panTarget = pVoice->m74_pan + pVoice->mD4 + (pSoundInstance->m88 >> 0x10);
+                    
+                    if (panTarget > 0x7FFF) {
+                        panTarget = 0x7FFF;
+                    }
+                    if (panTarget < 0) {
+                        panTarget = 0;
+                    }
+
+                    volumeTarget = ((pSoundInstance->m70 >> 0x10) * ((pVoice->m76 * volumeTarget) >> 0xF)) >> 0x10;
+
+                    int volumeLeft;
+                    int volumeRight;
+                    if ((musicStatusFlag & 0x100) == 0) { // mono?
+                        volumeLeft = (volumeTarget * 0x5A00) >> 0xF;
+                        volumeRight = volumeLeft;
+                    }
+                    else {
+                        int rawVolumeLeft;
+                        int rawVolumeRight;
+                        // stereo, handle panning
+                        if (panTarget < 0x4000) {
+                            rawVolumeLeft = 0x7F00 - ((panTarget * 0x2500) >> 0xE);
+                            rawVolumeRight = (panTarget * 0x5A00) >> 0xE;
+                        }
+                        else {
+                            rawVolumeLeft = ((0x8000 - panTarget) * 0x5A00) >> 0xE;
+                            rawVolumeRight = 0x7F00 - (((0x8000 - panTarget) * 0x2500) >> 0xE);
+                        }
+                        volumeLeft = (rawVolumeLeft * 0x5A00) >> 0xF;
+                        volumeRight = (rawVolumeRight * 0x5A00) >> 0xF;
+                    }
+                    pVoice->m30.m8_volumeLeft = volumeLeft;
+                    pVoice->m30.mA_volumeRight = volumeRight;
+                }
+                if (pVoice->m2 & 0x200) {
+                    int value = (((int)pVoice->m96_volumeSlideDuration + (int)pVoice->mD0 + (int)(pSoundInstance->m7C >> 16)) * 0x10000) >> 0x10;
+                    int sampleRate = computeSampleRate(value);
+                    pVoice->m30.m14_ADPCM_SampleRate = sampleRate & 0x3FFF;
+                    pVoice->m30.m6 |= 4;
+                }
+                if (pVoice->m2 & 1) {
+                    voicePostUpdate2Sub0(&pVoice->m30, pVoice->m27);
+                }
+                if (pVoice->m2 & 2) {
+                    voicePostUpdate2Sub1(&pVoice->m30, pVoice->m27);
+                }
+                pVoice->m2 = 0;
+            }
+        }
+    }
+}
+
+u16 needUpdateMasterVolume = 0;
+u16 needToUpdateSPUCDVolume = 0;
+
+struct sSpuCommonAttributes {
+    u32 mask = 0;
+};
+
+sSpuCommonAttributes spuCommonAttributes;
+
+void audioTickSub1() {
+    if (playSoundEffectSubSub1BF1) {
+        for (int i = 0; i < 24; i++) {
+            if (playSoundEffectSubSub1BF1 & (1 << i)) {
+                int reg = 5 + i * 8;
+                emulatedSpuDevice.write(reg, emulatedSpuDevice.read(reg) & 0xFFC0 | 6); // sustain?
+            }
+        }
+    }
+
+    u32 keyOff = voiceStatusBF3 | playSoundEffectSubSub1BF1;
+    if (keyOff) {
+        emulatedSpuDevice.write(198, keyOff);
+        emulatedSpuDevice.write(199, keyOff>>16);
+    }
+}
+
 void audioTick() {
+    spuMutex.lock();
     if ((musicStatusFlag & 0x40) == 0) {
         int oddUpdate = spuUpdateCounter & 1;
         spuUpdateCounter++;
 
         if (oddUpdate) {
-            MissingCode();
+            if (needUpdateMasterVolume != 0) {
+                assert(0);
+            }
+            if (needToUpdateSPUCDVolume != 0) {
+                assert(0);
+            }
+            if (spuCommonAttributes.mask != 0) {
+                assert(0);
+            }
         }
         sendAdsrToSpu();
 
@@ -363,7 +525,7 @@ void audioTick() {
                 pSoundInstance->m20++;
                 pSoundInstance->m28 = (pSoundInstance->m64 >> 16) + pSoundInstance->m28;
                 pSoundInstance->m50 -= pSoundInstance->m54;
-                while (pSoundInstance->m50) {
+                while (pSoundInstance->m50 < 0) {
                     pSoundInstance->m36--;
                     pSoundInstance->m50 += 0x10000;
                     if (pSoundInstance->m36 == 0) {
@@ -379,19 +541,18 @@ void audioTick() {
                         executeSequenceEvents(pSoundInstance, pSoundInstance->m94_events, pSoundInstance->m14_count);
                     }
 
-                    // if not voices are left active, disable the instance
+                    // if no voices are left active, disable the instance
                     if (pSoundInstance->m48_activeVoicesBF == 0) {
                         pSoundInstance->m10_flags &= 0x7fff;
                         break;
                     }
                     pSoundInstance->m24++;
                     if (pSoundInstance->m70 == 0) {
-                        assert(0);
+                        startMusicInstanceSub0(pSoundInstance);
                     }
                     if (pSoundInstance->m32 == pSoundInstance->m1E) {
                         pSoundInstance->m10_flags &= 0xffdf;
-                        //assert(0);
-                        MissingCode();
+                        assert(0);
                         pSoundInstance->m1E = 0;
                     }
                 }
@@ -404,14 +565,18 @@ void audioTick() {
         pSoundInstance = pPlayingSoundsLinkedList;
         while (pSoundInstance) {
             if ((short)pSoundInstance->m10_flags < 0) {
-                assert(0);
+                voicePostUpdate1(pSoundInstance, pSoundInstance->m94_events, pSoundInstance->m14_count);
+                voicePostUpdate2(pSoundInstance, pSoundInstance->m94_events, pSoundInstance->m14_count);
             }
 
             pSoundInstance = pSoundInstance->m0_pNext;
         }
 
+        audioTickSub1();
+
         MissingCode();
     }
+    spuMutex.unlock();
 }
 
 void initSoundSystem(ushort param_1) {

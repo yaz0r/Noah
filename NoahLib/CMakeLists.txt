@@ -4,7 +4,7 @@ include_directories(
     "."
     "${THIRD_PARTY}/SDL/include"
     "${THIRD_PARTY}/imgui"
-    "${THIRD_PARTY}/soloud/soloud/include"
+    "${THIRD_PARTY}/soloud.cmake/soloud/include"
     "${THIRD_PARTY}/bgfx.cmake/bgfx/include"
     "${THIRD_PARTY}/bgfx.cmake/bx/include"
     "${THIRD_PARTY}/bgfx.cmake/bgfx/3rdparty"

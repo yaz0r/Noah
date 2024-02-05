@@ -15,6 +15,7 @@
 #include "battle/battleDebug.h"
 #include "kernel/audio/soundSystem.h"
 #include "kernel/audio/wds.h"
+#include "kernel/audio/spu.h"
 
 ImLogger Noah_Logger[eLogCategories::log_max];
 
@@ -33,6 +34,7 @@ bool noahInit(int argc, char* argv[])
 
     MissingCode();
 
+    SpuInit();
     initCDAndFileSystem(&fatFileTableBuffer, &fatDirectoryTableBuffer, -1);
     initSoundSystem(0);
 

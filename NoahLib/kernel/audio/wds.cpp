@@ -85,7 +85,7 @@ int allocateSPUSpaceForSamples(int sampleSizes, int param_2)
 
 int getSamplePtr(sWdsFile* param_1, s32 param_2) {
     if (param_2 == 0) {
-        param_2 = param_1->m28;
+        param_2 = param_1->m28_adpcmAddress;
     }
     else if (param_2 == -1) {
         param_2 = 0;
@@ -94,7 +94,7 @@ int getSamplePtr(sWdsFile* param_1, s32 param_2) {
         assert(0);
     }
     else {
-        return allocateSPUSpaceForSamples(param_1->m14_ADPCMSize, param_1->m28);
+        return allocateSPUSpaceForSamples(param_1->m14_ADPCMSize, param_1->m28_adpcmAddress);
     }
 }
 
@@ -116,8 +116,8 @@ bool loadWdsSub0SubSub(void)
 
 void spuDmaCompletionCallback(void) {
     musicStatusFlag = musicStatusFlag | 4;
-    if (loadWdsSub0SubVar1[spuDmaTransertEntry].m10) {
-        loadWdsSub0SubVar1[spuDmaTransertEntry].m10();
+    if (loadWdsSub0SubVar1[spuDmaTransertEntry].m10_callback) {
+        loadWdsSub0SubVar1[spuDmaTransertEntry].m10_callback();
     }
     musicStatusFlag = musicStatusFlag & 0xffef;
     if (spuDmaTransertEntry != loadWdsSub0SubVar0) {
@@ -131,18 +131,19 @@ void startTransfert() {
     if (7 < spuDmaTransertEntry) {
         spuDmaTransertEntry = 0;
     }
+
     musicStatusFlag |= 0x10;
 
     sLoadWdsSub0SubVar0* pEntry = &loadWdsSub0SubVar1[spuDmaTransertEntry];
     auto previousCallback = SpuSetTransferCallback(spuDmaCompletionCallback);
     SpuSetTransferMode(0);
-    SpuSetTransferStartAddr(pEntry->m8);
+    SpuSetTransferStartAddr(pEntry->m8_spuAddress);
     switch (pEntry->m0) {
     case 1:
-        SpuWrite(pEntry->m4, pEntry->mC);
+        SpuWrite(pEntry->m4_size, pEntry->mC_size);
         break;
     case 2:
-        SpuRead(pEntry->m4, pEntry->mC);
+        SpuRead(pEntry->m4_size, pEntry->mC_size);
         break;
     default:
         assert(0);
@@ -150,9 +151,12 @@ void startTransfert() {
     if (previousCallback != spuDmaCompletionCallback) {
         setSoundError(0x26);
     }
+
+    // HACK: clear the dma transfer in progress indicator so we don't defer the next bank upload
+    musicStatusFlag &= ~0x10;
 }
 
-void loadWdsSub0Sub(int sampleEntry, std::vector<u8>::iterator data, int adpcmSize, void(*param_4)(), int param_5) {
+void loadWdsSub0Sub(int destSpuAddress, std::vector<u8>::iterator data, int adpcmSize, void(*param_4)(), int param_5) {
     int iVar2;
     u16 originalMusicStatusFlag = musicStatusFlag;
     if ((musicStatusFlag & 4) == 0) {
@@ -168,10 +172,10 @@ void loadWdsSub0Sub(int sampleEntry, std::vector<u8>::iterator data, int adpcmSi
     sLoadWdsSub0SubVar0* psVar3 = &loadWdsSub0SubVar1[loadWdsSub0SubVar0];
     psVar3->m0 = param_5 & 0xf;
     psVar3->m2 = 0;
-    psVar3->m4 = data;
-    psVar3->m8 = sampleEntry & 0x7fff8;
-    psVar3->mC = adpcmSize;
-    psVar3->m10 = param_4;
+    psVar3->m4_size = data;
+    psVar3->m8_spuAddress = destSpuAddress & 0x7fff8;
+    psVar3->mC_size = adpcmSize;
+    psVar3->m10_callback = param_4;
     if ((musicStatusFlag & 0x10) == 0) {
         startTransfert();
     }
@@ -197,7 +201,7 @@ sWdsFile* loadWds(sWdsFile& wdsFile, s32 param_2) {
 
     sWdsFile* wdsCopy = new sWdsFile; // TODO: this was allocated from the sound arena
     wdsCopy->init(wdsFile.m_rawData.begin(), wdsFile.m10_headerSize1);
-    wdsCopy->m28 = samplePtrToLoad;
+    wdsCopy->m28_adpcmAddress = samplePtrToLoad;
 
     DisableEvent(audioTickEvent);
     sWdsFile** ppWdsList = &pLoadedWdsLinkedList;

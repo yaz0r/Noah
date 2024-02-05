@@ -186,7 +186,7 @@ std::vector<u8>::iterator seqOP_62_volumeSlide(std::vector<u8>::iterator it, sSo
 
 std::vector<u8>::iterator seqOP_68_pan(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pChannel->m74_pan = (ushort)it[0] << 8;
-    pChannel->m2 = pChannel->m2 | 0x100;
+    pChannel->m2 |= 0x100;
     return it + 1;
 }
 

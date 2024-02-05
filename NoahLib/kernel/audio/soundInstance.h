@@ -92,6 +92,12 @@ struct sSoundInstance {
         m94_events.resize(numEvents);
     }
 
+    void*  operator new(size_t size) {
+        void* data = new u8[size];
+        memset(data, 0, size);
+        return data;
+    }
+
     sSoundInstance* m0_pNext = nullptr;
     void* m4 = nullptr;
     struct sSeqFile* m8_pSeq = nullptr;
@@ -164,3 +170,4 @@ sSoundInstance* createMusicInstance(sSeqFile* param_1);
 void playSoundEffectSubSub0(sSoundInstanceEvent30* param_1, int param_2);
 
 void startMusicInstance(sSoundInstance* param_1, int, int);
+void startMusicInstanceSub0(sSoundInstance* param_1);
