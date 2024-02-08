@@ -8,9 +8,21 @@
 #include "kernel/events.h"
 #include "seqOpcodes.h"
 #include "spuEmu/spu.h"
+#include "pitchTable.h"
+
+static const u16 SPU_REG_KEYON_low = 0x188 / 2;
+static const u16 SPU_REG_KEYON_high = 0x18A / 2;
+static const u16 SPU_REG_KEYOFF_low = 0x18C / 2;
+static const u16 SPU_REG_KEYOFF_high = 0x18E / 2;
+static const u16 SPU_REG_CHON_low = 0x19c / 2;
+static const u16 SPU_REG_CHON_high = 0x19E / 2;
 
 u16 musicStatusFlag = 0;
 std::array<sSoundInstanceEvent30*, 0x18> playSoundEffectSubSub1Var0;
+
+std::mutex spuStatusMutex;
+static const int numRegs = 512;
+std::array<u16, numRegs> SPURegisterStatus;
 
 void setSoundError(u16 errorCode) {
     assert(0);
@@ -56,23 +68,23 @@ void sendAdsrToSpu() {
                 pSPUVoiceADPCMRepeatAddr[i] = voiceState->m20_ADPCM_RepeatAddress >> 3;
             }
             if (dirtyFlag & 0x10) { // update attack
-                pSPUVoiceADSR[i].m0_lower = (pSPUVoiceADSR[i].m0_lower & 0xFF) + (u16)voiceState->m27 * 0x100 + (ushort)(voiceState->m24 >> 2) * -0x8000;
+                pSPUVoiceADSR[i].m0_lower = (pSPUVoiceADSR[i].m0_lower & 0xFF) + (u16)voiceState->m27_ADSR_Attack * 0x100 + (ushort)(voiceState->m24_ADSR_AttackMode >> 2) * -0x8000;
                 emulatedSpuDevice.write(4 + i * 8, pSPUVoiceADSR[i].m0_lower);
             }
             if (dirtyFlag & 0x20) { // update decay
-                pSPUVoiceADSR[i].m0_lower = (pSPUVoiceADSR[i].m0_lower & 0xFF0F) + (u16)voiceState->m28 * 0x10;
+                pSPUVoiceADSR[i].m0_lower = (pSPUVoiceADSR[i].m0_lower & 0xFF0F) + (u16)voiceState->m28_ADSR_Decay * 0x10;
                 emulatedSpuDevice.write(4 + i * 8, pSPUVoiceADSR[i].m0_lower);
             }
-            if (dirtyFlag & 0x40) { // update release
-                pSPUVoiceADSR[i].m2_high = (pSPUVoiceADSR[i].m2_high & 0x3F) + (u16)voiceState->m29 * 0x40 + (ushort)(voiceState->m25 >> 1) * 0x4000;
+            if (dirtyFlag & 0x40) { // update sustain
+                pSPUVoiceADSR[i].m2_high = (pSPUVoiceADSR[i].m2_high & 0x3F) + (u16)voiceState->m29_ADSR_Sustain * 0x40 + (ushort)(voiceState->m25_ADSR_SustainMode >> 1) * 0x4000;
                 emulatedSpuDevice.write(5 + i * 8, pSPUVoiceADSR[i].m2_high);
             }
-            if (dirtyFlag & 0x80) { // update sustain
-                pSPUVoiceADSR[i].m2_high = (pSPUVoiceADSR[i].m2_high & 0xFFC0) + (u16)voiceState->m2A + (ushort)(voiceState->m26 >> 2) * 0x20;
+            if (dirtyFlag & 0x80) { // update release
+                pSPUVoiceADSR[i].m2_high = (pSPUVoiceADSR[i].m2_high & 0xFFC0) + (u16)voiceState->m2A_ADSR_Release + (ushort)(voiceState->m26_ADSR_ReleaseMode >> 2) * 0x20;
                 emulatedSpuDevice.write(5 + i * 8, pSPUVoiceADSR[i].m2_high);
             }
             if (dirtyFlag & 0x100) { // update sustain level
-                pSPUVoiceADSR[i].m0_lower = (pSPUVoiceADSR[i].m0_lower & 0xFFF0) + (u16)voiceState->m2B;
+                pSPUVoiceADSR[i].m0_lower = (pSPUVoiceADSR[i].m0_lower & 0xFFF0) + (u16)voiceState->m2B_ADSR_SustainLevel;
                 emulatedSpuDevice.write(4 + i * 8, pSPUVoiceADSR[i].m0_lower);
             }
             postUpdateFlag = postUpdateFlag | dirtyFlag & 0x7000;
@@ -99,10 +111,10 @@ void sendAdsrToSpu() {
         }
     }
 
-    if (playSoundEffectSubSub1BF2 != 0) {
-        emulatedSpuDevice.write(196, playSoundEffectSubSub1BF2);
-        emulatedSpuDevice.write(197, playSoundEffectSubSub1BF2 >> 16);
-        playSoundEffectSubSub1BF2 = 0;
+    if (pendingKeyOn != 0) {
+        emulatedSpuDevice.write(SPU_REG_KEYON_low, pendingKeyOn);
+        emulatedSpuDevice.write(SPU_REG_KEYON_high, pendingKeyOn >> 16);
+        pendingKeyOn = 0;
     }
 }
 
@@ -122,40 +134,59 @@ void executeSequenceEvents2(sSoundInstance* param_1, std::vector<sSoundInstanceE
         sSoundInstanceEvent& instanceEvent = param_2[i];
 
         if (instanceEvent.m0) {
-            u16 flags = instanceEvent.m2;
             if (instanceEvent.m5C_deltaTime) {
-                s16 var4 = instanceEvent.m4;
-                if (var4 & 8) { // volume slide
+                if (instanceEvent.m4 & 8) { // volume slide
                     instanceEvent.m96_volumeSlideDuration--;
-                    flags |= 0x100; // update volume
+                    instanceEvent.m2 |= 0x100; // update volume
                     if (instanceEvent.m96_volumeSlideDuration == 0) {
-                        var4 &= ~8;
+                        instanceEvent.m4 &= ~8;
                     }
                     instanceEvent.m78_volume += instanceEvent.m88_volumeSlideDelta;
                 }
-                if (var4 & 1) {
-                    assert(0);
+                if (instanceEvent.m4 & 1) {
+                    instanceEvent.m2 |= 0x200;
+                    if (!(instanceEvent.m4 & 2)) {
+                        instanceEvent.m92_panTarget--;
+                        if (instanceEvent.m92_panTarget == 0) {
+                            instanceEvent.m4 &= ~0x1;
+                        }
+                    }
+                    instanceEvent.m68_finalNoteToPlay += instanceEvent.m84;
                 }
-                if (var4 & 0x10) {
-                    assert(0);
+                if (instanceEvent.m4 & 0x10) { // interpolate pan
+                    instanceEvent.m98--;
+                    if (instanceEvent.m98 == 0) {
+                        instanceEvent.m74_pan = instanceEvent.m92_panTarget;
+                        instanceEvent.m4 &= ~0x10;
+                    }
+                    else {
+                        instanceEvent.m74_pan += instanceEvent.m90_panDelta;
+                    }
+                    instanceEvent.m2 |= 0x100;
                 }
-                if (var4 & 0x20) {
-                    assert(0);
+                if (instanceEvent.m4 & 0x20) {
+                    instanceEvent.m9A--;
+                    if (instanceEvent.m9A == 0) {
+                        instanceEvent.m76 = instanceEvent.m8E;
+                        instanceEvent.m4 &= ~0x20;
+                    }
+                    else {
+                        instanceEvent.m76 += instanceEvent.m8C;
+                    }
+                    instanceEvent.m2 |= 0x100;
                 }
-                instanceEvent.m4 = var4;
 
                 if (--instanceEvent.m5C_deltaTime == 1) {
                     if (instanceEvent.m0 & 0x1000) {
-                        instanceEvent.m30.m2A = 6;
+                        instanceEvent.m30.m2A_ADSR_Release = 6;
                         instanceEvent.m30.m6 |= 0x80;
                     }
                 }
                 if (--instanceEvent.m5E == 0) {
-                    flags |= 2;
+                    instanceEvent.m2 |= 2;
                     instanceEvent.m0 |= 0x400;
                 }
             }
-            instanceEvent.m2 = flags;
         }
     }
 }
@@ -165,7 +196,7 @@ static const std::array<u8, 19> deltaTimeTable = { { 0, 192, 144, 96, 72, 64, 48
 void processPercussions(sSoundInstance* param_1, sSoundInstanceEvent* param_2, u32 param_3) {
     auto& percussionData = param_1->mC_pPercussionData->data[param_3];
     setupAdsr(percussionData.m0_adsr, param_2);
-    param_2->m68 = ((uint)percussionData.m1 * 0x100 + (int)param_2->m6E + (int)param_2->m6C) * 0x10000;
+    param_2->m68_finalNoteToPlay = ((uint)percussionData.m1 * 0x100 + (int)param_2->m6E + (int)param_2->m6C) * 0x10000;
     param_2->m2 |= 0x100;
     param_2->m74_pan = percussionData.m3_pan << 8;
 }
@@ -175,7 +206,7 @@ void executeSequenceEvents(sSoundInstance* param_1, std::vector<sSoundInstanceEv
         sSoundInstanceEvent& instanceEvent = param_2[i];
         if (instanceEvent.m0) {
             bool bNeedPostUpdate = false;
-            if ((instanceEvent.m5C_deltaTime & 0xFFFF) == 0) {
+            if ((instanceEvent.m5C_deltaTime) == 0) {
                 auto originalM0 = instanceEvent.m0;
                 instanceEvent.m0 &= 0xF8FF;
                 auto byteCodeIt = instanceEvent.m14;
@@ -189,7 +220,7 @@ void executeSequenceEvents(sSoundInstance* param_1, std::vector<sSoundInstanceEv
                         int data_byte = byteCodeIt[1];
                         s8 relativeKey = (data_byte / 19); // Note: this was done with a lookup table in original code
                         byteCodeIt += 2;
-                        instanceEvent.m65 = instanceEvent.m64 + relativeKey;
+                        instanceEvent.m65 = instanceEvent.m66_octave + relativeKey;
 
                         u8 deltaTime = deltaTimeTable[data_byte % 19]; // Note this was done with a repeating table in original code
                         if (deltaTime == 0) {
@@ -197,12 +228,12 @@ void executeSequenceEvents(sSoundInstance* param_1, std::vector<sSoundInstanceEv
                             byteCodeIt++;
                         }
                         instanceEvent.m5C_deltaTime = deltaTime;
-                        instanceEvent.m30.m2A = instanceEvent.m28;
+                        instanceEvent.m30.m2A_ADSR_Release = instanceEvent.m28_ADSR_ReleaseBackup;
                         instanceEvent.m30.m6 |= 0x80;
 
                         if ((instanceEvent.m0 & 0x10) == 0) {
                             // no percussion
-                            instanceEvent.m68 = ((s32)instanceEvent.m6C * 0x10000) + ((s32)instanceEvent.m66_octave * 0x100) + ((s32)instanceEvent.m6E);
+                            instanceEvent.m68_finalNoteToPlay = (((u32)instanceEvent.m6C) + ((u32)instanceEvent.m65 * 0x100) + ((u32)instanceEvent.m6E)) * 0x10000;
                         }
                         else {
                             // with percussion
@@ -223,7 +254,7 @@ void executeSequenceEvents(sSoundInstance* param_1, std::vector<sSoundInstanceEv
                     else {
                         byteCodeIt = seqOpcodes[byteCode - 0x80](byteCodeIt + 1, param_1, &instanceEvent);
                         if (instanceEvent.m0 == 0) { // disable the voice
-                            param_1->m48_activeVoicesBF &= ~(1 << (instanceEvent.m6 & 0x1f));
+                            param_1->m48_activeVoicesBF &= ~(1 << (instanceEvent.m6_voiceIndex & 0x1f));
                             break;
                         }
                     }
@@ -292,10 +323,10 @@ void executeSequenceEvents(sSoundInstance* param_1, std::vector<sSoundInstanceEv
                         instanceEvent.m0 &= ~0x1000;
                     }
 
-                    int time = (int)instanceEvent.m60 + (int)instanceEvent.m5C_deltaTime;
+                    int time = instanceEvent.m60 + instanceEvent.m5C_deltaTime;
                     if (time * 0x10000 < 1) {
                         time += instanceEvent.m5C_deltaTime;
-                        instanceEvent.m60 += instanceEvent.m5C_deltaTime;
+                        instanceEvent.m60 += instanceEvent.m5C_deltaTime & 0xFF;
                     }
                     u32 minTime = 0x7FFF;
                     if ((instanceEvent.m0 & 0x600) == 0) {
@@ -354,8 +385,8 @@ void voicePostUpdate1(sSoundInstance* pSoundInstance, std::vector<sSoundInstance
     }
 }
 
-u32 voiceStatusBF3 = 0;
-extern u32 playSoundEffectSubSub1BF1;
+u32 pendingKeyOff2 = 0;
+extern u32 pendingKeyOff;
 
 void voicePostUpdate2Sub0(sSoundInstanceEvent30* param_1, uint param_2)
 {
@@ -370,9 +401,9 @@ void voicePostUpdate2Sub0(sSoundInstanceEvent30* param_1, uint param_2)
             param_1->m6 = -1;
             param_1->m0 = (short)param_2;
             playSoundEffectSubSub1Var0[param_2] = param_1;
-            playSoundEffectSubSub1BF1 = 1 << (param_2 & 0x1f) | playSoundEffectSubSub1BF1;
+            pendingKeyOff = 1 << (param_2 & 0x1f) | pendingKeyOff;
         }
-        playSoundEffectSubSub1BF2 = 1 << (param_2 & 0x1f) | playSoundEffectSubSub1BF2;
+        pendingKeyOn = 1 << (param_2 & 0x1f) | pendingKeyOn;
     }
     return;
 }
@@ -380,14 +411,30 @@ void voicePostUpdate2Sub0(sSoundInstanceEvent30* param_1, uint param_2)
 void voicePostUpdate2Sub1(sSoundInstanceEvent30* param_1, uint param_2)
 {
     if ((param_2 < 0x18) && (playSoundEffectSubSub1Var0[param_2] == param_1)) {
-        voiceStatusBF3 = 1 << (param_2 & 0x1f) | voiceStatusBF3;
+        pendingKeyOff2 |= 1 << (param_2 & 0x1f);
     }
     return;
 }
 
+// This used to be a lookup table
+s8 getPitchTable1(int value) {
+    return (value % 0xC) + 0x10 * (value / 0xC);
+}
+
 int computeSampleRate(int pitch) {
-    MissingCode();
-    return 0x1000; // this is the value for 44100hz
+    int octaveMid = 6 - ((int)(uint)(byte)getPitchTable1((pitch & 0x7fff) >> 8) >> 4);
+    if ((int)octaveMid < 0) {
+        return (short)((int)(short)pitchTable2
+            [(pitch & 0xff) +
+            ((byte)getPitchTable1((pitch & 0x7fff) >> 8) & 0xf) * 0x100] <<
+            (-octaveMid & 0x1f));
+    }
+    else {
+        return (short)((int)(short)pitchTable2
+            [(pitch & 0xff) +
+            ((byte)getPitchTable1((pitch & 0x7fff) >> 8) & 0xf) * 0x100] >>
+            (octaveMid & 0x1f));
+    }
 }
 
 void voicePostUpdate2(sSoundInstance* pSoundInstance, std::vector<sSoundInstanceEvent>& voices, int voicesCount) {
@@ -441,7 +488,7 @@ void voicePostUpdate2(sSoundInstance* pSoundInstance, std::vector<sSoundInstance
                     pVoice->m30.mA_volumeRight = volumeRight;
                 }
                 if (pVoice->m2 & 0x200) {
-                    int value = (((int)pVoice->m96_volumeSlideDuration + (int)pVoice->mD0 + (int)(pSoundInstance->m7C >> 16)) * 0x10000) >> 0x10;
+                    int value = (((pVoice->m68_finalNoteToPlay >> 16) + (int)pVoice->mD0 + (int)(pSoundInstance->m7C >> 16)) * 0x10000) >> 0x10;
                     int sampleRate = computeSampleRate(value);
                     pVoice->m30.m14_ADPCM_SampleRate = sampleRate & 0x3FFF;
                     pVoice->m30.m6 |= 4;
@@ -468,19 +515,21 @@ struct sSpuCommonAttributes {
 sSpuCommonAttributes spuCommonAttributes;
 
 void audioTickSub1() {
-    if (playSoundEffectSubSub1BF1) {
+    if (pendingKeyOff) {
         for (int i = 0; i < 24; i++) {
-            if (playSoundEffectSubSub1BF1 & (1 << i)) {
+            if (pendingKeyOff & (1 << i)) {
                 int reg = 5 + i * 8;
                 emulatedSpuDevice.write(reg, emulatedSpuDevice.read(reg) & 0xFFC0 | 6); // sustain?
             }
         }
     }
 
-    u32 keyOff = voiceStatusBF3 | playSoundEffectSubSub1BF1;
+    u32 keyOff = pendingKeyOff2 | pendingKeyOff;
     if (keyOff) {
-        emulatedSpuDevice.write(198, keyOff);
-        emulatedSpuDevice.write(199, keyOff>>16);
+        emulatedSpuDevice.write(SPU_REG_KEYOFF_low, keyOff);
+        emulatedSpuDevice.write(SPU_REG_KEYOFF_high, keyOff>>16);
+        pendingKeyOff = 0;
+        pendingKeyOff2 = 0;
     }
 }
 
@@ -523,7 +572,7 @@ void audioTick() {
                 }
 
                 pSoundInstance->m20++;
-                pSoundInstance->m28 = (pSoundInstance->m64 >> 16) + pSoundInstance->m28;
+                pSoundInstance->m28 += pSoundInstance->m64 >> 16;
                 pSoundInstance->m50 -= pSoundInstance->m54;
                 while (pSoundInstance->m50 < 0) {
                     pSoundInstance->m36--;
@@ -576,7 +625,17 @@ void audioTick() {
 
         MissingCode();
     }
+
+    std::array<u16, numRegs> tempSPUMemoryStatus;
+    for (int i = 0; i < numRegs; i++) {
+        tempSPUMemoryStatus[i] = emulatedSpuDevice.read(i);
+    }
+
     spuMutex.unlock();
+
+    spuStatusMutex.lock();
+    SPURegisterStatus = tempSPUMemoryStatus;
+    spuStatusMutex.unlock();
 }
 
 void initSoundSystem(ushort param_1) {
@@ -635,4 +694,38 @@ int processSoundMenuSub0(void)
 
 void setupReverb(uint param_1, s16 param_2, long param_3, long param_4) {
     MissingCode();
+}
+
+void printTextHex16(const std::string& label, u16 value) {
+    ImGui::Text(label.c_str()); ImGui::SameLine(); ImGui::Text("0x%04X", value);
+}
+
+void updateSPUDebugger() {
+    if (ImGui::Begin("SPU debugger")) {
+        spuStatusMutex.lock();
+
+        u32 chanelOn = (((u32)SPURegisterStatus[SPU_REG_CHON_high] << 16) | SPURegisterStatus[SPU_REG_CHON_low]);
+
+        for (int i = 0; i < 24; i++) {
+            ImGui::Text((std::string("Voice ") + std::to_string(i)).c_str());
+
+            u32 ADSR = ((u32)SPURegisterStatus[4 + i * 8]) | ((u32)SPURegisterStatus[5 + i * 8]) << 16;
+            ImGui::Text("Attack %d", (ADSR >> 8) & 0x7F);
+            ImGui::Text("Decay %d", (ADSR >> 4) & 0xF);
+            //ImGui::Text("Sustain level  %d", (ADSR & 0xF));
+            ImGui::Text("Sustain %d", (ADSR >> 22) & 0x7F);
+            ImGui::Text("Release %d", ((ADSR >> 16) & 0x1F));
+
+            ImGui::Text("ChOn  %d", (bool)(chanelOn & (1 << i)));
+            printTextHex16("volume left", SPURegisterStatus[0 + i * 8]);
+            printTextHex16("volume right", SPURegisterStatus[1 + i * 8]);
+
+
+
+            ImGui::Separator();
+        }
+
+        spuStatusMutex.unlock();
+    }
+    ImGui::End();
 }

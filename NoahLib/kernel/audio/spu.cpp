@@ -7,7 +7,7 @@
 s32 spuUpdateCounter = 0;
 
 machine_config dummy;
-spu_device emulatedSpuDevice(dummy, "SPU", nullptr, 1);
+spu_device emulatedSpuDevice(dummy, "SPU", nullptr, 33800000);
 
 std::mutex spuMutex;
 

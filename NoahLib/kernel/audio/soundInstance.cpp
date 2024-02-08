@@ -71,7 +71,7 @@ sSoundInstance* initSoundEffectInstances(uint param_1) {
 
     for (int i = 0; i < numMaxSoundEffectInstances; i++) {
         pSoundInstance->m94_events[i].m0 = 0;
-        pSoundInstance->m94_events[i].m6 = i;
+        pSoundInstance->m94_events[i].m6_voiceIndex = i;
         pSoundInstance->m94_events[i].m27 = 0x18 - numMaxSoundEffectInstances + i;
     }
 
@@ -82,54 +82,56 @@ sSoundInstance* initSoundEffectInstances(uint param_1) {
 
 void setupAdsr(int param_1, sSoundInstanceEvent* param_2) {
     param_2->m26_ADSRIndex = (char)param_1;
-    auto pbVar5 = param_2->m2C_pWds->m_rawData.begin() + 0x30 + param_1 * 0x10;
-    u32 adpcmAddressOffset = READ_LE_U32(pbVar5) * 8;
-    u32 adpcmSampleSize = READ_LE_U16(pbVar5 + 4) * 8;
+    auto pADSRData = param_2->m2C_pWds->m_rawData.begin() + 0x30 + param_1 * 0x10;
+
+    u32 adpcmAddressOffset = READ_LE_U32(pADSRData) * 8;
+    u32 adpcmSampleSize = READ_LE_U16(pADSRData + 4) * 8;
+    u16 value6C = READ_LE_U16(pADSRData + 0x6);
+    u32 ADSR_Values = READ_LE_U32(pADSRData + 8);
+    u16 ADSR_Modes = READ_LE_U16(pADSRData + 0xC);
+
     param_2->m30.m1C_ADPCM_StartAddress = param_2->m2C_pWds->m28_adpcmAddress + adpcmAddressOffset;
     param_2->m30.m20_ADPCM_RepeatAddress = adpcmAddressOffset + adpcmSampleSize;
+    
+    param_2->m30.m24_ADSR_AttackMode = (ADSR_Modes >> 0) & 7;
+    param_2->m30.m25_ADSR_SustainMode = (ADSR_Modes >> 4) & 7;
+    param_2->m30.m26_ADSR_ReleaseMode = (ADSR_Modes >> 8) & 7;
+    
+    param_2->m30.m27_ADSR_Attack = ADSR_Values & 0x7f;
+    param_2->m30.m28_ADSR_Decay = (ADSR_Values >> 8) & 0xf;
+    param_2->m30.m2B_ADSR_SustainLevel = (ADSR_Values >> 0xc) & 0xf;
+    param_2->m30.m29_ADSR_Sustain = (ADSR_Values >> 0x10) & 0x7f;
+    param_2->m30.m2A_ADSR_Release = (ADSR_Values >> 0x18) & 0x1f;
 
-    u16 uVar1 = READ_LE_U16(pbVar5 + 0xC);
-    param_2->m30.m24 = (byte)uVar1 & 7;
-    param_2->m30.m25 = (byte)(uVar1 >> 4) & 7;
-    param_2->m30.m26 = (byte)(uVar1 >> 8) & 7;
+    param_2->m28_ADSR_ReleaseBackup = param_2->m30.m2A_ADSR_Release;
+    param_2->m0 |= 0x8000;
 
-    u32 uVar6 = READ_LE_U32(pbVar5 + 8);
-    param_2->m30.m27 = (byte)uVar6 & 0x7f;
-    param_2->m30.m28 = (byte)(uVar6 >> 8) & 0xf;
-    param_2->m30.m29 = (byte)(uVar6 >> 0x10) & 0x7f;
-    param_2->m30.m2B = (byte)(uVar6 >> 0xc) & 0xf;
-    byte bVar3 = (byte)(uVar6 >> 0x18) & 0x1f;
-    param_2->m28 = bVar3;
-    param_2->m30.m2A = bVar3;
-
-    u16 sVar2 = READ_LE_U16(pbVar5 + 0x6);
-    param_2->m0 = param_2->m0 | 0x8000;
-    param_2->m6C = sVar2;
+    param_2->m6C = value6C;
 }
 
-u32 playSoundEffectSubSub1BF1 = 0;
-u32 playSoundEffectSubSub1BF2 = 0;
+u32 pendingKeyOff = 0;
+u32 pendingKeyOn = 0;
 
 void playSoundEffectSubSub0(sSoundInstanceEvent30* param_1, int param_2) {
     if ((param_2 < 0x18) && (playSoundEffectSubSub1Var0[param_2] == param_1)) {
         playSoundEffectSubSub1Var0[param_2] = nullptr;
-        u32 uVar1 = 1 << (param_2 & 0x1f);
-        playSoundEffectSubSub1BF1 = uVar1 | playSoundEffectSubSub1BF1;
-        playSoundEffectSubSub1BF2 = ~uVar1 & playSoundEffectSubSub1BF2;
+        u32 keyBitField = 1 << (param_2 & 0x1f);
+        pendingKeyOff |= keyBitField;
+        pendingKeyOn &= ~keyBitField;
     }
 }
 
 void playSoundEffectSubSub1(sSoundInstanceEvent30* param_1, u32 param_2) {
     if (param_2 < 0x18) {
         if (playSoundEffectSubSub1Var0[param_2] == param_1) {
-            playSoundEffectSubSub1BF1 |= 1 << (param_2 & 0x1f);
+            pendingKeyOff |= 1 << (param_2 & 0x1f);
         }
         else if ((playSoundEffectSubSub1Var0[param_2] == nullptr) || (playSoundEffectSubSub1Var0[param_2]->m4 <= param_1->m4)) {
             param_1->m6 = -1;
             param_1->m0 = param_2;
             playSoundEffectSubSub1Var0[param_2] = param_1;
-            playSoundEffectSubSub1BF1 |= (1 << (param_2 & 0x1f));
-            playSoundEffectSubSub1BF2 &= ~(1 << (param_2 & 0x1f));
+            pendingKeyOff |= (1 << (param_2 & 0x1f));
+            pendingKeyOn &= ~(1 << (param_2 & 0x1f));
         }
     }
 }
@@ -160,12 +162,12 @@ void playSoundEffectSub(uint param_1, uint param_2, short param_3, u16 param_4) 
                 pSoundEvent->mC = spuUpdateCounter;
                 pSoundEvent->m7 = param_1 >> 8;
                 if (READ_LE_U16(pDrumData) == 0) {
-                    pSoundInstance->m48_activeVoicesBF = ~(1 << (pSoundEvent->m6 & 0x1f)) & pSoundInstance->m48_activeVoicesBF;
+                    pSoundInstance->m48_activeVoicesBF = ~(1 << (pSoundEvent->m6_voiceIndex & 0x1f)) & pSoundInstance->m48_activeVoicesBF;
                     pSoundEvent->m0 = 0;
                     playSoundEffectSubSub0(&pSoundEvent->m30, pSoundEvent->m27);
                 }
                 else {
-                    pSoundInstance->m48_activeVoicesBF = 1 << (pSoundEvent->m6 & 0x1f) | pSoundInstance->m48_activeVoicesBF;
+                    pSoundInstance->m48_activeVoicesBF = 1 << (pSoundEvent->m6_voiceIndex & 0x1f) | pSoundInstance->m48_activeVoicesBF;
                     pSoundEvent->m0 = 0x409;
                     if ((pCurrentSeq->m10 & 1U) != 0) {
                         pSoundEvent->m0 = 0x40b;
@@ -271,7 +273,7 @@ void initSoundInstanceTracks(sSoundInstance* param_1) {
                 pSoundEvent->m2 = 0x170;
                 pSoundEvent->m4 = 0;
                 pSoundEvent->m7 = 0x10;
-                pSoundEvent->m6 = i;
+                pSoundEvent->m6_voiceIndex = i;
                 pSoundEvent->m8 = param_1->m8_pSeq->m10;
 
                 pSoundEvent->m66_octave = 0x3C;

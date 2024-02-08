@@ -955,6 +955,7 @@ spu_device::spu_device(const machine_config &mconfig, const char *tag, device_t 
 	//device_sound_interface(mconfig, *this),
 	//m_stream_flags(STREAM_DEFAULT_FLAGS),
 	//m_irq_handler(*this),
+    m_clock(clock),
 	dirty_flags(-1),
 	status_enabled(false),
 	xa_voll(0x8000),

@@ -6,6 +6,8 @@ struct sEventState {
     bool m_isEnabled = false;
     eventFunc m_function = nullptr;
 
+    u16 m_target = 0;
+    u16 m_mode = 0;
     std::thread m_thread;
 };
 
@@ -46,7 +48,11 @@ u32 EnableEvent(u32 event) {
 }
 
 u32 SetRCnt(u32 spec, u16 target, u32 mode) {
-    MissingCode();
+    sEventState* pEventState = getEventForDesc(spec);
+    if (pEventState) {
+        pEventState->m_target = target;
+        pEventState->m_mode = mode;
+    }
     return 1;
 }
 
@@ -56,7 +62,13 @@ void rootCounterThread(u32 spec) {
         assert(pEventState);
 
         pEventState->m_function();
-        std::this_thread::sleep_for(std::chrono::nanoseconds(240));
+
+        int baseFreq = 33800000;
+        int baseFreq8 = 33800000 / 8;
+        float numMili = ((float)pEventState->m_target) / baseFreq8;
+        float numNano = numMili * 1000000;
+
+        std::this_thread::sleep_for(std::chrono::nanoseconds((int)numNano));
     }
 }
 

@@ -178,6 +178,7 @@ void noahFrame_start()
 
 bool noahFrame_end()
 {
+    updateSPUDebugger();
     if (ImGui::Begin("Loggers")) {
         if (ImGui::BeginTabBar("tabs")) {
 

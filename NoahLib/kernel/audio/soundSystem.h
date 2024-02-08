@@ -14,14 +14,14 @@ struct sSoundInstanceEvent30 {
     u16 m14_ADPCM_SampleRate;
     u32 m1C_ADPCM_StartAddress;
     u32 m20_ADPCM_RepeatAddress;
-    u8 m24;
-    u8 m25;
-    u8 m26;
-    u8 m27;
-    u8 m28;
-    u8 m29;
-    u8 m2A;
-    u8 m2B;
+    u8 m24_ADSR_AttackMode;
+    u8 m25_ADSR_SustainMode;
+    u8 m26_ADSR_ReleaseMode;
+    u8 m27_ADSR_Attack;
+    u8 m28_ADSR_Decay;
+    u8 m29_ADSR_Sustain;
+    u8 m2A_ADSR_Release;
+    u8 m2B_ADSR_SustainLevel;
 };
 extern std::array<sSoundInstanceEvent30*, 24> playSoundEffectSubSub1Var0;
 
@@ -29,3 +29,5 @@ void initSoundSystem(ushort param_1);
 void setSoundError(u16 errorCode);
 int processSoundMenuSub0(void);
 void setupReverb(uint param_1, s16 param_2, long param_3, long param_4);
+
+void updateSPUDebugger();

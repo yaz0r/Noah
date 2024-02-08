@@ -442,7 +442,7 @@ struct OcornutImguiContext
 
 	void endFrame()
 	{
-		ImGui::Render();
+    		ImGui::Render();
 		ImGui::UpdatePlatformWindows();
 		render(ImGui::GetDrawData());
 

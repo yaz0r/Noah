@@ -27,7 +27,7 @@ struct sSoundInstanceEvent {
     u16 m0;
     s16 m2;
     s16 m4;
-    u8 m6;
+    u8 m6_voiceIndex;
     u8 m7;
     u32 m8;
     u32 mC;
@@ -41,7 +41,7 @@ struct sSoundInstanceEvent {
     s8 m25;
     s8 m26_ADSRIndex;
     u8 m27;
-    s8 m28;
+    s8 m28_ADSR_ReleaseBackup;
     struct sWdsFile* m2C_pWds;
     sSoundInstanceEvent30 m30;
     u16 m5C_deltaTime;
@@ -49,10 +49,10 @@ struct sSoundInstanceEvent {
     s8 m60;
     s16 m62;
     s8 m64;
-    s8 m65;
+    u8 m65;
     s16 m66_octave;
-    s32 m68;
-    s16 m6C;
+    u32 m68_finalNoteToPlay;
+    u16 m6C;
     s16 m6E;
     s16 m70;
     s16 m72_callstackDepth;
@@ -62,8 +62,15 @@ struct sSoundInstanceEvent {
     s32 m7C;
     u16 m80;
     s16 m82;
+    u32 m84;
     s32 m88_volumeSlideDelta;
+    s16 m8C;
+    s16 m8E;
+    s16 m90_panDelta;
+    s16 m92_panTarget;
     u16 m96_volumeSlideDuration;
+    u16 m98;
+    u16 m9A;
     std::array<sSoundInstanceEventCallstack, 3> m9C_callstack;
     u16 mCA;
     s16 mCE;
@@ -158,7 +165,7 @@ extern int numMaxSoundEffectInstances;
 extern sSoundInstance* pPlayingSoundsLinkedList;
 extern sSoundInstance* pSoundEffectsInstances;
 extern int playSoundEffectVar0;
-extern u32 playSoundEffectSubSub1BF2;
+extern u32 pendingKeyOn;
 
 sSoundInstance* initSoundEffectInstances(uint param_1);
 void addActiveSoundInstance(sSoundInstance* pSoundInstance);

@@ -90,7 +90,7 @@ std::vector<u8>::iterator seqOP_19_loopEnd(std::vector<u8>::iterator it, sSoundI
 
 std::vector<u8>::iterator seqOP_20_setTempo(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pInstance->m58 = (int)it[0] << 0x10;
-    pInstance->m54 = (int)it[0] * (int)(pInstance->m64 >> 8);
+    pInstance->m54 = (int)it[0] * (pInstance->m64 >> 16);
     return it + 1;
 }
 
@@ -145,24 +145,24 @@ std::vector<u8>::iterator seqOP_40_ADSRReset(std::vector<u8>::iterator it, sSoun
 
 std::vector<u8>::iterator seqOP_49(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pChannel->m30.m6 |= 0x40;
-    pChannel->m30.m25 = *it;
+    pChannel->m30.m25_ADSR_SustainMode = *it;
     return it + 1;
 }
 
 std::vector<u8>::iterator seqOP_4A(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pChannel->m30.m6 |= 0x80;
-    pChannel->m30.m26 = *it;
+    pChannel->m30.m26_ADSR_ReleaseMode = *it;
     return it + 1;
 }
 
 std::vector<u8>::iterator seqOP_44(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pChannel->m30.m6 |= 0x40;
-    pChannel->m30.m29 = *it;
+    pChannel->m30.m29_ADSR_Sustain = *it;
     return it + 1;
 }
 std::vector<u8>::iterator seqOP_45(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pChannel->m30.m6 |= 0x40;
-    pChannel->m30.m2A = *it;
+    pChannel->m30.m2A_ADSR_Release = *it;
     return it + 1;
 }
 
