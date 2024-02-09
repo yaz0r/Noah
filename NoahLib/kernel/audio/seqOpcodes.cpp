@@ -209,7 +209,7 @@ std::vector<u8>::iterator seqOP_78(std::vector<u8>::iterator it, sSoundInstance*
 
 std::vector<u8>::iterator seqOP_7C_changeWdsAndADSR(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pChannel->m25 = it[0];
-    sWdsFile* pWds = findInWdsLinkedList(it[1]);
+    sWdsFile* pWds = findInWdsLinkedList(it[0]);
     if (pWds == nullptr) {
         pWds = pLoadedWdsLinkedList;
     }
@@ -220,7 +220,7 @@ std::vector<u8>::iterator seqOP_7C_changeWdsAndADSR(std::vector<u8>::iterator it
 
 std::vector<u8>::iterator seqOP_7E_changeBank(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pChannel->m25 = it[0];
-    sWdsFile* pWds = findInWdsLinkedList(it[1]);
+    sWdsFile* pWds = findInWdsLinkedList(it[0]);
     if (pWds == nullptr) {
         pWds = pLoadedWdsLinkedList;
     }

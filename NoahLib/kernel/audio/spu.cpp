@@ -21,12 +21,12 @@ public:
         int numSamples = std::min<int>(44100, aSamplesToRead);
 
         spuMutex.lock();
-        emulatedSpuDevice.generate(temp, numSamples * 4);
+        emulatedSpuDevice.generate(temp, numSamples * 4); 
         spuMutex.unlock();
 
         for (int i = 0; i < aSamplesToRead; i++) {
-            aBuffer[i * 2 + 0] = temp[i][0] / (float)0x7FFF;
-            aBuffer[i * 2 + 1] = temp[i][1] / (float)0x7FFF;
+            aBuffer[0 * aBufferSize + i] = temp[i][0] / (float)0x7FFF;
+            aBuffer[1 * aBufferSize + i] = temp[i][1] / (float)0x7FFF;
         }
 
         return numSamples;

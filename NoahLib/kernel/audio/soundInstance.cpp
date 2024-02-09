@@ -329,10 +329,11 @@ void initPercussions(sSoundInstance* param_1, sSeqFile* param_2) {
     int numPercussionData = param_2->m14 >> 8;
     auto pDrumKit = param_2->m_rawData.begin() + param_2->m20_drumKitOffset;
     for (int i = 0; i < numPercussionData; i++) {
-        param_1->mC_pPercussionData->data[*pDrumKit].m0_adsr = READ_LE_U8(pDrumKit + 1);
-        param_1->mC_pPercussionData->data[*pDrumKit].m1 = READ_LE_U8(pDrumKit + 2);
-        param_1->mC_pPercussionData->data[*pDrumKit].m2 = READ_LE_U8(pDrumKit + 3);
-        param_1->mC_pPercussionData->data[*pDrumKit].m3_pan = READ_LE_U8(pDrumKit + 4);
+        auto& destSlot = param_1->mC_pPercussionData->data[READ_LE_U8(pDrumKit + 0)];
+        destSlot.m0_adsr = READ_LE_U8(pDrumKit + 1);
+        destSlot.m1 = READ_LE_U8(pDrumKit + 2);
+        destSlot.m2 = READ_LE_U8(pDrumKit + 3);
+        destSlot.m3_pan = READ_LE_U8(pDrumKit + 4);
         pDrumKit += 5;
     }
 }

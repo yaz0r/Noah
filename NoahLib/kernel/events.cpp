@@ -64,11 +64,11 @@ void rootCounterThread(u32 spec) {
         pEventState->m_function();
 
         int baseFreq = 33800000;
-        int baseFreq8 = 33800000 / 8;
+        int baseFreq8 = baseFreq / 8;
         float numMili = ((float)pEventState->m_target) / baseFreq8;
-        float numNano = numMili * 1000000;
+        float numMicro = numMili * 1000 * 16 * 16 * 2;
 
-        std::this_thread::sleep_for(std::chrono::nanoseconds((int)numNano));
+        std::this_thread::sleep_for(std::chrono::microseconds((int)numMicro));
     }
 }
 

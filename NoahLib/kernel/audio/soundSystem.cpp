@@ -28,18 +28,6 @@ void setSoundError(u16 errorCode) {
     assert(0);
 }
 
-std::array<u16, 24> pSPUVoiceVolumeLeft;
-std::array<u16, 24> pSPUVoiceVolumeRight;
-std::array<u16, 24> pSPUVoiceADPCMSampleRate;
-std::array<u32, 24> pSPUVoiceADPCMStartAddr;
-std::array<u32, 24> pSPUVoiceADPCMRepeatAddr;
-
-struct sADSR {
-    u16 m0_lower;
-    u16 m2_high;
-};
-std::array<sADSR, 24> pSPUVoiceADSR;
-
 void sendAdsrToSpu() {
     u16 postUpdateFlag = 0;
     u32 pitchModulationFlag = 0;
@@ -54,38 +42,46 @@ void sendAdsrToSpu() {
             if (dirtyFlag & 1) {
                 emulatedSpuDevice.write(0 + i * 8, voiceState->m8_volumeLeft);
                 emulatedSpuDevice.write(1 + i * 8, voiceState->mA_volumeRight);
-                pSPUVoiceVolumeLeft[i] = voiceState->m8_volumeLeft;
-                pSPUVoiceVolumeRight[i] = voiceState->mA_volumeRight;
             }
             if (dirtyFlag & 4) {
                 emulatedSpuDevice.write(2 + i * 8, voiceState->m14_ADPCM_SampleRate);
-                pSPUVoiceADPCMSampleRate[i] = voiceState->m14_ADPCM_SampleRate;
             }
             if (dirtyFlag & 8) {
                 emulatedSpuDevice.write(3 + i * 8, voiceState->m1C_ADPCM_StartAddress >> 3);
                 emulatedSpuDevice.write(7 + i * 8, voiceState->m20_ADPCM_RepeatAddress >> 3);
-                pSPUVoiceADPCMStartAddr[i] = voiceState->m1C_ADPCM_StartAddress >> 3;
-                pSPUVoiceADPCMRepeatAddr[i] = voiceState->m20_ADPCM_RepeatAddress >> 3;
             }
             if (dirtyFlag & 0x10) { // update attack
-                pSPUVoiceADSR[i].m0_lower = (pSPUVoiceADSR[i].m0_lower & 0xFF) + (u16)voiceState->m27_ADSR_Attack * 0x100 + (ushort)(voiceState->m24_ADSR_AttackMode >> 2) * -0x8000;
-                emulatedSpuDevice.write(4 + i * 8, pSPUVoiceADSR[i].m0_lower);
+                u16 currentValue = emulatedSpuDevice.read(4 + i * 8);
+                currentValue &= 0xFF; // clear
+                currentValue |= ((u16)voiceState->m27_ADSR_Attack) << 8;
+                currentValue |= (voiceState->m24_ADSR_AttackMode >> 2) * -0x8000;
+                emulatedSpuDevice.write(4 + i * 8, currentValue);
             }
             if (dirtyFlag & 0x20) { // update decay
-                pSPUVoiceADSR[i].m0_lower = (pSPUVoiceADSR[i].m0_lower & 0xFF0F) + (u16)voiceState->m28_ADSR_Decay * 0x10;
-                emulatedSpuDevice.write(4 + i * 8, pSPUVoiceADSR[i].m0_lower);
+                u16 currentValue = emulatedSpuDevice.read(4 + i * 8);
+                currentValue &= 0xFF0F;
+                currentValue |= ((u16)voiceState->m28_ADSR_Decay) << 4;
+                emulatedSpuDevice.write(4 + i * 8, currentValue);
             }
             if (dirtyFlag & 0x40) { // update sustain
-                pSPUVoiceADSR[i].m2_high = (pSPUVoiceADSR[i].m2_high & 0x3F) + (u16)voiceState->m29_ADSR_Sustain * 0x40 + (ushort)(voiceState->m25_ADSR_SustainMode >> 1) * 0x4000;
-                emulatedSpuDevice.write(5 + i * 8, pSPUVoiceADSR[i].m2_high);
+                u16 currentValue = emulatedSpuDevice.read(5 + i * 8);
+                currentValue &= 0x3F;
+                currentValue |= (u16)voiceState->m29_ADSR_Sustain * 0x40;
+                currentValue |= (u16)(voiceState->m25_ADSR_SustainMode >> 1) * 0x4000;
+                emulatedSpuDevice.write(5 + i * 8, currentValue);
             }
             if (dirtyFlag & 0x80) { // update release
-                pSPUVoiceADSR[i].m2_high = (pSPUVoiceADSR[i].m2_high & 0xFFC0) + (u16)voiceState->m2A_ADSR_Release + (ushort)(voiceState->m26_ADSR_ReleaseMode >> 2) * 0x20;
-                emulatedSpuDevice.write(5 + i * 8, pSPUVoiceADSR[i].m2_high);
+                u16 currentValue = emulatedSpuDevice.read(5 + i * 8);
+                currentValue &= 0xFFC0;
+                currentValue |= voiceState->m2A_ADSR_Release;
+                currentValue |= (u16)(voiceState->m26_ADSR_ReleaseMode >> 2) * 0x20;
+                emulatedSpuDevice.write(5 + i * 8, currentValue);
             }
             if (dirtyFlag & 0x100) { // update sustain level
-                pSPUVoiceADSR[i].m0_lower = (pSPUVoiceADSR[i].m0_lower & 0xFFF0) + (u16)voiceState->m2B_ADSR_SustainLevel;
-                emulatedSpuDevice.write(4 + i * 8, pSPUVoiceADSR[i].m0_lower);
+                u16 currentValue = emulatedSpuDevice.read(4 + i * 8);
+                currentValue &= 0xFFF0;
+                currentValue |= voiceState->m2B_ADSR_SustainLevel;
+                emulatedSpuDevice.write(4 + i * 8, currentValue);
             }
             postUpdateFlag = postUpdateFlag | dirtyFlag & 0x7000;
             voiceState->m6 = 0;
@@ -218,9 +214,9 @@ void executeSequenceEvents(sSoundInstance* param_1, std::vector<sSoundInstanceEv
                         }
                         instanceEvent.m2 |= 0x100;
                         int data_byte = byteCodeIt[1];
-                        s8 relativeKey = (data_byte / 19); // Note: this was done with a lookup table in original code
+                        s8 relativeKey = instanceEvent.m66_octave + (data_byte / 19); // Note: this was done with a lookup table in original code
                         byteCodeIt += 2;
-                        instanceEvent.m65 = instanceEvent.m66_octave + relativeKey;
+                        instanceEvent.m65 = relativeKey;
 
                         u8 deltaTime = deltaTimeTable[data_byte % 19]; // Note this was done with a repeating table in original code
                         if (deltaTime == 0) {
@@ -720,7 +716,10 @@ void updateSPUDebugger() {
             printTextHex16("volume left", SPURegisterStatus[0 + i * 8]);
             printTextHex16("volume right", SPURegisterStatus[1 + i * 8]);
 
+            ImGui::Text("Start pos %d", (int)SPURegisterStatus[3 + i * 8] << 3);
+            ImGui::Text("Loop pos %d", (int)SPURegisterStatus[7 + i * 8] << 3);
 
+            ImGui::Text("RawPitch 0x%04X", (int)SPURegisterStatus[2 + i * 8]);
 
             ImGui::Separator();
         }
