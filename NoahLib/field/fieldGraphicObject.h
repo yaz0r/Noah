@@ -190,7 +190,7 @@ struct sSpriteActorCore {
             u32 mx6 : 1;
             u32 mx7_timeScale : 12;
             u32 mx13_dummy : 5;
-            u32 mx18 : 8;
+            s32 mx18 : 8;
         };
         u32 mRaw;
     } mAC;
