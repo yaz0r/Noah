@@ -3840,6 +3840,7 @@ void initFieldData()
         fieldDecompress(rawFieldSize + 0x10, rawFieldBundle.begin() + READ_LE_U32(&rawFieldBundle[0x13C]), rawFieldActorSetupParams);
 
         u32 count = READ_LE_U32(rawFieldActorSetupParams.begin());
+        fieldActorSetupParams.clear();
         fieldActorSetupParams.resize(count);
         for (int i = 0; i < count; i++)
         {
