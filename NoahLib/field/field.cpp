@@ -9552,6 +9552,7 @@ void fieldEntryPoint()
                 }
                 MissingCode();
                 syncKernelAndFieldStates();
+                deleteAllParticleEffects();
                 MissingCode();
                 releaseAllDialogWindows();
                 DrawSync(0);
@@ -9572,8 +9573,17 @@ void fieldEntryPoint()
                         unflagAllocation(rawFieldBundle);
                         rawFieldBundle.clear();
                     }
+                    clearMusic();
                     MissingCode();
                     syncKernelAndFieldStates();
+                    deleteAllParticleEffects();
+                    MissingCode();
+                    releaseAllDialogWindows();
+                    DrawSync(0);
+                    VSync(0);
+                    freeFieldData();
+                    MissingCode();
+                    typeOfPlayableCharacterLoaded = 0;
                     MissingCode();
                     fieldChangeGameMode(3);
                     return;

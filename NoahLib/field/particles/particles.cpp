@@ -602,3 +602,9 @@ void stopParticleEffect(int param_1, int param_2)
         }
     }
 }
+
+void deleteAllParticleEffects() {
+    for (int i = 0; i < 0x40; i++) {
+        deleteParticleEffect(i);
+    }
+}
