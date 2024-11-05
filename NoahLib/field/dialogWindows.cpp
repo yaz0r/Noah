@@ -1251,40 +1251,34 @@ const std::array<u8, 8> dpadButtonMapping = { {
     0,1,2,3,4,5,6,7
 } };
 
-std::array<s16, 10> dialogSpecialCase9AndATable;
+std::array<s16, 11> dialogSpecialCase9AndATable;
 s16 dialogSpecialCase9AndAVar0;
-s16 dialogSpecialCase9AndAVar1;
+
+std::vector<u8> dialogSpecialCase9AndA_2Data = {
+    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+};
 
 void dialogSpecialCase9AndASub0(s16* param_1)
 {
-    ushort uVar1;
-    char cVar2;
-    char* pcVar3;
-    char* pcVar4;
-    int iVar5;
-
-    assert(0);
-    /*
-    pcVar4 = &dialogSpecialCase9AndA_2Data;
-    iVar5 = *(int*)(printDialogTextVar + 0x6c);
-    uVar1 = *param_1;
+    auto pcVar4 = dialogSpecialCase9AndA_2Data.begin();
+    auto iVar5 = printDialogTextVar[27];
+    
+    ushort uVar1 = *(param_1++);
     while (uVar1 != 0xffff) {
-        pcVar3 = (char*)((uint)uVar1 * 2 + iVar5);
-        param_1 = param_1 + 1;
+        auto pcVar3 = ((uint)uVar1 * 2 + iVar5);
         if (*pcVar3 == '\0') {
-            cVar2 = pcVar3[1];
+            *pcVar4 = pcVar3[1];
         }
         else {
             *pcVar4 = *pcVar3;
-            cVar2 = pcVar3[1];
             pcVar4 = pcVar4 + 1;
+            *pcVar4 = pcVar3[1];
+            
         }
-        *pcVar4 = cVar2;
         pcVar4 = pcVar4 + 1;
-        uVar1 = *param_1;
+        uVar1 = *(param_1++);
     }
-    *pcVar4 = '\0';
-    * */
+    *pcVar4 = 0;
     return;
 }
 
@@ -1308,7 +1302,7 @@ void dialogSpecialCase9AndA(s32 param_1, int param_2, int param_3) {
         param_3 = 10;
     }
     iVar5 = 0;
-    std::array<s16, 10>::iterator psVar1 = dialogSpecialCase9AndATable.begin();
+    std::array<s16, 11>::iterator psVar1 = dialogSpecialCase9AndATable.begin();
     do {
         uVar6 = param_1 / uVar4;
         param_1 = param_1 % uVar4;
@@ -1318,8 +1312,8 @@ void dialogSpecialCase9AndA(s32 param_1, int param_2, int param_3) {
         *psVar1 = (short)uVar6 + dialogSpecialCase9AndAVar0;
         psVar1 = psVar1 + 1;
     } while (iVar5 < 10);
-    s16* puVar2 = &dialogSpecialCase9AndAVar0;
-    dialogSpecialCase9AndAVar1 = -1;
+    s16* puVar2 = dialogSpecialCase9AndATable.data() - 1;
+    dialogSpecialCase9AndATable[10] = -1;
     uVar4 = uVar3 & 0xfff0;
     while ((uVar4 == uVar3 && (puVar2 != (&dialogSpecialCase9AndATable[9])))) {
         puVar2 = puVar2 + 1;
@@ -1369,19 +1363,21 @@ void updateDialogTextImage(sDialogWindow18* param_1)
 		param_1->m28_perLineBuffer[iVar13].m50.y = param_1->mE + (short)((int)characterToPrint / 2) * 0xd;
 	}
 
+    int bVar1 = param_1->m69;
+    int iVar13 = bVar1 - 1;
+    auto printDialogTextVarBackup = printDialogTextVar;
+
 	if (param_1->m6C_autoClose != 0) {
 		param_1->m6C_autoClose = 0;
 		param_1->m10_flags = param_1->m10_flags & 0xfffb;
 		return;
 	}
 
-	int bVar1 = param_1->m69;
-	int iVar13 = bVar1 - 1;
-
 	while (1)
 	{
 		if (iVar13 == -1)
 		{
+            printDialogTextVar = printDialogTextVarBackup;
 			return;
 		}
 
@@ -1461,11 +1457,14 @@ void updateDialogTextImage(sDialogWindow18* param_1)
                 continue;
             }
             case 0xA:
-                param_1->m1C_currentStringToPrint = param_1->m1C_currentStringToPrint + 2;
-                dialogSpecialCase9AndA(param_1->m70[param_1->m1C_currentStringToPrint[2]], 1, 0);
-                //dialogSpecialCase9AndA_2(param_1, &dialogSpecialCase9AndA_2Data);
-                MissingCode();
+            {
+                u8 varNumberToPrint = param_1->m1C_currentStringToPrint[2];
+                param_1->m1C_currentStringToPrint += 2;
+                dialogSpecialCase9AndA(param_1->m70[varNumberToPrint], 1, 0);
+                dialogSpecialCase9AndA_2(param_1, dialogSpecialCase9AndA_2Data.begin());
+                printDialogTextVarBackup = printDialogTextVar;
                 continue;
+            }
 			case 0xE:
 				{
 					int bVar1 = param_1->m68;
