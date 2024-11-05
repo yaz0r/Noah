@@ -1465,6 +1465,15 @@ void updateDialogTextImage(sDialogWindow18* param_1)
                 printDialogTextVarBackup = printDialogTextVar;
                 continue;
             }
+            case 0xC:
+            {
+                u8 varNumberToPrint = param_1->m1C_currentStringToPrint[2];
+                param_1->m1C_currentStringToPrint += 2;
+                dialogSpecialCase9AndA(param_1->m70[varNumberToPrint], 1, 1);
+                dialogSpecialCase9AndA_2(param_1, dialogSpecialCase9AndA_2Data.begin());
+                printDialogTextVarBackup = printDialogTextVar;
+                continue;
+            }
 			case 0xE:
 				{
 					int bVar1 = param_1->m68;
@@ -1478,6 +1487,16 @@ void updateDialogTextImage(sDialogWindow18* param_1)
 					param_1->m86_currentDelayForNextCharacter = uVar6;
 				}
 				return;
+                /*
+            case 0xF:
+            {
+                u8 varNumberToPrint = param_1->m1C_currentStringToPrint[2];
+                param_1->m1C_currentStringToPrint += 2;
+                characterToPrint = dpadButtonMapping[varNumberToPrint];
+                dialogSpecialCase9AndA_2(param_1, getDialogParamPointer(printDialogTextVarBackup[51], characterToPrint));
+                printDialogTextVarBackup = printDialogTextVar;
+                continue;
+            }*/
 			default:
 				assert(0);
 			}

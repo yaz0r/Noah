@@ -139,6 +139,16 @@ std::vector<u8>::iterator seqOP_2F_percussionOff(std::vector<u8>::iterator it, s
     return it;
 }
 
+std::vector<u8>::iterator seqOP_30(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+    pChannel->m0 |= 0x800;
+    return it;
+}
+
+std::vector<u8>::iterator seqOP_31(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+    pChannel->m0 &= ~0x800;
+    return it;
+}
+
 std::vector<u8>::iterator seqOP_3A(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     if (((pInstance->m10_flags & 6) == 0) ||
         (((musicStatusFlag & 0x2000) != 0 && ((pChannel->m0 & 2) == 0)))) {
@@ -202,6 +212,12 @@ std::vector<u8>::iterator seqOP_57_LFODepth(std::vector<u8>::iterator it, sSound
 std::vector<u8>::iterator seqOP_58_LFOLength(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     MissingCode();
     return it + 3;
+}
+
+std::vector<u8>::iterator seqOP_5B(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+    pChannel->mCE &= ~1;
+    pChannel->mD8[0].m1E &= ~1;
+    return it;
 }
 
 std::vector<u8>::iterator seqOP_60_setVolume(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
@@ -335,8 +351,8 @@ const std::array<seqFunction, 0x80> seqOpcodes = { {
     seqOP_2F_percussionOff,
 
     //0x30
-    nullptr,
-    nullptr,
+    seqOP_30,
+    seqOP_31,
     nullptr,
     nullptr,
     nullptr,
@@ -382,7 +398,7 @@ const std::array<seqFunction, 0x80> seqOpcodes = { {
     seqOP_58_LFOLength,
     nullptr,
     nullptr,
-    nullptr,
+    seqOP_5B,
     nullptr,
     nullptr,
     nullptr,
