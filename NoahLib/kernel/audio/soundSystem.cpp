@@ -150,8 +150,8 @@ void executeSequenceEvents2(sSoundInstance* param_1, std::vector<sSoundInstanceE
                     instanceEvent.m68_finalNoteToPlay += instanceEvent.m84;
                 }
                 if (instanceEvent.m4 & 0x10) { // interpolate pan
-                    instanceEvent.m98--;
-                    if (instanceEvent.m98 == 0) {
+                    instanceEvent.m98_panDuration--;
+                    if (instanceEvent.m98_panDuration == 0) {
                         instanceEvent.m74_pan = instanceEvent.m92_panTarget;
                         instanceEvent.m4 &= ~0x10;
                     }

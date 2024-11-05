@@ -28,6 +28,8 @@
 #include "battle/battleConfig.h"
 #include "battle/battle.h" // todo: waitFormusic
 #include "kernel/audio/seq.h"
+#include "kernel/audio/wds.h"
+#include "kernel/audio/soundInstance.h"
 
 #include "SDL_gamecontroller.h"
 #include "SDL_keyboard.h"
@@ -2811,19 +2813,33 @@ int currentlyLoadedWave = -1;
 int playMusicVar3 = 0;
 
 std::vector<u8> musicLoadBuffer;
+extern sWdsFile* worldmapWdsResult;
+sWdsFile musicLoadBuffer2;
 
 void loadMusicPhase0UploadData(void* param_1) {
-    assert(0);
+    worldmapWdsResult = playMusic2(&musicLoadBuffer2, 0x2000, 0);
+    /*
+    if (playMusicVar3 > -1) {
+        if (playMusicVar3 < 4) {
+            memcpy(musicLoadBuffer.data() + playMusicVar3 * 0x200, param_1, 0x200);
+            playMusicVar3++;
+            MissingCode();
+            if (playMusicVar3 == 4) {
+                worldmapWdsResult = playMusic2(musicLoadBuffer.begin(), 0x2000, 0);
+            }
+        }
+        else if (playMusicVar3 == 4) {
+            assert(0);
+        }
+    }*/
 }
-
-std::vector<u8> musicLoadBuffer2;
 
 void (*musicLoadedCallback)(void*) = nullptr;
 
 void loadMusicPhase0(int param_1, int param_2, void(*param_3)(void*))
 {
     loadCompleted = 1;
-    musicLoadBuffer2 = allocateBufferForVramUpload(8);
+    //musicLoadBuffer2 = allocateBufferForVramUpload(8);
     readFile(param_1, musicLoadBuffer2, 0, 0x100);
     musicLoadedCallback = param_3;
     return;
@@ -4236,6 +4252,9 @@ void initFontSystem()
     initFontPalettes(0x100, 0xf0);
 }
 
+extern u8 menuReturnState0;
+extern int currentlyLoadedMusic;
+
 void bootField()
 {
     initFontSystem();
@@ -4277,6 +4296,19 @@ void bootField()
 
     resetInputs();
     fieldMusicLoadPending = 0;
+    if (menuReturnState0 == 1) {
+        currentlyPlayingMusic = 0xe;
+        clearMusic2();
+    }
+    if (currentlyLoadedMusic == currentlyPlayingMusic) {
+        clearMusic2();
+    }
+    else {
+        clearMusic();
+        fieldMusicLoadPending = -1;
+        MissingCode();
+        playMusic(currentlyPlayingMusic);
+    }
 
     MissingCode();
 }
@@ -9241,31 +9273,48 @@ void fieldPerFrameReset()
     syncKernelAndFieldStates();
 }
 
+void* loadedMusicData = nullptr;
+
+void* loadMusicPhase0UpdateSub() {
+    return nullptr;
+}
+
 int loadMusicPhase0Update() {
-    MissingCode();
-    musicLoadedCallback(0); // TODO: what argument are we expecting here?
-    return 0;
+    // TODO: this should be called on chucks of 0x200 bytes
+    /*loadedMusicData = loadMusicPhase0UpdateSub();
+    if (loadedMusicData == nullptr) {
+        if (!isCDBusy() && (loadedMusicData == nullptr))
+        {
+            musicLoadBuffer2.clear();
+            loadCompleted = 0;
+            return -1;
+        }
+        return 0;
+    }
+    else*/ {
+        musicLoadedCallback(nullptr); // TODO: what argument are we expecting here?
+        loadCompleted = 0;
+        return  -1;
+        return 0;
+    }
 }
 
 int updateMusicLoadingState() {
-    int iVar1;
-    int iVar2;
 
-    iVar2 = 0;
-    do {
-        iVar1 = loadMusicPhase0Update();
-        iVar2 = iVar2 + 1;
-        if (iVar1 == -1) {
+    for (int i = 0; i < 4; i++) {
+        if (loadMusicPhase0Update() == -1)
             return 0;
-        }
-    } while (iVar2 < 5);
+    }
     return -1;
 }
 
 int currentlyLoadedMusic = -1;
 int updateMusicState2Var1 = 0;
+int updateMusicState2Var2 = 0;
 int updateMusicState2Var3 = 0;
 sSeqFile battleMusic;
+extern sSoundInstance* pMusic;
+void playBattleMusic(sSoundInstance* param_1, int param_2, int param_3);
 
 int updateMusicState2(int param_1)
 {
@@ -9276,7 +9325,8 @@ int updateMusicState2(int param_1)
         waitForMusic(0x10);
         musicLoadBuffer.clear();
         musicVar2 = 0;
-        assert(0);
+        //assert(0);
+        MissingCode();
         currentlyLoadedWave = musicLookupTable[param_1][0];
     }
 
@@ -9296,7 +9346,22 @@ int updateMusicState2(int param_1)
     else {
         if (!isCDBusy()) {
             if (updateMusicState2Var1 == 1) {
-                assert(0);
+                if (updateMusicState2Var2 == 0) {
+                    pMusic = createMusicInstance(&battleMusic);
+                    if (musicVar1 == -1) {
+                        startMusicInstance(pMusic, 0x7f, 0);
+                    }
+                    else {
+                        startMusicInstance(pMusic, 0, 0);
+                        playBattleMusic(pMusic, 0, 0);
+                    }
+                }
+                else{
+                    assert(0);
+                }
+                updateMusicState2Var1 = 0;
+                MissingCode();
+                currentlyLoadedMusic = param_1;
             }
             oldMusicVar2 = 0;
             musicVar1 = -1;

@@ -229,3 +229,46 @@ sWdsFile* findInWdsLinkedList(u32 bankId) {
     }
     return psVar1;
 }
+
+void setupSamplesPtr(int, int) {
+    MissingCode();
+}
+
+void sendSamples2(std::vector<u8>::iterator, int) {
+    MissingCode();
+}
+
+sWdsFile* playMusic2(sWdsFile* wdsFile, int param_2, int param_3) {
+    sWdsFile* psVar2 = findInWdsLinkedList(wdsFile->m20_bankNumber);
+    if (psVar2 == nullptr) {
+        if (int samplePtrToLoad = getSamplePtr(wdsFile, param_3)) {
+            //setupSamplesPtr(samplePtr, wdsFile->m14_ADPCMSize);
+            //sendSamples2(wdsFile->m_rawData.begin() + wdsFile->m18_headerSize2, param_2 - wdsFile->m10_headerSize1);
+
+            loadWdsSub0(samplePtrToLoad, wdsFile->m_rawData.begin() + wdsFile->m18_headerSize2, wdsFile->m14_ADPCMSize, nullptr);
+
+            sWdsFile* wdsCopy = new sWdsFile; // TODO: this was allocated from the sound arena
+
+            if (wdsCopy) {
+                wdsCopy->init(wdsFile->m_rawData.begin(), wdsFile->m10_headerSize1);
+                wdsCopy->m28_adpcmAddress = samplePtrToLoad;
+                DisableEvent(audioTickEvent);
+
+                auto ppsVar5 = &pLoadedWdsLinkedList;
+                for (auto psVar3 = pLoadedWdsLinkedList; psVar3 != nullptr; psVar3 = psVar3->m2C_pNext) {
+                    psVar3 = *ppsVar5;
+                    ppsVar5 = &psVar3->m2C_pNext;
+                }
+                *ppsVar5 = wdsCopy;
+                wdsCopy->m2C_pNext = nullptr;
+                EnableEvent(audioTickEvent);
+                return wdsCopy;
+            }
+            assert(0);
+        }
+        setSoundError(0x1F);
+        return nullptr;
+    }
+    setSoundError(0x16);
+    return nullptr;
+}

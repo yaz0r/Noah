@@ -88,6 +88,16 @@ std::vector<u8>::iterator seqOP_19_loopEnd(std::vector<u8>::iterator it, sSoundI
     return it;
 }
 
+std::vector<u8>::iterator seqOP_1A(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+    auto& pCallstack = pChannel->m9C_callstack[pChannel->m72_callstackDepth];
+    if (pCallstack.m0_loopCount == 0) {
+        it = pCallstack.m8_loopEndIt;
+        pChannel->m66_octave = pCallstack.m3;
+        pChannel->m72_callstackDepth--;
+    }
+    return it;
+}
+
 std::vector<u8>::iterator seqOP_20_setTempo(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pInstance->m58 = (int)it[0] << 0x10;
     pInstance->m54 = (int)it[0] * (pInstance->m64 >> 16);
@@ -155,6 +165,12 @@ std::vector<u8>::iterator seqOP_4A(std::vector<u8>::iterator it, sSoundInstance*
     return it + 1;
 }
 
+std::vector<u8>::iterator seqOP_42(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+    pChannel->m30.m6 |= 0x10;
+    pChannel->m30.m27_ADSR_Attack = *it;
+    return it + 1;
+}
+
 std::vector<u8>::iterator seqOP_44(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pChannel->m30.m6 |= 0x40;
     pChannel->m30.m29_ADSR_Sustain = *it;
@@ -164,6 +180,28 @@ std::vector<u8>::iterator seqOP_45(std::vector<u8>::iterator it, sSoundInstance*
     pChannel->m30.m6 |= 0x40;
     pChannel->m30.m2A_ADSR_Release = *it;
     return it + 1;
+}
+
+std::vector<u8>::iterator seqOP_50(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+    pChannel->m6E = ((int)it[0] << 0x18) >> 0x13;
+    pChannel->m2 |= 0x200;
+    return it + 1;
+}
+
+std::vector<u8>::iterator seqOP_51(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+    pChannel->m6E += ((int)it[0] << 0x18) >> 0x13;
+    pChannel->m2 |= 0x200;
+    return it + 1;
+}
+
+std::vector<u8>::iterator seqOP_57_LFODepth(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+    MissingCode();
+    return it + 1;
+}
+
+std::vector<u8>::iterator seqOP_58_LFOLength(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+    MissingCode();
+    return it + 3;
 }
 
 std::vector<u8>::iterator seqOP_60_setVolume(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
@@ -188,6 +226,18 @@ std::vector<u8>::iterator seqOP_68_pan(std::vector<u8>::iterator it, sSoundInsta
     pChannel->m74_pan = (ushort)it[0] << 8;
     pChannel->m2 |= 0x100;
     return it + 1;
+}
+
+std::vector<u8>::iterator seqOP_6A_panSlide(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+    int duration = it[0];
+    int targetPan = it[1] - ((((int)pChannel->m74_pan) << 0x10) >> 0x18);
+    if (duration && targetPan) {
+        pChannel->m92_panTarget = targetPan * 0x100;
+        pChannel->m98_panDuration = duration;
+        pChannel->m4 |= 0x10;
+        pChannel->m90_panDelta = pChannel->m92_panTarget / duration;
+    }
+    return it + 2;
 }
 
 std::vector<u8>::iterator seqOP_78(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
@@ -259,7 +309,7 @@ const std::array<seqFunction, 0x80> seqOpcodes = { {
     seqOP_17_timeSignature,
     seqOP_18_loopStart,
     seqOP_19_loopEnd,
-    nullptr,
+    seqOP_1A,
     nullptr,
     nullptr,
     nullptr,
@@ -305,7 +355,7 @@ const std::array<seqFunction, 0x80> seqOpcodes = { {
     //0x40
     seqOP_40_ADSRReset,
     nullptr,
-    nullptr,
+    seqOP_42,
     nullptr,
     seqOP_44,
     seqOP_45,
@@ -321,15 +371,15 @@ const std::array<seqFunction, 0x80> seqOpcodes = { {
     nullptr,
 
     //0x50
+    seqOP_50,
+    seqOP_51,
     nullptr,
     nullptr,
     nullptr,
     nullptr,
     nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
+    seqOP_57_LFODepth,
+    seqOP_58_LFOLength,
     nullptr,
     nullptr,
     nullptr,
@@ -349,7 +399,7 @@ const std::array<seqFunction, 0x80> seqOpcodes = { {
     nullptr,
     seqOP_68_pan,
     nullptr,
-    nullptr,
+    seqOP_6A_panSlide,
     nullptr,
     nullptr,
     nullptr,
