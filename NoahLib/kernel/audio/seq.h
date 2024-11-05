@@ -22,7 +22,7 @@ struct sSeqFile : sLoadableData {
         m14 = READ_LE_U16(it + 0x14);
         m16_sampleBank = READ_LE_U16(it + 0x16);
         m18 = READ_LE_U16(it + 0x18);
-        m1A = READ_LE_U8(it + 0x1A);
+        m1A = READ_LE_S8(it + 0x1A);
         m1B = READ_LE_U8(it + 0x1B);
         m1C_Original = READ_LE_U8(it + 0x1C);
         m1D_Original = READ_LE_U8(it + 0x1D);
@@ -37,7 +37,7 @@ struct sSeqFile : sLoadableData {
     u16 m14;
     u16 m16_sampleBank;
     u16 m18;
-    u8 m1A;
+    s8 m1A;
     u8 m1B;
 
     u8 m1C_Original;

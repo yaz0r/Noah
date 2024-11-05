@@ -28,6 +28,6 @@ extern std::array<sSoundInstanceEvent30*, 24> playSoundEffectSubSub1Var0;
 void initSoundSystem(ushort param_1);
 void setSoundError(u16 errorCode);
 int processSoundMenuSub0(void);
-void setupReverb(uint param_1, s16 param_2, long param_3, long param_4);
+void setupReverb(int mode, s16 param_2, long delay, long feedback);
 
 void updateSPUDebugger();

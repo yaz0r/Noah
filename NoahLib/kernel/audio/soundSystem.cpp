@@ -688,7 +688,7 @@ int processSoundMenuSub0(void)
     return uVar1;
 }
 
-void setupReverb(uint param_1, s16 param_2, long param_3, long param_4) {
+void setupReverb(int mode, s16 param_2, long delay, long feedback) {
     MissingCode();
 }
 

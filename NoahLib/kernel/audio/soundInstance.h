@@ -129,7 +129,7 @@ struct sSoundInstance {
     s16 m3A;
     s16 m3C;
     s16 m3E;
-    u8 m41;
+    s8 m41;
     u8 m42;
     u8 m43;
     s16 m44;
