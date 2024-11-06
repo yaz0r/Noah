@@ -655,7 +655,7 @@ s32 worldmap_taskYggdrasil_update(int param_1)
                     break;
                 case 3: //sand
                     spawnWorldmapParticles(0x3C, &SVECTOR_1f8000a8, &SVECTOR_1f8000a0);
-                    clearWorldmapParticles(0x3cF);
+                    clearWorldmapParticles(0x3F);
                     break;
                 }
             } else {
