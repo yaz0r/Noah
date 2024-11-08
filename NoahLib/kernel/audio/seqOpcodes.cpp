@@ -162,6 +162,14 @@ std::vector<u8>::iterator seqOP_31(std::vector<u8>::iterator it, sSoundInstance*
     return it;
 }
 
+std::vector<u8>::iterator seqOP_32(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+    if ((pChannel->m27 & 1) != 0) {
+        (pChannel->m30).m6 = (pChannel->m30).m6 | 0x1000;
+        (pChannel->m30).m2 = (pChannel->m30).m2 | 0x10;
+    }
+    return it;
+}
+
 std::vector<u8>::iterator seqOP_3A(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     if (((pInstance->m10_flags & 6) == 0) ||
         (((musicStatusFlag & 0x2000) != 0 && ((pChannel->m0 & 2) == 0)))) {
@@ -415,7 +423,7 @@ const std::array<seqFunction, 0x80> seqOpcodes = { {
     //0x30
     seqOP_30,
     seqOP_31,
-    nullptr,
+    seqOP_32,
     nullptr,
     nullptr,
     nullptr,

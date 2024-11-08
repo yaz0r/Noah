@@ -102,6 +102,7 @@ void initOpcodes()
     fieldScriptOpcodes[0x85] = OP_IF_GAMEPROGRESS_GREATER;
     fieldScriptOpcodes[0x86] = OP_IF_GAMEPROGRESS_EQUAL;
     fieldScriptOpcodes[0x87] = OP_SET_GAMEPROGRESS;
+    fieldScriptOpcodes[0x8F] = OP_ADD_GOLD;
     fieldScriptOpcodes[0x91] = OP_IF_CHARACTER_IN_PARTY;
     fieldScriptOpcodes[0x92] = OP_92;
     fieldScriptOpcodes[0x93] = OP_ADD_ENDITY_TO_MECHA_LIST;

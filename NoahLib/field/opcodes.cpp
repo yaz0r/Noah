@@ -16,6 +16,8 @@
 #include "field/particles/particles.h"
 #include "battle/battle.h"
 
+#include "kernel/audio/soundInstance.h"
+
 s32 particleCreationSlot = 0;
 
 // TODO: Cleanup
@@ -1972,6 +1974,20 @@ void OP_SET_GAMEPROGRESS()
     ADVANCE_VM(0x3);
 }
 
+void OP_ADD_GOLD() {
+    sFieldScriptEntity* psVar1;
+    int iVar2;
+
+    iVar2 = getImmediateOrVariableUnsigned(1);
+    psVar1 = pCurrentFieldScriptActor;
+    iVar2 = pKernelGameState->m1924_Gold + iVar2;
+    if (9999999 < iVar2) {
+        iVar2 = 9999999;
+    }
+    pKernelGameState->m1924_Gold = iVar2;
+    psVar1->mCC_scriptPC = psVar1->mCC_scriptPC + 3;
+}
+
 void OP_IF_CHARACTER_IN_PARTY()
 {
     for (int i = 0; i < 3; i++) {
@@ -2507,21 +2523,17 @@ void OP_72()
     }
 }
 
-void OP_C4SubSub0(uint param_1)
-{
-    MissingCode();
-}
-
 void OP_C4SubSub1(int param_1, short param_2, short param_3, uint param_4)
 {
-    MissingCode();
+    StopSoundEffect((param_4 & 7) << 1);
+    PlaySoundEffect2(param_1, (param_4 & 7) << 1, (int)param_2, (int)param_3);
 }
 
 int OP_C4SubVar0 = 0;
 void playFieldSoundEffect(int param_1, uint param_2)
 {
     if (param_1 == 0) {
-        OP_C4SubSub0((param_2 & 7) << 1);
+        StopSoundEffect((param_2 & 7) << 1);
     }
     else {
         OP_C4SubVar0 = param_1;

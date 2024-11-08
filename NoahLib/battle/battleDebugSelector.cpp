@@ -8,6 +8,9 @@
 #include "kernel/debugText.h"
 #include "kernel/memory.h"
 
+void clearMusic();
+extern sSeqFile battleMusic;
+
 std::array<std::array<int, 3>, 4> battleDebugSelectorTableValues;
 std::array<std::array<u8, 3>, 4> battleDebugSelectorIsCellEnabled;
 
@@ -317,6 +320,12 @@ void battleSetDebugInventory() {
     MissingCode();
 }
 
+void openMusicBattleFolder(void)
+{
+    setCurrentDirectory(0x20, 2);
+    return;
+}
+
 void battleDebugSelector()
 {
     battleDebugSelectorInit();
@@ -369,7 +378,10 @@ void battleDebugSelector()
         }
     }
 
-    MissingCode(); // load battle music
+    clearMusic();
+    openMusicBattleFolder();
+    readFile(4, battleMusic, 0, 80); // TODO this normally go through a temp buffer + memmove for some reasons
+    waitReadCompletion(0);
 
     battleSetDebugInventory();
 

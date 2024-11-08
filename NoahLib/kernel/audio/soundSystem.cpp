@@ -248,7 +248,11 @@ void executeSequenceEvents(sSoundInstance* param_1, std::vector<sSoundInstanceEv
                         }
                     }
                     else {
-                        byteCodeIt = seqOpcodes[byteCode - 0x80](byteCodeIt + 1, param_1, &instanceEvent);
+                        auto opcode = seqOpcodes[byteCode - 0x80];
+                        if (opcode == nullptr) {
+                            return;
+                        }
+                        byteCodeIt = opcode(byteCodeIt + 1, param_1, &instanceEvent);
                         if (instanceEvent.m0 == 0) { // disable the voice
                             param_1->m48_activeVoicesBF &= ~(1 << (instanceEvent.m6_voiceIndex & 0x1f));
                             break;
@@ -300,11 +304,11 @@ void executeSequenceEvents(sSoundInstance* param_1, std::vector<sSoundInstanceEv
                                 break;
                             }
 
-                            byteCodeIt = instanceEvent.m18_infiniteLoopStart.value();
                             bIsKeyOn = byteCode2 < 0x80;
                             if (!instanceEvent.m18_infiniteLoopStart.has_value()) {
                                 goto LAB_8003ca60;
                             }
+                            byteCodeIt = instanceEvent.m18_infiniteLoopStart.value();
                         LAB_8003ca48:
                             byteCode2 = *byteCodeIt;
                         } while (0x7F < byteCode2);

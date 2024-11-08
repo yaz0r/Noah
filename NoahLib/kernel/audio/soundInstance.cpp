@@ -523,3 +523,34 @@ void freeSoundInstance(sSoundInstance* pSoundInstance) {
         setSoundError(10);
     }
 }
+
+void StopSoundEffect(uint param_1)
+{
+    sSoundInstance* psVar1;
+    sSoundInstanceEvent* psVar2;
+    int iVar4;
+
+    psVar1 = pSoundEffectsInstances;
+    iVar4 = 2;
+    psVar2 = pSoundEffectsInstances->m94_events.data() + (param_1 & 0xfe ^ 8);
+    do {
+        iVar4 = iVar4 + -1;
+        if ((psVar2->m0 & 1) != 0) {
+            psVar2->m0 = 0;
+            psVar1->m48_activeVoicesBF = ~(1 << (psVar2->m6_voiceIndex & 0x1f)) & psVar1->m48_activeVoicesBF;
+            playSoundEffectSubSub0(&psVar2->m30, psVar2->m27);
+        }
+        psVar2 = psVar2 + 1;
+    } while (iVar4 != 0);
+}
+
+void PlaySoundEffect2(int param_1, uint param_2, int param_3, int param_4)
+
+{
+    if ((musicStatusFlag & 0x800) != 0) {
+        playSoundEffectVar0 = 2;
+        playSoundEffectSub(param_2 & 0xfe ^ 8 | 0x2000, param_1, (short)((uint)(param_3 << 0x18) >> 0x10),
+            (ushort)((uint)(param_4 << 0x18) >> 0x10));
+    }
+    return;
+}

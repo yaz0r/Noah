@@ -25,6 +25,7 @@
 #include "kernel/TIM.h"
 #include "kernel/audio/wds.h"
 #include "kernel/audio/seq.h"
+#include "kernel/audio/soundInstance.h"
 
 #include "battle/menu_chi.h"
 
@@ -89,8 +90,12 @@ s32 backupCameraMode = 1;
 
 bool battleSpritesDisabled = false;
 
+extern sSoundInstance* pMusic;
+sSoundInstance* pCurrentBattleMusic;
+
 void jumpUpdatePositionSub0(sSpriteActorCore* param_1, sSpriteActorCore* param_2);
 void jumpUpdatePosition(sSpriteActorCore* param_1);
+void playBattleMusic(sSoundInstance* param_1, int param_2, int param_3);
 
 extern int spriteCallback2Var4;
 
@@ -3030,13 +3035,13 @@ bool initFxFragments(void)
         std::span<u8>::iterator psVar4 = sFieldEntitySub4_110_8005a474.m10_startOfAnimationContainer->getAnimation(startJumpAnimationVar2);
         spriteBytecode2ExtendedE0(processBattleAnimationSub0_var1, psVar4, &sFieldEntitySub4_110_8005a474);
     }
-    MissingCode();
-    //puVar5 = loadEffectFragmentsAndAudio(FxFragmentSpecialAnimation);
+    processBattleAnimationSub0_var1->m50 = loadEffectFragmentsAndAudio(*FxFragmentSpecialAnimation);
+    MissingCode(); // Stuff are pretty weird here, not sure what this is trying to do
     //psVar4->m50 = (int)puVar5;
     //psVar1->m50 = (int)puVar5;
     fxFragmentLoaded = 1;
     //DAT_Battle__800c35d4 = 1;
-    //playBattleMusic(pCurrentBattleMusic, 0x60, 0x78);
+    playBattleMusic(pCurrentBattleMusic, 0x60, 0x78);
     MissingCode();
     allocateSavePointMeshDataSub0_callback(&sStack_60);
     return !isVramPrebacked;
@@ -6302,6 +6307,14 @@ void setupStringsForMonsterNames() {
     }
 }
 
+sSoundInstance* realStartBattleMusic(sSeqFile* param_1, int param_2, int param_3) {
+    sSoundInstance* psVar1;
+
+    psVar1 = createMusicInstance(param_1);
+    startMusicInstance(psVar1, param_2, param_3);
+    return psVar1;
+}
+
 void battleMain() {
 
 #if 0
@@ -6315,6 +6328,12 @@ void battleMain() {
     memset(battleVar0, 0, sizeof(sBattleVar0));
     memset(battleVar1, 0, sizeof(sBattleVar1));
     memset(battleVar2, 0, sizeof(sBattleVar2));
+
+    battleDebugDisplay = 0;
+    newBattleInputButton2 = 0xff;
+    previousNewBattleInputButton = 0xff;
+    startCharacterJumpToEnemyVar0 = 0;
+    pCurrentBattleMusic = pMusic;
 
     // TODO: more logic here
     {
@@ -6337,10 +6356,11 @@ void battleMain() {
     initBattleGraphics(&battleConfigFile3);
 
     MissingCode();
+    if (battleInitVar1 != 0) {
+        pCurrentBattleMusic = realStartBattleMusic(&battleMusic, 0x7f, 0);
+    }
     battleLoadDataVar2Bis = battleLoadDataVar2;
     battleLoadDataVar2Ter = battleLoadDataVar2;
-    MissingCode();
-
     init8920();
     makeBattleTimeProgress = 1;
     setCameraVisibleEntities(allPlayerCharacterBitmask);

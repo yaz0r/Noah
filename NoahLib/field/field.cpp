@@ -9512,6 +9512,40 @@ int isFieldBattlePrevented(void)
     return iVar1;
 }
 
+int loadFieldSeqVar0 = -1;
+extern sSeqFile* fieldSeq;
+
+void loadFieldSeq(void)
+{
+    size_t sVar1;
+
+    setCurrentDirectory(4, 0);
+    sVar1 = getFileSizeAligned(0xa8);
+    fieldSeq = new sSeqFile();
+    flagAllocation(fieldSeq->m_rawData);
+    //if (loadFieldSeqVar0 == -1) {
+        readFile(0xa8, *fieldSeq, 0, 0x80);
+        waitReadCompletion(0);
+    //}
+    /*else {
+        memcpy((uchar*)fieldSeq, loadFieldSeqVar1, sVar1);
+        unflagAllocation(loadFieldSeqVar1);
+        free(loadFieldSeqVar1);
+    }*/
+    loadSequence(fieldSeq);
+    waitForMusic(0x10);
+    setCurrentDirectory(4, 0);
+    loadFieldSeqVar0 = -1;
+    return;
+}
+
+void unloadFieldSeq() {
+    unloadSequence(fieldSeq);
+    unflagAllocation(fieldSeq->m_rawData);
+    delete fieldSeq;
+    loadFieldSeqVar0 = -1;
+}
+
 void fieldEntryPoint()
 {
     fieldDebugDisable = (runningOnDTL == -1);
@@ -9524,6 +9558,10 @@ void fieldEntryPoint()
     MissingCode();
 
     setCurrentDirectory(4, 0); // TODO: this is not explicitly called at this level
+
+    loadFieldSeq();
+
+    MissingCode();
 
     allocatePartyCharacterBuffers();
 
@@ -9607,6 +9645,7 @@ void fieldEntryPoint()
             VSync(0);
             freeFieldData();
             MissingCode();
+            unloadFieldSeq();
             typeOfPlayableCharacterLoaded = 0;
             MissingCode();
             fieldChangeGameMode(0);//enter battle
@@ -9653,6 +9692,7 @@ void fieldEntryPoint()
                 VSync(0);
                 freeFieldData();
                 MissingCode();
+                unloadFieldSeq();
                 typeOfPlayableCharacterLoaded = 0;
                 MissingCode();
                 fieldChangeGameMode(1);
@@ -9677,6 +9717,7 @@ void fieldEntryPoint()
                     VSync(0);
                     freeFieldData();
                     MissingCode();
+                    unloadFieldSeq();
                     typeOfPlayableCharacterLoaded = 0;
                     MissingCode();
                     fieldChangeGameMode(3);
