@@ -350,7 +350,7 @@ extern std::array<sSpriteActorCore*, 11> battleSpriteActorCores;
 
 extern MATRIX battleRenderingMatrix;
 extern s8 battleTimeEnabled;
-extern s8 battleCharacters[3];
+extern std::array<s8, 4> battleCharacters;
 extern u8 bBattleTickMode1;
 extern std::array<s8, 0xB> isEntityReadyForBattle;
 extern std::array<s8, 0xB> randomTurnOrder;

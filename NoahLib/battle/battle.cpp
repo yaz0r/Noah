@@ -64,7 +64,7 @@ s8 battleDebugDisplay = 0;
 s8 requestedBattleConfig = 0;
 bool battleIsPaused = false;
 u8 battleInputButton = 0;
-s8 battleCharacters[3];
+std::array<s8, 4> battleCharacters;
 std::array<s8, 11> isBattleSlotFilled;
 
 sMechaDataTable1* battleLoadDataVar0;
@@ -126,14 +126,14 @@ s8 setupTurnRenderLoop_menuVar;
 u8 startJumpAnimationVar1;
 u16 jumpAnimationActiveActorBF = 0;
 s16 startJumpAnimationVar2;
-void* loadWdsDataNeeded = nullptr;
+sWdsFile* loadWdsDataNeeded = nullptr;
 u8 startJumpAnimationVar3 = 0;
 u32 startReadingBattleJumpAnimationVar0 = 0;
 
 void loadWdsDataIfNeeded(void)
 {
     if (loadWdsDataNeeded != 0) {
-        assert(0);
+        unloadWds(loadWdsDataNeeded);
     }
     loadWdsDataNeeded = 0;
     return;
@@ -159,7 +159,7 @@ void initBattleDefDrawContext() {
 
 sLoadingBatchCommands battleLoadingCommands[4];
 
-sLoadableDataRaw battleStartSeq;
+sSeqFile battleStartSeq;
 sLoadableDataRaw battleCharacterConfigFile;
 sLoadableDataRaw battleLoaderBinary;
 
@@ -193,7 +193,7 @@ void loadBattleLoader() {
 
     Noah_MissingCode("Code to get the amount of free memory before battle loader");
 
-    battleStartSeq.resize(getFileSizeAligned(2));
+    //battleStartSeq.resize(getFileSizeAligned(2));
     battleCharacterConfigFile.resize(getFileSizeAligned(3));
 
     battleLoadingCommands[0].m0_fileIndex = 2;
@@ -207,6 +207,8 @@ void loadBattleLoader() {
     batchStartLoadingFiles(battleLoadingCommands, 0);
 
     while (isCDBusy() == 3) {};
+
+    loadSequence(&battleStartSeq);
 
     Noah_MissingCode("Start battle transition seq");
 }
@@ -2100,10 +2102,12 @@ void initBattleSpriteSystem() {
     objectClippingMask = 0;
 }
 
+extern sWdsFile* wdsFile5;
 void initBattleGraphics(sBattleSpriteConfigs* param_1) {
     initBattle3dRendering();
     initBattleSpriteSystem();
     createBattleSpriteLoadingTask(param_1);
+    unloadWds(wdsFile5);
     setupSVector(&battleCameraEyeTarget, battleMechaInitData->m482_eye.vx, battleMechaInitData->m482_eye.vy, battleMechaInitData->m482_eye.vz);
     setupSVector(&battleCameraEye, battleMechaInitData->m482_eye.vx, battleMechaInitData->m482_eye.vy, battleMechaInitData->m482_eye.vz);
     setupSVector(&battleCameraAtTarget, battleMechaInitData->m47C_at.vx, battleMechaInitData->m47C_at.vy, battleMechaInitData->m47C_at.vz);
@@ -2299,7 +2303,10 @@ bool initJumpData(uint entity, uint target) {
         battleJumpData[i].m4 = var2 & 0x80;
     }
 
-    return battleCharacters[entity] == 4;
+    // HACK this would get out of bound for enemies
+    if(entity < battleCharacters.size())
+        return battleCharacters[entity] == 4; // return if billy
+    return 0;
 }
 
 
@@ -2635,9 +2642,7 @@ std::optional<std::vector<u8>::iterator> loadEffectFragmentsAndAudio(sSpriteActo
             }
         }
         else if (magic == 'sdes') {
-            sSeqFile tempSeq;
-            tempSeq.init(entry, buffer.m_rawData.size() - offset);
-            loadSequence(&tempSeq);
+            loadSequence(&buffer.m4_entriesAsSequences[i]);
             pWds = entry;
         }
         else {
@@ -2897,11 +2902,21 @@ void freePlayerTurnStructs(void) {
     }
 }
 
+void clearFragmentSeq(sSpriteActorAnimationBundle* pBundle) {
+    for (int i = 3; i < pBundle->m0_numEntries; i++) {
+        u32 offset = READ_LE_U32(pBundle->m_rawData.begin() + 0x4 + 4 * i);
+        std::vector<u8>::iterator entry = pBundle->m_rawData.begin() + offset;
+        u32 magic = READ_LE_U32(entry);
+        if (magic == 'sdes') {
+            unloadSequence(&pBundle->m4_entriesAsSequences[i]);
+        }
+    }
+}
+
 void clearFxFragment(void)
 {
     if (fxFragmentLoaded != '\0') {
-        //FUN_Battle__800c1140(battleAnimationLoadingDest);
-        MissingCode();
+        clearFragmentSeq(battleAnimationLoadingDest);
         fxFragmentLoaded = '\0';
     }
     return;
@@ -6335,6 +6350,14 @@ void battleMain() {
     while (battleTimeEnabled == '\0') {
         battleRenderDebugAndMain();
     }
+
+    // This would cause a use after free if it was kept in the original order
+    //battleStartSeq.clear();
+    if (battleTransitionEffect != 4) {
+        stopSequence(&battleStartSeq);
+    }
+    unloadSequence(&battleStartSeq);
+    //battleStartSeq.clear(); // this was moved here to avoid use after free
 
     MissingCode();
 

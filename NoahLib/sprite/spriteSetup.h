@@ -1,6 +1,7 @@
 #pragma once
 
 #include "kernel/filesystem.h"
+#include "kernel/audio/seq.h"
 
 struct sFieldEntitySub4_110_0_frame {
     void init(std::span<u8>::iterator data) {
@@ -84,6 +85,14 @@ struct sSpriteActorAnimationBundle : public sLoadableData
 #endif
         m8_pData.init(inputData + READ_LE_U32(inputData + 8));
         mC_pData = m4_entries[2];
+
+        m4_entriesAsSequences.resize(m4_entries.size());
+        for (int i = 3; i < m0_numEntries; i++) {
+            u32 magic = READ_LE_U32(m4_entries[i].begin());
+            if (magic == 'sdes') {
+                m4_entriesAsSequences[i].init(m4_entries[i].begin(), m4_entries[i].size());
+            }
+        }
     }
 
     std::vector<u8> m_rawData;
@@ -104,6 +113,8 @@ struct sSpriteActorAnimationBundle : public sLoadableData
 
     sFieldEntitySub4_110_0 m8_pData;
     std::span<u8> mC_pData;
+
+    std::vector<sSeqFile> m4_entriesAsSequences;
 
 };
 

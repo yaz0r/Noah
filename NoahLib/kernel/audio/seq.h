@@ -11,6 +11,15 @@ struct sSeqFile : sLoadableData {
         }
         init(temp);
     }
+    void init(std::span<u8>::iterator it, int size) {
+        std::vector<u8> temp;
+        temp.resize(size);
+        for (int i = 0; i < size; i++) {
+            temp[i] = it[i];
+        }
+        init(temp);
+    }
+
     virtual void init(std::vector<u8>& data) override {
         m_rawData = data;
         auto it = data.begin();

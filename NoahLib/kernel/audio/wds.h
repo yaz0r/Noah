@@ -51,5 +51,6 @@ extern sWdsFile* pLoadedWdsLinkedList;
 void spuDmaCompletionCallback(void);
 void initLoadedSampleTable();
 sWdsFile* loadWds(sWdsFile& wdsFile, s32 param_2);
+void unloadWds(sWdsFile* pWdsFile);
 sWdsFile* findInWdsLinkedList(u32 bankId);
 sWdsFile* playMusic2(sWdsFile* param_1, int param_2, int param_3);

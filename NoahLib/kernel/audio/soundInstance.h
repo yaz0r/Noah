@@ -168,6 +168,7 @@ extern int playSoundEffectVar0;
 extern u32 pendingKeyOn;
 
 sSoundInstance* initSoundEffectInstances(uint param_1);
+void freeSoundInstance(sSoundInstance* pSoundInstance);
 void addActiveSoundInstance(sSoundInstance* pSoundInstance);
 void initSoundInstanceDefaults(sSoundInstance* pSoundInstance);
 void playSoundEffectSub(uint param_1, uint param_2, short param_3, u16 param_4);

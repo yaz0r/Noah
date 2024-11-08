@@ -2714,10 +2714,47 @@ int playMusicAuthorized = 0;
 int musicVar1 = -1;
 int musicVar2 = 0;
 int currentlyPlayingMusic = 255;
+int updateMusicState2Var3 = 0;
+int currentlyLoadedWave = -1;
+int currentlyLoadedMusic = -1;
+int needStartMusicInstanceSub0 = 0;
+int needReloadWds = 0;
+extern sSoundInstance* pMusic;
+int updateMusicState2Var2 = 0;
+
+void updateNeedStartMusicInstanceSub0() {
+    if (needStartMusicInstanceSub0 == 1) {
+        startMusicInstanceSub0(pMusic);
+        if (updateMusicState2Var2 == 0) {
+            freeSoundInstance(pMusic);
+        }
+        else {
+            assert(0);
+        }
+        needStartMusicInstanceSub0 = 0;
+        updateMusicState2Var2 = 0;
+    }
+}
+extern sWdsFile* worldmapWdsResult;
+
+void reloadWdsIfNeeded(void)
+{
+    if (needReloadWds == 1) {
+        unloadWds(worldmapWdsResult);
+        needReloadWds = 0;
+    }
+    return;
+}
 
 void clearMusic()
 {
-    MissingCode();
+    if (updateMusicState2Var3 != 0) {
+        updateNeedStartMusicInstanceSub0();
+        reloadWdsIfNeeded();
+    }
+    currentlyLoadedWave = -1;
+    currentlyLoadedMusic = -1;
+    updateMusicState2Var3 = 0;
 }
 
 void clearMusic2()
@@ -2809,11 +2846,9 @@ std::array<std::array<s8, 2>, 0x50> musicLookupTable = { { // incomplete
 } };
 
 int isMusicLoadingStartPending = 0;
-int currentlyLoadedWave = -1;
 int playMusicVar3 = 0;
 
 std::vector<u8> musicLoadBuffer;
-extern sWdsFile* worldmapWdsResult;
 sWdsFile musicLoadBuffer2;
 
 void loadMusicPhase0UploadData(void* param_1) {
@@ -4253,7 +4288,6 @@ void initFontSystem()
 }
 
 extern u8 menuReturnState0;
-extern int currentlyLoadedMusic;
 
 void bootField()
 {
@@ -9308,12 +9342,8 @@ int updateMusicLoadingState() {
     return -1;
 }
 
-int currentlyLoadedMusic = -1;
 int updateMusicState2Var1 = 0;
-int updateMusicState2Var2 = 0;
-int updateMusicState2Var3 = 0;
 sSeqFile battleMusic;
-extern sSoundInstance* pMusic;
 void playBattleMusic(sSoundInstance* param_1, int param_2, int param_3);
 
 int updateMusicState2(int param_1)
@@ -9325,8 +9355,7 @@ int updateMusicState2(int param_1)
         waitForMusic(0x10);
         musicLoadBuffer.clear();
         musicVar2 = 0;
-        //assert(0);
-        MissingCode();
+        needReloadWds = oldMusicVar2;
         currentlyLoadedWave = musicLookupTable[param_1][0];
     }
 
@@ -9360,7 +9389,7 @@ int updateMusicState2(int param_1)
                     assert(0);
                 }
                 updateMusicState2Var1 = 0;
-                MissingCode();
+                needStartMusicInstanceSub0 = 1;
                 currentlyLoadedMusic = param_1;
             }
             oldMusicVar2 = 0;

@@ -104,6 +104,19 @@ std::vector<u8>::iterator seqOP_20_setTempo(std::vector<u8>::iterator it, sSound
     return it + 1;
 }
 
+std::vector<u8>::iterator seqOP_22_tempoSlide(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+    int duration = it[0];
+    int tempoOffset = it[1];
+
+    pInstance->m62 = tempoOffset;
+    int targetTempo = tempoOffset * 0x10000 - pInstance->m58;
+
+    if ((duration != 0) && (targetTempo != 0)) {
+        pInstance->m60 = (ushort)duration;
+        pInstance->m5C = targetTempo / (int)(uint)duration;
+    }
+    return it + 2;
+}
 
 std::vector<u8>::iterator seqOP_29(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pChannel->m62 = it[0];
@@ -204,12 +217,22 @@ std::vector<u8>::iterator seqOP_51(std::vector<u8>::iterator it, sSoundInstance*
     return it + 1;
 }
 
+std::vector<u8>::iterator seqOP_54(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+    MissingCode();
+    return it + 2;
+}
+
 std::vector<u8>::iterator seqOP_57_LFODepth(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     MissingCode();
     return it + 1;
 }
 
 std::vector<u8>::iterator seqOP_58_LFOLength(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+    MissingCode();
+    return it + 3;
+}
+
+std::vector<u8>::iterator seqOP_59(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     MissingCode();
     return it + 3;
 }
@@ -227,6 +250,13 @@ std::vector<u8>::iterator seqOP_60_setVolume(std::vector<u8>::iterator it, sSoun
     return it + 1;
 }
 
+std::vector<u8>::iterator seqOP_61(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+    pChannel->m78_volume = (int)it[0] * 0x1000000 + pChannel->m78_volume & 0x7fffffff;
+    pChannel->m2 |= 0x100;
+    pChannel->m4 &= 0xfef7;
+    return it + 1;
+}
+
 std::vector<u8>::iterator seqOP_62_volumeSlide(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     int duration = it[0];
     int targetVolume = (int)it[1] * 0x1000000 - pChannel->m78_volume;
@@ -236,6 +266,27 @@ std::vector<u8>::iterator seqOP_62_volumeSlide(std::vector<u8>::iterator it, sSo
         pChannel->m88_volumeSlideDelta = targetVolume / (int)(uint)duration;
     }
     return it + 2;
+}
+
+std::vector<u8>::iterator seqOP_63(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+    MissingCode();
+    return it + 1;
+}
+
+std::vector<u8>::iterator seqOP_64(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+    MissingCode();
+    return it + 3;
+}
+
+std::vector<u8>::iterator seqOP_65(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+    MissingCode();
+    return it + 3;
+}
+
+std::vector<u8>::iterator seqOP_67(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+    pChannel->mCE &= 0xFFFD;
+    pChannel->mD8[1].m1E &= 0xFFFE;
+    return it;
 }
 
 std::vector<u8>::iterator seqOP_68_pan(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
@@ -254,6 +305,17 @@ std::vector<u8>::iterator seqOP_6A_panSlide(std::vector<u8>::iterator it, sSound
         pChannel->m90_panDelta = pChannel->m92_panTarget / duration;
     }
     return it + 2;
+}
+
+std::vector<u8>::iterator seqOP_6D(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+    MissingCode();
+    return it + 3;
+}
+
+std::vector<u8>::iterator seqOP_6F(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+    pChannel->mCE &= 0xFFFB;
+    pChannel->mD8[2].m1E &= 0xFFFE;
+    return it;
 }
 
 std::vector<u8>::iterator seqOP_78(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
@@ -335,7 +397,7 @@ const std::array<seqFunction, 0x80> seqOpcodes = { {
     //0x20
     seqOP_20_setTempo,
     nullptr,
-    nullptr,
+    seqOP_22_tempoSlide,
     nullptr,
     nullptr,
     nullptr,
@@ -391,12 +453,12 @@ const std::array<seqFunction, 0x80> seqOpcodes = { {
     seqOP_51,
     nullptr,
     nullptr,
-    nullptr,
+    seqOP_54,
     nullptr,
     nullptr,
     seqOP_57_LFODepth,
     seqOP_58_LFOLength,
-    nullptr,
+    seqOP_59,
     nullptr,
     seqOP_5B,
     nullptr,
@@ -406,21 +468,21 @@ const std::array<seqFunction, 0x80> seqOpcodes = { {
 
     //0x60
     seqOP_60_setVolume,
-    nullptr,
+    seqOP_61,
     seqOP_62_volumeSlide,
+    seqOP_63,
+    seqOP_64,
+    seqOP_65,
     nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
+    seqOP_67,
     seqOP_68_pan,
     nullptr,
     seqOP_6A_panSlide,
     nullptr,
     nullptr,
+    seqOP_6D,
     nullptr,
-    nullptr,
-    nullptr,
+    seqOP_6F,
 
     //0x70
     nullptr,

@@ -452,3 +452,74 @@ void startMusicInstance(sSoundInstance* param_1, int param_2, int param_3) {
         }
     }
 }
+
+void freeBackToSoundArena(sSoundInstance* pInstance) {
+    delete pInstance; // TODO: implement sound arena
+}
+
+int createMusicInstanceSub0(sSeqFile*) {
+    return 0;
+}
+
+int removePlayingSound(sSoundInstance* param_1)
+
+{
+    sSoundInstance* psVar1;
+    sSoundInstance* psVar2;
+    sSoundInstance* psVar3;
+
+    psVar2 = pPlayingSoundsLinkedList;
+    psVar3 = (sSoundInstance*)0x0;
+    if (pPlayingSoundsLinkedList != (sSoundInstance*)0x0) {
+        do {
+            psVar1 = psVar2;
+            psVar2 = psVar1;
+            if (psVar1 == param_1) break;
+            psVar2 = psVar1->m0_pNext;
+            psVar3 = psVar1;
+        } while (psVar2 != (sSoundInstance*)0x0);
+        if (psVar2 != (sSoundInstance*)0x0) {
+            if (((int)(short)param_1->m10_flags & 0x8000U) != 0) {
+                if (param_1 == (sSoundInstance*)0x0) {
+                    setSoundError(5);
+                }
+                else {
+                    param_1->m10_flags = param_1->m10_flags & 0x7fff;
+                    startMusicInstanceSub0Sub(param_1);
+                }
+            }
+            if (psVar3 == (sSoundInstance*)0x0) {
+                pPlayingSoundsLinkedList = param_1->m0_pNext;
+            }
+            else {
+                psVar3->m0_pNext = param_1->m0_pNext;
+            }
+            return 0;
+        }
+    }
+    setSoundError(0xf);
+    return -1;
+}
+
+
+void freeSoundInstance(sSoundInstance* pSoundInstance) {
+    if (((int)(short)pSoundInstance->m10_flags & 0x8000U) != 0) {
+        startMusicInstanceSub0(pSoundInstance);
+    }
+    s16 sVar1 = createMusicInstanceSub0(pSoundInstance->m8_pSeq);
+    if (sVar1 == 0) {
+        int iVar2 = removePlayingSound(pSoundInstance);
+        if (iVar2 == 0) {
+            freeSoundInstanceField4(pSoundInstance);
+            if ((pSoundInstance->m10_flags & 0x4000) == 0) {
+                freeBackToSoundArena(pSoundInstance);
+            }
+        }
+        else {
+            setSoundError(5);
+        }
+    }
+    else {
+        setSoundError(10);
+    }
+}

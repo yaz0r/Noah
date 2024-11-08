@@ -190,6 +190,69 @@ void loadWdsSub0(int sampleEntry, std::vector<u8>::iterator data, int adpcmSize,
 
 sWdsFile* pLoadedWdsLinkedList = nullptr;
 
+void freeBackToSoundArena(sWdsFile* pFile) {
+    delete pFile; // TODO: implement sound arena
+}
+
+
+int freeSamples(int param_1) {
+    structsLoadedSample* psVar1;
+    structsLoadedSample* psVar2;
+    structsLoadedSample* psVar3;
+
+    psVar1 = spuAllocatedBlocks.data();
+    psVar3 = (structsLoadedSample*)0x0;
+    while (true) {
+        psVar2 = psVar1;
+        if (psVar2->m4 == param_1) {
+            psVar3->m2 = psVar2->m2;
+            psVar2->m0 = 0;
+            psVar2->m1 = 0;
+            psVar2->m4 = 0;
+            psVar2->m2 = 0;
+            return param_1;
+        }
+        if (psVar2->m2 == 0) break;
+        psVar1 = spuAllocatedBlocks.data() + psVar2->m2;
+        psVar3 = psVar2;
+    }
+    return 0;
+}
+
+void unloadWds(sWdsFile* pWdsFiled) {
+    if (pLoadedWdsLinkedList) {
+        sWdsFile* pCurrent = pLoadedWdsLinkedList;
+        sWdsFile* pPrevious = nullptr;
+        do {
+            sWdsFile* psVar1 = pCurrent;
+            pCurrent = psVar1;
+            if (psVar1 == pWdsFiled)
+                break;
+            pCurrent = psVar1->m2C_pNext;
+            pPrevious = psVar1;
+        } while (pCurrent != (sWdsFile*)0x0);
+
+        if (pCurrent != (sWdsFile*)0x0) {
+            DisableEvent(audioTickEvent);
+            if (pPrevious == (sWdsFile*)0x0) {
+                pLoadedWdsLinkedList = pWdsFiled->m2C_pNext;
+            }
+            else {
+                pPrevious->m2C_pNext = pWdsFiled->m2C_pNext;
+            }
+            EnableEvent(audioTickEvent);
+            int iVar3 = freeSamples(pWdsFiled->m28_adpcmAddress);
+            if (pWdsFiled->m28_adpcmAddress != iVar3) {
+                setSoundError(0x24);
+            }
+            freeBackToSoundArena(pWdsFiled);
+        }
+    }
+    else {
+        setSoundError(0x11);
+    }
+}
+
 sWdsFile* loadWds(sWdsFile& wdsFile, s32 param_2) {
     int samplePtrToLoad = getSamplePtr(&wdsFile, param_2);
     if (samplePtrToLoad == 0) {
