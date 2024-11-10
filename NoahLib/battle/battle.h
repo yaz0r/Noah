@@ -529,7 +529,6 @@ extern s8 battleRunningVar1;
 
 extern std::array<sLoadedMechas*, 32> battleMechas;
 
-extern struct sBattleRunningVar0* battleEventVar0;
 extern s8 battleCameraVar0;
 
 void handleMenuSelectEnemy_cancel_sub0(u8 param_1);

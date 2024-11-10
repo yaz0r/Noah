@@ -30,10 +30,10 @@
 
 #include "battle/menu_chi.h"
 
+
 u16 allPlayerCharacterBitmask = 0;
 u8 battleInitVar0 = 0;
 u8 battleInitVar1 = 0;
-struct sBattleRunningVar0* battleEventVar0 = nullptr;
 s8 battleRunningVar1 = 0;
 s8 isBattleAnEvent = 0;
 s8 currentBattleMode = 0;
@@ -1029,6 +1029,36 @@ LAB_Battle__8008a804:
     } while (1);
 }
 
+void battleUpdateInputs_mode2() {
+    bool bVar1 = true;
+    bool wasPaused = false;
+    do
+    {
+        if (!isControllerConnected(0)) {
+            assert(0);
+        }
+        else {
+            bVar1 = false;
+            if (wasPaused) {
+                assert(0);
+            }
+        }
+
+    } while (bVar1);
+    MissingCode();
+    if (battleVar1->mCA_battleEventPoly) {
+        for (int i = 0; i < 0x10; i++) {
+            if (battleEventVar0->m0[i].m28) {
+                battleEventVar0->m0[i].m26--;
+                if (battleEventVar0->m0[i].m26 < 0) {
+                    battleEventVar0->m0[i].m26 = 0;
+                }
+            }
+        }
+    }
+    MissingCode();
+}
+
 void battleUpdateInputs(int mode) {
     switch (currentBattleMode) {
     case 0:
@@ -1038,7 +1068,7 @@ void battleUpdateInputs(int mode) {
         battleUpdateInputs_mode1(mode);
         break;
     case 2: // cutscene
-        MissingCode();
+        battleUpdateInputs_mode2();
         break;
     default:
         assert(0);

@@ -8,41 +8,7 @@
 #include "battle/battleSpriteLoader.h"
 
 sLoadableDataRaw battleEventFile3;
-
-struct sBattleRunningVar0Sub {
-    std::array<s16, 8> m0;
-    std::array<s8, 8> m10;
-    std::array<s8, 8> m18;
-    s8 m20 = 0;
-    s8 m21 = 0;
-    s8 m22 = 0;
-    s8 m23 = 0;
-    s8 m24 = 0;
-    s16 m26 = 0;
-    s8 m28 = 0;
-    sSpriteActorAnimationBundle* m2C = nullptr;
-    sTaskHeader* m30 = nullptr;
-    s8 m34 = 0;
-    s8 m35 = 0;
-    // size 0x38
-};
-
-struct sBattleRunningVar0 {
-    std::array<sBattleRunningVar0Sub, 0x10> m0;
-    std::array<s16,8> m380;
-    std::vector<u8>::iterator m390;
-    std::array<s16, 1> m394;
-    std::array<s8, 0x10> m794;
-    s8 m7F5;
-    std::array<POLY_FT4, 2> m7A4;
-    std::array<s16, 5> m7F6;
-    s8 m800 = 0;
-    std::array<s8, 0x10> m804;
-    sSeqFile* m818 = nullptr;
-    s8 m81F;
-    s8 m820;
-    // size 0x828
-};
+sBattleRunningVar0* battleEventVar0 = nullptr;
 
 struct sBattleRunningVar1 {
     // size 0x98
@@ -226,6 +192,65 @@ int battleEvent_OP0(int currentEntityId, const std::vector<u8>::iterator& byteco
     return 0;
 }
 
+uint battleEvent_OP5_sub0_sub(sBattleRunningVar0Sub* param_1)
+{
+    uint uVar1;
+
+    uVar1 = 1;
+    do {
+        if (param_1->m10[uVar1] == -1) break;
+        uVar1 = uVar1 + 1;
+    } while ((int)uVar1 < 8);
+    return uVar1 & 0xffff;
+}
+
+int battleEvent_OP5_sub0(int currentEntityId, const std::vector<u8>::iterator& bytecode) {
+    int uVar2 = battleEvent_OP5_sub0_sub(&battleEventVar0->m0[currentEntityId]) & 0xFF;
+    if (uVar2 != 8) {
+        battleEventVar0->m0[currentEntityId].m23 = (bytecode[2] & 0x1F);
+        battleEventVar0->m0[bytecode[1]].m10[uVar2] = bytecode[2] >> 5;
+        battleEventVar0->m0[bytecode[1]].m0[uVar2] = READ_LE_U16(bytecode[1] * 0x10 + battleEventVar2.begin() + 0x44 + battleEventVar0->m0[currentEntityId].m23 * 2);
+        battleEventVar0->m0[bytecode[1]].m18[uVar2] = battleEventVar0->m0[currentEntityId].m23;
+        return 3;
+    }
+    return 0;
+}
+
+int battleEvent_OP5(int currentEntityId, const std::vector<u8>::iterator& bytecode) {
+    if (battleEventVar0->m0[currentEntityId].m23 == (bytecode[2] & 0x1F)) {
+        bool bVar2 = true;
+        for (int i = 0; i < 8; i++) {
+            if (battleEventVar0->m0[bytecode[1]].m18[i] == battleEventVar0->m0[currentEntityId].m23) {
+                bVar2 = false;
+                break;
+            }
+        }
+        if (bVar2) {
+            if (battleEventVar0->m0[currentEntityId].m23 != battleEventVar0->m0[bytecode[1]].m21) {
+                battleEventVar0->m0[currentEntityId].m23 = -1;
+                return 3;
+            }
+        }
+    }
+    else {
+        battleEvent_OP5_sub0(currentEntityId, bytecode);
+    }
+    return 0;
+}
+
+int battleEvent_OP18_sub(int param_1, int param_2, int param_3) {
+    MissingCode();
+    return 0;
+}
+
+int battleEvent_OP18(int currentEntityId, const std::vector<u8>::iterator& bytecode) {
+    char cVar1;
+
+    // print dialog window in battle event
+    cVar1 = battleEvent_OP18_sub(READ_LE_U16(bytecode + 1), battleEventVar0->m0[currentEntityId].m24, bytecode[3]);
+    return (uint)(cVar1 != '\0') << 2;
+}
+
 int battleEvent_OP1A(int currentEntityId, const std::vector<u8>::iterator& bytecode) {
     battleEvent_loadArgs(bytecode, 5, 0, 1);
 
@@ -260,29 +285,26 @@ int battleEvent_OP1F(int currentEntityId, const std::vector<u8>::iterator& bytec
 int battleEvent_OP23(int currentEntityId, const std::vector<u8>::iterator& bytecode) {
     battleEvent_loadArgs(bytecode, 3, 0, 1);
 
-    int bytecodeSize;
-    auto slot = &battleEventVar0->m0[battleEventVar0->m380[0] - 0xF3];
+    int slotIndex = battleEventVar0->m380[0] - 0xF3;
+    auto slot = &battleEventVar0->m0[slotIndex];
     switch (slot->m34) {
     case 0:
         slot->m34 = 2;
-        setupMechaForEvent(battleEventVar0->m380[0] - 0xF3, characterIdToTargetBitmask(battleEventVar0->m380[1] + 0xD), battleEventVar0->m380[2]);
-        bytecodeSize = 0;
-        break;
+        setupMechaForEvent(slotIndex, characterIdToTargetBitmask(battleEventVar0->m380[1] + 0xD), battleEventVar0->m380[2]);
+        return 0;
     case 1:
         waitBattleAnimationSpriteLoading();
         waitBattleAnimationSoundLoaded();
         slot->m34 = 0;
-        bytecodeSize = 7;
-        break;
+        return 7;
     case 2:
-        bytecodeSize = 0;
-        break;
+        return 0;
     default:
         assert(0);
         break;
     }
 
-    return bytecodeSize;
+    return 0;
 }
 
 void battleEvent_OP2A_sub0(sBattleSpriteActor* pTaskHeader, int index) {
@@ -359,6 +381,12 @@ void battleEvent_update(int) {
                     case 0x0:
                         bytecodeSize = battleEvent_OP0(currentEntityId, battleEventVar0->m390 + bytecodeOffset);
                         j = 3; // to bread out of the loop
+                        break;
+                    case 0x5:
+                        bytecodeSize = battleEvent_OP5(currentEntityId, battleEventVar0->m390 + bytecodeOffset);
+                        break;
+                    case 0x18:
+                        bytecodeSize = battleEvent_OP18(currentEntityId, battleEventVar0->m390 + bytecodeOffset);
                         break;
                     case 0x1A:
                         bytecodeSize = battleEvent_OP1A(currentEntityId, battleEventVar0->m390 + bytecodeOffset);
