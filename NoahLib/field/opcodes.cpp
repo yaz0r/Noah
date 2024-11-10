@@ -3034,8 +3034,7 @@ void OPX_84()
     else {
         battleTransitionEffect = fieldBattleTransitionEffect;
         requestedBattleConfig = getImmediateOrVariableUnsigned(1);
-        //battleInitVar1 = 0;
-        MissingCode();
+        battleInitVar1 = 0;
         playMusicAuthorized = 0;
         fieldExecuteVar2 = 0;
         MissingCode();

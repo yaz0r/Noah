@@ -30,7 +30,7 @@
 
 #include "battle/menu_chi.h"
 
-
+void freeMechaModelBlocks(sMechaInitVar4* param_1, int param_2);
 u16 allPlayerCharacterBitmask = 0;
 u8 battleInitVar0 = 0;
 u8 battleInitVar1 = 0;
@@ -246,6 +246,8 @@ int waitForMusic(uint param_1) {
     return 0;
 }
 
+void initModel5(sModel* pModelBlock);
+
 void mechaInitEnvironmentMechaMesh(int entryId, ushort flags, sMechaDataTable2* pData2, sMechaDataTable1* pData1, ushort tpageX, ushort tpageY, ushort clutX, short clutY, SFP_VEC3* param_9)
 {
     resetMemoryAllocStats(4, 0);
@@ -297,7 +299,12 @@ void mechaInitEnvironmentMechaMesh(int entryId, ushort flags, sMechaDataTable2* 
         //patchSelfModifyingCode(2, 2, 0x40, 0x40);
     }
 
-    sModel battleMechaModelBlocksBufferForLoading;
+    // HACK:
+    // This should be global, but there is some weird weird side effect when mechas are loading with flag 0x5
+    // as it creates battleMechaModelBlocksBufferForLoading but doesn't cleanup.
+    // Later a mecha with flag with 0x2 set will skip over the battleMechaModelBlocksBufferForLoading init
+    // but still use it in the (flags & 2) == 0 block, and then freeing it
+    sModel* battleMechaModelBlocksBufferForLoading = nullptr;
 
     int battleMechaInitVar4Counter = 0;
     if ((flags & 1) == 0) {
@@ -309,7 +316,8 @@ void mechaInitEnvironmentMechaMesh(int entryId, ushort flags, sMechaDataTable2* 
         // TODO: convert that properly
         std::span<u8> temp(pData1->m4_textures.m_raw.begin(), pData1->m4_textures.m_raw.size());
         uploadTextureToVram(temp.begin(), uVar29, tpageX, tpageY, uVar29, clutX, clutY);
-        battleMechaModelBlocksBufferForLoading = pData1->m8_modelBlocks;
+        battleMechaModelBlocksBufferForLoading = new sModel;
+        *battleMechaModelBlocksBufferForLoading = pData1->m8_modelBlocks;
 
         int iVar2;
         do {
@@ -319,7 +327,7 @@ void mechaInitEnvironmentMechaMesh(int entryId, ushort flags, sMechaDataTable2* 
             battleMechaInitVar4Counter = iVar2;
         } while (iVar2 < 8);
 
-        sMechaModel_init(battleMechaModelBlocksBufferForLoading, &battleMechaInitVar4[battleMechaInitVar4Counter]);
+        sMechaModel_init(*battleMechaModelBlocksBufferForLoading, &battleMechaInitVar4[battleMechaInitVar4Counter]);
     }
 
     pLoadedMecha->m0 = &battleMechaInitVar4[battleMechaInitVar4Counter];
@@ -415,15 +423,22 @@ void mechaInitEnvironmentMechaMesh(int entryId, ushort flags, sMechaDataTable2* 
     }
 
     if ((flags & 2) == 0) {
-        pLoadedMecha->mA8 = new sModel;
-        *pLoadedMecha->mA8 = battleMechaModelBlocksBufferForLoading;
-        // Fixup
-        for (int i = 0; i < pLoadedMecha->mA8->m0_numBlocks; i++) {
-            pLoadedMecha->mA8->m10_blocks[i].m_baseItForRelocation = &pLoadedMecha->mA8->mRawData[0];
-        }
+        if(battleMechaModelBlocksBufferForLoading) // Hack, this should not be necessary
+        {
+            initModel5(battleMechaModelBlocksBufferForLoading);
+            sModel* pNewModel = new sModel;
+            *pNewModel = *battleMechaModelBlocksBufferForLoading;
+            // Fixup
+            for (int i = 0; i < pNewModel->m0_numBlocks; i++) {
+                pNewModel->m10_blocks[i].m_baseItForRelocation = pNewModel->mRawData.data();
+            }
 
-        sMechaModel_init(*pLoadedMecha->mA8, pLoadedMecha->m0);
-        MissingCode();
+            delete battleMechaModelBlocksBufferForLoading;
+            battleMechaModelBlocksBufferForLoading = nullptr;
+            freeMechaModelBlocks(pLoadedMecha->m0, 0);
+            sMechaModel_init(*pNewModel, pLoadedMecha->m0);
+            pLoadedMecha->mA8 = pNewModel;
+        }
     }
     else
     {
@@ -619,7 +634,7 @@ void updateMechAnim(sLoadedMechas* param_1, sMechaInitVar2* param_2, int iterati
 void renderMechasBattle(MATRIX* pMatrix, MATRIX* param_2, OTTable& OT, int oddOrEven)
 {
     MissingCode();
-    //battleMechaVar0 += 1 + DAT_Battle__800ccc5c;
+    battleMechaVar0 += 1;// +DAT_Battle__800ccc5c;
     if (battleMechaVar0 > 6) {
         battleMechaVar0 = 6;
     }
@@ -4264,7 +4279,7 @@ void removeBillyWindow(uint param_1, char param_2)
 
 void performMechaPlayAnimation(ushort param_1, short param_2, int param_3)
 {
-    mechaPlayAnimation(param_1, param_2, param_3);
+    mechaPlayAnimation_battle(param_1, param_2, param_3);
     return;
 }
 
@@ -6439,7 +6454,12 @@ void battleMain() {
     pCurrentBattleMusic = pMusic;
 
     // TODO: more logic here
+    if (battleInitVar0 == '\0') {
+        if (battleInitVar1 != '\0') goto LAB_Battle__80071064;
+    }
+    else
     {
+        LAB_Battle__80071064:
         int battleSelected = battleInitVar0 - 1;
         if (battleInitVar0 == '\0') {
             battleDebugSelector();
@@ -7117,6 +7137,9 @@ void battleSpriteEffect(sSpriteActorCore* param_1, s8 param_2, std::span<u8>::it
     case 0x2E:
         battleSpriteEffect_2E(&param_1->mA0, endOfOpcode);
         return;
+    case 0x32:
+        SetGeomOffset(0xa0, 0xa4);
+        return;
     case 0x3a:
         battleSpriteEffect_3A(param_1, endOfOpcode);
         return;
@@ -7409,4 +7432,13 @@ void setupMechaForEvent(s16 param_1, s16 param_2, int animationIndex) {
 
 int mecha_battle_op3() {
     return allocateSavePointMeshDataSub0_var0 - isDamageDisplayPolysTask2Running();
+}
+
+void mechaPlayAnimation_battle(ushort mechaId, short mechaId2, int animationId) {
+    setupMechaForEventVar0 = mechaId2;
+    setupMechaForEventVar1 = mechaId;
+    battleMechas[mechaId]->m35 = 0;
+    if (battleMechas[mechaId]) {
+        initMechaAnimation(battleMechas[mechaId], battleMechas[mechaId], &battleMechaInitVar2, animationId);
+    }
 }

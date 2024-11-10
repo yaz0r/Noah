@@ -18,6 +18,8 @@ s16 mechaPlayAnimationVar1 = 0;
 std::array<s16, 4> mechaCurrentAnimation;
 u32 mechaBytecodeToggle = 0;
 
+void initModel5(sModel* pModelBlock);
+
 void waitForLoading(void)
 {
     int iVar1;
@@ -996,6 +998,11 @@ void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int pa
             setBoneVisibility(pMecha, &(*pMecha->m4_bones)[*pNextBytecode], bytecodeHigher);
             pNextBytecode = pCurrentByteCodePtr + 2;
             break;
+        case 0x24:
+            if (pMecha) {
+                pMecha->m34 = bytecodeHigher & 1;
+            }
+            break;
         case 0x32:
             _currentByteCode = *pNextBytecode;
             pNextBytecode = pCurrentByteCodePtr + _currentByteCode / 2;
@@ -1114,6 +1121,30 @@ void initMechaTransforms1(sLoadedMechas* param_1, sMechaInitVar2* param_2, std::
     param_1->m1E = -1;
 }
 
+void freeModelBlock(sModelBlock* param_1) {
+    if (param_1->m0_flags & 1) {
+        param_1->m18.clear();
+        param_1->m0_flags &= ~1;
+    }
+}
+
+void freeMechaModelBlocks(sMechaInitVar4* param_1, int param_2) {
+    if (param_1) {
+        for (int i = 0; i < param_1->m4; i++) {
+            if (param_1->m0.size()) {
+                if (param_1->m0[i]) {
+                    if (param_2) {
+                        freeModelBlock(param_1->m0[i]);
+                    }
+                }
+            }
+        }
+        if (param_1->m0.size()) {
+            param_1->m0.clear();
+        }
+    }
+}
+
 void mechaInitNewMecha(int entryId, ushort flags, sMechaDataTable2* pData2, sMechaDataTable1* pData1, ushort tpageX, ushort tpageY, ushort clutX, short clutY, SFP_VEC3* param_9)
 {
     resetMemoryAllocStats(4, 0);
@@ -1165,7 +1196,7 @@ void mechaInitNewMecha(int entryId, ushort flags, sMechaDataTable2* pData2, sMec
         //patchSelfModifyingCode(2, 2, 0x40, 0x40);
     }
 
-    sModel mechaModelBlocksBufferForLoading;
+    static sModel* mechaModelBlocksBufferForLoading = nullptr;
 
     int mechaInitVar4Counter = 0;
     if ((flags & 1) == 0) {
@@ -1177,7 +1208,8 @@ void mechaInitNewMecha(int entryId, ushort flags, sMechaDataTable2* pData2, sMec
         // TODO: convert that properly
         std::span<u8> tempSpan(pData1->m4_textures.m_raw.begin(), pData1->m4_textures.m_raw.size());
         uploadTextureToVram(tempSpan.begin(), uVar29, tpageX, tpageY, uVar29, clutX, clutY);
-        mechaModelBlocksBufferForLoading = pData1->m8_modelBlocks;
+        mechaModelBlocksBufferForLoading = new sModel;
+        *mechaModelBlocksBufferForLoading = pData1->m8_modelBlocks;
 
         int iVar2;
         do {
@@ -1187,7 +1219,7 @@ void mechaInitNewMecha(int entryId, ushort flags, sMechaDataTable2* pData2, sMec
             mechaInitVar4Counter = iVar2;
         } while (iVar2 < 8);
 
-        sMechaModel_init(mechaModelBlocksBufferForLoading, &mechaInitVar4[mechaInitVar4Counter]);
+        sMechaModel_init(*mechaModelBlocksBufferForLoading, &mechaInitVar4[mechaInitVar4Counter]);
     }
 
     pLoadedMecha->m0 = &mechaInitVar4[mechaInitVar4Counter];
@@ -1282,15 +1314,22 @@ void mechaInitNewMecha(int entryId, ushort flags, sMechaDataTable2* pData2, sMec
     }
 
     if ((flags & 2) == 0) {
-        pLoadedMecha->mA8 = new sModel;
-        *pLoadedMecha->mA8 = mechaModelBlocksBufferForLoading;
+        initModel5(mechaModelBlocksBufferForLoading);
+
+        sModel* newModel = new sModel;
+        *newModel = *mechaModelBlocksBufferForLoading;
         // Fixup
-        for (int i = 0; i < pLoadedMecha->mA8->m0_numBlocks; i++) {
-            pLoadedMecha->mA8->m10_blocks[i].m_baseItForRelocation = &pLoadedMecha->mA8->mRawData[0];
+        for (int i = 0; i < newModel->m0_numBlocks; i++) {
+            newModel->m10_blocks[i].m_baseItForRelocation = newModel->mRawData.data();
         }
 
-        sMechaModel_init(*pLoadedMecha->mA8, pLoadedMecha->m0);
-        MissingCode();
+        delete mechaModelBlocksBufferForLoading;
+        mechaModelBlocksBufferForLoading = nullptr;
+
+        freeMechaModelBlocks(pLoadedMecha->m0, 0);
+
+        sMechaModel_init(*newModel, pLoadedMecha->m0);
+        pLoadedMecha->mA8 = newModel;
     }
     else
     {

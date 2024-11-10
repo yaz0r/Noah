@@ -236,9 +236,9 @@ struct sLoadedMechas {
     std::vector<sMechaBone>* m4_bones;
     std::vector<std::vector<sMechaDataTable2_4_8>>* m8_bytecodeTable;
     u32 mC;
-    sMechaDataTable2_4_8* m10_bytecode0;
+    sMechaDataTable2_4_8* m10_bytecode0 = nullptr;
     sMechaDataTable2_4::sMechaDataTable2_4_4_array* m14;
-    std::vector<u8>* m18;
+    std::vector<u8>* m18 = nullptr;
     s16 m1C_scale;
     s16 m1E;
     u8 m20_mechaEntryId;

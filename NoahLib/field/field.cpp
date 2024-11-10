@@ -1992,6 +1992,11 @@ const std::array<sPolyTypeRenderDefinition, 17> polyRenderDefs = { {
     {	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	nullptr,	8,	0x4,	0x20}, // 0x10
 } };
 
+void initModel5(sModel* pModelBlock)
+{
+    MissingCode();
+}
+
 void initModel5(sModelBlock* pModelBlock)
 {
     MissingCode();
@@ -7602,8 +7607,7 @@ bool submitModelForRendering(sModelBlock* param_1, std::vector<sTag*>& param_2, 
         return 0;
     }
 
-    if(param_1->m18.size())
-        currentModeBlock18 = &param_1->m18[0];
+    currentModeBlock18 = param_1->m18.data();
     currentModelBlockNormals = param_1->m_baseItForRelocation + param_1->mC_offsetNormals;
     currentModelBlockVertices = param_1->m_baseItForRelocation + param_1->m8_offsetVertices;
     fieldPolyCount2 += param_1->m4_numPrims;

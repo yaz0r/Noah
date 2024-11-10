@@ -363,6 +363,15 @@ int battleEvent_OP37(int currentEntityId, const std::vector<u8>::iterator& bytec
     return 1;
 }
 
+
+int battleEvent_OP38(int currentEntityId, const std::vector<u8>::iterator& bytecode) {
+    battleEvent_loadArgs(bytecode, 3, 0, 1);
+
+    int mechaIndex = battleEventVar0->m380[0] - 0xF3;
+    mechaPlayAnimation_battle(mechaIndex, characterIdToTargetBitmask(battleEventVar0->m380[1] + 0xD), battleEventVar0->m380[2]);
+    return 7;
+}
+
 void battleEvent_update(int) {
     waitBattleAnimationSoundLoaded();
     updateCharacterBlinkingTask(0);
@@ -414,6 +423,9 @@ void battleEvent_update(int) {
                         break;
                     case 0x37:
                         bytecodeSize = battleEvent_OP37(currentEntityId, battleEventVar0->m390 + bytecodeOffset);
+                        break;
+                    case 0x38:
+                        bytecodeSize = battleEvent_OP38(currentEntityId, battleEventVar0->m390 + bytecodeOffset);
                         break;
                     default:
                         assert(0);

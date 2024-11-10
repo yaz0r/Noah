@@ -53,7 +53,7 @@ struct sModel
 {
     void init(std::vector<u8>::iterator inputData, int dataSize);
 
-    u32 m0_numBlocks;
+    u32 m0_numBlocks = 0;
     std::vector<sModelBlock> m10_blocks;
 
     std::vector<u8> mRawData;

@@ -561,3 +561,4 @@ void setBattleCameraMode(int param_1);
 void setupMechaForEvent(s16 param_1, s16 param_2, int animationIndex);
 int mecha_battle_op3();
 void mecha_battle_op3_2(int);
+void mechaPlayAnimation_battle(ushort mechaId, short mechaId2, int animationId);
