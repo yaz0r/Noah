@@ -1352,6 +1352,46 @@ void updateApFuelPolyBar() {
             battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].g1 = 0xFF;
             battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].b1 = 0;
             break;
+        case 2: // Fuel
+        {
+            int fuelXRatio = (((battleEntities[i].mA4_gear.m38_fuel * 100) / battleEntities[i].mA4_gear.m3C_maxFuel) * 0x15E0) / 10000;
+
+            battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].x0 = i * 0x60 + partyMemberSpritesOffset[battlePartyLayoutType][i] + 0x28;
+            battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].y0 = 0x22;
+            battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].x1 = i * 0x60 + partyMemberSpritesOffset[battlePartyLayoutType][i] + fuelXRatio;
+            battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].y1 = 0x22;
+            battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].x2 = i * 0x60 + partyMemberSpritesOffset[battlePartyLayoutType][i] + 0x28;
+            battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].y2 = 0x26;
+            battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].x3 = i * 0x60 + partyMemberSpritesOffset[battlePartyLayoutType][i] + fuelXRatio;
+            battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].y3 = 0x26;
+            if (battleEntities[i].mA4_gear.m38_fuel < battleEntities[i].mA4_gear.m3C_maxFuel / 4) {
+                if (battleEntities[i].mA4_gear.m3C_maxFuel / 8 <= battleEntities[i].mA4_gear.m38_fuel) {
+                    battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].r0 = 0xff;
+                    battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].g0 = 0xff;
+                    battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].b0 = '\0';
+                    battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].r1 = 0xff;
+                    battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].g1 = 0xff;
+                    battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].b1 = '\0';
+                }
+                else {
+                    battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].r0 = 0xff;
+                    battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].g0 = '\x7f';
+                    battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].b0 = '\x7f';
+                    battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].r1 = 0xff;
+                    battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].g1 = '\x7f';
+                    battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].b1 = '\x7f';
+                }
+            }
+            else {
+                battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].r0 = '\0';
+                battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].g0 = '\0';
+                battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].b0 = 0xff;
+                battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].r1 = '\0';
+                battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].g1 = '\0';
+                battleVar0->m740_APOrFuelPoly[i][battleOddOrEven].b1 = 0xff;
+            }
+        }
+        break;
         default:
             assert(0);
         }

@@ -56,16 +56,55 @@ int initMechaForBattleSub0(int param_1)
     return iVar1;
 }
 
-void battleMechaUpdate(sTaskHeader*) {
-    MissingCode();
+void battleMechaUpdate(sTaskHeader* param_1) {
+    sSpriteActorCore* pSpriteActor = (sSpriteActorCore*)param_1->m4;
+    int mechaId = (pSpriteActor->mAC.mx0_entityIdUpper2bit << 2) | (pSpriteActor->mA8.mx1E_entityId_bottom2bit);
+    sLoadedMechas* pMecha = battleMechas[mechaId];
+    if (pMecha) {
+        if (pSpriteActor->m9E_wait == 0) {
+            pSpriteActor->m64_spriteByteCode.reset();
+        }
+        if (pSpriteActor->m64_spriteByteCode.has_value()) {
+            OP_INIT_ENTITY_SCRIPT_sub0Sub9(pSpriteActor);
+            savePointCallback8Sub0(pSpriteActor);
+            if ((pSpriteActor->mAC.mx6) != 0) {
+                OP_INIT_ENTITY_SCRIPT_sub0Sub9(pSpriteActor);
+                savePointCallback8Sub0(pSpriteActor);
+            }
+        }
+        (pSpriteActor->m0_position).vx = pMecha->m4_bones->at(0).m5C_translation[0] << 0x10;
+        (pSpriteActor->m0_position).vy = pMecha->m4_bones->at(0).m5C_translation[1] << 0x10;
+        (pSpriteActor->m0_position).vz = pMecha->m4_bones->at(0).m5C_translation[2] << 0x10;
+    }
 }
 
-void battleMechaDraw(sTaskHeader*) {
-    MissingCode();
+void battleMechaDraw(sTaskHeader* param_1) {
+    sSpriteActorCore* pSpriteActor = (sSpriteActorCore*)param_1->m4;
+    int mechaId = (pSpriteActor->mAC.mx0_entityIdUpper2bit << 2) | (pSpriteActor->mA8.mx1E_entityId_bottom2bit);
+    pSpriteActor->m36 = initMechaForBattleSub0(mechaId);
+    pSpriteActor->m38 = pSpriteActor->m36 >> 1;
+
+    SVECTOR local_20;
+    local_20.vx = pSpriteActor->m0_position.vx.getIntegerPart();
+    local_20.vy = pSpriteActor->m0_position.vy.getIntegerPart();
+    local_20.vz = pSpriteActor->m0_position.vz.getIntegerPart();
+
+    SetRotMatrix(&battleRenderingMatrix);
+    SetTransMatrix(&battleRenderingMatrix);
+
+    sVec2_s16 sStack_18;
+    long dummy;
+    long flag;
+    int lVar3 = RotTransPers(&local_20, &sStack_18, &dummy, &flag);
+    int sVar2 = (short)(lVar3 >> (gDepthDivider & 0x1f)) + pSpriteActor->m30;
+    if ((flag & 0x8000) != 0) {
+        sVar2 = 0;
+    }
+    pSpriteActor->m2E = sVar2;
 }
 
 void battleMechaDelete(sTaskHeader*) {
-    MissingCode();
+    assert(0);
 }
 
 void initMechaForBattle(int param_1) {

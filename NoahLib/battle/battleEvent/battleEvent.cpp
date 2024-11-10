@@ -327,7 +327,7 @@ int battleEvent_OP35(int currentEntityId, const std::vector<u8>::iterator& bytec
         entry->m2C = new sSpriteActorAnimationBundle;
         std::vector<u8> rawBundle = mallocAndDecompress(battleEventFile3.begin() + READ_LE_U32(battleEventFile3.begin() + 4 + battleEventVar0->m380[1] * 4));
         entry->m2C->init(rawBundle);
-        SVECTOR position;
+        SVECTOR position = { 0,0,0 };
         entry->m30 = battleEvent_OP35_createEntity(entry->m2C, &position);
         entry->m35 = 1;
     }

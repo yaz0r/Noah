@@ -264,7 +264,7 @@ struct sLoadedMechas {
     s8 m5C;
     s8 m5D;
     s16 m5E;
-    s16 m60;
+    s16 m60 = 0;
     u8 m62_isSeqLoaded;
     u8 m63;
     std::array<s16, 3> m70;
