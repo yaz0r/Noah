@@ -382,7 +382,7 @@ void applyFlagToAllVoices(ushort param_1, sSoundInstance* param_2) {
 void playBattleMusicSub1Sub0(sSoundInstance* param_1, ushort param_2) {
     for (int i = 0; i < param_1->m14_count; i++) {
         if (param_1->m94_events[i].m0) {
-            param_1->m94_events[i].mCA |= param_2;
+            param_1->m94_events[i].m30.m6 |= param_2;
         }
     }
 }

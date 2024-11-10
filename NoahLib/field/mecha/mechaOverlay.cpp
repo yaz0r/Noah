@@ -782,8 +782,6 @@ void mechaOP_19(sLoadedMechas* param_1)
 
 void mechaOP_11_b(sLoadedMechas* param_1, sMechaDataTable2_4_4* param_2, int param_3)
 {
-    int iVar1;
-
     if (param_2->m12 == 0) {
         param_1->m98 = -1;
     }
@@ -797,14 +795,17 @@ void mechaOP_11_b(sLoadedMechas* param_1, sMechaDataTable2_4_4* param_2, int par
         }
         param_1->m9C = 0;
         param_1->m9E = param_2->m12;
-        //iVar1 = *(int*)&param_2->field_0x14;
-       // param_1->mA0 = (int)(&param_2->field_0x0 + iVar1);
-       // param_1->mA4 = (int)(&param_2->field_0x0 + iVar1);
-        assert(0);
+        param_1->mA0 = param_2->m_raw.begin() + param_2->m14;
+        param_1->mA4 = param_2->m_raw.begin() + param_2->m14;
     }
     return;
 }
 
+static const std::vector<s8> DAT_Battle__800c3530 = { {
+        0x1, 0x6C,
+} };
+
+extern s16 setupMechaForEventVar1;
 
 void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int param_3, int param_4)
 {
@@ -904,6 +905,23 @@ void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int pa
                 }
             }
             break;
+        case 4:
+            // battle only
+            assert(isBattleOverlayLoaded);
+            if (pMecha->mC == nullptr) {
+                int local_10;
+                int local_c;
+                getCurrentDirectory(&local_10, &local_c);
+                setCurrentDirectory(0x28, 2);
+                u16 nextValue = *pNextBytecode;
+                pNextBytecode++;
+                int fileIndex = bytecodeHigher + DAT_Battle__800c3530[nextValue];
+                //sVar12 = getFileSizeAligned(fileIndex);
+                //piVar13 = (int*)malloc(sVar12);
+                pMecha->mC = new sLoadableDataRaw;
+                readFile(fileIndex, *pMecha->mC, 0, 0);
+                setCurrentDirectory(local_10, local_c);
+            }
         case 0x8:
             mechaOP_8(param_2, pMecha->m4_bones); // release all tracks disabled
             break;
@@ -1003,9 +1021,39 @@ void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int pa
                 pMecha->m34 = bytecodeHigher & 1;
             }
             break;
+        case 0x28: // distance to target?
+        {
+            //int distance = computeMechaDistanceToTarget(pMecha);
+            if (pMecha->m8E == 0) {
+                pMecha->m8E = 1;
+            }
+            MissingCode();
+            pNextBytecode++;
+            break;
+        }
+        case 0x2E:
+            MissingCode();
+            pNextBytecode++;
+            break;
+        case 0x2F:
+            if (mecha_battle_op3()) { // wait for damage and other displays to be done?
+                continueBytecodeExecution = 0;
+                pNextBytecode = pCurrentByteCodePtr;
+            }
+            break;
         case 0x32:
             _currentByteCode = *pNextBytecode;
             pNextBytecode = pCurrentByteCodePtr + _currentByteCode / 2;
+            break;
+        case 0x36:
+            pMecha->m44 = 0;
+            pMecha->m46 = *pNextBytecode++;
+            pMecha->m9C = *pNextBytecode++;
+            MissingCode();
+            break;
+        case 0x39:
+            MissingCode();
+            pNextBytecode++;
             break;
         case 0x42:
         case 0x43:
@@ -1026,6 +1074,44 @@ void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int pa
                 (*pMecha->m4_bones)[0].m5C_translation[2] = battleVisualEntities[index].mC_Z;
             }
             break;
+        case 0x4B:
+            pMecha->m7C[0] = *pNextBytecode++;
+            pMecha->m7C[1] = *pNextBytecode++;
+            pMecha->m7C[2] = *pNextBytecode++;
+            break;
+        case 0x4D:
+            pMecha->m82[0] = *pNextBytecode++;
+            pMecha->m82[1] = *pNextBytecode++;
+            pMecha->m82[2] = *pNextBytecode++;
+            break;
+        case 0x4F:
+            pNextBytecode++;
+            break;
+        case 0x53:
+        {
+            int sp120 = pMecha->m88[0];
+            int sp122 = 0;
+            int sp124 = pMecha->m88[2];
+            MissingCode();
+        }
+        break;
+        case 0x54:
+            MissingCode();
+            pNextBytecode++;
+            break;
+        case 0x57:
+            MissingCode();
+            break;
+        case 0x58:
+            pMecha->m58 = bytecodeHigher & 0xFF;
+            pMecha->m5A = 0;
+            pMecha->m64 = 0;
+            pMecha->m66 = 0;
+            pMecha->m68 = 0;
+            if (bytecodeHigher & 0xFF) {
+                MissingCode();
+            }
+            break;
         case 0x5A:
             MissingCode();
             break;
@@ -1039,7 +1125,8 @@ void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int pa
             u16 nextValue = *pNextBytecode;
             pNextBytecode++;
             if (getBattleSlotLayout(pMecha->m20_mechaEntryId)) {
-                pNextBytecode = pCurrentByteCodePtr + nextValue;
+                assert((nextValue % 2) == 0);
+                pNextBytecode = pCurrentByteCodePtr + nextValue / 2;
             }
             break;
         }
@@ -1049,6 +1136,40 @@ void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int pa
                 (int)(short)pCurrentByteCodePtr[4]);
             pNextBytecode = pCurrentByteCodePtr + 5;
             break;
+        case 0x6E:
+        {
+            u16 bitfield;
+            int index = battleGetMechaBitfieldForAnim(pMecha, bytecodeHigher, &bitfield);
+            u16 nextValue = *pNextBytecode;
+            pNextBytecode++;
+            if (battleMechas[index]) {
+                if (battleMechas[index]->m38 == (nextValue & 1)) {
+                    continueBytecodeExecution = 0;
+                    pNextBytecode = pCurrentByteCodePtr;
+                }
+            }
+            break;
+        }
+        break;
+        case 0x6F:
+            if ((bytecodeHigher && 0xFF) == 0) {
+                pMecha->m3A = -1;
+            }
+            else {
+                pMecha->m3A = setupMechaForEventVar1;
+            }
+            break;
+        case 0x70:
+        {
+            u16 nextValue = *pNextBytecode;
+            pNextBytecode++;
+            if (pMecha->m3A == setupMechaForEventVar1) {
+                assert((nextValue % 2) == 0);
+                pNextBytecode = pCurrentByteCodePtr + nextValue / 2;
+                continueBytecodeExecution = 0;
+            }
+            break;
+        }
         default:
             assert(0);
         }

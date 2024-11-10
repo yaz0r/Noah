@@ -57,6 +57,11 @@ void advanceBattleScript(sBattleScriptExecutionContext* pScriptContext) {
     pScriptContext->m0_scriptPtr += 4;
 }
 
+void monsterBattleOpcode_4(sBattleScriptExecutionContext* param_1, uint param_2) {
+    auto pByte = monstersScriptsEntities[param_2].m30_varArray.begin() + param_1->m0_scriptPtr[1];
+    *pByte = param_1->m0_scriptPtr[2];
+}
+
 void monsterBattleOpcode_addByte(sBattleScriptExecutionContext* param_1, uint param_2) {
     auto pByte = monstersScriptsEntities[param_2].m30_varArray.begin() + param_1->m0_scriptPtr[1];
     *pByte = std::min<u8>(*pByte + param_1->m0_scriptPtr[2], 0xFF);
@@ -136,6 +141,24 @@ void monsterBattleOpcode_43(sBattleScriptExecutionContext* param_1, uint param_2
     } while ((local_28[2] & local_28[0] & local_28[1]) == 0);
 }
 
+void monsterBattleOpcode_4A(sBattleScriptExecutionContext* param_1, uint param_2) {
+    std::array<u8, 3> local_28 = { 0,0,0 };
+    monstersScriptsEntities[param_2].m20[param_1->m0_scriptPtr[1]] = 0;
+    do {
+        u32 uVar3 = getRandomValueInRange(0, 2);
+        u32 uVar5 = uVar3 & 0xff;
+        if (local_28[uVar5] == 0) {
+            bool cVar1 = isMonsterTargetValid(uVar5, param_1->m0_scriptPtr[2]);
+            if ((cVar1 != '\0') &&
+                (apConfigArray[uVar5].m1 == 0)) {
+                monstersScriptsEntities[param_2].m20[param_1->m0_scriptPtr[1]] = characterIdToTargetBitmask(uVar5);
+                return;
+            }
+            local_28[uVar3 & 0xff] = 1;
+        }
+    } while ((local_28[2] & local_28[0] & local_28[1]) == 0);
+}
+
 int monsterBattleOpcode_50Sub(int param_1)
 {
     short sVar1;
@@ -203,6 +226,9 @@ int executeMonsterScriptLower(sBattleScriptExecutionContext* pScriptContext, int
     case 1:
         numIterations = monsterBattleOpcode_1(pScriptContext, battleScriptContext, numIterations);
         break;
+    case 4:
+        monsterBattleOpcode_4(pScriptContext, entityIndex);
+        break;
     case 8:
         monsterBattleOpcode_addByte(pScriptContext, entityIndex);
         break;
@@ -223,6 +249,9 @@ int executeMonsterScriptLower(sBattleScriptExecutionContext* pScriptContext, int
         break;
     case 0x43:
         monsterBattleOpcode_43(pScriptContext, entityIndex);
+        break;
+    case 0x4A:
+        monsterBattleOpcode_4A(pScriptContext, entityIndex);
         break;
     case 0x50:
         monsterBattleOpcode_50(pScriptContext, entityIndex);

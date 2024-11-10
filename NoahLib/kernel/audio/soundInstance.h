@@ -71,8 +71,7 @@ struct sSoundInstanceEvent {
     u16 m96_volumeSlideDuration;
     u16 m98_panDuration;
     u16 m9A;
-    std::array<sSoundInstanceEventCallstack, 3> m9C_callstack;
-    u16 mCA;
+    std::array<sSoundInstanceEventCallstack, 4> m9C_callstack;
     s16 mCE;
     s16 mD0;
     s16 mD2;

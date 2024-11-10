@@ -205,29 +205,36 @@ uint battleEvent_OP5_sub0_sub(sBattleRunningVar0Sub* param_1)
 }
 
 int battleEvent_OP5_sub0(int currentEntityId, const std::vector<u8>::iterator& bytecode) {
+    auto& thisEntity = battleEventVar0->m0[currentEntityId];
     int uVar2 = battleEvent_OP5_sub0_sub(&battleEventVar0->m0[currentEntityId]) & 0xFF;
     if (uVar2 != 8) {
-        battleEventVar0->m0[currentEntityId].m23 = (bytecode[2] & 0x1F);
-        battleEventVar0->m0[bytecode[1]].m10[uVar2] = bytecode[2] >> 5;
-        battleEventVar0->m0[bytecode[1]].m0[uVar2] = READ_LE_U16(bytecode[1] * 0x10 + battleEventVar2.begin() + 0x44 + battleEventVar0->m0[currentEntityId].m23 * 2);
-        battleEventVar0->m0[bytecode[1]].m18[uVar2] = battleEventVar0->m0[currentEntityId].m23;
+        auto& otherEntity = battleEventVar0->m0[bytecode[1]];
+
+        thisEntity.m23 = (bytecode[2] & 0x1F);
+        otherEntity.m10[uVar2] = bytecode[2] >> 5;
+        otherEntity.m0[uVar2] = READ_LE_U16(bytecode[1] * 0x10 + battleEventVar2.begin() + 0x44 + thisEntity.m23 * 2);
+        otherEntity.m18[uVar2] = thisEntity.m23;
         return 3;
     }
     return 0;
 }
 
 int battleEvent_OP5(int currentEntityId, const std::vector<u8>::iterator& bytecode) {
-    if (battleEventVar0->m0[currentEntityId].m23 == (bytecode[2] & 0x1F)) {
+
+    auto& thisEntity = battleEventVar0->m0[currentEntityId];
+    auto& otherEntity = battleEventVar0->m0[bytecode[1]];
+
+    if (thisEntity.m23 == (bytecode[2] & 0x1F)) {
         bool bVar2 = true;
         for (int i = 0; i < 8; i++) {
-            if (battleEventVar0->m0[bytecode[1]].m18[i] == battleEventVar0->m0[currentEntityId].m23) {
+            if (otherEntity.m18[i] == thisEntity.m23) {
                 bVar2 = false;
                 break;
             }
         }
         if (bVar2) {
-            if (battleEventVar0->m0[currentEntityId].m23 != battleEventVar0->m0[bytecode[1]].m21) {
-                battleEventVar0->m0[currentEntityId].m23 = -1;
+            if (thisEntity.m23 != otherEntity.m21) {
+                thisEntity.m23 = -1;
                 return 3;
             }
         }
@@ -240,7 +247,7 @@ int battleEvent_OP5(int currentEntityId, const std::vector<u8>::iterator& byteco
 
 int battleEvent_OP18_sub(int param_1, int param_2, int param_3) {
     MissingCode();
-    return 0;
+    return 1;
 }
 
 int battleEvent_OP18(int currentEntityId, const std::vector<u8>::iterator& bytecode) {

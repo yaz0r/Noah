@@ -417,8 +417,8 @@ void mechaInitEnvironmentMechaMesh(int entryId, ushort flags, sMechaDataTable2* 
 
     if ((flags & 0x40) == 0) {
         pLoadedMecha->mB0 = &pData2->m8;
-        initMechaTransforms1(pLoadedMecha, &mechaInitVar2, &pData2->m4.m8, &pData2->m4.m4);
-        initMechaAnimation(pLoadedMecha, pLoadedMecha, &mechaInitVar2, 0);
+        initMechaTransforms1(pLoadedMecha, &battleMechaInitVar2, &pData2->m4.m8, &pData2->m4.m4);
+        initMechaAnimation(pLoadedMecha, pLoadedMecha, &battleMechaInitVar2, 0);
         MissingCode();
     }
 
@@ -7354,9 +7354,28 @@ void battleSpriteOpcode_FB(sSpriteActorCore* param_1, int param_2, std::span<u8>
     param_1->mAC.mx5 = 1;
 }
 
+s16 setupMechaForEventVar0 = 0;
+s16 setupMechaForEventVar1 = 0;
+
+u32 setupMechaForEventSub0(void) {
+    uint uVar1;
+
+    uVar1 = 0;
+    do {
+        if (((int)(uint)setupMechaForEventVar1 >> (uVar1 & 0x1f) & 1U) != 0) {
+            return uVar1;
+        }
+        uVar1 = uVar1 + 1;
+    } while ((int)uVar1 < 0xd);
+    return uVar1;
+}
+
 int battleGetMechaBitfieldForAnim(sLoadedMechas* param_1, int target, u16* result) {
     int index;
     switch (target) {
+    case 0xFF:
+        index = setupMechaForEventSub0();
+        break;
     case 0xFD:
     case 0xF9:
         index = param_1->m20_mechaEntryId;
@@ -7382,22 +7401,6 @@ void setCurrentDir_20_0(void)
 {
     setCurrentDirectory(0x20, 0);
     return;
-}
-
-s16 setupMechaForEventVar0 = 0;
-s16 setupMechaForEventVar1 = 0;
-
-u32 setupMechaForEventSub0(void) {
-    uint uVar1;
-
-    uVar1 = 0;
-    do {
-        if (((int)(uint)setupMechaForEventVar1 >> (uVar1 & 0x1f) & 1U) != 0) {
-            return uVar1;
-        }
-        uVar1 = uVar1 + 1;
-    } while ((int)uVar1 < 0xd);
-    return uVar1;
 }
 
 void setupMechaForEventSub1(int param_1, uint param_2)

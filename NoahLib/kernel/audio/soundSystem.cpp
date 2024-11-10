@@ -278,7 +278,7 @@ void executeSequenceEvents(sSoundInstance* param_1, std::vector<sSoundInstanceEv
                                     if (1 < byteCode2 - 0xb0) {
                                         // We need to do an optional here to account for the fact that we can have a negative index
                                         // as in that case, we should never access the stack
-                                        std::optional<std::array<sSoundInstanceEventCallstack, 3>::iterator> pCallstackEntry;
+                                        std::optional<std::array<sSoundInstanceEventCallstack, 4>::iterator> pCallstackEntry;
                                         if (instanceEvent.m72_callstackDepth >= 0) {
                                             pCallstackEntry = instanceEvent.m9C_callstack.begin() + instanceEvent.m72_callstackDepth;
                                         }
