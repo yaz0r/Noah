@@ -72,6 +72,13 @@ do
         param_1->mA8.mx1C = 0;
         return;
     case 0x98:
+        if (param_1->m70) {
+            param_1->m9E_wait = 1;
+            if ((param_1->m70->mAC.mx18 == param_1->m8D) && (param_1->m70->mA8.mx1C == 2)) {
+                return;
+            }
+        }
+        break;
     case 0xD4:
     case 0xFA:
         assert(0);
@@ -225,6 +232,19 @@ do
         break;
     case 0x97:
         MissingCode();
+        param_1->m64_spriteByteCode.value() += sizePerBytecodeTable[bytecode];
+        break;
+    case 0x9D:
+        if ((param_1->m40 >> 0xd & 0xf) == 10) {
+            battleCameraEye.vx = param_1->m0_position.vx >> 0x10;
+            battleCameraEye.vy = param_1->m0_position.vy >> 0x10;
+            battleCameraEye.vz = param_1->m0_position.vz >> 0x10;
+        }
+        else {
+            battleCameraAt.vx = param_1->m0_position.vx >> 0x10;
+            battleCameraAt.vy = param_1->m0_position.vy >> 0x10;
+            battleCameraAt.vz = param_1->m0_position.vz >> 0x10;
+        }
         param_1->m64_spriteByteCode.value() += sizePerBytecodeTable[bytecode];
         break;
     case 0xA4:

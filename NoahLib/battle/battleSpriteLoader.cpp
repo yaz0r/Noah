@@ -6,6 +6,7 @@
 #include "battle/battle.h"
 #include "field/field.h"
 
+void initMechaForBattle(int param_1);
 
 bool battleScriptLoaderTaskCreationInProgress = 0;
 
@@ -28,17 +29,18 @@ void defaultBattleSpriteDeleteCallback(sTaskHeader* param_1) {
 
 std::vector<u8> battleSpriteLoadTempBuffer;
 
-struct sBattleUploadSprite {
-    std::array<u16, 11> m0;
-    std::array<s32, 11> m20;
-};
-
 int getSpriteNumVerticalStrides(std::vector<u8>::iterator data) {
     return READ_LE_U32(data);
 }
 
 void loadBattleSpriteVram(sBattleSpriteConfigs* param_1) {
+    struct sBattleUploadSprite {
+        std::array<u16, 11> m0;
+        std::array<s32, 11> m20;
+    };
     sBattleUploadSprite spriteIndicies;
+    spriteIndicies.m0.fill(0);
+    spriteIndicies.m20.fill(0);
 
     for (int i = 0; i < 11; i++) {
         spriteIndicies.m20[i] = battleVisualEntities[i].m2;
@@ -82,7 +84,7 @@ void loadBattleSpriteVram(sBattleSpriteConfigs* param_1) {
                 int numUsedEntries = 0;
                 int iVar8 = local_3c - 3;
                 for (int iVar3 = 3; iVar3 != 0xB; iVar3++) {
-                    if (spriteIndicies.m0[iVar3] == iVar8) {
+                    if (spriteIndicies.m20[iVar3] == iVar8) {
                         numUsedEntries++;
                     }
                 }
@@ -90,8 +92,8 @@ void loadBattleSpriteVram(sBattleSpriteConfigs* param_1) {
                     std::vector<u8>::iterator pSpriteData = param_1->begin() + param_1->m8[numCurrentEntity + 1].m4_spriteDataOffset;
                     if (READ_LE_U8(pSpriteData + 1) && (READ_LE_U8(pSpriteData + 0) == numCurrentEntity)) {
                         for (int i = 3; i < 0xB; i++) {
-                            if (spriteIndicies.m20[6] == slot) {
-                                spriteIndicies.m20[6] = iVar8;
+                            if (spriteIndicies.m20[i] == slot) {
+                                spriteIndicies.m20[i] = iVar8;
                                 numUsedEntries++;
                             }
                         }
@@ -99,7 +101,7 @@ void loadBattleSpriteVram(sBattleSpriteConfigs* param_1) {
                 }
                 for (int entryId = 3; entryId != 0xB; entryId++) {
                     int slotValue = spriteIndicies.m20[entryId];
-                    if ((slotValue > 8) && (slotValue == iVar8) && entryId) {
+                    if ((slotValue < 8) && (slotValue == iVar8) && entryId) {
                         spriteSlot = -(numUsedEntries < 2 ^ 1) & 2;
                         if (iDest) {
                             spriteSlot = 7;
@@ -112,8 +114,7 @@ void loadBattleSpriteVram(sBattleSpriteConfigs* param_1) {
                         iDest++;
 
                         mechaInitEnvironmentMechaMesh(entryId, spriteSlot | 0x80, &param_1->m8[currentSpriteEntityId].m_mechaData2, &param_1->m8[currentSpriteEntityId].m_mechaData1, currentSpriteX, 0x100, 0, ((entryId - iVar3) * 0x10000) >> 0x10, 0);
-                        assert(0);
-                        //initMechaForBattle(entryId);
+                        initMechaForBattle(entryId);
                     }
                 }
             }

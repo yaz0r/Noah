@@ -202,6 +202,7 @@ struct sBattleVar1 {
     std::array<u8, 7> mBF_isDialogWindowInitialized3;
     u8 mC6_isTargetSelectionCursorVisible;
     u8 mC7;
+    u8 mCA_battleEventPoly;
     u8 mCB;
     std::array<u8, 3> mCC;
     u8 mCF;
@@ -343,6 +344,8 @@ extern std::array<sBattleVisualEntity, 0x11> battleVisualEntities;
 
 struct sBattleSpriteActor : public sTaskHeaderPair {
     sSpriteActor m38_spriteActor;
+
+    //size 0x19C
 };
 
 extern std::array<sBattleSpriteActor*, 11> battleSpriteActors;
@@ -521,8 +524,13 @@ extern u8 startCharacterJumpToEnemyVar0;
 extern FP_VEC3 previousCameraEye2;
 extern FP_VEC3 previousCameraAt2;
 extern sSpriteActorCore* processBattleAnimationSub0_var1;
+extern s8 isBattleAnEvent;
+extern s8 battleRunningVar1;
 
 extern std::array<sLoadedMechas*, 32> battleMechas;
+
+extern struct sBattleRunningVar0* battleEventVar0;
+extern s8 battleCameraVar0;
 
 void handleMenuSelectEnemy_cancel_sub0(u8 param_1);
 void updateMonsterScriptEntitiesVarByAtttack(byte param_1, byte targetId);
@@ -547,3 +555,10 @@ void spriteBytecode2ExtendedE0_Sub0_10_battle(sSavePointMeshAbstract* param_1);
 void createMechaLoadingTask(int param_1);
 int battleGetMechaBitfieldForAnim(sLoadedMechas* param_1, int target, u16* result);
 int getBattleSlotLayout(int index);
+void setCurrentDir_20_0(void);
+void waitBattleAnimationSoundLoaded();
+void startJumpAnimationSub0(int param_1);
+void setBattleCameraMode(int param_1);
+void setupMechaForEvent(s16 param_1, s16 param_2, int animationIndex);
+int mecha_battle_op3();
+void mecha_battle_op3_2(int);

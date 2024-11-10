@@ -96,7 +96,7 @@ bool noahInit(int argc, char* argv[])
             std::vector<u8> overlay;
             readFile(0x1, overlay, 0, 0);
             waitReadCompletion(0);
-            FILE* fHandle = fopen((std::string("battle_1") + std::string(".ovl")).c_str(), "wb+");
+            FILE* fHandle = fopen((std::string("battle_event") + std::string(".ovl")).c_str(), "wb+");
             if (fHandle) {
                 fwrite(&overlay[0], 1, overlay.size(), fHandle);
                 fclose(fHandle);

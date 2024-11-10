@@ -74,3 +74,7 @@ T* battleLoaderAllocateMainBattleSprite(sTaskHeader* param_1, int param_2)
 
 extern bool battleScriptLoaderTaskCreationInProgress;
 extern int mainBattleSpriteCallback_phase5Var;
+
+void battleSpriteUpdate(sTaskHeader* param_1);
+void battleSpriteRender(sTaskHeader* param_1);
+void battleSpriteDelete(sTaskHeader*);

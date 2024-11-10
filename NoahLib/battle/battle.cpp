@@ -26,13 +26,14 @@
 #include "kernel/audio/wds.h"
 #include "kernel/audio/seq.h"
 #include "kernel/audio/soundInstance.h"
+#include "battle/battleEvent/battleEvent.h"
 
 #include "battle/menu_chi.h"
 
 u16 allPlayerCharacterBitmask = 0;
 u8 battleInitVar0 = 0;
 u8 battleInitVar1 = 0;
-s32 battleRunningVar0 = 0;
+struct sBattleRunningVar0* battleEventVar0 = nullptr;
 s8 battleRunningVar1 = 0;
 s8 isBattleAnEvent = 0;
 s8 currentBattleMode = 0;
@@ -188,6 +189,11 @@ void mechaInitForBattle() {
     battleMechaVar5 = 1;
     initMechaInitVar2(&battleMechaInitVar2, battleMechaInitData->m348);
     initMechaInitVar3(&battleMechaInitVar3, battleMechaInitData->m34A);
+
+    for (int i = 0; i < 0x20; i++) {
+        battleMechas[i] = nullptr;
+    }
+
 
     MissingCode();
 }
@@ -775,7 +781,7 @@ void computeBattleCameraParams(uint bitmask) {
                     bestDistance = distance;
                 }
                 if (battleVisualEntities[i].m4_isGear) {
-                    assert(0);
+                    MissingCode();
                 }
             }
 
@@ -5984,8 +5990,20 @@ void removeCurrentMonsterNameString() {
     MissingCode();
 }
 
-void updateBattleOverlay801E5000(int) {
-    MissingCode();
+extern u8 needToLoadBattleOverlay801E5000;
+
+void loadBattleOverlay801E5000IfNeeded() {
+    if (needToLoadBattleOverlay801E5000 != '\0') {
+        MissingCode();
+        battleEventEntry();
+    }
+}
+
+void updateBattleOverlay801E5000(int param) {
+    if (needToLoadBattleOverlay801E5000 != '\0') {
+        battleEvent_update(param);
+
+    }
 }
 
 void execMonsterScriptEndOfPlayerTurn() {
@@ -6037,7 +6055,22 @@ void clearAnimationsEndOfTurnSub() {
 
 void waitBattleAnimationSoundLoaded() {
     if (!battleAnimationSoundLoaded) {
-        assert(0);
+        battleIdleDuringLoading();
+        setCurrentDirectory(0x2c, 0);
+        //sVar2 = getFileSizeAligned(5);
+        sWdsFile wdsFile;
+        readFile(5, wdsFile, 0, 0x80);
+        battleIdleDuringLoading();
+        sWdsFile* psVar3 = findInWdsLinkedList(wdsFile.m20_bankNumber);
+        if (psVar3 == nullptr) {
+            loadWdsDataIfNeeded();
+            loadWdsDataNeeded = loadWds(wdsFile, 0);
+            while (waitForMusic(0) != 0) {
+                battleRender();
+            }
+            battleAnimationSoundLoaded = '\x01';
+            startJumpAnimationVar3 = 0;
+        }
     }
 }
 
@@ -6371,16 +6404,17 @@ void battleMain() {
         battleRenderDebugAndMain();
     }
 
-    // This would cause a use after free if it was kept in the original order
+    // This would cause a use after free
     //battleStartSeq.clear();
     if (battleTransitionEffect != 4) {
         stopSequence(&battleStartSeq);
     }
     unloadSequence(&battleStartSeq);
-    //battleStartSeq.clear(); // this was moved here to avoid use after free
 
     MissingCode();
 
+    loadBattleOverlay801E5000IfNeeded();
+    updateBattleOverlay801E5000(1);
     if (isBattleAnEvent == '\0') {
         currentBattleMode = 1;
     }
@@ -6393,7 +6427,7 @@ void battleMain() {
         }
     }
 
-    int battleRunningVar0Temp = battleRunningVar0;
+    struct sBattleRunningVar0* battleRunningVar0Temp = battleEventVar0;
 
     while (!battleRunningVar1 && !isBattleAnEvent) {
         if (battleTimeEnabled != '\0') {
@@ -6768,6 +6802,19 @@ void battleSpriteEffect_3A_sub(short param_1, int param_2, short param_3, short 
     sBattleSpriteEffect_3A_sub_entity_update(battleSpriteEffect_3A_sub_entity);
 }
 
+void battleSpriteEffect_2D(sSpriteActorCore* param_1, std::span<u8>::iterator param_2) {
+    std::span<u8>::iterator dataLocation = param_2 + READ_LE_S16(param_2);
+    param_1->m0_position.vx = ((int)READ_LE_S16(dataLocation + 0)) << 0x10;
+    param_1->m0_position.vy = ((int)READ_LE_S16(dataLocation + 2)) << 0x10;
+    param_1->m0_position.vz = ((int)READ_LE_S16(dataLocation + 4)) << 0x10;
+}
+
+void battleSpriteEffect_2E(SVECTOR* param_1, std::span<u8>::iterator param_2) {
+    std::span<u8>::iterator dataLocation = param_2 + READ_LE_S16(param_2);
+    param_1->vx = ((int)READ_LE_S16(dataLocation + 0));
+    param_1->vy = ((int)READ_LE_S16(dataLocation + 2));
+    param_1->vz = ((int)READ_LE_S16(dataLocation + 4));
+}
 
 void battleSpriteEffect_3A(sSpriteActorCore* param_1, std::span<u8>::iterator param_2) {
     std::span<u8>::iterator dataLocation = param_2 + READ_LE_S16(param_2);
@@ -6908,6 +6955,33 @@ void battleSpriteEffect_23(sSpriteActorCore* param_1)
     setSpriteActorAngle(param_1, sVar1);
 }
 
+void battleSpriteEffect_1C(sSpriteActorCore* param_1) {
+    VECTOR difference;
+    difference.vx = param_1->mA0.vx - param_1->m0_position.vx.getIntegerPart();
+    difference.vy = param_1->mA0.vy - param_1->m0_position.vy.getIntegerPart();
+    difference.vz = param_1->mA0.vz - param_1->m0_position.vz.getIntegerPart();
+
+    VECTOR differenceSquare;
+    Square0(&difference, &differenceSquare);
+
+    SVECTOR newDirection;
+    newDirection.vx = 0;
+    newDirection.vy = -ratan2(difference.vz, difference.vx);
+    newDirection.vz = ratan2(difference.vy, SquareRoot0(differenceSquare.vx + differenceSquare.vz));
+
+    SVECTOR newVector;
+    setupSVector(&newVector, (short)((uint)(param_1->m18_moveSpeed << 9) >> 0x10), 0, 0);
+
+    MATRIX rotationMatrix;
+    createRotationMatrix(&newDirection, &rotationMatrix);
+    VECTOR transformedVector;
+    ApplyMatrix(&rotationMatrix, &newVector, &transformedVector);
+
+    (param_1->mC_step).vx = transformedVector.vx << 7;
+    (param_1->mC_step).vy = transformedVector.vy << 7;
+    (param_1->mC_step).vz = transformedVector.vz << 7;
+}
+
 void battleSpriteEffect(sSpriteActorCore* param_1, s8 param_2, std::span<u8>::iterator endOfOpcode) {
     switch (param_2) {
     case 5:
@@ -6945,6 +7019,9 @@ void battleSpriteEffect(sSpriteActorCore* param_1, s8 param_2, std::span<u8>::it
         param_1->mC_step.vz = iVar3 >> 8;
         return;
     }
+    case 0x1C:
+        battleSpriteEffect_1C(param_1);
+        return;
     case 0x1f:
         param_1->m3C = param_1->m3C & 0xfbffffff;
         savePointCallback8Sub0Sub0_battle(param_1);
@@ -6964,6 +7041,12 @@ void battleSpriteEffect(sSpriteActorCore* param_1, s8 param_2, std::span<u8>::it
         param_1->mC_step.vx = (iVar11 >> 0xc) << 8;
         return;
     }
+    case 0x2D:
+        battleSpriteEffect_2D(param_1, endOfOpcode);
+        return;
+    case 0x2E:
+        battleSpriteEffect_2E(&param_1->mA0, endOfOpcode);
+        return;
     case 0x3a:
         battleSpriteEffect_3A(param_1, endOfOpcode);
         return;
@@ -7093,6 +7176,13 @@ void spriteBytecode2ExtendedE0_Sub0_10_battle(sSavePointMeshAbstract* param_1) {
         assert(0);
     }
     else {
+        if (battleCameraModeCallback2 == nullptr) {
+            battleCameraModeCallback2 = param_1;
+            battleCameraAtTarget_backup.vx = battleCameraAtTarget.vx;
+            battleCameraAtTarget_backup.vy = battleCameraAtTarget.vy;
+            battleCameraAtTarget_backup.vz = battleCameraAtTarget.vz;
+            goto LAB_Battle__800bc27c;
+        }
         assert(0);
     }
     assert(0);
@@ -7193,4 +7283,60 @@ int getBattleSlotLayout(int index) {
 void executeSpriteBytecode2_battle(sSpriteActorCore* param_1) {
 #define IMPLEMENT_BATTLE_SPECIFIC_CASES
 #include "kernel/spriteVM.h"
+}
+
+void setCurrentDir_20_0(void)
+{
+    setCurrentDirectory(0x20, 0);
+    return;
+}
+
+s16 setupMechaForEventVar0 = 0;
+s16 setupMechaForEventVar1 = 0;
+
+u32 setupMechaForEventSub0(void) {
+    uint uVar1;
+
+    uVar1 = 0;
+    do {
+        if (((int)(uint)setupMechaForEventVar1 >> (uVar1 & 0x1f) & 1U) != 0) {
+            return uVar1;
+        }
+        uVar1 = uVar1 + 1;
+    } while ((int)uVar1 < 0xd);
+    return uVar1;
+}
+
+void setupMechaForEventSub1(int param_1, uint param_2)
+{
+    sSpriteActorCore* psVar1;
+
+    psVar1 = battleSpriteActorCores[param_1];
+    if (psVar1 != (sSpriteActorCore*)0x0) {
+        currentJumpAnimationBitMask = (u16)(1 << (param_2 & 0x1f));
+        processBattleAnimationSub0_var1 = psVar1;
+        psVar1->m74_pTargetEntitySprite = battleSpriteActorCores[param_2];
+        pSpriteCoreListHead[0] = battleSpriteActorCores[param_2];
+        pSpriteCoreListHead[1] = nullptr;
+    }
+    return;
+}
+
+void setupMechaForEvent(s16 param_1, s16 param_2, int animationIndex) {
+    battleMechaVar3 = 1;
+    setupMechaForEventVar0 = param_1;
+    setupMechaForEventVar1 = param_2;
+    battleMechas[param_1]->m35 = 1;
+    allocateSavePointMeshDataSub0_var0 = 0;
+    spriteBytecode2ExtendedE0_Var0 = 1;
+    setupMechaForEventSub1(param_1, setupMechaForEventSub0());
+    allocateJumpAnimationStructVar0 = 1;
+    battleCurrentDamages[0].m18_damageType[setupMechaForEventSub0()] = 0;
+    if (battleMechas[param_1]) {
+        initMechaAnimation(battleMechas[param_1], battleMechas[param_1], &battleMechaInitVar2, animationIndex);
+    }
+}
+
+int mecha_battle_op3() {
+    return allocateSavePointMeshDataSub0_var0 - isDamageDisplayPolysTask2Running();
 }

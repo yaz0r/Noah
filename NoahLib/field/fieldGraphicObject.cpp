@@ -709,6 +709,9 @@ const std::vector<void (*)(sTaskHeader*)> spriteBytecode2ExtendedE0_Sub0Sub0_cal
         spriteCallback_render8,
         spriteCallback_render9,
         nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
 } };
 
 void spriteBytecode2ExtendedE0_Sub0Sub0(sTaskHeader* param_1, int param_2)
@@ -738,6 +741,13 @@ void spriteBytecode2ExtendedE0_Sub0(sSavePointMeshAbstract* param_1)
         param_1->m38_spriteActorCore.m0_position.vx = previousCameraEye2.vx;
         param_1->m38_spriteActorCore.m0_position.vy = previousCameraEye2.vy;
         param_1->m38_spriteActorCore.m0_position.vz = previousCameraEye2.vz;
+        break;
+    case 11:
+        param_1->m38_spriteActorCore.m34_currentSpriteFrame = 0;
+        spriteBytecode2ExtendedE0_Sub0_10_battle(param_1);
+        param_1->m38_spriteActorCore.m0_position.vx = previousCameraAt2.vx;
+        param_1->m38_spriteActorCore.m0_position.vy = previousCameraAt2.vy;
+        param_1->m38_spriteActorCore.m0_position.vz = previousCameraAt2.vz;
         break;
     default:
         assert(0);

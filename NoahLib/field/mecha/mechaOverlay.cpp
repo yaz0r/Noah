@@ -883,8 +883,24 @@ void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int pa
             continueBytecodeExecution = 0;
             break;
         case 2:
+            assert(isBattleOverlayLoaded == 0); // there is some code different in battle
             continueBytecodeExecution = 0;
             local_78 = 1;
+            break;
+        case 3:
+            // battle only
+            assert(isBattleOverlayLoaded);
+            if (pMecha->m35) {
+                if (mecha_battle_op3() == 0) {
+                    allocateSavePointMeshDataSub0_var0 = 0;
+                    spriteBytecode2ExtendedE0_Var0 = 0;
+                    pMecha->m35 = 0;
+                    mecha_battle_op3_2(pMecha->m20_mechaEntryId);
+                }
+                else {
+                    continueBytecodeExecution = 0;
+                }
+            }
             break;
         case 0x8:
             mechaOP_8(param_2, pMecha->m4_bones); // release all tracks disabled
@@ -1016,7 +1032,7 @@ void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int pa
             u16 nextValue = *pNextBytecode;
             pNextBytecode++;
             if (getBattleSlotLayout(pMecha->m20_mechaEntryId)) {
-                assert(0);
+                pNextBytecode = pCurrentByteCodePtr + nextValue;
             }
             break;
         }

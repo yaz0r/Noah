@@ -339,3 +339,7 @@ int modulateSpeed(sSpriteActorCore* param_1, int param_2);
 
 extern int initFieldVar5;
 extern int initFieldVar4;
+
+void initFieldEntitySub4Sub1(sSpriteActorCore* param_1);
+void initFieldEntitySub4Sub2(sSpriteActor* pThis);
+void setAnimationBundle(sSpriteActorCore* param_1, sSpriteActorAnimationBundle* pAnimationBundle);
