@@ -1,4 +1,7 @@
 /data/iso
 /data/shaders/generated
 /data/imgui.ini
+/data/*.ovl
 /build
+*.generated.h
+*.rdc
