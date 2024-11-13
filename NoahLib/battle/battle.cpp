@@ -3253,6 +3253,9 @@ void allocateJumpAnimationStructCallback(sJumpAnimationControlStruct* param_1) {
             updateBattleAnimationDataLoading();
         }
         break;
+    case 8: // Gear attack
+        MissingCode();
+        break;
     case 10: // during attack
         if (allocateSavePointMeshDataSub0_var0 == isDamageDisplayPolysTask2Running()) {
             deleteJumpAnimationControlStructEndOfAttack();
@@ -3428,7 +3431,11 @@ void startJumpAnimation(int isBilly, uint actor, uint jumpTarget, uint facing) {
         }
     }
     else {
-        assert(0);
+        waitBattleAnimationSpriteLoading();
+        waitBattleAnimationSoundLoaded();
+        setupJumpAnimationStruct1C(8);
+        performMechaPlayAnimation(actor, jumpTarget, 0x1a);
+        setBattleCameraParamX(0xc0);
     }
 
     if (isBilly == 0) {
@@ -3437,7 +3444,9 @@ void startJumpAnimation(int isBilly, uint actor, uint jumpTarget, uint facing) {
             jumpUpdatePosition(jumpAnimationControlStruct->m4);
         }
         else {
-            assert(0);
+            performMechaPlayAnimation
+            (actor, battleCurrentDamages[allocateJumpAnimationStructVar0].m16_targetBitMask, 2);
+
         }
     }
     else {
@@ -7136,6 +7145,9 @@ void battleSpriteEffect(sSpriteActorCore* param_1, s8 param_2, std::span<u8>::it
         return;
     case 0x2E:
         battleSpriteEffect_2E(&param_1->mA0, endOfOpcode);
+        return;
+    case 0x31:
+        SetGeomOffset(0xa0, 0x70);
         return;
     case 0x32:
         SetGeomOffset(0xa0, 0xa4);

@@ -1048,9 +1048,6 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, std
         (param_1->mC_step).vz = 0;
         param_1->m18_moveSpeed = 0;
         break;
-    case 0xB0:
-        MissingCode(); // play sound effect?
-        break;
     case 0x8D:
         setupOverrideTPage(param_1->m24_vramData->m4_vramLocation.vx, param_1->m24_vramData->m4_vramLocation.vy);
         break;
@@ -1138,13 +1135,16 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, std
         param_1->m0_position.vz += offset;
         break;
     }
+    case 0xB0:
+        MissingCode(); // play sound effect?
+        break;
 	case 0xB3:
 		param_1->mA8.mxB= READ_LE_U8(param_3) & 0x3F;
 		break;
 	case 0xB4:
 		pushByteOnAnimationStack(param_1, READ_LE_U8(param_3));
 		break;
-    case 0xb5:
+    case 0xB5:
         if ((param_1->m3C & 3) != 0) {
             setGraphicEntityScale(param_1, (short)((READ_LE_U8(param_3) << 0x18) >> 0x10));
         }
