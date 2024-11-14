@@ -75,7 +75,7 @@ void StartFrame()
     }
 
     // Pull the input from SDL2 instead
-    ImGui_ImplSDL2_NewFrame(gWindowBGFX);
+    ImGui_ImplSDL2_NewFrame();
     imguiBeginFrame(0, 0, 0, 0, outputResolution[0], outputResolution[1], -1);
 
     if (ImGui::BeginMainMenuBar())
