@@ -25,7 +25,7 @@ void updateColorFromSin(sSpriteActorCore* param_1, int param_2) {
     byte bVar2;
 
     iVar1 = getAngleCos(param_2 << 6);
-    iVar1 = (iVar1 + 0x1000 >> 6) + 0x80;
+    iVar1 = ((iVar1 + 0x1000) >> 6) + 0x80;
     if (0xff < iVar1) {
         iVar1 = 0xff;
     }

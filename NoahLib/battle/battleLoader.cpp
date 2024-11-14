@@ -798,13 +798,13 @@ void loadEnemies() {
                 unknownMonsterStatus0[i - 3].m1 = 1;
             }
             for (int j = 0; j < 4; j++) {
-                monstersScriptsEntities[i - 3].m10[j] = 0;
+                monstersScriptsEntities[i - 3].m10_s32Vars[j] = 0;
             }
             for (int j = 0; j < 8; j++) {
-                monstersScriptsEntities[i - 3].m20[j] = 0;
+                monstersScriptsEntities[i - 3].m20_s16Vars[j] = 0;
             }
             for (int j = 0; j < 16; j++) {
-                monstersScriptsEntities[i - 3].m30_varArray[j] = 0;
+                monstersScriptsEntities[i - 3].m30_s8Vars[j] = 0;
             }
         }
     }

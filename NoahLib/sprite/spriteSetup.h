@@ -53,7 +53,7 @@ struct sSpriteActorAnimationBundle : public sLoadableData
         assert(m0_numEntries >= 3);
 
         m4_entries.reserve(m0_numEntries);
-        for (int i = 0; i < m0_numEntries; i++) {
+        for (u32 i = 0; i < m0_numEntries; i++) {
             u32 start = READ_LE_U32(inputData + 4 + i * 4);
             u32 end = READ_LE_U32(inputData + 4 + (i+1) * 4);
             m4_entries.push_back(std::span<u8>(inputData + start, end - start));
@@ -87,7 +87,7 @@ struct sSpriteActorAnimationBundle : public sLoadableData
         mC_pData = m4_entries[2];
 
         m4_entriesAsSequences.resize(m4_entries.size());
-        for (int i = 3; i < m0_numEntries; i++) {
+        for (u32 i = 3; i < m0_numEntries; i++) {
             u32 magic = READ_LE_U32(m4_entries[i].begin());
             if (magic == 'sdes') {
                 m4_entriesAsSequences[i].init(m4_entries[i].begin(), m4_entries[i].size());

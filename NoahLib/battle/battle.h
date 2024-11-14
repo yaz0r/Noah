@@ -325,7 +325,7 @@ struct sBattleVisualBuffer {
 
     sSpriteActorAnimationBundle bundle;
 };
-extern std::array<sBattleVisualBuffer, 0x11> battleVisualBuffers;
+extern std::array<sBattleVisualBuffer, 11> battleVisualBuffers;
 
 struct sBattleVisualEntity {
     u8 m0_positionSlot;
@@ -340,7 +340,7 @@ struct sBattleVisualEntity {
 
     // size 0x1C
 };
-extern std::array<sBattleVisualEntity, 0x11> battleVisualEntities;
+extern std::array<sBattleVisualEntity, 11> battleVisualEntities;
 
 struct sBattleSpriteActor : public sTaskHeaderPair {
     sSpriteActor m38_spriteActor;

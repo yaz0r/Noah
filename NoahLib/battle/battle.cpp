@@ -76,12 +76,12 @@ sBattleMechaInitData* battleLoadDataVar2;
 sBattleMechaInitData* battleLoadDataVar2Bis;
 sBattleMechaInitData* battleLoadDataVar2Ter;
 
-std::array<s8, 0xB> isEntityReadyForBattle;
-std::array<s8, 0xB> randomTurnOrder;
+std::array<s8, 11> isEntityReadyForBattle;
+std::array<s8, 11> randomTurnOrder;
 s8 currentEntryInRandomTurnOrder;
 
-std::array<sBattleVisualBuffer, 0x11> battleVisualBuffers;
-std::array<sBattleVisualEntity, 0x11> battleVisualEntities;
+std::array<sBattleVisualBuffer, 11> battleVisualBuffers;
+std::array<sBattleVisualEntity, 11> battleVisualEntities;
 std::array<sBattleEntity, 11> battleEntities;
 
 sGameStateA4* startBattleAttackAnimationVar5;
@@ -5297,7 +5297,7 @@ u32 startBattleAttackAnimation() {
     initBattleAttackStatus();
 
     startBattleAttackAnimationVar0 = 0;
-    startBattleAttackAnimationVar1 = '\0';
+    startBattleAttackAnimationVar1 = 0;
     startBattleAttackAnimationVar2 = performAttackSub3_attacker;
 
     battleGetSlotStatusSub_currentBattleEntity = &battleEntities[performAttackSub3_attacker].m0_base;
@@ -5391,15 +5391,15 @@ void performAttackSub3(s8 param_1, s16 hitEntitiesBF, s16 param_3) {
 void updateMonsterScriptEntitiesVarByAtttack(byte param_1, byte targetId) {
     if (targetId >= 3) { // don't do anything for players
         targetId -= 3;
-        monstersScriptsEntities[targetId].m20[7] = characterIdToTargetBitmask(param_1);
+        monstersScriptsEntities[targetId].m20_s16Vars[7] = characterIdToTargetBitmask(param_1);
         for (int i = 0; i < 5; i++) {
-            monstersScriptsEntities[targetId].m30_varArray[9 + i] = battleTickMain_var3[i];
+            monstersScriptsEntities[targetId].m30_s8Vars[9 + i] = battleTickMain_var3[i];
 
             if ((performAttackSub3_var0 & characterIdToTargetBitmask(battleVar2->m0[param_1].m3C_currentTarget)) == 0) {
-                monstersScriptsEntities[targetId].m30_varArray[0xe] = 0;
+                monstersScriptsEntities[targetId].m30_s8Vars[0xe] = 0;
             }
             else {
-                monstersScriptsEntities[targetId].m30_varArray[0xe] = 1;
+                monstersScriptsEntities[targetId].m30_s8Vars[0xe] = 1;
             }
         }
     }
@@ -5459,11 +5459,8 @@ void setDamageDone(uint param_1)
 
 void markEnemyDead(uint param_1)
 {
-    byte bVar1;
-    uint uVar2;
-
-    param_1 = param_1 & 0xff;
-    uVar2 = (param_1 < 3 ^ 1) << 3;
+    param_1 &= 0xFF;
+    uint uVar2 = ((param_1 < 3) ^ 1) << 3;
     if (apConfigArray[param_1].m1 != 0) {
         uVar2 = uVar2 | 0x10;
     }
@@ -5482,7 +5479,7 @@ void applyChangeToHpOrMp(uint param_1) {
         if (isBattleSlotFilled[i] == 0)
             continue;
         if (battleEntities[i].m0_base.m7C & 0x8000) {
-            performAttackSub3_var0 |= characterIdToTargetBitmask(i & 0xff);
+            performAttackSub3_var0 |= characterIdToTargetBitmask(i);
             continue;
         }
 
@@ -5494,10 +5491,10 @@ void applyChangeToHpOrMp(uint param_1) {
             if (battleVisualEntities[i].m4_isGear == 0) {
                 if (battleEntities[i].m0_base.m4C_HP - battleCurrentDamages[param_1].m0_damageValue[i] < 1) {
                     battleEntities[i].m0_base.m4C_HP = 0;
-                    performAttackSub3_var0 |= characterIdToTargetBitmask(i & 0xff);
+                    performAttackSub3_var0 |= characterIdToTargetBitmask(i);
                     battleEntities[i].m0_base.m7C |= 0x8000;
-                    if (i > 2) {
-                        markEnemyDead(i & 0xff);
+                    if (i > 2) { // if it's an enemy
+                        markEnemyDead(i);
                     }
                 }
                 else {
@@ -5575,7 +5572,7 @@ int performAttack(byte param_1, uint numAPUsed) {
     battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m47_battleAnimationToPlay = performAttack_type;
     battleVar2->m2DA_indexInBattleVar48++;
     updateMonsterScriptEntitiesVarByAtttack(param_1, battleVar2->m0[param_1].m3C_currentTarget);
-    if ((2 < battleVar2->m0[param_1].m3C_currentTarget) && (executeMonsterScriptWhenAttacked(battleVar2->m0[param_1].m3C_currentTarget) != '\0'))
+    if ((2 < battleVar2->m0[param_1].m3C_currentTarget) && (executeMonsterScriptWhenAttacked(battleVar2->m0[param_1].m3C_currentTarget) != 0))
     {
         returnValue = 1;
     }
