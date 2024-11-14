@@ -100,7 +100,7 @@ std::vector<u8>::iterator seqOP_1A(std::vector<u8>::iterator it, sSoundInstance*
 
 std::vector<u8>::iterator seqOP_20_setTempo(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pInstance->m58 = (int)it[0] << 0x10;
-    pInstance->m54 = (int)it[0] * (pInstance->m64 >> 16);
+    pInstance->m54 = (int)it[0] * (pInstance->m64.m0.getIntegerPart());
     return it + 1;
 }
 

@@ -123,7 +123,7 @@ void executeSequenceEvents2(sSoundInstance* param_1, std::vector<sSoundInstanceE
             param_1->m58 += param_1->m5C;
         }
         param_1->m60--;
-        param_1->m54 = (param_1->m58 >> 16) * (param_1->m64 >> 16);
+        param_1->m54 = (param_1->m58 >> 16) * (param_1->m64.m0.getIntegerPart());
     }
 
     for (int i = 0; i < param_3; i++) {
@@ -452,7 +452,7 @@ void voicePostUpdate2(sSoundInstance* pSoundInstance, std::vector<sSoundInstance
                     if (volumeTarget < 0) {
                         volumeTarget = 0;
                     }
-                    s32 panTarget = pVoice->m74_pan + pVoice->mD4 + (pSoundInstance->m88 >> 0x10);
+                    s32 panTarget = pVoice->m74_pan + pVoice->mD4 + (pSoundInstance->m88.m0.getIntegerPart());
                     
                     if (panTarget > 0x7FFF) {
                         panTarget = 0x7FFF;
@@ -461,7 +461,7 @@ void voicePostUpdate2(sSoundInstance* pSoundInstance, std::vector<sSoundInstance
                         panTarget = 0;
                     }
 
-                    volumeTarget = ((pSoundInstance->m70 >> 0x10) * ((pVoice->m76 * volumeTarget) >> 0xF)) >> 0x10;
+                    volumeTarget = ((pSoundInstance->m70.m0.getIntegerPart()) * ((pVoice->m76 * volumeTarget) >> 0xF)) >> 0x10;
 
                     int volumeLeft;
                     int volumeRight;
@@ -488,7 +488,7 @@ void voicePostUpdate2(sSoundInstance* pSoundInstance, std::vector<sSoundInstance
                     pVoice->m30.mA_volumeRight = volumeRight;
                 }
                 if (pVoice->m2 & 0x200) {
-                    int value = (((pVoice->m68_finalNoteToPlay >> 16) + (int)pVoice->mD0 + (int)(pSoundInstance->m7C >> 16)) * 0x10000) >> 0x10;
+                    int value = (((pVoice->m68_finalNoteToPlay >> 16) + (int)pVoice->mD0 + (int)(pSoundInstance->m7C.m0.getIntegerPart())) * 0x10000) >> 0x10;
                     int sampleRate = computeSampleRate(value);
                     pVoice->m30.m14_ADPCM_SampleRate = sampleRate & 0x3FFF;
                     pVoice->m30.m6 |= 4;
@@ -533,6 +533,21 @@ void audioTickSub1() {
     }
 }
 
+void interpolateAudioParam(sInterpolatableAudioParam* param_1) {
+    short sVar1;
+    int iVar2;
+
+    sVar1 = param_1->m8;
+    param_1->m8 = sVar1 + -1;
+    if (sVar1 == 1) {
+        iVar2 = (int)param_1->mA << 0x10;
+    }
+    else {
+        iVar2 = param_1->m0 + param_1->m4;
+    }
+    param_1->m0 = iVar2;
+}
+
 void audioTick() {
     spuMutex.lock();
     if ((musicStatusFlag & 0x40) == 0) {
@@ -558,21 +573,22 @@ void audioTick() {
                 if ((pSoundInstance->m2C != 0) && ((uint)pSoundInstance->m2C <= (uint)pSoundInstance->m24)) {
                     assert(0);
                 }
-                if (pSoundInstance->m6C != 0) {
+                if (pSoundInstance->m64.m8 != 0) {
                     assert(0);
                 }
-                if (pSoundInstance->m78 != 0) {
+                if (pSoundInstance->m70.m8 != 0) {
+                    interpolateAudioParam(&pSoundInstance->m70);
+                    applyFlagToAllVoices(0x100, pSoundInstance);
+                }
+                if (pSoundInstance->m7C.m8 != 0) {
                     assert(0);
                 }
-                if (pSoundInstance->m84 != 0) {
-                    assert(0);
-                }
-                if (pSoundInstance->m90 != 0) {
+                if (pSoundInstance->m88.m8 != 0) {
                     assert(0);
                 }
 
                 pSoundInstance->m20++;
-                pSoundInstance->m28 += pSoundInstance->m64 >> 16;
+                pSoundInstance->m28 += pSoundInstance->m64.m0.getIntegerPart();
                 pSoundInstance->m50 -= pSoundInstance->m54;
                 while (pSoundInstance->m50 < 0) {
                     pSoundInstance->m36--;
@@ -596,7 +612,7 @@ void audioTick() {
                         break;
                     }
                     pSoundInstance->m24++;
-                    if (pSoundInstance->m70 == 0) {
+                    if (pSoundInstance->m70.m0 == 0) {
                         startMusicInstanceSub0(pSoundInstance);
                     }
                     if (pSoundInstance->m32 == pSoundInstance->m1E) {

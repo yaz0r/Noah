@@ -93,6 +93,13 @@ struct sPercussionData {
     // size 0x180
 };
 
+struct sInterpolatableAudioParam {
+    sFixedPoint m0;
+    s32 m4;
+    s16 m8;
+    s16 mA;
+};
+
 struct sSoundInstance {
     sSoundInstance(int numEvents, bool allocateExtra) {
         m94_events.resize(numEvents);
@@ -140,18 +147,10 @@ struct sSoundInstance {
     s32 m5C;
     s16 m60;
     s16 m62;
-    s32 m64;
-    s32 m68;
-    s16 m6C;
-    s16 m6E;
-    s32 m70;
-    s32 m74;
-    s16 m78;
-    s16 m7A;
-    s32 m7C;
-    s16 m84;
-    s32 m88;
-    s16 m90;
+    sInterpolatableAudioParam m64;
+    sInterpolatableAudioParam m70;
+    sInterpolatableAudioParam m7C;
+    sInterpolatableAudioParam m88;
 
     std::vector<sSoundInstanceEvent> m94_events;
 
@@ -173,6 +172,7 @@ void initSoundInstanceDefaults(sSoundInstance* pSoundInstance);
 void playSoundEffectSub(uint param_1, uint param_2, short param_3, u16 param_4);
 void setupAdsr(int param_1, sSoundInstanceEvent* param_2);
 sSoundInstance* createMusicInstance(sSeqFile* param_1);
+void applyFlagToAllVoices(ushort param_1, sSoundInstance* param_2);
 
 void playSoundEffectSubSub0(sSoundInstanceEvent30* param_1, int param_2);
 
