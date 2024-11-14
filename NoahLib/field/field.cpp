@@ -3856,24 +3856,16 @@ void initFieldData()
 
         walkMeshIterator += 4 * 4;
 
-        int iVar4 = 0;
         u8* walkMeshVar1Raw = &(rawFieldWalkMesh[0]) + READ_LE_U32(walkMeshIterator);
         walkMeshIterator += 4;
 
         std::array<u8*, 5> walkMeshVerticesRaw;
         std::array<u8*, 5> walkMeshTriangleRaw;
 
-        if (numWalkMesh > 0) {
-            std::array<u8*, 5>::iterator piVar11 = walkMeshVerticesRaw.begin();
-            std::array<u8*, 5>::iterator ppuVar8 = walkMeshTriangleRaw.begin();
-            do {
-                iVar4 = iVar4 + 1;
-                *ppuVar8 = &rawFieldWalkMesh[0] + READ_LE_U32(walkMeshIterator);
-                *piVar11 = &rawFieldWalkMesh[0] + READ_LE_U32(walkMeshIterator + 4);
-                ppuVar8++;
-                piVar11++;
-                walkMeshIterator = walkMeshIterator + 2 * 4;
-            } while (iVar4 < numWalkMesh);
+        for (int i = 0; i < numWalkMesh; i++) {
+            walkMeshVerticesRaw[i] = &rawFieldWalkMesh[0] + READ_LE_U32(walkMeshIterator);
+            walkMeshTriangleRaw[i] = &rawFieldWalkMesh[0] + READ_LE_U32(walkMeshIterator + 4);
+            walkMeshIterator = walkMeshIterator + 2 * 4;
         }
         walkMeshVar4 = (walkMeshTriangleRaw[0] - walkMeshVar1Raw) / 4;
 

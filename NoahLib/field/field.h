@@ -76,9 +76,9 @@ struct sFieldScriptEntity_flags0
             u32 m7 : 1;
             u32 m8 : 3;
             u32 mx800_isJumping : 1; // 0x800
-            u32 m12_unk : 1;
-            u32 m13_unk : 1;
-            u32 m14_isPlayerControlled : 1;
+            u32 m12_unk : 1; // 0x1000
+            u32 m13_unk : 1; // 0x2000
+            u32 m14_isPlayerControlled : 1; // 0x4000
         };
         u32 m_rawFlags = 0;
     };

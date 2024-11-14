@@ -132,7 +132,7 @@ void fieldModelInspector_step(int modelId)
         const float projWidth = projHeight * camAspect;
 
         const bgfx::Caps* caps = bgfx::getCaps();
-        bx::mtxProj(mtx_projection, camFovy, camAspect, camNear, camFar, caps->homogeneousDepth, bx::Handness::Right);
+        bx::mtxProj(mtx_projection, camFovy, camAspect, camNear, camFar, caps->homogeneousDepth, bx::Handedness::Right);
 
         bgfx::setViewRect(fieldModelInspector_bgfxView, 0, 0, currentWindowSize[0], currentWindowSize[1]);
         bgfx::setViewTransform(fieldModelInspector_bgfxView, mtx_view, mtx_projection);

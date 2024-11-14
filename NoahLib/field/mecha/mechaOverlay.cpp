@@ -1993,8 +1993,6 @@ void updateMechAnimSub4(sLoadedMechas* param_1, sMechaInitVar2* param_2, int odd
     if (param_1->m98 <= -1)
         return;
 
-    assert(0);
-
     while (param_1->m9C < param_1->m9E) {
         MissingCode();
         param_1->m9C++;

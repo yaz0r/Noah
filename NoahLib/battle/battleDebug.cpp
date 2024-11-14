@@ -131,7 +131,7 @@ void battleDebugView_frame() {
         const float projWidth = projHeight * camAspect;
 
         const bgfx::Caps* caps = bgfx::getCaps();
-        bx::mtxProj(mtx_projection, camFovy, camAspect, camNear, camFar, caps->homogeneousDepth, bx::Handness::Right);
+        bx::mtxProj(mtx_projection, camFovy, camAspect, camNear, camFar, caps->homogeneousDepth, bx::Handedness::Right);
 
         ImVec2 imageStart = ImGui::GetCursorScreenPos();
 
