@@ -14,3 +14,10 @@ Still early stage and very partially playable.
 * World map has basic features implemented.
 * Battles are not playable. Basic systems are in place but a lot is missing or buggy.
 
+## Screenshots
+![image](https://github.com/user-attachments/assets/82ca935d-a24e-4e0f-9c2c-fb8f20ace919)
+![image](https://github.com/user-attachments/assets/2ac5617d-24ae-40f0-9639-99b79fd790f0)
+![image](https://github.com/user-attachments/assets/cdcaf540-cd8c-4c9c-8d2a-56e65265bfa6)
+![image](https://github.com/user-attachments/assets/8ae4f752-1361-4430-a4a5-f77925246b8b)
+
+
