@@ -1,4 +1,6 @@
-# Noah: reverse engineering of a game with mechas, martial art and where you kill God.
+# Noah: reverse engineering of a Xenogears.
+
+This is a decompilation of Xenogears for PS1, based on the US release. It is non-matching and doesn't compile for PS1, instead targetting more modern system. The code is also more strict than the original C code probably was.
 
 # Build:
 Only Windows builds are supported right now. You need vs2022 installed with CMake
