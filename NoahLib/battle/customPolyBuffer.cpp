@@ -1,6 +1,6 @@
 #include "noahLib.h"
 #include "kernel/gte.h"
-#include "psx/gpuprims.h"
+#include "psx/libgpu.h"
 
 #include "customPolyBuffer.h"
 

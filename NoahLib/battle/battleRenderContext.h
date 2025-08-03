@@ -1,6 +1,6 @@
 #pragma once
 
-#include "psx/gpuprims.h"
+#include "psx/libgpu.h"
 
 struct sBattleRenderStruct {
     DRAWENV m0_drawEnv;

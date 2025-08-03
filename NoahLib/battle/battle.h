@@ -7,7 +7,7 @@
 #include "kernel/filesystem.h"
 #include "kernel/gameState.h"
 #include "kernel/math.h"
-#include "psx/gpuprims.h"
+#include "psx/libgpu.h"
 #include "field/fieldGraphicObject.h"
 #include "kernel/font.h"
 

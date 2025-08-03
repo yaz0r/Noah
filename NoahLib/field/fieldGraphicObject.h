@@ -1,6 +1,6 @@
 #pragma once
 #include "kernel/math.h"
-#include "psx/gpuprims.h"
+#include "psx/libgpu.h"
 #include <optional>
 
 #include "kernel/taskLists.h"

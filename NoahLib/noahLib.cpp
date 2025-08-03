@@ -17,7 +17,14 @@
 #include "kernel/audio/wds.h"
 #include "kernel/audio/spu.h"
 
+#include "psx/libetc.h"
+#include "psx/libgpu.h"
+
 ImLogger Noah_Logger[eLogCategories::log_max];
+
+void initMemoryCardsAndSpu(u32);
+void startCardsLib();
+void _bu_init();
 
 sWdsFile* wdsFile3 = nullptr;
 sWdsFile* wdsFile5 = nullptr;
@@ -31,6 +38,25 @@ bool noahInit(int argc, char* argv[])
 
     //////////////////////////////////////////////////////////////////////////
     // start the original code
+
+    ResetCallback();
+    SetGraphDebug(0);
+    SetVideoMode(0);
+    ResetGraph(0);
+
+    RECT clearRect = {
+         0, 0, 0x180, 0x1E0
+    };
+    ClearImage(&clearRect, 0, 0, 0);
+    DrawSync(0);
+    SetDispMask(1);
+    InitGeom();
+    //initInputs();
+    initMemoryCardsAndSpu(1);
+    startCardsLib();
+    _bu_init();
+    //VSyncCallback(vsyncCallback);
+    //initMemory(getOverlayBasePtr(), &fragmentFile);
 
     MissingCode();
 
@@ -200,6 +226,12 @@ bool noahFrame_end()
                     break;
                 case eLogCategories::log_unimlemented:
                     if (ImGui::BeginTabItem("Unimplemented")) {
+                        Noah_Logger[i].Draw();
+                        ImGui::EndTabItem();
+                    }
+                    break;
+                case eLogCategories::log_error:
+                    if (ImGui::BeginTabItem("Error")) {
                         Noah_Logger[i].Draw();
                         ImGui::EndTabItem();
                     }

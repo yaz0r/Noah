@@ -2885,6 +2885,22 @@ void loadMusicPhase0(int param_1, int param_2, void(*param_3)(void*))
     return;
 }
 
+u32 playMusicSubVar0 = 0;
+u16 playWorldmapMusic = 0;
+sWdsFile* playMusicSubVar1 = nullptr;
+u32 playMusicSubVar2 = 1;
+
+void playMusicSub(void)
+{
+    if (playMusicSubVar0 == 0) {
+        playWorldmapMusic = 1;
+        unloadWds(playMusicSubVar1);
+        playMusicSubVar0 = 1;
+    }
+    playMusicSubVar2 = 0;
+    return;
+}
+
 void playMusic(int musicId)
 {
     waitReadCompletion(0);
@@ -2896,7 +2912,7 @@ void playMusic(int musicId)
     else {
         setCurrentDirectory(0x1C, 0);
         if (musicLookupTable[musicId][1] == 1) {
-            assert(0);
+            playMusicSub();
         }
 
         if ((musicLookupTable[musicId][0] != 0xFF) && (musicLookupTable[musicId][0] != currentlyLoadedWave)) {
@@ -3783,13 +3799,16 @@ void initFieldData()
         rawEncounterData.resize(rawFieldSize + 0x10);
         fieldDecompress(rawFieldSize + 0x10, rawFieldBundle.begin() + READ_LE_U32(&rawFieldBundle[0x148]), rawEncounterData);
         int numEntries = rawFieldSize / 0x20;
-        assert(numEntries == 16);
+        if(numEntries)
+        {
+            assert(numEntries == 16);
 
-        // 16 entries of 32 bytes (battleConfigs) for every encounter at 0x800658DC
-        // then 16 entries of 1 byte
-        for (int i = 0; i < 0x10; i++) {            
-            battleConfigs[i].init(rawEncounterData.begin() + 0x20 * i);
-            encounterProbabilityWeight[i] = READ_LE_U8(rawEncounterData.begin() + i + 0x200);
+            // 16 entries of 32 bytes (battleConfigs) for every encounter at 0x800658DC
+            // then 16 entries of 1 byte
+            for (int i = 0; i < 0x10; i++) {
+                battleConfigs[i].init(rawEncounterData.begin() + 0x20 * i);
+                encounterProbabilityWeight[i] = READ_LE_U8(rawEncounterData.begin() + i + 0x200);
+            }
         }
     }
 

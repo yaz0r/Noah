@@ -1,5 +1,5 @@
 #pragma once
-#include "psx/gpuprims.h"
+#include "psx/libgpu.h"
 
 struct sDebugText {
     u16 m0;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "psx/gpuprims.h"
+#include "psx/libgpu.h"
 
 struct sMenuContext_3A8 {
     std::array<POLY_FT4, 2> m0_memoryCardTransparentPolys;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "psx/gpuprims.h"
+#include "psx/libgpu.h"
 
 extern std::array<u16, 81> worldmapGrid;
 extern std::array<u16, 81> worldmapGrid2;

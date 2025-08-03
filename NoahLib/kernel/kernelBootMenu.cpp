@@ -2,7 +2,7 @@
 #include "kernelBootMenu.h"
 #include "kernel/graphics.h"
 #include "kernel/memory.h"
-#include "psx/gpuprims.h"
+#include "psx/libgpu.h"
 #include "kernel/gameMode.h"
 #include "field/field.h"
 #include "kernel/debugText.h"
@@ -21,7 +21,7 @@ sKernelDisplayContext* gKernelDisplayContext = nullptr;
 
 void initKernelMenuDrawContext(int param_1)
 {
-    kernelMenuDrawEnvDoubleBuffer[param_1].m0_DrawEnv.isbg = '\x01';
+    kernelMenuDrawEnvDoubleBuffer[param_1].m0_DrawEnv.isbg = 1;
     kernelMenuDrawEnvDoubleBuffer[param_1].m0_DrawEnv.dtd = 1;
     kernelMenuDrawEnvDoubleBuffer[param_1].m0_DrawEnv.r0 = 0;
     kernelMenuDrawEnvDoubleBuffer[param_1].m0_DrawEnv.g0 = 0;

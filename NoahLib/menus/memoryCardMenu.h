@@ -1,6 +1,6 @@
 #pragma once
 
-#include "psx/gpuprims.h"
+#include "psx/libgpu.h"
 
 struct sMenuContext_34C {
     std::array<std::array<POLY_FT4, 2>, 32> m0_polys;

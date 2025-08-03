@@ -28,6 +28,9 @@
 #include "kernel/audio/soundInstance.h"
 #include "battle/battleEvent/battleEvent.h"
 
+#include "psx/libgpu.h"
+#include "psx/libapi.h"
+
 #include "battle/menu_chi.h"
 
 void freeMechaModelBlocks(sMechaInitVar4* param_1, int param_2);
@@ -3087,9 +3090,9 @@ void battleLoadFileFrom0xC(void)
         setCurrentDirectory(local_10, local_c);
         DrawSync(0);
         VSync(0);
-        //EnterCriticalSection();
-        //FlushCache();
-        //ExitCriticalSection();
+        EnterCriticalSection();
+        FlushCache();
+        ExitCriticalSection();
     }
     initFieldVar4 = 1;
     return;

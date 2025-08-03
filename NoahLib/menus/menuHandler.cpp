@@ -10,7 +10,7 @@
 #include "kernel/gameMode.h"
 #include "kernel/font.h"
 #include "kernel/audio/soundSystem.h"
-#include "kernel/criticalSection.h"
+#include "psx/libapi.h"
 #include "kernel/audio/seq.h"
 #include "kernel/debugText.h"
 #include "kernel/events.h"

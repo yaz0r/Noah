@@ -19,6 +19,9 @@
 #include "kernel/audio/seq.h"
 #include "kernel/audio/soundInstance.h"
 
+#include "psx/libgpu.h"
+#include "psx/libapi.h"
+
 VECTOR worldmapPosition;
 u32 worldmapGamestate1824;
 SVECTOR worldmapRotation = { 0,0,0,0 };
@@ -124,8 +127,6 @@ void worldmapMode0_init(void) {
 
 void initWorldmapGraphics(void)
 {
-    long a;
-
     ResetGraph(1);
     worldmapMinimapScale = 0x100;
     SetGeomScreen(0x100);
@@ -160,7 +161,7 @@ void initWorldmapGraphics(void)
     setFogNearColor(0x80, 0x80, 0x80);
     SetBackColor(0x80, 0x80, 0x80);
     SetFarColor(worldMapFarColor[0], worldMapFarColor[1], worldMapFarColor[2]);
-    a = 0x800;
+    long a = 0x800;
     if (exitWorldMapMode == 2) {
         a = 0xb00;
     }
@@ -784,6 +785,12 @@ void worldmapMode0_update(void) {
 }
 
 void worldmapMode0_free(void) {
+    if (exitWorldMapMode == 0) {
+        playBattleMusic(pMusic, 0, 0xf0);
+    }
+    MissingCode();
+    unloadSequence(fieldSeq);
+    delete fieldSeq; fieldSeq = nullptr;
     MissingCode();
 }
 
@@ -811,7 +818,7 @@ std::array<sWorldmapModes, 19> worldmapModes = { {
 
 void worldmapFlushCacheAndSync(void)
 {
-    /*
+
     DrawSync(0);
     VSync(0);
     EnterCriticalSection();
@@ -819,8 +826,6 @@ void worldmapFlushCacheAndSync(void)
     VSync(0);
     FlushCache();
     ExitCriticalSection();
-    return;*/
-    MissingCode();
 }
 
 

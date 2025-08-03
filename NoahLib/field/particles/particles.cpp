@@ -1,5 +1,5 @@
 #include "noahLib.h"
-#include "psx/gpuprims.h"
+#include "psx/libgpu.h"
 #include "field/particles/particles.h"
 #include "kernel/memory.h"
 #include "kernel/graphics.h"

@@ -2,7 +2,7 @@
 #include "worldmap.h"
 #include "worldmapTask.h"
 #include "worldmapTaskFader.h"
-#include "psx/gpuprims.h"
+#include "psx/libgpu.h"
 #include "kernel/graphics.h"
 
 s32 worldmapFadeRunning;

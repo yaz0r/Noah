@@ -1,7 +1,7 @@
 #include "noahLib.h"
 #include "worldmap.h"
 #include "worldmapMinimap.h"
-#include "psx/gpuprims.h"
+#include "psx/libgpu.h"
 #include "kernel/graphics.h"
 #include "kernel/gte.h"
 #include "kernel/gameState.h"

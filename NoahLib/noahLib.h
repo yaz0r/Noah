@@ -202,6 +202,7 @@ enum eLogCategories
     log_default = 0,
     log_warning,
     log_unimlemented,
+    log_error,
     log_hacks,
 
     log_max
@@ -212,6 +213,7 @@ extern ImLogger Noah_Logger[eLogCategories::log_max];
 #define Noah_CategorizedLog(logCategory, string, ...) {Noah_Logger[logCategory].AddLog(string, __VA_ARGS__);}
 #define Noah_MissingCode(name) { static bool printed = false; if(!printed) {printed = true; Noah_Logger[log_unimlemented].AddLog("Unimplemented: %s\n", name);}}
 #define Noah_WarningOnce(name) { static bool printed = false; if(!printed) {printed = true; Noah_Logger[log_warning].AddLog("Warning: %s\n", name);}}
+#define Noah_Error(string, ...) {Noah_Logger[log_error].AddLog(string, __VA_ARGS__);}
 
 void UnimplementedImpl(const char* functionName);
 void HackImpl(const char* functionName);

@@ -41,7 +41,7 @@ bool changeWorldmapEntityState(int param_1, short param_2);
 
 extern sWorldmapState* gWorldmapState;
 
-#include "psx/gpuprims.h"
+#include "psx/libgpu.h"
 
 struct sWorldmapRenderingStruct {
     DRAWENV m0_DrawEnv;

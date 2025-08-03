@@ -1,6 +1,6 @@
 #pragma once
 
-#include "psx/gpuprims.h"
+#include "psx/libgpu.h"
 
 struct sBattleRunningVar0Sub {
     std::array<s16, 8> m0;

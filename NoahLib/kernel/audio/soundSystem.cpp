@@ -25,7 +25,7 @@ static const int numRegs = 512;
 std::array<u16, numRegs> SPURegisterStatus;
 
 void setSoundError(u16 errorCode) {
-    assert(0);
+    Noah_Error("SoundError: %d", errorCode);
 }
 
 void sendAdsrToSpu() {
