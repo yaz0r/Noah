@@ -1657,10 +1657,10 @@ void closeMemoryCardsEvents(void)
 {
     menuDraw();
     EnterCriticalSection();
-    CloseEvent(gMenuContext->m32C_memoryCardContext->m4FEC_events[0]);
-    CloseEvent(gMenuContext->m32C_memoryCardContext->m4FEC_events[1]);
-    CloseEvent(gMenuContext->m32C_memoryCardContext->m4FEC_events[2]);
-    CloseEvent(gMenuContext->m32C_memoryCardContext->m4FEC_events[3]);
+    CloseEvent(gMenuContext->m32C_memoryCardContext->m4FEC_events.m0_end_io);
+    CloseEvent(gMenuContext->m32C_memoryCardContext->m4FEC_events.m4_error);
+    CloseEvent(gMenuContext->m32C_memoryCardContext->m4FEC_events.m8_timeout);
+    CloseEvent(gMenuContext->m32C_memoryCardContext->m4FEC_events.mC_newdev);
     ExitCriticalSection();
     return;
 }
@@ -1690,19 +1690,14 @@ void startMemoryCard(void)
     DrawSync(0);
     VSync(0);
     EnterCriticalSection();
-    uVar2 = OpenEvent(0xf4000001, 4, 0x2000, 0);
-    gMenuContext->m32C_memoryCardContext->m4FEC_events[0] = uVar2;
-    uVar2 = OpenEvent(0xf4000001, 0x8000, 0x2000, 0);
-    gMenuContext->m32C_memoryCardContext->m4FEC_events[1] = uVar2;
-    uVar2 = OpenEvent(0xf4000001, 0x100, 0x2000, 0);
-    gMenuContext->m32C_memoryCardContext->m4FEC_events[2] = uVar2;
-    uVar2 = OpenEvent(0xf4000001, 0x2000, 0x2000, 0);
-    psVar1 = gMenuContext;
-    gMenuContext->m32C_memoryCardContext->m4FEC_events[3] = uVar2;
-    EnableEvent(psVar1->m32C_memoryCardContext->m4FEC_events[0]);
-    EnableEvent(gMenuContext->m32C_memoryCardContext->m4FEC_events[1]);
-    EnableEvent(gMenuContext->m32C_memoryCardContext->m4FEC_events[2]);
-    EnableEvent(gMenuContext->m32C_memoryCardContext->m4FEC_events[3]);
+    gMenuContext->m32C_memoryCardContext->m4FEC_events.m0_end_io = OpenEvent(0xf4000001, 4, 0x2000);
+    gMenuContext->m32C_memoryCardContext->m4FEC_events.m4_error = OpenEvent(0xf4000001, 0x8000, 0x2000);
+    gMenuContext->m32C_memoryCardContext->m4FEC_events.m8_timeout = OpenEvent(0xf4000001, 0x100, 0x2000);
+    gMenuContext->m32C_memoryCardContext->m4FEC_events.mC_newdev = OpenEvent(0xf4000001, 0x2000, 0x2000);
+    EnableEvent(gMenuContext->m32C_memoryCardContext->m4FEC_events.m0_end_io);
+    EnableEvent(gMenuContext->m32C_memoryCardContext->m4FEC_events.m4_error);
+    EnableEvent(gMenuContext->m32C_memoryCardContext->m4FEC_events.m8_timeout);
+    EnableEvent(gMenuContext->m32C_memoryCardContext->m4FEC_events.mC_newdev);
     ExitCriticalSection();
     return;
 }

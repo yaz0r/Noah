@@ -9,7 +9,7 @@
 
 typedef void(*eventFunc)();
 
-u32 OpenEvent(u32 desc, u32 spec, u32 mode, eventFunc func);
+u32 OpenEvent(u32 desc, u32 spec, u32 mode, eventFunc func = nullptr);
 u32 CloseEvent(u32 event);
 u32 EnableEvent(u32 event);
 

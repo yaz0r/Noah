@@ -49,7 +49,12 @@ struct sMenuContext_32C {
     std::array<s8, 12> m4FCE;
     std::array<u8, 4> m4FE4;
     std::array<s8, 4> m4FE8;
-    std::array<u32, 4> m4FEC_events;
+    struct {
+        u32 m0_end_io;
+        u32 m4_error;
+        u32 m8_timeout;
+        u32 mC_newdev;
+    } m4FEC_events;
 };
 
 struct sWeaponStats {
