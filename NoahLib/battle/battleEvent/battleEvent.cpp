@@ -436,7 +436,7 @@ int battleEvent_DisplayDialog(u16 messageIndex, int protraitIndex, int flags) {
         battleRenderDebugAndMain();
         battleVar1->mC8_dialogPortrait = 0;
         if (!(flags & 8)) {
-            drawCircleMenuChi_updateSub6(0);
+            clearBattleDialogWindow(0);
         }
         battleEventVar0->m802_dialogBoxInitialized = 0;
         battleEventVar0->m7F6_dialogParams = battleEventDefaultDialogParams;
@@ -572,7 +572,7 @@ int battleEvent_OP38(int currentEntityId, const std::vector<u8>::iterator& bytec
     return 7;
 }
 
-void battleFader_update(int) {
+void battleEvent_update(int) {
     waitBattleAnimationSoundLoaded();
     updateCharacterBlinkingTask(0);
 

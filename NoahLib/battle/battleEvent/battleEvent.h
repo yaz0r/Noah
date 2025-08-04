@@ -55,6 +55,6 @@ struct sBattleRunningVar0 {
 extern struct sBattleRunningVar0* battleEventVar0;
 
 void battleEventEntry(void);
-void battleFader_update(int);
+void battleEvent_update(int);
 
 extern struct sDialogWindow18* battleEventVar1;

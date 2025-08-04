@@ -378,11 +378,11 @@ std::array<std::array<u8, 8>, 16> battleCommandsSetups = { {
     {0x1E, 0x1C, 0x22, 0x25, 0x2C, 0x1C, 0x1A, 0x2E},
 } };
 
-u8 needToLoadBattleOverlay801E5000 = 0;
+bool needBattleEventOverlay = false;
 
 void batteLoaderPhase2_2() {
     if (currentBattleConfig.m1_flags & 0x20) {
-        needToLoadBattleOverlay801E5000 = 1;
+        needBattleEventOverlay = 1;
     }
 
     for (int i = 0; i < 3; i++) {

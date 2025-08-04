@@ -417,7 +417,7 @@ void drawBattleDialogWindows() {
     }
 }
 
-void drawCircleMenuChi_updateSub6(uint param_1)
+void clearBattleDialogWindow(uint param_1)
 {
     param_1 = param_1 & 0xff;
     battleVar1->mB0_isDialogWindowInitialized[param_1] = 0;

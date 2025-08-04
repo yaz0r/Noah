@@ -903,10 +903,10 @@ int drawCircleMenuChi_update(int param_1) {
             drawCircleMenuChi_updateSub5(iVar5);
             freeBattleVar0_A230();
             removeTargetSelectionCursors();
-            drawCircleMenuChi_updateSub6(0);
-            drawCircleMenuChi_updateSub6(1);
-            drawCircleMenuChi_updateSub6(2);
-            drawCircleMenuChi_updateSub6(3);
+            clearBattleDialogWindow(0);
+            clearBattleDialogWindow(1);
+            clearBattleDialogWindow(2);
+            clearBattleDialogWindow(3);
             return iVar5;
         }
     } while (true);

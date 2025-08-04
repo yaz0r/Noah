@@ -6132,19 +6132,18 @@ void removeCurrentMonsterNameString() {
     MissingCode();
 }
 
-extern u8 needToLoadBattleOverlay801E5000;
+extern bool needBattleEventOverlay;
 
-void loadBattleOverlay801E5000IfNeeded() {
-    if (needToLoadBattleOverlay801E5000 != '\0') {
+void loadBattleEventOverlay() {
+    if (needBattleEventOverlay) {
         MissingCode();
         battleEventEntry();
     }
 }
 
-void updateBattleOverlay801E5000(int param) {
-    if (needToLoadBattleOverlay801E5000 != '\0') {
-        battleFader_update(param);
-
+void updateBattleEventOverlay(int param) {
+    if (needBattleEventOverlay != '\0') {
+        battleEvent_update(param);
     }
 }
 
@@ -6305,7 +6304,7 @@ void battleTickMain(s8 param_1) {
         loadMonsterAttackName();
         displayAndWaitMonsterAttackName();
         removeCurrentMonsterNameString();
-        updateBattleOverlay801E5000(0);
+        updateBattleEventOverlay(0);
 
         for (int i = 0; i < 8; i++) {
             if (bitmaskCharacterCheck(entitiesHitInCurrentAttackBF, i + 3)) {
@@ -6337,7 +6336,7 @@ void battleTickMain(s8 param_1) {
             displayAndWaitMonsterAttackName();
         }
         removeCurrentMonsterNameString();
-        updateBattleOverlay801E5000(0);
+        updateBattleEventOverlay(0);
     }
     copyBattleVar1_m7C();
     applyBattleEffectBF7();
@@ -6535,7 +6534,7 @@ void battleMain() {
     currentBattleMode = 2;
     initBattleGraphics(&battleConfigFile3);
     battleCreateFader(0, 2, 0xff, 0xff, 0xff);
-    if (needToLoadBattleOverlay801E5000 == '\0') {
+    if (!needBattleEventOverlay) {
         battleCreateFader(0x14, 2, 0, 0, 0);
     }
     if (battleInitVar1 != 0) {
@@ -6562,8 +6561,8 @@ void battleMain() {
 
     MissingCode();
 
-    loadBattleOverlay801E5000IfNeeded();
-    updateBattleOverlay801E5000(1);
+    loadBattleEventOverlay();
+    updateBattleEventOverlay(1);
     if (isBattleAnEvent == '\0') {
         currentBattleMode = 1;
     }
@@ -6583,6 +6582,10 @@ void battleMain() {
             battleTickGameplay();
         }
         battleRenderDebugAndMain();
+    }
+    if (((!needBattleEventOverlay) && ((battleRunningVar1 & 0x40) == 0)) &&
+        ((currentBattleConfig.m1_flags & 8) == 0)) {
+        battleCreateFader(0x40, 2, 0x40, 0x40, 0x40);
     }
 
     MissingCode();

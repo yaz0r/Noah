@@ -29,4 +29,4 @@ extern std::array<sBattleDialogWindow2*, 7> battleDialogWindows2;
 
 void allocateAndSetupBattleDialogWindow(byte param_1, short x, short y, short width, short height, char param_6, char param_7);
 void drawBattleDialogWindows();
-void drawCircleMenuChi_updateSub6(uint param_1);
+void clearBattleDialogWindow(uint param_1);
