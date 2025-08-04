@@ -5,9 +5,7 @@
 #include "field/field.h"
 #include "psx/libgpu.h"
 
-struct sBattleFader {
-    sTaskHeader m0;
-    sTaskHeader m1C;
+struct sBattleFader : public sTaskHeaderPair {
     s32 m38;
     s32 m3C_duration;
     s8 m40;
@@ -32,7 +30,7 @@ void battleFader_update(sTaskHeader* pSprite) {
         pThis->m48_currentColor[2] = pThis->m42_targetColor[2];
 
         if ((pThis->m48_currentColor[0] == 0) && (pThis->m48_currentColor[1] == 0) && (pThis->m48_currentColor[2] == 0)) {
-            pThis->m0.mC_deleteCallback(pSprite);
+            pThis->mC_deleteCallback(pSprite);
         }
     }
     else {
@@ -86,7 +84,7 @@ void battleFader_draw(sTaskHeader* pSprite) {
 void battleFader_delete(sTaskHeader* pSprite) {
     sBattleFader* pThis = (sBattleFader*)pSprite;
     registerSpriteCallback2Sub0(&pThis->m1C);
-    allocateSavePointMeshDataSub0_callback(&pThis->m0);
+    allocateSavePointMeshDataSub0_callback(pThis);
     pBattleFader1 = nullptr;
 }
 
@@ -113,17 +111,17 @@ void battleCreateFader(int param_1, s8 tpageABE, s8 targetR, s8 targetG, s8 targ
         pSprite = &battleFader2;
         pBattleFader2 = &battleFader2;
     }
-    allocateSavePointMeshDataSub0(nullptr, &pSprite->m0);
-    registerSpriteCallback2(&pSprite->m0, &pSprite->m1C);
-    pSprite->m0.m14 &= 0x7fffffff;
+    allocateSavePointMeshDataSub0(nullptr, pSprite);
+    registerSpriteCallback2(pSprite, &pSprite->m1C);
+    pSprite->m14 &= 0x7fffffff;
     if (spriteBytecode2ExtendedE0_Var0) {
         spriteBytecode2ExtendedE0_Var0--;
     }
-    setTaskUpdateFunction(&pSprite->m0, battleFader_update);
+    setTaskUpdateFunction(pSprite, battleFader_update);
     setTaskDrawFunction(&pSprite->m1C, battleFader_draw);
-    setTaskDeleteFunction(&pSprite->m0, battleFader_delete);
+    setTaskDeleteFunction(pSprite, battleFader_delete);
 
-    pSprite->m0.m4 = pSprite;
+    pSprite->m4 = pSprite;
     pSprite->m1C.m4 = pSprite;
     pSprite->m40 = 0;
     pSprite->m45_startColor[0] = 0;
@@ -137,5 +135,5 @@ LAB_Battle__800b3b20:
     pSprite->m42_targetColor[2] = targetB;
     pSprite->m38 = param_1 * 2;
     pSprite->m3C_duration = param_1 * 2;
-    battleFader_update(&pSprite->m0);
+    battleFader_update(pSprite);
 }
