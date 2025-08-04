@@ -9,18 +9,6 @@ void updatePSXVram();
 void initPSXFB();
 void drawPSXFB();
 
-void DrawSync(int);
-int VSync(int);
-void InitGeom();
-
-u16 GetClut(int x, int y);
-u16 GetTPage(int tp, int abr, int x, int y);
-
-
-sTag* ClearOTagR(sTag* ot, int n);
-sTag* ClearOTagR(std::vector<sTag>& ot, int n);
-void DrawOTag(sTag* ot);
-
 DISPENV* PutDispEnv(DISPENV* env);
 DRAWENV* PutDrawEnv(DRAWENV* env);
 
@@ -39,9 +27,3 @@ int MoveImage(RECT* rect, int x, int y);
 
 void SetColorMatrix(MATRIX*);
 void SetLightMatrix(MATRIX*);
-
-void SetGeomScreen(s32);
-void SetGeomOffset(s32, s32);
-
-s32 ReadGeomScreen();
-void ReadGeomOffset(s32*, s32*);

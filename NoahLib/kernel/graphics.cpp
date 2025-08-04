@@ -47,40 +47,6 @@ ImVec2 PSXInternalResolution = { 320,216 };
 float PSXRenderScaling = 2.f;
 ImVec2 PSXRenderResolution = { PSXInternalResolution.x * PSXRenderScaling, PSXInternalResolution.y * PSXRenderScaling };
 
-void DrawSync(int)
-{
-    MissingCode();
-}
-
-int VSync(int)
-{
-    MissingCode();
-	return 0;
-}
-
-void InitGeom()
-{
-    MissingCode();
-
-	setCopControlWord(2, 0xe800, 0x155);
-	setCopControlWord(2, 0xf000, 0x100);
-	setCopControlWord(2, 0xd000, 1000);
-	setCopControlWord(2, 0xd800, 0xffffef9e);
-	setCopControlWord(2, 0xe000, 0x1400000);
-	setCopControlWord(2, 0xc000, 0);
-	setCopControlWord(2, 0xc800, 0);
-}
-
-u16 GetTPage(int tp, int abr, int x, int y)
-{
-	return (u16)((ushort)((tp & 3U) << 7) | (ushort)((abr & 3U) << 5) | (ushort)((int)(y & 0x100U) >> 4) | (ushort)((int)(x & 0x3ffU) >> 6) | (ushort)((y & 0x200U) << 2));
-}
-
-u16 GetClut(int x, int y)
-{
-	return (u16)((u16)(y << 6) | (u16)(x >> 4) & 0x3f);
-}
-
 DISPENV currentDispEnv;
 DRAWENV currentDrawEnv;
 
@@ -104,45 +70,6 @@ DRAWENV* PutDrawEnv(DRAWENV* env)
 void SetDispMask(int mask)
 {
     MissingCode();
-}
-
-sTag* ClearOTagR(std::vector<sTag>& ot, int n) {
-    std::vector<sTag>::iterator pCurrent = ot.begin();
-    for (int i = 0; i < n - 1; i++)
-    {
-        pCurrent++;
-        pCurrent->m0_pNext = &(pCurrent[-1]);
-        pCurrent->m3_size = 0;
-    }
-
-    TermPrim(&ot[0]);
-
-    return &ot[0];
-}
-
-sTag* ClearOTagR(sTag* ot, int n)
-{
-	sTag* pCurrent = ot;
-	for (int i=0; i<n-1; i++)
-	{
-		pCurrent++;
-		pCurrent->m0_pNext = pCurrent - 1;
-		pCurrent->m3_size = 0;
-	}
-
-    TermPrim(ot);
-
-	return ot;
-}
-
-void DrawOTag(sTag* ot)
-{
-	updatePSXVram();
-	while (ot)
-	{
-		ot->execute();
-		ot = ot->m0_pNext;
-	}
 }
 
 u8 graphType = 0;
@@ -1404,24 +1331,4 @@ void SetColorMatrix(MATRIX*) {
 }
 void SetLightMatrix(MATRIX*) {
     MissingCode();
-}
-
-void SetGeomScreen(s32 h)
-{
-    setCopControlWord(2, 0xd000, h);
-}
-
-void SetGeomOffset(int ofx, int ofy)
-{
-    setCopControlWord(2, 0xc000, ofx << 0x10);
-    setCopControlWord(2, 0xc800, ofy << 0x10);
-}
-
-s32 ReadGeomScreen() {
-    return gte_stH();
-}
-
-void ReadGeomOffset(s32* ofx, s32* ofy) {
-    *ofx = gte_stOFX() >> 16;
-    *ofy = gte_stOFY() >> 16;
 }

@@ -4,7 +4,7 @@
 #include "spu.h"
 #include "seq.h"
 #include "soundInstance.h"
-#include "kernel/criticalSection.h"
+#include "psx/libapi.h"
 #include "kernel/events.h"
 #include "seqOpcodes.h"
 #include "spuEmu/spu.h"

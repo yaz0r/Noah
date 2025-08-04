@@ -168,26 +168,15 @@ sBattleStartEffect* createBattleStartEffect() {
     return initBattleStartEffect(psVar1);
 }
 
-s32  RotTransPers3(const SVECTOR* v0, const SVECTOR* v1, const SVECTOR* v2, sVec2_s16* p0, sVec2_s16* p1, sVec2_s16* p2, s32* p, s32* flag) {
-    gte_ldv3(v0, v1, v2);
-    gte_rtpt_b();
-    gte_stsxy3(p0, p1, p2);
-    gte_stdp(p);
-    s32 lVar2 = gte_stFLAG();
-    s32 iVar1 = gte_stSZ3();
-    *flag = lVar2;
-    return iVar1 >> 2;
-}
+
 
 void renderBattleStartEffect(sBattleStartEffect* param_1) {
     sBattleStartEffect* pEffect = (sBattleStartEffect*)param_1->m4;
 
     s32 oldScreenOffsetX;
     s32 oldScreenOffsetY;
-    s32 oldScreenGeom;
-    MissingCode();
-    //ReadGeomOffset(&oldScreenOffsetX, &oldScreenOffsetY);
-    //oldScreenGeom = ReadGeomScreen();
+    ReadGeomOffset(&oldScreenOffsetX, &oldScreenOffsetY);
+    s32 oldScreenGeom = ReadGeomScreen();
 
     SetGeomOffset(0xa0, 0x70);
     SetGeomScreen(0x200);
@@ -217,16 +206,15 @@ void renderBattleStartEffect(sBattleStartEffect* param_1) {
 
                     s32 lStack64;
                     s32 lStack60;
-                    s32 depth = RotTransPers3(&(*pVector)[0], &(*pVector)[1], &(*pVector)[2], &p->x0y0, &p->x1y1, &p->x2y2, &lStack64, &lStack60);
+                    s32 depth = RotTransPers3(&pVector->at(0), &pVector->at(1), &pVector->at(2), &p->x0y0, &p->x1y1, &p->x2y2, &lStack64, &lStack60);
                     AddPrim(&(*pBattleStartEffectOT)[depth >> 6], p);
                 }
             }
         }
     }
 
-    MissingCode();
-    //SetGeomOffset(oldScreenOffsetX, oldScreenOffsetY);
-    //SetGeomScreen(oldScreenGeom);
+    SetGeomOffset(oldScreenOffsetX, oldScreenOffsetY);
+    SetGeomScreen(oldScreenGeom);
 }
 
 void updateBattleStartEffect(sBattleStartEffect* param_1) {

@@ -58,7 +58,7 @@ bool noahFrame_end();
 struct sFixedPoint
 {
     s32 m_value;
-    operator const s32&() const { return m_value; }
+    operator const s32& () const { return m_value; }
     operator s32& () { return m_value; }
     sFixedPoint& operator=(s32 value) { m_value = value; return *this; }
 
@@ -192,9 +192,7 @@ struct SFP_VEC4 : public SFP_VEC3
     }
 };
 
-typedef FP_VEC4 VECTOR;
-typedef SFP_VEC4 SVECTOR;
-
+#include "psx/libgte.h"
 #include "kernel/logger.h"
 
 enum eLogCategories

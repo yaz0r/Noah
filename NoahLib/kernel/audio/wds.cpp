@@ -1,7 +1,7 @@
 #include "noahLib.h"
 #include "wds.h"
 #include "soundSystem.h"
-#include "kernel/criticalSection.h"
+#include "psx/libapi.h"
 #include "spu.h"
 
 struct structsLoadedSample {
