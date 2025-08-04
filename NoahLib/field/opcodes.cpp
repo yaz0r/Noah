@@ -21,7 +21,7 @@
 s32 particleCreationSlot = 0;
 
 // TODO: Cleanup
-s16 findTriangleInWalkMesh(int posX, int posZ, int walkmeshId, SFP_VEC4* param_4, FP_VEC4* param_5);
+s16 findTriangleInWalkMesh(int posX, int posZ, int walkmeshId, SVECTOR* param_4, VECTOR* param_5);
 extern s16 numWalkMesh;
 /////////////////////////
 
@@ -261,7 +261,7 @@ void OP_10Sub(int param_1)
             assert(pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 0] == 0x10);
             assert(pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1] == 0);
             if (pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0 != 0) {
-                FP_VEC4 currentPosition = pCurrentFieldScriptActor->m20_position;
+                VECTOR currentPosition = pCurrentFieldScriptActor->m20_position;
 
                 (pCurrentFieldScriptActor->m20_position).vx = getVar80(2, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 8]) << 0x10;
                 (pCurrentFieldScriptActor->m20_position).vz = getVar40(4, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 8]) << 0x10;
@@ -1169,7 +1169,7 @@ uint getCharacterToEntity(int param_1)
 void projectCharacterToScreen(int* param_1, int* param_2)
 {
     int iVar1;
-    SFP_VEC4 local_48;
+    SVECTOR local_48;
     MATRIX MStack64;
     sVec2_s16 local_20;
     long lStack28;
@@ -1573,8 +1573,8 @@ void OP_WORLDMAP(void) {
 
 void OP_57(void)
 {
-    std::array<FP_VEC4, 4> auStack168;
-    std::array<SFP_VEC4, 4> auStack104;
+    std::array<VECTOR, 4> auStack168;
+    std::array<SVECTOR, 4> auStack104;
 
     pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags |= 0x10000;
     int iVar6;
@@ -3961,9 +3961,9 @@ void OP_SET_BACKGROUND_CLEAR_COLOR()
 void computeOrbit(FP_VEC3* param_1, FP_VEC3* param_2, s16 orbitRotation)
 {
     MATRIX MStack88;
-    FP_VEC4 local_38;
-    FP_VEC4 local_28;
-    SFP_VEC4 local_18;
+    VECTOR local_38;
+    VECTOR local_28;
+    SVECTOR local_18;
 
     local_18.vx = 0;
     local_18.vz = 0;

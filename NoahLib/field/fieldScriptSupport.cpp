@@ -20,7 +20,7 @@ s16 op99Var4 = 0;
 s16 sceneScale = 0;
 s16 sceneDIP = 0;
 
-SFP_VEC4 cameraRotationBetweenEyeAndAt;
+SVECTOR cameraRotationBetweenEyeAndAt;
 
 s16 op9DVar0 = 0;
 s32 op9DVar1 = 0;
@@ -548,7 +548,7 @@ void OP_CHANGE_FIELD_WHEN_READY_Sub()
 
 void projectActorToScreen(int param_1, int* param_2, int* param_3, short param_4)
 {
-	SFP_VEC4 local_50;
+	SVECTOR local_50;
 	MATRIX MStack72;
     sVec2_s16 local_28;
 	long lStack36;

@@ -9,25 +9,25 @@ MATRIX* RotMatrixY(long r, MATRIX* m);
 MATRIX* RotMatrixZ(long r, MATRIX* m);
 
 MATRIX* SetMulMatrix(MATRIX* m0, MATRIX* m1);
-void createRotationMatrix(SFP_VEC4*, MATRIX*);
-MATRIX* ScaleMatrixL(MATRIX* m, FP_VEC4* v);
-MATRIX* ScaleMatrix(MATRIX* m, FP_VEC4* v);
+void createRotationMatrix(SVECTOR*, MATRIX*);
+MATRIX* ScaleMatrixL(MATRIX* m, VECTOR* v);
+MATRIX* ScaleMatrix(MATRIX* m, VECTOR* v);
 MATRIX* MulMatrix0(MATRIX* m0, MATRIX* m1, MATRIX* m2);
 MATRIX* CompMatrix(const MATRIX* m0, const MATRIX* m1, MATRIX* m2);
 void SetRotMatrix(const MATRIX* m);
 void SetTransMatrix(const MATRIX* m);
-long RotTransPers(SFP_VEC4* $2, sVec2_s16* sxy, long* p, long* flag);
-long RotTransPers4(SFP_VEC4* v0, SFP_VEC4* v1, SFP_VEC4* v2, SFP_VEC4* v3, sVec2_s16* sxy0, sVec2_s16* sxy1, sVec2_s16* sxy2, sVec2_s16* sxy3, long* p, long* flag);
+long RotTransPers(SVECTOR* $2, sVec2_s16* sxy, long* p, long* flag);
+long RotTransPers4(SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, SVECTOR* v3, sVec2_s16* sxy0, sVec2_s16* sxy1, sVec2_s16* sxy2, sVec2_s16* sxy3, long* p, long* flag);
 void resetMatrixTranslation(MATRIX* m);
 MATRIX* MulRotationMatrix(const MATRIX* m0, MATRIX* m1);
-void RotTrans(SFP_VEC4* rotation, FP_VEC4* output, long* flag);
+void RotTrans(SVECTOR* rotation, VECTOR* output, long* flag);
 void copyRotationMatrix(MATRIX* param_1, MATRIX* param_2);
-FP_VEC4* ApplyMatrix(MATRIX* m, SFP_VEC4* inputVector, FP_VEC4* outputVector);
+VECTOR* ApplyMatrix(MATRIX* m, SVECTOR* inputVector, VECTOR* outputVector);
 
 void Square0(VECTOR* v0, VECTOR* v1);
 s32 SquareRoot0(s32 value);
 
-FP_VEC4* ApplyMatrixLV(MATRIX* m, FP_VEC4* v0, FP_VEC4* v1);
+VECTOR* ApplyMatrixLV(MATRIX* m, VECTOR* v0, VECTOR* v1);
 
 void gte_MulMatrix0(const MATRIX* m0, const MATRIX* m1, MATRIX* m2);
 
@@ -50,19 +50,19 @@ enum eCOP2D
 
 s32 length2d(s32 param_1, s32 param_2);
 s32 length1d(s32 param_1);
-void lookAtDivided(MATRIX* pOutputMatrix, FP_VEC4* param_2, FP_VEC4* param_3, FP_VEC4* param_4);
+void lookAtDivided(MATRIX* pOutputMatrix, VECTOR* param_2, VECTOR* param_3, VECTOR* param_4);
 void lookAtNoDivide(MATRIX* param_1, SVECTOR* param_2, SVECTOR* param_3, SVECTOR* param_4);
-long RotAverage4(SFP_VEC4* v0, SFP_VEC4* v1, SFP_VEC4* v2, SFP_VEC4* v3, sVec2_s16* sxy0, sVec2_s16* sxy1, sVec2_s16* sxy2, sVec2_s16* sxy3, long* p, long* flag);
+long RotAverage4(SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, SVECTOR* v3, sVec2_s16* sxy0, sVec2_s16* sxy1, sVec2_s16* sxy2, sVec2_s16* sxy3, long* p, long* flag);
 void setIdentityMatrix(MATRIX* param_1);
-int VectorNormal(FP_VEC4* input, FP_VEC4* output);
-int VectorNormalS(FP_VEC4* input, SFP_VEC4* output);
-void OuterProduct12(FP_VEC4* a, FP_VEC4* b, FP_VEC4* r);
+int VectorNormal(VECTOR* input, VECTOR* output);
+int VectorNormalS(VECTOR* input, SVECTOR* output);
+void OuterProduct12(VECTOR* a, VECTOR* b, VECTOR* r);
 void OuterProduct0(VECTOR* $2, VECTOR* $3, VECTOR* v2);
 long NCLIP(sVec2_s16 sxy0, sVec2_s16 sxy1, sVec2_s16 sxy2);
 void copyMatrix(MATRIX* param_1, MATRIX* param_2);
-MATRIX* TransMatrix(MATRIX* m, FP_VEC4* v);
+MATRIX* TransMatrix(MATRIX* m, VECTOR* v);
 MATRIX* RotMatrixZYX(SVECTOR* r, MATRIX* m);
-MATRIX* RotMatrixYXZ(SFP_VEC4* r, MATRIX* m);
+MATRIX* RotMatrixYXZ(SVECTOR* r, MATRIX* m);
 VECTOR* ApplyRotMatrixLV(VECTOR* $2, VECTOR* $3);
 VECTOR* ApplyRotMatrix(SVECTOR* $2, VECTOR* $3);
 void setupVector(VECTOR* param_1, long param_2, long param_3, long param_4);

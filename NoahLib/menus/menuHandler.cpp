@@ -664,7 +664,7 @@ void displayGoldAndPlayTime(void)
     return;
 }
 
-void transformAndDrawPolyFT4(std::array<SFP_VEC4, 4>& param_1, std::array<POLY_FT4, 2>& param_2, int param_3, int param_4)
+void transformAndDrawPolyFT4(std::array<SVECTOR, 4>& param_1, std::array<POLY_FT4, 2>& param_2, int param_3, int param_4)
 {
     long lStack24;
     long lStack20;
@@ -715,8 +715,8 @@ void drawMenuContext364_menuBox(int param_1, char param_2) {
 void drawMenuBoxes(void)
 {
     int iVar1;
-    SFP_VEC4 local_50;
-    FP_VEC4 local_48;
+    SVECTOR local_50;
+    VECTOR local_48;
     MATRIX MStack56;
 
     iVar1 = 0;
@@ -1023,7 +1023,7 @@ void drawMenu2_sub_sub8(void)
     return;
 }
 
-void transformAndAddPrim(int param_1, std::array<SFP_VEC4, 4>* param_2, std::array<POLY_FT4, 2>* param_3, int param_4) {
+void transformAndAddPrim(int param_1, std::array<SVECTOR, 4>* param_2, std::array<POLY_FT4, 2>* param_3, int param_4) {
     for (int i = 0; i < param_1; i++) {
         POLY_FT4* p = &param_3[i][param_4];
         long dummy1, dummy2;
@@ -2560,7 +2560,7 @@ void updateMenuSelection2(int param_1, sMenuContext_4E0* param_2, void* param_3_
 {
     byte bVar1;
     sMenuContext* psVar2;
-    SFP_VEC4* pSVar3;
+    SVECTOR* pSVar3;
     short sVar4;
     int iVar5;
     short sVar6;
@@ -2976,7 +2976,7 @@ void setupMenuContext364(uint param_1)
     }
 }
 
-void initMemoryCardPolyVerts(std::array<SFP_VEC4, 4>& param_1, short param_2, short param_3, short param_4, short param_5)
+void initMemoryCardPolyVerts(std::array<SVECTOR, 4>& param_1, short param_2, short param_3, short param_4, short param_5)
 {
     short sVar1;
 

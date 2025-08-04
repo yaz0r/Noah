@@ -389,8 +389,8 @@ extern s32 worldmapWaterWave;
 void averageVector(VECTOR* param_1, VECTOR* param_2, VECTOR* param_3);
 u8* getWorldChunkForPosition(int x, int y);
 
-VECTOR VECTOR_worldmap__8009b244 = { {0xB50,0,-0xB50} };
-VECTOR VECTOR_worldmap__8009b254 = { {0xB50,0,0xB50} };
+VECTOR VECTOR_worldmap__8009b244 = {0xB50,0,-0xB50, 0};
+VECTOR VECTOR_worldmap__8009b254 = {0xB50,0,0xB50, 0};
 
 int getWorldmapElevationWithWater(uint x, uint z) {
     short sVar1;

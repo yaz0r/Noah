@@ -2,9 +2,6 @@
 
 #include "noahLib.h"
 
-typedef FP_VEC4 VECTOR;
-typedef SFP_VEC4 SVECTOR;
-
 struct sVec2_s16
 {
     s16 vx;
@@ -51,7 +48,7 @@ struct sVec2_s16
 struct MATRIX
 {
     std::array<std::array<s16, 3>, 3> m;
-    FP_VEC4 t;
+    VECTOR t;
 };
 
 #include "libgte/gte.h"

@@ -218,7 +218,7 @@ struct sMechaBone {
     MATRIX m2C_boneFinalMatrix;
     std::array<s16, 3> m4C_scale;
     s16 m52;
-    SFP_VEC4 m54_rotationAngles;
+    SVECTOR m54_rotationAngles;
     std::array<s32, 3> m5C_translation;
     std::array<std::vector<sTag*>, 2> m68;
     std::array<sMechaInitVar2Sub*, 3> m70_animTracks;
@@ -336,7 +336,7 @@ void mechaPlayAnimation(ushort param_1, short param_2, int param_3);
 
 void getMechaBoneMatrix(MATRIX* param_1, void* param_2, int mechaIndex, int boneIndex);
 void freeMecha(int index);
-void mechaInitNewMecha(int entryId, ushort flags, sMechaDataTable2* pData2, sMechaDataTable1* pData1, ushort tpageX, ushort tpageY, ushort clutX, short clutY, SFP_VEC3* param_9);
+void mechaInitNewMecha(int entryId, ushort flags, sMechaDataTable2* pData2, sMechaDataTable1* pData1, ushort tpageX, ushort tpageY, ushort clutX, short clutY, SVECTOR* param_9);
 
 extern std::array<sMechaDataTable1*, 9> mechaDataTable1;
 extern std::array<sLoadableDataRaw, 9> mechaDataTable1_raw;
@@ -344,7 +344,7 @@ extern std::array<sLoadableDataRaw, 9> mechaDataTable1_raw;
 extern std::array<sMechaDataTable2*, 9> mechaDataTable2;
 extern std::array<sLoadableDataRaw, 9> mechaDataTable2_raw;
 
-extern std::array<SFP_VEC4, 4> initMechaTempVar;
+extern std::array<SVECTOR, 4> initMechaTempVar;
 
 extern std::array<sLoadingBatchCommands, 16> mechaOverlayBatchLoadingTable;
 

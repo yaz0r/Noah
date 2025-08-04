@@ -131,7 +131,7 @@ void initWorldmapMinimap()
 void worldmapRenderMinimap() {
     std::array<POLY_G3, 4>::iterator p = worldmapMinimapRadar[worldmapOddOrEven].begin();
     for (int i = 0; i < 4; i++) {
-        SFP_VEC4 rotationAngles;
+        SVECTOR rotationAngles;
         rotationAngles.vx = 0;
         rotationAngles.vy = 0;
         rotationAngles.vz = worldmapRotation.vy;

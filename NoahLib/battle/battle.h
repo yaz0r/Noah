@@ -359,7 +359,7 @@ extern std::array<s8, 0xB> isEntityReadyForBattle;
 extern std::array<s8, 0xB> randomTurnOrder;
 extern s8 currentEntryInRandomTurnOrder;
 extern std::array<s8, 11> isBattleSlotFilled;
-void mechaInitEnvironmentMechaMesh(int entryId, ushort flags, sMechaDataTable2* pData2, sMechaDataTable1* pData1, ushort tpageX, ushort tpageY, ushort clutX, short clutY, SFP_VEC3* param_9);
+void mechaInitEnvironmentMechaMesh(int entryId, ushort flags, sMechaDataTable2* pData2, sMechaDataTable1* pData1, ushort tpageX, ushort tpageY, ushort clutX, short clutY, SVECTOR* param_9);
 u16 characterIdToTargetBitmask(uint param_1);
 extern std::array<s8, 12> targetsPerPriority;
 ushort characterOdToInverseTargetBitmask(uint param_1);

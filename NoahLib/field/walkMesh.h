@@ -15,7 +15,7 @@ struct sWalkMesh
     struct sBlock
     {
         std::vector<sTriangleData> m_triangles;
-        std::vector<SFP_VEC4> m_vertices;
+        std::vector<SVECTOR> m_vertices;
     };
 
     std::vector<sBlock> m_blocks;

@@ -167,7 +167,7 @@ int setupDamagePoly(sFont fontData, int character, sDamageDisplaySub0* param_3, 
     return fontData.m4[character].m0_polyCount;
 }
 
-extern SFP_VEC4 currentSpriteCharacterSize[4];
+extern SVECTOR currentSpriteCharacterSize[4];
 
 void drawDamageDisplayCharacter(sDamageDisplaySub0* param_1, sColorAndCode colorAndCode) {
     if ((shapeTransfertTableCurrentEntry + sizeof(POLY_FT4) < shapeTransfertTableEnd)) {

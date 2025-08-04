@@ -59,8 +59,8 @@ struct sFieldEntitySub4_B4_sub
 };
 
 struct sFieldEntitySub4_B4_base {
-    SFP_VEC4 m0_rotation;
-    SFP_VEC4 m6_scale;
+    SVECTOR m0_rotation;
+    SVECTOR m6_scale;
     MATRIX mC_matrix;
 
     virtual ~sFieldEntitySub4_B4_base() = default;

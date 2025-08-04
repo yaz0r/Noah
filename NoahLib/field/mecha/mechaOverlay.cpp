@@ -198,7 +198,7 @@ void mechaInitOverlay(int mechaMaxCount)
 std::array<u8, 3> mechaBackColor = { 0,0,0 };
 std::array<MATRIX, 2> mechaFieldArgs2;
 
-std::array<SFP_VEC4, 4> initMechaTempVar;
+std::array<SVECTOR, 4> initMechaTempVar;
 
 void sMechaModel_init(sModel& modelBlock, sMechaInitVar4* param_2)
 {
@@ -832,12 +832,12 @@ void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int pa
         (*pMecha->m4_bones)[0].m54_rotationAngles[1] += pMecha->m70[1] >> 3;
         (*pMecha->m4_bones)[0].m54_rotationAngles[2] += pMecha->m70[2] >> 3;
 
-        SFP_VEC4 local_120;
+        SVECTOR local_120;
         local_120.vx = ((int)pMecha->m7C[0] * (int)(*pMecha->m4_bones)[0].m4C_scale[0] >> 0xc);
         local_120.vy = ((int)pMecha->m7C[1] * (int)(*pMecha->m4_bones)[0].m4C_scale[1] >> 0xc);
         local_120.vz = ((int)pMecha->m7C[2] * (int)(*pMecha->m4_bones)[0].m4C_scale[2] >> 0xc);
 
-        FP_VEC4 local_130;
+        VECTOR local_130;
         ApplyMatrix(&(*pMecha->m4_bones)[0].m2C_boneFinalMatrix, &local_120, &local_130);
 
         (*pMecha->m4_bones)[0].m5C_translation[0] += (pMecha->m1C_scale * local_130.vx >> 0xc);
@@ -1266,7 +1266,7 @@ void freeMechaModelBlocks(sMechaInitVar4* param_1, int param_2) {
     }
 }
 
-void mechaInitNewMecha(int entryId, ushort flags, sMechaDataTable2* pData2, sMechaDataTable1* pData1, ushort tpageX, ushort tpageY, ushort clutX, short clutY, SFP_VEC3* param_9)
+void mechaInitNewMecha(int entryId, ushort flags, sMechaDataTable2* pData2, sMechaDataTable1* pData1, ushort tpageX, ushort tpageY, ushort clutX, short clutY, SVECTOR* param_9)
 {
     resetMemoryAllocStats(4, 0);
     if (9 < entryId) {

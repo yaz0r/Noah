@@ -3,7 +3,7 @@
 #include "trigo.h"
 #include "gte.h"
 
-void createRotationMatrix(SFP_VEC4* param_1, MATRIX* param_2)
+void createRotationMatrix(SVECTOR* param_1, MATRIX* param_2)
 {
     int iVar1;
     int iVar2;
@@ -35,7 +35,7 @@ void createRotationMatrix(SFP_VEC4* param_1, MATRIX* param_2)
     param_2->m[2][2] = (short)(iVar4 * iVar3 >> 0xc);
 }
 
-MATRIX* ScaleMatrixL(MATRIX* m, FP_VEC4* v)
+MATRIX* ScaleMatrixL(MATRIX* m, VECTOR* v)
 {
     m->m[0][0] = m->m[0][0] * v->vx >> 0xc;
     m->m[0][1] = m->m[0][1] * v->vx >> 0xc;
@@ -52,7 +52,7 @@ MATRIX* ScaleMatrixL(MATRIX* m, FP_VEC4* v)
     return m;
 }
 
-MATRIX* ScaleMatrix(MATRIX* m, FP_VEC4* v)
+MATRIX* ScaleMatrix(MATRIX* m, VECTOR* v)
 {
     m->m[0][0] = m->m[0][0] * v->vx >> 0xc;
     m->m[0][1] = m->m[0][1] * v->vx >> 0xc;
@@ -106,7 +106,7 @@ MATRIX* MulMatrix0(MATRIX* m0, MATRIX* m1, MATRIX* m2)
 	return m2;
 }
 
-long RotTransPers(SFP_VEC4* v0, sVec2_s16* sxy, long* p, long* flag)
+long RotTransPers(SVECTOR* v0, sVec2_s16* sxy, long* p, long* flag)
 {
 	setCopReg(2, 0, sVec2_s16::fromValue(v0->vx, v0->vy));
 	setCopReg(2, 0x800, sVec2_s16::fromValue(v0->vz, 0));
@@ -117,7 +117,7 @@ long RotTransPers(SFP_VEC4* v0, sVec2_s16* sxy, long* p, long* flag)
 	return getCopReg(2, 0x9800) >> 2;
 }
 
-long RotTransPers4(SFP_VEC4* v0, SFP_VEC4* v1, SFP_VEC4* v2, SFP_VEC4* v3, sVec2_s16* sxy0, sVec2_s16* sxy1, sVec2_s16* sxy2, sVec2_s16* sxy3, long* p, long* flag)
+long RotTransPers4(SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, SVECTOR* v3, sVec2_s16* sxy0, sVec2_s16* sxy1, sVec2_s16* sxy2, sVec2_s16* sxy3, long* p, long* flag)
 {
 	setCopReg(2, 0, sVec2_s16::fromValue(v0->vx, v0->vy));
 	setCopReg(2, 1, sVec2_s16::fromValue(v0->vz, 0));
@@ -285,7 +285,7 @@ MATRIX* CompMatrix(const MATRIX* m0, const MATRIX* m1, MATRIX* m2)
 	return m2;
 }
 
-void RotTrans(SFP_VEC4* rotation, FP_VEC4* output, long* flag)
+void RotTrans(SVECTOR* rotation, VECTOR* output, long* flag)
 {
 	setCopReg(2, 0, sVec2_s16::fromValue(rotation->vx, rotation->vy));
 	setCopReg(2, 1, sVec2_s16::fromValue(rotation->vz, 0));
@@ -375,7 +375,7 @@ sSQRTables SQRTables = {
 	}
 };
 
-FP_VEC4* ApplyMatrixLV(MATRIX* m, FP_VEC4* v0, FP_VEC4* v1)
+VECTOR* ApplyMatrixLV(MATRIX* m, VECTOR* v0, VECTOR* v1)
 {
 	uint uVar1;
 	int iVar2;
@@ -492,7 +492,7 @@ s32 length2d(s32 param_1, s32 param_2)
 	return SquareRoot0(local_18.vx + local_18.vy);
 }
 
-FP_VEC4* ApplyMatrix(MATRIX* m, SFP_VEC4* inputVector, FP_VEC4* outputVector)
+VECTOR* ApplyMatrix(MATRIX* m, SVECTOR* inputVector, VECTOR* outputVector)
 {
 #if 0
 	outputVector->vx = m->m[0][0] * inputVector->vx + m->m[1][0] * inputVector->vy + m->m[2][0] * inputVector->vz;
@@ -554,24 +554,24 @@ void lookAtNoDivide(MATRIX* param_1, SVECTOR* param_2, SVECTOR* param_3, SVECTOR
     return;
 }
 
-void lookAtDivided(MATRIX* pOutputMatrix, FP_VEC4* vEye, FP_VEC4* vAt, FP_VEC4* vUp)
+void lookAtDivided(MATRIX* pOutputMatrix, VECTOR* vEye, VECTOR* vAt, VECTOR* vUp)
 {
-	FP_VEC4 local_60 = {
+	VECTOR local_60 = {
 		(vAt->vx - vEye->vx) >> 16,
 		(vAt->vy - vEye->vy) >> 16,
 		(vAt->vz - vEye->vz) >> 16,
 	};
-	FP_VEC4 local_30 = {
+	VECTOR local_30 = {
 		(vUp->vx) >> 16,
 		(vUp->vy) >> 16,
 		(vUp->vz) >> 16,
 	};
 
-	FP_VEC4 local_50;
+	VECTOR local_50;
 	VectorNormal(&local_60, &local_50);
 	OuterProduct12(&local_30, &local_50, &local_60);
 
-	FP_VEC4 local_40;
+	VECTOR local_40;
 	VectorNormal(&local_60, &local_40);
 	OuterProduct12(&local_50, &local_40, &local_60);
 
@@ -589,7 +589,7 @@ void lookAtDivided(MATRIX* pOutputMatrix, FP_VEC4* vEye, FP_VEC4* vAt, FP_VEC4* 
 	pOutputMatrix->m[2][1] = local_50.vy;
 	pOutputMatrix->m[2][2] = local_50.vz;
 
-    SFP_VEC4 local_20 = {
+    SVECTOR local_20 = {
         (s16)((vEye->vx >> 16) * 3),
         (s16)((vEye->vy >> 16) * 3),
         (s16)((vEye->vz >> 16) * 3),
@@ -604,14 +604,14 @@ void lookAtDivided(MATRIX* pOutputMatrix, FP_VEC4* vEye, FP_VEC4* vAt, FP_VEC4* 
 
 void setIdentityMatrix(MATRIX* param_1)
 {
-	SFP_VEC4 rotation = { 0,0,0 };
+	SVECTOR rotation = { 0,0,0 };
 	createRotationMatrix(&rotation, param_1);
 	param_1->t[0] = 0;
 	param_1->t[1] = 0;
 	param_1->t[2] = 0;
 }
 
-long RotAverage4(SFP_VEC4* v0, SFP_VEC4* v1, SFP_VEC4* v2, SFP_VEC4* v3, sVec2_s16* sxy0, sVec2_s16* sxy1, sVec2_s16* sxy2, sVec2_s16* sxy3, long* p, long* flag)
+long RotAverage4(SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, SVECTOR* v3, sVec2_s16* sxy0, sVec2_s16* sxy1, sVec2_s16* sxy2, sVec2_s16* sxy3, long* p, long* flag)
 {
 	gte_ldv3(v0, v1, v2);
 	gte_rtpt();
@@ -649,7 +649,7 @@ long NCLIP(sVec2_s16 sxy0, sVec2_s16 sxy1, sVec2_s16 sxy2)
     return -((int64_t)(SX0 * SY1) + (SX1 * SY2) + (SX2 * SY0) - (SX0 * SY2) - (SX1 * SY0) - (SX2 * SY1));
 }
 
-void OuterProduct12(FP_VEC4* a, FP_VEC4* b, FP_VEC4* r)
+void OuterProduct12(VECTOR* a, VECTOR* b, VECTOR* r)
 {
 #if 0
 	r->vx = ((s64)a->vy * b->vz - (s64)a->vz * b->vy) >> 12;
@@ -722,21 +722,21 @@ void OuterProduct0(VECTOR* $2, VECTOR* $3, VECTOR* v2)
     return;
 }
 
-void toFloat(FP_VEC4* v0, std::array<float, 3>& output)
+void toFloat(VECTOR* v0, std::array<float, 3>& output)
 {
 	output[0] = v0->vx / (float)0x10000;
 	output[1] = v0->vy / (float)0x10000;
 	output[2] = v0->vz / (float)0x10000;
 }
 
-void fromFloat(FP_VEC4* v0, std::array<float, 3>& asFloat)
+void fromFloat(VECTOR* v0, std::array<float, 3>& asFloat)
 {
 	v0->vx = asFloat[0] * (float)0x10000;
 	v0->vy = asFloat[1] * (float)0x10000;
 	v0->vz = asFloat[2] * (float)0x10000;
 }
 
-int VectorNormalInner(FP_VEC4* input, FP_VEC4* output)
+int VectorNormalInner(VECTOR* input, VECTOR* output)
 {
 	setCopReg(2, 0x4800, input->vx);
 	setCopReg(2, 0x5000, input->vy);
@@ -766,14 +766,14 @@ int VectorNormalInner(FP_VEC4* input, FP_VEC4* output)
 	return iVar4;
 }
 
-int VectorNormal(FP_VEC4* input, FP_VEC4* output)
+int VectorNormal(VECTOR* input, VECTOR* output)
 {
     return VectorNormalInner(input, output);
 }
 
-int VectorNormalS(FP_VEC4* input, SFP_VEC4* output)
+int VectorNormalS(VECTOR* input, SVECTOR* output)
 {
-    FP_VEC4 tempOutput;
+    VECTOR tempOutput;
     int result = VectorNormalInner(input, &tempOutput);
     output->vx = tempOutput.vx;
     output->vy = tempOutput.vy;
@@ -839,7 +839,7 @@ MATRIX* SetMulMatrix(MATRIX* m0, MATRIX* m1)
 	return m0;
 }
 
-MATRIX* TransMatrix(MATRIX* m, FP_VEC4* v)
+MATRIX* TransMatrix(MATRIX* m, VECTOR* v)
 {
     long lVar1;
     long lVar2;
@@ -935,7 +935,7 @@ MATRIX* RotMatrixZ(long r, MATRIX* m)
     return m;
 }
 
-MATRIX* RotMatrixYXZ(SFP_VEC4* r, MATRIX* m)
+MATRIX* RotMatrixYXZ(SVECTOR* r, MATRIX* m)
 {
     // correct Psy-Q implementation
     int c0, c1, c2;

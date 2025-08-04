@@ -289,7 +289,7 @@ int interpolateParticleColor(int value, int step)
 }
 
 void projectAndRenderParticle(sParticle* pParticle, MATRIX* projectionMatrix, short param_3, int sort, VECTOR* scale, int attachementMode) {
-    SFP_VEC4 local_40;
+    SVECTOR local_40;
     MATRIX MStack128;
 
     local_40.vx = 0;
@@ -383,7 +383,7 @@ void updateParticle(sParticleConfig* particleEffect, sParticle* pParticle, MATRI
         pParticle->m48_color[1] = interpolateParticleColor(pParticle->m48_color[1], pParticle->m4C_colorStep[1]);
         pParticle->m48_color[2] = interpolateParticleColor(pParticle->m48_color[2], pParticle->m4C_colorStep[2]);
 
-        FP_VEC4 scale;
+        VECTOR scale;
         scale.vx = particleEffect->m50;
         scale.vy = particleEffect->m50;
         scale.vz = particleEffect->m50;

@@ -347,7 +347,7 @@ void setupSpriteObjectMatrix(sSpriteActorCore* param_1)
 
 {
     if ((param_1->m40 & 1) == 0) {
-        FP_VEC4 scale;
+        VECTOR scale;
         scale.vx = param_1->m20->m6_scale.vx;
         scale.vy = param_1->m20->m6_scale.vy;
         scale.vz = param_1->m20->m6_scale.vz;
@@ -356,7 +356,7 @@ void setupSpriteObjectMatrix(sSpriteActorCore* param_1)
     }
     else {
         MATRIX scaleMatrix;
-        FP_VEC4 scale;
+        VECTOR scale;
 
         // make identity
         scaleMatrix.m[0][0] = 0x1000;
@@ -383,7 +383,7 @@ void setupSpriteObjectMatrix(sSpriteActorCore* param_1)
     }
 
     if (param_1->m3A != 0) {
-        FP_VEC4 scale;
+        VECTOR scale;
         scale.vx = param_1->m3A / 2;
         scale.vy = param_1->m3A / 2;
         scale.vz = param_1->m3A / 2;
@@ -414,7 +414,7 @@ void spriteCallback_render2(sTaskHeader* param_1) {
     spriteCallback_render2_updateMatrix(pSpriteActor);
 
     if (pSpriteActor->m20->getAsObject()->m34_pModelBlock) {
-        FP_VEC4 temp;
+        VECTOR temp;
         temp[0] = pSpriteActor->m0_position.vx.getIntegerPart();
         temp[1] = pSpriteActor->m0_position.vy.getIntegerPart();
         temp[2] = pSpriteActor->m0_position.vz.getIntegerPart();
@@ -1192,7 +1192,7 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, std
                 return;
             }
             bool applyToMatrix = (param_1->m3C >> 24) & 1;
-            SFP_VEC4 local_70;
+            SVECTOR local_70;
             switch (READ_LE_U8(param_3) & 0x3F)
             {
             case 0:

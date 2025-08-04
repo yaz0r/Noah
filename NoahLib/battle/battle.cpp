@@ -251,7 +251,7 @@ int waitForMusic(uint param_1) {
 
 void initModel5(sModel* pModelBlock);
 
-void mechaInitEnvironmentMechaMesh(int entryId, ushort flags, sMechaDataTable2* pData2, sMechaDataTable1* pData1, ushort tpageX, ushort tpageY, ushort clutX, short clutY, SFP_VEC3* param_9)
+void mechaInitEnvironmentMechaMesh(int entryId, ushort flags, sMechaDataTable2* pData2, sMechaDataTable1* pData1, ushort tpageX, ushort tpageY, ushort clutX, short clutY, SVECTOR* param_9)
 {
     resetMemoryAllocStats(4, 0);
     if (0x1F < entryId) {

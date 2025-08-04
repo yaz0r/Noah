@@ -52,7 +52,7 @@ void sWalkMesh::init(const std::vector<u8>& input)
         newBlock.m_vertices.resize(maxVertexIndex + 1);
         for (int vertexId = 0; vertexId < maxVertexIndex + 1; vertexId ++)
         {
-            SFP_VEC4& vertice = newBlock.m_vertices[vertexId];
+            SVECTOR& vertice = newBlock.m_vertices[vertexId];
 
             vertice.vx = READ_LE_S16(input.begin() + block_vertex_start + vertexId * 4 * 2 + 0);
             vertice.vy = READ_LE_S16(input.begin() + block_vertex_start + vertexId * 4 * 2 + 2);

@@ -13,7 +13,7 @@ struct sParticle {
     std::array<u8, 4> m48_color;
     std::array<s8, 4> m4C_colorStep;
     std::array<POLY_FT4, 2> m50;
-    std::array<SFP_VEC4, 4> mA0_worldspaceVertices;
+    std::array<SVECTOR, 4> mA0_worldspaceVertices;
     // size 0xC0
 };
 

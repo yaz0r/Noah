@@ -16,7 +16,7 @@ extern s16 op99Var3;
 extern s16 op99Var4;
 extern s16 sceneScale;
 extern s16 sceneDIP;
-extern SFP_VEC4 cameraRotationBetweenEyeAndAt;
+extern SVECTOR cameraRotationBetweenEyeAndAt;
 extern s16 op9DVar0;
 extern s32 op9DVar1;
 extern s32 op9DVar2;

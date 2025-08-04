@@ -10,9 +10,9 @@ struct sMenuContext_358 {
     std::array<POLY_FT4, 2> m0_portrait;
     std::array<POLY_FT4, 2> m50_name;
     std::array<std::array<POLY_FT4, 2>, 2> m1E00_polys;
-    std::array<SFP_VEC4, 4> m1EAC;
-    std::array<SFP_VEC4, 4> m1EC0;
-    std::array<std::array<SFP_VEC4, 4>, 2> m2AA0;
+    std::array<SVECTOR, 4> m1EAC;
+    std::array<SVECTOR, 4> m1EC0;
+    std::array<std::array<SVECTOR, 4>, 2> m2AA0;
     u8 m2AE0;
     u8 m2AED;
     u8 m2AEE;
@@ -24,10 +24,10 @@ struct sMenuContext_35C {
     std::array<std::array<std::array<POLY_FT4, 2>, 4>, 7> mEB0;
     std::array<std::array<std::array<POLY_FT4, 2>, 4>, 7> m1770;
     std::array<std::array<POLY_G4, 2>, 7> m2030;
-    std::array<std::array<SFP_VEC4, 4>, 47> m2420;
-    std::array<std::array<std::array<SFP_VEC4, 4>, 4>, 7> m2A00;
-    std::array<std::array<std::array<SFP_VEC4, 4>, 4>, 7> m2D80;
-    std::array<std::array<SFP_VEC4, 4>, 7> m3100;
+    std::array<std::array<SVECTOR, 4>, 47> m2420;
+    std::array<std::array<std::array<SVECTOR, 4>, 4>, 7> m2A00;
+    std::array<std::array<std::array<SVECTOR, 4>, 4>, 7> m2D80;
+    std::array<std::array<SVECTOR, 4>, 7> m3100;
     std::array<s8, 7> m32C0;
     std::array<s8, 7> m32C7;
     std::array<s8, 7> m32CE;
@@ -103,7 +103,7 @@ void loadSharedMenuData2(s8 param_1) {
 
 struct sMenuContext_440 {
     std::array<std::array<POLY_FT4, 2>, 4> m0;
-    std::array<std::array<SFP_VEC4, 4>, 4> m140;
+    std::array<std::array<SVECTOR, 4>, 4> m140;
     u8 m1C0;
     // size 0x1C4
 };

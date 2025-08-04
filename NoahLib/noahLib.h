@@ -109,9 +109,44 @@ struct FP_VEC3
     }
 };
 
-struct FP_VEC4 : public FP_VEC3
+struct VECTOR
 {
-    s32 pad;
+    sFixedPoint vx;
+    sFixedPoint vy;
+    sFixedPoint vz;
+    sFixedPoint pad;
+
+    sFixedPoint operator[](size_t idx) const
+    {
+        switch (idx)
+        {
+        case 0:
+            return vx;
+        case 1:
+            return vy;
+        case 2:
+            return vz;
+        default:
+            assert(0);
+            return sFixedPoint::fromValue(0);
+        }
+    }
+
+    sFixedPoint& operator[](size_t idx)
+    {
+        switch (idx)
+        {
+        case 0:
+            return vx;
+        case 1:
+            return vy;
+        case 2:
+            return vz;
+        default:
+            assert(0);
+            return vx;
+        }
+    }
 };
 
 struct SFP_VEC3
@@ -121,36 +156,39 @@ struct SFP_VEC3
     s16 vz;
 };
 
-struct SFP_VEC4 : public SFP_VEC3
+struct SVECTOR
 {
+    s16 vx;
+    s16 vy;
+    s16 vz;
     s16 pad;
 
-    static SFP_VEC4 FromIt(u8* it)
+    static SVECTOR FromIt(u8* it)
     {
-        SFP_VEC4 temp;
+        SVECTOR temp;
         temp.vx = READ_LE_S16(it); it += 2;
         temp.vy = READ_LE_S16(it); it += 2;
         temp.vz = READ_LE_S16(it); it += 2;
         return temp;
     }
 
-    static SFP_VEC4 FromIt(std::vector<u8>::iterator it)
+    static SVECTOR FromIt(std::vector<u8>::iterator it)
     {
-        SFP_VEC4 temp;
+        SVECTOR temp;
         temp.vx = READ_LE_S16(it); it += 2;
         temp.vy = READ_LE_S16(it); it += 2;
         temp.vz = READ_LE_S16(it); it += 2;
         return temp;
     }
 
-    SFP_VEC4& operator+=(const SFP_VEC4& rhs) {
+    SVECTOR& operator+=(const SVECTOR& rhs) {
         vx += rhs.vx;
         vy += rhs.vy;
         vz += rhs.vz;
         return *this;
     }
 
-    SFP_VEC4& operator-=(const SFP_VEC4& rhs) {
+    SVECTOR& operator-=(const SVECTOR& rhs) {
         vx -= rhs.vx;
         vy -= rhs.vy;
         vz -= rhs.vz;

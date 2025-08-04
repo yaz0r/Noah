@@ -768,7 +768,7 @@ void gte_ldlv0(const VECTOR* pVertices0)
     setCopReg(2, COP2D_Z0, sVec2_s16::fromValue(pVertices0->vz, 0));
 }
 
-void gte_ldv0(const SFP_VEC4* pVertices0)
+void gte_ldv0(const SVECTOR* pVertices0)
 {
 	setCopReg(2, COP2D_XY0, sVec2_s16::fromValue(pVertices0->vx, pVertices0->vy));
 	setCopReg(2, COP2D_Z0, sVec2_s16::fromValue(pVertices0->vz, 0));
@@ -789,7 +789,7 @@ void gte_ldIR0(s32 value) {
     setCopReg(2, COP2D_IR0, sVec2_s16::fromValue(value, 0));
 }
 
-void gte_ldVXY0(struct SFP_VEC4* pInput) {
+void gte_ldVXY0(struct SVECTOR* pInput) {
     setCopReg(2, COP2D_XY0, sVec2_s16::fromValue(pInput->vx, pInput->vy));
 }
 
@@ -797,7 +797,7 @@ void gte_ldVZ0(s16* pInput) {
     setCopReg(2, COP2D_Z0, sVec2_s16::fromValue(*pInput, 0));
 }
 
-void gte_ldVXY1(struct SFP_VEC4* pInput) {
+void gte_ldVXY1(struct SVECTOR* pInput) {
     setCopReg(2, COP2D_XY1, sVec2_s16::fromValue(pInput->vx, pInput->vy));
 }
 
@@ -805,7 +805,7 @@ void gte_ldVZ1(s16* pInput) {
     setCopReg(2, COP2D_Z1, sVec2_s16::fromValue(*pInput, 0));
 }
 
-void gte_ldVXY2(struct SFP_VEC4* pInput) {
+void gte_ldVXY2(struct SVECTOR* pInput) {
     setCopReg(2, COP2D_XY2, sVec2_s16::fromValue(pInput->vx, pInput->vy));
 }
 
@@ -843,7 +843,7 @@ void gte_ldv3(u8* pVertices0, u8* pVertices1, u8* pVertices2)
     setCopReg(2, COP2D_Z2, sVec2_s16::fromValue(READ_LE_S16(pVertices2 + 4), 0));
 }
 
-void gte_ldv3(const SFP_VEC4* pVertices0, const SFP_VEC4* pVertices1, const SFP_VEC4* pVertices2)
+void gte_ldv3(const SVECTOR* pVertices0, const SVECTOR* pVertices1, const SVECTOR* pVertices2)
 {
 	setCopReg(2, COP2D_XY0, sVec2_s16::fromValue(pVertices0->vx, pVertices0->vy));
 	setCopReg(2, COP2D_Z0, sVec2_s16::fromValue(pVertices0->vz, 0));

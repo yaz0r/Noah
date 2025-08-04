@@ -32,14 +32,14 @@ struct sFieldEntitySub0
     std::array<std::vector<sTag*>,2> m8;
     s16 m12_renderMode;
     void* m14;
-    SFP_VEC4 m18;
+    SVECTOR m18;
     s16 m20;
     //size 0x24
 };
 
 struct sFieldEntity2dSprite
 {
-    SFP_VEC4 m0_shadowPolyVertices[4];
+    SVECTOR m0_shadowPolyVertices[4];
     POLY_FT4 m20_shadowPoly[2];
     //size 0x70
 };
@@ -105,10 +105,10 @@ struct sFieldScriptEntity
     s32 m14_currentTriangleFlag;
     SFP_VEC3 m18_boundingVolume;
     s16 m1E_collisionRadius;
-    FP_VEC4 m20_position;
-    FP_VEC4 m30_stepVector;
-    FP_VEC4 m40;
-    FP_VEC4 m50_surfaceNormal;
+    VECTOR m20_position;
+    VECTOR m30_stepVector;
+    VECTOR m40;
+    VECTOR m50_surfaceNormal;
     std::array<s16, 3> m60;
     std::array<s16, 3> m68_oldPosition;
     s16 m6E;
@@ -185,7 +185,7 @@ struct sFieldEntity
     sMatrix mC_matrix;
     sMatrix m2C_matrixBackup;
     sFieldScriptEntity* m4C_scriptEntity;
-    SFP_VEC4 m50_modelRotation;
+    SVECTOR m50_modelRotation;
     u16 m58_flags;
     u16 m5A;
     //size 0x5C
@@ -244,10 +244,10 @@ extern FP_VEC3 cameraInterpolationTargetStep;
 extern FP_VEC3 cameraInterpolationTargetStartPosition;
 extern FP_VEC3 cameraInterpolationPositionStep;
 extern FP_VEC3 cameraInterpolationStartPosition;
-extern FP_VEC4 cameraEye;
-extern FP_VEC4 cameraEye2;
-extern FP_VEC4 cameraAt;
-extern FP_VEC4 cameraAt2;
+extern VECTOR cameraEye;
+extern VECTOR cameraEye2;
+extern VECTOR cameraAt;
+extern VECTOR cameraAt2;
 extern u16 cameraInterpolationFlags;
 extern s16 cameraInterpolationTargetNumSteps;
 extern s32 cameraInterpolationPositionNumSteps;
@@ -318,9 +318,9 @@ extern MATRIX currentProjectionMatrix;
 extern std::array<sLoadableDataRaw, 3> partyCharacterBuffersRaw;
 extern std::array<int, 3> asyncPartyCharacterLoadingTable;
 
-extern SFP_VEC4 cameraProjectionAngles;
-extern SFP_VEC4 cameraRotation;
-extern FP_VEC4 cameraUp;
+extern SVECTOR cameraProjectionAngles;
+extern SVECTOR cameraRotation;
+extern VECTOR cameraUp;
 extern s16 cameraTan;
 
 extern MATRIX worldScaleMatrix;
@@ -508,7 +508,7 @@ void loadImageFileToVram(int fileId, void* allocation, int, int, int, int, int, 
 
 extern std::array<sGameController, 2> newPadButtonForScripts;
 
-extern SFP_VEC4 computeProjectionMatrixAngles;
+extern SVECTOR computeProjectionMatrixAngles;
 extern s32 objectClippingMask;
 
 extern u8* shapeTransfertTableCurrentEntry;

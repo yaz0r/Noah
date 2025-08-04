@@ -142,7 +142,7 @@ void setupWorldmapMatrix1(SVECTOR* param_1) {
 
         worldmapRotationmatrixX = worldmapMainMatrix2;
 
-        FP_VEC4 temp2;
+        VECTOR temp2;
         ApplyMatrix(&worldmapRotationmatrixX, &temp, &temp2);
         TransMatrix(&worldmapMainMatrix2, &temp2);
     }
