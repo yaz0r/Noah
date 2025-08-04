@@ -128,3 +128,5 @@ void setupWindowSize2(sDialogWindow18* param_1, int x1, int y1, short x2, short 
 void resetDialogWindow18(sDialogWindow18* param_1);
 void addDialogWindowsToOTSub2(sDialogWindow18* param_1, const std::vector<u8>::iterator& param_2);
 void updateAndRenderTextForDialogWindow(sDialogWindow18* param_1, sTag* OT, int oddOrEven);
+void dealocateDialogWindow18Memory(sDialogWindow18* param_1);
+void addDialogWindowsToOTSub1(sDialogWindow18* param_1);

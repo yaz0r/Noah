@@ -352,7 +352,7 @@ void drawBattleDialogWindow(uint param_1, short x, short y, short width, short h
     battleVar1->mB0_isDialogWindowInitialized[uVar2] = 1;
 }
 
-void allocateAndSetupBattleDialogWindow(byte param_1, short param_2, short param_3, short param_4, short param_5, char param_6, char param_7) {
+void allocateAndSetupBattleDialogWindow(byte param_1, short x, short y, short width, short height, char param_6, char param_7) {
     if (battleVar1->mB0_isDialogWindowInitialized[param_1] == 0) {
         battleDialogWindows[param_1] = new sBattleDialogWindow;
         memset(battleDialogWindows[param_1], 0, sizeof(sBattleDialogWindow));
@@ -363,7 +363,7 @@ void allocateAndSetupBattleDialogWindow(byte param_1, short param_2, short param
         setupBattleDialogWindow(param_1);
     }
     if (param_6 == '\0') {
-        drawBattleDialogWindow(param_1, param_2, param_3, param_4, param_5);
+        drawBattleDialogWindow(param_1, x, y, width, height);
         if (param_7 != '\0') {
             battleRenderDebugAndMain();
         }
@@ -371,10 +371,10 @@ void allocateAndSetupBattleDialogWindow(byte param_1, short param_2, short param
     else {
         auto& psVar3 = battleDialogWindows2[param_1];
         psVar3->mC_windowIndex = param_1;
-        psVar3->m0 = param_2;
-        psVar3->m2 = param_3;
-        psVar3->m4 = param_4;
-        psVar3->m6 = param_5;
+        psVar3->m0_x = x;
+        psVar3->m2_y = y;
+        psVar3->m4_width = width;
+        psVar3->m6_height = height;
         psVar3->m8 = 0;
         psVar3->mA = 0;
         battleVar1->mBF_isDialogWindowInitialized3[param_1] = 0;
@@ -383,43 +383,47 @@ void allocateAndSetupBattleDialogWindow(byte param_1, short param_2, short param
 }
 
 void drawBattleDialogWindows() {
-    bool bVar1;
-    short sVar2;
-    sBattleDialogWindow2* psVar3;
-    char cVar4;
-    int iVar5;
-
-    iVar5 = 0;
-    do {
-        psVar3 = battleDialogWindows2[iVar5];
-        if ((battleVar1->mB8_isDialogWindowInitialized2[iVar5] != 0) &&
-            (battleVar1->mBF_isDialogWindowInitialized3[iVar5] == 0)) {
-            bVar1 = (ushort)psVar3->m8 + 0x20 < (uint)(ushort)psVar3->m4;
+    for(int i = 0; i <7; i++) {
+        sBattleDialogWindow2* psVar3 = battleDialogWindows2[i];
+        if ((battleVar1->mB8_isDialogWindowInitialized2[i] != 0) &&
+            (battleVar1->mBF_isDialogWindowInitialized3[i] == 0)) {
+            bool bVar1 = (ushort)psVar3->m8 + 0x20 < (uint)(ushort)psVar3->m4_width;
+            short sVar2;
             if (bVar1) {
                 sVar2 = psVar3->m8 + 0x20;
             }
             else {
-                sVar2 = psVar3->m4;
+                sVar2 = psVar3->m4_width;
             }
-            cVar4 = !bVar1;
+            char cVar4 = !bVar1;
             psVar3->m8 = sVar2;
-            if ((ushort)psVar3->mA + 0x20 < (uint)(ushort)psVar3->m6) {
+            if ((ushort)psVar3->mA + 0x20 < (uint)(ushort)psVar3->m6_height) {
                 sVar2 = psVar3->mA + 0x20;
             }
             else {
-                sVar2 = psVar3->m6;
-                cVar4 = cVar4 + '\x01';
+                sVar2 = psVar3->m6_height;
+                cVar4++;
             }
             psVar3->mA = sVar2;
-            if (cVar4 == '\x02') {
-                battleVar1->mBF_isDialogWindowInitialized3[iVar5] = 1;
+            if (cVar4 == 2) {
+                battleVar1->mBF_isDialogWindowInitialized3[i] = 1;
             }
             drawBattleDialogWindow
             ((uint)psVar3->mC_windowIndex,
-                (psVar3->m0 + ((ushort)psVar3->m4 >> 1)) - ((ushort)psVar3->m8 >> 1),
-                (psVar3->m2 + ((ushort)psVar3->m6 >> 1)) - ((ushort)psVar3->mA >> 1), psVar3->m8,
+                (psVar3->m0_x + ((ushort)psVar3->m4_width >> 1)) - ((ushort)psVar3->m8 >> 1),
+                (psVar3->m2_y + ((ushort)psVar3->m6_height >> 1)) - ((ushort)psVar3->mA >> 1), psVar3->m8,
                 psVar3->mA);
         }
-        iVar5 = iVar5 + 1;
-    } while (iVar5 < 7);
+    }
+}
+
+void drawCircleMenuChi_updateSub6(uint param_1)
+{
+    param_1 = param_1 & 0xff;
+    battleVar1->mB0_isDialogWindowInitialized[param_1] = 0;
+    battleVar1->mB8_isDialogWindowInitialized2[param_1] = 0;
+    battleRenderDebugAndMain();
+    delete battleDialogWindows[param_1];
+    delete battleDialogWindows2[param_1];
+    return;
 }

@@ -14,10 +14,10 @@ struct sBattleDialogWindow {
 };
 
 struct sBattleDialogWindow2 {
-    s16 m0;
-    s16 m2;
-    s16 m4;
-    s16 m6;
+    s16 m0_x;
+    s16 m2_y;
+    s16 m4_width;
+    s16 m6_height;
     s16 m8;
     s16 mA;
     s8 mC_windowIndex;
@@ -27,5 +27,6 @@ struct sBattleDialogWindow2 {
 extern std::array<sBattleDialogWindow*, 7> battleDialogWindows;
 extern std::array<sBattleDialogWindow2*, 7> battleDialogWindows2;
 
-void allocateAndSetupBattleDialogWindow(byte param_1, short param_2, short param_3, short param_4, short param_5, char param_6, char param_7);
+void allocateAndSetupBattleDialogWindow(byte param_1, short x, short y, short width, short height, char param_6, char param_7);
 void drawBattleDialogWindows();
+void drawCircleMenuChi_updateSub6(uint param_1);

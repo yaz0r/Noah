@@ -28,8 +28,10 @@ struct sBattleRunningVar0 {
     std::array<s8, 0x10> m794;
     s8 m7F5;
     std::array<POLY_FT4, 2> m7A4;
+    s8 m7F4_battleDialogPortraitOddOrEven;
     std::array<s16, 5> m7F6;
     s8 m800 = 0;
+    s8 m802_dialogBoxInitialized = 0;
     std::array<s8, 0x10> m804;
     struct sSeqFile* m818 = nullptr;
     s8 m81F;
@@ -41,3 +43,5 @@ extern struct sBattleRunningVar0* battleEventVar0;
 
 void battleEventEntry(void);
 void battleEvent_update(int);
+
+extern struct sDialogWindow18* battleEventVar1;

@@ -202,6 +202,8 @@ struct sBattleVar1 {
     std::array<u8, 7> mBF_isDialogWindowInitialized3;
     u8 mC6_isTargetSelectionCursorVisible;
     u8 mC7;
+    u8 mC8_dialogPortrait;
+    u8 mC9_dialog;
     u8 mCA_battleEventPoly;
     u8 mCB;
     std::array<u8, 3> mCC;

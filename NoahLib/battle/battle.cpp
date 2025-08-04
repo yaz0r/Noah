@@ -33,6 +33,10 @@
 
 #include "battle/menu_chi.h"
 
+void updatePortraits();
+void render_BA8_27C8_1E68(void);
+void battleDrawAPBar();
+void drawMonsterNames();
 void freeMechaModelBlocks(sMechaInitVar4* param_1, int param_2);
 u16 allPlayerCharacterBitmask = 0;
 u8 battleInitVar0 = 0;
@@ -1074,7 +1078,34 @@ void battleUpdateInputs_mode2() {
             }
         }
     }
-    MissingCode();
+
+    do {
+        if (battleVar1->mCF == 0) {
+            battleInputButton = 0xFF;
+        }
+        if (getInputOverflowed() == 0) {
+            while (loadInputFromVSyncBuffer()) {
+                if (!battleIsPaused) {
+                    if ((newPadButtonForDialogs & 0x20) != 0) {
+                        battleInputButton = 4;
+                    }
+                }
+                else if (*pRunningOnDTL != -1) {
+                    assert(0);
+                }
+                else if (newPadButtonForDialogs & 0x800) {
+                    if (battleTimeEnabled != '\0') {
+                        if (battleIsPaused == '\0') {
+                            assert(0);
+                        }
+                    }
+                }
+            }
+        }
+        else {
+            resetInputs();
+        }
+    } while (battleIsPaused);
 }
 
 void battleUpdateInputs(int mode) {
@@ -1093,8 +1124,24 @@ void battleUpdateInputs(int mode) {
     }
 }
 
+void drawDialogPortrait() {
+    if (battleVar1->mC8_dialogPortrait) {
+        AddPrim(&(*pCurrentBattleOT)[1], &battleEventVar0->m7A4[battleEventVar0->m7F4_battleDialogPortraitOddOrEven]);
+    }
+    if (battleVar1->mC9_dialog) {
+        updateAndRenderTextForDialogWindow(battleEventVar1, &(*pCurrentBattleOT)[1], battleOddOrEven);
+    }
+}
+
 void drawBattleMode2() {
-    MissingCode();
+    drawBattleDialogWindows();
+    updatePortraits();
+    render_BA8_27C8_1E68();
+    drawMonsterNames();
+    drawDialogPortrait();
+    battleDrawAPBar();
+    //FUN_Battle__80088b80();
+    //battleDrawOverallUI();
 }
 
 void battleRenderPortraitSelection() {

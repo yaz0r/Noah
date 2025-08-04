@@ -775,17 +775,6 @@ void freeBattleVar0_A230(void)
     return;
 }
 
-void drawCircleMenuChi_updateSub6(uint param_1)
-{
-    param_1 = param_1 & 0xff;
-    battleVar1->mB0_isDialogWindowInitialized[param_1] = 0;
-    battleVar1->mB8_isDialogWindowInitialized2[param_1] = 0;
-    battleRenderDebugAndMain();
-    delete battleDialogWindows[param_1];
-    delete battleDialogWindows2[param_1];
-    return;
-}
-
 int drawCircleMenuChi_update(int param_1) {
     char cVar1;
     int iVar2;
