@@ -22,6 +22,7 @@ void gte_rtps();
 void gte_rtv0();
 void gte_rtir();
 void gte_rtir_sf0();
+void gte_gpf0();
 void gte_gpf12();
 void gte_ldv0(std::vector<u8>::iterator& pVertices);
 void gte_ldv0(u8* pVertices);

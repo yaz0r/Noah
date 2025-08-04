@@ -34,5 +34,6 @@ void registerSpriteCallback2Sub0(sTaskHeader* param_1);
 void allocateSavePointMeshDataSub0_callback(sTaskHeader* param_1);
 
 void setTaskUpdateFunction(sTaskHeader* param_1, void (*param_2)(sTaskHeader*));
+void setTaskDrawFunction(sTaskHeader* param_1, void (*param_2)(sTaskHeader*));
 void setTaskDeleteFunction(sTaskHeader* param_1, void (*param_2)(sTaskHeader*));
 

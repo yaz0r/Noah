@@ -27,6 +27,7 @@
 #include "kernel/audio/seq.h"
 #include "kernel/audio/soundInstance.h"
 #include "battle/battleEvent/battleEvent.h"
+#include "battle/battleFader.h"
 
 #include "psx/libgpu.h"
 #include "psx/libapi.h"
@@ -1070,10 +1071,10 @@ void battleUpdateInputs_mode2() {
     MissingCode();
     if (battleVar1->mCA_battleEventPoly) {
         for (int i = 0; i < 0x10; i++) {
-            if (battleEventVar0->m0[i].m28) {
-                battleEventVar0->m0[i].m26--;
-                if (battleEventVar0->m0[i].m26 < 0) {
-                    battleEventVar0->m0[i].m26 = 0;
+            if (battleEventVar0->m0_scriptEntities[i].m28) {
+                battleEventVar0->m0_scriptEntities[i].m26--;
+                if (battleEventVar0->m0_scriptEntities[i].m26 < 0) {
+                    battleEventVar0->m0_scriptEntities[i].m26 = 0;
                 }
             }
         }
@@ -6142,7 +6143,7 @@ void loadBattleOverlay801E5000IfNeeded() {
 
 void updateBattleOverlay801E5000(int param) {
     if (needToLoadBattleOverlay801E5000 != '\0') {
-        battleEvent_update(param);
+        battleFader_update(param);
 
     }
 }
@@ -6533,8 +6534,10 @@ void battleMain() {
     checkWinConditions();
     currentBattleMode = 2;
     initBattleGraphics(&battleConfigFile3);
-
-    MissingCode();
+    battleCreateFader(0, 2, 0xff, 0xff, 0xff);
+    if (needToLoadBattleOverlay801E5000 == '\0') {
+        battleCreateFader(0x14, 2, 0, 0, 0);
+    }
     if (battleInitVar1 != 0) {
         pCurrentBattleMusic = realStartBattleMusic(&battleMusic, 0x7f, 0);
     }

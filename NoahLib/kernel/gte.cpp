@@ -762,6 +762,10 @@ void gte_gpf12() {
     copFunction(2, 0x0198003D);
 }
 
+void gte_gpf0() {
+    copFunction(2, 0x0190003D);
+}
+
 void gte_ldlv0(const VECTOR* pVertices0)
 {
     setCopReg(2, COP2D_XY0, sVec2_s16::fromValue(pVertices0->vx, pVertices0->vy));
@@ -973,7 +977,6 @@ void gte_stdp(s32* output) {
 s32 gte_stSZ3() {
     return getCopReg(2, 0x9800);
 }
-
 
 void gte_SetRotMatrix(const MATRIX* m) {
     setCopControlWord(2, 0, sVec2_s16::fromValue(m->m[0][0], m->m[0][1]));

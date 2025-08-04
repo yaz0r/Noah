@@ -658,12 +658,6 @@ sSavePointMeshAbstract* createSavePointMeshData(int mode1, int mode2, sFieldEnti
     return pNewSavePoint;
 }
 
-void setTaskDrawFunction(sTaskHeader* param_1, void (*param_2)(sTaskHeader*))
-{
-    param_1->m8_updateCallback = param_2;
-    return;
-}
-
 void spriteCallback_render0(sTaskHeader* param_1) {
     sSpriteActorCore* pSpriteSheet = ((sSpriteActorCore*)param_1->m4);
     if ((!pSpriteSheet->mB0.mx8) || !battleSpritesDisabled) {

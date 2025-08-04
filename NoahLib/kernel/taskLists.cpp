@@ -187,6 +187,11 @@ void setTaskUpdateFunction(sTaskHeader* param_1, void (*param_2)(sTaskHeader*))
     param_1->m8_updateCallback = param_2;
 }
 
+void setTaskDrawFunction(sTaskHeader* param_1, void (*param_2)(sTaskHeader*))
+{
+    param_1->m8_updateCallback = param_2;
+}
+
 void setTaskDeleteFunction(sTaskHeader* param_1, void (*param_2)(sTaskHeader*))
 {
     param_1->mC_deleteCallback = param_2;

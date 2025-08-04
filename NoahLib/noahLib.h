@@ -147,6 +147,13 @@ struct VECTOR
             return vx;
         }
     }
+
+    VECTOR& operator/=(const s32 value) {
+        vx /= value;
+        vy /= value;
+        vz /= value;
+        return *this;
+    }
 };
 
 struct SFP_VEC3

@@ -145,6 +145,7 @@ struct sSpriteActorCore {
     std::span<u8>::iterator m5C;
     std::optional<std::span<u8>::iterator> m60_endOfAnimationContainer;
     std::optional<std::span<u8>::iterator> m64_spriteByteCode;
+
     void(*m68)(sSpriteActorCore*);
     union {
         struct sTaskHeader* m6C_pointerToOwnerStructure;
@@ -255,7 +256,6 @@ extern sSpriteActorCore* spriteTransfertListHead;
 
 void savePointCallback8Sub0(sSpriteActorCore* param_1);
 void registerSpriteCallback2(sTaskHeader* param_1, sTaskHeader* param_2);
-void setTaskDrawFunction(sTaskHeader* param_1, void (*param_2)(sTaskHeader*));
 
 void SetTimeScale(sSpriteActor* param_1, int param_2); // 0x80021BCC
 void OP_INIT_ENTITY_SCRIPT_sub0Sub9(sSpriteActorCore* param_1);

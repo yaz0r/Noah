@@ -188,10 +188,10 @@ struct POLY_F4 : public sTag
         };
         sColorAndCode m_colorAndCode;
     };
-    sVec2_s16 x0y0;
-    sVec2_s16 x1y1;
-    sVec2_s16 x2y2;
-    sVec2_s16 x3y3;
+    sVec2_s16 x0y0; // 8
+    sVec2_s16 x1y1; // C
+    sVec2_s16 x2y2; // 0x10
+    sVec2_s16 x3y3; // 0x14
     // size 5, code 0x28
 
     void execute();
