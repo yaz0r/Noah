@@ -4,8 +4,8 @@
 #include "bgfx/bgfx.h"
 #include "bx/math.h"
 #include "imguiBGFX.h"
-#include "SDL_scancode.h"
-#include "SDL_keyboard.h"
+#include <SDL_scancode.h>
+#include <SDL_keyboard.h>
 #include "field/fieldModel.h"
 
 static ImVec2 oldWindowSize = { -1,-1 };
@@ -87,9 +87,9 @@ void battleDebugView_frame() {
 
                 bx::Vec3 translationVector(0, 0, 0);
 
-                const Uint8* keyState = SDL_GetKeyboardState(NULL);
+                const bool* keyState = SDL_GetKeyboardState(NULL);
 
-                for (int i = 0; i < SDL_NUM_SCANCODES; i++)
+                for (int i = 0; i < SDL_SCANCODE_COUNT; i++)
                 {
                     if (keyState[i])
                     {

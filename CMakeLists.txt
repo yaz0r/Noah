@@ -16,55 +16,54 @@ else()
 endif()
 ENDMACRO(COPY_BUILD_CONFIG)
 
-if(CMAKE_CONFIGURATION_TYPES)
-   list(REMOVE_ITEM CMAKE_CONFIGURATION_TYPES MinSizeRel)
-   list(REMOVE_ITEM CMAKE_CONFIGURATION_TYPES RelWithDebInfo)
-else()
-   message("  XXX custom build types are not allowed...")
-endif()
-
-#always generate debug info
-set( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /DEBUG" )
-
-# REF/COMDAT folding
-set( CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO} /OPT:REF /OPT:ICF" )
-set( CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /OPT:REF /OPT:ICF" )
-
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MP /MD /Zc:__cplusplus")
-
 IF(MSVC)
-    set( CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /D_ITERATOR_DEBUG_LEVEL=1 /D_MSVC_STL_HARDENING=1")
-    set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /D_ITERATOR_DEBUG_LEVEL=1 /D_MSVC_STL_HARDENING=1")
+   if(CMAKE_CONFIGURATION_TYPES)
+      list(REMOVE_ITEM CMAKE_CONFIGURATION_TYPES MinSizeRel)
+      list(REMOVE_ITEM CMAKE_CONFIGURATION_TYPES RelWithDebInfo)
+   else()
+      message("  XXX custom build types are not allowed...")
+   endif()
 
-    set( CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /Zc:__cplusplus /Zc:preprocessor")
-    set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Zc:__cplusplus /Zc:preprocessor")
+   #always generate debug info
+   set( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /DEBUG" )
 
-    set( CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /Zc:__cplusplus /Zc:preprocessor")
-    set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zc:__cplusplus /Zc:preprocessor")
+   # REF/COMDAT folding
+   set( CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO "${CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO} /OPT:REF /OPT:ICF" )
+   set( CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /OPT:REF /OPT:ICF" )
 
+   set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MP /MD /Zc:__cplusplus")
+
+   set( CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /D_ITERATOR_DEBUG_LEVEL=1 /D_MSVC_STL_HARDENING=1")
+   set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /D_ITERATOR_DEBUG_LEVEL=1 /D_MSVC_STL_HARDENING=1")
+
+   set( CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /Zc:__cplusplus /Zc:preprocessor")
+   set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Zc:__cplusplus /Zc:preprocessor")
+
+   set( CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /Zc:__cplusplus /Zc:preprocessor")
+   set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Zc:__cplusplus /Zc:preprocessor")
+
+   # for edit and continue
+   set( CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /MP /ZI /GR-")
+   set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MP /ZI /GR-")
+
+   set( CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /MP /Zi /GR-")
+   set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MP /Zi /GR-")
+
+   COPY_BUILD_CONFIG(Debug Debug_Asan)
+   COPY_BUILD_CONFIG(Release Shipping)
+   COPY_BUILD_CONFIG(Release Release_Asan)
+
+   # config shipping preprocessors
+   set( CMAKE_C_FLAGS_SHIPPING "${CMAKE_C_FLAGS_SHIPPING} -D SHIPPING_BUILD")
+   set( CMAKE_CXX_FLAGS_SHIPPING "${CMAKE_CXX_FLAGS_SHIPPING} -D SHIPPING_BUILD")
+
+   COPY_BUILD_CONFIG(Shipping Shipping_Asan)
+
+   # enable asan
+   set(CMAKE_CXX_FLAGS_DEBUG_ASAN "${CMAKE_CXX_FLAGS_DEBUG_ASAN} /fsanitize=address /Zi")
+   set(CMAKE_CXX_FLAGS_RELEASE_ASAN "${CMAKE_CXX_FLAGS_RELEASE_ASAN} /fsanitize=address /Oy-")
+   set(CMAKE_CXX_FLAGS_SHIPPING_ASAN "${CMAKE_CXX_FLAGS_SHIPPING_ASAN} /fsanitize=address /Oy-")
 ENDIF(MSVC)
-
-# for edit and continue
-set( CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /MP /ZI /GR-")
-set( CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MP /ZI /GR-")
-
-set( CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /MP /Zi /GR-")
-set( CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MP /Zi /GR-")
-
-COPY_BUILD_CONFIG(Debug Debug_Asan)
-COPY_BUILD_CONFIG(Release Shipping)
-COPY_BUILD_CONFIG(Release Release_Asan)
-
-# config shipping preprocessors
-set( CMAKE_C_FLAGS_SHIPPING "${CMAKE_C_FLAGS_SHIPPING} -D SHIPPING_BUILD")
-set( CMAKE_CXX_FLAGS_SHIPPING "${CMAKE_CXX_FLAGS_SHIPPING} -D SHIPPING_BUILD")
-
-COPY_BUILD_CONFIG(Shipping Shipping_Asan)
-
-# enable asan
-set(CMAKE_CXX_FLAGS_DEBUG_ASAN "${CMAKE_CXX_FLAGS_DEBUG_ASAN} /fsanitize=address /Zi")
-set(CMAKE_CXX_FLAGS_RELEASE_ASAN "${CMAKE_CXX_FLAGS_RELEASE_ASAN} /fsanitize=address /Oy-")
-set(CMAKE_CXX_FLAGS_SHIPPING_ASAN "${CMAKE_CXX_FLAGS_SHIPPING_ASAN} /fsanitize=address /Oy-")
 
 set(THIRD_PARTY "${CMAKE_SOURCE_DIR}/ThirdParty")
 
@@ -76,8 +75,8 @@ add_subdirectory( ${THIRD_PARTY}/soloud.cmake )
 
 add_subdirectory(bin2c)
 
-#set(HAVE_LIBC ON CACHE BOOL "" FORCE)
 set(SDL_SHARED OFF CACHE BOOL "" FORCE)
+set(SDL_STATIC ON CACHE BOOL "" FORCE)
 add_subdirectory( ${THIRD_PARTY}/SDL )
 
 add_subdirectory( NoahLib )

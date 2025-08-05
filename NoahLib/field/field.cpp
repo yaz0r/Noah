@@ -31,7 +31,7 @@
 #include "kernel/audio/wds.h"
 #include "kernel/audio/soundInstance.h"
 
-#include "SDL_gamecontroller.h"
+#include "SDL_gamepad.h"
 #include "SDL_keyboard.h"
 
 MATRIX computeProjectionMatrixTempMatrix2;
@@ -2773,7 +2773,7 @@ int isLoadCompleted()
     return 0;
 }
 
-std::array<std::array<s8, 2>, 0x50> musicLookupTable = { { // incomplete
+std::array<std::array<u8, 2>, 0x50> musicLookupTable = { { // incomplete
     {0, 0},
     {1, 0},
     {2, 0},
@@ -8473,8 +8473,11 @@ void renderSpriteSquishedShadow(sSpriteActorCore* pSpriteSheet, sTag* pTag)
             auto uVar9 = psVar4->m14.raw;
             uVar5 = uVar9 & 7;
             if (uVar11 != uVar5) {
+                assert(0);
+                /*
                 unaff_s6 = (ushort)(spriteMatrixTable[uVar5] &
                     (ushort) ((int)&(*pSpriteSheet).m3C>>8)) == 0;
+                    */
                 uVar11 = uVar5;
             }
             if (unaff_s6 != '\0') {
@@ -9058,17 +9061,20 @@ void getInputDuringVsync(void)
     if (!isGameInFocus())
         return;
 
-    static SDL_GameController* controller = nullptr;
+    static SDL_Gamepad* controller = nullptr;
     if (controller == nullptr)
     {
-        for (int i = 0; i < SDL_NumJoysticks(); ++i) {
-            if (SDL_IsGameController(i)) {
-                controller = SDL_GameControllerOpen(i);
-                if (controller) {
-                    break;
-                }
-                else {
-                    fprintf(stderr, "Could not open gamecontroller %i: %s\n", i, SDL_GetError());
+        int num_joysticks;
+        if(SDL_JoystickID *joysticks = SDL_GetJoysticks(&num_joysticks)) {
+            for (int i = 0; i < num_joysticks; ++i) {
+                if (SDL_IsGamepad(i)) {
+                    controller = SDL_OpenGamepad(i);
+                    if (controller) {
+                        break;
+                    }
+                    else {
+                        fprintf(stderr, "Could not open gamecontroller %i: %s\n", i, SDL_GetError());
+                    }
                 }
             }
         }
@@ -9077,18 +9083,18 @@ void getInputDuringVsync(void)
     u16 buttonMask = 0;
     if (controller)
     {
-        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_LEFTSHOULDER) ? controllerButtons::L1 : 0;
-        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER) ? controllerButtons::R1 : 0;
-        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_Y) ? controllerButtons::TRIANGLE : 0;
-        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_B) ? controllerButtons::INTERACT : 0;
-        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_A) ? controllerButtons::CROSS : 0;
-        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_X) ? controllerButtons::JUMP : 0;
-        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_BACK) ? controllerButtons::SELECT : 0;
-        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_START) ? controllerButtons::START : 0;
-        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_UP) ? controllerButtons::UP : 0;
-        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_RIGHT) ? controllerButtons::RIGHT : 0;
-        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_DOWN) ? controllerButtons::DOWN : 0;
-        buttonMask |= SDL_GameControllerGetButton(controller, SDL_CONTROLLER_BUTTON_DPAD_LEFT) ? controllerButtons::LEFT : 0;
+        buttonMask |= SDL_GetGamepadButton(controller, SDL_GAMEPAD_BUTTON_LEFT_SHOULDER) ? controllerButtons::L1 : 0;
+        buttonMask |= SDL_GetGamepadButton(controller, SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER) ? controllerButtons::R1 : 0;
+        buttonMask |= SDL_GetGamepadButton(controller, SDL_GAMEPAD_BUTTON_NORTH) ? controllerButtons::TRIANGLE : 0;
+        buttonMask |= SDL_GetGamepadButton(controller, SDL_GAMEPAD_BUTTON_EAST) ? controllerButtons::INTERACT : 0;
+        buttonMask |= SDL_GetGamepadButton(controller, SDL_GAMEPAD_BUTTON_SOUTH) ? controllerButtons::CROSS : 0;
+        buttonMask |= SDL_GetGamepadButton(controller, SDL_GAMEPAD_BUTTON_WEST) ? controllerButtons::JUMP : 0;
+        buttonMask |= SDL_GetGamepadButton(controller, SDL_GAMEPAD_BUTTON_BACK) ? controllerButtons::SELECT : 0;
+        buttonMask |= SDL_GetGamepadButton(controller, SDL_GAMEPAD_BUTTON_START) ? controllerButtons::START : 0;
+        buttonMask |= SDL_GetGamepadButton(controller, SDL_GAMEPAD_BUTTON_DPAD_UP) ? controllerButtons::UP : 0;
+        buttonMask |= SDL_GetGamepadButton(controller, SDL_GAMEPAD_BUTTON_DPAD_RIGHT) ? controllerButtons::RIGHT : 0;
+        buttonMask |= SDL_GetGamepadButton(controller, SDL_GAMEPAD_BUTTON_DPAD_DOWN) ? controllerButtons::DOWN : 0;
+        buttonMask |= SDL_GetGamepadButton(controller, SDL_GAMEPAD_BUTTON_DPAD_LEFT) ? controllerButtons::LEFT : 0;
 
 
         /*
@@ -9105,9 +9111,9 @@ void getInputDuringVsync(void)
     }
     //else
     {
-        const Uint8* keyState = SDL_GetKeyboardState(NULL);
+        const bool* keyState = SDL_GetKeyboardState(NULL);
 
-        for (int i = 0; i < SDL_NUM_SCANCODES; i++)
+        for (int i = 0; i < SDL_SCANCODE_COUNT; i++)
         {
             if (keyState[i])
             {

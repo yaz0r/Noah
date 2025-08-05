@@ -300,9 +300,9 @@ void fieldViewDebug_step()
 
                 bx::Vec3 translationVector(0, 0, 0);
 
-                const Uint8* keyState = SDL_GetKeyboardState(NULL);
+                const bool* keyState = SDL_GetKeyboardState(NULL);
 
-                for (int i = 0; i < SDL_NUM_SCANCODES; i++)
+                for (int i = 0; i < SDL_SCANCODE_COUNT; i++)
                 {
                     if (keyState[i])
                     {

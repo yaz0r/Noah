@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.9)
 
 include_directories(
     "."
+    "${THIRD_PARTY}/SDL/include/SDL3"
     "${THIRD_PARTY}/SDL/include"
     "${THIRD_PARTY}/imgui"
     "${THIRD_PARTY}/soloud.cmake/soloud/include"
@@ -33,7 +34,7 @@ set(SOURCES
  "${THIRD_PARTY}/imgui/imgui_draw.cpp"
  "${THIRD_PARTY}/imgui/imgui_tables.cpp"
  "${THIRD_PARTY}/imgui/imgui_widgets.cpp"
- "${THIRD_PARTY}/imgui/backends/imgui_impl_sdl2.cpp"
+ "${THIRD_PARTY}/imgui/backends/imgui_impl_sdl3.cpp"
 
  "${THIRD_PARTY}/tinyxml2/tinyxml2.cpp"
  "${THIRD_PARTY}/tinyxml2/tinyxml2.h"
@@ -52,66 +53,31 @@ function(assign_source_group)
     endforeach()
 endfunction(assign_source_group)
 
+macro(addShaderProgramPermutation vsname psname varyingname)
+    bgfx_compile_shaders(SHADERS shaders/${vsname}.sc AS_HEADERS OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/shaders/generated TYPE VERTEX VARYING_DEF ${CMAKE_CURRENT_SOURCE_DIR}/shaders/${varyingname}.sc INCLUDE_DIRS ${BGFX_DIR}/src AS_HEADERS)
+    bgfx_compile_shaders(SHADERS shaders/${psname}.sc AS_HEADERS OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/shaders/generated TYPE FRAGMENT VARYING_DEF ${CMAKE_CURRENT_SOURCE_DIR}/shaders/${varyingname}.sc INCLUDE_DIRS ${BGFX_DIR}/src AS_HEADERS)
+    #shaderc(FILE shaders/${vsname}.sc BIN2C ${vsname}_${api} OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/shaders/generated/${vsname}_${api}.debug.h DEBUG VERTEX ${platform} VARYINGDEF shaders/${varyingname}.sc INCLUDES ${BGFX_DIR}/src PROFILE ${profileVS})
+    #shaderc(FILE shaders/${psname}.sc BIN2C ${psname}_${api} OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/shaders/generated/${psname}_${api}.debug.h DEBUG FRAGMENT ${platform} VARYINGDEF shaders/${varyingname}.sc INCLUDES ${BGFX_DIR}/src PROFILE ${profilePS})
+    #set(SOURCES
+     #   ${SOURCES}
+    #    ${CMAKE_CURRENT_SOURCE_DIR}/shaders/generated/${vsname}_${api}.h
+     #   ${CMAKE_CURRENT_SOURCE_DIR}/shaders/generated/${psname}_${api}.h
+        #${CMAKE_CURRENT_SOURCE_DIR}/shaders/generated/${vsname}_${api}.debug.h
+        #${CMAKE_CURRENT_SOURCE_DIR}/shaders/generated/${psname}_${api}.debug.h
+    #)
+endmacro()
+
 macro(addShaderProgram vsname psname varyingname)
 
-set(SOURCES
-    ${SOURCES}
-    shaders/${vsname}.sc
-    shaders/${psname}.sc
-    shaders/${varyingname}.sc
-)
-
-bgfx_compile_shaders(FILE shaders/${vsname}.sc OUTPUT ${THIRD_PARTY}/../data/shaders/generated/${vsname}.glsl.bin VERTEX WINDOWS VARYINGDEF shaders/${varyingname}.sc INCLUDES ${BGFX_DIR}/src PROFILE 430)
-bgfx_compile_shaders(FILE shaders/${psname}.sc OUTPUT ${THIRD_PARTY}/../data/shaders/generated/${psname}.glsl.bin FRAGMENT WINDOWS VARYINGDEF shaders/${varyingname}.sc INCLUDES ${BGFX_DIR}/src PROFILE 430)
-
-set(SOURCES
-    ${SOURCES}
-    ${THIRD_PARTY}/../data/shaders/generated/${vsname}.glsl.bin
-    ${THIRD_PARTY}/../data/shaders/generated/${psname}.glsl.bin
-)
-
-IF(${CMAKE_SYSTEM_NAME} MATCHES iOS|tvOS)
-    bgfx_compile_shaders(FILE shaders/${vsname}.sc OUTPUT ${THIRD_PARTY}/../data/shaders/generated/${vsname}.metal.bin VERTEX IOS VARYINGDEF shaders/${varyingname}.sc INCLUDES ${BGFX_DIR}/src PROFILE metal)
-    bgfx_compile_shaders(FILE shaders/${psname}.sc OUTPUT ${THIRD_PARTY}/../data/shaders/generated/${psname}.metal.bin FRAGMENT IOS VARYINGDEF shaders/${varyingname}.sc INCLUDES ${BGFX_DIR}/src PROFILE metal)
     set(SOURCES
         ${SOURCES}
-        ${THIRD_PARTY}/../data/shaders/generated/${vsname}.metal.bin
-        ${THIRD_PARTY}/../data/shaders/generated/${psname}.metal.bin
-    )
-endif()
-
-IF(${CMAKE_SYSTEM_NAME} MATCHES Darwin)
-    bgfx_compile_shaders(FILE shaders/${vsname}.sc OUTPUT ${THIRD_PARTY}/../data/shaders/generated/${vsname}.metal.bin VERTEX OSX VARYINGDEF shaders/${varyingname}.sc INCLUDES ${BGFX_DIR}/src PROFILE metal)
-    bgfx_compile_shaders(FILE shaders/${psname}.sc OUTPUT ${THIRD_PARTY}/../data/shaders/generated/${psname}.metal.bin FRAGMENT OSX VARYINGDEF shaders/${varyingname}.sc INCLUDES ${BGFX_DIR}/src PROFILE metal)
-    set(SOURCES
-        ${SOURCES}
-        ${THIRD_PARTY}/../data/shaders/generated/${vsname}.metal.bin
-        ${THIRD_PARTY}/../data/shaders/generated/${psname}.metal.bin
-    )
-endif()
-
-IF(${CMAKE_SYSTEM_NAME} MATCHES Windows)
-    bgfx_compile_shaders(FILE shaders/${vsname}.sc OUTPUT ${THIRD_PARTY}/../data/shaders/generated/${vsname}.dx11.bin VERTEX WINDOWS VARYINGDEF shaders/${varyingname}.sc INCLUDES ${BGFX_DIR}/src PROFILE vs_5_0)
-    bgfx_compile_shaders(FILE shaders/${psname}.sc OUTPUT ${THIRD_PARTY}/../data/shaders/generated/${psname}.dx11.bin FRAGMENT WINDOWS VARYINGDEF shaders/${varyingname}.sc INCLUDES ${BGFX_DIR}/src PROFILE ps_5_0)
-    bgfx_compile_shaders(FILE shaders/${vsname}.sc OUTPUT ${THIRD_PARTY}/../data/shaders/generated/${vsname}.dx11.debug.bin DEBUG VERTEX WINDOWS VARYINGDEF shaders/${varyingname}.sc INCLUDES ${BGFX_DIR}/src PROFILE vs_5_0)
-    bgfx_compile_shaders(FILE shaders/${psname}.sc OUTPUT ${THIRD_PARTY}/../data/shaders/generated/${psname}.dx11.debug.bin DEBUG FRAGMENT WINDOWS VARYINGDEF shaders/${varyingname}.sc INCLUDES ${BGFX_DIR}/src PROFILE ps_5_0)
-    set(SOURCES
-        ${SOURCES}
-        ${THIRD_PARTY}/../data/shaders/generated/${vsname}.dx11.bin
-        ${THIRD_PARTY}/../data/shaders/generated/${psname}.dx11.bin
-        ${THIRD_PARTY}/../data/shaders/generated/${vsname}.dx11.debug.bin
-        ${THIRD_PARTY}/../data/shaders/generated/${psname}.dx11.debug.bin
+        shaders/${vsname}.sc
+        shaders/${psname}.sc
+        shaders/${varyingname}.sc
     )
 
-    
-    bgfx_compile_shaders(FILE shaders/${vsname}.sc OUTPUT ${THIRD_PARTY}/../data/shaders/generated/${vsname}.spirv.bin VERTEX LINUX VARYINGDEF shaders/${varyingname}.sc INCLUDES ${BGFX_DIR}/src PROFILE spirv)
-    bgfx_compile_shaders(FILE shaders/${psname}.sc OUTPUT ${THIRD_PARTY}/../data/shaders/generated/${psname}.spirv.bin FRAGMENT LINUX VARYINGDEF shaders/${varyingname}.sc INCLUDES ${BGFX_DIR}/src PROFILE spirv)
-    set(SOURCES
-        ${SOURCES}
-        ${THIRD_PARTY}/../data/shaders/generated/${vsname}.spirv.bin
-        ${THIRD_PARTY}/../data/shaders/generated/${psname}.spirv.bin
-    )
-endif()
+    addShaderProgramPermutation(${vsname} ${psname} ${varyingname})
+    addShaderProgramPermutation(${vsname} ${psname} ${varyingname})
 
 endmacro()
 

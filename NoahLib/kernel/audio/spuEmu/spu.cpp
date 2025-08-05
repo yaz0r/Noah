@@ -14,6 +14,7 @@
 //#include "cpu/psx/psx.h"
 //#include "corestr.h"
 
+#include <cstring>
 #include <vector>
 #include <algorithm>
 #include "assert.h"
