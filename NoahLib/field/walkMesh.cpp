@@ -90,31 +90,7 @@ bgfx::ShaderHandle loadBgfxShader(const std::string& filename)
     return handle;
 }
 
-bgfx::ProgramHandle loadBgfxProgram(const std::string& VSFile, const std::string& PSFile)
-{
-    std::string shaderFileExtension = "";
-    switch (bgfx::getRendererType())
-    {
-    case bgfx::RendererType::Direct3D11:
-    case bgfx::RendererType::Direct3D12: shaderFileExtension = ".dx11.debug.bin";  break;
-    //case bgfx::RendererType::Direct3D12: shaderFileExtension = ".dx11.bin";  break;
-    case bgfx::RendererType::OpenGL:     shaderFileExtension = ".glsl.bin";  break;
-    case bgfx::RendererType::Metal:      shaderFileExtension = ".metal.bin";  break;
-    case bgfx::RendererType::Vulkan:     shaderFileExtension = ".spirv.bin";  break;
-    default:
-        assert(0);
-    }
-
-    bgfx::ShaderHandle vsh = loadBgfxShader(std::string("shaders/generated/") + VSFile + shaderFileExtension);
-    bgfx::ShaderHandle psh = loadBgfxShader(std::string("shaders/generated/") + PSFile + shaderFileExtension);
-
-    assert(bgfx::isValid(vsh));
-    assert(bgfx::isValid(psh));
-
-    bgfx::ProgramHandle ProgramHandle = bgfx::createProgram(vsh, psh, true /* destroy shaders when program is destroyed */);
-    assert(bgfx::isValid(ProgramHandle));
-    return ProgramHandle;
-}
+bgfx::ProgramHandle loadBgfxProgram(const std::string& VSFile, const std::string& PSFile);
 
 bgfx::ProgramHandle getLineShader()
 {
