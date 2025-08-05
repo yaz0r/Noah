@@ -117,8 +117,8 @@ u32 get_tw(RECT* param_1)
 void SetDrawMode(DR_MODE* p, int dfe, int dtd, int tpage, RECT* tw)
 {
 	p->m3_size = 2;
-	p->code[0] = get_mode(dfe, dtd, tpage & 0xffff);
-	p->code[1] = get_tw(tw);
+	p->m_rawCode = get_mode(dfe, dtd, tpage & 0xffff);
+	p->drModeCode = get_tw(tw);
 }
 
 bgfx::FrameBufferHandle PSXOutput_FB = BGFX_INVALID_HANDLE;
@@ -277,15 +277,15 @@ void SPRT::execute()
 			pVertices[i].CLUT[0] = clut & 0x3F;
 			pVertices[i].CLUT[1] = (clut >> 6) & 0x1FF;
 
-			assert(((gCurrentDrawMode.code[0] >> 24) & 0xFF) == 0xE1);
-			pVertices[i].Texpage[0] = gCurrentDrawMode.code[0] & 0xFF;
-			pVertices[i].Texpage[1] = (gCurrentDrawMode.code[0] >> 8) & 0xFF;
-			pVertices[i].Texpage[2] = (gCurrentDrawMode.code[0] >> 16) & 0xFF;
+			assert(gCurrentDrawMode.code == 0xE1);
+            pVertices[i].Texpage[0] = gCurrentDrawMode.r0;
+			pVertices[i].Texpage[1] = gCurrentDrawMode.g0;
+			pVertices[i].Texpage[2] = gCurrentDrawMode.b0;
 			pVertices[i].Texpage[3] = 0xE1;
 
-			pVertices[i].TextureWindow[0] = gCurrentDrawMode.code[1] & 0xFF;
-			pVertices[i].TextureWindow[1] = (gCurrentDrawMode.code[1] >> 8) & 0xFF;
-			pVertices[i].TextureWindow[2] = (gCurrentDrawMode.code[1] >> 16) & 0xFF;
+            pVertices[i].TextureWindow[0] = gCurrentDrawMode.drModeCode & 0xFF;
+			pVertices[i].TextureWindow[1] = (gCurrentDrawMode.drModeCode >> 8) & 0xFF;
+			pVertices[i].TextureWindow[2] = (gCurrentDrawMode.drModeCode >> 16) & 0xFF;
 			pVertices[i].TextureWindow[3] = 0;
 		}
 
@@ -336,7 +336,7 @@ void SPRT::execute()
 			| BGFX_STATE_MSAA
 			| BGFX_STATE_PT_TRISTRIP;
 
-		u32 blendRGBA = getBlending(code, gCurrentDrawMode.code[0], State);
+		u32 blendRGBA = getBlending(code, gCurrentDrawMode.m_rawCode, State);
 
 		bgfx::setState(State, blendRGBA);
 
@@ -404,7 +404,7 @@ void POLY_G3::execute()
             | BGFX_STATE_MSAA
             | BGFX_STATE_PT_TRISTRIP;
 
-        u32 blendRGBA = getBlending(code, gCurrentDrawMode.code[0], State);
+        u32 blendRGBA = getBlending(code, gCurrentDrawMode.m_rawCode, State);
 
         bgfx::setState(State, blendRGBA);
 
@@ -479,7 +479,7 @@ void POLY_G4::execute()
             | BGFX_STATE_MSAA
             | BGFX_STATE_PT_TRISTRIP;
 
-        u32 blendRGBA = getBlending(code, gCurrentDrawMode.code[0], State);
+        u32 blendRGBA = getBlending(code, gCurrentDrawMode.m_rawCode, State);
 
         bgfx::setState(State, blendRGBA);
 
@@ -545,7 +545,7 @@ void TILE::execute()
 			| BGFX_STATE_MSAA
 			| BGFX_STATE_PT_TRISTRIP;
 
-		u32 blendRGBA = getBlending(code, gCurrentDrawMode.code[0], State);
+		u32 blendRGBA = getBlending(code, gCurrentDrawMode.m_rawCode, State);
 
 		bgfx::setState(State, blendRGBA);
 
@@ -606,7 +606,7 @@ void POLY_F3::execute()
             | BGFX_STATE_MSAA
             | BGFX_STATE_PT_TRISTRIP;
 
-        u32 blendRGBA = getBlending(code, gCurrentDrawMode.code[0], State);
+        u32 blendRGBA = getBlending(code, gCurrentDrawMode.m_rawCode, State);
 
         bgfx::setState(State, blendRGBA);
 
@@ -667,7 +667,7 @@ void LINE_F3::execute()
             | BGFX_STATE_MSAA
             | BGFX_STATE_PT_LINESTRIP;
 
-        u32 blendRGBA = getBlending(code, gCurrentDrawMode.code[0], State);
+        u32 blendRGBA = getBlending(code, gCurrentDrawMode.m_rawCode, State);
 
         bgfx::setState(State, blendRGBA);
 
@@ -733,7 +733,7 @@ void POLY_F4::execute()
             | BGFX_STATE_MSAA
             | BGFX_STATE_PT_TRISTRIP;
 
-        u32 blendRGBA = getBlending(code, gCurrentDrawMode.code[0], State);
+        u32 blendRGBA = getBlending(code, gCurrentDrawMode.m_rawCode, State);
 
         bgfx::setState(State, blendRGBA);
 
@@ -1161,7 +1161,7 @@ u32 currentTpage = 0;
 
 void DR_TPAGE::execute()
 {
-    currentTpage = code[0];
+    currentTpage = m_rawCode;
 }
 
 void SPRT_8::execute()
@@ -1190,9 +1190,9 @@ void SPRT_8::execute()
             pVertices[i].Texpage[2] = (currentTpage >> 16) & 0xFF;
             pVertices[i].Texpage[3] = 0xE1;
 
-            pVertices[i].TextureWindow[0] = gCurrentDrawMode.code[1] & 0xFF;
-            pVertices[i].TextureWindow[1] = (gCurrentDrawMode.code[1] >> 8) & 0xFF;
-            pVertices[i].TextureWindow[2] = (gCurrentDrawMode.code[1] >> 16) & 0xFF;
+            pVertices[i].TextureWindow[0] = gCurrentDrawMode.drModeCode & 0xFF;
+            pVertices[i].TextureWindow[1] = (gCurrentDrawMode.drModeCode >> 8) & 0xFF;
+            pVertices[i].TextureWindow[2] = (gCurrentDrawMode.drModeCode >> 16) & 0xFF;
             pVertices[i].TextureWindow[3] = 0;
         }
 
@@ -1246,7 +1246,7 @@ void SPRT_8::execute()
             | BGFX_STATE_MSAA
             | BGFX_STATE_PT_TRISTRIP;
 
-        u32 blendRGBA = getBlending(code, gCurrentDrawMode.code[0], State);
+        u32 blendRGBA = getBlending(code, gCurrentDrawMode.m_rawCode, State);
 
         bgfx::setState(State, blendRGBA);
 

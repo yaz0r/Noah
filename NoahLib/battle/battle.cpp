@@ -7078,7 +7078,7 @@ void battleSpriteEffect_5_draw(sTaskHeader* param_1) {
                     shapeTransfertTableCurrentEntry += sizeof(DR_TPAGE);
 
                     pDestRdTPage->m3_size = 1;
-                    pDestRdTPage->code[0] = (transparency - 1 & 3) << 5 | 0xe1000000;
+                    pDestRdTPage->m_rawCode = (transparency - 1 & 3) << 5 | 0xe1000000;
                     AddPrim(&(*characterRenderingOT)[otDepth], pDestRdTPage);
                 }
             }
