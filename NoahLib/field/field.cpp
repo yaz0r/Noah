@@ -8473,11 +8473,7 @@ void renderSpriteSquishedShadow(sSpriteActorCore* pSpriteSheet, sTag* pTag)
             auto uVar9 = psVar4->m14.raw;
             uVar5 = uVar9 & 7;
             if (uVar11 != uVar5) {
-                assert(0);
-                /*
-                unaff_s6 = (ushort)(spriteMatrixTable[uVar5] &
-                    (ushort) ((int)&(*pSpriteSheet).m3C>>8)) == 0;
-                    */
+                unaff_s6 = (ushort)(spriteMatrixTable[uVar5] & (pSpriteSheet->m3C >> 8)) == 0;
                 uVar11 = uVar5;
             }
             if (unaff_s6 != '\0') {

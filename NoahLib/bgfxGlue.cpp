@@ -57,22 +57,22 @@ void StartFrame()
     {
         bgfx::reset(outputResolution[0], outputResolution[1]);
     }
-/*
+
     SDL_Event event;
     while (SDL_PollEvent(&event))
     {
-        ImGui_ImplSDL2_ProcessEvent(&event);
+        ImGui_ImplSDL3_ProcessEvent(&event);
 
         switch (event.type)
         {
-        case SDL_QUIT:
+        case SDL_EVENT_QUIT:
             gCloseApp = true;
             break;
         default:
             break;
         }
     }
-*/
+
     // Pull the input from SDL2 instead
     ImGui_ImplSDL3_NewFrame();
     imguiBeginFrame(0, 0, 0, 0, outputResolution[0], outputResolution[1], -1);
@@ -156,7 +156,7 @@ void createBgfxInitParams()
     initparam.platformData.nwh = cbSetupMetalLayer((void*)SDL_GetPointerProperty(SDL_GetWindowProperties(gWindowBGFX), SDL_PROP_WINDOW_COCOA_WINDOW_POINTER, NULL));
 #elif BX_PLATFORM_WINDOWS
     initparam.platformData.ndt = NULL;
-    initparam.platformData.nwh = (HWND)SDL_GetPointerProperty(SDL_GetWindowProperties(gWindowBGFX), SDL_PROP_WINDOW_WIN32_HWND_POINTER, NULL);
+    initparam.platformData.nwh = (void*)SDL_GetPointerProperty(SDL_GetWindowProperties(gWindowBGFX), SDL_PROP_WINDOW_WIN32_HWND_POINTER, NULL);
 #endif // BX_PLATFORM_
 }
 

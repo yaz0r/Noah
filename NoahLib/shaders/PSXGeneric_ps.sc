@@ -12,7 +12,7 @@ int readU8FromPDXVram(int x, int y)
 
 int readU4FromPDXVram(int x, int y)
 {
-    uvec4 texel = texelFetch(s_PSXVram, ivec2(x/2,y), 0);
+    uvec4 texel = texelFetch(s_PSXVram, ivec2(int(uint(x)/uint(2)),y), 0);
 
     if(bool(x & 1))
     {
@@ -119,8 +119,8 @@ void main()
         ivec4 textureWindow = getTextureWindow(v_textureWindow.x | (v_textureWindow.y << 8) | (v_textureWindow.z << 16) | (v_textureWindow.w << 24));
 
         ivec2 texcoordInPage = ivec2(v_texcoord0.xy);
-        texcoordInPage.x = (texcoordInPage.x % textureWindow.w) + textureWindow.x;
-        texcoordInPage.y = (texcoordInPage.y % textureWindow.z) + textureWindow.y;
+        texcoordInPage.x = int((uint(texcoordInPage.x) % uint(textureWindow.w)) + uint(textureWindow.x));
+        texcoordInPage.y = int((uint(texcoordInPage.y) % uint(textureWindow.z)) + uint(textureWindow.y));
 
         if(!gl_FrontFacing)
         {
