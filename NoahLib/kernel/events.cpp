@@ -1,5 +1,6 @@
 #include "noahLib.h"
 #include "events.h"
+#include <thread>
 
 enum event_class {
     EVENT_VBLANK = 0xf0000001,  // IRQ0
@@ -37,7 +38,7 @@ struct sEventState {
     eventFunc m_function = nullptr;
 };
 
-std::vector<sEventState> g_Events(10, {});
+std::vector<sEventState> g_Events(10, sEventState());
 
 sEventState* getEventForDesc(u32 desc) {
     for (int i = 0; i < g_Events.size(); i++) {

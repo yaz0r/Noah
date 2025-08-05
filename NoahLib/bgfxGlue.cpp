@@ -1,8 +1,7 @@
 #include <SDL.h>
-#include <SDL_syswm.h>
 #include <bgfx/bgfx.h>
 #include <bx/platform.h>
-#include <backends/imgui_impl_sdl2.h>
+#include <backends/imgui_impl_sdl3.h>
 #include "imguiBGFX.h"
 
 #include "noahLib.h"
@@ -62,11 +61,11 @@ void StartFrame()
     SDL_Event event;
     while (SDL_PollEvent(&event))
     {
-        ImGui_ImplSDL2_ProcessEvent(&event);
+        ImGui_ImplSDL3_ProcessEvent(&event);
 
         switch (event.type)
         {
-        case SDL_QUIT:
+        case SDL_EVENT_QUIT:
             gCloseApp = true;
             break;
         default:
@@ -75,7 +74,7 @@ void StartFrame()
     }
 
     // Pull the input from SDL2 instead
-    ImGui_ImplSDL2_NewFrame();
+    ImGui_ImplSDL3_NewFrame();
     imguiBeginFrame(0, 0, 0, 0, outputResolution[0], outputResolution[1], -1);
 
     if (ImGui::BeginMainMenuBar())
@@ -137,16 +136,40 @@ void EndFrame()
     }
 }
 
+bgfx::Init initparam;
+
+void createBgfxInitParams()
+{
+#if BX_PLATFORM_LINUX
+    if (SDL_strcmp(SDL_GetCurrentVideoDriver(), "x11") == 0)
+    {
+        initparam.platformData.ndt = (void*)SDL_GetPointerProperty(SDL_GetWindowProperties(gWindowBGFX), SDL_PROP_WINDOW_X11_DISPLAY_POINTER, NULL);
+        initparam.platformData.nwh = (void*)SDL_GetNumberProperty(SDL_GetWindowProperties(gWindowBGFX), SDL_PROP_WINDOW_X11_WINDOW_NUMBER, 0);
+    }
+    else if (SDL_strcmp(SDL_GetCurrentVideoDriver(), "wayland") == 0)
+    {
+        initparam.platformData.ndt = (void*)SDL_GetPointerProperty(SDL_GetWindowProperties(gWindowBGFX), SDL_PROP_WINDOW_WAYLAND_DISPLAY_POINTER, NULL);
+        initparam.platformData.nwh = (void*)SDL_GetPointerProperty(SDL_GetWindowProperties(gWindowBGFX), SDL_PROP_WINDOW_WAYLAND_SURFACE_POINTER, NULL);
+    }
+#elif BX_PLATFORM_OSX
+    initparam.platformData.ndt = NULL;
+    initparam.platformData.nwh = cbSetupMetalLayer((void*)SDL_GetPointerProperty(SDL_GetWindowProperties(gWindowBGFX), SDL_PROP_WINDOW_COCOA_WINDOW_POINTER, NULL));
+#elif BX_PLATFORM_WINDOWS
+    initparam.platformData.ndt = NULL;
+    initparam.platformData.nwh = (void*)SDL_GetPointerProperty(SDL_GetWindowProperties(gWindowBGFX), SDL_PROP_WINDOW_WIN32_HWND_POINTER, NULL);
+#endif // BX_PLATFORM_
+}
+
 int initBgfxGlue(int argc, char* argv[])
 {
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_JOYSTICK) != 0)
+    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK))
     {
         assert(false);
     }
 
     u32 flags = 0;
     flags |= SDL_WINDOW_RESIZABLE;
-    flags |= SDL_WINDOW_ALLOW_HIGHDPI;
+    flags |= SDL_WINDOW_HIGH_PIXEL_DENSITY;
 
 #ifdef __IPHONEOS__
     flags |= SDL_WINDOW_FULLSCREEN;
@@ -154,40 +177,39 @@ int initBgfxGlue(int argc, char* argv[])
 
     int resolution[2] = { 1280, 960 };
 
-    gWindowBGFX = SDL_CreateWindow("Noah", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, resolution[0], resolution[1], flags);
+    gWindowBGFX = SDL_CreateWindow("Noah",  resolution[0], resolution[1], flags);
 
-    SDL_SysWMinfo wmi;
-    SDL_VERSION(&wmi.version);
-    if (!SDL_GetWindowWMInfo(gWindowBGFX, &wmi)) {
-        return false;
-    }
-
-    bgfx::Init initparam;
-#if defined(SDL_VIDEO_DRIVER_X11)
-    initparam.platformData.ndt = wmi.info.x11.display;
-    initparam.platformData.nwh = (void*)(uintptr_t)wmi.info.x11.window;
-#elif BX_PLATFORM_OSX
-    initparam.platformData.ndt = NULL;
-    initparam.platformData.nwh = cbSetupMetalLayer(wmi.info.cocoa.window);
-#elif BX_PLATFORM_WINDOWS
-    initparam.platformData.ndt = NULL;
-    initparam.platformData.nwh = wmi.info.win.window;
-#elif BX_PLATFORM_STEAMLINK
-    initparam.platformData.ndt = wmi.info.vivante.display;
-    initparam.platformData.nwh = wmi.info.vivante.window;
-#endif // BX_PLATFORM_
-
+    createBgfxInitParams();
     //initparam.type = bgfx::RendererType::OpenGL;
     //initparam.type = bgfx::RendererType::Vulkan;
+    //initparam.type = bgfx::RendererType::Direct3D12;
+#if BX_CONFIG_DEBUG
+    initparam.debug = true;
+#endif
     bgfx::init(initparam);
 
     imguiCreate();
 
     ImGuiIO& io = ImGui::GetIO();
     //io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-
-    ImGui_ImplSDL2_InitForMetal(gWindowBGFX);
-    //ImGui_ImplSDL2_InitForD3D(gWindowBGFX);
+    if ((bgfx::getRendererType() == bgfx::RendererType::Direct3D11) || (bgfx::getRendererType() == bgfx::RendererType::Direct3D12)) {
+        ImGui_ImplSDL3_InitForD3D(gWindowBGFX);
+    }
+    else
+    if (bgfx::getRendererType() == bgfx::RendererType::Metal) {
+        ImGui_ImplSDL3_InitForMetal(gWindowBGFX);
+    }
+    else
+    if (bgfx::getRendererType() == bgfx::RendererType::OpenGL) {
+        ImGui_ImplSDL3_InitForOpenGL(gWindowBGFX, SDL_GL_GetCurrentContext());
+    }
+    else
+    if (bgfx::getRendererType() == bgfx::RendererType::Vulkan) {
+        ImGui_ImplSDL3_InitForVulkan(gWindowBGFX);
+    }
+    else {
+        ImGui_ImplSDL3_InitForOther(gWindowBGFX);
+    }
 
     return true;
 }

@@ -2,7 +2,7 @@
 // copyright-holders:pSXAuthor, R. Belmont
 //#include "emu.h"
 #include "spureverb.h"
-
+#include <cstring>
 //
 //
 //

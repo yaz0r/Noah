@@ -6,7 +6,7 @@
 	url = https://github.com/libsdl-org/SDL.git
 [submodule "ThirdParty/soloud.cmake/soloud"]
 	path = ThirdParty/soloud.cmake/soloud
-	url = https://github.com/jarikomppa/soloud.git
+	url = https://github.com/yaz0r/soloud.git
 [submodule "ThirdParty/imgui"]
 	path = ThirdParty/imgui
 	url = https://github.com/ocornut/imgui.git

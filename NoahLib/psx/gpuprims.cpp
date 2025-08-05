@@ -4,7 +4,7 @@
 DR_MODE gCurrentDrawMode;
 
 void sTag::execute() {
-    sColorAndCode colorAndCode = *(sColorAndCode*)(((u8*)this) + sizeof(sTag));
+    sColorAndCode& colorAndCode = m_colorAndCode;
 
     u8 code = colorAndCode.m3_code;
     if (m3_size == 0) {
@@ -254,5 +254,5 @@ void SetDrawTPage(DR_TPAGE* p, int dfe, int dtd, int tpage) {
     if (dfe != 0) {
         uVar1 |= 0x400;
     }
-    p->code[0] = uVar2 | uVar1;
+    p->m_rawCode = uVar2 | uVar1;
 }

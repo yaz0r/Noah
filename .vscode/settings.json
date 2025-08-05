@@ -1,0 +1,5 @@
+{
+    "cmake.debugConfig": {
+        "cwd": "${workspaceFolder}/data"
+    }
+}

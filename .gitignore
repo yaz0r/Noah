@@ -5,3 +5,4 @@
 /build
 *.generated.h
 *.rdc
+NoahLib/shaders/generated
