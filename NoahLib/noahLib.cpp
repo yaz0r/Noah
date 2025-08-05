@@ -16,6 +16,7 @@
 #include "kernel/audio/soundSystem.h"
 #include "kernel/audio/wds.h"
 #include "kernel/audio/spu.h"
+#include "validation/validation.h"
 
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
@@ -29,12 +30,22 @@ void _bu_init();
 sWdsFile* wdsFile3 = nullptr;
 sWdsFile* wdsFile5 = nullptr;
 
+#ifdef WIN32 && DEBUG
+bool enableValidation = true;
+#else
+bool enableValidation = false
+#endif
+
 bool noahInit(int argc, char* argv[])
 {
     initBgfxGlue(argc, argv);
     c_isoManager::init();
 
     noahFrame_start();
+
+    if (enableValidation) {
+        validationInit();
+    }
 
     //////////////////////////////////////////////////////////////////////////
     // start the original code
