@@ -1,9 +1,7 @@
 #pragma once
 
 #ifdef WIN32
-#pragma comment (lib, "Ws2_32.lib")
-#include <WinSock2.h>
-typedef SOCKET hSocket;
+typedef uintptr_t hSocket;
 #else
 #error No socket implementation
 #endif
