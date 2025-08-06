@@ -174,6 +174,17 @@ void GDBConnection::setBreakpoint(u64 address, int length) {
     sendAck(m_socket);
 }
 
+void GDBConnection::removeBreakpoint(u64 address, int length) {
+    std::string packet = createPacket(std::format("z0,{:X},{}", address, length));
+    std::string receivedPacket = sendReceivePackage(m_socket, packet);
+
+    auto receivedData = parsePacket(receivedPacket);
+    if (!receivedData.has_value())
+        return;
+
+    sendAck(m_socket);
+}
+
 std::string flipStringEndianess(const std::string& string) {
     std::string resultString;
     for (int j = 6; j >= 0; j -= 2) {
@@ -287,6 +298,10 @@ u32 GDBConnection::resumeExecution() {
     //sendAck(m_socket);
 
     while (true) {
+        if (receivedData.value_or("") == "T05")
+        {
+            break;
+        }
         std::string receivedPacket = sendReceivePackage(m_socket, createPacket(""));
         auto receivedData = parsePacket(receivedPacket);
         sendAck(m_socket);
@@ -298,9 +313,22 @@ u32 GDBConnection::resumeExecution() {
         //else
         //    assert(receivedData.value_or("") == "S00");
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 
     // Return current PC
     return getRegister(37);
+}
+
+void GDBConnection::executeUntilAddress(u32 address) {
+    setBreakpoint(address);
+    u32 PC = resumeExecution();
+    assert(PC == address);
+    removeBreakpoint(address);
+}
+
+u16 GDBConnection::readU16(u64 address) {
+    std::vector<u8> data = readMemory(address, 2);
+    return (*(u16*)data.data());
+    return _byteswap_ushort(*(u16*)data.data());
 }

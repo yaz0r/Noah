@@ -10,12 +10,17 @@ public:
     std::vector<u8> readMemory(u64 address, size_t size);
     bool writeMemory(u64 address, const void* buffer, size_t size);
 
+    u16 readU16(u64 address);
+
     void sendMonitorCommand(const std::string& command);
     void resetTarget();
     void setBreakpoint(u64 address, int length = 4);
+    void removeBreakpoint(u64 address, int length = 4);
 
     u32 pauseExecution();
     u32 resumeExecution();
+    void executeUntilAddress(u32 address);
+    void stepOut();
 
     struct sRegs {
         union {
@@ -63,6 +68,14 @@ public:
             };
         };
     };
+
+    enum REG_Names {
+        V0 = 2,
+        A0 = 4,
+        RA = 31,
+        PC = 37,
+    };
+
     void getRegisters(sRegs& outputRegs);
     u32 getRegister(int index);
     void setRegister(int index, u32 value);

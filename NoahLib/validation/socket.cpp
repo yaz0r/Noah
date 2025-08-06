@@ -1,5 +1,7 @@
 #include "noahLib.h"
 #include "socket.h"
+#pragma comment (lib, "Ws2_32.lib")
+#include <WinSock2.h>
 
 bool openSocket(hSocket& socket, const std::string& address, u16 port) {
 #ifdef WIN32
