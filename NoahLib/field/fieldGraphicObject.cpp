@@ -1669,6 +1669,10 @@ std::span<u8>::iterator popPointerFromAnimationStack(sSpriteActorCore* param_1)
     return param_1->m8E_stack[param_1->m8C_stackPosition++].asPs1Pointer;
 }
 
+#define SPRITE_VM_NAME executeSpriteBytecode2_field
+#include "kernel/spriteVM.h"
+#undef SPRITE_VM_NAME
+
 void executeSpriteBytecode2_battle(sSpriteActorCore* param_1);
 
 void executeSpriteBytecode2(sSpriteActorCore* param_1)
@@ -1678,7 +1682,7 @@ void executeSpriteBytecode2(sSpriteActorCore* param_1)
         return;
     }
 
-#include "kernel/spriteVM.h"
+    executeSpriteBytecode2_field(param_1);
 }
 
 void OP_INIT_ENTITY_SCRIPT_sub0Sub9(sSpriteActorCore* param_1)

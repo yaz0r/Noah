@@ -7457,10 +7457,10 @@ int getBattleSlotLayout(int index) {
     return battleSlotLayout[battleVisualEntities[index].m0_positionSlot + 0x18][0];
 }
 
-void executeSpriteBytecode2_battle(sSpriteActorCore* param_1) {
 #define IMPLEMENT_BATTLE_SPECIFIC_CASES
+#define SPRITE_VM_NAME executeSpriteBytecode2_battle
 #include "kernel/spriteVM.h"
-}
+#undef SPRITE_VM_NAME
 
 void setCurrentDir_20_0(void)
 {
