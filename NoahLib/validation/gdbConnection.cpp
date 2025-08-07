@@ -5,6 +5,8 @@
 #include <thread>  // For std::this_thread::sleep_for
 #include <chrono>  // For std::chrono::seconds, milliseconds, etc.
 
+#include "sharedmem.h"
+
 u8 calculateChecksum(const std::string& data) {
     u64 checksum = 0;
     for (const auto& c : data)
@@ -75,12 +77,42 @@ std::string sendReceivePackage(const hSocket& socket, const std::string& packet)
     return buffer;
 }
 
+static int fromHexChar(char c) {
+    if ((c >= '0') && (c <= '9')) return c - '0';
+    if ((c >= 'A') && (c <= 'F')) return c + 10 - 'A';
+    if ((c >= 'a') && (c <= 'f')) return c + 10 - 'a';
+    return -1;
+}
+
+std::string decodeEscapedString(const std::string& input) {
+    assert(input[0] == 'O');
+    std::string::const_iterator it = input.begin() + 1;
+    std::string decodedString;
+    decodedString.reserve((input.length() - 1) / 2);
+    while (it != input.end()) {
+        decodedString.push_back((fromHexChar(it[0]) << 4) | fromHexChar(it[1]));
+
+        it+=2;
+    }
+
+    return decodedString;
+}
+
 bool GDBConnection::openConnection(const std::string& server, u16 port) {
     if (!openSocket(m_socket, server, port))
         return false;
 
     sendReceivePackage(m_socket, createPacket("!"));
     sendReceivePackage(m_socket, createPacket("Hg0"));
+
+    std::string sharedmem = decodeEscapedString(sendMonitorCommand("sharedmem wram"));
+    if (sharedmem.length()) {
+        m_wramSharedMemory = new SharedMem();
+        if (!m_wramSharedMemory->init(sharedmem.c_str(), 0x00800000, false)) {
+            delete m_wramSharedMemory;
+            m_wramSharedMemory = nullptr;
+        }
+    }
 
     return true;
 }
@@ -145,22 +177,32 @@ std::vector<u8> decodeMemoryResponse(const std::string& response) {
 }
 
 std::vector<u8> GDBConnection::readMemory(u64 address, size_t size) {
-    std::string packet = createPacket(std::format("m{:X},{:X}", address, size));
+    if (m_wramSharedMemory) {
+        u8* pPtrBase = m_wramSharedMemory->getPtr();
+        pPtrBase += address & 0x007FFFFF;
+        std::vector<u8> data;
+        data.resize(size);
+        memcpy(data.data(), pPtrBase, size);
+        return data;
+    }
+    else {
+        std::string packet = createPacket(std::format("m{:X},{:X}", address, size));
 
-    std::string receivedPacket = sendReceivePackage(m_socket, packet);
+        std::string receivedPacket = sendReceivePackage(m_socket, packet);
 
-    auto receivedData = parsePacket(receivedPacket);
-    if (!receivedData.has_value())
-        return {};
+        auto receivedData = parsePacket(receivedPacket);
+        if (!receivedData.has_value())
+            return {};
 
-    sendAck(m_socket);
+        sendAck(m_socket);
 
-    if (receivedData->size() == 3 && receivedData->starts_with("E"))
-        return {};
+        if (receivedData->size() == 3 && receivedData->starts_with("E"))
+            return {};
 
-    auto data = decodeMemoryResponse(*receivedData);
-    data.resize(size);
-    return data;
+        auto data = decodeMemoryResponse(*receivedData);
+        data.resize(size);
+        return data;
+    }
 }
 
 void GDBConnection::setBreakpoint(u64 address, int length) {
@@ -217,7 +259,7 @@ void GDBConnection::getRegisters(sRegs& outputRegs) {
     sendAck(m_socket);
 }
 
-void GDBConnection::sendMonitorCommand(const std::string& command) {
+std::string GDBConnection::sendMonitorCommand(const std::string& command) {
     std::string commandEncoded;
     for (int i = 0; i < command.length(); i++) {
         commandEncoded += std::format("{:02X}", command[i]);
@@ -228,9 +270,20 @@ void GDBConnection::sendMonitorCommand(const std::string& command) {
 
     auto receivedData = parsePacket(receivedPacket);
     if (!receivedData.has_value())
-        return;
+        return "";
 
     sendAck(m_socket);
+
+    // Wait for OK
+    {
+        std::string receivedPacket = sendReceivePackage(m_socket, "");
+        auto receivedData = parsePacket(receivedPacket);
+        if (!receivedData.has_value())
+            return "";
+        assert(*receivedData == "OK");
+    }
+
+    return receivedData.value();
 }
 
 void GDBConnection::resetTarget() {
@@ -287,7 +340,7 @@ u32 GDBConnection::pauseExecution() {
     return getRegister(37);
 }
 
-u32 GDBConnection::resumeExecution() {
+u32 GDBConnection::executeToNextTrap() {
     std::string packet = createPacket("c");
     std::string receivedPacket = sendReceivePackage(m_socket, packet);
 
@@ -322,7 +375,7 @@ u32 GDBConnection::resumeExecution() {
 
 void GDBConnection::executeUntilAddress(u32 address) {
     setBreakpoint(address);
-    u32 PC = resumeExecution();
+    u32 PC = executeToNextTrap();
     assert(PC == address);
     removeBreakpoint(address);
 }

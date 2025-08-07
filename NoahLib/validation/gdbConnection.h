@@ -12,13 +12,13 @@ public:
 
     u16 readU16(u64 address);
 
-    void sendMonitorCommand(const std::string& command);
+    std::string sendMonitorCommand(const std::string& command);
     void resetTarget();
     void setBreakpoint(u64 address, int length = 4);
     void removeBreakpoint(u64 address, int length = 4);
 
     u32 pauseExecution();
-    u32 resumeExecution();
+    u32 executeToNextTrap();
     void executeUntilAddress(u32 address);
     void stepOut();
 
@@ -81,4 +81,6 @@ public:
     void setRegister(int index, u32 value);
 private:
     hSocket m_socket;
+
+    class SharedMem* m_wramSharedMemory = nullptr;
 };
