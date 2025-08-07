@@ -7,6 +7,8 @@
 
 #include "sharedmem.h"
 
+GDBConnection* g_gdbConnection = nullptr;
+
 u8 calculateChecksum(const std::string& data) {
     u64 checksum = 0;
     for (const auto& c : data)
@@ -205,6 +207,17 @@ std::vector<u8> GDBConnection::readMemory(u64 address, size_t size) {
     }
 }
 
+void GDBConnection::writeMemory(u64 address, const void* buffer, size_t size) {
+    if (m_wramSharedMemory) {
+        u8* pPtrBase = m_wramSharedMemory->getPtr();
+        pPtrBase += address & 0x007FFFFF;
+        memcpy(pPtrBase, buffer, size);
+    }
+    else {
+        assert(0);
+    }
+}
+
 void GDBConnection::setBreakpoint(u64 address, int length) {
     std::string packet = createPacket(std::format("Z0,{:X},{}", address, length));
     std::string receivedPacket = sendReceivePackage(m_socket, packet);
@@ -384,4 +397,14 @@ u16 GDBConnection::readU16(u64 address) {
     std::vector<u8> data = readMemory(address, 2);
     return (*(u16*)data.data());
     return _byteswap_ushort(*(u16*)data.data());
+}
+
+void GDBConnection::writeU32(u64 address, u32 value) {
+    value = _byteswap_ulong(value);
+    writeMemory(address, &value, 4);
+}
+
+void GDBConnection::writeU16(u64 address, u16 value) {
+    value = _byteswap_ushort(value);
+    writeMemory(address, &value, 2);
 }

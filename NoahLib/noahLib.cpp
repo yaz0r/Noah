@@ -43,10 +43,6 @@ bool noahInit(int argc, char* argv[])
 
     noahFrame_start();
 
-    if (enableValidation) {
-        validationInit();
-    }
-
     //////////////////////////////////////////////////////////////////////////
     // start the original code
 
@@ -194,6 +190,10 @@ bool noahInit(int argc, char* argv[])
     initGameState();
 
     MissingCode();
+
+    if (enableValidation) {
+        validationInit();
+    }
 
     setGameMode(6); // for into movie?
 
