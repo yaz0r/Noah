@@ -16,7 +16,10 @@ bool validationInit() {
     g_gdbConnection->resetTarget();
     g_gdbConnection->executeUntilAddress(0x80019578); // start of main
 
-    g_gdbConnection->executeUntilAddress(0x8001992c); // just before booting the game
+    // disable the EA logo to speed boot
+    g_gdbConnection->writeU32(0x8001991c, 0x00000000);
+
+    g_gdbConnection->executeUntilAddress(0x8001991c); // just before booting the game
 
     // patch boot mode to kernel
     g_gdbConnection->writeU32(0x80019930, 0x00000434); 
