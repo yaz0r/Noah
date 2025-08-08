@@ -38,7 +38,6 @@
 
 MATRIX computeProjectionMatrixTempMatrix2;
 
-u32 playTimeInVsync = 0;
 s32 bootModeReady = 0;
 s32 newBootMode = 0;
 s32 menuFadeState = 0;
@@ -555,7 +554,7 @@ int getWalkmeshTriangleFlag(sFieldScriptEntity* param_1)
     return 0;
 }
 
-void initFieldScriptEntityValues(int index)
+void resetFieldScriptEntityValues(int index)
 {
     sFieldScriptEntity* pFieldScriptEntity = actorArray[index].m4C_scriptEntity;
 
@@ -747,7 +746,7 @@ void initFieldScriptEntity(int index)
             MissingCode();
         }
 
-        initFieldScriptEntityValues(index);
+        resetFieldScriptEntityValues(index);
         actorArray[index].m8_2dSprite = new sFieldEntity2dSprite;
         initCharacterShadowPoly(actorArray[index].m8_2dSprite);
     }
@@ -814,7 +813,7 @@ void sprintf_screen(const char* format, ...)
     MissingCode();
 }
 
-void OP_INIT_ENTITY_SCRIPT_sub0(int actorId, int clutYEntry, sSpriteActorAnimationBundle* pSetup, int param_4, int clutXEntry, int param_6, int param_7)
+void resetFieldScriptEntityGraphicEntity(int actorId, int clutYEntry, sSpriteActorAnimationBundle* pSetup, int param_4, int clutXEntry, int param_6, int param_7)
 {
     resetMemoryAllocStats(8, 0);
     actorArray[actorId].m4C_scriptEntity->m127 = clutYEntry;
@@ -1004,10 +1003,10 @@ void copyPartySlotFromNext(uint param_1)
         partyToFieldEntityArrayMapping[param_1] = partyToFieldEntityArrayMapping[param_1 + 1];
         sFieldScriptEntity* psVar3 = actorArray[iVar13].m4C_scriptEntity;
         if ((psVar3->m126 & 0x80) == 0) {
-            OP_INIT_ENTITY_SCRIPT_sub0(iVar13, param_1, &partyCharacterBuffers[param_1], 1, 0, param_1, 1);
+            resetFieldScriptEntityGraphicEntity(iVar13, param_1, &partyCharacterBuffers[param_1], 1, 0, param_1, 1);
         }
         else {
-            OP_INIT_ENTITY_SCRIPT_sub0(iVar13, psVar3->m127, &fieldActorSetupParams[psVar3->m126 & 0x7f], psVar3->m130.m28, psVar3->m134.m0, actorArray[iVar13].m4C_scriptEntity->m126, actorArray[iVar13].m4C_scriptEntity->m134.m4);
+            resetFieldScriptEntityGraphicEntity(iVar13, psVar3->m127, &fieldActorSetupParams[psVar3->m126 & 0x7f], psVar3->m130.m28, psVar3->m134.m0, actorArray[iVar13].m4C_scriptEntity->m126, actorArray[iVar13].m4C_scriptEntity->m134.m4);
         }
         currentParty[param_1 + 1] = 0xff;
         asyncPartyCharacterLoadingTable[param_1 + 1] = 0xff;
@@ -1018,46 +1017,38 @@ void copyPartySlotFromNext(uint param_1)
 
 void emptyPartySlot(int param_1)
 {
-    uint* puVar1;
-    ushort* puVar2;
-    ushort uVar3;
-    int iVar4;
-    sFieldScriptEntity* psVar5;
-    sFieldScriptEntity* psVar6;
-    sFieldEntity* psVar7;
-    int iVar8;
-    int* piVar9;
+    // Backup
+    sFieldEntity* pBackupCurrentFieldEntity = pCurrentFieldEntity;
+    sFieldScriptEntity* pBackupCurrentFieldScriptActor = pCurrentFieldScriptActor;
+    int backupCurrentFieldActorId = currentFieldActorId;
 
-    psVar7 = pCurrentFieldEntity;
-    psVar5 = pCurrentFieldScriptActor;
-    iVar4 = currentFieldActorId;
-    piVar9 = &partyToFieldEntityArrayMapping[param_1];
-    if (*piVar9 != 0xff) {
-        pCurrentFieldEntity = &actorArray[*piVar9];
-        uVar3 = pCurrentFieldScriptActor->mCC_scriptPC;
+    int fieldEntity = partyToFieldEntityArrayMapping[param_1];
+    if (fieldEntity != 0xff) {
+        pCurrentFieldEntity = &actorArray[fieldEntity];
+
+        ushort backupScriptPC = pCurrentFieldScriptActor->mCC_scriptPC;
         pCurrentFieldScriptActor = pCurrentFieldEntity->m4C_scriptEntity;
-        initFieldScriptEntityValues(*piVar9);
-        iVar8 = *piVar9;
-        currentFieldActorId = iVar8;
-        actorArray[iVar8].m58_flags = actorArray[iVar8].m58_flags & 0xf07f | 0x200;
-        OP_INIT_ENTITY_SCRIPT_sub0(iVar8, 0, &partyCharacterBuffers[0], 1, 0, 0, 1);
-        psVar6 = pCurrentFieldScriptActor;
+        resetFieldScriptEntityValues(fieldEntity);
+        currentFieldActorId = fieldEntity;
+        actorArray[fieldEntity].m58_flags = (actorArray[fieldEntity].m58_flags & 0xf07f) | 0x200;
+        resetFieldScriptEntityGraphicEntity(fieldEntity, 0, &partyCharacterBuffers[0], 1, 0, 0, 1);
         pCurrentFieldScriptActor->m0_fieldScriptFlags.m0_updateScriptDisabled = 1;
-        puVar1 = &pCurrentFieldScriptActor->m4_flags.m_rawFlags;
         breakCurrentScript = 0;
-        puVar2 = &pCurrentFieldScriptActor->mCC_scriptPC;
-        currentFieldActorId = iVar4;
-        pCurrentFieldScriptActor = psVar5;
-        pCurrentFieldEntity = psVar7;
-        *puVar2 = uVar3;
-        psVar6->m4_flags.m_rawFlags = *puVar1 | 0x100000;
-        psVar6->m0_fieldScriptFlags.m_rawFlags |= 0x20000;
-        psVar6->m4_flags.m_rawFlags = psVar6->m4_flags.m_rawFlags | 0x400;
-        *piVar9 = 0xff;
+
+        // restore values from backup
+        currentFieldActorId = backupCurrentFieldActorId;
+        pCurrentFieldScriptActor = pBackupCurrentFieldScriptActor;
+        pCurrentFieldEntity = pBackupCurrentFieldEntity;
+
+        pCurrentFieldScriptActor->mCC_scriptPC = backupScriptPC;
+
+        pCurrentFieldScriptActor->m4_flags.m_rawFlags |= 0x100000;
+        pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags |= 0x20000;
+        pCurrentFieldScriptActor->m4_flags.m_rawFlags |= 0x400;
+        partyToFieldEntityArrayMapping[param_1] = 0xff;
     }
     currentParty[param_1] = 0xff;
     asyncPartyCharacterLoadingTable[param_1] = 0xff;
-    return;
 }
 
 int getGearForCharacter(int param_1)
@@ -1834,7 +1825,7 @@ void startAllEntityScripts()
 
             if (fieldScriptInitVar0 == 0)
             {
-                OP_INIT_ENTITY_SCRIPT_sub0(i, 0, &fieldActorSetupParams[0], 0, 0, 0x80, 0);
+                resetFieldScriptEntityGraphicEntity(i, 0, &fieldActorSetupParams[0], 0, 0, 0x80, 0);
                 pCurrentFieldScriptActor->m4_flags.m_x800 = 1;
             }
         }
@@ -7638,14 +7629,6 @@ void logFieldRenderingEvent(const char* param_1)
 
 */
 
-void vsyncCallback(void)
-{
-    playTimeInVsync++;
-    getInputDuringVsync();
-    saveInputs();
-    incrementPlayTime();
-    MissingCode();
-}
 
 void updateFieldInputs()
 {
@@ -7706,8 +7689,8 @@ void syncKernelAndFieldStates()
         saveStateToKernel();
         MissingCode();
 
-        setVar(0xc, (timeMinutes << 8) | timeSeconds);
-        setVar(0xe, timeHours);
+        setVar(0xc, (g_playTimeMinutes << 8) | g_playTimeSeconds);
+        setVar(0xe, g_playTimeHours);
         setVar(0x1e, actorArray[playerControlledActor].m4C_scriptEntity->m20_position.vx.getIntegerPart());
         setVar(0x20, actorArray[playerControlledActor].m4C_scriptEntity->m20_position.vz.getIntegerPart());
         setVar(0x22, actorArray[playerControlledActor].m4C_scriptEntity->m20_position.vy.getIntegerPart());
@@ -8018,7 +8001,7 @@ void fieldEntryPoint()
     {
         MissingCode();
         ////
-        u32 playTimeBeginningOfLoop = playTimeInVsync;
+        u32 playTimeBeginningOfLoop = g_playTimeInVsync;
         if (!isControllerConnected(0)) {
             pauseMusic();
             decompressPauseSignToVram(0x88, (g_frameOddOrEven + 1U & 1) << 8 | 100);
@@ -8033,7 +8016,7 @@ void fieldEntryPoint()
 
         /* pause when player press start */
         if ((((padButtonForField & 0x800) != 0) && ((padButtonForScripts[0].m0_buttons & 0x40U) == 0)) && (pauseDisabled == '\0')) {
-            playTimeInVsync = playTimeBeginningOfLoop;
+            g_playTimeInVsync = playTimeBeginningOfLoop;
             pauseMusic();
             decompressPauseSignToVram(0x88, (g_frameOddOrEven + 1U & 1) << 8 | 100);
             do {
@@ -8253,7 +8236,7 @@ void runInitScriptForNewlyLoadedPC(uint param_1) {
             if ((pCurrentFieldScriptFile[scriptEntryPoint] == 0x16) && ((pCurrentFieldScriptFile + scriptEntryPoint)[1] == param_1)) {
                 pCurrentFieldEntity = &actorArray[i];
                 pCurrentFieldScriptActor = pCurrentFieldEntity->m4C_scriptEntity;
-                initFieldScriptEntityValues(i);
+                resetFieldScriptEntityValues(i);
                 currentFieldActorId = i;
                 actorArray[i].m4C_scriptEntity->mCC_scriptPC = scriptEntryPoint;
                 currentScriptFinished = 0;

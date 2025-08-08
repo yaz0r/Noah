@@ -1,30 +1,32 @@
 #include "noahLib.h"
 #include "playTime.h"
 
-s32 timeOverflow = 0;
-s32 timeVSyncCount = 0;
-u32 timeHours = 0;
-u32 timeMinutes = 0;
-u32 timeSeconds = 0;
+u32 g_playTimeInVsync = 0;
+
+bool g_playTimeOverflow = false;
+s8 g_timeVSyncCount = 0;
+u8 g_playTimeHours = 0;
+u8 g_playTimeMinutes = 0;
+u8 g_playTimeSeconds = 0;
 
 void incrementPlayTime()
 {
-    if (timeOverflow == 0) {
-        timeVSyncCount += 1;
-        if (timeVSyncCount == 60) {
-            timeVSyncCount = 0;
-            timeSeconds += 1;
+    if (!g_playTimeOverflow) {
+        g_timeVSyncCount++;
+        if (g_timeVSyncCount == 60) {
+            g_timeVSyncCount = 0;
+            g_playTimeSeconds++;
         }
-        if (timeSeconds == 60) {
-            timeSeconds = 0;
-            timeMinutes += 1;
+        if (g_playTimeSeconds == 60) {
+            g_playTimeSeconds = 0;
+            g_playTimeMinutes++;
         }
-        if (timeMinutes == 60) {
-            timeMinutes = 0;
-            timeHours += 1;
+        if (g_playTimeMinutes == 60) {
+            g_playTimeMinutes = 0;
+            g_playTimeHours++;
         }
-        if (timeHours == 100) {
-            timeOverflow = 1;
+        if (g_playTimeHours == 100) {
+            g_playTimeOverflow = true;
         }
     }
 }

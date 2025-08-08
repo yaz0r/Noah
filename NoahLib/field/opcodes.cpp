@@ -597,7 +597,7 @@ void OPX_15()
     actorArray[currentFieldActorId].m58_flags = actorArray[currentFieldActorId].m58_flags & 0xf07f | 0x200;
     uint uVar4 = getImmediateOrVariableUnsigned(1);
     int uVar5 = getImmediateOrVariableUnsigned(3);
-    OP_INIT_ENTITY_SCRIPT_sub0(currentFieldActorId, uVar4, &fieldActorSetupParams[uVar4], 0, uVar5, uVar4 | 0x80, 1);
+    resetFieldScriptEntityGraphicEntity(currentFieldActorId, uVar4, &fieldActorSetupParams[uVar4], 0, uVar5, uVar4 | 0x80, 1);
     OP_INIT_ENTITY_SCRIPT_sub1();
     ADVANCE_VM(0x5);
     pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags &= ~0x80;
@@ -640,7 +640,7 @@ void OP_INIT_ENTITY_NPC(void)
     actorArray[currentFieldActorId].m58_flags |= 0x200;
 
     u32 index = getImmediateOrVariableUnsigned(1);
-    OP_INIT_ENTITY_SCRIPT_sub0(currentFieldActorId, index, &fieldActorSetupParams[index], 0, 0, index | 0x80, 0);
+    resetFieldScriptEntityGraphicEntity(currentFieldActorId, index, &fieldActorSetupParams[index], 0, 0, index | 0x80, 0);
     OP_INIT_ENTITY_SCRIPT_sub1();
     ADVANCE_VM(0x3);
     pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags &= ~0x80;
@@ -1033,7 +1033,7 @@ void OP_INIT_ENTITY_PC(void)
     pCurrentFieldScriptActor->mE4_playableCharacterId = (short)iVar3;
     psVar8->m58_flags = psVar8->m58_flags & 0xf07f | 0x200;
     if (iVar4 == -1) {
-        OP_INIT_ENTITY_SCRIPT_sub0(currentFieldActorId, 0, &partyCharacterBuffers[0], 1, 0, 0, 1);
+        resetFieldScriptEntityGraphicEntity(currentFieldActorId, 0, &partyCharacterBuffers[0], 1, 0, 0, 1);
         psVar7 = pCurrentFieldScriptActor;
         pCurrentFieldScriptActor->m0_fieldScriptFlags.m0_updateScriptDisabled = 1;
         currentScriptFinished = 1;
@@ -1051,12 +1051,12 @@ void OP_INIT_ENTITY_PC(void)
         iVar2 = currentFieldActorId;
         partyToFieldEntityArrayMapping[iVar4] = currentFieldActorId;
         if (pcInitVar1 == 0) {
-            OP_INIT_ENTITY_SCRIPT_sub0(iVar2, iVar4, &partyCharacterBuffers[iVar4], 1, 0, iVar4, 1);
+            resetFieldScriptEntityGraphicEntity(iVar2, iVar4, &partyCharacterBuffers[iVar4], 1, 0, iVar4, 1);
             pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags &= ~0x300;
             pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags |= 0x400;
         }
         else {
-            OP_INIT_ENTITY_SCRIPT_sub0
+            resetFieldScriptEntityGraphicEntity
             (iVar2, (uint)characterMappingTable[iVar3] + pcInitVar1, &fieldActorSetupParams[pcInitVar1 + characterMappingTable[iVar3]], 0, 0,
                 (uint)characterMappingTable[iVar3] + pcInitVar1 | 0x80, 1);
             psVar7 = pCurrentFieldScriptActor;
@@ -1814,7 +1814,7 @@ void OP_5C()
 
         pFieldEntity->m58_flags = pFieldEntity->m58_flags & 0xf07f | 0x200;
 
-        OP_INIT_ENTITY_SCRIPT_sub0(currentFieldActorId, param0, &partyCharacterBuffers[param0], 1, 0, param0, 1);
+        resetFieldScriptEntityGraphicEntity(currentFieldActorId, param0, &partyCharacterBuffers[param0], 1, 0, param0, 1);
         actorArray[currentFieldActorId].m58_flags = actorArray[currentFieldActorId].m58_flags & 0xffdf;
         if ((fieldMapNumber & 0xfff) != (entityParam & 0x3fffU)) {
             pCurrentFieldScriptActor->m10_walkmeshId = 0;
@@ -2026,7 +2026,7 @@ void OP_ADD_ENDITY_TO_MECHA_LIST()
 {
     actorArray[currentFieldActorId].m58_flags = actorArray[currentFieldActorId].m58_flags & 0xf07f | 0x200;
     int iVar3 = getImmediateOrVariableUnsigned(1);
-    OP_INIT_ENTITY_SCRIPT_sub0(currentFieldActorId, 0, &fieldActorSetupParams[0], 0, 0, 0x80, 1);
+    resetFieldScriptEntityGraphicEntity(currentFieldActorId, 0, &fieldActorSetupParams[0], 0, 0, 0x80, 1);
     OP_INIT_ENTITY_SCRIPT_sub1();
     sFieldScriptEntity* psVar2 = pCurrentFieldScriptActor;
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
@@ -3642,7 +3642,7 @@ void OPX_21()
     iVar2 = findCharacterInParty(uVar3);
     psVar3->m58_flags = psVar3->m58_flags & 0xf07f | 0x200;
     if (iVar2 == -1) {
-        OP_INIT_ENTITY_SCRIPT_sub0(currentFieldActorId, 0, &partyCharacterBuffers[0], 1, 0, 0, 1);
+        resetFieldScriptEntityGraphicEntity(currentFieldActorId, 0, &partyCharacterBuffers[0], 1, 0, 0, 1);
         psVar1 = pCurrentFieldScriptActor;
         pCurrentFieldScriptActor->m0_fieldScriptFlags.m0_updateScriptDisabled = 1;
         currentScriptFinished = 1;
@@ -3650,7 +3650,7 @@ void OPX_21()
         psVar1->m4_flags.m_rawFlags = psVar1->m4_flags.m_rawFlags | 0x100000;
     }
     else {
-        OP_INIT_ENTITY_SCRIPT_sub0(currentFieldActorId, iVar2, &partyCharacterBuffers[iVar2], 2, 0, iVar2, 1);
+        resetFieldScriptEntityGraphicEntity(currentFieldActorId, iVar2, &partyCharacterBuffers[iVar2], 2, 0, iVar2, 1);
         OPX_21_Sub0 = -0xc0;
         actorArray[currentFieldActorId].m58_flags = actorArray[currentFieldActorId].m58_flags & 0xffdf;
         OP_INIT_ENTITY_SCRIPT_sub1();
@@ -3860,7 +3860,7 @@ void OP_REMOVE_FROM_AVAILABLE_PARTY()
 
 void OP_INIT_ENTITY_SCRIPT()
 {
-    OP_INIT_ENTITY_SCRIPT_sub0(currentFieldActorId, 0, &fieldActorSetupParams[0], 0, 0, 0x80, 1);
+    resetFieldScriptEntityGraphicEntity(currentFieldActorId, 0, &fieldActorSetupParams[0], 0, 0, 0x80, 1);
     OP_INIT_ENTITY_SCRIPT_sub1();
 
     pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags |= 0x100;

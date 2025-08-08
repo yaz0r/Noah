@@ -148,7 +148,7 @@ void getInputDuringVsync(void)
         previousDownButtons++;
         newPadButtonForField = newPadButtonForDialogs;
     }
-    else if (playTimeInVsync & 3)
+    else if (g_playTimeInVsync & 3)
     {
         newPadButtonForField = newPadButtonForDialogs;
     }

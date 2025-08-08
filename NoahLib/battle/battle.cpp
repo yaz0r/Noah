@@ -6627,14 +6627,14 @@ void battleHandleInput(void) {
                 decompressPauseSignToVram(0x88, 0x144);
                 pauseSignDisplayed = true;
                 pauseMusic();
-                savedPlayTime = playTimeInVsync;
+                savedPlayTime = g_playTimeInVsync;
             }
         }
         else {
             isPaused = false;
             if (pauseSignDisplayed) {
                 resumeMusic();
-                playTimeInVsync = savedPlayTime;
+                g_playTimeInVsync = savedPlayTime;
             }
         }
     } while (isPaused);
@@ -6722,12 +6722,12 @@ void battleHandleInput(void) {
                                 decompressPauseSignToVram(0x88, 0x144);
                                 pauseMusic();
                                 battleIsPaused = true;
-                                savedPlayTime = playTimeInVsync;
+                                savedPlayTime = g_playTimeInVsync;
                             }
                             else {
                                 resumeMusic();
                                 battleIsPaused = false;
-                                playTimeInVsync = savedPlayTime;
+                                g_playTimeInVsync = savedPlayTime;
                             }
                         }
                         break;

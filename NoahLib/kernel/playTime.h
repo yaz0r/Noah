@@ -1,8 +1,8 @@
 #pragma once
 
-extern u32 playTimeInVsync;
-extern u32 timeSeconds;
-extern u32 timeMinutes;
-extern u32 timeHours;
+extern u32 g_playTimeInVsync;
+extern u8 g_playTimeSeconds;
+extern u8 g_playTimeMinutes;
+extern u8 g_playTimeHours;
 
 void incrementPlayTime();

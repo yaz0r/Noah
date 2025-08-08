@@ -404,7 +404,7 @@ void vsyncCallback(void);
 void LogOpcode(int actorId, u16 scriptOffset, u16 opcode);
 void LogMissingOpcode(int actorId, u16 scriptOffset, u16 opcode);
 
-void initFieldScriptEntityValues(int index);
+void resetFieldScriptEntityValues(int index);
 
 void playMusic(int musicId);
 void setupRGBCalcMode(int, int, int, int, int, int);
@@ -425,7 +425,7 @@ void startPartyCharacterASyncLoading(int partyCharacter, int partySlot);
 void fieldEntryPoint();
 
 void setupSpecialAnimation(sSpriteActorCore* param_1, struct sSpriteActorAnimationBundle* param_2);
-void OP_INIT_ENTITY_SCRIPT_sub0(int actorId, int param_2, struct sSpriteActorAnimationBundle* pSetup, int param_4, int param_5, int param_6, int param_7);
+void resetFieldScriptEntityGraphicEntity(int actorId, int param_2, struct sSpriteActorAnimationBundle* pSetup, int param_4, int param_5, int param_6, int param_7);
 void OP_INIT_ENTITY_SCRIPT_sub1();
 void setCurrentActor2DPosition(int posX, int posZ);
 void updateScriptActor3dRotation(int index);

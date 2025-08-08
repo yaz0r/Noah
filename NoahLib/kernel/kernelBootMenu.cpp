@@ -67,7 +67,7 @@ void printKernelMenu(void)
         setGameMode(kernelMenuCurrentSelectedEntry + 1);
         menuQuit = 0;
     }
-    sprintf(timeString, "%02d:%02d:%02d", timeHours, timeMinutes, timeSeconds);
+    sprintf(timeString, "%02d:%02d:%02d", g_playTimeHours, g_playTimeMinutes, g_playTimeSeconds);
     const char* diskMode = "CD EMU";
     if (runningOnDTL != 0) {
         diskMode = "PC HDD";

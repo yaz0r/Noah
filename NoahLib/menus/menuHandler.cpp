@@ -1389,7 +1389,7 @@ void menuDraw() {
     updateMenuTransforms();
 
     gMenuContext->m2D8_frameCounter = gMenuContext->m2D8_frameCounter + 1;
-    updatePlayTimeString(playTimeInVsync);
+    updatePlayTimeString(g_playTimeInVsync);
     drawMenuPlayTime();
     drawMenuSpecificElements();
 
