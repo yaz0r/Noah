@@ -5,6 +5,7 @@
 #include "kernel/graphics.h"
 #include "kernel/filesystem.h"
 #include "kernel/color.h"
+#include "kernel/3dModel.h"
 
 struct sFieldEntitySub0
 {
@@ -330,10 +331,6 @@ extern s16 OP_B6SubVar0;
 extern s16 OP_B6Var1;
 extern s16 OP_B6Var2;
 
-extern int overrideTPageMode;
-extern s32 overrideTPageValue;
-
-extern int initModel2Sub0Var1;
 extern s32 primD_initSub0Sub1Var1;
 
 extern MATRIX currentRenderingMatrix;
@@ -470,7 +467,6 @@ std::vector<u8> allocateBufferForVramUpload(int);
 void loadImageFileToVram(int fileId, void* allocation, int, int, int, int, int, int, int, int);
 
 extern SVECTOR computeProjectionMatrixAngles;
-extern s32 objectClippingMask;
 
 extern u8* shapeTransfertTableCurrentEntry;
 extern u8* shapeTransfertTableEnd;

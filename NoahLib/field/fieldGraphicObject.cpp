@@ -4,6 +4,7 @@
 #include "sprite/spriteSetup.h"
 #include "kernel/TIM.h"
 #include "battle/battle.h"
+#include "kernel/3dModel_psxRenderer.h"
 
 int battleDefaultEntityScale = 0x2000;
 int fieldDrawEnvsInitialized = 0;
@@ -877,20 +878,6 @@ sStackElement* executeSpriteBytecode2Sub3(sSpriteActorCore* param_1, sPS1Pointer
 		assert(0);// pcVar2 = (char*)(*(int*)&param_1->field_0x88 + (bVar1 & 0x7f));
 	}
 	return nullptr;
-}
-
-void setupOverrideTPage(uint x, uint y)
-{
-    overrideTPageMode = 1;
-    overrideTPageValue = GetTPage(0, 0, x & 0xffff, y & 0xffff) & 0x1f;
-}
-
-void setupOverrideClut(uint x, uint y)
-{
-    u16 uVar1 = GetClut(x & 0xffff, y & 0xffff);
-    initModel2Sub0Var1 = 0;
-    primD_initSub0Sub1Var1 = uVar1 & 0xfff0;
-    return;
 }
 
 u16 customVramUploadX;

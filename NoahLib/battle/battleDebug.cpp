@@ -7,6 +7,7 @@
 #include <SDL_scancode.h>
 #include <SDL_keyboard.h>
 #include "field/fieldModel.h"
+#include "kernel/3dModel_bgfxRenderer.h"
 
 static ImVec2 oldWindowSize = { -1,-1 };
 
@@ -153,7 +154,7 @@ void battleDebugView_frame() {
 
         for (int i=0; i< environmentModelBlocks->m0.size(); i++)
         {
-            environmentModelBlocks->m0[i]->bgfxRender(fieldDebugger_bgfxView, nullptr);
+            environmentModelBlocks->m0[i]->getBgfxData()->bgfxRender(environmentModelBlocks->m0[i], fieldDebugger_bgfxView, nullptr);
         }
 
         /*

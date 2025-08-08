@@ -15,6 +15,7 @@
 #include "field/field.h"
 #include "field/walkMesh.h"
 #include "field/fieldScriptSupport.h"
+#include "kernel/3dModel_bgfxRenderer.h"
 
 #include "../imgui_club/imgui_memory_editor/imgui_memory_editor.h"
 

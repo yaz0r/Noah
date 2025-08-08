@@ -8,10 +8,7 @@
 #include "field/fieldGraphicObject.h"
 #include "kernel/gte.h"
 #include "worldmapWorldStreaming.h"
-
-extern s32 objectClippingMask;
-extern s32 fieldPolyCount;
-extern s32 fieldPolyCount2;
+#include "kernel/3dModel_psxRenderer.h"
 
 void drawWorlmapPolyFT4Array1(void) {
     MissingCode();

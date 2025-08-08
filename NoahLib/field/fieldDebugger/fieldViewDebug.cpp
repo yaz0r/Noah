@@ -11,6 +11,8 @@
 #include "SDL_keyboard.h"
 #include "field/field.h"
 #include "field/mecha/mechaOverlay.h"
+#include "kernel/3dModel.h"
+#include "kernel/3dModel_bgfxRenderer.h"
 
 #include <tgmath.h>
 
@@ -472,7 +474,7 @@ void fieldViewDebug_step()
 
             if (!(actorArray[i].m58_flags & 0x40))
             {
-                actorArray[i].m0->m4_pModelBlock->bgfxRender(fieldDebugger_bgfxView, finalMatrix);
+                actorArray[i].m0->m4_pModelBlock->getBgfxData()->bgfxRender(&(*actorArray[i].m0->m4_pModelBlock), fieldDebugger_bgfxView, finalMatrix);
             }
             else
             {

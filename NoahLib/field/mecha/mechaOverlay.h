@@ -3,6 +3,7 @@
 #include "kernel/filesystem.h"
 #include "kernel/graphics.h"
 #include "field/fieldModel.h"
+#include "kernel/3dModel.h"
 
 typedef u16 sMechaDataTable2_4_8;
 

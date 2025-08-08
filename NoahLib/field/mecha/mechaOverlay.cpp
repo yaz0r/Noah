@@ -7,6 +7,8 @@
 #include "field/fieldGraphicObject.h"
 #include "kernel/memory.h"
 #include "battle/battle.h"
+#include "kernel/3dModel_psxRenderer.h"
+#include "kernel/3dModel_bgfxRenderer.h"
 
 u32 NumMechas;
 std::array<s16, 4> mechaList;
@@ -2134,7 +2136,7 @@ void renderMechasForDebugFieldRenderer(int viewId)
                 if ((m4It->m8_geometryId != -1) && (m4It->m7_isEnabled)) {
                     float finalMatrix[16];
                     convertMatrixToBgfx(&m4It->m2C_boneFinalMatrix, finalMatrix);
-                    pMecha->m0->m0[m4It->m8_geometryId]->bgfxRender(viewId, finalMatrix);
+                    pMecha->m0->m0[m4It->m8_geometryId]->getBgfxData()->bgfxRender(pMecha->m0->m0[m4It->m8_geometryId], viewId, finalMatrix);
                 }
                 m4It++;
             }

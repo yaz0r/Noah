@@ -31,6 +31,7 @@
 #include "kernel/DTL.h"
 #include "field/field.h"
 #include "kernel/playTime.h"
+#include "kernel/3dModel_psxRenderer.h"
 
 #include "psx/libgpu.h"
 #include "psx/libapi.h"

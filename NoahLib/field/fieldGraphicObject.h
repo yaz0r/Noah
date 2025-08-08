@@ -281,8 +281,6 @@ void setTransparencyMode(sSpriteActorCore* param_1, u32 mode);
 void setCurrentAnimationPtr(sSpriteActorCore* param_1, std::span<u8>::iterator startOfAnimation);
 
 void uploadTextureToVram(std::span<u8>::iterator param_1, short param_2, short tpageX, short tpageY, short param_5, short clutX, short clutY);
-void setupOverrideTPage(uint x, uint y);
-void setupOverrideClut(uint x, uint y);
 
 void spriteCallback_render2_updateMatrix(sSpriteActorCore* param_1);
 

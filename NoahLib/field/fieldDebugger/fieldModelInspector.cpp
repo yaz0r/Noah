@@ -10,6 +10,8 @@
 #include "SDL_scancode.h"
 #include "SDL_keyboard.h"
 #include "field/fieldModel.h"
+#include "kernel/3dModel.h"
+#include "kernel/3dModel_bgfxRenderer.h"
 
 int fieldModelInspector_bgfxView = 2;
 
@@ -150,7 +152,7 @@ void fieldModelInspector_step(int modelId)
 
         if (gCurrentFieldModels.size() > modelId)
         {
-            gCurrentFieldModels[modelId].bgfxRender(fieldModelInspector_bgfxView, nullptr);
+            bgfxRender(&gCurrentFieldModels[modelId], fieldModelInspector_bgfxView, nullptr);
         }
     }
     //ImGui::End();
