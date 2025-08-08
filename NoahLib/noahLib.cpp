@@ -16,6 +16,7 @@
 #include "kernel/audio/soundSystem.h"
 #include "kernel/audio/wds.h"
 #include "kernel/audio/spu.h"
+#include "kernel/memory.h"
 #include "validation/validation.h"
 
 #include "psx/libetc.h"

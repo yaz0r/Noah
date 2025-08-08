@@ -11,10 +11,12 @@
 #include "dialogWindows.h"
 #include "screenDistortion.h"
 #include "field.h"
+#include "kernel/inputs.h"
 #include "mecha/mechaOverlay.h"
 #include "menus/menuHandler.h"
 #include "field/particles/particles.h"
 #include "battle/battle.h"
+#include "field/fieldInputs.h"
 
 #include "kernel/audio/soundInstance.h"
 
@@ -2185,7 +2187,7 @@ void OP_SETUP_MULTICHOICE()
         bVar2 = pCurrentFieldScriptFile[psVar4->mCC_scriptPC + 1];
         gDialogWindows[dialogWindowId].m382_CurrentMultiChoiceSelection = 0;
         gDialogWindows[dialogWindowId].m380_numMaxMultiChoiceSelection = ((bVar2 & 0xf) - (ushort)(bVar1 >> 4)) + 1;
-        setupMultiChoice(&gDialogWindows[dialogWindowId].m18, 0xef, 0x1e, 0xf0);
+        setupMultiChoiceColor(&gDialogWindows[dialogWindowId].m18, 0xef, 0x1e, 0xf0);
     }
     ADVANCE_VM(0x2);
     breakCurrentScript = 1;

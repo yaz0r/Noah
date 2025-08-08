@@ -3,7 +3,8 @@
 #include "validation/interception.h"
 #include "validation/gdbConnection.h"
 
-#include "field/field.h"
+#include "kernel/inputs.h"
+#include "field/fieldInputs.h"
 #include "field/dialogWindows.h"
 
 void updateFieldInputs();

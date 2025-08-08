@@ -9,7 +9,6 @@
 #include "battleStartEffect.h"
 #include "battleConfig.h"
 #include "field/mecha/mechaOverlay.h"
-#include "field/field.h"
 #include "kernel/gameMode.h"
 #include "field/fieldGraphicObject.h"
 #include "battleSpriteLoader.h"
@@ -28,6 +27,10 @@
 #include "kernel/audio/soundInstance.h"
 #include "battle/battleEvent/battleEvent.h"
 #include "battle/battleFader.h"
+#include "kernel/inputs.h"
+#include "kernel/DTL.h"
+#include "field/field.h"
+#include "kernel/playTime.h"
 
 #include "psx/libgpu.h"
 #include "psx/libapi.h"

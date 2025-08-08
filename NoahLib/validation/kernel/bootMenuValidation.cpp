@@ -3,7 +3,7 @@
 #include "validation/interception.h"
 #include "validation/gdbConnection.h"
 
-#include "field/field.h"
+#include "kernel/inputs.h"
 #include "kernel/gameState.h"
 
 void printKernelMenu();

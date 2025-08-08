@@ -14,8 +14,6 @@ DRAWENV* PutDrawEnv(DRAWENV* env);
 
 void SetDispMask(int mask);
 
-void AddPrim(sTag* ot, sTag* p);
-
 void setupPolyG4(POLY_G4* param_1, u8 param_2, u8 param_3, u8 param_4);
 void ClearImage(RECT* pRect, u8 r, u8 g, u8 b);
 

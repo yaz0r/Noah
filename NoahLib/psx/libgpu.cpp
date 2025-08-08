@@ -126,3 +126,9 @@ void DrawOTag(sTag* ot)
         ot = ot->m0_pNext;
     }
 }
+
+void AddPrim(sTag* ot, sTag* p)
+{
+    p->m0_pNext = ot->m0_pNext;
+    ot->m0_pNext = p;
+}

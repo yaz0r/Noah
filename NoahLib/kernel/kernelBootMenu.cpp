@@ -4,8 +4,10 @@
 #include "kernel/memory.h"
 #include "psx/libgpu.h"
 #include "kernel/gameMode.h"
-#include "field/field.h"
 #include "kernel/debugText.h"
+#include "kernel/inputs.h"
+#include "kernel/playTime.h"
+#include "kernel/DTL.h"
 
 struct sKernelDisplayContext {
     DRAWENV m0_DrawEnv;
@@ -50,10 +52,6 @@ s32 menuQuit = 0;
 s32 frameCount = 0;
 s32 oddOrEven = 0;
 s32 kernelMenuCurrentSelectedEntry = 0;
-
-u32 timeHours = 0;
-u32 timeMinutes = 0;
-u32 timeSeconds = 0;
 
 void printKernelMenu(void)
 {

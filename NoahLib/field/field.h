@@ -6,26 +6,6 @@
 #include "kernel/filesystem.h"
 #include "kernel/color.h"
 
-enum controllerButtons {
-    L1 = 1 << 2, // 0x4
-    R1 = 1 << 3, // 0x8
-    TRIANGLE = 1 << 4, // 0x10
-    INTERACT = 1 << 5, // 0x20
-    CROSS = 1 << 6, // 0x40
-    JUMP = 1 << 7, // 0x80
-    SELECT = 1 << 8, // 0x100
-    START = 1 << 11, // 0x800
-    UP = 1 << 12, // 0x1000
-    RIGHT = 1 << 13, // 0x2000
-    DOWN = 1 << 14, // 0x4000
-    LEFT = 1 << 15, // 0x8000
-};
-
-struct sGameController {
-    u16 m0_buttons;
-    u16 m2;
-};
-
 struct sFieldEntitySub0
 {
     std::vector<sModelBlock>::iterator m4_pModelBlock;
@@ -267,11 +247,6 @@ extern s32 OPX8E_param1;
 extern s8 pauseDisabled;
 extern u8 fieldBackgroundClearColor[3];
 
-extern u16 newPadButtonForDialogs;
-extern u16 newPadButtonForDialogs2;
-extern u16 newPadButtonForField;
-extern u16 newPadButtonForField2;
-
 extern int playMusicAuthorized;
 extern int musicVar1;
 extern int musicVar2;
@@ -291,7 +266,6 @@ extern const std::array<u16, 8> actorDirectionTable3;
 extern s32 load2dAnimVar;
 extern s32 loadCompleted;
 
-extern std::array<sGameController, 2> padButtonForScripts;
 extern std::array<s16, 4> cameraLimits;
 
 extern bool g_LogOpcodes;
@@ -387,16 +361,12 @@ extern bool bBattleSequenceInitialized;
 extern bool debugEncounterTriggerDisabled;
 extern int debugForcedEncounter;
 
-extern u32 playTimeInVsync;
-
 extern u32 fullScreenTransitionEffectRenderParam;
 extern u32 fullScreenTransitionEffectRenderMode;
 
 extern s16 updateCharacterVar1;
 
 extern int linkOTIndex;
-extern int runningOnDTL;
-extern int* pRunningOnDTL;
 
 extern struct sSeqFile battleMusic;
 
@@ -405,7 +375,6 @@ void renderSpriteActor(struct sSpriteActorCore* pSpriteSheet, sTag* pTag);
 
 void allocateShapeTransfert(int param_1);
 
-void resetInputs();
 void checkSoftReboot();
 
 void setCharacterRenderingOT(OTTable& OT);
@@ -422,8 +391,6 @@ void syncKernelAndFieldStates();
 void initFontPalettes(short param_1, short param_2);
 void initFontSystem();
 
-int loadInputFromVSyncBuffer();
-
 void flagAllocation(struct sLoadableData&);
 void unflagAllocation(struct sLoadableData&);
 
@@ -436,8 +403,6 @@ void emptyPartySlot(int param_1);
 void copyPartySlotFromNext(uint param_1);
 
 void vsyncCallback(void);
-
-void traceNextAlloc(int state);
 
 void LogOpcode(int actorId, u16 scriptOffset, u16 opcode);
 void LogMissingOpcode(int actorId, u16 scriptOffset, u16 opcode);
@@ -498,15 +463,11 @@ bool submitModelForRendering(sModelBlock* param_1, std::vector<sTag*>& param_2, 
 void doPCCollisionCheckAfterLoading();
 void runInitScriptForNewlyLoadedPC(uint param_1);
 
-bool isControllerConnected(int port);
 void decompressPauseSignToVram(short param_1, short param_2);
 void pauseMusic();
 void resumeMusic();
-int getInputOverflowed();
 std::vector<u8> allocateBufferForVramUpload(int);
 void loadImageFileToVram(int fileId, void* allocation, int, int, int, int, int, int, int, int);
-
-extern std::array<sGameController, 2> newPadButtonForScripts;
 
 extern SVECTOR computeProjectionMatrixAngles;
 extern s32 objectClippingMask;

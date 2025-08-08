@@ -14,6 +14,8 @@
 #include "kernel/audio/seq.h"
 #include "kernel/debugText.h"
 #include "kernel/events.h"
+#include "kernel/inputs.h"
+#include "kernel/playTime.h"
 
 #include "menus/menuGold.h"
 #include "menus/statusMenu.h"

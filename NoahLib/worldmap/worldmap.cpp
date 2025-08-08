@@ -18,6 +18,7 @@
 #include "kernel/audio/soundSystem.h"
 #include "kernel/audio/seq.h"
 #include "kernel/audio/soundInstance.h"
+#include "kernel/inputs.h"
 
 #include "psx/libgpu.h"
 #include "psx/libapi.h"
