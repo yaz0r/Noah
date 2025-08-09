@@ -5,14 +5,14 @@ struct sGameStateA4
     struct sGameStateA4Sub4 {
         s8 m0;
 
-        void deserialize(std::vector<u8>::iterator buffer) {
+        void deserialize(std::vector<u8>::const_iterator buffer) {
             m0 = READ_LE_U8(buffer + 0);
         }
 
         // size 8
     };
 
-    void deserialize(std::vector<u8>::iterator buffer) {
+    void deserialize(std::vector<u8>::const_iterator buffer) {
         m2 = READ_LE_S8(buffer + 0x2);
         m3 = READ_LE_S8(buffer + 0x3);
         for (int i = 0; i < m4.size(); i++) {
@@ -128,7 +128,7 @@ struct sGameStateA4
 
 struct sGameStateA42
 {
-    void deserialize(std::vector<u8>::iterator buffer) {
+    void deserialize(std::vector<u8>::const_iterator buffer) {
         m10_ether = READ_LE_S16(buffer + 0x10);
         m12_maxEther = READ_LE_S16(buffer + 0x12);
         m38_fuel = READ_LE_S32(buffer + 0x38);
@@ -161,7 +161,7 @@ struct sGameStateA42
 };
 
 struct sGameStateSize20 {
-    void deserialize(std::vector<u8>::iterator buffer) {
+    void deserialize(std::vector<u8>::const_iterator buffer) {
         for (int i = 0; i < 8; i++) {
             m0_unlockedAbilitiesBitField[i] = READ_LE_U16(buffer + i * 2);
         }
@@ -175,7 +175,7 @@ struct sGameStateSize20 {
 
 struct sGameState
 {
-    void deserialize(std::vector<u8>& rawGameState) {
+    void deserialize(const std::vector<u8>& rawGameState) {
         for (int i = 0; i < m26C_party.size(); i++) m26C_party[i].deserialize(rawGameState.begin() + 0x26C + i * 0xA4);
         for (int i = 0; i < m978_gears.size(); i++) m978_gears[i].deserialize(rawGameState.begin() + 0x978 + i * 0xA4);
         for (int i = 0; i < m16C0.size(); i++) m16C0[i].deserialize(rawGameState.begin() + 0x16C0 + i * 0x20);

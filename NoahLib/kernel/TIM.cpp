@@ -67,7 +67,7 @@ TIM_IMAGE* ReadTIM(TIM_IMAGE* timimg)
 	return timimg;
 }
 
-void loadTimToVram(std::vector<u8>::iterator ptr, short imageX, short imageY, short palX, short palY, short palW, short palH)
+void loadTimToVram(std::vector<u8>::const_iterator ptr, short imageX, short imageY, short palX, short palY, short palW, short palH)
 {
 	OpenTIM(ptr);
 

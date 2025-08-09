@@ -1,7 +1,10 @@
 #pragma once
 
-struct sWalkMesh
+#include "kernel/filesystem.h"
+struct sWalkMesh : public sLoadableDataRaw
 {
+    virtual ~sWalkMesh() {}
+
     u32 m0_count;
 
     struct sTriangleData
@@ -21,9 +24,10 @@ struct sWalkMesh
     std::vector<sBlock> m_blocks;
     std::vector<u32> m_materials;
 
-    void init(const std::vector<u8>& input);
-    void clear()
+    virtual void init(const std::vector<u8>& input) override;
+    virtual void clear() override
     {
+        sLoadableDataRaw::clear();
         m0_count = 0;
         m_blocks.clear();
     }

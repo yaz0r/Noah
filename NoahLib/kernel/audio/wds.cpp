@@ -156,7 +156,7 @@ void startTransfert() {
     musicStatusFlag &= ~0x10;
 }
 
-void loadWdsSub0Sub(int destSpuAddress, std::vector<u8>::iterator data, int adpcmSize, void(*param_4)(), int param_5) {
+void loadWdsSub0Sub(int destSpuAddress, std::vector<u8>::const_iterator data, int adpcmSize, void(*param_4)(), int param_5) {
     int iVar2;
     u16 originalMusicStatusFlag = musicStatusFlag;
     if ((musicStatusFlag & 4) == 0) {
@@ -184,7 +184,7 @@ void loadWdsSub0Sub(int destSpuAddress, std::vector<u8>::iterator data, int adpc
     }
 }
 
-void loadWdsSub0(int sampleEntry, std::vector<u8>::iterator data, int adpcmSize, void(*param_4)()) {
+void loadWdsSub0(int sampleEntry, std::vector<u8>::const_iterator data, int adpcmSize, void(*param_4)()) {
     loadWdsSub0Sub(sampleEntry, data, adpcmSize, param_4, 1);
 }
 
@@ -260,10 +260,10 @@ sWdsFile* loadWds(sWdsFile& wdsFile, s32 param_2) {
         return nullptr;
     }
 
-    loadWdsSub0(samplePtrToLoad, wdsFile.m_rawData.begin() + wdsFile.m18_headerSize2 , wdsFile.m14_ADPCMSize, nullptr);
+    loadWdsSub0(samplePtrToLoad, wdsFile.getRawData().begin() + wdsFile.m18_headerSize2 , wdsFile.m14_ADPCMSize, nullptr);
 
     sWdsFile* wdsCopy = new sWdsFile; // TODO: this was allocated from the sound arena
-    wdsCopy->init(wdsFile.m_rawData.begin(), wdsFile.m10_headerSize1);
+    wdsCopy->init(wdsFile.getRawData().begin(), wdsFile.m10_headerSize1);
     wdsCopy->m28_adpcmAddress = samplePtrToLoad;
 
     DisableEvent(audioTickEvent);
@@ -306,14 +306,14 @@ sWdsFile* playMusic2(sWdsFile* wdsFile, int param_2, int param_3) {
     if (psVar2 == nullptr) {
         if (int samplePtrToLoad = getSamplePtr(wdsFile, param_3)) {
             //setupSamplesPtr(samplePtr, wdsFile->m14_ADPCMSize);
-            //sendSamples2(wdsFile->m_rawData.begin() + wdsFile->m18_headerSize2, param_2 - wdsFile->m10_headerSize1);
+            //sendSamples2(wdsFile->getRawData().begin() + wdsFile->m18_headerSize2, param_2 - wdsFile->m10_headerSize1);
 
-            loadWdsSub0(samplePtrToLoad, wdsFile->m_rawData.begin() + wdsFile->m18_headerSize2, wdsFile->m14_ADPCMSize, nullptr);
+            loadWdsSub0(samplePtrToLoad, wdsFile->getRawData().begin() + wdsFile->m18_headerSize2, wdsFile->m14_ADPCMSize, nullptr);
 
             sWdsFile* wdsCopy = new sWdsFile; // TODO: this was allocated from the sound arena
 
             if (wdsCopy) {
-                wdsCopy->init(wdsFile->m_rawData.begin(), wdsFile->m10_headerSize1);
+                wdsCopy->init(wdsFile->getRawData().begin(), wdsFile->m10_headerSize1);
                 wdsCopy->m28_adpcmAddress = samplePtrToLoad;
                 DisableEvent(audioTickEvent);
 

@@ -29,7 +29,7 @@ void defaultBattleSpriteDeleteCallback(sTaskHeader* param_1) {
 
 std::vector<u8> battleSpriteLoadTempBuffer;
 
-int getSpriteNumVerticalStrides(std::vector<u8>::iterator data) {
+int getSpriteNumVerticalStrides(std::vector<u8>::const_iterator data) {
     return READ_LE_U32(data);
 }
 
@@ -60,7 +60,7 @@ void loadBattleSpriteVram(sBattleSpriteConfigs* param_1) {
         if (param_1->m8[numCurrentEntity].m8_isMecha == 0) {
             int spriteSlot = param_1->m8[numCurrentEntity].m4_spriteDataOffset;
             if (spriteSlot > 7) {
-                std::vector<u8>::iterator pSpriteData = param_1->begin() + param_1->m8[numCurrentEntity].m4_spriteDataOffset;
+                std::vector<u8>::const_iterator pSpriteData = param_1->getRawData().begin() + param_1->m8[numCurrentEntity].m4_spriteDataOffset;
                 uploadNpcSpriteSheet(pSpriteData, currentSpriteX, 0x100);
                 spriteIndicies.m0[currentSpriteSlot] = currentSpriteX;
                 currentSpriteX += getSpriteNumVerticalStrides(pSpriteData) * 0x40;
@@ -89,7 +89,7 @@ void loadBattleSpriteVram(sBattleSpriteConfigs* param_1) {
                     }
                 }
                 for (int slot = numCurrentEntity + 1; slot != numMaxEntity; slot++) {
-                    std::vector<u8>::iterator pSpriteData = param_1->begin() + param_1->m8[slot].m4_spriteDataOffset;
+                    std::vector<u8>::const_iterator pSpriteData = param_1->getRawData().begin() + param_1->m8[slot].m4_spriteDataOffset;
                     if (READ_LE_U8(pSpriteData + 1) && (READ_LE_U8(pSpriteData + 0) == numCurrentEntity)) {
                         for (int i = 3; i < 0xB; i++) {
                             if (spriteIndicies.m20[i] == slot) {
@@ -401,7 +401,7 @@ void setupPlayerSpriteLoadingCommands(std::array<sLoadingBatchCommands, 4>::iter
             sLoadableDataRaw* pNewLoadable = new sLoadableDataRaw(getFileSizeAligned(param_1->m0_fileIndex));
             param_1->m4_loadPtr = pNewLoadable;
 
-            battleVisualBuffers[i].m0_spriteData = std::span<u8>(pNewLoadable->mData.begin(), pNewLoadable->mData.size()).begin();
+            battleVisualBuffers[i].m0_spriteData = pNewLoadable->beginSpan();
             battleVisualBuffers[i].m8 = 0;
 
             param_1++;

@@ -8,6 +8,8 @@ sWalkMesh walkMesh;
 
 void sWalkMesh::init(const std::vector<u8>& input)
 {
+    sLoadableDataRaw::init(input);
+
     m0_count = READ_LE_U32(input.begin());
     assert(m0_count <= 4);
 

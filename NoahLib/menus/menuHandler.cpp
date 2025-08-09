@@ -257,7 +257,7 @@ void computeMenuBorder(sFont& font, int param_2, int* param_3, int* param_4, int
 
 void loadMenuSharedResources() {
 
-    std::vector<std::vector<u8>::iterator> relocatedPtr = doPointerRelocation(menuSharedResources.mData);
+    std::vector<std::vector<u8>::const_iterator> relocatedPtr = doPointerRelocation(menuSharedResources.getRawData());
 
     MissingCode();
 
@@ -394,7 +394,7 @@ std::vector<std::array<u8, 2>> DAT_Menu2__801ea524 = { {
     {{0xB, 0xC}},
 }};
 
-u8 renderString(std::vector<u8>::iterator buffer, std::vector<u16>& param_2, ushort param_3, byte param_4) {
+u8 renderString(std::vector<u8>::const_iterator buffer, std::vector<u16>& param_2, ushort param_3, byte param_4) {
     sDialogWindow18 sDialogWindow18_temp;
     sDialogWindow18_temp.mA_width1 = param_3 | 1;
     sDialogWindow18_temp.mC_height = 1;

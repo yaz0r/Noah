@@ -16,18 +16,18 @@ void loadInitialGameState()
     int size = getFileSizeAligned(3);
 
     {
-        std::vector<u8> rawGameState;
+        sLoadableDataRaw rawGameState;
         rawGameState.resize(size);
         readFile(3, rawGameState, 0, 0x80);
         waitReadCompletion(0);
 
-        gameState.deserialize(rawGameState);
+        gameState.deserialize(rawGameState.getRawData());
 
         for (int i = 0; i < 31; i++) {
             gameState.m0_names[i].clear();
             gameState.m0_names[i].resize(20, 0);
             for (int j = 0; j < 20/2; j++) {
-                u8 character = READ_LE_S8(rawGameState.begin() + 20 * i + j * 2);
+                u8 character = READ_LE_S8(rawGameState.getRawData().begin() + 20 * i + j * 2);
                 if (character == 0xF)
                     break;
                 gameState.m0_names[i][j] = character;

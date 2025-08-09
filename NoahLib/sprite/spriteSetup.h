@@ -37,12 +37,11 @@ struct sFieldEntitySub4_110_0 {
     sPS1Pointer rawPointer;
 };
 
-struct sSpriteActorAnimationBundle : public sLoadableData
+struct sSpriteActorAnimationBundle : public sLoadableDataRaw
 {
-    virtual void init(std::vector<u8>& inputData) override {
-        m_rawData = inputData;
-        std::span<u8> dataSpan(m_rawData.begin(), m_rawData.size());
-        init(dataSpan.begin());
+    virtual void init(const std::vector<u8>& inputData) override {
+        sLoadableDataRaw::init(inputData);
+        init(beginSpan());
     }
 
     void init(std::span<u8>::iterator inputData)
@@ -95,7 +94,6 @@ struct sSpriteActorAnimationBundle : public sLoadableData
         }
     }
 
-    std::vector<u8> m_rawData;
     std::span<u8>::iterator rawData;
 
     u32 m0_numEntries;

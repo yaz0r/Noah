@@ -17,8 +17,8 @@ struct sSoundInstanceEventCallstack {
     u8 m0_loopCount;
     u8 m2;
     u8 m3;
-    std::vector<u8>::iterator m4_loopStartIt;
-    std::vector<u8>::iterator m8_loopEndIt;
+    std::vector<u8>::const_iterator m4_loopStartIt;
+    std::vector<u8>::const_iterator m8_loopEndIt;
     // size 0xC
 };
 
@@ -31,9 +31,9 @@ struct sSoundInstanceEvent {
     u8 m7;
     u32 m8;
     u32 mC;
-    std::vector<u8>::iterator m10;
-    std::vector<u8>::iterator m14;
-    std::optional<std::vector<u8>::iterator> m18_infiniteLoopStart;
+    std::vector<u8>::const_iterator m10;
+    std::vector<u8>::const_iterator m14;
+    std::optional<std::vector<u8>::const_iterator> m18_infiniteLoopStart;
     s32 m1C;
     s16 m20;
     s8 m22;

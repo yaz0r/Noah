@@ -1541,6 +1541,16 @@ void initExtendedOpcodeTable()
 		.addArgumentU16OrVar("unused?")
 		.addArgumentU16OrVar("unused?")
 		.end();
+
+    m_extendedOpcode[0xBF]
+        .setName("SETUP_BATTLING")
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar("GearId_0")
+        .addArgumentU16OrVar("GearId_1")
+        .addArgumentU16OrVar()
+        .addArgumentU16OrVar()
+        .end();
     
     m_extendedOpcode[0xC8]
         .addArgumentS16OrVar(0x80)

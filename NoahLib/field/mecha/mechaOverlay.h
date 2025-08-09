@@ -85,11 +85,11 @@ struct sMechaDataTable2_8 {
 };
 
 struct sMechaDataTable2 : public sLoadableData {
-    virtual void init(std::vector<u8>& input) override {
+    virtual void init(const std::vector<u8>& input) override {
         init(input.begin());
     }
 
-    void init(const std::vector<u8>::iterator& input) {
+    void init(const std::vector<u8>::const_iterator& input) {
         //m_raw = input;
         std::vector<std::vector<u8>> relocatedData = doPointerRelocationAndSplit(input);
 
@@ -161,10 +161,10 @@ struct sMechaDataTable1_10 {
 };
 
 struct sMechaDataTable1 : public sLoadableData {
-    virtual void init(std::vector<u8>& input) override {
+    virtual void init(const std::vector<u8>& input) override {
         init(input.begin());
     }
-    void init(const std::vector<u8>::iterator& input) {
+    void init(const std::vector<u8>::const_iterator& input) {
         //m_raw = input;
         std::vector<std::vector<u8>> relocatedData = doPointerRelocationAndSplit(input);
 

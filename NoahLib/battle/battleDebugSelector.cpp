@@ -369,12 +369,12 @@ void battleDebugSelector()
 
     // load new battle config from file
     {
-        std::vector<u8> newBattleConfig;
+        sLoadableDataRaw newBattleConfig;
         resetMemoryAllocStats(2, 0);
         newBattleConfig.resize(getFileSizeAligned(fileNo));
         readFile(fileNo, newBattleConfig, 0, 0x80);
         for (int i = 0; i < 16; i++) {
-            battleConfigs[i].init(newBattleConfig.begin() + i * 32);
+            battleConfigs[i].init(newBattleConfig.getRawData().begin() + i * 32);
         }
     }
 

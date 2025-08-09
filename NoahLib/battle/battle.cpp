@@ -508,7 +508,7 @@ void startBattleLoader(int param_1)
 
     Hack("Deserialize mecha data for battle env");
     battleLoadDataVar0 = new sMechaDataTable1;
-    battleLoadDataVar0->init(battleLoadDataVar0_raw->mData.begin());
+    battleLoadDataVar0->init(battleLoadDataVar0_raw->getRawData().begin());
 
     battleRenderStructs[0].m0_drawEnv.isbg = loadBattleEnvironment(battleLoadDataVar2->mData.begin(), battleLoadDataVar1, battleLoadDataVar0, &battleMatrix800CCB94, &battleMatrix800CCBB4, &battleRenderStructs[0].m0_drawEnv.color);
 
@@ -2601,7 +2601,7 @@ void abilityPlayAnimationSub1(int param_1) {
     readFile(iVar5, *FxFragmentSpecialAnimation, 0, 0x80);
     battleIdleDuringLoading();
 
-    int hasExtraData = (READ_LE_U16(FxFragmentSpecialAnimation->m_rawData.begin() + READ_LE_U32(FxFragmentSpecialAnimation->m_rawData.begin() + 4)) >> 0xC) & 3;
+    int hasExtraData = (READ_LE_U16(FxFragmentSpecialAnimation->getRawData().begin() + READ_LE_U32(FxFragmentSpecialAnimation->getRawData().begin() + 4)) >> 0xC) & 3;
     if (hasExtraData) {
         assert(0);
     }
@@ -2769,19 +2769,19 @@ void loadEffectFragmentsAndAudioModel(sSpriteActorAnimationBundle& buffer, u32 o
     MissingCode();
 }
 
-std::optional<std::vector<u8>::iterator> loadEffectFragmentsAndAudio(sSpriteActorAnimationBundle& buffer) {
-    std::optional<std::vector<u8>::iterator> pWds;
-    int numEntries = READ_LE_U32(buffer.m_rawData.begin());
+std::optional<std::vector<u8>::const_iterator> loadEffectFragmentsAndAudio(sSpriteActorAnimationBundle& buffer) {
+    std::optional<std::vector<u8>::const_iterator> pWds;
+    int numEntries = READ_LE_U32(buffer.getRawData().begin());
     for (int i = 3; i< numEntries; i++) {
-        u32 offset = READ_LE_U32(buffer.m_rawData.begin() + 0x4 + 4 * i);
-        std::vector<u8>::iterator entry = buffer.m_rawData.begin() + offset;
+        u32 offset = READ_LE_U32(buffer.getRawData().begin() + 0x4 + 4 * i);
+        std::vector<u8>::const_iterator entry = buffer.getRawData().begin() + offset;
         u32 magic = READ_LE_U32(entry);
         if (magic == ' sdw') {
             loadWdsDataIfNeeded();
             battleAnimationSoundLoaded = 0;
             startJumpAnimationVar3 = 0;
             sWdsFile tempWds;
-            tempWds.init(entry, buffer.m_rawData.size() - offset);
+            tempWds.init(entry, buffer.getRawData().size() - offset);
             loadWdsDataNeeded = loadWds(tempWds, 0);
             while (waitForMusic(0)) {
                 if (runningOnDTL != -1) {
@@ -2804,8 +2804,8 @@ std::optional<std::vector<u8>::iterator> loadEffectFragmentsAndAudio(sSpriteActo
     return pWds;
 }
 
-std::optional<std::vector<u8>::iterator> loadFragmentIsNotLoadedYet() {
-    std::optional<std::vector<u8>::iterator> fragmentPtr;
+std::optional<std::vector<u8>::const_iterator> loadFragmentIsNotLoadedYet() {
+    std::optional<std::vector<u8>::const_iterator> fragmentPtr;
     if (fxFragmentLoaded == 0) {
         fragmentPtr = loadEffectFragmentsAndAudio(*battleAnimationLoadingDest);
         fxFragmentLoaded = 1;
@@ -3055,8 +3055,8 @@ void freePlayerTurnStructs(void) {
 
 void clearFragmentSeq(sSpriteActorAnimationBundle* pBundle) {
     for (int i = 3; i < pBundle->m0_numEntries; i++) {
-        u32 offset = READ_LE_U32(pBundle->m_rawData.begin() + 0x4 + 4 * i);
-        std::vector<u8>::iterator entry = pBundle->m_rawData.begin() + offset;
+        u32 offset = READ_LE_U32(pBundle->getRawData().begin() + 0x4 + 4 * i);
+        std::vector<u8>::const_iterator entry = pBundle->getRawData().begin() + offset;
         u32 magic = READ_LE_U32(entry);
         if (magic == 'sdes') {
             unloadSequence(&pBundle->m4_entriesAsSequences[i]);
@@ -3123,7 +3123,7 @@ void deleteJumpAnimationControlStructEndOfAttack() {
 }
 
 byte currentFileFrom0xC = 0;
-std::vector<u8> fragmentFile;
+sLoadableDataRaw fragmentFile;
 
 void battleLoadFileFrom0xC(void)
 {
@@ -6326,7 +6326,7 @@ void battleTickMain(s8 param_1) {
                 ((battleEntities[battleVar2->m2D3_currentEntityTurn].m0_base.m34 & 0x400U) == 0)) {
                 // Display the enemy's name
                 battleVar1->mB0_isDialogWindowInitialized[5] = 1;
-                std::vector<u8>::iterator pString = getDialogParamPointer(currentBattleSpecificStrings, battleMonsterMapping[battleVar2->m2D3_currentEntityTurn]);
+                std::vector<u8>::const_iterator pString = getDialogParamPointer(currentBattleSpecificStrings, battleMonsterMapping[battleVar2->m2D3_currentEntityTurn]);
                 previousEntityTurn.m8[0].m5E_currentMonsterNameStringWidth = renderString(pString, *previousEntityTurn.m8[0].m58_ramBufferFromMonsterName, 0x39, 0);
                 loadImageSync(&previousEntityTurn.m8[0].m50_monsterNameVRamRect, *previousEntityTurn.m8[0].m58_ramBufferFromMonsterName);
                 previousEntityTurn.m8[0].m5D_monsterNameIsDisplayed = 1;

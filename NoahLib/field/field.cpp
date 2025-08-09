@@ -58,10 +58,10 @@ struct sFieldVramMapping
 std::array<sFieldVramMapping, 32> fieldVramMapping;
 
 std::vector<u8> rawFieldBundleForDebug;
-std::vector<u8> rawFieldBundle;
+sLoadableDataRaw rawFieldBundle;
 std::vector<u8> rawFieldModels;
 std::vector<u8> rawFieldScriptData;
-std::vector<u8> rawFieldDialogBundle;
+sLoadableDataRaw rawFieldDialogBundle;
 std::vector<sFieldTrigger> fieldTriggerData;
 
 // this is malloc/free in original code, I keep it around for debugger
@@ -80,11 +80,15 @@ std::vector<sFieldEntity> actorArray;
 std::vector<sSpriteActorAnimationBundle> fieldActorSetupParams;
 std::vector<u8> rawFieldActorSetupParams;
 
-s16 numWalkMesh = 0;
-std::array<s32, 5> walkMeshNumTrianglePerBlock;
+// Walkmesh runtime vars in PSX memory order:
 std::vector<u32>* walkMeshVar1;
-std::array<std::vector<SVECTOR>*, 5> walkMeshVertices;
 std::array<std::vector<sWalkMesh::sTriangleData>*, 5> walkMeshTriangle;
+std::array<std::vector<SVECTOR>*, 5> walkMeshVertices;
+std::array<s32, 5> walkMeshNumTrianglePerBlock;
+s16 numWalkMesh = 0;
+
+
+
 s32 walkMeshVar4 = 0;
 
 s16 isFogSetup = 0;
@@ -411,14 +415,14 @@ void uploadFieldImages(std::vector<u8>::iterator pImageData)
 }
 
 RECT* currentNpcSpriteUploadRect = nullptr;
-std::vector<u8>::iterator currentNpcSpriteUploadDataPtr;
+std::vector<u8>::const_iterator currentNpcSpriteUploadDataPtr;
 
 void transfertNpcSpriteSheetElement()
 {
     LoadImage(currentNpcSpriteUploadRect, &currentNpcSpriteUploadDataPtr[0]);
 }
 
-void uploadNpcSpriteSheet(std::vector<u8>::iterator pImageData, int x, int y)
+void uploadNpcSpriteSheet(std::vector<u8>::const_iterator pImageData, int x, int y)
 {
     int count = READ_LE_U32(pImageData);
 
@@ -427,7 +431,7 @@ void uploadNpcSpriteSheet(std::vector<u8>::iterator pImageData, int x, int y)
     for (int i = 0; i < count; i++)
     {
         int offset = READ_LE_U32(pImageData + 4 + i * 4);
-        std::vector<u8>::iterator data = pImageData + offset;
+        std::vector<u8>::const_iterator data = pImageData + offset;
 
         RECT rect;
         rect.x = x + xOffset;
@@ -446,7 +450,7 @@ void uploadNpcSpriteSheet(std::vector<u8>::iterator pImageData, int x, int y)
     MissingCode();
 }
 
-void setupField3d(std::vector<u8>::iterator input)
+void setupField3d(std::vector<u8>::const_iterator input)
 {
     lookAtDivided(&cameraMatrix, &cameraEye, &cameraAt, &cameraUp);
     createRotationMatrix(&cameraProjectionAngles, &currentProjectionMatrix);
@@ -972,7 +976,7 @@ int findFreePartySlot(int param_1, int* param_2)
 int asyncPartyCharacterLoadingCharacterIndex = 0;
 int asyncPartyCharacterLoadingIndex = 0;
 int fieldExecuteVar1 = 0;
-std::vector<u8> asyncPartyCharacterLoadingBuffer;
+sLoadableDataRaw asyncPartyCharacterLoadingBuffer;
 
 void copyPartySlotFromNext(uint param_1)
 {
@@ -1934,15 +1938,15 @@ void unflagAllocation(struct sLoadableData&) {
     MissingCode();
 }
 
-void flagAllocation(std::vector<u8>&)
-{
-    MissingCode();
-}
+//void flagAllocation(std::vector<u8>&)
+//{
+//    MissingCode();
+//}
 
-void unflagAllocation(std::vector<u8>&)
-{
-    MissingCode();
-}
+//void unflagAllocation(std::vector<u8>&)
+//{
+ //   MissingCode();
+//}
 
 void setupObjectRenderModesSub0(sFieldEntitySub0* param_1)
 {
@@ -2354,10 +2358,10 @@ void initFieldData()
 
     for (int i = 0; i < 32; i++)
     {
-        fieldVramMapping[i].m0_vramX = READ_LE_S16(rawFieldBundle.begin() + i * 8 + 0);
-        fieldVramMapping[i].m2_vramY = READ_LE_S16(rawFieldBundle.begin() + i * 8 + 2);
-        fieldVramMapping[i].m4 = READ_LE_S16(rawFieldBundle.begin() + i * 8 + 4);
-        fieldVramMapping[i].m6 = READ_LE_S16(rawFieldBundle.begin() + i * 8 + 6);
+        fieldVramMapping[i].m0_vramX = READ_LE_S16(rawFieldBundle.getRawData().begin() + i * 8 + 0);
+        fieldVramMapping[i].m2_vramY = READ_LE_S16(rawFieldBundle.getRawData().begin() + i * 8 + 2);
+        fieldVramMapping[i].m4 = READ_LE_S16(rawFieldBundle.getRawData().begin() + i * 8 + 4);
+        fieldVramMapping[i].m6 = READ_LE_S16(rawFieldBundle.getRawData().begin() + i * 8 + 6);
     }
 
     MissingCode();
@@ -2379,12 +2383,13 @@ void initFieldData()
 
     initCompassShadowPoly();
 
+    // Decompress and upload all vram data for the field
     {
         {
 
-            int rawFieldImageBundleSize = READ_LE_U32(&rawFieldBundle[0x10C]);
+            int rawFieldImageBundleSize = READ_LE_U32(&rawFieldBundle.getRawData()[0x10C]);
             rawFieldImageBundle.resize(rawFieldImageBundleSize + 0x10);
-            fieldDecompress(rawFieldImageBundleSize + 0x10, rawFieldBundle.begin() + READ_LE_U32(&rawFieldBundle[0x130]), rawFieldImageBundle);
+            fieldDecompress(rawFieldImageBundleSize + 0x10, rawFieldBundle.getRawData().begin() + READ_LE_U32(&rawFieldBundle.getRawData()[0x130]), rawFieldImageBundle);
 
             int numImages = READ_LE_U32(rawFieldImageBundle.begin());
             for (int i = 0; i < numImages; i++)
@@ -2395,9 +2400,9 @@ void initFieldData()
         }
 
         {
-            int rawFieldImageBundle2Size = READ_LE_U32(&rawFieldBundle[0x11C]);
+            int rawFieldImageBundle2Size = READ_LE_U32(&rawFieldBundle.getRawData()[0x11C]);
             rawFieldImageBundle2.resize(rawFieldImageBundle2Size + 0x10);
-            fieldDecompress(rawFieldImageBundle2Size + 0x10, rawFieldBundle.begin() + READ_LE_U32(&rawFieldBundle[0x140]), rawFieldImageBundle2);
+            fieldDecompress(rawFieldImageBundle2Size + 0x10, rawFieldBundle.getRawData().begin() + READ_LE_U32(&rawFieldBundle.getRawData()[0x140]), rawFieldImageBundle2);
 
             int numImages = READ_LE_U32(rawFieldImageBundle2.begin());
             for (int i = 0; i < numImages; i++)
@@ -2415,13 +2420,13 @@ void initFieldData()
             }
         }
 
-        DrawSync(0); // needs to be done to transfert to vram before the bundles get deallocated
+        DrawSync(0); // needs to be done to transfer to vram before the bundles get deallocated
     }
 
     {
-        int rawFieldSize = READ_LE_U32(&rawFieldBundle[0x114]);
+        int rawFieldSize = READ_LE_U32(&rawFieldBundle.getRawData()[0x114]);
         rawFieldModels.resize(rawFieldSize + 0x10);
-        fieldDecompress(rawFieldSize + 0x10, rawFieldBundle.begin() + READ_LE_U32(&rawFieldBundle[0x138]), rawFieldModels);
+        fieldDecompress(rawFieldSize + 0x10, rawFieldBundle.getRawData().begin() + READ_LE_U32(&rawFieldBundle.getRawData()[0x138]), rawFieldModels);
 
         int numModels = READ_LE_U32(rawFieldModels.begin());
         gCurrentFieldModels.clear();
@@ -2446,9 +2451,9 @@ void initFieldData()
 
     {
         std::vector<u8> rawEncounterData;
-        int rawFieldSize = READ_LE_U32(&rawFieldBundle[0x124]);
+        int rawFieldSize = READ_LE_U32(&rawFieldBundle.getRawData()[0x124]);
         rawEncounterData.resize(rawFieldSize + 0x10);
-        fieldDecompress(rawFieldSize + 0x10, rawFieldBundle.begin() + READ_LE_U32(&rawFieldBundle[0x148]), rawEncounterData);
+        fieldDecompress(rawFieldSize + 0x10, rawFieldBundle.getRawData().begin() + READ_LE_U32(&rawFieldBundle.getRawData()[0x148]), rawEncounterData);
         int numEntries = rawFieldSize / 0x20;
         if(numEntries)
         {
@@ -2464,18 +2469,18 @@ void initFieldData()
     }
 
     {
-        int rawFieldSize = READ_LE_U32(&rawFieldBundle[0x120]);
+        int rawFieldSize = READ_LE_U32(&rawFieldBundle.getRawData()[0x120]);
         rawFieldScriptData.resize(rawFieldSize + 0x10);
-        fieldDecompress(rawFieldSize + 0x10, rawFieldBundle.begin() + READ_LE_U32(&rawFieldBundle[0x144]), rawFieldScriptData);
+        fieldDecompress(rawFieldSize + 0x10, rawFieldBundle.getRawData().begin() + READ_LE_U32(&rawFieldBundle.getRawData()[0x144]), rawFieldScriptData);
         totalActors = READ_LE_U32(rawFieldScriptData.begin() + 0x80);
         pCurrentFieldScriptFile = rawFieldScriptData.begin() + 0x84 + totalActors * 0x40;
     }
 
     {
         std::vector<u8> rawFieldTriggerData;
-        int rawFieldSize = READ_LE_U32(&rawFieldBundle[0x12C]);
+        int rawFieldSize = READ_LE_U32(&rawFieldBundle.getRawData()[0x12C]);
         rawFieldTriggerData.resize(rawFieldSize + 0x10);
-        fieldDecompress(rawFieldSize + 0x10, rawFieldBundle.begin() + READ_LE_U32(&rawFieldBundle[0x150]), rawFieldTriggerData);
+        fieldDecompress(rawFieldSize + 0x10, rawFieldBundle.getRawData().begin() + READ_LE_U32(&rawFieldBundle.getRawData()[0x150]), rawFieldTriggerData);
 
         fieldTriggerData.resize(rawFieldTriggerData.size() / 0x18);
         for (int i = 0; i < fieldTriggerData.size(); i++)
@@ -2495,22 +2500,13 @@ void initFieldData()
         }
     }
 
-    {
-        int rawFieldSize = READ_LE_U32(&rawFieldBundle[0x128]);
-        rawFieldDialogBundle.resize(rawFieldSize + 0x10);
-        fieldDecompress(rawFieldSize + 0x10, rawFieldBundle.begin() + READ_LE_U32(&rawFieldBundle[0x14C]), rawFieldDialogBundle);
-    }
+    fieldDecompress(READ_LE_U32(&rawFieldBundle.getRawData()[0x128]) + 0x10, rawFieldBundle.getRawData().begin() + READ_LE_U32(&rawFieldBundle.getRawData()[0x14C]), rawFieldDialogBundle);
 
     {
         // TODO: clean that up!
+        fieldDecompress(READ_LE_U32(&rawFieldBundle.getRawData()[0x110]) + 0x10, rawFieldBundle.getRawData().begin() + READ_LE_U32(&rawFieldBundle.getRawData()[0x134]), walkMesh);
 
-        std::vector<u8> rawFieldWalkMesh;
-        int rawFieldSize = READ_LE_U32(&rawFieldBundle[0x110]);
-        rawFieldWalkMesh.resize(rawFieldSize + 0x10);
-        fieldDecompress(rawFieldSize + 0x10, rawFieldBundle.begin() + READ_LE_U32(&rawFieldBundle[0x134]), rawFieldWalkMesh);
-        walkMesh.init(rawFieldWalkMesh);
-
-        std::vector<u8>::iterator walkMeshIterator = rawFieldWalkMesh.begin();
+        std::vector<u8>::const_iterator walkMeshIterator = walkMesh.getRawData().begin();
 
         numWalkMesh = walkMesh.m0_count;
         assert(numWalkMesh < 5);
@@ -2526,15 +2522,15 @@ void initFieldData()
 
         walkMeshIterator += 4 * 4;
 
-        u8* walkMeshVar1Raw = &(rawFieldWalkMesh[0]) + READ_LE_U32(walkMeshIterator);
+        const u8* walkMeshVar1Raw = walkMesh.getRawData().data() + READ_LE_U32(walkMeshIterator);
         walkMeshIterator += 4;
 
-        std::array<u8*, 5> walkMeshVerticesRaw;
-        std::array<u8*, 5> walkMeshTriangleRaw;
+        std::array<const u8*, 5> walkMeshVerticesRaw;
+        std::array<const u8*, 5> walkMeshTriangleRaw;
 
         for (int i = 0; i < numWalkMesh; i++) {
-            walkMeshVerticesRaw[i] = &rawFieldWalkMesh[0] + READ_LE_U32(walkMeshIterator);
-            walkMeshTriangleRaw[i] = &rawFieldWalkMesh[0] + READ_LE_U32(walkMeshIterator + 4);
+            walkMeshVerticesRaw[i] = walkMesh.getRawData().data() + READ_LE_U32(walkMeshIterator);
+            walkMeshTriangleRaw[i] = walkMesh.getRawData().data() + READ_LE_U32(walkMeshIterator + 4);
             walkMeshIterator = walkMeshIterator + 2 * 4;
         }
         walkMeshVar4 = (walkMeshTriangleRaw[0] - walkMeshVar1Raw) / 4;
@@ -2553,9 +2549,9 @@ void initFieldData()
     {
         // TODO: rawFieldActorSetupParams should be local, but fieldActorSetupParams still points inside of it. Figure that out.
 
-        int rawFieldSize = READ_LE_U32(&rawFieldBundle[0x118]);
+        int rawFieldSize = READ_LE_U32(&rawFieldBundle.getRawData()[0x118]);
         rawFieldActorSetupParams.resize(rawFieldSize + 0x10);
-        fieldDecompress(rawFieldSize + 0x10, rawFieldBundle.begin() + READ_LE_U32(&rawFieldBundle[0x13C]), rawFieldActorSetupParams);
+        fieldDecompress(rawFieldSize + 0x10, rawFieldBundle.getRawData().begin() + READ_LE_U32(&rawFieldBundle.getRawData()[0x13C]), rawFieldActorSetupParams);
 
         u32 count = READ_LE_U32(rawFieldActorSetupParams.begin());
         fieldActorSetupParams.clear();
@@ -2572,9 +2568,9 @@ void initFieldData()
     cameraLimits[2] = 1;
     cameraLimits[3] = 1;
 
-    setupField3d(rawFieldBundle.begin() + 0x154);
+    setupField3d(rawFieldBundle.getRawData().begin() + 0x154);
 
-    totalObjects = READ_LE_U16(&rawFieldBundle[0x18C]);
+    totalObjects = READ_LE_U16(&rawFieldBundle.getRawData()[0x18C]);
     actorArray.resize(totalObjects);
 
     for (int i = 0; i < totalObjects; i++)
@@ -2582,7 +2578,7 @@ void initFieldData()
         memset(&actorArray[i], 0, sizeof(sFieldEntity));
     }
 
-    std::vector<u8>::iterator fieldEntitySetup = rawFieldBundle.begin() + 0x190;
+    std::vector<u8>::const_iterator fieldEntitySetup = rawFieldBundle.getRawData().begin() + 0x190;
     for (int i = 0; i < totalObjects; i++)
     {
         actorArray[i].m58_flags = READ_LE_U16(fieldEntitySetup);
@@ -2636,7 +2632,7 @@ void initFieldData()
     resetAllRGBFadersToBlack();
 
     unflagAllocation(rawFieldBundle);
-    rawFieldBundleForDebug = rawFieldBundle;
+    rawFieldBundleForDebug = rawFieldBundle.getRawData();
     rawFieldBundle.clear();
 
     resetMemoryAllocStats(5, 0);
@@ -2748,7 +2744,7 @@ int loadNewField(int fieldId, int param)
     if (currentFieldId1 != -1)
     {
         unflagAllocation(rawFieldBundle);
-        rawFieldBundleForDebug = rawFieldBundle;
+        rawFieldBundleForDebug = rawFieldBundle.getRawData();
         rawFieldBundle.clear();
     }
     loadRawFieldBundle(fieldId);
@@ -3040,11 +3036,10 @@ void finalizeLoadPlayableCharacters()
             if (currentParty[i] != 0xFF)
             {
                 unflagAllocation(partyCharacterBuffersCompressed[i]);
-                decompress(partyCharacterBuffersCompressed[i].mData.begin(), partyCharacterBuffersRaw[i].mData);
-                partyCharacterBuffersCompressed[i].mData.clear();
+                decompress(partyCharacterBuffersCompressed[i].getRawData().begin(), partyCharacterBuffersRaw[i]);
+                partyCharacterBuffersCompressed[i].clear();
 
-                std::span<u8> tempSpan(partyCharacterBuffersRaw[i].mData.begin(), partyCharacterBuffersRaw[i].mData.size());
-                partyCharacterBuffers[i].init(tempSpan.begin());
+                partyCharacterBuffers[i].init(partyCharacterBuffersRaw[i].beginSpan());
             }
         }
 
@@ -7886,7 +7881,7 @@ void loadFieldSeq(void)
     setCurrentDirectory(4, 0);
     sVar1 = getFileSizeAligned(0xa8);
     fieldSeq = new sSeqFile();
-    flagAllocation(fieldSeq->m_rawData);
+    flagAllocation(*fieldSeq);
     //if (loadFieldSeqVar0 == -1) {
         readFile(0xa8, *fieldSeq, 0, 0x80);
         waitReadCompletion(0);
@@ -7905,7 +7900,7 @@ void loadFieldSeq(void)
 
 void unloadFieldSeq() {
     unloadSequence(fieldSeq);
-    unflagAllocation(fieldSeq->m_rawData);
+    unflagAllocation(*fieldSeq);
     delete fieldSeq;
     loadFieldSeqVar0 = -1;
 }

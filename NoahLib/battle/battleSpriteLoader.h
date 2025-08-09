@@ -23,12 +23,12 @@ struct sBattleSpriteConfigsSub {
 };
 
 struct sBattleSpriteConfigs : public sLoadableDataRaw {
-    void init(std::vector<u8>& data) {
+    virtual void init(const std::vector<u8>& data) override {
         sLoadableDataRaw::init(data);
 
-        m0_numEntities = READ_LE_S8(begin() + 0);
-        m1 = READ_LE_S8(begin() + 1);
-        m4_bufferSize = READ_LE_U32(begin() + 4);
+        m0_numEntities = READ_LE_S8(data.begin() + 0);
+        m1 = READ_LE_S8(data.begin() + 1);
+        m4_bufferSize = READ_LE_U32(data.begin() + 4);
 
         int headerSize = m0_numEntities * 0xC + 8;
 
@@ -40,13 +40,13 @@ struct sBattleSpriteConfigs : public sLoadableDataRaw {
         for (int i = 0; i < m0_numEntities; i++) {
             if (m8[i].m8_isMecha) {
                 if(m8[i].m4_spriteDataOffset > 7) {
-                    m8[i].m_mechaData2.init(begin() + m8[i].m0_spriteControlOffset);
-                    m8[i].m_mechaData1.init(begin() + m8[i].m4_spriteDataOffset);
+                    m8[i].m_mechaData2.init(data.begin() + m8[i].m0_spriteControlOffset);
+                    m8[i].m_mechaData1.init(data.begin() + m8[i].m4_spriteDataOffset);
                 }
             }
         }
 
-        m_spriteData.insert(m_spriteData.begin(), begin() + headerSize, begin() + m4_bufferSize - headerSize);
+        m_spriteData.insert(m_spriteData.begin(), data.begin() + headerSize, data.begin() + m4_bufferSize - headerSize);
     }
 
     u8 m0_numEntities;

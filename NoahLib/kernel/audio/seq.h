@@ -2,8 +2,8 @@
 
 #include "kernel/filesystem.h"
 
-struct sSeqFile : sLoadableData {
-    void init(std::vector<u8>::iterator it, int size) {
+struct sSeqFile : sLoadableDataRaw {
+    void init(std::vector<u8>::const_iterator it, int size) {
         std::vector<u8> temp;
         temp.resize(size);
         for (int i = 0; i < size; i++) {
@@ -20,8 +20,8 @@ struct sSeqFile : sLoadableData {
         init(temp);
     }
 
-    virtual void init(std::vector<u8>& data) override {
-        m_rawData = data;
+    virtual void init(const std::vector<u8>& data) override {
+        sLoadableDataRaw::init(data);
         auto it = data.begin();
 
         m0_magic = READ_LE_U32(it + 0x0);
@@ -54,8 +54,6 @@ struct sSeqFile : sLoadableData {
     sSeqFile* m1C_pNext;
 
     u16 m20_drumKitOffset;
-
-    std::vector<u8> m_rawData;
 };
 
 extern sSeqFile* pLoadedSequencesLinkedList;

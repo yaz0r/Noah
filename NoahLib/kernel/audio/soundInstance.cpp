@@ -82,7 +82,7 @@ sSoundInstance* initSoundEffectInstances(uint param_1) {
 
 void setupAdsr(int param_1, sSoundInstanceEvent* param_2) {
     param_2->m26_ADSRIndex = (char)param_1;
-    auto pADSRData = param_2->m2C_pWds->m_rawData.begin() + 0x30 + param_1 * 0x10;
+    std::vector<u8>::const_iterator pADSRData = param_2->m2C_pWds->getRawData().begin() + 0x30 + param_1 * 0x10;
 
     u32 adpcmAddressOffset = READ_LE_U32(pADSRData) * 8;
     u32 adpcmSampleSize = READ_LE_U16(pADSRData + 4) * 8;
@@ -147,7 +147,7 @@ void playSoundEffectSub(uint param_1, uint param_2, short param_3, u16 param_4) 
                 pWds = pLoadedWdsLinkedList;
             }
 
-            u32 uVar9 = (int)param_3 * READ_LE_U8(pCurrentSeq->m_rawData.begin() + pCurrentSeq->m18 + (param_2 & 0xFFFF));
+            u32 uVar9 = (int)param_3 * READ_LE_U8(pCurrentSeq->getRawData().begin() + pCurrentSeq->m18 + (param_2 & 0xFFFF));
             s16 uVar8 = (s16)(uVar9 >> 7);
             if ((uVar9 >> 0x16 & 1) != 0) {
                 uVar8 = 0x7fff;
@@ -156,7 +156,7 @@ void playSoundEffectSub(uint param_1, uint param_2, short param_3, u16 param_4) 
             DisableEvent(audioTickEvent);
             for (int i = 0; i < playSoundEffectVar0; i++) {
                 sSoundInstanceEvent* pSoundEvent = &pSoundEffectsInstances->m94_events[param_1 & 0xFF + i];
-                auto pDrumData = pCurrentSeq->m_rawData.begin() + 0x20 + (param_2 & 0xFFFF) * 2 + 2 * i;
+                auto pDrumData = pCurrentSeq->getRawData().begin() + 0x20 + (param_2 & 0xFFFF) * 2 + 2 * i;
 
                 pSoundEvent->m8 = param_2;
                 pSoundEvent->mC = spuUpdateCounter;
@@ -197,8 +197,8 @@ void playSoundEffectSub(uint param_1, uint param_2, short param_3, u16 param_4) 
                     pSoundEvent->m30.mE = 0;
                     pSoundEvent->mCE = 0;
                     pSoundEvent->m74_pan = param_4;
-                    pSoundEvent->m10 = pCurrentSeq->m_rawData.begin() + READ_LE_U16(pDrumData);
-                    pSoundEvent->m14 = pCurrentSeq->m_rawData.begin() + READ_LE_U16(pDrumData);
+                    pSoundEvent->m10 = pCurrentSeq->getRawData().begin() + READ_LE_U16(pDrumData);
+                    pSoundEvent->m14 = pCurrentSeq->getRawData().begin() + READ_LE_U16(pDrumData);
 
                     // Todo: cross-check that
                     for (int i = 0; i < 3; i++) {
@@ -252,7 +252,7 @@ void initSoundInstanceTracks(sSoundInstance* param_1) {
         }
         for (int i = 0; i < param_1->m14_count; i++) {
             sSoundInstanceEvent* pSoundEvent = &param_1->m94_events[i];
-            auto pDrumData = param_1->m8_pSeq->m_rawData.begin() + 0x22 + i * 2;
+            auto pDrumData = param_1->m8_pSeq->getRawData().begin() + 0x22 + i * 2;
 
             if (READ_LE_U16(pDrumData) == 0) {
                 pSoundEvent->m0 = 0;
@@ -301,8 +301,8 @@ void initSoundInstanceTracks(sSoundInstance* param_1) {
                 pSoundEvent->m30.mC = 0;
                 pSoundEvent->m30.mE = 0;
                 pSoundEvent->mCE = 0;
-                pSoundEvent->m10 = param_1->m8_pSeq->m_rawData.begin() + READ_LE_U16(pDrumData);
-                pSoundEvent->m14 = param_1->m8_pSeq->m_rawData.begin() + READ_LE_U16(pDrumData);
+                pSoundEvent->m10 = param_1->m8_pSeq->getRawData().begin() + READ_LE_U16(pDrumData);
+                pSoundEvent->m14 = param_1->m8_pSeq->getRawData().begin() + READ_LE_U16(pDrumData);
 
                 // Todo: cross-check that
                 for (int i = 0; i < 3; i++) {
@@ -327,7 +327,7 @@ void initSoundInstanceTracks(sSoundInstance* param_1) {
 void initPercussions(sSoundInstance* param_1, sSeqFile* param_2) {
     param_1->mC_pPercussionData = &param_1->mPercussionData;
     int numPercussionData = param_2->m14 >> 8;
-    auto pDrumKit = param_2->m_rawData.begin() + param_2->m20_drumKitOffset;
+    auto pDrumKit = param_2->getRawData().begin() + param_2->m20_drumKitOffset;
     for (int i = 0; i < numPercussionData; i++) {
         auto& destSlot = param_1->mC_pPercussionData->data[READ_LE_U8(pDrumKit + 0)];
         destSlot.m0_adsr = READ_LE_U8(pDrumKit + 1);

@@ -1,7 +1,7 @@
 #pragma once
 
 struct sBattleScriptEntity {
-    std::array<std::optional<std::vector<u8>::iterator>, 4> m0_scripts;
+    std::array<std::optional<std::vector<u8>::const_iterator>, 4> m0_scripts;
     std::array<s32, 4> m10_s32Vars;
     std::array<s16, 8> m20_s16Vars;
     std::array<u8, 16> m30_s8Vars;

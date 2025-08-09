@@ -21,7 +21,7 @@ extern sWorldmapExitDef worldmapExitToField312;
 extern sWorldmapExitDef worldmapExitToField440;
 extern sWorldmapExitDef worldmapExitToField290_yggdrasilDeck;
 
-extern std::vector<u8>::iterator worldmapFile1Buffer_1C;
+extern std::vector<u8>::const_iterator worldmapFile1Buffer_1C;
 
 
 int setupWorldmapExits(VECTOR* param_1, int param_2);

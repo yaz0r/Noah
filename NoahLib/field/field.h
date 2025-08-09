@@ -134,7 +134,7 @@ struct sFieldScriptEntity
     s16 m11C;
     s16 m11E;
     struct sSpriteActorAnimationBundle* m120_special2dAnimation;
-    std::vector<u8> m120_special2dAnimationRaw;
+    sLoadableDataRaw m120_special2dAnimationRaw;
     s16 m124_special2dAnimationId;
     u8 m126;
     u8 m127;
@@ -196,7 +196,7 @@ extern int asyncLoadingVar1;
 extern int fieldExecuteVar1;
 
 extern int asyncPartyCharacterLoadingIndex;
-extern std::vector<u8> asyncPartyCharacterLoadingBuffer;
+extern sLoadableDataRaw asyncPartyCharacterLoadingBuffer;
 extern int asyncPartyCharacterLoadingCharacterIndex;
 
 extern std::array<sSpriteActorAnimationBundle, 3> partyCharacterBuffers;
@@ -265,7 +265,7 @@ extern std::array<s16, 4> cameraLimits;
 extern bool g_LogOpcodes;
 extern bool g_BreakOnMissingOpcode;
 
-extern std::vector<u8> rawFieldDialogBundle;
+extern sLoadableDataRaw rawFieldDialogBundle;
 
 extern u8 DollyStop;
 extern u8 DollySet;
@@ -371,7 +371,7 @@ void clearShapeTransfertTableEntry(int param_1);
 void uploadCharacterSprites();
 void shapeTransfert();
 
-void uploadNpcSpriteSheet(std::vector<u8>::iterator pImageData, int x, int y);
+void uploadNpcSpriteSheet(std::vector<u8>::const_iterator pImageData, int x, int y);
 
 void setFieldDrawEnvClip(short x, short y, short w, short h);
 
@@ -383,8 +383,8 @@ void initFontSystem();
 void flagAllocation(struct sLoadableData&);
 void unflagAllocation(struct sLoadableData&);
 
-void flagAllocation(std::vector<u8>&);
-void unflagAllocation(std::vector<u8>&);
+//void flagAllocation(std::vector<u8>&);
+//void unflagAllocation(std::vector<u8>&);
 
 uint stepInterpolateDirection(int currentDirection, int targetDirection, int step);
 

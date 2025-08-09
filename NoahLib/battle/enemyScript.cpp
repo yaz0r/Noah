@@ -9,7 +9,7 @@ std::array<sBattleScriptContext, 32> battleScriptContext;
 ushort bitmaskCharacterCheck(ushort bitmask, uint characterId);
 
 struct sBattleScriptExecutionContext {
-    std::vector<u8>::iterator m0_scriptPtr;
+    std::vector<u8>::const_iterator m0_scriptPtr;
 };
 
 int executeMonsterScriptLower(sBattleScriptExecutionContext* pScriptContext, int entityIndex, int numIterations);

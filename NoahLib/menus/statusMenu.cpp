@@ -79,14 +79,14 @@ void initStatusMenuSub0(char param_1) {
 
 void loadSharedMenuData2(s8 param_1) {
     sLoadableDataRaw file;
-    std::vector<std::vector<u8>::iterator> relocatedFile;
+    std::vector<std::vector<u8>::const_iterator> relocatedFile;
 
     if (param_1 < 0x10) {
         setCurrentDirectory(0x10, 0);
         file.resize(getFileSizeAligned(2));
         readFile(2, file, 0, 0x80);
         waitReadCompletion(0);
-        relocatedFile = doPointerRelocation(file.mData);
+        relocatedFile = doPointerRelocation(file.getRawData());
     }
 
     switch (param_1) {

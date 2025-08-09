@@ -2,8 +2,8 @@
 
 #include "kernel/filesystem.h"
 
-struct sWdsFile : sLoadableData {
-    void init(std::vector<u8>::iterator it, int size) {
+struct sWdsFile : sLoadableDataRaw {
+    void init(std::vector<u8>::const_iterator it, int size) {
         std::vector<u8> temp;
         temp.resize(size);
         for (int i = 0; i < size; i++) {
@@ -11,8 +11,8 @@ struct sWdsFile : sLoadableData {
         }
         init(temp);
     }
-    virtual void init(std::vector<u8>& data) override {
-        m_rawData = data;
+    virtual void init(const std::vector<u8>& data) override {
+        sLoadableDataRaw::init(data);
 
         auto it = data.begin();
 
@@ -32,14 +32,12 @@ struct sWdsFile : sLoadableData {
     u16 m20_bankNumber;
     s32 m28_adpcmAddress;
     sWdsFile* m2C_pNext;
-
-    std::vector<u8> m_rawData;
 };
 
 struct sLoadWdsSub0SubVar0 {
     u16 m0;
     u16 m2;
-    std::vector<u8>::iterator m4_size;
+    std::vector<u8>::const_iterator m4_size;
     u32 m8_spuAddress;
     u32 mC_size;
     void (*m10_callback)();

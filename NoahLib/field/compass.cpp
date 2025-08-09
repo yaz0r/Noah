@@ -258,7 +258,7 @@ void renderCompass()
 	SetGeomScreen(sceneSCRZ);
 }
 
-std::vector<u8> compassGraphicDataStaging;
+sLoadableDataRaw compassGraphicDataStaging;
 
 struct RECT2
 {
@@ -299,7 +299,7 @@ void initCompassData()
 
 	MissingCode();
 
-	std::vector<std::vector<u8>::iterator> relocatedPointers = doPointerRelocation(compassGraphicDataStaging);
+	std::vector<std::vector<u8>::const_iterator> relocatedPointers = doPointerRelocation(compassGraphicDataStaging.getRawData());
 
 	for (int i = 0; i < 8; i++)
 	{

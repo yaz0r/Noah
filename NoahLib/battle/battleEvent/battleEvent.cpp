@@ -60,8 +60,8 @@ void battleEventEntry() {
     loadingCommands[2].m4_loadPtr = nullptr;
     batchStartLoadingFiles(loadingCommands, 0);
     idleBattleDuringLoading();
-    auto file2Reloc = doPointerRelocation(file2.mData);
-    auto file3Reloc = doPointerRelocation(battleEventFile3.mData);
+    auto file2Reloc = doPointerRelocation(file2.getRawData());
+    auto file3Reloc = doPointerRelocation(battleEventFile3.getRawData());
 
     battleEventVar2.init(mallocAndDecompress(file2Reloc[currentBattleConfig.m3_eventDataIndex * 2]));
     battleEventVarDialogueBundle = mallocAndDecompress(file2Reloc[currentBattleConfig.m3_eventDataIndex * 2 + 1]);
@@ -276,10 +276,10 @@ void battleDialogLoadPortrait(uint param_1, uint param_2, short x, short y, shor
     int size = getFileSizeAligned(portraitId + 0x46);
 
     {
-        std::vector<u8> portraitFile;
+        sLoadableDataRaw portraitFile;
         readFile(portraitId + 0x46, portraitFile, 0, 0x80);
         idleBattleDuringLoading();
-        OpenTIM(portraitFile.begin());
+        OpenTIM(portraitFile.getRawData().begin());
         TIM_IMAGE timImage;
         ReadTIM(&timImage);
         timImage.crect->x = 0;
@@ -547,7 +547,7 @@ int battleEvent_OP35(int currentEntityId, const std::vector<u8>::iterator& bytec
     sBattleRunningVar0Sub* entry = &battleEventVar0->m0_scriptEntities[(battleEventVar0->m380_currentArgs[0] + 0xD) & 0xFF];
     if (entry->m35 == 0) {
         entry->m2C = new sSpriteActorAnimationBundle;
-        std::vector<u8> rawBundle = mallocAndDecompress(battleEventFile3.begin() + READ_LE_U32(battleEventFile3.begin() + 4 + battleEventVar0->m380_currentArgs[1] * 4));
+        std::vector<u8> rawBundle = mallocAndDecompress(battleEventFile3.getRawData().begin() + READ_LE_U32(battleEventFile3.getRawData().begin() + 4 + battleEventVar0->m380_currentArgs[1] * 4));
         entry->m2C->init(rawBundle);
         SVECTOR position = { 0,0,0 };
         entry->m30 = battleEvent_OP35_createEntity(entry->m2C, &position);

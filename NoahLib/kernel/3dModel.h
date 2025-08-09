@@ -3,7 +3,7 @@
 struct sModelBlock
 {
     ~sModelBlock();
-    void init(u8* input);
+    void init(const u8* input);
 
     u16 m0_flags;
     s16 m2_numVertices;
@@ -45,7 +45,7 @@ private:
 
 struct sModel
 {
-    void init(std::vector<u8>::iterator inputData, int dataSize);
+    void init(std::vector<u8>::const_iterator inputData, int dataSize);
 
     u32 m0_numBlocks = 0;
     std::vector<sModelBlock> m10_blocks;

@@ -16,7 +16,7 @@ sBgfxRendererData* sModelBlock::getBgfxData() {
     return m_pBgfxRendererData;
 }
 
-void sModelBlock::init(u8* blockData) {
+void sModelBlock::init(const u8* blockData) {
     m0_flags = READ_LE_U16(blockData + 0);
     m2_numVertices = READ_LE_U16(blockData + 2);
     m4_numPrims = READ_LE_U16(blockData + 4);
@@ -42,7 +42,7 @@ void sModelBlock::init(u8* blockData) {
     m34_instanceBufferSize = READ_LE_U32(blockData + 0x34);
 }
 
-void sModel::init(std::vector<u8>::iterator input, int dataSize)
+void sModel::init(std::vector<u8>::const_iterator input, int dataSize)
 {
     mRawData.resize(dataSize);
     for (int i = 0; i < dataSize; i++)

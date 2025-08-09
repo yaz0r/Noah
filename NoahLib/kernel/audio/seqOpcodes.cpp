@@ -4,20 +4,20 @@
 #include "soundSystem.h"
 #include "wds.h"
 
-std::vector<u8>::iterator seqOP_0_restAndNoteOff(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_0_restAndNoteOff(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pChannel->m5C_deltaTime = it[0];
     pChannel->m2 |= 2;
     pChannel->m0 |= 0x400;
     return it + 1;
 }
 
-std::vector<u8>::iterator seqOP_1_hold(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_1_hold(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pChannel->m0 = pChannel->m0 | 0x100;
     pChannel->m5C_deltaTime = it[0];
     return it + 1;
 }
 
-std::vector<u8>::iterator seqOP_10_end(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_10_end(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     if (!pChannel->m18_infiniteLoopStart.has_value()) {
         pChannel->m2 &= 0xFFFC;
         playSoundEffectSubSub0(&pChannel->m30, pChannel->m27);
@@ -32,29 +32,29 @@ std::vector<u8>::iterator seqOP_10_end(std::vector<u8>::iterator it, sSoundInsta
     return it;
 }
 
-std::vector<u8>::iterator seqOP_11_infiniteLoop(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_11_infiniteLoop(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pChannel->m18_infiniteLoopStart = it;
     pChannel->m23_infiniteLoopOctave = pChannel->m66_octave;
 
     return it;
 }
 
-std::vector<u8>::iterator seqOP_14_setOctave(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_14_setOctave(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pChannel->m66_octave = it[0] * 0xc;
     return it + 1;
 }
 
-std::vector<u8>::iterator seqOP_15_incOctave(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_15_incOctave(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pChannel->m66_octave += 0xc;
     return it;
 }
 
-std::vector<u8>::iterator seqOP_16_decOctave(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_16_decOctave(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pChannel->m66_octave -= 0xc;
     return it;
 }
 
-std::vector<u8>::iterator seqOP_17_timeSignature(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_17_timeSignature(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     int numerator = it[0];
     int denominator = it[1];
     pInstance->m3A = (short)(0xc0 / denominator);
@@ -65,7 +65,7 @@ std::vector<u8>::iterator seqOP_17_timeSignature(std::vector<u8>::iterator it, s
     return it + 2;
 }
 
-std::vector<u8>::iterator seqOP_18_loopStart(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_18_loopStart(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pChannel->m72_callstackDepth++;
     auto& pCallstack = pChannel->m9C_callstack[pChannel->m72_callstackDepth];
     pCallstack.m0_loopCount = *it - 1;
@@ -74,7 +74,7 @@ std::vector<u8>::iterator seqOP_18_loopStart(std::vector<u8>::iterator it, sSoun
     return it + 1;
 }
 
-std::vector<u8>::iterator seqOP_19_loopEnd(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_19_loopEnd(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     auto& pCallstack = pChannel->m9C_callstack[pChannel->m72_callstackDepth];
     if (--pCallstack.m0_loopCount == 0xFF) {
         pChannel->m72_callstackDepth--;
@@ -88,7 +88,7 @@ std::vector<u8>::iterator seqOP_19_loopEnd(std::vector<u8>::iterator it, sSoundI
     return it;
 }
 
-std::vector<u8>::iterator seqOP_1A(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_1A(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     auto& pCallstack = pChannel->m9C_callstack[pChannel->m72_callstackDepth];
     if (pCallstack.m0_loopCount == 0) {
         it = pCallstack.m8_loopEndIt;
@@ -98,13 +98,13 @@ std::vector<u8>::iterator seqOP_1A(std::vector<u8>::iterator it, sSoundInstance*
     return it;
 }
 
-std::vector<u8>::iterator seqOP_20_setTempo(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_20_setTempo(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pInstance->m58 = (int)it[0] << 0x10;
     pInstance->m54 = (int)it[0] * (pInstance->m64.m0.getIntegerPart());
     return it + 1;
 }
 
-std::vector<u8>::iterator seqOP_22_tempoSlide(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_22_tempoSlide(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     int duration = it[0];
     int tempoOffset = it[1];
 
@@ -118,17 +118,17 @@ std::vector<u8>::iterator seqOP_22_tempoSlide(std::vector<u8>::iterator it, sSou
     return it + 2;
 }
 
-std::vector<u8>::iterator seqOP_29(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_29(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pChannel->m62 = it[0];
     return it + 1;
 }
 
-std::vector<u8>::iterator seqOP_2C_setAdsr(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_2C_setAdsr(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     setupAdsr(it[0], pChannel);
     return it + 1;
 }
 
-std::vector<u8>::iterator seqOP_2D(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_2D(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     if (it[0] == 0) {
         pChannel->m60 = 0;
     }
@@ -138,31 +138,31 @@ std::vector<u8>::iterator seqOP_2D(std::vector<u8>::iterator it, sSoundInstance*
     return it + 1;
 }
 
-std::vector<u8>::iterator seqOP_2E_percussionOn(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_2E_percussionOn(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     if (pInstance->mC_pPercussionData) {
         pChannel->m0 |= 0x10;
     }
     return it;
 }
 
-std::vector<u8>::iterator seqOP_2F_percussionOff(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_2F_percussionOff(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     if (pInstance->mC_pPercussionData) {
         pChannel->m0 &= ~0x10;
     }
     return it;
 }
 
-std::vector<u8>::iterator seqOP_30(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_30(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pChannel->m0 |= 0x800;
     return it;
 }
 
-std::vector<u8>::iterator seqOP_31(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_31(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pChannel->m0 &= ~0x800;
     return it;
 }
 
-std::vector<u8>::iterator seqOP_32(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_32(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     if ((pChannel->m27 & 1) != 0) {
         (pChannel->m30).m6 = (pChannel->m30).m6 | 0x1000;
         (pChannel->m30).m2 = (pChannel->m30).m2 | 0x10;
@@ -170,7 +170,7 @@ std::vector<u8>::iterator seqOP_32(std::vector<u8>::iterator it, sSoundInstance*
     return it;
 }
 
-std::vector<u8>::iterator seqOP_3A(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_3A(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     if (((pInstance->m10_flags & 6) == 0) ||
         (((musicStatusFlag & 0x2000) != 0 && ((pChannel->m0 & 2) == 0)))) {
         pChannel->m30.m6 |= 0x4000;
@@ -179,93 +179,93 @@ std::vector<u8>::iterator seqOP_3A(std::vector<u8>::iterator it, sSoundInstance*
     return it;
 }
 
-std::vector<u8>::iterator seqOP_40_ADSRReset(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_40_ADSRReset(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     setupAdsr(pChannel->m26_ADSRIndex, pChannel);
     return it;
 }
 
-std::vector<u8>::iterator seqOP_49(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_49(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pChannel->m30.m6 |= 0x40;
     pChannel->m30.m25_ADSR_SustainMode = *it;
     return it + 1;
 }
 
-std::vector<u8>::iterator seqOP_4A(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_4A(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pChannel->m30.m6 |= 0x80;
     pChannel->m30.m26_ADSR_ReleaseMode = *it;
     return it + 1;
 }
 
-std::vector<u8>::iterator seqOP_42(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_42(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pChannel->m30.m6 |= 0x10;
     pChannel->m30.m27_ADSR_Attack = *it;
     return it + 1;
 }
 
-std::vector<u8>::iterator seqOP_44(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_44(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pChannel->m30.m6 |= 0x40;
     pChannel->m30.m29_ADSR_Sustain = *it;
     return it + 1;
 }
-std::vector<u8>::iterator seqOP_45(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_45(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pChannel->m30.m6 |= 0x40;
     pChannel->m30.m2A_ADSR_Release = *it;
     return it + 1;
 }
 
-std::vector<u8>::iterator seqOP_50(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_50(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pChannel->m6E = ((int)it[0] << 0x18) >> 0x13;
     pChannel->m2 |= 0x200;
     return it + 1;
 }
 
-std::vector<u8>::iterator seqOP_51(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_51(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pChannel->m6E += ((int)it[0] << 0x18) >> 0x13;
     pChannel->m2 |= 0x200;
     return it + 1;
 }
 
-std::vector<u8>::iterator seqOP_54(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_54(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     MissingCode();
     return it + 2;
 }
 
-std::vector<u8>::iterator seqOP_57_LFODepth(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_57_LFODepth(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     MissingCode();
     return it + 1;
 }
 
-std::vector<u8>::iterator seqOP_58_LFOLength(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_58_LFOLength(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     MissingCode();
     return it + 3;
 }
 
-std::vector<u8>::iterator seqOP_59(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_59(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     MissingCode();
     return it + 3;
 }
 
-std::vector<u8>::iterator seqOP_5B(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_5B(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pChannel->mCE &= ~1;
     pChannel->mD8[0].m1E &= ~1;
     return it;
 }
 
-std::vector<u8>::iterator seqOP_60_setVolume(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_60_setVolume(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pChannel->m78_volume = (int)it[0] << 0x18;
     pChannel->m4 &= 0xfef7;
     pChannel->m2 |= 0x100;
     return it + 1;
 }
 
-std::vector<u8>::iterator seqOP_61(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_61(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pChannel->m78_volume = (int)it[0] * 0x1000000 + pChannel->m78_volume & 0x7fffffff;
     pChannel->m2 |= 0x100;
     pChannel->m4 &= 0xfef7;
     return it + 1;
 }
 
-std::vector<u8>::iterator seqOP_62_volumeSlide(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_62_volumeSlide(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     int duration = it[0];
     int targetVolume = (int)it[1] * 0x1000000 - pChannel->m78_volume;
     if (duration && targetVolume) {
@@ -276,34 +276,34 @@ std::vector<u8>::iterator seqOP_62_volumeSlide(std::vector<u8>::iterator it, sSo
     return it + 2;
 }
 
-std::vector<u8>::iterator seqOP_63(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_63(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     MissingCode();
     return it + 1;
 }
 
-std::vector<u8>::iterator seqOP_64(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_64(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     MissingCode();
     return it + 3;
 }
 
-std::vector<u8>::iterator seqOP_65(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_65(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     MissingCode();
     return it + 3;
 }
 
-std::vector<u8>::iterator seqOP_67(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_67(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pChannel->mCE &= 0xFFFD;
     pChannel->mD8[1].m1E &= 0xFFFE;
     return it;
 }
 
-std::vector<u8>::iterator seqOP_68_pan(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_68_pan(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pChannel->m74_pan = (ushort)it[0] << 8;
     pChannel->m2 |= 0x100;
     return it + 1;
 }
 
-std::vector<u8>::iterator seqOP_6A_panSlide(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_6A_panSlide(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     int duration = it[0];
     int targetPan = it[1] - ((((int)pChannel->m74_pan) << 0x10) >> 0x18);
     if (duration && targetPan) {
@@ -315,18 +315,18 @@ std::vector<u8>::iterator seqOP_6A_panSlide(std::vector<u8>::iterator it, sSound
     return it + 2;
 }
 
-std::vector<u8>::iterator seqOP_6D(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_6D(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     MissingCode();
     return it + 3;
 }
 
-std::vector<u8>::iterator seqOP_6F(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_6F(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pChannel->mCE &= 0xFFFB;
     pChannel->mD8[2].m1E &= 0xFFFE;
     return it;
 }
 
-std::vector<u8>::iterator seqOP_78(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_78(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     int bVar1 = it[1];
     int iVar2 = (uint)it[2] * 0x1000000 + (uint)it[0] * -0x1000000;
 
@@ -343,7 +343,7 @@ std::vector<u8>::iterator seqOP_78(std::vector<u8>::iterator it, sSoundInstance*
     return it + 3;
 }
 
-std::vector<u8>::iterator seqOP_7C_changeWdsAndADSR(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_7C_changeWdsAndADSR(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pChannel->m25 = it[0];
     sWdsFile* pWds = findInWdsLinkedList(it[0]);
     if (pWds == nullptr) {
@@ -354,7 +354,7 @@ std::vector<u8>::iterator seqOP_7C_changeWdsAndADSR(std::vector<u8>::iterator it
     return it + 2;
 }
 
-std::vector<u8>::iterator seqOP_7E_changeBank(std::vector<u8>::iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
+std::vector<u8>::const_iterator seqOP_7E_changeBank(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pChannel->m25 = it[0];
     sWdsFile* pWds = findInWdsLinkedList(it[0]);
     if (pWds == nullptr) {

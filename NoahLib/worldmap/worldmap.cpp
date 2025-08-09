@@ -209,47 +209,47 @@ s32 worldmapFile9;
 s32 worldmapFile10;
 
 sModel worldmapModelFiles;
-std::vector<u8>::iterator worldmapFile1Buffer_C;
-std::vector<u8>::iterator worldmapFile1Buffer_14;
-std::vector<u8>::iterator worldmapFile1Buffer_18;
-std::vector<u8>::iterator worldmapFile1Buffer_1C;
-std::vector<u8>::iterator worldmapFile1Buffer_20;
-std::vector<u8>::iterator worldmapFile1Buffer_24;
+std::vector<u8>::const_iterator worldmapFile1Buffer_C;
+std::vector<u8>::const_iterator worldmapFile1Buffer_14;
+std::vector<u8>::const_iterator worldmapFile1Buffer_18;
+std::vector<u8>::const_iterator worldmapFile1Buffer_1C;
+std::vector<u8>::const_iterator worldmapFile1Buffer_20;
+std::vector<u8>::const_iterator worldmapFile1Buffer_24;
 
-std::vector<u8>::iterator worldmapFile1Buffer_4_0;
+std::vector<u8>::const_iterator worldmapFile1Buffer_4_0;
 
-std::vector<u8>::iterator pWorldmapModelsConfig;
+std::vector<u8>::const_iterator pWorldmapModelsConfig;
 
-std::array<std::vector<u8>::iterator, 16> worldmapFile1Buffer_2C_data;
+std::array<std::vector<u8>::const_iterator, 16> worldmapFile1Buffer_2C_data;
 
 void finalizeWorldMapFileLoading() {
-    worldmapFile1Buffer.mData = mallocAndDecompress(worldmapFile1Buffer.begin());
+    worldmapFile1Buffer.init(mallocAndDecompress(worldmapFile1Buffer.getRawData().begin()));
 
-    worldmapFile1Buffer_C = worldmapFile1Buffer.begin() + READ_LE_U32(worldmapFile1Buffer.begin() + 0xC);
-    worldmapModelFiles.init(worldmapFile1Buffer.begin() + READ_LE_U32(worldmapFile1Buffer.begin() + 0x8), READ_LE_U32(worldmapFile1Buffer.begin() + 0xC) - READ_LE_U32(worldmapFile1Buffer.begin() + 0x8));
-    worldmapFile1Buffer_14 = worldmapFile1Buffer.begin() + READ_LE_U32(worldmapFile1Buffer.begin() + 0x14);
-    pWorldmapModelsConfig = worldmapFile1Buffer.begin() + READ_LE_U32(worldmapFile1Buffer.begin() + 0x10);
-    worldmapFile1Buffer_1C = worldmapFile1Buffer.begin() + READ_LE_U32(worldmapFile1Buffer.begin() + 0x1C);
-    worldmapFile1Buffer_18 = worldmapFile1Buffer.begin() + READ_LE_U32(worldmapFile1Buffer.begin() + 0x18);
-    worldmapFile1Buffer_24 = worldmapFile1Buffer.begin() + READ_LE_U32(worldmapFile1Buffer.begin() + 0x24);
-    worldmapFile1Buffer_20 = worldmapFile1Buffer.begin() + READ_LE_U32(worldmapFile1Buffer.begin() + 0x20);
+    worldmapFile1Buffer_C = worldmapFile1Buffer.getRawData().begin() + READ_LE_U32(worldmapFile1Buffer.getRawData().begin() + 0xC);
+    worldmapModelFiles.init(worldmapFile1Buffer.getRawData().begin() + READ_LE_U32(worldmapFile1Buffer.getRawData().begin() + 0x8), READ_LE_U32(worldmapFile1Buffer.getRawData().begin() + 0xC) - READ_LE_U32(worldmapFile1Buffer.getRawData().begin() + 0x8));
+    worldmapFile1Buffer_14 = worldmapFile1Buffer.getRawData().begin() + READ_LE_U32(worldmapFile1Buffer.getRawData().begin() + 0x14);
+    pWorldmapModelsConfig = worldmapFile1Buffer.getRawData().begin() + READ_LE_U32(worldmapFile1Buffer.getRawData().begin() + 0x10);
+    worldmapFile1Buffer_1C = worldmapFile1Buffer.getRawData().begin() + READ_LE_U32(worldmapFile1Buffer.getRawData().begin() + 0x1C);
+    worldmapFile1Buffer_18 = worldmapFile1Buffer.getRawData().begin() + READ_LE_U32(worldmapFile1Buffer.getRawData().begin() + 0x18);
+    worldmapFile1Buffer_24 = worldmapFile1Buffer.getRawData().begin() + READ_LE_U32(worldmapFile1Buffer.getRawData().begin() + 0x24);
+    worldmapFile1Buffer_20 = worldmapFile1Buffer.getRawData().begin() + READ_LE_U32(worldmapFile1Buffer.getRawData().begin() + 0x20);
 
     for (int i = 0; i < 0x10; i++) {
-        worldmapFile1Buffer_2C_data[i] = worldmapFile1Buffer.begin() + READ_LE_U32(worldmapFile1Buffer.begin() + 0x2C + 4 * i);
+        worldmapFile1Buffer_2C_data[i] = worldmapFile1Buffer.getRawData().begin() + READ_LE_U32(worldmapFile1Buffer.getRawData().begin() + 0x2C + 4 * i);
     }
 
-    std::vector<u8>::iterator worldmapFile1Buffer_4 = worldmapFile1Buffer.begin() + READ_LE_U32(worldmapFile1Buffer.begin() + 0x4);
+    std::vector<u8>::const_iterator worldmapFile1Buffer_4 = worldmapFile1Buffer.getRawData().begin() + READ_LE_U32(worldmapFile1Buffer.getRawData().begin() + 0x4);
 
     worldmapFile1Buffer_4_0 = worldmapFile1Buffer_4 + READ_LE_U32(worldmapFile1Buffer_4);
 
     // init the worldmap exits. Original code was a relocation + cast
     {
-        std::vector<u8>::iterator data = worldmapFile1Buffer_4 + READ_LE_U32(worldmapFile1Buffer_4 + 4);
+        std::vector<u8>::const_iterator data = worldmapFile1Buffer_4 + READ_LE_U32(worldmapFile1Buffer_4 + 4);
         int numExitGroup = (READ_LE_U32(data) - READ_LE_U32(worldmapFile1Buffer_4 + 4)) / 4;
         assert(numExitGroup == 4);
 
         for (int i = 0; i < numExitGroup; i++) {
-            std::vector<u8>::iterator exitData = worldmapFile1Buffer_4 + READ_LE_U32(data + 4 * i);
+            std::vector<u8>::const_iterator exitData = worldmapFile1Buffer_4 + READ_LE_U32(data + 4 * i);
 
             do {
                 sWorldmapExitDef newExit;
@@ -412,7 +412,7 @@ void setupWorldmapPositionFromField() {
 
 void setupWorldmapPositionFromFileData(int param_1) {
     if ((gameState.m1834 & 0x2000) == 0) {
-        std::vector<u8>::iterator worldmapInitialPosition = worldmapFile1Buffer_4_0;
+        std::vector<u8>::const_iterator worldmapInitialPosition = worldmapFile1Buffer_4_0;
 
         while (READ_LE_S16(worldmapInitialPosition + 2) != -1) {
             if (READ_LE_S16(worldmapInitialPosition + 2) == param_1) {
@@ -480,7 +480,7 @@ std::array<u16, 0x40> USHORT_ARRAY_8009ccb4;
 std::array<u16, 8> USHORT_ARRAY_8009cd54;
 
 void loadWorldmapTextureFromFile2(void) {
-    loadMenuImageBundle(mallocAndDecompress(worldmapFile2Buffer.begin())); // Those are ground textures
+    loadMenuImageBundle(mallocAndDecompress(worldmapFile2Buffer.getRawData().begin())); // Those are ground textures
     DrawSync(0);
     worldmapFile2Buffer.clear();
 
@@ -521,7 +521,7 @@ void loadWorldmapTextureFromFile2(void) {
 void loadWorldmapTextureFromFile3(void) {
     // there was some code dealing with aligning the color in stack memory, but that seems unnecessary
 
-    loadMenuImageBundle(mallocAndDecompress(worldmapFile3Buffer.begin())); // Those are generic worlmap shared resources
+    loadMenuImageBundle(mallocAndDecompress(worldmapFile3Buffer.getRawData().begin())); // Those are generic worlmap shared resources
     DrawSync(0);
     worldmapFile3Buffer.clear();
 
@@ -661,19 +661,19 @@ void worldmapMode0_update(void) {
     waitReadCompletion(0);
     //################
     for (int i = 0; i < 3; i++) {
-        if(worldmapPartySpritesRaw[i].size())
+        if(worldmapPartySpritesRaw[i].getRawData().size())
         {
             worldmapPartySprites[i] = new sSpriteActorAnimationBundle();
-            worldmapPartySprites[i]->init(std::span<u8>(worldmapPartySpritesRaw[i].begin(), worldmapPartySpritesRaw[i].size()).begin());
+            worldmapPartySprites[i]->init(worldmapPartySpritesRaw[i].beginSpan());
         }
         else {
             worldmapPartySprites[i] = nullptr;
         }
 
-        if (worldmapPartyGearSpritesRaw[i].size())
+        if (worldmapPartyGearSpritesRaw[i].getRawData().size())
         {
             worldmapPartyGearSprites[i] = new sSpriteActorAnimationBundle();
-            worldmapPartyGearSprites[i]->init(std::span<u8>(worldmapPartyGearSpritesRaw[i].begin(), worldmapPartyGearSpritesRaw[i].size()).begin());
+            worldmapPartyGearSprites[i]->init(worldmapPartyGearSpritesRaw[i].beginSpan());
         }
         else {
             worldmapPartyGearSprites[i] = nullptr;

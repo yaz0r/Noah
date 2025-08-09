@@ -108,7 +108,7 @@ struct sWorldmapModel {
     SVECTOR m18_rotation;
     MATRIX m20_rotationMatrix;
     struct sModelBlock* m40_modelBlock;
-    std::vector<u8>::iterator m44_collisionMesh;
+    std::vector<u8>::const_iterator m44_collisionMesh;
     std::array<std::vector<sTag*>, 2> m48;
     sWorldmapModel* m50_parentModel;
     // size 0x54;

@@ -20,7 +20,7 @@ struct sDialogWindow18PerLineBufferEntry
 struct sDialogWindow18_8C
 {
     sDialogWindow18_8C* m0_pNext;
-    std::vector<u8>::iterator m4_dialogPointer;
+    std::vector<u8>::const_iterator m4_dialogPointer;
     // size 0x8
 };
 
@@ -36,8 +36,8 @@ struct sDialogWindow18
     s16 m12_widthPadded;
     sVec2_s16 m14;
     s16 m18;
-    std::vector<u8>::iterator m1C_currentStringToPrint;
-    std::vector<u8>::iterator m20;
+    std::vector<u8>::const_iterator m1C_currentStringToPrint;
+    std::vector<u8>::const_iterator m20;
     std::vector<sDialogWindow18PerLineBufferEntry> m28_perLineBuffer;
     std::vector<u16> m2C_inRamDialogTextImage;
     DR_MODE m30_textTileDrawMode[2];
@@ -56,10 +56,10 @@ struct sDialogWindow18
     s16 m86_currentDelayForNextCharacter;
     s16 m88_delayBetweenCharacters;
     sDialogWindow18_8C* m8C;
-    std::vector<u8>::iterator m90_dialogPointer;
+    std::vector<u8>::const_iterator m90_dialogPointer;
 };
 
-std::vector<u8>::iterator getDialogParamPointer(const std::vector<u8>::iterator& buffer, int param_2);
+std::vector<u8>::const_iterator getDialogParamPointer(const std::vector<u8>::const_iterator& buffer, int param_2);
 void resetDialogWindow18(sDialogWindow18* param_1);
 void setupWindowSize2(sDialogWindow18* param_1, int x1, int y1, short x2, short y2, short width, short height);
 void setSelectedLineForMultiChoice(sDialogWindow18* param_1, char param_2);

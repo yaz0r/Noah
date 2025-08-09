@@ -1,5 +1,6 @@
 #include "noahLib.h"
 #include "decompress.h"
+#include "kernel/filesystem.h"
 
 void decompress(std::vector<u8>::const_iterator inputStream, std::vector<u8>& output, u32 inputSize)
 {
@@ -65,9 +66,24 @@ void decompress(std::vector<u8>::const_iterator inputStream, std::vector<u8>& ou
     //output.resize(totalSize);
 }
 
+void decompress(std::vector<u8>::const_iterator inputStream, sLoadableDataRaw& output, u32 inputSize) {
+    std::vector<u8> decompressedData;
+    decompressedData.resize(output.getRawData().size());
+    decompress(inputStream, decompressedData, inputSize);
+    output.init(decompressedData);
+}
+
 void fieldDecompress(int size, std::vector<u8>::const_iterator inputStream, std::vector<u8>& output, u32 inputSize)
 {
     decompress(inputStream, output, inputSize);
+}
+
+void fieldDecompress(int size, std::vector<u8>::const_iterator inputStream, sLoadableData& output, u32 inputSize)
+{
+    std::vector<u8> decompressedData;
+    decompressedData.resize(size);
+    decompress(inputStream, decompressedData, inputSize);
+    output.init(decompressedData);
 }
 
 std::vector<u8> mallocAndDecompress(std::vector<u8>::const_iterator input, u32 inputSize)

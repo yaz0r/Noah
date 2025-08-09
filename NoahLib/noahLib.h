@@ -179,7 +179,7 @@ struct SVECTOR
         return temp;
     }
 
-    static SVECTOR FromIt(std::vector<u8>::iterator it)
+    static SVECTOR FromIt(std::vector<u8>::const_iterator it)
     {
         SVECTOR temp;
         temp.vx = READ_LE_S16(it); it += 2;

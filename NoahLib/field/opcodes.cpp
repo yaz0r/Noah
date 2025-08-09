@@ -493,10 +493,9 @@ void OP_FINALIZE_PARTY_CHARACTER_LOADING()
     }
     else {
         waitReadCompletion(0);
-        decompress(asyncPartyCharacterLoadingBuffer.begin(), partyCharacterBuffersRaw[asyncPartyCharacterLoadingIndex].mData);
+        decompress(asyncPartyCharacterLoadingBuffer.getRawData().begin(), partyCharacterBuffersRaw[asyncPartyCharacterLoadingIndex]);
         asyncPartyCharacterLoadingBuffer.clear();
-        std::span<u8> tempSpan(partyCharacterBuffersRaw[asyncPartyCharacterLoadingIndex].mData.begin(), partyCharacterBuffersRaw[asyncPartyCharacterLoadingIndex].mData.end());
-        partyCharacterBuffers[asyncPartyCharacterLoadingIndex].init(tempSpan.begin());
+        partyCharacterBuffers[asyncPartyCharacterLoadingIndex].init(partyCharacterBuffersRaw[asyncPartyCharacterLoadingIndex].beginSpan());
         runInitScriptForNewlyLoadedPC(asyncPartyCharacterLoadingCharacterIndex);
         asyncLoadingVar1 = 0xff;
         breakCurrentScript = 1;
@@ -2650,7 +2649,7 @@ void OP_LOAD_SPECIAL_2D_ANIMATION()
         pCurrentFieldScriptActor->m120_special2dAnimationRaw.resize(iVar2 + 8);
         readFile(iVar1, pCurrentFieldScriptActor->m120_special2dAnimationRaw, 0, 0x80);
 
-        std::span<u8>::iterator it = std::span<u8>(pCurrentFieldScriptActor->m120_special2dAnimationRaw.begin(), pCurrentFieldScriptActor->m120_special2dAnimationRaw.end()).begin();
+        std::span<u8>::iterator it = pCurrentFieldScriptActor->m120_special2dAnimationRaw.beginSpan();
         pCurrentFieldScriptActor->m120_special2dAnimation->init(it);
 
         if (fieldExecuteVar1 == 0) {
@@ -2836,9 +2835,9 @@ void OP_LOAD_NEW_MECHA(void)
     case 2:
         if (waitReadCompletion(1) == 0) {
             mechaDataTable2[mechaIndex] = new sMechaDataTable2;
-            mechaDataTable2[mechaIndex]->init(mechaDataTable2_raw[mechaIndex].mData.begin());
+            mechaDataTable2[mechaIndex]->init(mechaDataTable2_raw[mechaIndex].getRawData().begin());
             mechaDataTable1[mechaIndex] = new sMechaDataTable1;
-            mechaDataTable1[mechaIndex]->init(mechaDataTable1_raw[mechaIndex].mData.begin());
+            mechaDataTable1[mechaIndex]->init(mechaDataTable1_raw[mechaIndex].getRawData().begin());
 
             mechaInitNewMecha(mechaIndex, 0, mechaDataTable2[mechaIndex], mechaDataTable1[mechaIndex], (ushort)(((mechaIndex + mechaList2[mechaIndex]) * -0x40 + 0x240) * 0x10000 >> 0x10), 0x100, 0,
                 (short)((mechaIndex + 0xfc) * 0x10000 >> 0x10), &initMechaTempVar[mechaIndex]);
@@ -2847,7 +2846,7 @@ void OP_LOAD_NEW_MECHA(void)
 
             delete mechaDataTable1[mechaIndex];
             mechaDataTable1[mechaIndex] = nullptr;
-            mechaDataTable1_raw[mechaIndex].mData.clear();
+            mechaDataTable1_raw[mechaIndex].clear();
 
             pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 4;
 

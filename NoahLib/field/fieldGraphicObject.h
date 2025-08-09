@@ -139,7 +139,7 @@ struct sSpriteActorCore {
     struct sSpriteActorAnimationBundle* m44_currentAnimationBundle;
     struct sSpriteActorAnimationBundle* m48_defaultAnimationbundle;
     struct sSpriteActorAnimationBundle* m4C_specialAnimation = nullptr;
-    std::optional<std::vector<u8>::iterator> m50;
+    std::optional<std::vector<u8>::const_iterator> m50;
     std::span<u8>::iterator m54;
     std::span<u8>::iterator m58_startOfCurrentAnimation;
     std::span<u8>::iterator m5C;

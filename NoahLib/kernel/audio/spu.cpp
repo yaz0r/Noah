@@ -65,11 +65,11 @@ void SpuSetTransferStartAddr(int addrs) {
     spuMutex.unlock();
 }
 
-void SpuRead(std::vector<u8>::iterator it, int size) {
+void SpuRead(std::vector<u8>::const_iterator it, int size) {
     assert(0);
 }
 
-void SpuWrite(std::vector<u8>::iterator it, int size) {
+void SpuWrite(std::vector<u8>::const_iterator it, int size) {
     spuMutex.lock();
     emulatedSpuDevice.dma_write((u32*)&it[0], 0, size/4);
     spuMutex.unlock();

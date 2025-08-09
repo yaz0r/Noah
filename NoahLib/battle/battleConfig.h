@@ -1,7 +1,7 @@
 #pragma once
 
 struct sBattleConfig {
-    void init(std::vector<u8>::iterator input) {
+    void init(std::vector<u8>::const_iterator input) {
         m0 = READ_LE_S8(input + 0);
         m1_flags = READ_LE_U8(input + 1);
         m2_arenaId = READ_LE_S8(input + 2);

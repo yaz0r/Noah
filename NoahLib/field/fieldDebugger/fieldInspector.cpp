@@ -38,7 +38,7 @@ extern std::vector<u8> rawFieldImageBundle;
 extern std::vector<u8> rawFieldImageBundle2;
 extern std::vector<u8> rawFieldModels;
 extern std::vector<u8> rawFieldScriptData;
-extern std::vector<u8> rawFieldDialogBundle;
+extern sLoadableDataRaw rawFieldDialogBundle;
 
 
 class c_fieldInspector
@@ -115,7 +115,7 @@ public:
         }
         
         ImGui::Text("Num triggers: %lu", fieldTriggerData.size());
-        ImGui::Text("Dialog bundle size: %lu", rawFieldDialogBundle.size());
+        ImGui::Text("Dialog bundle size: %lu", rawFieldDialogBundle.getRawData().size());
         ImGui::Text("Walkmesh entries: %d", walkMesh.m0_count);
         ImGui::Text("Map entities size: %lu", fieldActorSetupParams.size());
 
@@ -145,7 +145,7 @@ public:
         }
     }
 
-    void fieldInspector_decodeDialog(std::vector<u8>::iterator& dialogStream, std::string& decodedString, int& numLines)
+    void fieldInspector_decodeDialog(std::vector<u8>::const_iterator& dialogStream, std::string& decodedString, int& numLines)
     {
         while (*dialogStream)
         {
@@ -491,7 +491,7 @@ public:
     {
         int numLines = 1;
         std::string decodedString;
-        std::vector<u8>::iterator dialogStream = rawFieldDialogBundle.begin() + READ_LE_U16(rawFieldDialogBundle.begin() + 4 + index * 2);
+        std::vector<u8>::const_iterator dialogStream = rawFieldDialogBundle.getRawData().begin() + READ_LE_U16(rawFieldDialogBundle.getRawData().begin() + 4 + index * 2);
 
         fieldInspector_decodeDialog(dialogStream, decodedString, numLines);
 
@@ -505,7 +505,7 @@ public:
 
     void fieldInspector_dialogs()
     {
-        int NumEntries = READ_LE_S16(rawFieldDialogBundle.begin());
+        int NumEntries = READ_LE_S16(rawFieldDialogBundle.getRawData().begin());
 
         for (int i = 0; i < NumEntries; i++)
         {

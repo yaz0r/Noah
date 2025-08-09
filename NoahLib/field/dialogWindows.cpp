@@ -388,7 +388,7 @@ void createDialogWindow(short x, short y, int dialogIndex, int windowIndex, int 
 		bVar3 = 1;
 	}
 	gDialogWindows[windowIndex].m18.m68 = bVar3;
-	gDialogWindows[windowIndex].m18.m90_dialogPointer = getDialogParamPointer(rawFieldDialogBundle.begin(), dialogIndex);
+	gDialogWindows[windowIndex].m18.m90_dialogPointer = getDialogParamPointer(rawFieldDialogBundle.getRawData().begin(), dialogIndex);
 	gDialogWindows[windowIndex].m40E = 0;
 	gDialogWindows[windowIndex].m18.m10_flags |= 2;
 	gDialogWindows[windowIndex].m416_fieldActorId = fieldActorId;

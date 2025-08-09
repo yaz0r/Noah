@@ -91,36 +91,34 @@ void loadBattleCharacterPortraits(const std::vector<u8>& input, s8 param_2) {
 
 std::array<sLoadingBatchCommands, 3> playerLoadingCommands;
 
-struct sBattleEnemyInitialStats : public sLoadableData {
+struct sBattleEnemyInitialStats : public sLoadableDataRaw {
     std::array<std::array<s16, 4>, 4> m0_scriptsOffsets;
-    std::vector<u8>::iterator m30_strings;
+    std::vector<u8>::const_iterator m30_strings;
     std::array<sBattleEntity,8> m32;
 
-    virtual void init(std::vector<u8>& data) override {
-        m_rawData = data;
+    virtual void init(const std::vector<u8>& data) override {
+        sLoadableDataRaw::init(data);
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 m0_scriptsOffsets[i][j] = READ_LE_S16(data.begin() + 0 + 4 * 2 * i + 2 * j);
             }
         }
-        m30_strings = m_rawData.begin() + READ_LE_U16(m_rawData.begin() + 0x30);
+        m30_strings = getRawData().begin() + READ_LE_U16(getRawData().begin() + 0x30);
         for (int i = 0; i < 8; i++) {
             m32[i].deserialize(data.begin() + 0x32 + 0x170 * i);
         }
     }
 
-    std::vector<u8>::iterator getPointerForScript(int setupId, int scriptType) {
-        return m_rawData.begin() + m0_scriptsOffsets[setupId][scriptType];
+    std::vector<u8>::const_iterator getPointerForScript(int setupId, int scriptType) {
+        return getRawData().begin() + m0_scriptsOffsets[setupId][scriptType];
     }
 
-    std::vector<u8>::iterator getPointerForScriptSub(int setupId, int scriptType, int subEntry) {
+    std::vector<u8>::const_iterator getPointerForScriptSub(int setupId, int scriptType, int subEntry) {
         auto it = getPointerForScript(setupId, scriptType);
         s16 offset = READ_LE_S16(it);
         assert(offset >= 0);
         return it + offset;
     }
-
-    std::vector<u8> m_rawData;
 };
 
 sBattleEnemyInitialStats battleConfigFile2;
@@ -147,7 +145,7 @@ void loadPartyMembers() {
         }
     }
 
-    std::vector<std::vector<u8>::iterator> relocatedPointer = doPointerRelocation(battleCharacterConfigFile.mData);
+    std::vector<std::vector<u8>::const_iterator> relocatedPointer = doPointerRelocation(battleCharacterConfigFile.getRawData());
 
     for (int i = 0; i < 3; i++) {
         if (battleCharacters[i] != 0x7F) {
@@ -692,7 +690,7 @@ std::vector<u16>* allocateTextureRamForText(int param_1)
 
 std::array<sRamTexture*, 10> itemLabelsIds;
 
-std::vector<u8>::iterator getItemLabelString(int param_1)
+std::vector<u8>::const_iterator getItemLabelString(int param_1)
 {
     return getDialogParamPointer(printDialogTextVar[18], param_1);
 }
@@ -761,7 +759,7 @@ void batteLoaderPhase1_3() {
     MissingCode();
 }
 
-std::vector<u8>::iterator currentBattleSpecificStrings;
+std::vector<u8>::const_iterator currentBattleSpecificStrings;
 
 void loadEnemies() {
     performAttackSub3_var0 = 0;

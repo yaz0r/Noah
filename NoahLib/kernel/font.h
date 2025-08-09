@@ -11,8 +11,8 @@ extern u8* dialogFontVarPtr2;
 
 extern std::vector<std::vector<u8>::iterator>::iterator printDialogTextVar;
 
-void initFont(std::vector<u8>& fontData);
-void setupPrintDialogTextVar(std::vector<u8>& fontData);
+void initFont(struct sLoadableDataRaw& fontData);
+void setupPrintDialogTextVar(struct sLoadableDataRaw& fontData);
 
 struct sFontGlyphPoly {
     s16 m0_textureU;

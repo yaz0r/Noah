@@ -8,7 +8,7 @@
 #include "enemyScript.h"
 #include "battleLoader.h"
 
-std::vector<u8> chiData;
+sLoadableDataRaw chiData;
 
 void setFolderChiData(void)
 {
@@ -156,12 +156,12 @@ void drawCircleMenuChi_updateSub0Sub0(short param_1, short param_2, short param_
 
 sRamTexture* tempRamTexture = nullptr;
 
-std::vector<u8>::iterator drawCircleMenuChi_updateSub0Sub1(int param_1)
+std::vector<u8>::const_iterator drawCircleMenuChi_updateSub0Sub1(int param_1)
 {
     return getDialogParamPointer(printDialogTextVar[0x50 / 4], param_1);
 }
 
-std::vector<u8>::iterator drawCircleMenuChi_updateSub0Sub2(int param_1)
+std::vector<u8>::const_iterator drawCircleMenuChi_updateSub0Sub2(int param_1)
 {
     return getDialogParamPointer(printDialogTextVar[0xC0 / 4], param_1);
 }
@@ -253,7 +253,7 @@ void drawCircleMenuChi_updateSub0(byte param_1) {
         localRect2.h = 0x10;
         loadImageSync(&localRect2, *tempRamTexture);
         if (isAbilityEnabled[entryIndex]) {
-            std::vector<u8>::iterator stringData;
+            std::vector<u8>::const_iterator stringData;
             if (apConfigArray[param_1].m1 == 0) {
                 stringData = drawCircleMenuChi_updateSub0Sub1((uint)battleEntities[param_1].m0_base.m56_battleCommandLoadout * 0x10 + entryIndex);
             }

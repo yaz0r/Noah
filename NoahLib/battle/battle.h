@@ -234,7 +234,7 @@ struct sBattle800c3e24 {
 extern sBattle800c3e24* battleG3;
 
 struct sBattleMechaInitData {
-    void init(std::vector<u8>::iterator it, u32 size) {
+    void init(std::vector<u8>::const_iterator it, u32 size) {
         mData.insert(mData.begin(), it, it+size);
 
         {
@@ -291,7 +291,7 @@ extern sBattleMechaInitData* battleMechaInitData;
 struct sBattleMechaInitDataFile : public sLoadableData {
     sBattleMechaInitDataFile(size_t size) {
     }
-    virtual void init(std::vector<u8>& data) override {
+    virtual void init(const std::vector<u8>& data) override {
         m4.init(data.begin() + 4, data.size() - 4);
     }
 
@@ -384,7 +384,7 @@ struct sBattleEntity {
     sGameStateA42 mA4_gear;
     u8 m15A_flags;
 
-    void deserialize(std::vector<u8>::iterator buffer) {
+    void deserialize(std::vector<u8>::const_iterator buffer) {
         m0_base.deserialize(buffer + 0);
         mA4_gear.deserialize(buffer + 0xA4);
         m15A_flags = READ_LE_U8(buffer + 0x15A);
@@ -518,7 +518,7 @@ extern u16 jumpAnimationActiveActorBF;
 extern s8 newBattleInputButton2;
 extern u8 battleInitVar1;
 extern s16 performAttackSub3_var0;
-extern std::vector<u8>::iterator currentBattleSpecificStrings;
+extern std::vector<u8>::const_iterator currentBattleSpecificStrings;
 extern std::array<s8, 11> battleMonsterMapping;
 extern s16 entitiesHitInCurrentAttackBF;
 extern s16 performAttack_type;

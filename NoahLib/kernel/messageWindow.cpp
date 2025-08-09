@@ -29,7 +29,7 @@ void setSelectedLineForMultiChoice(sDialogWindow18* param_1, char param_2)
     return;
 }
 
-std::vector<u8>::iterator getDialogParamPointer(const std::vector<u8>::iterator& buffer, int param_2)
+std::vector<u8>::const_iterator getDialogParamPointer(const std::vector<u8>::const_iterator& buffer, int param_2)
 {
     u32 numEntries = READ_LE_U32(buffer);
     assert(param_2 <= numEntries);
@@ -227,7 +227,7 @@ s8 addDialogWindowsToOTSub0(sDialogWindow18* param_1)
     return 0;
 }
 
-void addDialogWindowsToOTSub2(sDialogWindow18* param_1, const std::vector<u8>::iterator& param_2)
+void addDialogWindowsToOTSub2(sDialogWindow18* param_1, const std::vector<u8>::const_iterator& param_2)
 {
     sDialogWindow18_8C* psVar1;
     sDialogWindow18_8C* psVar2;
@@ -309,7 +309,7 @@ void updateDialogTextImage(sDialogWindow18* param_1)
             return;
         }
 
-        u8* pCharacterToPrint = &(*param_1->m1C_currentStringToPrint);
+        const u8* pCharacterToPrint = &(*param_1->m1C_currentStringToPrint);
         u8 characterToPrint = *pCharacterToPrint;
 
         switch (characterToPrint)

@@ -13,16 +13,16 @@ u8* dialogFontVarPtr2;
 
 std::vector<std::vector<u8>::iterator>::iterator printDialogTextVar;
 
-void initFont(std::vector<u8>& fontData)
+void initFont(sLoadableDataRaw& fontData)
 {
-	assert(fontData.size());
+	assert(fontData.getRawData().size());
 
-	dialogFontVar0 = READ_LE_U16(fontData.begin() + 4);
-	dialogFontVar4 = READ_LE_U16(fontData.begin() + 6);
-	dialogFontVar2 = READ_LE_U16(fontData.begin() + 8);
-	dialogFontVar3 = READ_LE_U16(fontData.begin() + 10);
-	dialogFontVar1 = READ_LE_U16(fontData.begin() + 0xC);
-	dialogFontVarPtr = fontData;
+    dialogFontVar0 = READ_LE_U16(fontData.getRawData().begin() + 4);
+    dialogFontVar4 = READ_LE_U16(fontData.getRawData().begin() + 6);
+    dialogFontVar2 = READ_LE_U16(fontData.getRawData().begin() + 8);
+    dialogFontVar3 = READ_LE_U16(fontData.getRawData().begin() + 10);
+    dialogFontVar1 = READ_LE_U16(fontData.getRawData().begin() + 0xC);
+	dialogFontVarPtr = fontData.getRawData();
 	dialogFontVarPtr2 = &dialogFontVarPtr[0] + READ_LE_U16(dialogFontVarPtr.begin() + 2);
 
 }
@@ -31,7 +31,7 @@ struct sBattleDialogBundle {
     u32 m0_numEntries;
     std::vector<std::vector<u8>::iterator> m4_entries;
 
-    void init(std::vector<u8>& rawData) {
+    void init(const std::vector<u8>& rawData) {
         m_rawData = rawData;
         m0_numEntries = READ_LE_U32(m_rawData.begin());
         m4_entries.resize(m0_numEntries);
@@ -43,11 +43,11 @@ struct sBattleDialogBundle {
     std::vector<u8> m_rawData;
 };
 
-void setupPrintDialogTextVar(std::vector<u8>& fontData)
+void setupPrintDialogTextVar(sLoadableDataRaw& fontData)
 {
-    assert(fontData.size());
+    assert(fontData.getRawData().size());
     static sBattleDialogBundle persistantBuffer;
-    persistantBuffer.init(fontData);
+    persistantBuffer.init(fontData.getRawData());
     
     flagAllocation(fontData);
     //printDialogTextVar = persistantBuffer.begin();

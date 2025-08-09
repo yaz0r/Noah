@@ -12,7 +12,7 @@ int checkHeaderSub0(sSeqFile* param_1) {
     int size = param_1->m8 + 3U >> 2;
 
     for (int i = 0; i < size; i++) {
-        checksum += READ_LE_S32(param_1->m_rawData.begin() + i * 4);
+        checksum += READ_LE_S32(param_1->getRawData().begin() + i * 4);
     }
 
     return checksum;

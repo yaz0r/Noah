@@ -335,7 +335,7 @@ int worldmapCheckCollisionsAgainstWorldmapModel(VECTOR* param_1, int param_2) {
         SetRotMatrix(&MATRIX_1f8000f0);
         SetTransMatrix(&MATRIX_1f8000f0);
 
-        std::vector<u8>::iterator pCollisionMesh = worldmapModels[param_2].m44_collisionMesh;
+        std::vector<u8>::const_iterator pCollisionMesh = worldmapModels[param_2].m44_collisionMesh;
         s32 numVertices = READ_LE_S32(pCollisionMesh);
 
         assert(0); // actually not used yet

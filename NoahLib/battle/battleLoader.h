@@ -2,7 +2,7 @@
 
 typedef std::vector<u16> sRamTexture;
 extern std::array<sRamTexture*, 10> itemLabelsIds;
-std::vector<u8>::iterator getItemLabelString(int param_1);
+std::vector<u8>::const_iterator getItemLabelString(int param_1);
 sRamTexture* allocateTextureRamForText(int param_1);
 
 void battleLoaderTick(s8 param_1);
