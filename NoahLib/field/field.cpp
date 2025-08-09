@@ -35,6 +35,7 @@
 #include "field/fieldInputs.h"
 #include "kernel/3dModel_psxRenderer.h"
 #include "kernel/3dModel_bgfxRenderer.h"
+#include "kernel/kernelVariables.h"
 
 MATRIX computeProjectionMatrixTempMatrix2;
 
@@ -72,13 +73,7 @@ std::array<s16, 4> cameraLimits;
 
 s32 totalObjects;
 
-s32 fieldMapNumber = -1;
-s32 currentFieldId0 = -1;
-s32 currentFieldId1 = -1;
-
 s32 totalActors;
-
-std::array<s32, 3> currentParty;
 
 std::vector<sFieldEntity> actorArray;
 
@@ -136,7 +131,6 @@ const std::array<s8, 12> characterMappingTable = {
 };
 
 s16 pcInitVar2 = 0;
-std::array<int, 3> unkPartyTable;
 
 u8 fieldBackgroundClearColor[3];
 
@@ -159,7 +153,6 @@ int fieldModelRelocation(std::vector<u8>::iterator pModelData)
 }
 
 s32 fieldChangePrevented = -1;
-s32 fieldMusicLoadPending = -1;
 s32 fieldTransitionMode = 0;
 s32 fieldTransitionFadeInLength = 0;
 s32 encounterTimer = 0;
@@ -776,8 +769,6 @@ void* initModelDynamicVertices(sModelBlock* pModelBlock)
     return nullptr;
 }
 
-int fieldScriptEntityAlreadyInitialized = 0;
-
 // 0: scenarioFlag
 std::array<s16, 1024> fieldVars;
 
@@ -981,7 +972,6 @@ int findFreePartySlot(int param_1, int* param_2)
 int asyncPartyCharacterLoadingCharacterIndex = 0;
 int asyncPartyCharacterLoadingIndex = 0;
 int fieldExecuteVar1 = 0;
-std::array<int, 3> asyncPartyCharacterLoadingTable;
 std::vector<u8> asyncPartyCharacterLoadingBuffer;
 
 void copyPartySlotFromNext(uint param_1)
@@ -1388,16 +1378,8 @@ void setCurrentActorTargetRotation(s16 param_1)
 
 
 int playMusicAuthorized = 0;
-int musicVar1 = -1;
-int musicVar2 = 0;
-int currentlyPlayingMusic = 255;
-int updateMusicState2Var3 = 0;
-int currentlyLoadedWave = -1;
-int currentlyLoadedMusic = -1;
-int needStartMusicInstanceSub0 = 0;
-int needReloadWds = 0;
+
 extern sSoundInstance* pMusic;
-int updateMusicState2Var2 = 0;
 
 void updateNeedStartMusicInstanceSub0() {
     if (needStartMusicInstanceSub0 == 1) {
@@ -1557,10 +1539,7 @@ void loadMusicPhase0(int param_1, int param_2, void(*param_3)(void*))
     return;
 }
 
-u32 playMusicSubVar0 = 0;
-u16 playWorldmapMusic = 0;
 sWdsFile* playMusicSubVar1 = nullptr;
-u32 playMusicSubVar2 = 1;
 
 void playMusicSub(void)
 {
@@ -2968,8 +2947,6 @@ void initFontSystem()
     initFontPalettes(0x100, 0xf0);
 }
 
-extern u8 menuReturnState0;
-
 void bootField()
 {
     initFontSystem();
@@ -3051,10 +3028,6 @@ void waitForReadFinished(void)
     waitReadCompletion(0);
     return;
 }
-
-int characterOrGearsLoadingInProgress = 0;
-int fieldRequestedGears = 0;
-int typeOfPlayableCharacterLoaded = 0;
 
 void finalizeLoadPlayableCharacters()
 {
@@ -6831,9 +6804,6 @@ void setCharacterRenderingOT(OTTable& OT)
 }
 
 int disableFogForCharacters = 0;
-bool disableCharacterShadowsRendering = 0;
-
-
 
 void setupSpriteActorTransform(sSpriteActorCore* pSpriteSheet)
 {
@@ -7743,7 +7713,6 @@ int updateMusicLoadingState() {
     return -1;
 }
 
-int updateMusicState2Var1 = 0;
 sSeqFile battleMusic;
 void playBattleMusic(sSoundInstance* param_1, int param_2, int param_3);
 
@@ -7908,7 +7877,6 @@ int isFieldBattlePrevented(void)
     return iVar1;
 }
 
-int loadFieldSeqVar0 = -1;
 extern sSeqFile* fieldSeq;
 
 void loadFieldSeq(void)

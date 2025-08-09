@@ -3,11 +3,11 @@
 #include "dialogWindows.h"
 #include "kernel/filesystem.h"
 #include "kernel/TIM.h"
+#include "kernel/kernelVariables.h"
 
 int currentFieldActorId;
 std::vector<u8>::iterator pCurrentFieldScriptFile;
 sFieldScriptEntity* pCurrentFieldScriptActor;
-std::array<int, 3> partyToFieldEntityArrayMapping;
 
 s32 op99Var1 = 0;
 s32 op99Var5 = 0;

@@ -9,6 +9,7 @@
 #include "battle/battle.h"
 #include "kernel/3dModel_psxRenderer.h"
 #include "kernel/3dModel_bgfxRenderer.h"
+#include "kernel/kernelVariables.h"
 
 u32 NumMechas;
 std::array<s16, 4> mechaList;
@@ -1517,8 +1518,6 @@ void freeMechaModule()
     freeMechaInitVar2(&mechaInitVar2);
     freeMechaInitVar3(&mechaInitVar3);
 }
-
-bool disableMechaRendering = false;
 
 void updateMechasPosForField()
 {

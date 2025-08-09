@@ -3,7 +3,6 @@
 
 extern int currentFieldActorId;
 extern std::vector<u8>::iterator pCurrentFieldScriptFile;
-extern std::array<int, 3> partyToFieldEntityArrayMapping; 
 extern sFieldScriptEntity* pCurrentFieldScriptActor;
 
 extern s32 op99Var1;

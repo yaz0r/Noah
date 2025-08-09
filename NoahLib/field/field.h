@@ -172,17 +172,13 @@ struct sFieldEntity
     //size 0x5C
 };
 extern std::vector<sFieldEntity> actorArray;
-extern std::array<s32, 3> currentParty;
 
 extern std::array<s32, 3> partyToFollowStructMapping;
 
 extern bool g_executeScripts;
 extern bool g_executeUpdateScripts;
 
-extern s32 fieldMapNumber;
 extern s32 fieldChangePrevented;
-extern s32 fieldMusicLoadPending;
-extern s32 currentFieldId0;
 
 extern std::array<s16, 1024> fieldVars;
 extern std::vector<u8> rawFieldScriptData;
@@ -249,9 +245,6 @@ extern s8 pauseDisabled;
 extern u8 fieldBackgroundClearColor[3];
 
 extern int playMusicAuthorized;
-extern int musicVar1;
-extern int musicVar2;
-extern int currentlyPlayingMusic;
 
 extern int g_frameOddOrEven;
 
@@ -291,7 +284,6 @@ extern std::vector<sFieldTrigger> fieldTriggerData;
 extern MATRIX currentProjectionMatrix;
 
 extern std::array<sLoadableDataRaw, 3> partyCharacterBuffersRaw;
-extern std::array<int, 3> asyncPartyCharacterLoadingTable;
 
 extern SVECTOR cameraProjectionAngles;
 extern SVECTOR cameraRotation;

@@ -16,6 +16,7 @@
 #include "kernel/events.h"
 #include "kernel/inputs.h"
 #include "kernel/playTime.h"
+#include "kernel/kernelVariables.h"
 
 #include "menus/menuGold.h"
 #include "menus/statusMenu.h"
@@ -28,7 +29,6 @@ sMenuContext *gMenuContext = nullptr;
 void updateMenuSelection(u8 count, u8 selectedEntry, std::span<std::array<u32, 2>>::iterator config);
 void updateMenuSelection2(int param_1, sMenuContext_4E0* param_2, void* param_3_unused, std::span<int>::iterator param_4, std::span<s8>::iterator param_5, byte param_6, byte param_7, int param_8);
 s32 menuIdToOpen = 0xFF;
-s32 menuOpenCount;
 
 u8 useDebugMenuList = 1;
 u8 menuToEnter = 0;
@@ -574,8 +574,6 @@ void setupMainMenu(void)
     }
     MissingCode();
 }
-
-u8 menuReturnState0 = 0;
 
 void drawMenuBackground(void)
 {

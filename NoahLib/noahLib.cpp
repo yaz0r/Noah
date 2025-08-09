@@ -18,6 +18,7 @@
 #include "kernel/audio/spu.h"
 #include "kernel/memory.h"
 #include "validation/validation.h"
+#include "kernel/kernelVariables.h"
 
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
@@ -187,7 +188,7 @@ bool noahInit(int argc, char* argv[])
     }
 
     MissingCode();
-
+    initKernelVariables();
     initGameState();
 
     MissingCode();

@@ -13,6 +13,7 @@
 #include "field/mecha/mechaOverlay.h"
 #include "kernel/3dModel.h"
 #include "kernel/3dModel_bgfxRenderer.h"
+#include "kernel/kernelVariables.h"
 
 #include <tgmath.h>
 

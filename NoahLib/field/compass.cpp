@@ -4,6 +4,7 @@
 #include "kernel/filesystem.h"
 #include "kernel/TIM.h"
 #include "dialogWindows.h"
+#include "kernel/kernelVariables.h"
 
 std::array<sFieldCompassVar2, 25> fieldCompassVar2;
 
@@ -79,8 +80,6 @@ RECT compassDataRect = { 0,0,0,0 };
 
 s16 compassArrowTargetDirection = 0;
 s16 compassArrowCurrentDirection = 0;
-
-int fieldCompassVar = 0;
 
 void drawCompassLetters(sTag* param_1, sFieldCompassVar2* param_2, MATRIX* param_3, int frameOddOrEven)
 {
@@ -259,7 +258,6 @@ void renderCompass()
 	SetGeomScreen(sceneSCRZ);
 }
 
-int compassGraphicDataLoaded = 0;
 std::vector<u8> compassGraphicDataStaging;
 
 struct RECT2

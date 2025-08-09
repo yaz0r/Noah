@@ -17,6 +17,7 @@
 #include "field/particles/particles.h"
 #include "battle/battle.h"
 #include "field/fieldInputs.h"
+#include "kernel/kernelVariables.h"
 
 #include "kernel/audio/soundInstance.h"
 

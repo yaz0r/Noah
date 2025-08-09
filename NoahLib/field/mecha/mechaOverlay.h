@@ -356,7 +356,6 @@ extern std::array<u8, 4> mechaList2;
 extern s16 numMaxMechaOverlayEntries;
 extern std::array<u8, 3> mechaBackColor;
 extern std::array<MATRIX, 2> mechaFieldArgs2;
-extern bool disableMechaRendering;
 
 struct sMechaInitVar2 {
     std::vector<sMechaInitVar2Sub> m0;

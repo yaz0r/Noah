@@ -20,6 +20,7 @@
 #include "kernel/audio/soundInstance.h"
 #include "kernel/inputs.h"
 #include "kernel/3dModel.h"
+#include "kernel/kernelVariables.h"
 
 #include "psx/libgpu.h"
 #include "psx/libapi.h"
@@ -607,7 +608,6 @@ void worldmapInitAllModels() {
     worldmapModels[4].m0_hidden = 1;
 }
 
-int worldmapSoundFilesPendingCount = 0;
 sWdsFile* worldmapWds;
 sSeqFile worldmapSound1;
 sSeqFile worldmapSound2;

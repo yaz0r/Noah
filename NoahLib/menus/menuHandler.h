@@ -4,7 +4,6 @@
 #include "kernel/font.h"
 
 extern s32 menuIdToOpen;
-extern s32 menuOpenCount;
 
 struct sMenuContext_1D4 {
     DRAWENV m0_DrawEnv;
