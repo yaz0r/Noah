@@ -101,9 +101,9 @@ struct sFieldScriptEntity
     std::array<u16, 4> m78_stack;
     s8 m80_dialogPortrait;
     s8 m81_selectedMultichoiceLine;
-    std::array<s8, 2> m82;
-    s32 m84;
-    std::array<s16, 2> m88;
+    std::array<s8, 2> m82_dialogWindowSize;
+    s32 m84_dialogWindowFlags;
+    std::array<s16, 2> m88_dialogWindowPosition;
     std::array<sFieldScriptEntityScriptSlot, 8> m8C_scriptSlots;
     u16 mCC_scriptPC;
     s8 mCE_currentScriptSlot;

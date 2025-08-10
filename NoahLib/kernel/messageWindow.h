@@ -32,7 +32,21 @@ struct sDialogWindow18
     s16 mA_width1;
     s16 mC_height;
     s16 mE;
-    u16 m10_flags;
+    union {
+        struct {
+            u16 m01 : 1;
+            u16 m02 : 1;
+            u16 m04 : 1;
+            u16 m08 : 1;
+            u16 m10 : 1;
+            u16 m20 : 1;
+            u16 m40 : 1;
+            u16 m80 : 1;
+            u16 m100 : 1;
+            u16 m200 : 1;
+        };
+        u16 m_rawValue;
+    } m10_flags;
     s16 m12_widthPadded;
     sVec2_s16 m14;
     s16 m18;

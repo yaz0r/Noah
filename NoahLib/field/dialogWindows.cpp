@@ -312,10 +312,10 @@ s16 dialogWindowOpenAnimationNumFrames = 0;
 void createDialogWindow(short x, short y, int dialogIndex, int windowIndex, int width, int height, int fieldActorId, int actorId, int mode, uint param_10, uint param_11)
 {
 	int y2 = y - 8;
-	u32 flagUpper = actorArray[fieldActorId].m4C_scriptEntity->m84 >> 16;
+	u32 flagUpper = actorArray[fieldActorId].m4C_scriptEntity->m84_dialogWindowFlags >> 16;
 	if (flagUpper == 0)
 	{
-		flagUpper = actorArray[fieldActorId].m4C_scriptEntity->m84 & 0xFFFF;
+		flagUpper = actorArray[fieldActorId].m4C_scriptEntity->m84_dialogWindowFlags & 0xFFFF;
 	}
 	flagUpper |= param_10;
 
@@ -390,7 +390,7 @@ void createDialogWindow(short x, short y, int dialogIndex, int windowIndex, int 
 	gDialogWindows[windowIndex].m18.m68 = bVar3;
 	gDialogWindows[windowIndex].m18.m90_dialogPointer = getDialogParamPointer(rawFieldDialogBundle.getRawData().begin(), dialogIndex);
 	gDialogWindows[windowIndex].m40E = 0;
-	gDialogWindows[windowIndex].m18.m10_flags |= 2;
+	gDialogWindows[windowIndex].m18.m10_flags.m02 = 1;
 	gDialogWindows[windowIndex].m416_fieldActorId = fieldActorId;
 	gDialogWindows[windowIndex].m418_actorId = actorId;
 	gDialogWindows[windowIndex].m408_openAnimationCounter = dialogWindowOpenAnimationNumFrames;
@@ -454,7 +454,7 @@ void stepDialogWindows()
 	{
 		if (gDialogWindows[i].m40E == 0)
 		{
-			if ((gDialogWindows[i].m408_openAnimationCounter == 0) && ((gDialogWindows[i].m18.m10_flags & 4) == 0)) {
+			if ((gDialogWindows[i].m408_openAnimationCounter == 0) && !gDialogWindows[i].m18.m10_flags.m04) {
 				releaseDialogWindow(i);
 			}
 			if (gDialogWindows[i].m414 == 0) {

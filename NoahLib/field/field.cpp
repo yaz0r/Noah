@@ -616,11 +616,11 @@ void resetFieldScriptEntityValues(int index)
     pFieldScriptEntity->mE4_playableCharacterId = 0xFF;
     pFieldScriptEntity->m76 = 0x100;
 
-    pFieldScriptEntity->m82[1] = 0;
-    pFieldScriptEntity->m82[0] = 0;
-    pFieldScriptEntity->m88[1] = 0;
-    pFieldScriptEntity->m88[0] = 0;
-    pFieldScriptEntity->m84 = 0;
+    pFieldScriptEntity->m82_dialogWindowSize[1] = 0;
+    pFieldScriptEntity->m82_dialogWindowSize[0] = 0;
+    pFieldScriptEntity->m88_dialogWindowPosition[1] = 0;
+    pFieldScriptEntity->m88_dialogWindowPosition[0] = 0;
+    pFieldScriptEntity->m84_dialogWindowFlags = 0;
     pFieldScriptEntity->mCF_scriptSlotWaitedOn = 0;
     pFieldScriptEntity->mCE_currentScriptSlot = 0;
     pFieldScriptEntity->mE8_currentAnimationId = 0;

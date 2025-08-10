@@ -617,21 +617,21 @@ int showDialogWindowForActor(int actorId, int mode)
 	int dialogBoxHeight = getDialogParam1(rawFieldDialogBundle.getRawData(), dialogIndex);
 
 	if ((mode == 0) || (mode == 3)) {
-		if (pCurrentFieldScriptActor->m82[0] != 0) {
-			dialogBoxWidth = pCurrentFieldScriptActor->m82[0];
+		if (pCurrentFieldScriptActor->m82_dialogWindowSize[0] != 0) {
+			dialogBoxWidth = pCurrentFieldScriptActor->m82_dialogWindowSize[0];
 		}
-		if (pCurrentFieldScriptActor->m82[1] != 0) {
-			dialogBoxHeight = pCurrentFieldScriptActor->m82[1];
+		if (pCurrentFieldScriptActor->m82_dialogWindowSize[1] != 0) {
+			dialogBoxHeight = pCurrentFieldScriptActor->m82_dialogWindowSize[1];
 		}
 	}
 
-    int old84 = pCurrentFieldScriptActor->m84;
+    int old84 = pCurrentFieldScriptActor->m84_dialogWindowFlags;
     int windowDisplayMode = old84 & 0xffff;
-    pCurrentFieldScriptActor->m84 = windowDisplayMode;
+    pCurrentFieldScriptActor->m84_dialogWindowFlags = windowDisplayMode;
     int flagFromScript = windowDisplayMode;
 	if (pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 3] != 0) {
         flagFromScript = old84 & 0xff00 | pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 3];
-        pCurrentFieldScriptActor->m84 = windowDisplayMode | flagFromScript << 0x10;
+        pCurrentFieldScriptActor->m84_dialogWindowFlags = windowDisplayMode | flagFromScript << 0x10;
 	}
 
     windowDisplayMode = (flagFromScript >> 4) & 3;
@@ -723,37 +723,37 @@ LAB_Field__8009ca64:
         boxY2 = (short)dialogBoxHeight * -0xe + 0xcc;
 	}
 	if ((mode == 0) || (mode == 3)) {
-		if (pCurrentFieldScriptActor->m88[0] != 0) {
-			boxX3 = pCurrentFieldScriptActor->m88[0];
+		if (pCurrentFieldScriptActor->m88_dialogWindowPosition[0] != 0) {
+			boxX3 = pCurrentFieldScriptActor->m88_dialogWindowPosition[0];
 		}
-		if (pCurrentFieldScriptActor->m88[1] != 0) {
-            boxY2 = pCurrentFieldScriptActor->m88[1];
+		if (pCurrentFieldScriptActor->m88_dialogWindowPosition[1] != 0) {
+            boxY2 = pCurrentFieldScriptActor->m88_dialogWindowPosition[1];
 		}
-		if (pCurrentFieldScriptActor->m82[0] != 0) {
-			dialogBoxWidth = (uint)pCurrentFieldScriptActor->m82[0];
+		if (pCurrentFieldScriptActor->m82_dialogWindowSize[0] != 0) {
+			dialogBoxWidth = (uint)pCurrentFieldScriptActor->m82_dialogWindowSize[0];
 		}
-		if (pCurrentFieldScriptActor->m82[1] != 0) {
-			dialogBoxHeight = (uint)pCurrentFieldScriptActor->m82[1];
+		if (pCurrentFieldScriptActor->m82_dialogWindowSize[1] != 0) {
+			dialogBoxHeight = (uint)pCurrentFieldScriptActor->m82_dialogWindowSize[1];
 		}
-		if ((pCurrentFieldScriptActor->m80_dialogPortrait != -1) && (((pCurrentFieldScriptActor->m84 >> 16) & 2) == 0)) {
+		if ((pCurrentFieldScriptActor->m80_dialogPortrait != -1) && (((pCurrentFieldScriptActor->m84_dialogWindowFlags >> 16) & 2) == 0)) {
 			dialogBoxHeight = 4;
 		}
 	}
-	if (((pCurrentFieldScriptActor->m84 >> 16) & 0x40) != 0) {
+	if (((pCurrentFieldScriptActor->m84_dialogWindowFlags >> 16) & 0x40) != 0) {
 		gDialogWindows[windowIndex].m40C_flags = gDialogWindows[windowIndex].m40C_flags | 0x40;
 	}
 
 	int flags = 0;
-	if (((pCurrentFieldScriptActor->m84 >> 16) & 0xc) == 0) {
+	if (((pCurrentFieldScriptActor->m84_dialogWindowFlags >> 16) & 0xc) == 0) {
 		windowDisplayMode = getCameraDirection();
 		flags = (((((int)((uint)(ushort)(actorArray[actorId].m4C_scriptEntity)->m106_currentRotation << 0x10) >> 0x19) - (windowDisplayMode & 0xffff)) + 1 & 7) < 4 ^ 1) << 10;
 	}
 	else {
-		if (((pCurrentFieldScriptActor->m84 >> 16) & 4) != 0) {
+		if (((pCurrentFieldScriptActor->m84_dialogWindowFlags >> 16) & 4) != 0) {
 			flags = 0x400;
 		}
 	}
-	createDialogWindow((int)boxX3, (int)boxY2, dialogIndex, windowIndex, dialogBoxWidth, dialogBoxHeight, currentFieldActorId, actorId, mode, flags, (pCurrentFieldScriptActor->m84 >> 16));
+	createDialogWindow((int)boxX3, (int)boxY2, dialogIndex, windowIndex, dialogBoxWidth, dialogBoxHeight, currentFieldActorId, actorId, mode, flags, (pCurrentFieldScriptActor->m84_dialogWindowFlags >> 16));
 	flagWindowOpenBF(windowIndex);
 	pCurrentFieldScriptActor->m104_rotation |= 0x8000;
     pCurrentFieldScriptActor->mCC_scriptPC += 4;

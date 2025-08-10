@@ -40,7 +40,7 @@ void resetDialogWindow18(sDialogWindow18* param_1)
 {
     if (param_1->m84_delay == 0) {
         param_1->m6C_autoClose = 0;
-        param_1->m10_flags = param_1->m10_flags & 2;
+        param_1->m10_flags.m_rawValue &= 2;
     }
     return;
 }
@@ -48,7 +48,7 @@ void resetDialogWindow18(sDialogWindow18* param_1)
 void setupWindowSize2(sDialogWindow18* param_1, int x1, int y1, short x2, short y2, short width, short height)
 {
     (param_1->m4).vx = x2;
-    param_1->m10_flags = 0;
+    param_1->m10_flags.m_rawValue = 0;
     param_1->m84_delay = 0;
     param_1->m8C = nullptr;
     param_1->m82 = 0;
@@ -175,7 +175,7 @@ void dealocateDialogWindow18MemorySub(sDialogWindow18* param_1)
 {
     param_1->m6C_autoClose = 0;
     param_1->m84_delay = 0;
-    param_1->m10_flags = param_1->m10_flags & 2;
+    param_1->m10_flags.m02 = 1;
     dealocateDialogWindow18MemorySubSub(param_1);
     return;
 }
@@ -191,16 +191,12 @@ void dealocateDialogWindow18Memory(sDialogWindow18* param_1)
 
 void addDialogWindowsToOTSub1(sDialogWindow18* param_1)
 {
-    ushort uVar1;
-
-    uVar1 = param_1->m10_flags;
-    param_1->m10_flags = uVar1 & 0xfff7;
-    if ((uVar1 & 0x200) != 0) {
+    param_1->m10_flags.m08 = 0;
+    if (param_1->m10_flags.m200) {
         param_1->m84_delay = 0;
         param_1->m6C_autoClose = 0;
-        param_1->m10_flags = param_1->m10_flags & 0xfdff;
+        param_1->m10_flags.m200 = 0;
     }
-    return;
 }
 
 int getWindowSubStructX(sDialogWindow18* param_1)
@@ -221,7 +217,7 @@ int getWindowSubStructY(sDialogWindow18* param_1)
 
 s8 addDialogWindowsToOTSub0(sDialogWindow18* param_1)
 {
-    if ((param_1->m10_flags & 8) != 0) {
+    if (param_1->m10_flags.m08) {
         return param_1->m6B;
     }
     return 0;
@@ -251,7 +247,7 @@ void addDialogWindowsToOTSub2(sDialogWindow18* param_1, const std::vector<u8>::c
 void dialogSpecialCase9AndA_2(sDialogWindow18* param_1, std::vector<u8>::iterator string) {
     param_1->m20 = param_1->m1C_currentStringToPrint;
     param_1->m1C_currentStringToPrint = string;
-    param_1->m10_flags |= 0x80;
+    param_1->m10_flags.m80 = 1;
 }
 
 void updateDialogTextImage(sDialogWindow18* param_1)
@@ -264,11 +260,10 @@ void updateDialogTextImage(sDialogWindow18* param_1)
         int sVar8 = (param_1->m0).vy;
         param_1->m18 = param_1->m18 + 1;
         if (sVar3 <= sVar8) {
-            int uVar5 = param_1->m10_flags;
             (param_1->m0).vy = 0;
-            param_1->m10_flags = uVar5 | 1;
+            param_1->m10_flags.m01 = 1;
         }
-        if ((param_1->m10_flags & 1) != 0) {
+        if (param_1->m10_flags.m01) {
             param_1->m28_perLineBuffer[(param_1->m14).vy].m58_widthDiv4 = 0;
             sVar3 = param_1->mC_height;
             sVar8 = (param_1->m14).vy + 1;
@@ -297,7 +292,7 @@ void updateDialogTextImage(sDialogWindow18* param_1)
 
     if (param_1->m6C_autoClose != 0) {
         param_1->m6C_autoClose = 0;
-        param_1->m10_flags = param_1->m10_flags & 0xfffb;
+        param_1->m10_flags.m04 = 0;
         return;
     }
 
@@ -315,13 +310,13 @@ void updateDialogTextImage(sDialogWindow18* param_1)
         switch (characterToPrint)
         {
         case 0:
-            if ((param_1->m10_flags & 0x80) == 0) {
-                param_1->m10_flags |= 8;
+            if (!param_1->m10_flags.m80) {
+                param_1->m10_flags.m08 = 1;
                 param_1->m6B = 1;
                 param_1->m6C_autoClose = 1;
                 return;
             }
-            param_1->m10_flags &= ~0x80;
+            param_1->m10_flags.m80 = 0;
             param_1->m1C_currentStringToPrint = param_1->m20 + 1;
             iVar13 = iVar13 + -1;
             break;
@@ -330,10 +325,11 @@ void updateDialogTextImage(sDialogWindow18* param_1)
             param_1->m1C_currentStringToPrint++;
             return;
         case 2:
-            param_1->m6B = '\x02';
-            param_1->m10_flags = param_1->m10_flags | 0x48;
+            param_1->m6B = 2;
+            param_1->m10_flags.m40 = 1;
+            param_1->m10_flags.m08 = 1;
             param_1->m1C_currentStringToPrint++;
-            if (*param_1->m1C_currentStringToPrint != '\x01') {
+            if (*param_1->m1C_currentStringToPrint != 1) {
                 return;
             }
             param_1->m1C_currentStringToPrint++;
@@ -345,24 +341,22 @@ void updateDialogTextImage(sDialogWindow18* param_1)
             // escape character;
             switch (pCharacterToPrint[1])
             {
-            case 0:
+            case 0: // Pause
                 param_1->m84_delay = param_1->m1C_currentStringToPrint[2];
                 param_1->m1C_currentStringToPrint += 3;
                 return;
             case 1:
                 if (param_1->m1C_currentStringToPrint[2] == 0) {
-                    int bVar1 = param_1->m6A;
-                    int bVar2 = param_1->m6A;
+                    param_1->m68 = param_1->m6A;
+                    param_1->m69 = param_1->m6A;
                     param_1->m6A = 0;
-                    param_1->m68 = bVar1;
-                    param_1->m69 = bVar2;
+
                 }
                 else {
-                    int bVar2 = param_1->m68;
-                    iVar13 = iVar13 + param_1->m1C_currentStringToPrint[2];
-                    param_1->m68 = bVar1;
-                    param_1->m69 = bVar1;
-                    param_1->m6A = bVar2;
+                    iVar13 += param_1->m1C_currentStringToPrint[2];
+                    param_1->m6A = param_1->m68;
+                    param_1->m68 = param_1->m1C_currentStringToPrint[2];
+                    param_1->m69 = param_1->m1C_currentStringToPrint[2];
                 }
                 param_1->m1C_currentStringToPrint = param_1->m1C_currentStringToPrint + 3;
                 break;
@@ -402,17 +396,16 @@ void updateDialogTextImage(sDialogWindow18* param_1)
                 printDialogTextVarBackup = printDialogTextVar;
                 continue;
             }
-            case 0xE:
+            case 0xE: // change text display speed
             {
-                int bVar1 = param_1->m68;
+                param_1->m6A = param_1->m68;
                 param_1->m68 = 1;
                 param_1->m69 = 1;
-                param_1->m6A = bVar1;
-                bVar1 = param_1->m1C_currentStringToPrint[2];
+                int newTextDisplaySpeedCharacterSpeed = param_1->m1C_currentStringToPrint[2];
                 param_1->m1C_currentStringToPrint = param_1->m1C_currentStringToPrint + 3;
-                int uVar6 = (ushort)bVar1;
-                param_1->m88_delayBetweenCharacters = uVar6;
-                param_1->m86_currentDelayForNextCharacter = uVar6;
+
+                param_1->m88_delayBetweenCharacters = newTextDisplaySpeedCharacterSpeed;
+                param_1->m86_currentDelayForNextCharacter = newTextDisplaySpeedCharacterSpeed;
             }
             return;
             /*
@@ -466,7 +459,7 @@ void updateDialogTextImage(sDialogWindow18* param_1)
 
 void updateAndRenderTextForDialogWindow(sDialogWindow18* param_1, sTag* OT, int oddOrEven)
 {
-    if ((param_1->m10_flags & 4) == 0) {
+    if (!param_1->m10_flags.m04) {
         if (param_1->m82 == 0) {
             return;
         }
@@ -474,31 +467,32 @@ void updateAndRenderTextForDialogWindow(sDialogWindow18* param_1, sTag* OT, int 
         param_1->m1C_currentStringToPrint = psVar8->m4_dialogPointer;
         param_1->m8C = param_1->m8C->m0_pNext;
         delete psVar8;
-        param_1->m82 = param_1->m82 + -1;
-        param_1->m10_flags = param_1->m10_flags & 2 | 0x24;
+        --param_1->m82;
+        param_1->m10_flags.m_rawValue &= 2;
+        param_1->m10_flags.m20 = 1;
+        param_1->m10_flags.m04 = 1;
         if (param_1->m6A != 0) {
-            u8 bVar3 = param_1->m6A;
+            param_1->m69 = param_1->m6A;
             param_1->m68 = param_1->m6A;
             param_1->m6A = 0;
-            param_1->m69 = bVar3;
         }
         param_1->m88_delayBetweenCharacters = 0;
         param_1->m86_currentDelayForNextCharacter = 0;
         param_1->m69 = param_1->m68;
     }
-    if ((param_1->m10_flags & 0x100) == 0) {
+    if (!param_1->m10_flags.m100) {
         param_1->m69 = param_1->m68;
     }
     else {
         param_1->m69 = param_1->m68 * 3;
     }
 
-    if (((param_1->m10_flags & 0x40) != 0) && ((param_1->m10_flags & 8) == 0)) {
-        param_1->m10_flags &= ~0x40;
-        param_1->m10_flags |= 0x20;
+    if (param_1->m10_flags.m40 && !param_1->m10_flags.m08) {
+        param_1->m10_flags.m40 = 0;
+        param_1->m10_flags.m20 = 1;
     }
 
-    if ((param_1->m10_flags & 0x20) != 0) {
+    if (param_1->m10_flags.m20) {
         sDialogWindow18PerLineBufferEntry* psVar5 = &param_1->m28_perLineBuffer[0];
         short sVar2 = param_1->mE;
         (param_1->m14).vy = 0;
@@ -515,7 +509,7 @@ void updateAndRenderTextForDialogWindow(sDialogWindow18* param_1, sTag* OT, int 
                 param_1->m28_perLineBuffer[i].m58_widthDiv4 = 0;
             }
         }
-        param_1->m10_flags &= ~0x20;
+        param_1->m10_flags.m20 = 0;
     }
 
     if (0 < param_1->mC_height) {
@@ -588,7 +582,7 @@ void updateAndRenderTextForDialogWindow(sDialogWindow18* param_1, sTag* OT, int 
     if (param_1->m84_delay == 0) {
         if (param_1->m86_currentDelayForNextCharacter == 0) {
             param_1->m86_currentDelayForNextCharacter = param_1->m88_delayBetweenCharacters;
-            if ((param_1->m10_flags & 0x58) == 0) {
+            if ((param_1->m10_flags.m_rawValue & 0x58) == 0) {
                 updateDialogTextImage(param_1);
                 LoadImage(&param_1->m28_perLineBuffer[(param_1->m0).vy].m50, (u8*)&param_1->m2C_inRamDialogTextImage[0]);
             }
@@ -598,22 +592,22 @@ void updateAndRenderTextForDialogWindow(sDialogWindow18* param_1, sTag* OT, int 
         }
     }
     else {
-        param_1->m84_delay = param_1->m84_delay + -1;
+        --param_1->m84_delay;
     }
 
     if (param_1->m84_delay != 0)
     {
         if (--param_1->m84_delay == -1)
         {
-            param_1->m10_flags = param_1->m10_flags & 0xffef;
+            param_1->m10_flags.m10 = 0;
         }
     }
 
-    if ((param_1->m10_flags & 2) == 0) {
+    if (!param_1->m10_flags.m02) {
         assert(0);
     }
 
-    param_1->m10_flags = param_1->m10_flags & 0xfeff;
+    param_1->m10_flags.m10 = 0;
     AddPrim(OT, &param_1->m30_textTileDrawMode[0]);
 }
 

@@ -404,7 +404,7 @@ u8 renderString(std::vector<u8>::const_iterator buffer, std::vector<u16>& param_
     sDialogWindow18_temp.m84_delay = 0;
     sDialogWindow18_temp.m6C_autoClose = 0;
     sDialogWindow18_temp.m6A = 0;
-    sDialogWindow18_temp.m10_flags = 0;
+    sDialogWindow18_temp.m10_flags.m_rawValue = 0;
     sDialogWindow18_temp.m0.vy = 0;
     sDialogWindow18_temp.m0.vx = 0;
     sDialogWindow18_temp.m69 = 100;

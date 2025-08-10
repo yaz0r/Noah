@@ -411,14 +411,14 @@ int battleEvent_DisplayDialog(u16 messageIndex, int protraitIndex, int flags) {
         battleDialogWindowX2 = x + 0xc;
         setupWindowSize2(battleEventVar1, 0x380, 0x100, battleDialogWindowX2, battleDialogWindowY2, battleEventVar0->m7F6_dialogParams.m4_width * 3, battleEventVar0->m7F6_dialogParams.m6_height);
         battleEventVar1->m48_textTile[1].m_colorAndCode.m3_code = 4;
-        battleEventVar1->m10_flags |= 2;
+        battleEventVar1->m10_flags.m02 = 1;
         resetDialogWindow18(battleEventVar1);
         addDialogWindowsToOTSub2(battleEventVar1, getDialogParamPointer(battleEventVarDialogueBundle.begin(), messageIndex));
         battleVar1->mC9_dialog = 1;
         battleEventVar0->m802_dialogBoxInitialized = 1;
         battleRenderDebugAndMain();
     }
-    if (battleEventVar1->m10_flags & 8) {
+    if (battleEventVar1->m10_flags.m08) {
         if ((flags & 8) == 0) {
             setupBattleDialogCursorSpritePoly((battleEventVar1->m0).vx * 4 + battleDialogWindowX2 + 2, (battleEventVar1->m0).vy * 0xe + battleDialogWindowY2 + 5);
         }
@@ -430,7 +430,7 @@ int battleEvent_DisplayDialog(u16 messageIndex, int protraitIndex, int flags) {
         }
 
     }
-    if (!(battleEventVar1->m10_flags & 4)) {
+    if (!battleEventVar1->m10_flags.m04) {
         battleVar1->mC9_dialog = 0;
         dealocateDialogWindow18Memory(battleEventVar1);
         battleRenderDebugAndMain();

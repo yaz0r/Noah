@@ -1263,14 +1263,14 @@ void OP_CLOSE_CURRENT_ACTOR_DIALOG()
         }
     }
     else {
-        pCurrentFieldScriptActor->m82[0] = 0;
+        pCurrentFieldScriptActor->m82_dialogWindowSize[0] = 0;
         psVar2 = pCurrentFieldScriptActor;
-        psVar5->m88[0] = 0;
-        psVar5->m88[1] = 0;
-        psVar2->m82[1] = 0;
+        psVar5->m88_dialogWindowPosition[0] = 0;
+        psVar5->m88_dialogWindowPosition[1] = 0;
+        psVar2->m82_dialogWindowSize[1] = 0;
         psVar5 = pCurrentFieldScriptActor;
         puVar1 = &pCurrentFieldScriptActor->mCC_scriptPC;
-        pCurrentFieldScriptActor->m84 = 0;
+        pCurrentFieldScriptActor->m84_dialogWindowFlags = 0;
         uVar3 = *puVar1 + 2;
     }
     psVar5->mCC_scriptPC = uVar3;
@@ -2017,7 +2017,7 @@ void OP_92()
 
     pCurrentFieldScriptActor->mCE_currentScriptSlot = 0;
     pCurrentFieldScriptActor->mCF_scriptSlotWaitedOn = 0;
-    pCurrentFieldScriptActor->m84 = 0;
+    pCurrentFieldScriptActor->m84_dialogWindowFlags = 0;
     pCurrentFieldScriptActor->m12C_flags &=  0xfffffe3f;
     breakCurrentScript = 1;
 }
@@ -2064,9 +2064,9 @@ void OP_WAIT_DIALOG()
     }
     else {
         if (((actorArray[gDialogWindows[windowIndex].m418_actorId].m4C_scriptEntity)->m4_flags.m_rawFlags & 0x200) != 0) {
-            int uVar2 = (uint)pCurrentFieldScriptActor->m84 >> 0x10;
+            int uVar2 = (uint)pCurrentFieldScriptActor->m84_dialogWindowFlags >> 0x10;
             if (uVar2 == 0) {
-                uVar2 = pCurrentFieldScriptActor->m84 & 0xffff;
+                uVar2 = pCurrentFieldScriptActor->m84_dialogWindowFlags & 0xffff;
             }
             if ((uVar2 & 1) == 0) {
                 if ((pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m18) != 7) {
@@ -4298,20 +4298,20 @@ void OP_CE()
 
 void OP_CF()
 {
-    pCurrentFieldScriptActor->m88[0] = pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1] * 2;
-    pCurrentFieldScriptActor->m88[1] = pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 2];
-    pCurrentFieldScriptActor->m82[0] = pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 3] * 3;
-    pCurrentFieldScriptActor->m82[1] = pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 4];
+    pCurrentFieldScriptActor->m88_dialogWindowPosition[0] = pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1] * 2;
+    pCurrentFieldScriptActor->m88_dialogWindowPosition[1] = pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 2];
+    pCurrentFieldScriptActor->m82_dialogWindowSize[0] = pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 3] * 3;
+    pCurrentFieldScriptActor->m82_dialogWindowSize[1] = pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 4];
     ADVANCE_VM(0x5);
 }
 
 void OP_SET_DIALOG_WINDOW_PARAM()
 {
-    pCurrentFieldScriptActor->m88[0] = getImmediateOrVariableUnsigned(1);
-    pCurrentFieldScriptActor->m88[1] = getImmediateOrVariableUnsigned(3);
-    pCurrentFieldScriptActor->m82[0] = getImmediateOrVariableUnsigned(5) * 3;
-    pCurrentFieldScriptActor->m82[1] = getImmediateOrVariableUnsigned(7);
-    pCurrentFieldScriptActor->m84 = getImmediateOrVariableUnsigned(9);
+    pCurrentFieldScriptActor->m88_dialogWindowPosition[0] = getImmediateOrVariableUnsigned(1);
+    pCurrentFieldScriptActor->m88_dialogWindowPosition[1] = getImmediateOrVariableUnsigned(3);
+    pCurrentFieldScriptActor->m82_dialogWindowSize[0] = getImmediateOrVariableUnsigned(5) * 3;
+    pCurrentFieldScriptActor->m82_dialogWindowSize[1] = getImmediateOrVariableUnsigned(7);
+    pCurrentFieldScriptActor->m84_dialogWindowFlags = getImmediateOrVariableUnsigned(9);
     ADVANCE_VM(0xB);
 }
 

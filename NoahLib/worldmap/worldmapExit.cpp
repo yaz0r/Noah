@@ -63,7 +63,7 @@ s32 worldmap_taskExit_init(s32) {
     worldmapExitVar0 = 0xffff;
     setupWindowSize2(&worldmapDialogWindow18, 0x3c0, 0x180, 0xa0, 0x78, 0x20, 1);
     worldmapDialogWindow18.m68 = 8;
-    worldmapDialogWindow18.m10_flags = worldmapDialogWindow18.m10_flags | 2;
+    worldmapDialogWindow18.m10_flags.m02 = 1;
     resetDialogWindow18(&worldmapDialogWindow18);
     return 1;
 }
