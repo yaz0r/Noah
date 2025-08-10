@@ -11,7 +11,15 @@ public:
     void writeMemory(u64 address, const void* buffer, size_t size);
 
     u16 readU16(u64 address);
-
+    s16 readS16(u64 address) {
+        u16 value = readU16(address);
+        return *(s16*)&value;
+    }
+    u32 readU32(u64 address);
+    s32 readS32(u64 address) {
+        u32 value = readU32(address);
+        return *(s32*)&value;
+    }
     void writeU32(u64 address, u32 value);
     void writeU16(u64 address, u16 value);
 

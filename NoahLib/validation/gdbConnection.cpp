@@ -396,15 +396,17 @@ void GDBConnection::executeUntilAddress(u32 address) {
 u16 GDBConnection::readU16(u64 address) {
     std::vector<u8> data = readMemory(address, 2);
     return (*(u16*)data.data());
-    return _byteswap_ushort(*(u16*)data.data());
+}
+
+u32 GDBConnection::readU32(u64 address) {
+    std::vector<u8> data = readMemory(address, 4);
+    return (*(u32*)data.data());
 }
 
 void GDBConnection::writeU32(u64 address, u32 value) {
-    value = _byteswap_ulong(value);
     writeMemory(address, &value, 4);
 }
 
 void GDBConnection::writeU16(u64 address, u16 value) {
-    value = _byteswap_ushort(value);
     writeMemory(address, &value, 2);
 }

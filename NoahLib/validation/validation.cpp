@@ -22,11 +22,14 @@ bool validationInit() {
     g_gdbConnection->executeUntilAddress(0x8001991c); // just before booting the game
 
     // patch boot mode to kernel
-    g_gdbConnection->writeU32(0x80019930, 0x00000434); 
+    g_gdbConnection->writeU32(0x80019930, 0x34040000); 
     
     // Patch game state to enter debug room from kernel
     gameState.m231A_fieldID = 0;
-    g_gdbConnection->writeU16(0x8006f94e, 0);
+    g_gdbConnection->writeU16(0x8006f94e, gameState.m231A_fieldID);
+
+    // Sync random seed
+    randSeed = g_gdbConnection->readU32(0x8005a1fc);
 
     boolMenuValidation_init();
     fieldInputsValidation_init();

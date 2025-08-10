@@ -7,6 +7,9 @@
 #include "field/fieldInputs.h"
 #include "field/dialogWindows.h"
 
+#include "validation/field/validateFieldEntities.h"
+#include "validation/kernel/randomSeed.h"
+
 void updateFieldInputs();
 void updateFieldInputs_detour();
 
@@ -22,6 +25,9 @@ void updateFieldInputs_detour() {
     padButtonForScripts[0].m0_buttons = g_gdbConnection->readU16(0x800afe9c);
     padButtonForScripts[1].m0_buttons = g_gdbConnection->readU16(0x800afea0);
     padButtonForDialogs = g_gdbConnection->readU16(0x800c2694);
+
+    validateRandomSeed();
+    validateFieldEntities();
 }
 
 void fieldInputsValidation_init() {
