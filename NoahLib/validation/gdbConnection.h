@@ -10,6 +10,12 @@ public:
     std::vector<u8> readMemory(u64 address, size_t size);
     void writeMemory(u64 address, const void* buffer, size_t size);
 
+    u8 readU8(u64 address);
+    s8 readS8(u64 address) {
+        u8 value = readU8(address);
+        return *(s8*)&value;
+    }
+
     u16 readU16(u64 address);
     s16 readS16(u64 address) {
         u16 value = readU16(address);

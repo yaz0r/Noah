@@ -223,6 +223,7 @@ struct sGameState
     s16 m231C_CameraYaw;
     s16 m231E_worldmapInitialPositionIndex;
     s16 m2320_worldmapMode;
+    s16 m2322_previouslyPlayingMusic;
 };
 
 extern sGameState gameState;

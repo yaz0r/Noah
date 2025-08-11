@@ -3,6 +3,7 @@
 #include "validation/gdbConnection.h"
 #include "field/field.h"
 #include "field/fieldGraphicObject.h"
+#include "kernel/playTime.h"
 
 void validate(u32 psxBase, const MATRIX& matrix) {
     for (int i = 0; i < 3; i++) {
@@ -29,12 +30,20 @@ void validate(u32 psxBase, const FP_VEC3& vec3) {
     validate(psxBase + 0x8, vec3.vz);
 }
 
+void validate(u32 psxBase, const s16& data) {
+    assert(data == g_gdbConnection->readS16(psxBase + 0));
+}
+
 void validate(u32 psxBase, const u16& data) {
     assert(data == g_gdbConnection->readU16(psxBase + 0));
 }
 
 void validate(u32 psxBase, const s32& data) {
     assert(data == g_gdbConnection->readS32(psxBase + 0));
+}
+
+void validate(u32 psxBase, const u32& data) {
+    assert(data == g_gdbConnection->readU32(psxBase + 0));
 }
 
 void validate(u32 psxBase, const sSpriteActorCore& pSpriteActorCore) {
@@ -49,10 +58,33 @@ void validate(u32 psxBase, const sSpriteActor& pSpriteActor) {
     //...
 }
 
+void validate(u32 psxBase, const sFieldScriptEntity& pFieldScriptEntity) {
+    validate(psxBase + 0x00, pFieldScriptEntity.m0_fieldScriptFlags.m_rawFlags);
+    validate(psxBase + 0x04, pFieldScriptEntity.m4_flags.m_rawFlags);
+    validate(psxBase + 0x10, pFieldScriptEntity.m10_walkmeshId);
+    validate(psxBase + 0x14, pFieldScriptEntity.m14_currentTriangleFlag);
+    //...
+    validate(psxBase + 0xCC, pFieldScriptEntity.mCC_scriptPC);
+    //...
+}
+
+template <typename T>
+void validate(u32 psxBase, const T* pPtr) {
+    if (pPtr) {
+        psxBase = g_gdbConnection->readU32(psxBase);
+        assert(psxBase);
+        validate(psxBase, *pPtr);
+    }
+    else {
+        assert(g_gdbConnection->readU32(psxBase) == 0);
+    }
+}
+
 void validate(u32 entityBase, const sFieldEntity& entity) {
-    validate(g_gdbConnection->readU32(entityBase + 0x4), *entity.m4_pVramSpriteSheet);
+    validate(entityBase + 0x4, entity.m4_pVramSpriteSheet);
     validate(entityBase + 0xC, entity.mC_matrix);
     validate(entityBase + 0x2C, entity.m2C_matrixBackup);
+    validate(entityBase + 0x4C, entity.m4C_scriptEntity);
     validate(entityBase + 0x50, entity.m50_modelRotation);
     validate(entityBase + 0x58, entity.m58_flags);
     validate(entityBase + 0x5A, entity.m5A);
@@ -68,4 +100,11 @@ void validateFieldEntities() {
         validate(entityBase, actorArray[i]);
     }
 
+}
+
+void validateFieldVars() {
+    u32 arrayBase = 0x800c3a68;
+    for (int i = 0; i < 0x200; i++) {
+        validate(arrayBase + i * 2, fieldVars[i]);
+    }
 }

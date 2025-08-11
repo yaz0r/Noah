@@ -30,123 +30,111 @@ extern s16 numWalkMesh;
 
 void OP_JUMP_IF()
 {
-    bool bVar1;
-    ushort uVar2;
+    
+    
     int iVar3;
-    byte bVar4;
-    uint uVar5;
-    uint uVar6;
 
-    uVar5 = 0;
-    bVar4 = pCurrentFieldScriptFile[(uint)pCurrentFieldScriptActor->mCC_scriptPC + 5] & 0xf0;
-    uVar6 = 0;
-    if (bVar4 == 0x40) {
-        uVar2 = readU16FromScript(1);
-        uVar6 = getVariable((uint)uVar2);
-        iVar3 = readS16FromScript(3);
-        uVar5 = iVar3;
-        uVar2 = readU16FromScript(1);
-        iVar3 = getBytesSign((uint)uVar2);
-        if (iVar3 != 0) {
-        LAB_Field__800a1cd0:
-            uVar5 = uVar5 & 0xffff;
-        }
-    }
-    else {
-        if (bVar4 < 0x41) {
-            if ((pCurrentFieldScriptFile[(uint)pCurrentFieldScriptActor->mCC_scriptPC + 5] & 0xf0) == 0) {
-                uVar2 = readU16FromScript(1);
-                uVar6 = getVariable((uint)uVar2);
-                uVar2 = readU16FromScript(3);
-                uVar5 = getVariable((uint)uVar2);
-                uVar2 = readU16FromScript(1);
-                iVar3 = getBytesSign((uint)uVar2);
-                if (iVar3 != 0) goto LAB_Field__800a1cd0;
-                uVar5 = uVar5;
-            }
+    uint valueB = 0;
+    uint valueA = 0;
+
+    u8 testControlByte = pCurrentFieldScriptFile[(uint)pCurrentFieldScriptActor->mCC_scriptPC + 5];
+
+    switch (testControlByte & 0xf0) {
+    case 0x00:
+        valueA = getVariable(readU16FromScript(1));
+        valueB = getVariable(readU16FromScript(3));
+        if (getBytesSign(readU16FromScript(1)) != 0) {
+            valueB &= 0xffff;
         }
         else {
-            if (bVar4 == 0x80) {
-                iVar3 = readS16FromScript(1);
-                uVar6 = iVar3;
-                uVar2 = readU16FromScript(3);
-                uVar5 = getVariable((uint)uVar2);
-                uVar2 = readU16FromScript(3);
-                iVar3 = getBytesSign((uint)uVar2);
-                if (iVar3 != 0) {
-                    uVar6 = uVar6 & 0xffff;
-                }
-            }
-            else {
-                if (bVar4 == 0xc0) {
-                    iVar3 = readS16FromScript(1);
-                    uVar6 = iVar3;
-                    iVar3 = readS16FromScript(3);
-                    uVar5 = iVar3;
-                }
-            }
+            valueB = (s16)valueB;
         }
+        break;
+    case 0x40:
+        valueA = getVariable(readU16FromScript(1));
+        valueB = readS16FromScript(3);
+        if (getBytesSign(readU16FromScript(1)) != 0) {
+            valueB &= 0xffff;
+        }
+        else {
+            valueB = (s16)valueB;
+        }
+        break;
+    case 0x80:
+        valueA = readS16FromScript(1);
+        valueB = getVariable(readU16FromScript(3));
+        if (getBytesSign(readU16FromScript(3))) {
+            valueA &= 0xffff;
+        }
+        else {
+            valueA = (s16)valueA;
+        }
+        break;
+    case 0xC0:
+        valueA = readS16FromScript(1);
+        valueB = readS16FromScript(3);
+        break;
     }
-    bVar1 = false;
-    switch ((uint)pCurrentFieldScriptFile[(uint)pCurrentFieldScriptActor->mCC_scriptPC + 5] & 0xf) {
+
+    bool testResult = false;
+    switch (testControlByte & 0xf) {
     case 0:
-        if (uVar6 == uVar5) {
-            bVar1 = true;
+        if (valueA == valueB) {
+            testResult = true;
         }
         goto switchD_Field_800a1d84_caseD_b;
     case 1:
-        if (uVar6 != uVar5) {
-            bVar1 = true;
+        if (valueA != valueB) {
+            testResult = true;
         }
         goto switchD_Field_800a1d84_caseD_b;
     case 2:
-        uVar5 = (uint)((int)uVar5 < (int)uVar6);
+        valueB = (uint)((int)valueB < (int)valueA);
         break;
     case 3:
-        uVar5 = (uint)((int)uVar6 < (int)uVar5);
+        valueB = (uint)((int)valueA < (int)valueB);
         break;
     case 4:
-        if ((int)uVar5 <= (int)uVar6) {
-            bVar1 = true;
+        if ((int)valueB <= (int)valueA) {
+            testResult = true;
         }
         goto switchD_Field_800a1d84_caseD_b;
     case 5:
-        if ((int)uVar6 <= (int)uVar5) {
-            bVar1 = true;
+        if ((int)valueA <= (int)valueB) {
+            testResult = true;
         }
         goto switchD_Field_800a1d84_caseD_b;
     case 6:
-        uVar5 = uVar6 & uVar5;
+        valueB = valueA & valueB;
         break;
     case 7:
-        if (uVar6 != uVar5) {
-            bVar1 = true;
+        if (valueA != valueB) {
+            testResult = true;
         }
         goto switchD_Field_800a1d84_caseD_b;
     case 8:
-        uVar5 = uVar6 | uVar5;
+        valueB = valueA | valueB;
         break;
     case 9:
-        uVar5 = uVar6 & uVar5;
+        valueB = valueA & valueB;
         break;
     case 10:
-        uVar5 = ~uVar6 & uVar5;
+        valueB = ~valueA & valueB;
         break;
     default:
         goto switchD_Field_800a1d84_caseD_b;
     }
-    if (uVar5 != 0) {
-        bVar1 = true;
+    if (valueB != 0) {
+        testResult = true;
     }
+
 switchD_Field_800a1d84_caseD_b:
-    if (bVar1) {
-        uVar2 = pCurrentFieldScriptActor->mCC_scriptPC + 8;
+    if (testResult) {
+        pCurrentFieldScriptActor->mCC_scriptPC += 8;
     }
     else {
-        uVar2 = readU16FromScript(6);
+        pCurrentFieldScriptActor->mCC_scriptPC = readU16FromScript(6);
     }
-    pCurrentFieldScriptActor->mCC_scriptPC = uVar2;
-    return;
 }
 
 void OP_4()
@@ -1555,7 +1543,7 @@ void OP_WORLDMAP(void) {
         breakCurrentScript = 1;
     }
     else {
-        syncKernelAndFieldStates();
+        fieldPerFrameReset();
         fieldRandomBattleVar = -1;
         fieldExecuteVar3 = 0;
         pKernelGameState->m231A_fieldID = getVar80(1, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 9]);

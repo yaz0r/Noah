@@ -393,6 +393,11 @@ void GDBConnection::executeUntilAddress(u32 address) {
     removeBreakpoint(address);
 }
 
+u8 GDBConnection::readU8(u64 address) {
+    std::vector<u8> data = readMemory(address, 1);
+    return (*(u8*)data.data());
+}
+
 u16 GDBConnection::readU16(u64 address) {
     std::vector<u8> data = readMemory(address, 2);
     return (*(u16*)data.data());

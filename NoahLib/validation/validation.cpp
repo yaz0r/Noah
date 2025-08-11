@@ -2,14 +2,17 @@
 #include "validation.h"
 #include "gdbConnection.h"
 
-#include "kernel/bootMenuValidation.h"
-#include "field/fieldInputsValidation.h"
+#include "validation/kernel/bootMenuValidation.h"
+#include "validation/field/fieldInputsValidation.h"
+#include "validation/field/validateField.h"
 
 #include "kernel/gameState.h"
 
 bool validationInit() {
     g_gdbConnection = new GDBConnection();
     if (!g_gdbConnection->openConnection("127.0.0.1", 3333)) {
+        delete g_gdbConnection;
+        g_gdbConnection = nullptr;
         return false;
     }
     g_gdbConnection->pauseExecution();
@@ -32,6 +35,7 @@ bool validationInit() {
     randSeed = g_gdbConnection->readU32(0x8005a1fc);
 
     boolMenuValidation_init();
+    validateField_init();
     fieldInputsValidation_init();
 
     return true;

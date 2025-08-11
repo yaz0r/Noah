@@ -36,6 +36,8 @@
 #include "kernel/3dModel_psxRenderer.h"
 #include "kernel/3dModel_bgfxRenderer.h"
 #include "kernel/kernelVariables.h"
+#include "kernel/debugText.h"
+#include "validation/gdbConnection.h"
 
 MATRIX computeProjectionMatrixTempMatrix2;
 
@@ -73,7 +75,7 @@ std::array<s16, 4> cameraLimits;
 
 s32 totalObjects;
 
-s32 totalActors;
+s32 g_totalActors;
 
 std::vector<sFieldEntity> actorArray;
 
@@ -727,7 +729,7 @@ int numInitializedFieldScriptEntities = 0;
 
 void initFieldScriptEntity(int index)
 {
-    if (index < totalActors)
+    if (index < g_totalActors)
     {
         numInitializedFieldScriptEntities++;
         sFieldScriptEntity* pNewFieldScriptEntity = new sFieldScriptEntity;
@@ -1773,7 +1775,7 @@ void startAllEntityScripts()
         setVar(0x10, 0);
         setVarsForCurrentParty();
 
-        for (int i = 0; i < totalActors; i++)
+        for (int i = 0; i < g_totalActors; i++)
         {
             // that was probably some macro
             pCurrentFieldEntity = &actorArray[i];
@@ -1782,7 +1784,7 @@ void startAllEntityScripts()
             pCurrentFieldScriptActor->mCC_scriptPC = getScriptEntryPoint(i, 2); // the update script
 
             // Does the entry point have any code?
-            if ((READ_LE_U16(pCurrentFieldScriptFile + pCurrentFieldScriptActor->mCC_scriptPC) == 0))
+            if ((READ_LE_U8(pCurrentFieldScriptFile + pCurrentFieldScriptActor->mCC_scriptPC) == 0))
             {
                 pCurrentFieldScriptActor->m4_flags.m_rawFlags |= 0x4000000;
             }
@@ -1796,7 +1798,7 @@ void startAllEntityScripts()
         }
 
         // execute the init script
-        for (int i = 0; i < totalActors; i++)
+        for (int i = 0; i < g_totalActors; i++)
         {
             pCurrentFieldEntity = &actorArray[i];
             pCurrentFieldScriptActor = pCurrentFieldEntity->m4C_scriptEntity;
@@ -2472,8 +2474,8 @@ void initFieldData()
         int rawFieldSize = READ_LE_U32(&rawFieldBundle.getRawData()[0x120]);
         rawFieldScriptData.resize(rawFieldSize + 0x10);
         fieldDecompress(rawFieldSize + 0x10, rawFieldBundle.getRawData().begin() + READ_LE_U32(&rawFieldBundle.getRawData()[0x144]), rawFieldScriptData);
-        totalActors = READ_LE_U32(rawFieldScriptData.begin() + 0x80);
-        pCurrentFieldScriptFile = rawFieldScriptData.begin() + 0x84 + totalActors * 0x40;
+        g_totalActors = READ_LE_U32(rawFieldScriptData.begin() + 0x80);
+        pCurrentFieldScriptFile = rawFieldScriptData.begin() + 0x84 + g_totalActors * 0x40;
     }
 
     {
@@ -3293,7 +3295,7 @@ void transitionFields()
 
 void exectueEntitiesUpdateFunction()
 {
-    int numEntitiesToUpdate = totalActors;
+    int numEntitiesToUpdate = g_totalActors;
     if (onlyUpdateDirector == 1)
     {
         numEntitiesToUpdate = 1;
@@ -3479,12 +3481,15 @@ LAB_Field__80082af4:
 
 int updateEntityEventCode3Sub0(sFieldScriptEntity* param_1)
 {
-    int iVar1;
-
-    iVar1 = -1;
-    if (((((((param_1->m14_currentTriangleFlag & 0x420000U) == 0) && (iVar1 = -1, updateEntityEventCode3Var1 == 0)) && (iVar1 = -1, param_1->m30_stepVector.vx == 0)) &&
-        ((iVar1 = -1, param_1->m30_stepVector.vy == 0 && (iVar1 = -1, param_1->m30_stepVector.vz == 0)))) &&
-        ((iVar1 = -1, updateEntityEventCode3Var2 == 1 && ((iVar1 = -1, param_1->m74 == -1 && (iVar1 = -1, (param_1->m0_fieldScriptFlags.m_rawFlags & 0x401800) == 0)))))) &&
+    int iVar1 = -1;
+    if (((((((param_1->m14_currentTriangleFlag & 0x420000U) == 0) &&
+        (iVar1 = -1, updateEntityEventCode3Var1 == 0)) &&
+        (iVar1 = -1, (param_1->m30_stepVector).vx == 0)) &&
+        ((iVar1 = -1, (param_1->m30_stepVector).vy == 0 &&
+            (iVar1 = -1, (param_1->m30_stepVector).vz == 0)))) &&
+        ((iVar1 = -1, updateEntityEventCode3Var2 == 1 &&
+            ((iVar1 = -1, param_1->m74 == -1 &&
+                (iVar1 = -1, (param_1->m0_fieldScriptFlags.m_rawFlags & 0x401800) == 0)))))) &&
         (((param_1->m4_flags.m_rawFlags & 1) == 0 || (iVar1 = -1, param_1->m10_walkmeshId != 0)))) {
         if (((param_1->m4_flags.m_rawFlags & 2) == 0) || (param_1->m10_walkmeshId != 1)) {
             iVar1 = 0;
@@ -4388,7 +4393,7 @@ void  startScriptsForCollisions(uint playerEntityIndex, sFieldEntity* pPlayerEnt
 {
     bool bTrigger = false;
     u32 newValueInFlags = 7;
-    for (int actorId =0; actorId <totalActors; actorId++)
+    for (int actorId =0; actorId <g_totalActors; actorId++)
     {
         sFieldScriptEntity* pTestedScriptEntity = actorArray[actorId].m4C_scriptEntity;
         s8 scriptIndexToStart = -1;
@@ -4538,16 +4543,69 @@ void  startScriptsForCollisions(uint playerEntityIndex, sFieldEntity* pPlayerEnt
     }
 }
 
+std::array<u8, 0x100> scratchBuffer;
+int positionInScratchBufferForMove = 0;
+
+template<typename T>
+T* allocateScratchBufferLocationForMoveCheck() {
+    assert(positionInScratchBufferForMove + sizeof(T) < scratchBuffer.size());
+    T* pNew = new (scratchBuffer.data() + positionInScratchBufferForMove) T();
+    positionInScratchBufferForMove += sizeof(T);
+    return pNew;
+}
+
+template<typename T>
+void freeScratchBuffer(T* pPtr) {
+    assert(scratchBuffer.data() + positionInScratchBufferForMove - sizeof(T) == (u8*)pPtr);
+    pPtr->~T();
+    positionInScratchBufferForMove -= sizeof(T);
+}
+
+struct sEntityMoveCheck0Sub1 {
+    s32 m10;
+    MATRIX m40;
+    s32 mA0;
+    s32 mA4;
+};
+
 int EntityMoveCheck0Sub1(int actorId, sSpriteActor* param_2, int stepX, int stepZ, int* param_5, VECTOR* outputNormal)
 {
-    MissingCode();
-    return -1;
+    sEntityMoveCheck0Sub1* pScratchData = allocateScratchBufferLocationForMoveCheck<sEntityMoveCheck0Sub1>();
+    pScratchData->mA0 = 0x7fffffff;
+    pScratchData->mA4 = (param_2->m0_spriteActorCore).m0_position.vz;
+    pScratchData->m10 = stepX * 0x10000 + stepZ;
+
+    MATRIX* m2;
+    MATRIX* pMVar7;
+    switch ((actorArray[actorId].m4C_scriptEntity)->m12C_flags & 3) {
+    default:
+        assert(0);
+    }
+
+    CompMatrix(m2, pMVar7, &pScratchData->m40);
+    SetRotMatrix(&pScratchData->m40);
+    SetTransMatrix(&pScratchData->m40);
+
+    if (param_2->m0_spriteActorCore.m0_position.vy.getIntegerPart()) {
+        assert(0);
+    }
+
+    if (pScratchData->mA0 == 0x7fffffff) {
+        freeScratchBuffer<sEntityMoveCheck0Sub1>(pScratchData);
+        return -1;
+    }
+    else {
+        *param_5 = pScratchData->mA0;
+        freeScratchBuffer<sEntityMoveCheck0Sub1>(pScratchData);
+        return 0;
+    }
 }
+
 
 void EntityMoveCheck0(uint playerEntityIndex, sFieldEntity* pPlayerEntity, sFieldScriptEntity* pPlayerScriptEntity)
 {
-    std::array<VECTOR, 8> scratchBuffer; // this would normally be allocated in the cpu scratch buffer
-    std::array<VECTOR, 8>::iterator pScratchBuffer = scratchBuffer.begin();
+    std::array<VECTOR, 2>* scratchBuffer = allocateScratchBufferLocationForMoveCheck<std::array<VECTOR, 2>>();
+    std::array<VECTOR, 2>::iterator pScratchBuffer = scratchBuffer->begin();
 
     bool finalState = false;
 
@@ -4576,10 +4634,17 @@ void EntityMoveCheck0(uint playerEntityIndex, sFieldEntity* pPlayerEntity, sFiel
     s32 finalCount;
     s8 playerVar74 = pPlayerScriptEntity->m74;
 
-    for (int actorId=0; actorId < totalActors; actorId++)
+    for (int actorId=0; actorId < g_totalActors; actorId++)
     {
         if (actorId == playerEntityIndex)
             continue;
+
+        if (g_gdbConnection)
+        {
+            void vallidateField();
+            g_gdbConnection->executeUntilAddress(0x8008426c);
+            vallidateField();
+        }
 
         sFieldScriptEntity* pCurrentFieldScriptEntity = actorArray[actorId].m4C_scriptEntity;
         sFieldScriptEntity_flags0 entityFlags = pCurrentFieldScriptEntity->m0_fieldScriptFlags;
@@ -4614,7 +4679,7 @@ void EntityMoveCheck0(uint playerEntityIndex, sFieldEntity* pPlayerEntity, sFiel
                     }
                     else {
                         if (fieldDebugDisable == 0) {
-                            assert(0);
+                            logToScreen("HITOFF\n");
                         }
                     }
                     continue;
@@ -4631,7 +4696,7 @@ void EntityMoveCheck0(uint playerEntityIndex, sFieldEntity* pPlayerEntity, sFiel
                 continue;
             }
             if (fieldDebugDisable == 0) {
-                assert(0);
+                logToScreen("POLYCHECK %d\n", actorId);
             }
             pCurrentFieldScriptEntity->m4_flags.m_rawFlags = pCurrentFieldScriptEntity->m4_flags.m_rawFlags | 0x100;
             testedEntityY = testedEntityYWithOffset + (uint)(ushort)pCurrentFieldScriptEntity->m18_boundingVolume.vy;
@@ -4697,6 +4762,13 @@ LAB_Field__80084520:
         }
     }
 
+    if (g_gdbConnection)
+    {
+        void vallidateField();
+        g_gdbConnection->executeUntilAddress(0x800846e0);
+        vallidateField();
+    }
+
     if (updateEntityEventCode3Var1 != 0) {
         finalState = false;
         finalCount = finalCount + 1;
@@ -4719,16 +4791,37 @@ LAB_Field__80084520:
         pPlayerScriptEntity->m74 = -1;
     }
 
-    MissingCode();
+    if (g_gdbConnection)
+    {
+        void vallidateField();
+        g_gdbConnection->executeUntilAddress(0x80084854);
+        vallidateField();
+    }
+
     if (((pPlayerScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x10000) == 0) && ((pPlayerScriptEntity->m4_flags.m_rawFlags & 0x200000) == 0)) {
         EntityMoveCheck1(playerEntityIndex, bestDistance, pPlayerEntity, pPlayerScriptEntity, 0);
     }
+
+    if (g_gdbConnection)
+    {
+        void vallidateField();
+        g_gdbConnection->executeUntilAddress(0x800848b8);
+        vallidateField();
+    }
+
     if ((actorArray[playerEntityIndex].m4_pVramSpriteSheet)->m7C->mC == 1) {
         resetInputs();
         pPlayerScriptEntity->m0_fieldScriptFlags.mx800_isJumping = 0;
     }
 
-    MissingCode();
+    if (g_gdbConnection)
+    {
+        void vallidateField();
+        g_gdbConnection->executeUntilAddress(0x800848f0);
+        vallidateField();
+    }
+
+    freeScratchBuffer<std::array<VECTOR, 2>>(scratchBuffer);
 }
 
 struct sEntityMoveCheck1StackStruct
@@ -4984,6 +5077,14 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
     if (((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x10000) != 0) ||
         ((((entityIndex != playerControlledActor || (EntityMoveCheck1Var1 != '\x01')) && ((pSpriteActor->mC_step).vy == 0)) &&
             (!updateEntityEventCode3Sub0(pFieldScriptEntity) && (pSpriteActor->m84_maxY == (pFieldScriptEntity->m20_position.vy >> 16)))))) {
+
+                if (g_gdbConnection)
+                {
+                    void vallidateField();
+                    g_gdbConnection->executeUntilAddress(0x80084b3c);
+                    vallidateField();
+                }
+
         return -1;
     }
 
@@ -5243,13 +5344,28 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
         }
     }
 
+    if(g_gdbConnection)
+    {
+        void vallidateField();
+        g_gdbConnection->executeUntilAddress(0x80085490);
+        vallidateField();
+    }
+
     initFollowStructForPlayer(entityIndex);
+
+    if (g_gdbConnection)
+    {
+        void vallidateField();
+        g_gdbConnection->executeUntilAddress(0x8008549c);
+        vallidateField();
+    }
+
     return 0;
 }
 
 void updatePartyFollowLeader() {
     if (!playerIsntPartyLeader) {
-        for (int i = 0; i < totalActors; i++) {
+        for (int i = 0; i < g_totalActors; i++) {
             sFieldEntity* pActor = &actorArray[i];
             sFieldScriptEntity* pScriptEntity = pActor->m4C_scriptEntity;
             if ((((pScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x1000000) != 0) && (i != playerControlledActor)) && ((pActor->m58_flags & 0x20) == 0)) {
@@ -5346,7 +5462,7 @@ LAB_Field__800818c8:
         }
     }
     else {
-        for (int i = 0; i < totalActors; i++) {
+        for (int i = 0; i < g_totalActors; i++) {
             sFieldEntity* pActor = &actorArray[i];
             sFieldScriptEntity* pScriptEntity = pActor->m4C_scriptEntity;
             if ((((pScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x1000000) != 0) && (i != playerControlledActor)) && ((pActor->m58_flags & 0x20) == 0)) {
@@ -5368,7 +5484,7 @@ void updateScriptAndMoveEntities()
 
     exectueEntitiesUpdateFunction();
 
-    for (int i = 0; i < totalActors; i++)
+    for (int i = 0; i < g_totalActors; i++)
     {
         actorArray[i].m4C_scriptEntity->m68_oldPosition[0] = actorArray[i].m4C_scriptEntity->m20_position.vx >> 16;
         actorArray[i].m4C_scriptEntity->m68_oldPosition[1] = actorArray[i].m4C_scriptEntity->m20_position.vy >> 16;
@@ -5381,7 +5497,7 @@ void updateScriptAndMoveEntities()
 
     entityUpdateVar1 = 0;
 
-    for (int i = 0; i < totalActors; i++)
+    for (int i = 0; i < g_totalActors; i++)
     {
         sFieldEntity* pFieldEntity = &actorArray[i];
         sFieldScriptEntity* pFieldScriptEntity = pFieldEntity->m4C_scriptEntity;
@@ -5425,7 +5541,7 @@ void updateScriptAndMoveEntities()
         assert(0); // "MOV CHECK1"
     }
 
-    for (int i = 0; i < totalActors; i++)
+    for (int i = 0; i < g_totalActors; i++)
     {
         if (actorArray[i].m58_flags & 0xF00)
         {
@@ -6110,7 +6226,7 @@ void updateAllEntities()
 
     setProjectionMatrixForField();
 
-    for (int i = 0; i < totalActors; i++)
+    for (int i = 0; i < g_totalActors; i++)
     {
         sFieldEntity* pActor = &actorArray[i];
         if (((pActor->m58_flags & 0xf40) != 0) && ((pActor->m58_flags & 0x20) == 0)) {
@@ -6177,7 +6293,7 @@ void updateCameraAt(VECTOR* pCameraAt)
         local_98.m20[i] = 0;
     }
 
-    for (int i = 0; i < totalActors; i++)
+    for (int i = 0; i < g_totalActors; i++)
     {
         MissingCode();
     }
@@ -6273,7 +6389,7 @@ void renderObjects()
 
         if (!(pFieldEntity->m58_flags & 0x40))
         {
-            if (i < totalActors)
+            if (i < g_totalActors)
             {
                 SVECTOR rotationAxis;
                 switch (pFieldEntity->m4C_scriptEntity->m12C_flags & 3)
@@ -7139,12 +7255,12 @@ void renderFieldCharacterSprites(OTTable& OT, int oddOrEven)
     tempVector.vx = 0;
     tempVector.vy = (sceneDIP / 3) * -2;
     tempVector.vz = 0;
-    if (totalActors)
+    if (g_totalActors)
     {
         std::array<sLoadedMechas*, 10>::iterator mechaIt = loadedMechas.begin();
         std::array<int, 10>::iterator mechaList3It = mechaList3.begin();
 
-        for (int currentActorIndex = 0; currentActorIndex < totalActors; currentActorIndex++)
+        for (int currentActorIndex = 0; currentActorIndex < g_totalActors; currentActorIndex++)
         {
             sFieldEntity* pFieldEntity = &actorArray[currentActorIndex];
             if ((pFieldEntity->m58_flags & 0x40) != 0) {
@@ -7297,7 +7413,7 @@ void renderCharShadows(OTTable& OT, int oddOrEven)
 
     if (!disableCharacterShadowsRendering)
     {
-        for (int currentActorId = 0; currentActorId < totalActors; currentActorId++)
+        for (int currentActorId = 0; currentActorId < g_totalActors; currentActorId++)
         {
             sFieldEntity* pCurrentFieldEntity = &actorArray[currentActorId];
             if ((pCurrentFieldEntity->m58_flags & 0x60) == 0x40) {
@@ -7444,7 +7560,7 @@ void renderChars()
         execSpritesCallbacksList2();
         renderFieldCharacterSprites(pCurrentFieldRenderingContext->mCC_OT, g_frameOddOrEven);
 
-        for (int i = 0; i < totalActors; i++)
+        for (int i = 0; i < g_totalActors; i++)
         {
             sFieldEntity* pFieldEntity = &actorArray[i];
             if ((pFieldEntity->m58_flags & 0x60) == 0x40)
@@ -7633,14 +7749,20 @@ void updateFieldInputs()
 void saveStateToKernel(void)
 {
     pKernelGameState->m231A_fieldID = fieldMapNumber;
-
+    pKernelGameState->m2322_previouslyPlayingMusic = currentlyPlayingMusic;
+    pKernelGameState->m2320_worldmapMode = pKernelGameState->m1930_fieldVarsBackup[1];
+    pKernelGameState->m231C_CameraYaw = pKernelGameState->m1930_fieldVarsBackup[4];
     MissingCode();
+    setVar(0x46, menuReturnState0);
+    setVar(6, getPlayerCharacterDir());
+    setVar(8, getCameraDirection());
+    setVar(0x24, sceneDIP);
+    setVar(0x3c, fieldMapNumber);
+    setVarsForCurrentParty();
 
     for (int i = 0; i < 0x200; i++) {
         pKernelGameState->m1930_fieldVarsBackup[i] = fieldVars[i];
     }
-
-    return;
 }
 
 void syncKernelAndFieldStates()
@@ -7943,9 +8065,8 @@ void fieldEntryPoint()
     MissingCode();
 
     if (fieldDebugDisable == 1) {
-        gameState.m1930_fieldVarsBackup[41] = 1;
+        gameState.m1930_fieldVarsBackup[40] = 1;
         setVar(0x50, 1);
-        MissingCode();
     }
     initCompassData();
     fieldRequestedGears = 0;
@@ -7997,7 +8118,7 @@ void fieldEntryPoint()
 
         if ((g_frameOddOrEven == 1) && (playMusicAuthorized == 0) && (isFieldTransitionPermittedByLoading() == 0) && (isFieldBattlePrevented() == 0)) {
             MissingCode();
-            syncKernelAndFieldStates();
+            fieldPerFrameReset();
             MissingCode();
             releaseAllDialogWindows();
             DrawSync(0);
@@ -8043,7 +8164,7 @@ void fieldEntryPoint()
                     rawFieldBundle.clear();
                 }
                 MissingCode();
-                syncKernelAndFieldStates();
+                fieldPerFrameReset();
                 deleteAllParticleEffects();
                 MissingCode();
                 releaseAllDialogWindows();
@@ -8068,7 +8189,7 @@ void fieldEntryPoint()
                     }
                     clearMusic();
                     MissingCode();
-                    syncKernelAndFieldStates();
+                    fieldPerFrameReset();
                     deleteAllParticleEffects();
                     MissingCode();
                     releaseAllDialogWindows();
@@ -8160,7 +8281,7 @@ void doPCCollisionCheckAfterLoading() {
     EntityMoveCheck1(playerControlledActor, ((actorArray[playerControlledActor].m4C_scriptEntity)->m20_position).vy.getIntegerPart(), &actorArray[playerControlledActor],
         actorArray[playerControlledActor].m4C_scriptEntity, 0); // TODO: what is the last argument supposed to be?
 
-    for (int i = 0; i < totalActors; i++) {
+    for (int i = 0; i < g_totalActors; i++) {
         sFieldEntity* pFieldEntity = &actorArray[i];
         sFieldScriptEntity* pFieldScriptEntity = pFieldEntity->m4C_scriptEntity;
         if ((pFieldEntity->m58_flags & 0xF80) == 0x200) {
@@ -8193,7 +8314,7 @@ void runInitScriptForNewlyLoadedPC(uint param_1) {
 
     if (fieldExecuteVar1) {
         u16 backScriptPC = backupCurrentFieldScriptActor->mCC_scriptPC;
-        for (int i = 0; i < totalActors; i++) {
+        for (int i = 0; i < g_totalActors; i++) {
             u16 scriptEntryPoint = getScriptEntryPoint(i, 0);
             // 0x16 is OP_INIT_ENTITY_PC
             if ((pCurrentFieldScriptFile[scriptEntryPoint] == 0x16) && ((pCurrentFieldScriptFile + scriptEntryPoint)[1] == param_1)) {

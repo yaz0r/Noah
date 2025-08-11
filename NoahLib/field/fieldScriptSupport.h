@@ -58,5 +58,7 @@ void SaveFieldAndDirections(void);
 void OP_CHANGE_FIELD_WHEN_READY_Sub();
 s32 distance3d(long param_1, long param_2, long param_3);
 
+uint getPlayerCharacterDir(void);
+
 extern s32 numDialogWindowsCreatedThisFrame;
 extern u8 updateCharacterVar0;

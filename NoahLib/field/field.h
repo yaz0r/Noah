@@ -375,7 +375,7 @@ void uploadNpcSpriteSheet(std::vector<u8>::const_iterator pImageData, int x, int
 
 void setFieldDrawEnvClip(short x, short y, short w, short h);
 
-void syncKernelAndFieldStates();
+void fieldPerFrameReset();
 
 void initFontPalettes(short param_1, short param_2);
 void initFontSystem();
