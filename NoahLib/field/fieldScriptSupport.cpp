@@ -4,6 +4,7 @@
 #include "kernel/filesystem.h"
 #include "kernel/TIM.h"
 #include "kernel/kernelVariables.h"
+#include "menus/menuHandler.h"
 
 int currentFieldActorId;
 std::vector<u8>::iterator pCurrentFieldScriptFile;
@@ -511,9 +512,8 @@ int getDialogParam1(const std::vector<u8>& bundle, int index)
 	return bundle[index * 2 + READ_LE_U16(&bundle[0]) * 2 + 7];
 }
 
-s32 iRam800afd04 = 0;
+s32 fieldTransitionInProgress = 0;
 s32 numDialogWindowsCreatedThisFrame = 0;
-s32 iRam800adb64 = 0xFF;
 s32 iRam800adb70 = 0;
 s32 dialogWindowFlag2 = 0;
 
@@ -570,7 +570,7 @@ int showDialogWindowForActor(int actorId, int mode)
 	fieldExectuteMaxCycles += 0x20;
 
 	int iVar6;
-	if (((((loadCompleted != 0) || (iRam800afd04 != 0)) || (numDialogWindowsCreatedThisFrame != 0)) || (iRam800adb64 != 0xff)) ||
+	if (((((loadCompleted != 0) || (fieldTransitionInProgress != 0)) || (numDialogWindowsCreatedThisFrame != 0)) || (menuIdToOpen != 0xff)) ||
 		(((iRam800adb70 == 0 && (iVar6 = isLoadCompleted(), iVar6 != 0)) ||
 			((pCurrentFieldScriptActor->m80_dialogPortrait != -1 && (iVar6 = isDialogAvatarLoaded((uint)pCurrentFieldScriptActor->m80_dialogPortrait), iVar6 == -1)))))) {
 		breakCurrentScript = 1;

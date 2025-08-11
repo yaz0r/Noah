@@ -10,8 +10,8 @@ void copFunction(int, u32);
 s32 getCopReg(int, int);
 s32 getCopControlWord(int, int);
 
-void gte_SetRotMatrix(const MATRIX* m);
-void gte_SetTransMatrix(const MATRIX* m);
+void SetRotMatrix(const MATRIX* m);
+void SetTransMatrix(const MATRIX* m);
 
 void gte_rtpt();
 void gte_rt();

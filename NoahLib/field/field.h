@@ -458,6 +458,12 @@ void resumeMusic();
 std::vector<u8> allocateBufferForVramUpload(int);
 void loadImageFileToVram(int fileId, void* allocation, int, int, int, int, int, int, int, int);
 
+void logFieldRenderingEvent(const char* param_1);
+void syncKernelAndFieldStates();
+void renderScreenTransitionPoly(void);
+void updateAndRenderField();
+void updateMusicState();
+
 extern SVECTOR computeProjectionMatrixAngles;
 
 extern u8* shapeTransfertTableCurrentEntry;

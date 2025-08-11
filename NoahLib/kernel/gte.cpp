@@ -750,7 +750,7 @@ void gte_rtv0()
 
 void gte_rtir()
 {
-	copFunction(2, 0x49E012);
+    copFunction(2, 0x49E012);
 }
 
 void gte_rtir_sf0()
@@ -978,7 +978,7 @@ s32 gte_stSZ3() {
     return getCopReg(2, 0x9800);
 }
 
-void gte_SetRotMatrix(const MATRIX* m) {
+void SetRotMatrix(const MATRIX* m) {
     setCopControlWord(2, 0, sVec2_s16::fromValue(m->m[0][0], m->m[0][1]));
     setCopControlWord(2, 0x800, sVec2_s16::fromValue(m->m[0][2], m->m[1][0]));
     setCopControlWord(2, 0x1000, sVec2_s16::fromValue(m->m[1][1], m->m[1][2]));
@@ -986,7 +986,7 @@ void gte_SetRotMatrix(const MATRIX* m) {
     setCopControlWord(2, 0x2000, sVec2_s16::fromValue(m->m[2][2], 0));
 }
 
-void gte_SetTransMatrix(const MATRIX* m) {
+void SetTransMatrix(const MATRIX* m) {
     setCopControlWord(2, 0x2800, m->t[0]);
     setCopControlWord(2, 0x3000, m->t[1]);
     setCopControlWord(2, 0x3800, m->t[2]);

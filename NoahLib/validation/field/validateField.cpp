@@ -5,6 +5,7 @@
 #include "validation/field/validateFieldEntities.h"
 #include "validation/kernel/randomSeed.h"
 #include "field/field.h"
+#include "field/fieldScriptSupport.h"
 #include "kernel/playTime.h"
 
 void EntityMoveCheck0(uint playerEntityIndex, sFieldEntity* pPlayerEntity, sFieldScriptEntity* pPlayerScriptEntity);
@@ -68,9 +69,32 @@ void startAllEntityScripts_detour() {
     validateFieldEntities();
 }
 
+int isLoadCompleted();
+int isLoadCompleted_detour();
+interceptor<int> isLoadCompleted_intercept(isLoadCompleted, isLoadCompleted_detour);
+
+int isLoadCompleted_detour() {
+    g_gdbConnection->executeUntilAddress(0x8008a598);
+    isLoadCompleted_intercept.callUndetoured();
+    return g_gdbConnection->getRegister(GDBConnection::REG_Names::V0);
+}
+
+// Need to sync bootField because of transition effect
+void bootField();
+void bootField_detour();
+interceptor<void> bootField_intercept(bootField, bootField_detour);
+
+void bootField_detour() {
+    bootField_intercept.callUndetoured();
+    g_gdbConnection->executeUntilAddress(0x80079280);
+    validateField();
+}
+
 bool bDebugEntityMoves = true;
 
 void validateField_init() {
+    bootField_intercept.enable();
+    isLoadCompleted_intercept.enable();
     initFieldData_intercept.enable();
     startAllEntityScripts_intercept.enable();
     if (bDebugEntityMoves) {
@@ -86,10 +110,13 @@ void validateField_shutdown() {
     }
     startAllEntityScripts_intercept.disable();
     initFieldData_intercept.disable();
+    isLoadCompleted_intercept.disable();
+    bootField_intercept.disable();
 }
 
-void vallidateField() {
+void validateField() {
     validateRandomSeed();
     validateFieldVars();
     validateFieldEntities();
+    assert(fieldTransitionInProgress == g_gdbConnection->readU32(0x800afd04));
 }

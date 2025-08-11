@@ -222,23 +222,7 @@ void PopMatrix()
 	currentMatrixStackOffset--;
 }
 
-void SetRotMatrix(const MATRIX* m)
-{
-	setCopControlWord(2, 0, sVec2_s16::fromValue(m->m[0][0], m->m[0][1]));
-	setCopControlWord(2, 0x800, sVec2_s16::fromValue(m->m[0][2], m->m[1][0]));
-	setCopControlWord(2, 0x1000, sVec2_s16::fromValue(m->m[1][1], m->m[1][2]));
-	setCopControlWord(2, 0x1800, sVec2_s16::fromValue(m->m[2][0], m->m[2][1]));
-	setCopControlWord(2, 0x2000, sVec2_s16::fromValue(m->m[2][2], 0));
-}
-
-void SetTransMatrix(const MATRIX* m)
-{
-	setCopControlWord(2, 0x2800, m->t[0]);
-	setCopControlWord(2, 0x3000, m->t[1]);
-	setCopControlWord(2, 0x3800, m->t[2]);
-}
-
-void GET_LoadMatrixCoumnToV0(const MATRIX* m1, int column)
+void GTE_LoadMatrixCoumnToV0(const MATRIX* m1, int column)
 {
 	setCopReg(2, 0, sVec2_s16::fromValue(m1->m[0][column], m1->m[1][column]));
 	setCopReg(2, 0x800, sVec2_s16::fromValue(m1->m[2][column], 0));
@@ -256,15 +240,15 @@ void gte_MulMatrix0(const MATRIX* m0, const MATRIX* m1, MATRIX* m2)
 	SetRotMatrix(m0);
 
 	// this uses the register v0, original code uses generic vector reg
-	GET_LoadMatrixCoumnToV0(m1, 0);
+	GTE_LoadMatrixCoumnToV0(m1, 0);
 	gte_rtv0();
 	GTE_StoreMatrixColumnFromV0(m2, 0);
 
-	GET_LoadMatrixCoumnToV0(m1, 1);
+	GTE_LoadMatrixCoumnToV0(m1, 1);
 	gte_rtv0();
 	GTE_StoreMatrixColumnFromV0(m2, 1);
 
-	GET_LoadMatrixCoumnToV0(m1, 2);
+	GTE_LoadMatrixCoumnToV0(m1, 2);
 	gte_rtv0();
 	GTE_StoreMatrixColumnFromV0(m2, 2);
 }
@@ -425,7 +409,7 @@ VECTOR* ApplyMatrixLV(MATRIX* m, VECTOR* v0, VECTOR* v1)
 	setCopReg(2, 0x4800, uVar1);
 	setCopReg(2, 0x5000, uVar3);
 	setCopReg(2, 0x5800, uVar5);
-	copFunction(2, 0x49e012);
+	gte_rtir();
 	if (iVar7 < 0) {
 		iVar7 = iVar7 * 8;
 	}

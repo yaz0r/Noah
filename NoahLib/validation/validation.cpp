@@ -3,8 +3,10 @@
 #include "gdbConnection.h"
 
 #include "validation/kernel/bootMenuValidation.h"
+#include "validation/kernel/validateKernel.h"
 #include "validation/field/fieldInputsValidation.h"
 #include "validation/field/validateField.h"
+
 
 #include "kernel/gameState.h"
 
@@ -34,6 +36,7 @@ bool validationInit() {
     // Sync random seed
     randSeed = g_gdbConnection->readU32(0x8005a1fc);
 
+    validateKernel_init();
     boolMenuValidation_init();
     validateField_init();
     fieldInputsValidation_init();

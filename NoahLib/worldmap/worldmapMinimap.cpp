@@ -143,8 +143,8 @@ void worldmapRenderMinimap() {
         radarMatrix.t[1] = ((worldmapRadarPosition.vz >> 0xC) / 0x155 + 0x78) - worldmapGeometryOffsetY;
         radarMatrix.t[2] = worldmapMinimapScale;
 
-        gte_SetRotMatrix(&radarMatrix);
-        gte_SetTransMatrix(&radarMatrix);
+        SetRotMatrix(&radarMatrix);
+        SetTransMatrix(&radarMatrix);
         gte_ldv3(&worldmapMinimapRadarShape[i][0], &worldmapMinimapRadarShape[i][1], &worldmapMinimapRadarShape[i][2]);
         gte_rtpt();
         gte_stsxy3(&p->x0y0, &p->x1y1, &p->x2y2);

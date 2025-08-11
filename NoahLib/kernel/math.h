@@ -24,6 +24,9 @@ void RotTrans(SVECTOR* rotation, VECTOR* output, long* flag);
 void copyRotationMatrix(MATRIX* param_1, MATRIX* param_2);
 VECTOR* ApplyMatrix(MATRIX* m, SVECTOR* inputVector, VECTOR* outputVector);
 
+void GTE_LoadMatrixCoumnToV0(const MATRIX* m1, int column);
+void gte_CompMatrix(MATRIX* r1, MATRIX* r2, MATRIX* r3);
+
 void Square0(VECTOR* v0, VECTOR* v1);
 s32 SquareRoot0(s32 value);
 

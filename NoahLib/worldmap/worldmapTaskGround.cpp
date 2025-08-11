@@ -174,7 +174,7 @@ LAB_worldmap__80093584:
 
 void gte_CompMatrix(MATRIX* r1, MATRIX* r2, MATRIX* r3) {
     gte_MulMatrix0(r1, r2, r3);
-    gte_SetTransMatrix(r1);
+    SetTransMatrix(r1);
     gte_ldlv0(&r2->t);
     gte_rt();
     gte_stlvnl(&r3->t);

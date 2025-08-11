@@ -62,3 +62,4 @@ uint getPlayerCharacterDir(void);
 
 extern s32 numDialogWindowsCreatedThisFrame;
 extern u8 updateCharacterVar0;
+extern s32 fieldTransitionInProgress;

@@ -641,7 +641,7 @@ s16 updateCharacterVar2 = 0;
 s16 updateCharacterVar2ResetValue = 0;
 s8 updateCharacterVar4 = 0;
 int numFollowStruct2 = 0;
-extern s32 iRam800adb64;
+extern s32 menuIdToOpen;
 extern s16 updateEntityEventCode4Var0;
 
 std::array<u16, 16> updateCharacterRotationOrder1 = {
@@ -858,12 +858,12 @@ void OP_UPDATE_CHARACTER()
     }
 
     // handle jump
-    if (((updateCharacterVar1 < 0x21) || (updateCharacterVar1 = 0x20, (padButtonForScripts[0].m0_buttons & controllerButtons::JUMP) == 0)) || (((pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags & 0x1800) != 0 || (iRam800adb64 != 0xff)))) {
+    if (((updateCharacterVar1 < 0x21) || (updateCharacterVar1 = 0x20, (padButtonForScripts[0].m0_buttons & controllerButtons::JUMP) == 0)) || (((pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags & 0x1800) != 0 || (menuIdToOpen != 0xff)))) {
         if (updateEntityEventCode4Var0 == 0) {
             if (padButtonForDialogs & controllerButtons::JUMP) {
                 if ((pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags & 0x1800) == 0) {
                     if ((pCurrentFieldScriptActor->m14_currentTriangleFlag & 0x400000U) == 0) {
-                        if (iRam800adb64 == 0xff) {
+                        if (menuIdToOpen == 0xff) {
                             if (!OP_UPDATE_CHARACTER_Sub0(pCurrentFieldScriptActor)) {
                                 pCurrentFieldScriptActor->m0_fieldScriptFlags.mx800_isJumping = 1;
                                 numFollowStruct2 = partyToFollowStructMapping[0];
@@ -881,7 +881,7 @@ void OP_UPDATE_CHARACTER()
             }
             else {
                 if (updateCharacterVar2 == 0) {
-                    if ((iRam800adb64 == 0xff) && !OP_UPDATE_CHARACTER_Sub0(pCurrentFieldScriptActor)) {
+                    if ((menuIdToOpen == 0xff) && !OP_UPDATE_CHARACTER_Sub0(pCurrentFieldScriptActor)) {
                         pCurrentFieldScriptActor->m0_fieldScriptFlags.mx800_isJumping = 1;
                         numFollowStruct2 = partyToFollowStructMapping[0];
                         pCurrentFieldScriptActor->mE8_currentAnimationId = 0xff;
@@ -928,11 +928,8 @@ void OP_UPDATE_CHARACTER_INFINITLY()
 
 void OP_SET_ACTOR_POSITION_2D(void)
 {
-    int posX;
-    int posZ;
-
-    posX = getVar80(1, (uint)pCurrentFieldScriptFile[(uint)pCurrentFieldScriptActor->mCC_scriptPC + 5]);
-    posZ = getVar40(3, (uint)pCurrentFieldScriptFile[(uint)pCurrentFieldScriptActor->mCC_scriptPC + 5]);
+    int posX = getVar80(1, (uint)pCurrentFieldScriptFile[(uint)pCurrentFieldScriptActor->mCC_scriptPC + 5]);
+    int posZ = getVar40(3, (uint)pCurrentFieldScriptFile[(uint)pCurrentFieldScriptActor->mCC_scriptPC + 5]);
     setCurrentActor2DPosition(posX, posZ);
     pCurrentFieldScriptActor->m4_flags.m_rawFlags &= ~0x200000;
     pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags &= ~0x10000;
