@@ -321,6 +321,7 @@ void resetFieldDefault()
     MissingCode();
     updateEntityEventCode3Var1 = 0;
     MissingCode();
+    g_updateAllEntitiesSub2Var0 = 4;
     currentParticleCreatorId = 0;
     updateCharacterVar1 = 0;
     actorCameraTracked = 0;
