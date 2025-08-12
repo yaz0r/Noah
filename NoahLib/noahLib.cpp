@@ -197,7 +197,7 @@ bool noahInit(int argc, char* argv[])
     MissingCode();
 
     if (enableValidation) {
-        //validationInit();
+        validationInit();
     }
 
     setGameMode(6); // for into movie?

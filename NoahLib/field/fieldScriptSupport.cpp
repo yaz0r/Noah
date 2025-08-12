@@ -30,144 +30,90 @@ s32 op9DVar3 = 0;
 
 u8 updateCharacterVar0 = 0;
 
-int getVar80(int param_1, uint param_2)
-
+int getVar80(int index, uint flags)
 {
-    ushort uVar1;
-    int iVar2;
-
-    if ((param_2 & 0x80) == 0) {
-        uVar1 = readU16FromScript(param_1);
-        iVar2 = getVariable((uint)uVar1);
+    if (!(flags & 0x80)) {
+        return getVariable(readU16FromScript(index));
     }
     else {
-        iVar2 = readS16FromScript(param_1);
-        iVar2 = (int)(short)iVar2;
+        return readS16FromScript(index);
     }
-    return iVar2;
 }
 
-int getVar40(int param_1, uint param_2)
-
+int getVar40(int index, uint flags)
 {
-    ushort uVar1;
-    int iVar2;
-
-    if ((param_2 & 0x40) == 0) {
-        uVar1 = readU16FromScript(param_1);
-        iVar2 = getVariable((uint)uVar1);
+    if (!(flags & 0x40)) {
+        return getVariable((uint)readU16FromScript(index));
     }
     else {
-        iVar2 = readS16FromScript(param_1);
-        iVar2 = (int)(short)iVar2;
+        return readS16FromScript(index);
     }
-    return iVar2;
 }
 
-
-int getVar20(int param_1, uint param_2)
+int getVar20(int index, uint flags)
 {
-    ushort uVar1;
-    int iVar2;
-
-    if ((param_2 & 0x20) == 0) {
-        uVar1 = readU16FromScript(param_1);
-        iVar2 = getVariable((uint)uVar1);
+    if (!(flags & 0x20)) {
+        return getVariable((uint)readU16FromScript(index));
     }
     else {
-        iVar2 = readS16FromScript(param_1);
-        iVar2 = (int)(short)iVar2;
+        return readS16FromScript(index);
     }
-    return iVar2;
 }
 
-int getVar10(int param_1, uint param_2)
+int getVar10(int index, uint flags)
 {
-    ushort uVar1;
-    int iVar2;
-
-    if ((param_2 & 0x10) == 0) {
-        uVar1 = readU16FromScript(param_1);
-        iVar2 = getVariable((uint)uVar1);
+    if (!(flags & 0x10)) {
+        return getVariable((uint)readU16FromScript(index));
     }
     else {
-        iVar2 = readS16FromScript(param_1);
-        iVar2 = (int)(short)iVar2;
+        return readS16FromScript(index);
     }
-    return iVar2;
 }
 
-int getVar08(int param_1, uint param_2)
+int getVar08(int index, uint flags)
 {
-    ushort uVar1;
-    int iVar2;
-
-    if ((param_2 & 0x08) == 0) {
-        uVar1 = readU16FromScript(param_1);
-        iVar2 = getVariable((uint)uVar1);
+    if (!(flags & 0x08)) {
+        return getVariable((uint)readU16FromScript(index));
     }
     else {
-        iVar2 = readS16FromScript(param_1);
-        iVar2 = (int)(short)iVar2;
+        return readS16FromScript(index);
     }
-    return iVar2;
 }
 
-int getVar04(int param_1, uint param_2)
+int getVar04(int index, uint flags)
 {
-    ushort uVar1;
-    int iVar2;
-
-    if ((param_2 & 0x04) == 0) {
-        uVar1 = readU16FromScript(param_1);
-        iVar2 = getVariable((uint)uVar1);
+    if (!(flags & 0x04)) {
+        return getVariable((uint)readU16FromScript(index));
     }
     else {
-        iVar2 = readS16FromScript(param_1);
-        iVar2 = (int)(short)iVar2;
+        return readS16FromScript(index);
     }
-    return iVar2;
 }
 
-int getVar02(int param_1, uint param_2)
+int getVar02(int index, uint flags)
 {
-    ushort uVar1;
-    int iVar2;
-
-    if ((param_2 & 0x02) == 0) {
-        uVar1 = readU16FromScript(param_1);
-        iVar2 = getVariable((uint)uVar1);
+    if (!(flags & 0x02)) {
+        return getVariable((uint)readU16FromScript(index));
     }
     else {
-        iVar2 = readS16FromScript(param_1);
-        iVar2 = (int)(short)iVar2;
+        return readS16FromScript(index);
     }
-    return iVar2;
 }
 
-int getVar01(int param_1, uint param_2)
+int getVar01(int index, uint flags)
 {
-    ushort uVar1;
-    int iVar2;
-
-    if ((param_2 & 0x01) == 0) {
-        uVar1 = readU16FromScript(param_1);
-        iVar2 = getVariable((uint)uVar1);
+    if (!(flags & 0x01)) {
+        return getVariable((uint)readU16FromScript(index));
     }
     else {
-        iVar2 = readS16FromScript(param_1);
-        iVar2 = (int)(short)iVar2;
+        return readS16FromScript(index);
     }
-    return iVar2;
 }
 
-uint readCharacter(int param_1)
+uint readCharacter(int offset)
 {
-    uint uVar1;
-    uint uVar2;
-
-    uVar1 = (uint)pCurrentFieldScriptFile[(uint)pCurrentFieldScriptActor->mCC_scriptPC + param_1];
-    uVar2 = partyToFieldEntityArrayMapping[0];
+    uint uVar1 = (uint)pCurrentFieldScriptFile[(uint)pCurrentFieldScriptActor->mCC_scriptPC + offset];
+    uint uVar2 = partyToFieldEntityArrayMapping[0];
     if ((((uVar1 != 0xff) && (uVar2 = partyToFieldEntityArrayMapping[1], uVar1 != 0xfe)) && (uVar2 = partyToFieldEntityArrayMapping[2], uVar1 != 0xfd)) && (uVar2 = uVar1, uVar1 == 0xfb)) {
         uVar2 = currentFieldActorId;
     }
@@ -176,15 +122,13 @@ uint readCharacter(int param_1)
 
 uint getImmediateOrVariableUnsigned(int param_1)
 {
-    ushort uVar1;
-    uint uVar2;
-
-    uVar1 = readU16FromScript(param_1);
-    uVar2 = (uint)uVar1 & 0x7fff;
-    if ((uVar1 & 0x8000) == 0) {
-        uVar2 = getVariable((uint)uVar1);
+    ushort value = readU16FromScript(param_1);
+    if ((value & 0x8000) == 0) {
+        return getVariable(value);
     }
-    return uVar2;
+    else {
+        return value & 0x7fff;
+    }
 }
 
 /*
@@ -529,16 +473,10 @@ uint getPlayerCharacterDir(void)
 
 void SaveFieldAndDirections(void)
 {
-	short sVar1;
-
-	setVar(4, (ushort)fieldMapNumber & 0x3fff);
-	sVar1 = getPlayerCharacterDir();
-	setVar(6, sVar1);
-	sVar1 = getCameraDirection();
-	setVar(8, sVar1);
-	sVar1 = getVariable(0x12);
-	setVar(0x12, sVar1 + 1);
-	return;
+	setVar(4, fieldMapNumber & 0x3fff);
+	setVar(6, getPlayerCharacterDir());
+	setVar(8, getCameraDirection());
+	setVar(0x12, getVariable(0x12) + 1);
 }
 
 void OP_CHANGE_FIELD_WHEN_READY_Sub()
@@ -569,13 +507,17 @@ int showDialogWindowForActor(int actorId, int mode)
 {
 	fieldExectuteMaxCycles += 0x20;
 
-	int iVar6;
-	if (((((loadCompleted != 0) || (fieldTransitionInProgress != 0)) || (numDialogWindowsCreatedThisFrame != 0)) || (menuIdToOpen != 0xff)) ||
-		(((iRam800adb70 == 0 && (iVar6 = isLoadCompleted(), iVar6 != 0)) ||
-			((pCurrentFieldScriptActor->m80_dialogPortrait != -1 && (iVar6 = isDialogAvatarLoaded((uint)pCurrentFieldScriptActor->m80_dialogPortrait), iVar6 == -1)))))) {
-		breakCurrentScript = 1;
-		return -1;
-	}
+    // All conditions to prevent opening dialog window this frame
+    if (loadCompleted ||
+        fieldTransitionInProgress || // we in the field transition effect
+        numDialogWindowsCreatedThisFrame || // can only create 1 dialog window per frame
+        (menuIdToOpen != 0xff) || // pending menu update
+        (!iRam800adb70 && isLoadCompleted()) ||
+        ((pCurrentFieldScriptActor->m80_dialogPortrait != -1) && (isDialogAvatarLoaded((uint)pCurrentFieldScriptActor->m80_dialogPortrait) == -1))) { // we need a dialog portrait and it's not loaded yet
+        breakCurrentScript = 1;
+        return -1;
+    }
+
 	numDialogWindowsCreatedThisFrame++;
 
     int dialogWindow;
@@ -587,8 +529,8 @@ int showDialogWindowForActor(int actorId, int mode)
 	fieldExectuteMaxCycles += 8;
 
     u16 dialogIndex = readU16FromScript(1);
-    int windowIndex = findFreeDialogWindow();
-	if (windowIndex == 0) {
+    int windowIndex;
+	if (!findFreeDialogWindow()) {
 		windowIndex = allocateDialogWindow();
 	}
     else

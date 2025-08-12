@@ -25,7 +25,7 @@ extern s32 iRam800adb70;
 
 extern s32 dialogWindowFlag2;
 
-int getVar80(int param_1, uint param_2);
+int getVar80(int index, uint flags);
 int getVar40(int param_1, uint param_2);
 int getVar20(int param_1, uint param_2);
 int getVar10(int param_1, uint param_2);
