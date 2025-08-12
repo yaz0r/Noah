@@ -15,13 +15,13 @@ interceptor<void, uint, sFieldEntity*, sFieldScriptEntity*> EntityMoveCheck0_int
 void EntityMoveCheck0_detour(uint playerEntityIndex, sFieldEntity* pPlayerEntity, sFieldScriptEntity* pPlayerScriptEntity) {
     // go to start of function and validate input state
     g_gdbConnection->executeUntilAddress(0x80084158);
-    validateFieldEntities();
+    validateField();
 
     EntityMoveCheck0_intercept.callUndetoured(playerEntityIndex, pPlayerEntity, pPlayerScriptEntity);
 
     // go to end of function and validate state
     g_gdbConnection->executeUntilAddress(0x80084924);
-    validateFieldEntities();
+    validateField();
 }
 
 void updateScriptAndMoveEntities();
@@ -31,13 +31,13 @@ interceptor<void> updateScriptAndMoveEntities_intercept(updateScriptAndMoveEntit
 void updateScriptAndMoveEntities_detour() {
     // go to start of function and validate input state
     g_gdbConnection->executeUntilAddress(0x8008110c);
-    validateFieldEntities();
+    validateField();
 
     updateScriptAndMoveEntities_intercept.callUndetoured();
 
     // go to end of function and validate state
     g_gdbConnection->executeUntilAddress(0x800815e8);
-    validateFieldEntities();
+    validateField();
 }
 
 void initFieldData();
@@ -50,7 +50,7 @@ void initFieldData_detour() {
 
     // go to end of function and validate state
     g_gdbConnection->executeUntilAddress(0x80071a5c);
-    validateFieldEntities();
+    validateField();
 }
 
 void startAllEntityScripts();
@@ -60,13 +60,13 @@ interceptor<void> startAllEntityScripts_intercept(startAllEntityScripts, startAl
 void startAllEntityScripts_detour() {
     // go to start of function and validate input state
     g_gdbConnection->executeUntilAddress(0x800a28d4);
-    validateFieldEntities();
+    validateField();
 
     startAllEntityScripts_intercept.callUndetoured();
 
     // go to end of function and validate state
     g_gdbConnection->executeUntilAddress(0x800a2fb8);
-    validateFieldEntities();
+    validateField();
 }
 
 int isLoadCompleted();

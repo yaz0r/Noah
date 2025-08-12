@@ -112,8 +112,8 @@ s32 playerControlledActor = 0;
 
 s32 worldScaleFactor;
 MATRIX worldScaleMatrix;
-MATRIX cameraMatrix;
-MATRIX cameraMatrix2;
+MATRIX g_cameraMatrix;
+MATRIX g_cameraMatrix2;
 VECTOR fieldObjectRenderingVar1 = { 0,0,0 };
 SVECTOR fieldObjectRenderingVar2 = { 0,0,0 };
 s32 sceneSCRZ = 0;
@@ -144,7 +144,7 @@ SVECTOR renderModelRotationAngles;
 MATRIX renderModelRotationMatrix;
 s32 cameraDeltaTan;
 
-MATRIX currentProjectionMatrix;
+MATRIX g_currentProjectionMatrix;
 
 s32 updateCameraInterpolationVar0 = 0;
 s32 updateCameraInterpolationVar1 = 0;
@@ -181,9 +181,9 @@ u16 inputAllowedMask2;
 std::array<sFieldRenderContext, 2> fieldRenderContext;
 sFieldRenderContext* pCurrentFieldRenderingContext = nullptr;
 
-SVECTOR cameraProjectionAngles;
-SVECTOR cameraRotation;
-VECTOR cameraUp = { 0,0,0,0 };
+SVECTOR g_cameraProjectionAngles;
+SVECTOR g_cameraRotation;
+VECTOR g_cameraUp = { 0,0,0,0 };
 
 s16 cameraDollyVar0 = 0;
 s32 cameraDollyVar1 = 0;
@@ -206,21 +206,21 @@ void resetCameraData()
 
     MissingCode();
 
-    cameraEye[0] = 0;
-    cameraEye[1] = 0;
-    cameraEye[2] = 0;
-    cameraAt[0] = 0;
-    cameraAt[1] = 0;
-    cameraAt[2] = 0;
-    cameraUp.vx = 0;
-    cameraUp.vy = 0x10000000;
-    cameraUp.vz = 0;
-    cameraEye2.vx = 0;
-    cameraEye2.vy = 0;
-    cameraEye2.vz = 0;
-    cameraAt2.vx = 0;
-    cameraAt2.vy = 0;
-    cameraAt2.vz = 0;
+    g_cameraEye[0] = 0;
+    g_cameraEye[1] = 0;
+    g_cameraEye[2] = 0;
+    g_cameraAt[0] = 0;
+    g_cameraAt[1] = 0;
+    g_cameraAt[2] = 0;
+    g_cameraUp.vx = 0;
+    g_cameraUp.vy = 0x10000000;
+    g_cameraUp.vz = 0;
+    g_cameraEye2.vx = 0;
+    g_cameraEye2.vy = 0;
+    g_cameraEye2.vz = 0;
+    g_cameraAt2.vx = 0;
+    g_cameraAt2.vy = 0;
+    g_cameraAt2.vz = 0;
 
     MissingCode();
 
@@ -367,19 +367,19 @@ void resetFieldDefault()
     }
 
     SetGeomScreen(0x200);
-    setIdentityMatrix(&cameraMatrix);
-    setIdentityMatrix(&cameraMatrix2);
-    setIdentityMatrix(&currentProjectionMatrix);
+    setIdentityMatrix(&g_cameraMatrix);
+    setIdentityMatrix(&g_cameraMatrix2);
+    setIdentityMatrix(&g_currentProjectionMatrix);
     setIdentityMatrix(&computeProjectionMatrixTempMatrix2);
-    cameraProjectionAngles.vx = 0;
-    cameraProjectionAngles.vy = 0;
-    cameraProjectionAngles.vz = 0;
-    cameraRotation.vx = 0;
-    cameraRotation.vy = 0;
-    cameraRotation.vz = 0;
+    g_cameraProjectionAngles.vx = 0;
+    g_cameraProjectionAngles.vy = 0;
+    g_cameraProjectionAngles.vz = 0;
+    g_cameraRotation.vx = 0;
+    g_cameraRotation.vy = 0;
+    g_cameraRotation.vz = 0;
     worldScaleFactor = 0x3000;
 
-    createRotationMatrix(&cameraProjectionAngles, &currentProjectionMatrix);
+    createRotationMatrix(&g_cameraProjectionAngles, &g_currentProjectionMatrix);
     pCurrentFieldRenderingContext = &fieldRenderContext[0];
     resetCameraData();
     resetPortraitLoadingStatus();
@@ -387,6 +387,8 @@ void resetFieldDefault()
     MissingCode();
     resetParticleEffectsTable();
     MissingCode();
+
+    VALIDATE_FIELD(0x80070c7c);
 }
 
 bool g_LogOpcodes = false;
@@ -455,11 +457,22 @@ void uploadNpcSpriteSheet(std::vector<u8>::const_iterator pImageData, int x, int
 
 void setupField3d(std::vector<u8>::const_iterator input)
 {
-    lookAtDivided(&cameraMatrix, &cameraEye, &cameraAt, &cameraUp);
-    createRotationMatrix(&cameraProjectionAngles, &currentProjectionMatrix);
-    MulRotationMatrix(&cameraMatrix, &currentProjectionMatrix);
+    VALIDATE_FIELD(0x8006fdec);
+    lookAtDivided(&g_cameraMatrix, &g_cameraEye, &g_cameraAt, &g_cameraUp);
+    createRotationMatrix(&g_cameraProjectionAngles, &g_currentProjectionMatrix);
+    MulRotationMatrix(&g_cameraMatrix, &g_currentProjectionMatrix);
+    VALIDATE_FIELD(0x8006fe3c);
 
     MissingCode();
+
+    SetRotMatrix(&g_cameraMatrix);
+    SetTransMatrix(&g_cameraMatrix);
+    long dummyFlag;
+    RotTrans(&g_cameraRotation, &g_currentProjectionMatrix.t, &dummyFlag);
+
+    SetRotMatrix(&g_currentProjectionMatrix);
+    SetTransMatrix(&g_currentProjectionMatrix);
+    VALIDATE_FIELD(0x80070084);
 }
 
 
@@ -1148,7 +1161,8 @@ void setCurrentActor2DPosition(int posX, int posZ)
     pCurrentFieldScriptActor->mF0 = 0;
     pCurrentFieldScriptActor->mEC_elevation = 0;
     pCurrentFieldScriptActor->m72_elevation = pCurrentFieldScriptActor->m20_position.vy >> 0x10;
-    pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags = (pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags & ~0x40001) | 0x400000;
+    pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags &= ~0x8000;
+    pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags |= 0x400000;
 }
 
 
@@ -1338,10 +1352,10 @@ FP_VEC3 cameraInterpolationTargetStep = { 0,0,0 };
 FP_VEC3 cameraInterpolationTargetStartPosition = { 0,0,0 };
 FP_VEC3 cameraInterpolationPositionStep = { 0,0,0 };
 FP_VEC3 cameraInterpolationStartPosition = { 0,0,0 };
-VECTOR cameraEye;
-VECTOR cameraAt;
-VECTOR cameraEye2;
-VECTOR cameraAt2;
+VECTOR g_cameraEye;
+VECTOR g_cameraAt;
+VECTOR g_cameraEye2;
+VECTOR g_cameraAt2;
 u16 cameraInterpolationFlags = 0;
 s16 cameraInterpolationTargetNumSteps = 0;
 s32 cameraInterpolationPositionNumSteps = 0;
@@ -2350,13 +2364,13 @@ void renderBackgroundPolyIfEnabled() {
         SVECTOR eyePos;
         SVECTOR eyeAt;
 
-        eyePos.vx = cameraEye[0].getIntegerPart();
-        eyePos.vy = cameraEye[1].getIntegerPart();
-        eyePos.vz = cameraEye[2].getIntegerPart();
-        eyeAt.vx = cameraAt[0].getIntegerPart();
-        eyeAt.vy = cameraAt[1].getIntegerPart();
-        eyeAt.vz = cameraAt[2].getIntegerPart();
-        renderBackgroundPoly(backgroundPoly, &eyePos, &eyeAt, &currentProjectionMatrix, &pCurrentFieldRenderingContext->m40D0_secondaryOT[linkOTIndex-1], g_frameOddOrEven);
+        eyePos.vx = g_cameraEye[0].getIntegerPart();
+        eyePos.vy = g_cameraEye[1].getIntegerPart();
+        eyePos.vz = g_cameraEye[2].getIntegerPart();
+        eyeAt.vx = g_cameraAt[0].getIntegerPart();
+        eyeAt.vy = g_cameraAt[1].getIntegerPart();
+        eyeAt.vz = g_cameraAt[2].getIntegerPart();
+        renderBackgroundPoly(backgroundPoly, &eyePos, &eyeAt, &g_currentProjectionMatrix, &pCurrentFieldRenderingContext->m40D0_secondaryOT[linkOTIndex-1], g_frameOddOrEven);
     }
 }
 
@@ -2594,9 +2608,9 @@ void initFieldData()
         actorArray[i].m50_modelRotation.vy = READ_LE_S16(fieldEntitySetup + 4);
         actorArray[i].m50_modelRotation.vz = READ_LE_S16(fieldEntitySetup + 6);
 
-        actorArray[i].m2C_matrixBackup.t[0] = actorArray[i].mC_matrix.t[0] = READ_LE_S16(fieldEntitySetup + 8);
-        actorArray[i].m2C_matrixBackup.t[1] = actorArray[i].mC_matrix.t[1] = READ_LE_S16(fieldEntitySetup + 10);
-        actorArray[i].m2C_matrixBackup.t[2] = actorArray[i].mC_matrix.t[2] = READ_LE_S16(fieldEntitySetup + 12);
+        actorArray[i].m2C_matrixBackup.t[0] = actorArray[i].mC_matrix.t[0] = READ_LE_U16(fieldEntitySetup + 8);
+        actorArray[i].m2C_matrixBackup.t[1] = actorArray[i].mC_matrix.t[1] = READ_LE_U16(fieldEntitySetup + 10);
+        actorArray[i].m2C_matrixBackup.t[2] = actorArray[i].mC_matrix.t[2] = READ_LE_U16(fieldEntitySetup + 12);
 
         // Is this a 3d model?
         if (!(actorArray[i].m58_flags & 0x40))
@@ -2694,9 +2708,9 @@ void initFieldData()
     }
     resetMemoryAllocStats(8, 0);
 
-    cameraAt2.vx = actorArray[actorCameraTracked].mC_matrix.t[0] << 16;
-    cameraAt2.vy = actorArray[actorCameraTracked].mC_matrix.t[1] << 16;
-    cameraAt2.vz = actorArray[actorCameraTracked].mC_matrix.t[2] << 16;
+    g_cameraAt2.vx = actorArray[actorCameraTracked].mC_matrix.t[0] << 16;
+    g_cameraAt2.vy = actorArray[actorCameraTracked].mC_matrix.t[1] << 16;
+    g_cameraAt2.vz = actorArray[actorCameraTracked].mC_matrix.t[2] << 16;
 
     for (int i = 0; i < totalObjects; i++)
     {
@@ -3393,6 +3407,7 @@ void exectueEntitiesUpdateFunction()
             {
                 executeFieldScript(8);
             }
+            VALIDATE_FIELD(0x800a2258);
             pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m0_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC;
         }
     }
@@ -4678,12 +4693,7 @@ void EntityMoveCheck0(uint playerEntityIndex, sFieldEntity* pPlayerEntity, sFiel
         if (actorId == playerEntityIndex)
             continue;
 
-        if (g_gdbConnection)
-        {
-            void validateField();
-            g_gdbConnection->executeUntilAddress(0x8008426c);
-            validateField();
-        }
+        VALIDATE_FIELD(0x8008426c);
 
         sFieldScriptEntity* pCurrentFieldScriptEntity = actorArray[actorId].m4C_scriptEntity;
         sFieldScriptEntity_flags0 entityFlags = pCurrentFieldScriptEntity->m0_fieldScriptFlags;
@@ -4801,12 +4811,7 @@ LAB_Field__80084520:
         }
     }
 
-    if (g_gdbConnection)
-    {
-        void validateField();
-        g_gdbConnection->executeUntilAddress(0x800846e0);
-        validateField();
-    }
+    VALIDATE_FIELD(0x800846e0);
 
     if (updateEntityEventCode3Var1 != 0) {
         finalState = false;
@@ -4830,35 +4835,20 @@ LAB_Field__80084520:
         pPlayerScriptEntity->m74 = -1;
     }
 
-    if (g_gdbConnection)
-    {
-        void validateField();
-        g_gdbConnection->executeUntilAddress(0x80084854);
-        validateField();
-    }
+    VALIDATE_FIELD(0x80084854);
 
     if (((pPlayerScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x10000) == 0) && ((pPlayerScriptEntity->m4_flags.m_rawFlags & 0x200000) == 0)) {
         EntityMoveCheck1(playerEntityIndex, bestDistance, pPlayerEntity, pPlayerScriptEntity, 0);
     }
 
-    if (g_gdbConnection)
-    {
-        void validateField();
-        g_gdbConnection->executeUntilAddress(0x800848b8);
-        validateField();
-    }
+    VALIDATE_FIELD(0x800848b8);
 
     if ((actorArray[playerEntityIndex].m4_pVramSpriteSheet)->m7C->mC == 1) {
         resetInputs();
         pPlayerScriptEntity->m0_fieldScriptFlags.mx800_isJumping = 0;
     }
 
-    if (g_gdbConnection)
-    {
-        void validateField();
-        g_gdbConnection->executeUntilAddress(0x800848f0);
-        validateField();
-    }
+    VALIDATE_FIELD(0x800848f0);
 
     freeScratchBuffer<std::array<VECTOR, 2>>(scratchBuffer);
 }
@@ -5117,12 +5107,7 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
         ((((entityIndex != playerControlledActor || (EntityMoveCheck1Var1 != '\x01')) && ((pSpriteActor->mC_step).vy == 0)) &&
             (!updateEntityEventCode3Sub0(pFieldScriptEntity) && (pSpriteActor->m84_maxY == (pFieldScriptEntity->m20_position.vy >> 16)))))) {
 
-                if (g_gdbConnection)
-                {
-                    void validateField();
-                    g_gdbConnection->executeUntilAddress(0x80084b3c);
-                    validateField();
-                }
+        VALIDATE_FIELD(0x80084b3c);
 
         return -1;
     }
@@ -5277,6 +5262,7 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
             pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags &= ~0x401000;
             (pFieldScriptEntity->m20_position).vy = (int)pSpriteActor->m84_maxY << 0x10;
         }
+        VALIDATE_FIELD(0x80085444);
         (pSpriteActor->m0_position).vx = (pFieldScriptEntity->m20_position).vx;
         (pSpriteActor->m0_position).vy = (pFieldScriptEntity->m20_position).vy;
         (pSpriteActor->m0_position).vz = (pFieldScriptEntity->m20_position).vz;
@@ -5311,7 +5297,7 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
         if (pFieldScriptEntity->m10_walkmeshId != sVar2) {
             pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags &= ~0x4000000;
         }
-
+        VALIDATE_FIELD(0x8008509c);
         int currentMaxY = (pSpriteActor->m0_spriteActorCore).m84_maxY;
 
         if (!(pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x4000000) && (currentMaxY > (pFieldScriptEntity->m20_position).vy.getIntegerPart())) {
@@ -5332,6 +5318,8 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
             (pFieldScriptEntity->m20_position).vy = (int)(pSpriteActor->m0_spriteActorCore).m84_maxY << 0x10;
         }
         pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags &= ~0x4000000;
+        VALIDATE_FIELD(0x80085160);
+
         int foundEntry = 0;
         if (0 < numWalkMesh + -1) {
             altitudeOfCurrentWalkMesh = pFieldScriptEntity->m20_position.vy >> 16;
@@ -5382,21 +5370,7 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
         }
     }
 
-    if(g_gdbConnection)
-    {
-        void validateField();
-        g_gdbConnection->executeUntilAddress(0x80085490);
-        validateField();
-    }
-
     initFollowStructForPlayer(entityIndex);
-
-    if (g_gdbConnection)
-    {
-        void validateField();
-        g_gdbConnection->executeUntilAddress(0x8008549c);
-        validateField();
-    }
 
     return 0;
 }
@@ -5579,18 +5553,31 @@ void updateScriptAndMoveEntities()
         assert(0); // "MOV CHECK1"
     }
 
+    VALIDATE_FIELD(0x8008141C);
     for (int i = 0; i < g_totalActors; i++)
     {
         if (actorArray[i].m58_flags & 0xF00)
         {
             sFieldScriptEntity* pFieldScriptEntity = actorArray[i].m4C_scriptEntity;
-            if (((((pFieldScriptEntity->m4_flags.m_rawFlags & 0x600) != 0x200) && ((actorArray[i].m58_flags & 0xf80) == 0x200)) && ((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x10001) == 0)) &&
-                ((i != playerControlledActor &&
-                    EntityMoveCheck1(i, 0x7fffffff, &actorArray[i], pFieldScriptEntity, 0) && (actorArray[i].m4_pVramSpriteSheet->m7C->mC == 1)))) {
-                pFieldScriptEntity->m0_fieldScriptFlags.mx800_isJumping = 0;
+
+            if (
+                (((pFieldScriptEntity->m4_flags.m_rawFlags & 0x600) != 0x200) &&
+                    ((actorArray[i].m58_flags & 0xf80) == 0x200)) &&
+                ((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x10001) == 0) &&
+                i != playerControlledActor
+                )
+            {
+                VALIDATE_FIELD(0x800814ac);
+                if (EntityMoveCheck1(i, 0x7fffffff, &actorArray[i], pFieldScriptEntity, 0)) {
+                    if (actorArray[i].m4_pVramSpriteSheet->m7C->mC == 1) {
+                        VALIDATE_FIELD(0x800814e4);
+                        pFieldScriptEntity->m0_fieldScriptFlags.mx800_isJumping = 0;
+                    }
+                }
             }
         }
     }
+    VALIDATE_FIELD(0x80081518);
 
     if (fieldDebugDisable == 0) {
         assert(0);
@@ -5608,7 +5595,7 @@ void updateScriptAndMoveEntities()
     }
 }
 
-int updateAllEntitiesSub2Var0 = 0;
+int g_updateAllEntitiesSub2Var0 = 0;
 
 uint stepInterpolateDirectionSub(int currentDirection, int targetDirection, int step)
 {
@@ -5631,7 +5618,7 @@ uint stepInterpolateDirectionSub(int currentDirection, int targetDirection, int 
 
 uint stepInterpolateDirection(int currentDirection, int targetDirection, int step)
 {
-    if (updateAllEntitiesSub2Var0 == 0) {
+    if (g_updateAllEntitiesSub2Var0 == 0) {
         return stepInterpolateDirectionSub(currentDirection, targetDirection, step);
     }
     else {
@@ -5640,10 +5627,11 @@ uint stepInterpolateDirection(int currentDirection, int targetDirection, int ste
 }
 
 short cameraShakeEnabled = 0;
-VECTOR fieldCameraOffset = { 0,0,0,0 };
+VECTOR g_fieldCameraOffset = { 0,0,0,0 };
 
 void updateCameraInterpolationSub2()
 {
+    VALIDATE_FIELD(0x80072d74);
     if ((op99Var7 & 0x10) != 0) {
         if (OP_B6SubVar0 != 0) {
             OP_B6Var2 = OP_B6Var2 + OP_B6Var1;
@@ -5665,32 +5653,34 @@ void updateCameraInterpolationSub2()
     s32 iVar2;
     s32 iVar1 = op99Var5 * op99Var5;
     s32 iVar3 = op99Var6 * op99Var6;
-    if ((cameraEye[0] >> 0x10 != cameraEye2.vx >> 0x10) && (iVar2 = (cameraEye2.vx - cameraEye[0]) >> 0x10, iVar3 <= iVar2 * iVar2)) {
-        cameraEye[0] = cameraEye[0] + (cameraEye2.vx - cameraEye[0]) / op99Var6;
+    if ((g_cameraEye[0] >> 0x10 != g_cameraEye2.vx >> 0x10) && (iVar2 = (g_cameraEye2.vx - g_cameraEye[0]) >> 0x10, iVar3 <= iVar2 * iVar2)) {
+        g_cameraEye[0] = g_cameraEye[0] + (g_cameraEye2.vx - g_cameraEye[0]) / op99Var6;
     }
-    if ((cameraEye[2] >> 0x10 != cameraEye2.vz >> 0x10) && (iVar2 = (cameraEye2.vz - cameraEye[2]) >> 0x10, iVar3 <= iVar2 * iVar2)) {
-        cameraEye[2] = cameraEye[2] + (cameraEye2.vz - cameraEye[2]) / op99Var6;
+    if ((g_cameraEye[2] >> 0x10 != g_cameraEye2.vz >> 0x10) && (iVar2 = (g_cameraEye2.vz - g_cameraEye[2]) >> 0x10, iVar3 <= iVar2 * iVar2)) {
+        g_cameraEye[2] = g_cameraEye[2] + (g_cameraEye2.vz - g_cameraEye[2]) / op99Var6;
     }
-    if ((cameraEye[1] >> 0x10 != cameraEye2.vy >> 0x10) && (iVar2 = (cameraEye2.vy - cameraEye[1]) >> 0x10, iVar3 <= iVar2 * iVar2)) {
-        cameraEye[1] = cameraEye[1] + (cameraEye2.vy - cameraEye[1]) / op99Var6;
+    if ((g_cameraEye[1] >> 0x10 != g_cameraEye2.vy >> 0x10) && (iVar2 = (g_cameraEye2.vy - g_cameraEye[1]) >> 0x10, iVar3 <= iVar2 * iVar2)) {
+        g_cameraEye[1] = g_cameraEye[1] + (g_cameraEye2.vy - g_cameraEye[1]) / op99Var6;
     }
-    if ((cameraAt[0] >> 0x10 != cameraAt2.vx >> 0x10) && (iVar3 = (cameraAt2.vx - cameraAt[0]) >> 0x10, iVar1 <= iVar3 * iVar3)) {
-        cameraAt[0] = cameraAt[0] + (cameraAt2.vx - cameraAt[0]) / op99Var5;
+    if ((g_cameraAt[0] >> 0x10 != g_cameraAt2.vx >> 0x10) && (iVar3 = (g_cameraAt2.vx - g_cameraAt[0]) >> 0x10, iVar1 <= iVar3 * iVar3)) {
+        g_cameraAt[0] = g_cameraAt[0] + (g_cameraAt2.vx - g_cameraAt[0]) / op99Var5;
     }
-    if ((cameraAt[2] >> 0x10 != cameraAt2.vz >> 0x10) && (iVar3 = (cameraAt2.vz - cameraAt[2]) >> 0x10, iVar1 <= iVar3 * iVar3)) {
-        cameraAt[2] = cameraAt[2] + (cameraAt2.vz - cameraAt[2]) / op99Var5;
+    if ((g_cameraAt[2] >> 0x10 != g_cameraAt2.vz >> 0x10) && (iVar3 = (g_cameraAt2.vz - g_cameraAt[2]) >> 0x10, iVar1 <= iVar3 * iVar3)) {
+        g_cameraAt[2] = g_cameraAt[2] + (g_cameraAt2.vz - g_cameraAt[2]) / op99Var5;
     }
-    if ((cameraAt[1] >> 0x10 != cameraAt2.vy >> 0x10) && (iVar3 = (cameraAt2.vy - cameraAt[1]) >> 0x10, iVar1 <= iVar3 * iVar3)) {
-        cameraAt[1] = cameraAt[1] + (cameraAt2.vy - cameraAt[1]) / op99Var5;
+    if ((g_cameraAt[1] >> 0x10 != g_cameraAt2.vy >> 0x10) && (iVar3 = (g_cameraAt2.vy - g_cameraAt[1]) >> 0x10, iVar1 <= iVar3 * iVar3)) {
+        g_cameraAt[1] = g_cameraAt[1] + (g_cameraAt2.vy - g_cameraAt[1]) / op99Var5;
     }
 
-    fieldCameraOffset.vx = 0;
-    fieldCameraOffset.vy = 0;
-    fieldCameraOffset.vz = 0;
+    g_fieldCameraOffset.vx = 0;
+    g_fieldCameraOffset.vy = 0;
+    g_fieldCameraOffset.vz = 0;
 
     if (cameraShakeEnabled != 0) {
         assert(0);
     }
+
+    VALIDATE_FIELD(0x80073228);
 }
 
 
@@ -6024,30 +6014,30 @@ void updateCameraInterpolationSub1(VECTOR* param_1, int elevation)
 
         std::array<s16, 2> local_50;
         updateCameraInterpolationSub1Sub0(local_60, collisionResult2, local_50);
-        cameraAt2.vx = (int)local_50[0] << 0x10;
-        cameraAt2.vz = (int)local_50[1] << 0x10;
+        g_cameraAt2.vx = (int)local_50[0] << 0x10;
+        g_cameraAt2.vz = (int)local_50[1] << 0x10;
         if (cameraCollisionVar0 == '\0') {
             if (cameraCollisionState == 0) {
                 cameraCollisionState = 1;
-                cameraAt2.vy = elevation << 0x10;
+                g_cameraAt2.vy = elevation << 0x10;
             }
         }
         else {
-            cameraAt2.vy = param_1->vy + -0x200000;
+            g_cameraAt2.vy = param_1->vy + -0x200000;
         }
     }
     else {
-        cameraAt2.vx = param_1->vx;
+        g_cameraAt2.vx = param_1->vx;
         cameraCollisionState = 0;
-        cameraAt2.vz = param_1->vz;
-        cameraAt2.vy = param_1->vy + -0x200000;
+        g_cameraAt2.vz = param_1->vz;
+        g_cameraAt2.vy = param_1->vy + -0x200000;
     }
 
-    cameraEye2.vy = (getAngleSin((sceneDIP * 0x5b >> 3) + 0xc00) * sceneSCRZ * -0x20 >> 0x10) * (int)sceneScale * 0x10 + cameraAt2.vy;
-    cameraEye2.vx = cameraAt2.vx;
-    cameraEye2.vz = (getAngleCos((sceneDIP * 0x5b >> 3) + 0xc00) * sceneSCRZ * 0x20 >> 0x10) * (int)sceneScale * 0x10 + cameraAt2.vz;
+    g_cameraEye2.vy = (getAngleSin((sceneDIP * 0x5b >> 3) + 0xc00) * sceneSCRZ * -0x20 >> 0x10) * (int)sceneScale * 0x10 + g_cameraAt2.vy;
+    g_cameraEye2.vx = g_cameraAt2.vx;
+    g_cameraEye2.vz = (getAngleCos((sceneDIP * 0x5b >> 3) + 0xc00) * sceneSCRZ * 0x20 >> 0x10) * (int)sceneScale * 0x10 + g_cameraAt2.vz;
 
-    computeCameraEyeFromAt(&cameraEye2, &cameraAt2);
+    computeCameraEyeFromAt(&g_cameraEye2, &g_cameraAt2);
 
     if ((op99Var7 & 1) != 0) {
         if (op9DVar0 != 0) {
@@ -6107,9 +6097,9 @@ void updateCameraInterpolation(void)
             if ((--cameraInterpolationTargetNumSteps) == 0) {
                 cameraInterpolationFlags &= ~1;
             }
-            cameraAt2.vx = cameraInterpolationTargetStartPosition[0];
-            cameraAt2.vy = cameraInterpolationTargetStartPosition[1];
-            cameraAt2.vz = cameraInterpolationTargetStartPosition[2];
+            g_cameraAt2.vx = cameraInterpolationTargetStartPosition[0];
+            g_cameraAt2.vy = cameraInterpolationTargetStartPosition[1];
+            g_cameraAt2.vz = cameraInterpolationTargetStartPosition[2];
         }
         if ((cameraInterpolationFlags & 2) != 0) {
             if (cameraInterpolationPositionNumSteps != 0) {
@@ -6120,9 +6110,9 @@ void updateCameraInterpolation(void)
             if ((--cameraInterpolationPositionNumSteps) == 0) {
                 cameraInterpolationFlags &= ~2;
             }
-            cameraEye2.vx = cameraInterpolationStartPosition[0];
-            cameraEye2.vy = cameraInterpolationStartPosition[1];
-            cameraEye2.vz = cameraInterpolationStartPosition[2];
+            g_cameraEye2.vx = cameraInterpolationStartPosition[0];
+            g_cameraEye2.vy = cameraInterpolationStartPosition[1];
+            g_cameraEye2.vz = cameraInterpolationStartPosition[2];
         }
         updateCameraInterpolationSub2();
         cameraRotationBetweenEyeAndAt.vy &= 0xfff;
@@ -6149,14 +6139,14 @@ void updateCameraInterpolation(void)
     if ((op99Var7 & 0x4000) == 0) {
         SVECTOR walkmeshOutput1;
         VECTOR walkmeshOutput2;
-        findTriangleInWalkMesh((cameraEye2.vx >> 16), (cameraEye2.vz >> 16), numWalkMesh + -1, &walkmeshOutput1, &walkmeshOutput2);
-        if ((int)walkmeshOutput1.vy < (int)(cameraEye2.vy >> 16)) {
-            cameraEye2.vy = (int)walkmeshOutput1.vy << 0x10;
+        findTriangleInWalkMesh((g_cameraEye2.vx >> 16), (g_cameraEye2.vz >> 16), numWalkMesh + -1, &walkmeshOutput1, &walkmeshOutput2);
+        if ((int)walkmeshOutput1.vy < (int)(g_cameraEye2.vy >> 16)) {
+            g_cameraEye2.vy = (int)walkmeshOutput1.vy << 0x10;
         }
     }
     if (cameraInterpolationMode == 2) {
-        int lVar3 = length2d((cameraAt2.vx >> 16) - (cameraAt[0] >> 16), (cameraAt2.vz >> 16) - (cameraAt[2] >> 16));
-        int lVar4 = length2d((cameraEye2.vx >> 16) - (cameraEye[0] >> 16), (cameraEye2.vz >> 16) - (cameraEye[2] >> 16));
+        int lVar3 = length2d((g_cameraAt2.vx >> 16) - (g_cameraAt[0] >> 16), (g_cameraAt2.vz >> 16) - (g_cameraAt[2] >> 16));
+        int lVar4 = length2d((g_cameraEye2.vx >> 16) - (g_cameraEye[0] >> 16), (g_cameraEye2.vz >> 16) - (g_cameraEye[2] >> 16));
         if ((lVar3 < 0x80) && (lVar4 < 0x80)) {
             cameraInterpolationMode = 0;
         }
@@ -6183,31 +6173,36 @@ void computeProjectionMatrix(void)
     MATRIX MStack64;
     long alStack32[2];
 
+    VALIDATE_FIELD(0x80072150);
+
     createRotationMatrix(&computeProjectionMatrixAngles, &computeProjectionMatrixTempMatrix);
     resetMatrixTranslation(&computeProjectionMatrixTempMatrix);
-    CompMatrix(&computeProjectionMatrixTempMatrix, &cameraMatrix, &MStack64);
-    copyMatrix(&cameraMatrix, &MStack64);
-    createRotationMatrix(&cameraProjectionAngles, &computeProjectionMatrixTempMatrix2);
+    CompMatrix(&computeProjectionMatrixTempMatrix, &g_cameraMatrix, &MStack64);
+    copyMatrix(&g_cameraMatrix, &MStack64);
+    createRotationMatrix(&g_cameraProjectionAngles, &computeProjectionMatrixTempMatrix2);
     resetMatrixTranslation(&computeProjectionMatrixTempMatrix2);
-    createRotationMatrix(&cameraProjectionAngles, &currentProjectionMatrix);
-    MulRotationMatrix(&cameraMatrix, &currentProjectionMatrix);
-    SetRotMatrix(&cameraMatrix);
-    SetTransMatrix(&cameraMatrix);
-    RotTrans(&cameraRotation, &currentProjectionMatrix.t, alStack32);
+    createRotationMatrix(&g_cameraProjectionAngles, &g_currentProjectionMatrix);
+    MulRotationMatrix(&g_cameraMatrix, &g_currentProjectionMatrix);
+    SetRotMatrix(&g_cameraMatrix);
+    SetTransMatrix(&g_cameraMatrix);
+    RotTrans(&g_cameraRotation, &g_currentProjectionMatrix.t, alStack32);
     local_70.vx = worldScaleFactor;
     local_70.vy = worldScaleFactor;
     local_70.vz = worldScaleFactor;
-    ScaleMatrix(&currentProjectionMatrix, &local_70);
-    SetRotMatrix(&currentProjectionMatrix);
-    SetTransMatrix(&currentProjectionMatrix);
+    ScaleMatrix(&g_currentProjectionMatrix, &local_70);
+    SetRotMatrix(&g_currentProjectionMatrix);
+    SetTransMatrix(&g_currentProjectionMatrix);
+
+    VALIDATE_FIELD(0x8007224c);
+
     return;
 }
 
 void setProjectionMatrixForField(void)
 {
     computeProjectionMatrix();
-    SetRotMatrix(&currentProjectionMatrix);
-    SetTransMatrix(&currentProjectionMatrix);
+    SetRotMatrix(&g_currentProjectionMatrix);
+    SetTransMatrix(&g_currentProjectionMatrix);
     if (fieldDebugDisable == 0) {
         assert(0);
     }
@@ -6223,45 +6218,47 @@ void updateAllEntities()
     renderModelRotationMatrix.t[1] = 0;
     renderModelRotationMatrix.t[0] = 0;
 
-    cameraTan = ratan2(cameraAt[2] - cameraEye[2], cameraAt[0] - cameraEye[0]) + -0x400;
-    camera2Tan = ratan2(cameraAt2.vz - cameraEye2.vz, cameraAt2.vx - cameraEye2.vx) + -0x400;
-    cameraDeltaTan = ratan2(length2d((cameraAt[0] - cameraEye[0]) >> 0x10, (cameraAt[2] - cameraEye[2]) >> 0x10), (cameraAt[1] - cameraEye[1]) >> 0x10);
+    cameraTan = ratan2(g_cameraAt[2] - g_cameraEye[2], g_cameraAt[0] - g_cameraEye[0]) + -0x400;
+    camera2Tan = ratan2(g_cameraAt2.vz - g_cameraEye2.vz, g_cameraAt2.vx - g_cameraEye2.vx) + -0x400;
+    cameraDeltaTan = ratan2(length2d((g_cameraAt[0] - g_cameraEye[0]) >> 0x10, (g_cameraAt[2] - g_cameraEye[2]) >> 0x10), (g_cameraAt[1] - g_cameraEye[1]) >> 0x10);
 
     sCurrentCameraVectors cameraVectors;
     pCurrentCameraVectors = &cameraVectors;
 
+    VALIDATE_FIELD(0x80073ae4);
     updateCameraInterpolation();
+    VALIDATE_FIELD(0x80073aec);
 
-    int lVar6 = fieldCameraOffset.vz;
-    int lVar5 = fieldCameraOffset.vy;
-    int lVar7 = fieldCameraOffset.vx;
-    int iVar9 = cameraEye[2];
-    int iVar11 = cameraEye[1];
-    int iVar12 = cameraEye[0];
-    (pCurrentCameraVectors->m10_eye).vx = cameraEye[0];
-    (pCurrentCameraVectors->m10_eye).vx = iVar12 + lVar7;
-    iVar12 = cameraAt[0];
-    (pCurrentCameraVectors->m10_eye).vy = iVar11;
-    (pCurrentCameraVectors->m10_eye).vy = iVar11 + lVar5;
-    iVar11 = cameraAt[1];
-    (pCurrentCameraVectors->m10_eye).vz = iVar9;
-    int iVar4 = cameraAt[2];
-    (pCurrentCameraVectors->m20_at).vx = iVar12;
-    (pCurrentCameraVectors->m20_at).vx = iVar12 + lVar7;
-    (pCurrentCameraVectors->m10_eye).vz = iVar9 + lVar6;
-    (pCurrentCameraVectors->m20_at).vy = iVar11;
-    (pCurrentCameraVectors->m20_at).vz = iVar4;
-    (pCurrentCameraVectors->m20_at).vy = iVar11 + lVar5;
-    (pCurrentCameraVectors->m20_at).vz = iVar4 + lVar6;
-    if (updateAllEntitiesSub2Var0 == 0) {
-        cameraMatrix = cameraMatrix2;
-        lookAtDivided(&cameraMatrix2, &pCurrentCameraVectors->m10_eye, &pCurrentCameraVectors->m20_at, &cameraUp);
+    (pCurrentCameraVectors->m10_eye).vx = g_cameraEye.vx;
+    (pCurrentCameraVectors->m10_eye).vx = g_cameraEye.vx + g_fieldCameraOffset.vx;
+
+    (pCurrentCameraVectors->m10_eye).vy = g_cameraEye.vy;
+    (pCurrentCameraVectors->m10_eye).vy = g_cameraEye.vy + g_fieldCameraOffset.vy;
+
+    (pCurrentCameraVectors->m10_eye).vz = g_cameraEye.vz;
+    (pCurrentCameraVectors->m10_eye).vz = g_cameraEye.vz + g_fieldCameraOffset.vz;
+
+    (pCurrentCameraVectors->m20_at).vx = g_cameraAt[0];
+    (pCurrentCameraVectors->m20_at).vx = g_cameraAt[0] + g_fieldCameraOffset.vx;    
+
+    (pCurrentCameraVectors->m20_at).vy = g_cameraAt[1];
+    (pCurrentCameraVectors->m20_at).vy = g_cameraAt[1] + g_fieldCameraOffset.vy;
+
+    (pCurrentCameraVectors->m20_at).vz = g_cameraAt[2];
+    (pCurrentCameraVectors->m20_at).vz = g_cameraAt[2] + g_fieldCameraOffset.vz;
+
+    if (g_updateAllEntitiesSub2Var0 == 0) {
+        g_cameraMatrix = g_cameraMatrix2;
+        VALIDATE_FIELD(0x80073c3c);
+        lookAtDivided(&g_cameraMatrix2, &pCurrentCameraVectors->m10_eye, &pCurrentCameraVectors->m20_at, &g_cameraUp);
     }
     else {
-        lookAtDivided(&cameraMatrix, &pCurrentCameraVectors->m10_eye, &pCurrentCameraVectors->m20_at, &cameraUp);
-        cameraMatrix2 = cameraMatrix;
+        VALIDATE_FIELD(0x80073b94);
+        lookAtDivided(&g_cameraMatrix, &pCurrentCameraVectors->m10_eye, &pCurrentCameraVectors->m20_at, &g_cameraUp);
+        g_cameraMatrix2 = g_cameraMatrix;
     }
 
+    VALIDATE_FIELD(0x80073c5c);
     setProjectionMatrixForField();
 
     for (int i = 0; i < g_totalActors; i++)
@@ -6320,6 +6317,8 @@ struct sUpdateCameraAtStruct
 
 void updateCameraAt(VECTOR* pCameraAt)
 {
+    VALIDATE_FIELD(0x80086590);
+
     sUpdateCameraAtStruct local_98;
     for (int i = 0; i < 3; i++)
     {
@@ -6337,6 +6336,8 @@ void updateCameraAt(VECTOR* pCameraAt)
     }
 
     MissingCode();
+
+    VALIDATE_FIELD(0x80086900);
 }
 
 void updateCamera()
@@ -6408,7 +6409,7 @@ void renderObjects()
     ScaleMatrix(&worldScaleMatrix, &scale2);
 
     MATRIX fieldLocalWorldMatrix;
-    CompMatrix(&currentProjectionMatrix, &renderModelRotationMatrix, &fieldLocalWorldMatrix);
+    CompMatrix(&g_currentProjectionMatrix, &renderModelRotationMatrix, &fieldLocalWorldMatrix);
 
     objectClippingMask = 0;
     fieldObjectRenderingVar1.vy = fieldObjectRenderingVar1.vy + fieldObjectRenderingVar2.vz;
@@ -6441,7 +6442,7 @@ void renderObjects()
                         }
                         else
                         {
-                            CompMatrix(&currentProjectionMatrix, &actorArray[pFieldEntity->m4C_scriptEntity->m75].m2C_matrixBackup, &rotationMatrix);
+                            CompMatrix(&g_currentProjectionMatrix, &actorArray[pFieldEntity->m4C_scriptEntity->m75].m2C_matrixBackup, &rotationMatrix);
                             CompMatrix(&rotationMatrix, &actorArray[i].mC_matrix, &projectedMatrix);
                             CompMatrix(&actorArray[pFieldEntity->m4C_scriptEntity->m75].m2C_matrixBackup, &actorArray[i].mC_matrix, &actorArray[i].m2C_matrixBackup);
                         }
@@ -6456,21 +6457,21 @@ void renderObjects()
                     createRotationMatrix(&rotationAxis, &rotationMatrix);
                     MulRotationMatrix(&actorArray[i].mC_matrix, &rotationMatrix);
                     rotationMatrix.t = actorArray[i].mC_matrix.t;
-                    CompMatrix(&currentProjectionMatrix, &rotationMatrix, &projectedMatrix);
+                    CompMatrix(&g_currentProjectionMatrix, &rotationMatrix, &projectedMatrix);
                     break;
                 case 2:
                     rotationAxis = { 0, pFieldEntity->m4C_scriptEntity->m70_rotationForRendering,0 };
                     createRotationMatrix(&rotationAxis, &rotationMatrix);
                     MulRotationMatrix(&actorArray[i].mC_matrix, &rotationMatrix);
                     rotationMatrix.t = actorArray[i].mC_matrix.t;
-                    CompMatrix(&currentProjectionMatrix, &rotationMatrix, &projectedMatrix);
+                    CompMatrix(&g_currentProjectionMatrix, &rotationMatrix, &projectedMatrix);
                     break;
                 case 3:
                     rotationAxis = { 0, 0, pFieldEntity->m4C_scriptEntity->m70_rotationForRendering };
                     createRotationMatrix(&rotationAxis, &rotationMatrix);
                     MulRotationMatrix(&actorArray[i].mC_matrix, &rotationMatrix);
                     rotationMatrix.t = actorArray[i].mC_matrix.t;
-                    CompMatrix(&currentProjectionMatrix, &rotationMatrix, &projectedMatrix);
+                    CompMatrix(&g_currentProjectionMatrix, &rotationMatrix, &projectedMatrix);
                     break;
                 default:
                     assert(0); // else projectedMatrix is uninitialized
@@ -7285,6 +7286,12 @@ void renderSpriteActor(sSpriteActorCore* pSpriteSheet, sTag* pTag)
 
 void renderFieldCharacterSprites(OTTable& OT, int oddOrEven)
 {
+    if (g_gdbConnection)
+    {
+        void validateField();
+        g_gdbConnection->executeUntilAddress(0x80075b44);
+        validateField();
+    }
     int cameraDirection = getCameraDirection() & 0xFFFF;
     MATRIX localRotationMatrix;
     copyRotationMatrix(&localRotationMatrix, &computeProjectionMatrixTempMatrix);
@@ -7310,7 +7317,7 @@ void renderFieldCharacterSprites(OTTable& OT, int oddOrEven)
                 if ((pScriptEntity->m4_flags.m_rawFlags & 0x2000) == 0) {
                     // This code originally used the macro versions of the gte functions
                     MATRIX tempMatrix;
-                    CompMatrix(&currentProjectionMatrix, &pFieldEntity->mC_matrix, &tempMatrix);
+                    CompMatrix(&g_currentProjectionMatrix, &pFieldEntity->mC_matrix, &tempMatrix);
 
                     SetRotMatrix(&tempMatrix);
                     SetTransMatrix(&tempMatrix);
@@ -7320,12 +7327,26 @@ void renderFieldCharacterSprites(OTTable& OT, int oddOrEven)
                     long mathFlag;
                     s32 spriteDepth = RotTransPers(&tempVector, &onscreenPosition, &p, &mathFlag);
 
+                    if (g_gdbConnection)
+                    {
+                        void validateField();
+                        g_gdbConnection->executeUntilAddress(0x80075e84);
+                        validateField();
+                    }
+
                     // TODO: this test uses a trick for negative values
-                    if (((onscreenPosition.vy) + 9U < 323) && (onscreenPosition.vx + 39U < 399)) {
+                    if ((((u16)onscreenPosition.vy) + 9U < 323) && ((u16)onscreenPosition.vx + 39U < 399)) {
                         pScriptEntity->m4_flags.m_rawFlags &= ~0x200;
                     }
                     else {
                         pScriptEntity->m4_flags.m_rawFlags |= 0x200;
+                    }
+
+                    if (g_gdbConnection)
+                    {
+                        void validateField();
+                        g_gdbConnection->executeUntilAddress(0x80075ed4);
+                        validateField();
                     }
 
                     if (((disableCharacterShadowsRendering == 0) && ((pFieldEntity->m58_flags & 0x20) == 0)) && (-1 < mathFlag)) {
@@ -7410,11 +7431,18 @@ void renderFieldCharacterSprites(OTTable& OT, int oddOrEven)
             }
         }
     }
+
+    if (g_gdbConnection)
+    {
+        void validateField();
+        g_gdbConnection->executeUntilAddress(0x800764ac);
+        validateField();
+    }
 }
 
 void renderCharShadows(OTTable& OT, int oddOrEven)
 {
-    MATRIX localProjectionMatrix = currentProjectionMatrix;
+    MATRIX localProjectionMatrix = g_currentProjectionMatrix;
 
     if (!disableCharacterShadowsRendering)
     {
@@ -7473,7 +7501,7 @@ void renderCharShadows(OTTable& OT, int oddOrEven)
                     local_b8[7] = (short)local_e8.vy;
                     local_b8[5] = (short)uVar4;
 
-                    SetRotMatrix(&currentProjectionMatrix);
+                    SetRotMatrix(&g_currentProjectionMatrix);
 
                     setCopReg(2, 0x4800, local_d8.vx & 0xffff);
                     setCopReg(2, 0x5000, uVar1 & 0xffff);
@@ -7509,9 +7537,9 @@ void renderCharShadows(OTTable& OT, int oddOrEven)
                     local_98.m[1][1] = uVar2;
                     local_98.m[1][2] = iVar7;
                     local_98.m[2][2] = uVar4;
-                    setCopControlWord(2, 0x2800, currentProjectionMatrix.t[0]);
-                    setCopControlWord(2, 0x3000, currentProjectionMatrix.t[1]);
-                    setCopControlWord(2, 0x3800, currentProjectionMatrix.t[2]);
+                    setCopControlWord(2, 0x2800, g_currentProjectionMatrix.t[0]);
+                    setCopControlWord(2, 0x3000, g_currentProjectionMatrix.t[1]);
+                    setCopControlWord(2, 0x3800, g_currentProjectionMatrix.t[2]);
                     setCopReg(2, 0, (uint)(pCurrentFieldEntity->mC_matrix).t[0] & 0xffff | (uint)(ushort)pCurrentFieldEntity->m4_pVramSpriteSheet->m84_maxY << 0x10);
                     setCopReg(2, 1, (pCurrentFieldEntity->mC_matrix).t[2]);
                     copFunction(2, 0x480012);
@@ -7559,7 +7587,7 @@ void renderChars()
     if (renderCharsDisabled != 1) {
         clearShapeTransfertTableEntry(frameOddOrEven);
         setCharacterRenderingOT(pCurrentFieldRenderingContext->mCC_OT);
-        setCurrentRenderingMatrix(&currentProjectionMatrix);
+        setCurrentRenderingMatrix(&g_currentProjectionMatrix);
         uploadCharacterSprites();
         execSpritesCallbacksList1();
         execSpritesCallbacksList2();
@@ -7651,7 +7679,7 @@ void updateAndRenderField()
     u8 clearR = fieldBackgroundClearColor[0];
     u8 clearG = fieldBackgroundClearColor[1];
     u8 clearB = fieldBackgroundClearColor[2];
-    if (updateAllEntitiesSub2Var0 != 0) {
+    if (g_updateAllEntitiesSub2Var0 != 0) {
         if (fieldTransitionMode == 3) {
             assert(0);
         }
@@ -7667,7 +7695,7 @@ void updateAndRenderField()
     shapeTransfert();
     MissingCode();
 
-    if (updateAllEntitiesSub2Var0 == 0) {
+    if (g_updateAllEntitiesSub2Var0 == 0) {
         if (fieldUseGroundOT != 0) {
             // Add secondaryOT[0 - linkOTIndex] to mCC_OT[linkOTIndex]
             linkOT(&pCurrentFieldRenderingContext->mCC_OT[linkOTIndex], pCurrentFieldRenderingContext->m40D0_secondaryOT, linkOTIndex);
@@ -7738,7 +7766,7 @@ void updateFieldInputs()
     resetInputs();
     //FUN_Field__8007ae78(1, &DAT_80065848);
     MissingCode();
-    if (updateAllEntitiesSub2Var0 != 0) {
+    if (g_updateAllEntitiesSub2Var0 != 0) {
         padButtonForScripts[0].m0_buttons = 0;
         padButtonForScripts[1].m0_buttons = 0;
         padButtonForDialogs = 0;
@@ -7899,8 +7927,8 @@ void updateMusicState()
     if (fieldMusicLoadPending == -1) {
         fieldMusicLoadPending = updateMusicState2(currentlyPlayingMusic);
     }
-    if (updateAllEntitiesSub2Var0 != 0) {
-        updateAllEntitiesSub2Var0 = updateAllEntitiesSub2Var0 + -1;
+    if (g_updateAllEntitiesSub2Var0 != 0) {
+        g_updateAllEntitiesSub2Var0 = g_updateAllEntitiesSub2Var0 + -1;
     }
 }
 

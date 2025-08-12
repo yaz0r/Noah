@@ -221,10 +221,10 @@ extern FP_VEC3 cameraInterpolationTargetStep;
 extern FP_VEC3 cameraInterpolationTargetStartPosition;
 extern FP_VEC3 cameraInterpolationPositionStep;
 extern FP_VEC3 cameraInterpolationStartPosition;
-extern VECTOR cameraEye;
-extern VECTOR cameraEye2;
-extern VECTOR cameraAt;
-extern VECTOR cameraAt2;
+extern VECTOR g_cameraEye;
+extern VECTOR g_cameraEye2;
+extern VECTOR g_cameraAt;
+extern VECTOR g_cameraAt2;
 extern u16 cameraInterpolationFlags;
 extern s16 cameraInterpolationTargetNumSteps;
 extern s32 cameraInterpolationPositionNumSteps;
@@ -281,22 +281,23 @@ struct sFieldTrigger
 };
 extern std::vector<sFieldTrigger> fieldTriggerData;
 
-extern MATRIX currentProjectionMatrix;
+extern MATRIX g_currentProjectionMatrix;
 
 extern std::array<sLoadableDataRaw, 3> partyCharacterBuffersRaw;
 
-extern SVECTOR cameraProjectionAngles;
-extern SVECTOR cameraRotation;
-extern VECTOR cameraUp;
+extern SVECTOR g_cameraProjectionAngles;
+extern SVECTOR g_cameraRotation;
+extern VECTOR g_cameraUp;
 extern s16 cameraTan;
 
 extern MATRIX worldScaleMatrix;
-extern MATRIX cameraMatrix;
+extern MATRIX g_cameraMatrix;
+extern MATRIX g_cameraMatrix2;
 extern s32 sceneSCRZ;
 
 extern u16 padButtonForField;
 
-extern int updateAllEntitiesSub2Var0;
+extern int g_updateAllEntitiesSub2Var0;
 
 extern s16 cameraDollyVar0;
 extern s32 cameraDollyVar1;
@@ -358,6 +359,8 @@ extern s16 updateCharacterVar1;
 extern int linkOTIndex;
 
 extern struct sSeqFile battleMusic;
+
+extern VECTOR g_fieldCameraOffset;
 
 void setCurrentRenderingMatrix(MATRIX* pMatrix);
 void renderSpriteActor(struct sSpriteActorCore* pSpriteSheet, sTag* pTag);
@@ -468,3 +471,11 @@ extern SVECTOR computeProjectionMatrixAngles;
 
 extern u8* shapeTransfertTableCurrentEntry;
 extern u8* shapeTransfertTableEnd;
+
+#define VALIDATE_FIELD(x) \
+    if (g_gdbConnection) \
+    { \
+        void validateField();\
+        g_gdbConnection->executeUntilAddress(x); \
+        validateField(); \
+    }

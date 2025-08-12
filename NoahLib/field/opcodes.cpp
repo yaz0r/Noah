@@ -18,6 +18,7 @@
 #include "battle/battle.h"
 #include "field/fieldInputs.h"
 #include "kernel/kernelVariables.h"
+#include "validation/gdbConnection.h"
 
 #include "kernel/audio/soundInstance.h"
 
@@ -1163,7 +1164,7 @@ void projectCharacterToScreen(int* param_1, int* param_2)
     long alStack24[2];
 
     iVar1 = getCharacterToEntity(1);
-    CompMatrix(&currentProjectionMatrix, (MATRIX*)&actorArray[iVar1].m2C_matrixBackup, &MStack64);
+    CompMatrix(&g_currentProjectionMatrix, (MATRIX*)&actorArray[iVar1].m2C_matrixBackup, &MStack64);
     local_48.vx = 0;
     local_48.vy = 0;
     local_48.vz = 0;
@@ -1178,7 +1179,7 @@ void OP_IF_CHARACTER_IN_VIEW() {
     s32 x, y;
 
     projectCharacterToScreen(&x, &y);
-    if (updateAllEntitiesSub2Var0 == 0) {
+    if (g_updateAllEntitiesSub2Var0 == 0) {
         if ((y - 0x21U < 0x9f) && (x - 0x21U < 0xff)) {
             ADVANCE_VM(0x4);
         }
@@ -2210,18 +2211,18 @@ void OP_ROTATE_CAMERA_RELATIVE(void)
 
 void OP_AB(void)
 {
-    cameraTargetOverride[2] = cameraAt2.vz;
-    desiredCameraTarget[2] = cameraAt2.vz;
-    cameraTargetOverride[0] = cameraAt2.vx;
-    desiredCameraTarget[0] = cameraAt2.vx;
-    cameraTargetOverride[1] = cameraAt2.vy;
-    desiredCameraTarget[1] = cameraAt2.vy;
-    cameraPositionOverride[0] = cameraEye2.vx;
-    cameraPositionOverride[1] = cameraEye2.vy;
-    cameraPositionOverride[2] = cameraEye2.vz;
-    desiredCameraPosition[0] = cameraEye2.vx;
-    desiredCameraPosition[1] = cameraEye2.vy;
-    desiredCameraPosition[2] = cameraEye2.vz;
+    cameraTargetOverride[2] = g_cameraAt2.vz;
+    desiredCameraTarget[2] = g_cameraAt2.vz;
+    cameraTargetOverride[0] = g_cameraAt2.vx;
+    desiredCameraTarget[0] = g_cameraAt2.vx;
+    cameraTargetOverride[1] = g_cameraAt2.vy;
+    desiredCameraTarget[1] = g_cameraAt2.vy;
+    cameraPositionOverride[0] = g_cameraEye2.vx;
+    cameraPositionOverride[1] = g_cameraEye2.vy;
+    cameraPositionOverride[2] = g_cameraEye2.vz;
+    desiredCameraPosition[0] = g_cameraEye2.vx;
+    desiredCameraPosition[1] = g_cameraEye2.vy;
+    desiredCameraPosition[2] = g_cameraEye2.vz;
     fieldExectuteMaxCycles++;
     ADVANCE_VM(0x1);
     return;
@@ -2229,6 +2230,7 @@ void OP_AB(void)
 
 void OP_SETUP_CAMERA_INTERPOLATION_STEPS()
 {
+    VALIDATE_FIELD(0x800903bc);
     switch (pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1] & 0xf)
     {
     case 0:
@@ -2245,9 +2247,9 @@ void OP_SETUP_CAMERA_INTERPOLATION_STEPS()
         cameraInterpolationTargetStartPosition[2] = cameraTargetOverride[2];
         cameraInterpolationFlags = cameraInterpolationFlags | 1;
         if ((pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1] & 0x80) != 0) {
-            cameraAt[0] = cameraTargetOverride[0];
-            cameraAt[1] = cameraTargetOverride[1];
-            cameraAt[2] = cameraTargetOverride[2];
+            g_cameraAt[0] = cameraTargetOverride[0];
+            g_cameraAt[1] = cameraTargetOverride[1];
+            g_cameraAt[2] = cameraTargetOverride[2];
         }
         break;
     case 1:
@@ -2264,32 +2266,33 @@ void OP_SETUP_CAMERA_INTERPOLATION_STEPS()
         cameraInterpolationStartPosition[2] = cameraPositionOverride[2];
         cameraInterpolationFlags = cameraInterpolationFlags | 2;
         if ((pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1] & 0x80) != 0) {
-            cameraEye[0] = cameraPositionOverride[0];
-            cameraEye[1] = cameraPositionOverride[1];
-            cameraEye[2] = cameraPositionOverride[2];
+            g_cameraEye[0] = cameraPositionOverride[0];
+            g_cameraEye[1] = cameraPositionOverride[1];
+            g_cameraEye[2] = cameraPositionOverride[2];
         }
         break;
     default:
         assert(0);
         break;
     }
+    VALIDATE_FIELD(0x80090a08);
     ADVANCE_VM(0x4);
 }
 
 void OP_60()
 {
-    cameraTargetOverride[2] = cameraAt2.vz;
-    cameraTargetOverride[0] = cameraAt2.vx;
-    cameraTargetOverride[1] = cameraAt2.vy;
+    cameraTargetOverride[2] = g_cameraAt2.vz;
+    cameraTargetOverride[0] = g_cameraAt2.vx;
+    cameraTargetOverride[1] = g_cameraAt2.vy;
     fieldExectuteMaxCycles = fieldExectuteMaxCycles + 1;
     ADVANCE_VM(0x1);
 }
 
 void OP_64()
 {
-    cameraPositionOverride[2] = cameraEye2.vz;
-    cameraPositionOverride[0] = cameraEye2.vx;
-    cameraPositionOverride[1] = cameraEye2.vy;
+    cameraPositionOverride[2] = g_cameraEye2.vz;
+    cameraPositionOverride[0] = g_cameraEye2.vx;
+    cameraPositionOverride[1] = g_cameraEye2.vy;
     fieldExectuteMaxCycles = fieldExectuteMaxCycles + 1;
     ADVANCE_VM(0x1);
 }

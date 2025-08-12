@@ -492,7 +492,7 @@ void projectActorToScreen(int param_1, int* param_2, int* param_3, short param_4
 	long lStack36;
 	long alStack32[2];
 
-	CompMatrix(&currentProjectionMatrix, &actorArray[param_1].mC_matrix, &MStack72);
+	CompMatrix(&g_currentProjectionMatrix, &actorArray[param_1].mC_matrix, &MStack72);
 	SetRotMatrix(&MStack72);
 	SetTransMatrix(&MStack72);
 	local_50.vx = 0;

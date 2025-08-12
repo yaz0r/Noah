@@ -2083,7 +2083,7 @@ void renderMechasInField()
         if (NumMechas != 0) {
             updateMechasPosForField();
             SetBackColor((uint)mechaBackColor[0], (uint)mechaBackColor[1], (uint)mechaBackColor[2]);
-            renderMechas(&currentProjectionMatrix, &mechaFieldArgs2[0], pCurrentFieldRenderingContext->mCC_OT, g_frameOddOrEven, 1);
+            renderMechas(&g_currentProjectionMatrix, &mechaFieldArgs2[0], pCurrentFieldRenderingContext->mCC_OT, g_frameOddOrEven, 1);
         }
         if (fieldDebugDisable == 0) {
             assert(0);

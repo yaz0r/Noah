@@ -5,19 +5,28 @@
 #include "field/fieldGraphicObject.h"
 #include "kernel/playTime.h"
 
+void validate(u32 psxBase, const SVECTOR& svector) {
+    assert(svector.vx == g_gdbConnection->readS16(psxBase + 0));
+    assert(svector.vy == g_gdbConnection->readS16(psxBase + 2));
+    assert(svector.vz == g_gdbConnection->readS16(psxBase + 4));
+    //assert(svector.pad == g_gdbConnection->readS16(psxBase + 6));
+}
+
+void validate(u32 psxBase, const VECTOR& vector) {
+    assert(vector.vx == g_gdbConnection->readS32(psxBase + 0));
+    assert(vector.vy == g_gdbConnection->readS32(psxBase + 4));
+    assert(vector.vz == g_gdbConnection->readS32(psxBase + 8));
+    //assert(vector.pad == g_gdbConnection->readS32(psxBase + 0xC));
+}
+
 void validate(u32 psxBase, const MATRIX& matrix) {
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
             assert(g_gdbConnection->readS16(psxBase + 2 * (j * 3 + i)) == matrix.m[j][i]);
         }
     }
-}
 
-void validate(u32 psxBase, const SVECTOR& svector) {
-    assert(svector.vx == g_gdbConnection->readS16(psxBase + 0));
-    assert(svector.vy == g_gdbConnection->readS16(psxBase + 2));
-    assert(svector.vz == g_gdbConnection->readS16(psxBase + 4));
-    assert(svector.pad == g_gdbConnection->readS16(psxBase + 6));
+    validate(psxBase + 0x14, matrix.t);
 }
 
 void validate(u32 psxBase, const sFixedPoint& data) {
@@ -103,6 +112,19 @@ void validateFieldEntities() {
 }
 
 void validateFieldVars() {
+    validate(0x800af880, g_cameraEye);
+    validate(0x800af8b0, g_cameraEye2);
+    validate(0x800af890, g_cameraAt);
+    validate(0x800af8c0, g_cameraAt2);
+    validate(0x800af8a0, g_cameraUp);
+    validate(0x800afa54, g_cameraProjectionAngles);
+    validate(0x800afa5c, g_cameraRotation);
+    validate(0x800AFA64, g_currentProjectionMatrix);
+    validate(0x800AF990, g_cameraMatrix);
+    validate(0x800af85c, g_cameraMatrix2);
+    validate(0x800af8e0, g_fieldCameraOffset);
+    validate(0x800adc18, g_updateAllEntitiesSub2Var0);
+
     u32 arrayBase = 0x800c3a68;
     for (int i = 0; i < 0x200; i++) {
         validate(arrayBase + i * 2, fieldVars[i]);

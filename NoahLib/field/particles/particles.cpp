@@ -513,7 +513,7 @@ void updateParticles()
         return;
     }
 
-    MATRIX localProjectionMatrix = currentProjectionMatrix;
+    MATRIX localProjectionMatrix = g_currentProjectionMatrix;
     for (int i = 0; i < 0x40; i++) {
         bool isEffectStillAlive = false;
         if (activeParticleEffectsTable[i] == 1) {

@@ -4,6 +4,7 @@
 #include <format>
 #include <thread>  // For std::this_thread::sleep_for
 #include <chrono>  // For std::chrono::seconds, milliseconds, etc.
+#include <unordered_set>
 
 #include "sharedmem.h"
 
@@ -218,8 +219,13 @@ void GDBConnection::writeMemory(u64 address, const void* buffer, size_t size) {
     }
 }
 
-void GDBConnection::setBreakpoint(u64 address, int length) {
-    std::string packet = createPacket(std::format("Z0,{:X},{}", address, length));
+std::unordered_set<u64> m_breakpoints;
+
+void GDBConnection::setBreakpoint(u64 address) {
+    if (m_breakpoints.contains(address)) {
+        return;
+    }
+    std::string packet = createPacket(std::format("Z0,{:X},{}", address, 4));
     std::string receivedPacket = sendReceivePackage(m_socket, packet);
 
     auto receivedData = parsePacket(receivedPacket);
@@ -227,10 +233,15 @@ void GDBConnection::setBreakpoint(u64 address, int length) {
         return;
 
     sendAck(m_socket);
+
+    m_breakpoints.insert(address);
 }
 
-void GDBConnection::removeBreakpoint(u64 address, int length) {
-    std::string packet = createPacket(std::format("z0,{:X},{}", address, length));
+void GDBConnection::removeBreakpoint(u64 address) {
+    if (!m_breakpoints.contains(address)) {
+        return;
+    }
+    std::string packet = createPacket(std::format("z0,{:X},{}", address, 4));
     std::string receivedPacket = sendReceivePackage(m_socket, packet);
 
     auto receivedData = parsePacket(receivedPacket);
@@ -238,6 +249,8 @@ void GDBConnection::removeBreakpoint(u64 address, int length) {
         return;
 
     sendAck(m_socket);
+
+    m_breakpoints.erase(address);
 }
 
 std::string flipStringEndianess(const std::string& string) {
@@ -390,7 +403,7 @@ void GDBConnection::executeUntilAddress(u32 address) {
     setBreakpoint(address);
     u32 PC = executeToNextTrap();
     assert(PC == address);
-    removeBreakpoint(address);
+   // removeBreakpoint(address);
 }
 
 u8 GDBConnection::readU8(u64 address) {

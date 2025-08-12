@@ -163,12 +163,12 @@ void renderCompass()
 	VECTOR local_30 = { 0,0,0 };
 	VECTOR local_40 = {
 		0,
-		cameraEye[1] - cameraAt[1],
-		length2d((cameraEye[0] - cameraAt[0]) >> 0x10,(cameraEye[2] - cameraAt[2]) >> 0x10) * -0x10000,
+		g_cameraEye[1] - g_cameraAt[1],
+		length2d((g_cameraEye[0] - g_cameraAt[0]) >> 0x10,(g_cameraEye[2] - g_cameraAt[2]) >> 0x10) * -0x10000,
 	};
 
 	MATRIX MStack200;
-	lookAtDivided(&MStack200, &local_40, &local_30, &cameraUp);
+	lookAtDivided(&MStack200, &local_40, &local_30, &g_cameraUp);
 
 	MATRIX MStack232;
 	setIdentityMatrix(&MStack232);
@@ -196,7 +196,7 @@ void renderCompass()
 	MATRIX MStack136;
 	CompMatrix(&MStack232, &MStack168, &MStack136);
 
-	if (((compassDisabled == '\0') && (updateAllEntitiesSub2Var0 == 0))) {
+	if (((compassDisabled == '\0') && (g_updateAllEntitiesSub2Var0 == 0))) {
 		if (fieldCompassVar == 0)
 		{
 			for (int i = 0x14; i < 0x15; i++)
@@ -215,7 +215,7 @@ void renderCompass()
 	SetRotMatrix(&MStack232);
 	SetTransMatrix(&MStack232);
 	setIdentityMatrix(&MStack168);
-	MulRotationMatrix(&cameraMatrix, &MStack168);
+	MulRotationMatrix(&g_cameraMatrix, &MStack168);
 	MStack168.t[2] = 0x1000;
 	CompMatrix(&MStack232, &MStack168, &MStack136);
 	copyMatrix(&MStack232, &MStack136);
@@ -225,7 +225,7 @@ void renderCompass()
 	MATRIX MStack104;
 	createRotationMatrix(&local_48, &MStack104);
 
-	if (((compassDisabled == '\0') && (updateAllEntitiesSub2Var0 == 0))) {
+	if (((compassDisabled == '\0') && (g_updateAllEntitiesSub2Var0 == 0))) {
 		//compass cardinal letters
 		for (int i=0; i<4; i++)
 		{

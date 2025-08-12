@@ -31,8 +31,8 @@ public:
 
     std::string sendMonitorCommand(const std::string& command);
     void resetTarget();
-    void setBreakpoint(u64 address, int length = 4);
-    void removeBreakpoint(u64 address, int length = 4);
+    void setBreakpoint(u64 address);
+    void removeBreakpoint(u64 address);
 
     u32 pauseExecution();
     u32 executeToNextTrap();
