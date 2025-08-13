@@ -5,6 +5,7 @@
 #include "kernel/TIM.h"
 #include "battle/battle.h"
 #include "kernel/3dModel_psxRenderer.h"
+#include "validation/gdbConnection.h"
 
 int battleDefaultEntityScale = 0x2000;
 int fieldDrawEnvsInitialized = 0;
@@ -147,6 +148,9 @@ void executeSpriteBytecode2Sub0Sub0(sSpriteActorCore* param_1, int frameId, sFie
 
 void addToSpriteTransferList(sSpriteActorCore* param_1, short param_2)
 {
+    VALIDATE_FIELD(0x8001d2b0);
+    VALIDATE_REG(A1, param_2);
+
 	if ((param_1->m3C & 3) == 1) {
         if (param_1->m40 & 0x00100000) {
             param_1->m40 &= ~0x00100000;
@@ -1789,7 +1793,10 @@ void executeSpriteBytecode(sSpriteActorCore* param_1, std::span<u8>::iterator pa
 {
 	int unaff_s3;
 
-	while (true)
+    VALIDATE_FIELD(0x80022660);
+    VALIDATE_REG(A2, param_3);
+
+    while (true)
 	{
         std::span<u8>::iterator pBytecode = param_1->m64_spriteByteCode.value();
 		if ((pBytecode == param_2) && (param_1->mA8.mx16 == param_3)) {
@@ -1797,6 +1804,10 @@ void executeSpriteBytecode(sSpriteActorCore* param_1, std::span<u8>::iterator pa
 		}
 
 		u8 bytecode = READ_LE_U8(pBytecode);
+
+        VALIDATE_FIELD(0x800226bc);
+        VALIDATE_REG(S2, bytecode);
+
 		if (bytecode < 0x80)
 		{
 			param_1->m64_spriteByteCode = pBytecode + 1;
@@ -1862,6 +1873,9 @@ void executeSpriteBytecode(sSpriteActorCore* param_1, std::span<u8>::iterator pa
 
 void setSpriteActorAngle(sSpriteActorCore* param_1, short angle)
 {
+    VALIDATE_FIELD(0x800223b0);
+    VALIDATE_REG(A1, angle);
+
 	short sVar1;
 	ushort uVar2;
 	uint originalM17;
@@ -1931,6 +1945,7 @@ void setSpriteActorAngle(sSpriteActorCore* param_1, short angle)
 	}
 
 	// direction angle changed
+    auto A8Backup = param_1->mA8;
 	if (originalM17 != param_1->mA8.mx11) {
 		sVar1 = param_1->m9E_wait;
 		uVar2 = READ_LE_U16(param_1->m58_startOfCurrentAnimation + 2);
@@ -1938,7 +1953,7 @@ void setSpriteActorAngle(sSpriteActorCore* param_1, short angle)
 		param_1->mA8.mx16 = 0;
 		param_1->mA8.mxB = 0x3F;
 		param_1->m64_spriteByteCode = param_1->m58_startOfCurrentAnimation + uVar2 + 2;
-		executeSpriteBytecode(param_1, puVar5, param_1->mA8.mx16);
+		executeSpriteBytecode(param_1, puVar5, A8Backup.mx16);
 		param_1->m9E_wait = sVar1;
 	}
 
@@ -2142,6 +2157,7 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub8(sSpriteActorCore* param1, void(*callback)(sS
 
 void fieldActorCallback(sSpriteActorCore* pThis)
 {
+    VALIDATE_FIELD(0x80076a74);
 	actorArray[pThis->m7C->m14_actorId].m4C_scriptEntity->m4_flags.m_rawFlags |= 0x10000;
 }
 

@@ -90,10 +90,26 @@ void bootField_detour() {
     validateField();
 }
 
+// Need to 0 initialize memory
+sSpriteActor* createSpriteActor(sSpriteActorAnimationBundle* pSetup, int param_2, int param_3, int vramX, int vramY, int param_6);
+sSpriteActor* createSpriteActor_detour(sSpriteActorAnimationBundle* pSetup, int param_2, int param_3, int vramX, int vramY, int param_6);
+interceptor<sSpriteActor*, sSpriteActorAnimationBundle*, int, int, int, int, int> createSpriteActor_intercept(createSpriteActor, createSpriteActor_detour);
+
+sSpriteActor* createSpriteActor_detour(sSpriteActorAnimationBundle* pSetup, int param_2, int param_3, int vramX, int vramY, int param_6) {
+    g_gdbConnection->executeUntilAddress(0x80024568);
+    u32 allocationBase = g_gdbConnection->getRegister(GDBConnection::REG_Names::V0);
+    for (int i = 0; i < 0x164; i += 4) {
+        g_gdbConnection->writeU32(allocationBase + i, 0);
+    }
+    return createSpriteActor_intercept.callUndetoured(pSetup, param_2, param_3, vramX, vramY, param_6);
+}
+
+
 bool bDebugEntityMoves = true;
 
 void validateField_init() {
     bootField_intercept.enable();
+    createSpriteActor_intercept.enable();
     isLoadCompleted_intercept.enable();
     initFieldData_intercept.enable();
     startAllEntityScripts_intercept.enable();
@@ -111,6 +127,7 @@ void validateField_shutdown() {
     startAllEntityScripts_intercept.disable();
     initFieldData_intercept.disable();
     isLoadCompleted_intercept.disable();
+    createSpriteActor_intercept.disable();
     bootField_intercept.disable();
 }
 

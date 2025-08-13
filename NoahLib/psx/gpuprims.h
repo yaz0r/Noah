@@ -20,6 +20,15 @@ struct sColorAndCode
         u8 m3_code;
     };
     
+    static sColorAndCode zero() {
+        sColorAndCode value;
+        value.m0_r = 0;
+        value.m1_g = 0;
+        value.m2_b = 0;
+        value.m3_code = 0;
+
+        return value;
+    }
 };
 
 struct sTag

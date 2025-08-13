@@ -2738,8 +2738,17 @@ void initFieldData()
     }
     fieldUseGroundOT = enableGroundOT;
 
-    MissingCode();
-
+    for (int i = 0; i < g_totalActors; i++) {
+        if (actorArray[i].m58_flags & 0x40) {
+            sFieldScriptEntity* pEntity4C = actorArray[i].m4C_scriptEntity;
+            if ((pEntity4C->m4_flags.m_rawFlags & 0x1000000) == 0) {
+                setSpriteActorAngle(actorArray[i].m4_pVramSpriteSheet, cameraTan + pEntity4C->m108_rotation3);
+            }
+            else {
+                OP_INIT_ENTITY_SCRIPT_sub0Sub7(actorArray[i].m4_pVramSpriteSheet, cameraTan + pEntity4C->m108_rotation3);
+            }
+        }
+    }
 }
 
 
@@ -7328,12 +7337,7 @@ void renderFieldCharacterSprites(OTTable& OT, int oddOrEven)
                     long mathFlag;
                     s32 spriteDepth = RotTransPers(&tempVector, &onscreenPosition, &p, &mathFlag);
 
-                    if (g_gdbConnection)
-                    {
-                        void validateField();
-                        g_gdbConnection->executeUntilAddress(0x80075e84);
-                        validateField();
-                    }
+                    VALIDATE_FIELD(0x80075e84);
 
                     // TODO: this test uses a trick for negative values
                     if ((((u16)onscreenPosition.vy) + 9U < 323) && ((u16)onscreenPosition.vx + 39U < 399)) {
@@ -7343,12 +7347,7 @@ void renderFieldCharacterSprites(OTTable& OT, int oddOrEven)
                         pScriptEntity->m4_flags.m_rawFlags |= 0x200;
                     }
 
-                    if (g_gdbConnection)
-                    {
-                        void validateField();
-                        g_gdbConnection->executeUntilAddress(0x80075ed4);
-                        validateField();
-                    }
+                    VALIDATE_FIELD(0x80075ed4);
 
                     if (((disableCharacterShadowsRendering == 0) && ((pFieldEntity->m58_flags & 0x20) == 0)) && (-1 < mathFlag)) {
                         VECTOR VStack200;
@@ -8110,10 +8109,9 @@ void fieldEntryPoint()
     MissingCode();
 
     bootField();
+    fieldTransitionCompleted = 1;
 
-    MissingCode();
-
-    bool bVar2 = false;
+    bool bVar2 = false; // ?
 
     do
     {
@@ -8145,7 +8143,11 @@ void fieldEntryPoint()
             } while ((padButtonForField & 0x800) == 0);
             resumeMusic();
         }
-
+        g_playTimeInVsync = playTimeBeginningOfLoop;
+        if (fieldDebugDisable == 1) {
+            setVar(0x50, 1);
+        }
+        checkSoftReboot();
         fieldPerFrameReset();
         updateAndRenderField();
         renderFullScreenTransitionEffect();

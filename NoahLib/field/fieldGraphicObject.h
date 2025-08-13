@@ -97,47 +97,47 @@ struct sFieldEntitySub4_B4_alt : public sFieldEntitySub4_B4_base
 
 struct sFieldEntitySub4_110
 {
-    struct sFieldEntitySub4_110_0* m0_spriteData;
-	sVec2_s16 m4_vramLocation;
-	sVec2_s16 m8_clut;
-	std::span<u8>* mC;
-    sSpriteActorAnimationBundle::sAnimationBundle* m10_startOfAnimationContainer;
+    struct sFieldEntitySub4_110_0* m0_spriteData = nullptr;
+	sVec2_s16 m4_vramLocation = sVec2_s16(0,0);
+	sVec2_s16 m8_clut = sVec2_s16(0,0);
+	std::span<u8>* mC = nullptr;
+    sSpriteActorAnimationBundle::sAnimationBundle* m10_startOfAnimationContainer = nullptr;
 	// size 0x14 (guessed, but seems to make sense)
 };
 
 struct sStackElement
 {
-	u8 asU8;
-	u16 asU16;
+	u8 asU8 = 0;
+	u16 asU16 = 0;
     std::span<u8>::iterator asPs1Pointer;
 };
 
 struct sSpriteActorCore {
-    FP_VEC3 m0_position;
-    FP_VEC3 mC_step;
-    s32 m18_moveSpeed;
-    s32 m1C_gravity;
+    FP_VEC3 m0_position = { 0,0,0 };
+    FP_VEC3 mC_step = { 0,0,0 };
+    s32 m18_moveSpeed = 0;
+    s32 m1C_gravity = 0;
     sFieldEntitySub4_B4_base* m20 = nullptr;
-    sFieldEntitySub4_110* m24_vramData;
-    sColorAndCode m28_colorAndCode;
-    s16 m2C_scale;
-    s16 m2E;
-    s16 m30;
-    s16 m32_direction;
-    s16 m34_currentSpriteFrame;
-    s16 m36;
-    s16 m38;
-    s16 m3A;
-    u32 m3C;
+    sFieldEntitySub4_110* m24_vramData = nullptr;
+    sColorAndCode m28_colorAndCode = sColorAndCode::zero();
+    s16 m2C_scale = 0;
+    s16 m2E = 0;
+    s16 m30 = 0;
+    s16 m32_direction = 0;
+    s16 m34_currentSpriteFrame = 0;
+    s16 m36 = 0;
+    s16 m38 = 0;
+    s16 m3A = 0;
+    u32 m3C = 0;
 
     /*
     * 0x00100000: related to having sub group transforms array
     * 0x00020000 = added to shape transfer list
     */
-    u32 m40;
+    u32 m40 = 0;
 
-    struct sSpriteActorAnimationBundle* m44_currentAnimationBundle;
-    struct sSpriteActorAnimationBundle* m48_defaultAnimationbundle;
+    struct sSpriteActorAnimationBundle* m44_currentAnimationBundle = nullptr;
+    struct sSpriteActorAnimationBundle* m48_defaultAnimationbundle = nullptr;
     struct sSpriteActorAnimationBundle* m4C_specialAnimation = nullptr;
     std::optional<std::vector<u8>::const_iterator> m50;
     std::span<u8>::iterator m54;
@@ -146,27 +146,27 @@ struct sSpriteActorCore {
     std::optional<std::span<u8>::iterator> m60_endOfAnimationContainer;
     std::optional<std::span<u8>::iterator> m64_spriteByteCode;
 
-    void(*m68)(sSpriteActorCore*);
+    void(*m68)(sSpriteActorCore*) = nullptr;
     union {
-        struct sTaskHeader* m6C_pointerToOwnerStructure;
+        struct sTaskHeader* m6C_pointerToOwnerStructure = nullptr;
         struct sTaskHeaderPair* m6C_pointerToOwnerStructurePair;
         struct sSpriteActor* m6C_pointerToOwnerStructureSpriteActor;
     };
-    sSpriteActorCore* m70;
-    sSpriteActorCore* m74_pTargetEntitySprite;
-    u32 m78;
-    sFieldEntitySub4_F4* m7C;
-    s16 m80;
-    s16 m82;
-    s16 m84_maxY;
-    u16 m86_thisSize;
-    sPS1Pointer m88_stack2;
-    s8 m8C_stackPosition;
-    s8 m8D;
+    sSpriteActorCore* m70 = nullptr;
+    sSpriteActorCore* m74_pTargetEntitySprite = nullptr;
+    u32 m78 = 0;
+    sFieldEntitySub4_F4* m7C = nullptr;
+    s16 m80 = 0;
+    s16 m82 = 0;
+    s16 m84_maxY = 0;
+    u16 m86_thisSize = 0;
+    std::span<u8>::iterator m88_stack2;
+    s8 m8C_stackPosition = 0;
+    s8 m8D = 0;
     std::array<sStackElement, 16> m8E_stack;
-    u16 m9E_wait;
+    u16 m9E_wait = 0;
     SVECTOR mA0;
-    struct {
+    struct sMA8{
         u32 mx0 : 1;
         u32 mx1 : 10;
         u32 mxB : 6;
@@ -176,12 +176,16 @@ struct sSpriteActorCore {
         u32 mx1C : 2;
         u32 mx1E_entityId_bottom2bit : 2;
 
+        sMA8() {
+            clear();
+        }
+
         void clear()
         {
             memset(this, 0, sizeof(*this));
         }
     } mA8;
-    union {
+    union sMAC {
         struct {
             u32 mx0_entityIdUpper2bit : 2;
             u32 mx2_facing : 1;
@@ -194,8 +198,12 @@ struct sSpriteActorCore {
             s32 mx18 : 8;
         };
         u32 mRaw;
+
+        sMAC() {
+            mRaw = 0;
+        }
     } mAC;
-    union {
+    union sMB0 {
         struct {
             s32 mx0_animationId : 8;
             u32 mx8 : 1;
@@ -203,6 +211,10 @@ struct sSpriteActorCore {
             u32 mx10 : 1;
         };
         u32 mRaw;
+
+        sMB0() {
+            mRaw = 0;
+        }
     } mB0;
 };
 

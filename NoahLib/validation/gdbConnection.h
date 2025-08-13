@@ -89,6 +89,9 @@ public:
     enum REG_Names {
         V0 = 2,
         A0 = 4,
+        A1 = 5,
+        A2 = 6,
+        S2 = 18,
         RA = 31,
         PC = 37,
     };

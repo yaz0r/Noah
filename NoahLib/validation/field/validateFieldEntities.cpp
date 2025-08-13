@@ -60,6 +60,17 @@ void validate(u32 psxBase, const sSpriteActorCore& pSpriteActorCore) {
     validate(psxBase + 0xC, pSpriteActorCore.mC_step);
     validate(psxBase + 0x18, pSpriteActorCore.m18_moveSpeed);
     validate(psxBase + 0x1C, pSpriteActorCore.m1C_gravity);
+    //...
+    validate(psxBase + 0x2C, pSpriteActorCore.m2C_scale);
+    validate(psxBase + 0x2E, pSpriteActorCore.m2E);
+    validate(psxBase + 0x30, pSpriteActorCore.m30);
+    validate(psxBase + 0x32, pSpriteActorCore.m32_direction);
+    validate(psxBase + 0x34, pSpriteActorCore.m34_currentSpriteFrame);
+    validate(psxBase + 0x36, pSpriteActorCore.m36);
+    validate(psxBase + 0x38, pSpriteActorCore.m38);
+    validate(psxBase + 0x3A, pSpriteActorCore.m3A);
+    validate(psxBase + 0x3C, pSpriteActorCore.m3C);
+
 }
 
 void validate(u32 psxBase, const sSpriteActor& pSpriteActor) {

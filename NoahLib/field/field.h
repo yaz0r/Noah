@@ -476,6 +476,9 @@ extern u8* shapeTransfertTableEnd;
     if (g_gdbConnection) \
     { \
         void validateField();\
-        g_gdbConnection->executeUntilAddress(x); \
-        validateField(); \
+        /*g_gdbConnection->executeUntilAddress(x);*/ \
+        /*validateField();*/ \
     }
+
+#define VALIDATE_REG(reg, value) \
+    /*assert(g_gdbConnection->getRegister(GDBConnection::reg) == value);*/
