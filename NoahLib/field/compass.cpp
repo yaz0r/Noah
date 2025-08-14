@@ -196,7 +196,7 @@ void renderCompass()
 	MATRIX MStack136;
 	CompMatrix(&MStack232, &MStack168, &MStack136);
 
-	if (((compassDisabled == '\0') && (g_updateAllEntitiesSub2Var0 == 0))) {
+	if (((g_compassDisabled == '\0') && (g_updateAllEntitiesSub2Var0 == 0))) {
 		if (fieldCompassVar == 0)
 		{
 			for (int i = 0x14; i < 0x15; i++)
@@ -225,7 +225,7 @@ void renderCompass()
 	MATRIX MStack104;
 	createRotationMatrix(&local_48, &MStack104);
 
-	if (((compassDisabled == '\0') && (g_updateAllEntitiesSub2Var0 == 0))) {
+	if (((g_compassDisabled == '\0') && (g_updateAllEntitiesSub2Var0 == 0))) {
 		//compass cardinal letters
 		for (int i=0; i<4; i++)
 		{

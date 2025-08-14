@@ -125,6 +125,7 @@ bool bDebugEntityMoves = true;
 
 void validateField_init() {
     enableFieldValidationContext(FCT_Base);
+    enableFieldValidationContext(FCT_MoveCheck);
 
     bootField_intercept.enable();
     createSpriteActor_intercept.enable();

@@ -462,10 +462,10 @@ void  OP_REMOVE_FROM_CURRENT_PARTY()
         }
 
         if ((currentParty[0] == 0xff) || (partyToFieldEntityArrayMapping[0] == 0xff)) {
-            playerControlledActor = 0;
+            g_playerControlledActor = 0;
         }
         else {
-            playerControlledActor = partyToFieldEntityArrayMapping[0];
+            g_playerControlledActor = partyToFieldEntityArrayMapping[0];
             (actorArray[partyToFieldEntityArrayMapping[0]].m4C_scriptEntity)->m0_fieldScriptFlags.m_rawFlags &= ~0x80;
             (actorArray[partyToFieldEntityArrayMapping[0]].m4C_scriptEntity)->m0_fieldScriptFlags.m_rawFlags |= 0x0400;
             (actorArray[partyToFieldEntityArrayMapping[0]].m4C_scriptEntity)->m0_fieldScriptFlags.m14_isPlayerControlled = 1;
@@ -1028,7 +1028,7 @@ void OP_INIT_ENTITY_PC(void)
     }
     else {
         if (iVar4 == 0) {
-            playerControlledActor = currentFieldActorId;
+            g_playerControlledActor = currentFieldActorId;
             actorCameraTracked = currentFieldActorId;
             psVar7->m0_fieldScriptFlags.m_rawFlags &= ~0x80;
             psVar7->m0_fieldScriptFlags.m_rawFlags |= 0x0400;
@@ -1389,7 +1389,7 @@ void OP_46(void)
 
 void enablePlayerFlag80(void)
 {
-    (actorArray[playerControlledActor].m4C_scriptEntity)->m0_fieldScriptFlags.m_rawFlags |= 0x80;
+    (actorArray[g_playerControlledActor].m4C_scriptEntity)->m0_fieldScriptFlags.m_rawFlags |= 0x80;
     return;
 }
 
@@ -1397,8 +1397,8 @@ int walkAndChangeField(int param_1, int param_2, int param_3, int param_4)
 {
     fieldRandomBattleVar = -1;
 
-    sFieldScriptEntity* psVar11 = actorArray[playerControlledActor].m4C_scriptEntity;
-    sSpriteActor* psVar12 = actorArray[playerControlledActor].m4_pVramSpriteSheet;
+    sFieldScriptEntity* psVar11 = actorArray[g_playerControlledActor].m4C_scriptEntity;
+    sSpriteActor* psVar12 = actorArray[g_playerControlledActor].m4_pVramSpriteSheet;
     psVar11->m4_flags.m_rawFlags = psVar11->m4_flags.m_rawFlags | 0x38;
     psVar12->m18_moveSpeed = 0x80000;
     int lVar6 = length1d(8);
@@ -1456,7 +1456,7 @@ int walkAndChangeField(int param_1, int param_2, int param_3, int param_4)
     psVar11->m106_currentRotation = uVar4;
     psVar12->m18_moveSpeed = 0;
     psVar11->mE8_currentAnimationId = 0;
-    setVisualAnimation(psVar12, 0, &actorArray[playerControlledActor]);
+    setVisualAnimation(psVar12, 0, &actorArray[g_playerControlledActor]);
     breakCurrentScript = 1;
     psVar11->m8C_scriptSlots[psVar11->mCE_currentScriptSlot].m4_flags.raw = 0xffff;
     psVar11->m8C_scriptSlots[psVar11->mCE_currentScriptSlot].m4_flags.raw &= 0xfe7fffff;
@@ -2427,8 +2427,8 @@ void OP_CALL_IF_IN_TRIGGER()
     uint uVar4;
 
     sVec2_s16 caracterPosition;
-    caracterPosition.vx = actorArray[playerControlledActor].m4C_scriptEntity->m20_position.vz >> 16;
-    caracterPosition.vy = actorArray[playerControlledActor].m4C_scriptEntity->m20_position.vx >> 16;
+    caracterPosition.vx = actorArray[g_playerControlledActor].m4C_scriptEntity->m20_position.vz >> 16;
+    caracterPosition.vy = actorArray[g_playerControlledActor].m4C_scriptEntity->m20_position.vx >> 16;
 
     sFieldTrigger* psVar5 = &fieldTriggerData[pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1]];
 
@@ -2684,7 +2684,7 @@ void OPX_4D(void)
 
 void OP_ENABLE_MENU()
 {
-    menuDisabled = 0;
+    g_menuDisabled = 0;
     pCurrentFieldScriptActor->mCC_scriptPC += 1;
 }
 
@@ -2733,21 +2733,21 @@ void OP_SET_OFF_GEAR()
 
 void OP_DISABLE_MENU(void)
 {
-    menuDisabled = 1;
+    g_menuDisabled = 1;
     pCurrentFieldScriptActor->mCC_scriptPC++;
 }
 
 void OP_DISABLE_COMPASS(void)
 {
-    compassDisabled = 1;
+    g_compassDisabled = 1;
     pCurrentFieldScriptActor->mCC_scriptPC++;
 }
 
 void OP_ENABLE_PLAYER_CONTROLS()
 {
     fieldRandomBattleVar = 0;
-    menuDisabled = 0;
-    compassDisabled = 0;
+    g_menuDisabled = 0;
+    g_compassDisabled = 0;
     op99Var7 = op99Var7 & 0x3fff;
     ADVANCE_VM(0x1);
 }
@@ -2755,8 +2755,8 @@ void OP_ENABLE_PLAYER_CONTROLS()
 void OPX_START_CINEMATIC(void)
 {
     fieldRandomBattleVar = -1;
-    menuDisabled = 1;
-    compassDisabled = 1;
+    g_menuDisabled = 1;
+    g_compassDisabled = 1;
     op99Var7 = op99Var7 | 0xc000;
     if ((playMusicAuthorized == 0) || (fieldExecuteVar3 == 0)) {
         breakCurrentScript = 1;
@@ -3878,8 +3878,8 @@ void OP_IF_PLAYER_IN_TRIGGER2()
     uint uVar4;
 
     sVec2_s16 caracterPosition;
-    caracterPosition.vx = actorArray[playerControlledActor].m4C_scriptEntity->m20_position.vz >> 16;
-    caracterPosition.vy = actorArray[playerControlledActor].m4C_scriptEntity->m20_position.vx >> 16;
+    caracterPosition.vx = actorArray[g_playerControlledActor].m4C_scriptEntity->m20_position.vz >> 16;
+    caracterPosition.vy = actorArray[g_playerControlledActor].m4C_scriptEntity->m20_position.vx >> 16;
 
     sFieldTrigger* psVar5 = &fieldTriggerData[pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1]];
 
@@ -3912,13 +3912,13 @@ void OP_IF_PLAYER_IN_TRIGGER()
     long lVar3;
     uint uVar4;
 
-    sVec2_s16 playerPosition = sVec2_s16::fromValue(actorArray[playerControlledActor].m4C_scriptEntity->m20_position.vz.getIntegerPart(), actorArray[playerControlledActor].m4C_scriptEntity->m20_position.vx.getIntegerPart());
+    sVec2_s16 playerPosition = sVec2_s16::fromValue(actorArray[g_playerControlledActor].m4C_scriptEntity->m20_position.vz.getIntegerPart(), actorArray[g_playerControlledActor].m4C_scriptEntity->m20_position.vx.getIntegerPart());
 
     sFieldTrigger* psVar5 = &fieldTriggerData[pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1]];
 
-    int playerY = actorArray[playerControlledActor].m4C_scriptEntity->m20_position.vy.getIntegerPart();
+    int playerY = actorArray[g_playerControlledActor].m4C_scriptEntity->m20_position.vy.getIntegerPart();
 
-    if ((psVar5->m0[1] < playerY) && ((int)(playerY - (uint)(ushort)actorArray[playerControlledActor].m4C_scriptEntity->m18_boundingVolume.vy) < (int)psVar5->m0[1]))
+    if ((psVar5->m0[1] < playerY) && ((int)(playerY - (uint)(ushort)actorArray[g_playerControlledActor].m4C_scriptEntity->m18_boundingVolume.vy) < (int)psVar5->m0[1]))
     {
         std::array<sVec2_s16, 4> triggerCorners;
         triggerCorners[0].set(psVar5->m0[2], psVar5->m0[0]);

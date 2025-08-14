@@ -209,7 +209,7 @@ extern std::array<sSpriteActorAnimationBundle, 3> partyCharacterBuffers;
 extern s16 actorCameraTracked;
 extern s32 pcInitVar1;
 //extern std::array<int, 11> PCToActorArray;
-extern s32 playerControlledActor;
+extern s32 g_playerControlledActor;
 extern const std::array<s8, 12> characterMappingTable;
 extern s16 pcInitVar2;
 extern std::array<int, 3> unkPartyTable;
@@ -237,8 +237,10 @@ extern s32 cameraInterpolationPositionNumSteps;
 
 extern s16 camera2Tan;
 
-extern u8 menuDisabled;
-extern u8 compassDisabled;
+extern s8 g_PartyFollowDisabled;
+extern u8 g_menuDisabled;
+extern u8 g_compassDisabled;
+
 extern u16 OPX_80Params[8];
 extern s32 OPX_81Params[3];
 extern std::array<sColor, 3> OPX_82Param0;

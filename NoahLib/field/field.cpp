@@ -107,7 +107,7 @@ std::array<sLoadableDataRaw, 3> partyCharacterBuffersCompressed;
 std::array<sSpriteActorAnimationBundle, 3> partyCharacterBuffers;
 s16 actorCameraTracked = 0;
 s32 pcInitVar1 = 0;
-s32 playerControlledActor = 0;
+s32 g_playerControlledActor = 0;
 //std::array<int, 11> PCToActorArray;
 
 s32 worldScaleFactor;
@@ -235,7 +235,7 @@ void resetCameraData()
 }
 
 int linkOTIndex;
-s8 EntityMoveCheck1Var1 = 0;
+s8 g_PartyFollowDisabled = 0;
 char fieldObjectRenderingVar3 = 0;
 char noUpdatesToPartyMemebers = 0;
 int onlyUpdateDirector = 0;
@@ -277,8 +277,8 @@ void resetFieldDefault()
 
     MissingCode();
 
-    compassDisabled = 0;
-    menuDisabled = 0;
+    g_compassDisabled = 0;
+    g_menuDisabled = 0;
     MissingCode();
     pcInitVar1 = 0;
     updateCharacterVar0 = 0;
@@ -291,7 +291,7 @@ void resetFieldDefault()
     fieldBackgroundClearColor[1] = 0;
     fieldBackgroundClearColor[0] = 0;
     noUpdatesToPartyMemebers = 0;
-    EntityMoveCheck1Var1 = 0;
+    g_PartyFollowDisabled = 0;
     fieldObjectRenderingVar3 = 0;
     onlyUpdateDirector = 0;
     fieldUseGroundOT = 0;
@@ -349,7 +349,7 @@ void resetFieldDefault()
     MissingCode();
     updateEntityEventCode3Var2 = 0;
     MissingCode();
-    playerControlledActor = 0;
+    g_playerControlledActor = 0;
     deltaMoveVar0 = 0;
     windowOpenBF = 0;
     fieldRandomBattleVar = 0;
@@ -1267,7 +1267,7 @@ int spriteWalkToPositionOrActor(int param_1)
         lVar14 = length1d(actorArray[readCharacter(1)].m4C_scriptEntity->m1E_collisionRadius + pCurrentFieldScriptActor->m1E_collisionRadius);
         destinationX = actorArray[readCharacter(1)].m4C_scriptEntity->m20_position.vx >> 16;
         destinationZ = actorArray[readCharacter(1)].m4C_scriptEntity->m20_position.vz >> 16;
-        if (pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1] == playerControlledActor)
+        if (pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1] == g_playerControlledActor)
         {
             pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags |= 0x200000;
         }
@@ -1679,8 +1679,8 @@ void updateGearState(int param_1)
     return;
 }
 
-u8 menuDisabled = 0;
-u8 compassDisabled = 0;
+u8 g_menuDisabled = 0;
+u8 g_compassDisabled = 0;
 u16 OPX_80Params[8] = { 0,0,0,0,0,0,0,0 };
 s32 OPX_81Params[3] = { 0,0,0 };
 std::array<sColor, 3> OPX_82Param0 = { {{0,0,0},{0,0,0},{0,0,0} } };
@@ -3513,6 +3513,8 @@ LAB_Field__80082af4:
 
 int updateEntityEventCode3Sub0(sFieldScriptEntity* param_1)
 {
+    VALIDATE_FIELD(FCT_MoveCheck, 0x8008492c);
+
     int iVar1 = -1;
     if (((((((param_1->m14_currentTriangleFlag & 0x420000U) == 0) &&
         (iVar1 = -1, updateEntityEventCode3Var1 == 0)) &&
@@ -4272,7 +4274,7 @@ void updateEntityEventCode3(int index, sFieldEntity* pFieldEntity, sFieldScriptE
             int iVar1 = -1;
             if (pFieldScriptEntity->m8_currentWalkMeshTriangle[pFieldScriptEntity->m10_walkmeshId] != -1) {
                 int backupFlags = pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags;
-                if (index == playerControlledActor) {
+                if (index == g_playerControlledActor) {
                     if (partyToFieldEntityArrayMapping[1] != 0xff) {
                         pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags |= (actorArray[partyToFieldEntityArrayMapping[1]].m4C_scriptEntity)->m0_fieldScriptFlags.m_rawFlags & 0x600;
                     }
@@ -4365,12 +4367,17 @@ LAB_Field__800830ac:
         stepVector.vx = stepVector.vx >> 1;
         stepVector.vz = stepVector.vz >> 1;
     }
+
+    VALIDATE_FIELD(FCT_MoveCheck, 0x80083120);
+
     pFieldScriptEntity->m30_stepVector.vx = stepVector.vx;
     pFieldScriptEntity->m30_stepVector.vy = stepVector.vy;
     pFieldScriptEntity->m30_stepVector.vz = stepVector.vz;
     pFieldScriptEntity->m40.vx = 0;
     pFieldScriptEntity->m40.vy = 0;
     pFieldScriptEntity->m40.vz = 0;
+
+    VALIDATE_FIELD(FCT_MoveCheck, 0x80083170);
 }
 
 int EntityMoveCheck1(int entityIndex, int mask, sFieldEntity* pFieldEntity, sFieldScriptEntity* pFieldScriptEntity, uint param_5);
@@ -5040,7 +5047,7 @@ std::array<s32, 3> partyToFollowStructMapping = { {0,0,0} };
 void initFollowStructForPlayer(s32 entityIndex) {
     sFieldScriptEntity* pScriptEntity = actorArray[entityIndex].m4C_scriptEntity;
     sSpriteActor* pSpriteActor = actorArray[entityIndex].m4_pVramSpriteSheet;
-    if (entityIndex == playerControlledActor) {
+    if (entityIndex == g_playerControlledActor) {
         if (!noUpdatesToPartyMemebers) {
             followDataTable[partyToFollowStructMapping[0]].m20.vx = (pSpriteActor->m0_spriteActorCore).mC_step.vx;
             followDataTable[partyToFollowStructMapping[0]].m20.vy = (pSpriteActor->m0_spriteActorCore).mC_step.vy;
@@ -5072,7 +5079,7 @@ void initFollowStructForPlayer(s32 entityIndex) {
 int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntity, sFieldScriptEntity* pFieldScriptEntity, uint param_5)
 {
     sSpriteActor* pSpriteActor = actorArray[entityIndex].m4_pVramSpriteSheet;
-    if (entityIndex == playerControlledActor) {
+    if (entityIndex == g_playerControlledActor) {
         inputAllowedMask = 0xFFFF;
     }
     if ((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x1000000) != 0) {
@@ -5081,14 +5088,22 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
     if ((pFieldScriptEntity->m4_flags.m_rawFlags & 0x200000) != 0) {
         return -1;
     }
-    if (((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x10000) != 0) ||
-        ((((entityIndex != playerControlledActor || (EntityMoveCheck1Var1 != '\x01')) && ((pSpriteActor->mC_step).vy == 0)) &&
-            (!updateEntityEventCode3Sub0(pFieldScriptEntity) && (pSpriteActor->m84_maxY == (pFieldScriptEntity->m20_position.vy >> 16)))))) {
 
-        VALIDATE_FIELD(FCT_MoveCheck, 0x80084b3c);
-
+    if (pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x10000) {
         return -1;
     }
+
+    if (entityIndex != g_playerControlledActor || (g_PartyFollowDisabled != 1)) {
+        if (pSpriteActor->mC_step.vy == 0) {
+            if (!updateEntityEventCode3Sub0(pFieldScriptEntity)) {
+                if (pSpriteActor->m84_maxY == (pFieldScriptEntity->m20_position.vy.getIntegerPart())) {
+                    return -1;
+                }
+            }
+        }
+    }
+
+    VALIDATE_FIELD(FCT_MoveCheck, 0x80084b44);
 
     sEntityMoveCheck1StackStruct stackVar;
 
@@ -5212,7 +5227,7 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
         }
 
         // disable the player's directional arrow for movement
-        if (entityIndex == playerControlledActor) {
+        if (entityIndex == g_playerControlledActor) {
             inputAllowedMask = 0xfff;
         }
 
@@ -5358,13 +5373,13 @@ void updatePartyFollowLeader() {
         for (int i = 0; i < g_totalActors; i++) {
             sFieldEntity* pActor = &actorArray[i];
             sFieldScriptEntity* pScriptEntity = pActor->m4C_scriptEntity;
-            if ((((pScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x1000000) != 0) && (i != playerControlledActor)) && ((pActor->m58_flags & 0x20) == 0)) {
+            if ((((pScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x1000000) != 0) && (i != g_playerControlledActor)) && ((pActor->m58_flags & 0x20) == 0)) {
                 s32 partyPosition = findCharacterInParty(pScriptEntity->mE4_playableCharacterId);
                 if (partyPosition != -1) {
                     std::array<s32, 3>::iterator puVar9 = partyToFollowStructMapping.begin() + partyPosition;
                     updateEntityEventCode3Sub1(pActor->m4_pVramSpriteSheet, followDataTable[*puVar9].m14_rotation, pActor);
                     sFieldScriptEntity_flags0 uVar7 = followDataTable[*puVar9].m0_flags;
-                    if (EntityMoveCheck1Var1 == 1) {
+                    if (g_PartyFollowDisabled == 1) {
                         *puVar9 = partyToFollowStructMapping[0] + 1U & 0x1f;
                     LAB_Field__80081920:
 
@@ -5455,7 +5470,7 @@ LAB_Field__800818c8:
         for (int i = 0; i < g_totalActors; i++) {
             sFieldEntity* pActor = &actorArray[i];
             sFieldScriptEntity* pScriptEntity = pActor->m4C_scriptEntity;
-            if ((((pScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x1000000) != 0) && (i != playerControlledActor)) && ((pActor->m58_flags & 0x20) == 0)) {
+            if ((((pScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x1000000) != 0) && (i != g_playerControlledActor)) && ((pActor->m58_flags & 0x20) == 0)) {
                 if (pScriptEntity->mE8_currentAnimationId != pScriptEntity->mE6) {
                     pScriptEntity->mE8_currentAnimationId = pScriptEntity->mE6;
                     if (pScriptEntity->mE8_currentAnimationId < 0) {
@@ -5524,7 +5539,7 @@ void updateScriptAndMoveEntities()
         assert(0); // "MOV CHECK0"
     }
 
-    EntityMoveCheck0(playerControlledActor, &actorArray[playerControlledActor], actorArray[playerControlledActor].m4C_scriptEntity);
+    EntityMoveCheck0(g_playerControlledActor, &actorArray[g_playerControlledActor], actorArray[g_playerControlledActor].m4C_scriptEntity);
 
     if (fieldDebugDisable == 0)
     {
@@ -5542,7 +5557,7 @@ void updateScriptAndMoveEntities()
                 (((pFieldScriptEntity->m4_flags.m_rawFlags & 0x600) != 0x200) &&
                     ((actorArray[i].m58_flags & 0xf80) == 0x200)) &&
                 ((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x10001) == 0) &&
-                i != playerControlledActor
+                i != g_playerControlledActor
                 )
             {
                 VALIDATE_FIELD(FCT_MoveCheck, 0x800814ac);
@@ -5561,7 +5576,7 @@ void updateScriptAndMoveEntities()
         assert(0);
     }
     if ((fieldRandomBattleVar == 0) && (noUpdatesToPartyMemebers == '\0')) {
-        startScriptsForCollisions(playerControlledActor, &actorArray[playerControlledActor], actorArray[playerControlledActor].m4C_scriptEntity);
+        startScriptsForCollisions(g_playerControlledActor, &actorArray[g_playerControlledActor], actorArray[g_playerControlledActor].m4C_scriptEntity);
     }
 
     updateEntityEventCode3Var2 = 1;
@@ -6323,7 +6338,7 @@ void updateCamera()
     switch (cameraTrackingMode)
     {
     case eCameraTrackingMode::e0_followPlayer: // follow player
-        updateCameraAt(&actorArray[playerControlledActor].m4C_scriptEntity->m20_position);
+        updateCameraAt(&actorArray[g_playerControlledActor].m4C_scriptEntity->m20_position);
         break;
     default:
         assert(0);
@@ -7778,9 +7793,9 @@ void syncKernelAndFieldStates()
 
         setVar(0xc, (g_playTimeMinutes << 8) | g_playTimeSeconds);
         setVar(0xe, g_playTimeHours);
-        setVar(0x1e, actorArray[playerControlledActor].m4C_scriptEntity->m20_position.vx.getIntegerPart());
-        setVar(0x20, actorArray[playerControlledActor].m4C_scriptEntity->m20_position.vz.getIntegerPart());
-        setVar(0x22, actorArray[playerControlledActor].m4C_scriptEntity->m20_position.vy.getIntegerPart());
+        setVar(0x1e, actorArray[g_playerControlledActor].m4C_scriptEntity->m20_position.vx.getIntegerPart());
+        setVar(0x20, actorArray[g_playerControlledActor].m4C_scriptEntity->m20_position.vz.getIntegerPart());
+        setVar(0x22, actorArray[g_playerControlledActor].m4C_scriptEntity->m20_position.vy.getIntegerPart());
     }
 }
 
@@ -7989,7 +8004,7 @@ int isFieldBattlePrevented(void)
 
     iVar1 = 0;
     if ((bBattleSequenceInitialized == 1) && (updateEntityEventCode4Var0 == 0)) {
-        iVar1 = -(s32)(((actorArray[playerControlledActor].m4C_scriptEntity)->m0_fieldScriptFlags.mx800_isJumping) != 0);
+        iVar1 = -(s32)(((actorArray[g_playerControlledActor].m4C_scriptEntity)->m0_fieldScriptFlags.mx800_isJumping) != 0);
     }
     return iVar1;
 }
@@ -8212,14 +8227,14 @@ void fieldEntryPoint()
 
         // TODO: this is within a larger test
         {
-            if (((menuIdToOpen != 0xff) && (g_frameOddOrEven == 0)) && (((actorArray[playerControlledActor].m4C_scriptEntity)->m0_fieldScriptFlags.m_rawFlags & 0x1800) == 0)) {
+            if (((menuIdToOpen != 0xff) && (g_frameOddOrEven == 0)) && (((actorArray[g_playerControlledActor].m4C_scriptEntity)->m0_fieldScriptFlags.m_rawFlags & 0x1800) == 0)) {
                 //releaseAllDialogWindows();
                 MissingCode();
                 loadAndOpenMenu();
                 menuIdToOpen = 0xff;
             }
 
-            if ((((g_padButtonForField & 0x10) != 0) && (menuDisabled == '\0')) && ((menuIdToOpen == 0xff && (playerCanRun == 1)))) {
+            if ((((g_padButtonForField & 0x10) != 0) && (g_menuDisabled == '\0')) && ((menuIdToOpen == 0xff && (playerCanRun == 1)))) {
                 menuIdToOpen = 0x80;
                 //menuOpenArg = (byte)DAT_Field__800b236c;
             }
@@ -8246,12 +8261,12 @@ void fieldEntryPoint()
                 startFieldTransition();
                 iRam800adb70 = 0;
             }
-            if (((menuIdToOpen != 0xff) && (g_frameOddOrEven == 0)) && (((actorArray[playerControlledActor].m4C_scriptEntity)->m0_fieldScriptFlags.m_rawFlags & 0x1800) == 0)) {
+            if (((menuIdToOpen != 0xff) && (g_frameOddOrEven == 0)) && (((actorArray[g_playerControlledActor].m4C_scriptEntity)->m0_fieldScriptFlags.m_rawFlags & 0x1800) == 0)) {
                 releaseAllDialogWindows();
                 loadAndOpenMenu();
                 menuIdToOpen = 0xff;
             }
-            if ((((g_padButtonForField & 0x10) != 0) && (menuDisabled == '\0')) && ((menuIdToOpen == 0xff && (playerCanRun == 1)))) {
+            if ((((g_padButtonForField & 0x10) != 0) && (g_menuDisabled == '\0')) && ((menuIdToOpen == 0xff && (playerCanRun == 1)))) {
                 menuIdToOpen = 0x80;
                 //menuOpenArg = (byte)DAT_Field__800b236c;
             }
@@ -8281,8 +8296,8 @@ void copyActorPositions(int dest, int source) {
 }
 
 void doPCCollisionCheckAfterLoading() {
-    EntityMoveCheck1(playerControlledActor, ((actorArray[playerControlledActor].m4C_scriptEntity)->m20_position).vy.getIntegerPart(), &actorArray[playerControlledActor],
-        actorArray[playerControlledActor].m4C_scriptEntity, 0); // TODO: what is the last argument supposed to be?
+    EntityMoveCheck1(g_playerControlledActor, ((actorArray[g_playerControlledActor].m4C_scriptEntity)->m20_position).vy.getIntegerPart(), &actorArray[g_playerControlledActor],
+        actorArray[g_playerControlledActor].m4C_scriptEntity, 0); // TODO: what is the last argument supposed to be?
 
     for (int i = 0; i < g_totalActors; i++) {
         sFieldEntity* pFieldEntity = &actorArray[i];
@@ -8293,7 +8308,7 @@ void doPCCollisionCheckAfterLoading() {
                 EntityMoveCheck1(i, actorArray[i].m4C_scriptEntity->m20_position.vy.getIntegerPart(), pFieldEntity, pFieldScriptEntity, 0);// TODO: what is the last argument supposed to be?
 
                 actorArray[i].m4_pVramSpriteSheet->m0_position = actorArray[i].m4_pVramSpriteSheet->m0_spriteActorCore.m0_position;
-                pFieldEntity->mC_matrix.t = actorArray[playerControlledActor].mC_matrix.t;
+                pFieldEntity->mC_matrix.t = actorArray[g_playerControlledActor].mC_matrix.t;
             }
         }
     }
@@ -8301,7 +8316,7 @@ void doPCCollisionCheckAfterLoading() {
     partyToFollowStructMapping.fill(0);
 
     for (int i = 0; i < 0x20; i++) {
-        initFollowStructForPlayer(playerControlledActor);
+        initFollowStructForPlayer(g_playerControlledActor);
     }
 }
 
@@ -8328,7 +8343,7 @@ void runInitScriptForNewlyLoadedPC(uint param_1) {
                 actorArray[i].m4C_scriptEntity->mCC_scriptPC = scriptEntryPoint;
                 currentScriptFinished = 0;
                 pCurrentFieldScriptActor->mCC_scriptPC = getScriptEntryPoint(i, 0);
-                copyActorPositions(i, playerControlledActor);
+                copyActorPositions(i, g_playerControlledActor);
                 executeFieldScript(0xffff);
                 doPCCollisionCheckAfterLoading();
                 

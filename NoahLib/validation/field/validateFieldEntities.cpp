@@ -19,6 +19,12 @@ void validate(u32 psxBase, const VECTOR& vector) {
     //assert(vector.pad == g_gdbConnection->readS32(psxBase + 0xC));
 }
 
+void validate(u32 psxBase, const SFP_VEC3& vector) {
+    assert(vector.vx == g_gdbConnection->readS32(psxBase + 0));
+    assert(vector.vy == g_gdbConnection->readS32(psxBase + 4));
+    assert(vector.vz == g_gdbConnection->readS32(psxBase + 8));
+}
+
 void validate(u32 psxBase, const MATRIX& matrix) {
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
@@ -37,6 +43,14 @@ void validate(u32 psxBase, const FP_VEC3& vec3) {
     validate(psxBase + 0x0, vec3.vx);
     validate(psxBase + 0x4, vec3.vy);
     validate(psxBase + 0x8, vec3.vz);
+}
+
+void validate(u32 psxBase, const s8& data) {
+    assert(data == g_gdbConnection->readS8(psxBase + 0));
+}
+
+void validate(u32 psxBase, const u8& data) {
+    assert(data == g_gdbConnection->readU8(psxBase + 0));
 }
 
 void validate(u32 psxBase, const s16& data) {
@@ -83,6 +97,11 @@ void validate(u32 psxBase, const sFieldScriptEntity& pFieldScriptEntity) {
     validate(psxBase + 0x04, pFieldScriptEntity.m4_flags.m_rawFlags);
     validate(psxBase + 0x10, pFieldScriptEntity.m10_walkmeshId);
     validate(psxBase + 0x14, pFieldScriptEntity.m14_currentTriangleFlag);
+    //validate(psxBase + 0x18, pFieldScriptEntity.m18_boundingVolume);
+    validate(psxBase + 0x1E, pFieldScriptEntity.m1E_collisionRadius);
+    //
+    validate(psxBase + 0x20, pFieldScriptEntity.m20_position);
+    validate(psxBase + 0x30, pFieldScriptEntity.m30_stepVector);
     //...
     validate(psxBase + 0xCC, pFieldScriptEntity.mCC_scriptPC);
     //...
@@ -135,6 +154,11 @@ void validateFieldVars() {
     validate(0x800af85c, g_cameraMatrix2);
     validate(0x800af8e0, g_fieldCameraOffset);
     validate(0x800adc18, g_updateAllEntitiesSub2Var0);
+
+    validate(0x800b21cf, g_PartyFollowDisabled);
+    validate(0x800b21d0, g_menuDisabled);
+    validate(0x800b21d1, g_compassDisabled);
+    validate(0x800b226c, g_playerControlledActor);
 
     u32 arrayBase = 0x800c3a68;
     for (int i = 0; i < 0x200; i++) {

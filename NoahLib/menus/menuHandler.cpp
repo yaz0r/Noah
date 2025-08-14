@@ -4060,7 +4060,7 @@ void enterMenu(void)
 
 void loadAndOpenMenu(void)
 {
-    if ((menuIdToOpen != 0x80) || (menuDisabled == 0)) {
+    if ((menuIdToOpen != 0x80) || (g_menuDisabled == 0)) {
         MissingCode();
 
         setCurrentDirectory(0x10, 0);

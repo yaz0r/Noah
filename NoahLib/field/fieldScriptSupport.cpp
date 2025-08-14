@@ -468,7 +468,7 @@ u32 getCameraDirection(void)
 
 uint getPlayerCharacterDir(void)
 {
-	return (((actorArray[playerControlledActor].m4C_scriptEntity)->m106_currentRotation + 0x100) >> 9) + 2U & 7;
+	return (((actorArray[g_playerControlledActor].m4C_scriptEntity)->m106_currentRotation + 0x100) >> 9) + 2U & 7;
 }
 
 void SaveFieldAndDirections(void)
