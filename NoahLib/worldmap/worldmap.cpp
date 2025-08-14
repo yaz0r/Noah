@@ -448,12 +448,6 @@ void tweakWorldmapTexture(std::vector<u16>::iterator param_1, std::vector<u16>::
         s32 iVar5 = 0;
         do {
             s32 iVar9 = iVar5 / param_3;
-            if (param_3 == 0) {
-                assert(0);
-            }
-            if ((param_3 == -1) && (iVar5 == INT32_MIN)) {
-                assert(0);
-            }
             s32 iVar7 = 0;
             iVar5 = 0x1000 - iVar9;
             std::vector<u16>::iterator puVar6 = param_1;

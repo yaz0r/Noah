@@ -2167,12 +2167,6 @@ void computeBackgroundPoly(sBackgroundPoly* pBackgroundPoly, int param_2, int pa
 {
     s32 iVar15 = pBackgroundPoly->m328;
     s32 iVar17 = param_4 + 0x100;
-    if (iVar17 == 0) {
-        assert(0);
-    }
-    if ((iVar17 == -1) && (iVar15 << 8 == INT32_MIN)) {
-        assert(0);
-    }
     s32 iVar10 = (0x140 - (iVar15 << 8) / iVar17) / 2;
     s32 iVar23 = iVar10 * param_4;
     if (iVar23 < 0) {
@@ -2180,24 +2174,12 @@ void computeBackgroundPoly(sBackgroundPoly* pBackgroundPoly, int param_2, int pa
     }
     iVar23 = (param_2 - (iVar10 + (iVar23 >> 8))) * 0x10000 >> 0x10;
     iVar10 = iVar23 % iVar15;
-    if (iVar15 == 0) {
-        assert(0);
-    }
-    if ((iVar15 == -1) && (iVar23 == INT32_MIN)) {
-        assert(0);
-    }
     if (iVar10 << 0x10 < 0) {
         iVar10 = (uint) * (ushort*)&pBackgroundPoly->m328 + iVar10;
     }
     iVar15 = 0;
     if ((-1 < param_3) && (iVar23 = pBackgroundPoly->m32C << 8, param_3 <= pBackgroundPoly->m32C + 0xf0)) {
         iVar15 = iVar23 / iVar17;
-        if (iVar17 == 0) {
-            assert(0);
-        }
-        if ((iVar17 == -1) && (iVar23 == INT32_MIN)) {
-            assert(0);
-        }
     }
 
     s32 currentX = 0;
@@ -2228,12 +2210,6 @@ void computeBackgroundPoly(sBackgroundPoly* pBackgroundPoly, int param_2, int pa
             s32 sVar7 = (short)iVar8;
             iVar10 = (iVar8 << 0x10) >> 8;
             iVar8 = iVar10 / iVar20;
-            if (iVar20 == 0) {
-                assert(0);
-            }
-            if ((iVar20 == -1) && (iVar10 == INT32_MIN)) {
-                assert(0);
-            }
             s32 uVar9 = currentX;
             if (0x140 < (int)(short)uVar9 + (int)(short)iVar8) {
                 iVar8 = 320 - currentX;
@@ -2245,12 +2221,6 @@ void computeBackgroundPoly(sBackgroundPoly* pBackgroundPoly, int param_2, int pa
             }
             s32 iVar13 = pBackgroundPoly->m328;
             iVar10 = (int)(short)(sVar16 + sVar7) % iVar13;
-            if (iVar13 == 0) {
-                assert(0);
-            }
-            if ((iVar13 == -1) && ((short)(sVar16 + sVar7) == INT32_MIN)) {
-                assert(0);
-            }
             currentX = currentX + iVar8;
 
 

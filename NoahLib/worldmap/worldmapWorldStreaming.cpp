@@ -373,12 +373,6 @@ void streamWorldmap1(void)
                 if (worldmapChunks[iVar6] == (byte*)0x0) {
                     pbVar4 = (byte*)malloc(0x710);
                     iVar13 = iVar6 / worldmapSizeX;
-                    if (worldmapSizeX == 0) {
-                        assert(0);
-                    }
-                    if ((worldmapSizeX == -1) && (iVar6 == INT32_MIN)) {
-                        assert(0);
-                    }
                     iVar14 = (iVar6 % worldmapSizeX) * worldmapSizeY;
                     bVar2 = true;
                     worldmapChunks[iVar6] = pbVar4;
@@ -406,12 +400,6 @@ void streamWorldmap1(void)
                 else {
                     if (!bVar2) goto LAB_worldmap__80099018;
                     iVar12 = getFileStartSector(worldmapFile10);
-                    if (worldmapSizeX == 0) {
-                        assert(0);
-                    }
-                    if ((worldmapSizeX == -1) && (iVar6 == INT32_MIN)) {
-                        assert(0);
-                    }
                     pbVar4 = *ppbVar7;
                     iVar12 = iVar12 + (iVar6 % worldmapSizeX) * worldmapSizeY + iVar6 / worldmapSizeX;
                 }
@@ -456,12 +444,6 @@ void streamWorldmap1(void)
                 if (worldmapChunks[iVar6] == (byte*)0x0) {
                     pbVar4 = (byte*)malloc(0x710);
                     iVar13 = iVar6 / worldmapSizeX;
-                    if (worldmapSizeX == 0) {
-                        assert(0);
-                    }
-                    if ((worldmapSizeX == -1) && (iVar6 == INT32_MIN)) {
-                        assert(0);
-                    }
                     iVar14 = (iVar6 % worldmapSizeX) * 0x800 * worldmapSizeY;
                     bVar2 = true;
                     worldmapChunks[iVar6] = pbVar4;
@@ -489,12 +471,6 @@ void streamWorldmap1(void)
                 else {
                     if (!bVar2) goto LAB_worldmap__800992cc;
                     iVar12 = getFilenameFromPC(worldmapFile10);
-                    if (worldmapSizeX == 0) {
-                        assert(0);
-                    }
-                    if ((worldmapSizeX == -1) && (iVar10 == INT32_MIN)) {
-                        assert(0);
-                    }
                     pbVar4 = *ppbVar7;
                     iVar10 = (iVar10 % worldmapSizeX) * 0x800 * worldmapSizeY + (iVar10 / worldmapSizeX) * 0x800;
                 }
