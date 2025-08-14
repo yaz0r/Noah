@@ -32,7 +32,7 @@ void _bu_init();
 sWdsFile* wdsFile3 = nullptr;
 sWdsFile* wdsFile5 = nullptr;
 
-#if defined(WIN32) && defined(DEBUG)
+#if defined(WIN32)
 bool enableValidation = true;
 #else
 bool enableValidation = false;

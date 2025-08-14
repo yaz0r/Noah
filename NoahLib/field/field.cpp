@@ -173,7 +173,6 @@ bool debugEncounterTriggerDisabled = false;
 int debugForcedEncounter = -1;
 
 u16 inputAllowedMask = 0xFFFF;
-u16 padButtonForField;
 u16 padButtonForField2;
 
 u16 inputAllowedMask2;
@@ -265,7 +264,7 @@ void resetFieldDefault()
     padButtonForScripts[1].m0_buttons = 0;
     padButtonForDialogs = 0;
     padButtonForDialogs2 = 0;
-    padButtonForField = 0;
+    g_padButtonForField = 0;
     padButtonForField2 = 0;
 
     MissingCode();
@@ -7719,18 +7718,18 @@ void updateFieldInputs()
     padButtonForScripts[1].m0_buttons = 0;
     padButtonForDialogs = 0;
     padButtonForDialogs2 = 0;
-    padButtonForField = 0;
+    g_padButtonForField = 0;
     padButtonForField2 = 0;
     while (loadInputFromVSyncBuffer()) {
         padButtonForScripts[0].m0_buttons |= newPadButtonForScripts[0].m0_buttons & inputAllowedMask2;
         padButtonForScripts[1].m0_buttons |= newPadButtonForScripts[1].m0_buttons;
         padButtonForDialogs |= newPadButtonForDialogs & inputAllowedMask2;
         padButtonForDialogs2 |= newPadButtonForDialogs2;
-        padButtonForField |= newPadButtonForField & inputAllowedMask2;
+        g_padButtonForField |= newPadButtonForField & inputAllowedMask2;
         padButtonForField2 |= newPadButtonForField2;
     }
     padButtonForScripts[0].m0_buttons &= inputAllowedMask;
-    padButtonForField &= inputAllowedMask;
+    g_padButtonForField &= inputAllowedMask;
     padButtonForDialogs &= inputAllowedMask;
     resetInputs();
     //FUN_Field__8007ae78(1, &DAT_80065848);
@@ -7740,7 +7739,7 @@ void updateFieldInputs()
         padButtonForScripts[1].m0_buttons = 0;
         padButtonForDialogs = 0;
         padButtonForDialogs2 = 0;
-        padButtonForField = 0;
+        g_padButtonForField = 0;
         padButtonForField2 = 0;
     }
     if (playMusicAuthorized == 0) {
@@ -8100,7 +8099,7 @@ void fieldEntryPoint()
         }
 
         /* pause when player press start */
-        if ((((padButtonForField & 0x800) != 0) && ((padButtonForScripts[0].m0_buttons & 0x40U) == 0)) && (pauseDisabled == '\0')) {
+        if ((((g_padButtonForField & 0x800) != 0) && ((padButtonForScripts[0].m0_buttons & 0x40U) == 0)) && (pauseDisabled == '\0')) {
             g_playTimeInVsync = playTimeBeginningOfLoop;
             pauseMusic();
             decompressPauseSignToVram(0x88, (g_frameOddOrEven + 1U & 1) << 8 | 100);
@@ -8109,7 +8108,7 @@ void fieldEntryPoint()
                 VSync(2);
                 updateFieldInputs();
                 checkSoftReboot();
-            } while ((padButtonForField & 0x800) == 0);
+            } while ((g_padButtonForField & 0x800) == 0);
             resumeMusic();
         }
         g_playTimeInVsync = playTimeBeginningOfLoop;
@@ -8221,7 +8220,7 @@ void fieldEntryPoint()
                 menuIdToOpen = 0xff;
             }
 
-            if ((((padButtonForField & 0x10) != 0) && (menuDisabled == '\0')) && ((menuIdToOpen == 0xff && (playerCanRun == 1)))) {
+            if ((((g_padButtonForField & 0x10) != 0) && (menuDisabled == '\0')) && ((menuIdToOpen == 0xff && (playerCanRun == 1)))) {
                 menuIdToOpen = 0x80;
                 //menuOpenArg = (byte)DAT_Field__800b236c;
             }
@@ -8253,7 +8252,7 @@ void fieldEntryPoint()
                 loadAndOpenMenu();
                 menuIdToOpen = 0xff;
             }
-            if ((((padButtonForField & 0x10) != 0) && (menuDisabled == '\0')) && ((menuIdToOpen == 0xff && (playerCanRun == 1)))) {
+            if ((((g_padButtonForField & 0x10) != 0) && (menuDisabled == '\0')) && ((menuIdToOpen == 0xff && (playerCanRun == 1)))) {
                 menuIdToOpen = 0x80;
                 //menuOpenArg = (byte)DAT_Field__800b236c;
             }

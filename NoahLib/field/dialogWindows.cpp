@@ -6,6 +6,7 @@
 #include "kernel/TIM.h"
 #include "kernel/gameState.h"
 #include "kernel/inputs.h"
+#include "field/fieldInputs.h"
 
 std::array<sDialogWindow, 4> gDialogWindows;
 std::array<s32, 4> dialogWindowVar1;
@@ -667,12 +668,12 @@ void updateMultiChoice(int param_1)
 {
 	if ((gDialogWindows[param_1].m37C == 0) && (gDialogWindows[param_1].m408_openAnimationCounter == 0)) {
 		if (gDialogWindows[param_1].m410 == 0) {
-            if ((padButtonForField & 0x4000) != 0) {
+            if ((g_padButtonForField & 0x4000) != 0) {
                 gDialogWindows[param_1].m382_CurrentMultiChoiceSelection++;
                 if(gDialogWindows[param_1].m380_numMaxMultiChoiceSelection + -1 < (int)gDialogWindows[param_1].m382_CurrentMultiChoiceSelection)
                     gDialogWindows[param_1].m382_CurrentMultiChoiceSelection = 0;
             }
-            if ((padButtonForField & 0x1000) != 0) {
+            if ((g_padButtonForField & 0x1000) != 0) {
                 gDialogWindows[param_1].m382_CurrentMultiChoiceSelection = gDialogWindows[param_1].m382_CurrentMultiChoiceSelection + -1;
                 if (gDialogWindows[param_1].m382_CurrentMultiChoiceSelection < 0) {
                     gDialogWindows[param_1].m382_CurrentMultiChoiceSelection = gDialogWindows[param_1].m380_numMaxMultiChoiceSelection + -1;

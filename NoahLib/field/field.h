@@ -301,8 +301,6 @@ extern MATRIX g_cameraMatrix;
 extern MATRIX g_cameraMatrix2;
 extern s32 sceneSCRZ;
 
-extern u16 padButtonForField;
-
 extern int g_updateAllEntitiesSub2Var0;
 
 extern s16 cameraDollyVar0;

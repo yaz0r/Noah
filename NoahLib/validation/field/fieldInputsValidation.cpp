@@ -34,7 +34,7 @@ void fieldPerFrameReset_detour() {
     padButtonForScripts[0].m0_buttons = g_gdbConnection->readU16(0x800afe9c);
     padButtonForScripts[1].m0_buttons = g_gdbConnection->readU16(0x800afea0);
     padButtonForDialogs = g_gdbConnection->readU16(0x800c2694);
-
+    g_padButtonForField = g_gdbConnection->readU16(0x800c3900);
     validateField();
 }
 
