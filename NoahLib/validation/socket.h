@@ -1,11 +1,14 @@
 #pragma once
 
+namespace socketNS {
+
 #ifdef WIN32
-typedef uintptr_t hSocket;
+    typedef uintptr_t hSocket;
 #else
-#error No socket implementation
+    typedef int hSocket;
 #endif
 
-bool openSocket(hSocket& socket, const std::string& address, u16 port);
-void writeString(const hSocket& socket, const std::string& packet);
-char readCharacter(const hSocket& socket);
+    bool openSocket(hSocket& socket, const std::string& address, u16 port);
+    void writeString(const hSocket& socket, const std::string& packet);
+    char readCharacter(const hSocket& socket);
+};

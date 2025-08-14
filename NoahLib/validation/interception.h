@@ -2,9 +2,11 @@
 
 #include <functional>
 
+#ifdef WIN32
 namespace windows {
 #include <windows.h>
 }
+#endif
 
 template< class ReturnType, class... Args >
 class interceptor {
@@ -20,6 +22,7 @@ public:
     typedef ReturnType(* const* targetType)(Args...);
 
     u8* unpackFunction(functionSignature& functionToUnpack) {
+#ifdef WIN32
         auto target = functionToUnpack.target<ReturnType(*)(Args...)>();
         u8* ptr = (u8*)*target;
         // In case of edit and continue
@@ -28,6 +31,10 @@ public:
             ptr += offset + 5;
         }
         return ptr;
+#else
+        assert(0);
+        return nullptr;
+#endif
     }
 
     void enable() {
@@ -35,6 +42,7 @@ public:
             u8* originalFunctionPtr = unpackFunction(m_originalFunction);
             u8* detourFunctionPtr = unpackFunction(m_interceptedFunction);
 
+#ifdef WIN32
             windows::DWORD old_flags;
             windows::VirtualProtect(originalFunctionPtr, m_savedBytes.size(), PAGE_EXECUTE_READWRITE, &old_flags);
 
@@ -44,7 +52,9 @@ public:
             memcpy(originalFunctionPtr + call.size(), &detourFunctionPtr, sizeof(uintptr_t));
 
             windows::VirtualProtect(originalFunctionPtr, m_savedBytes.size(), old_flags, &old_flags);
-
+#else 
+            assert(0); // unimplpemented
+#endif
             m_enabled = true;
         }
     }
@@ -52,12 +62,16 @@ public:
         if (m_enabled) {
             u8* originalFunctionPtr = unpackFunction(m_originalFunction);
 
+#ifdef WIN32
             windows::DWORD old_flags;
             windows::VirtualProtect(originalFunctionPtr, m_savedBytes.size(), PAGE_EXECUTE_READWRITE, &old_flags);
 
             memcpy(originalFunctionPtr, m_savedBytes.data(), m_savedBytes.size());
 
             windows::VirtualProtect(originalFunctionPtr, m_savedBytes.size(), old_flags, &old_flags);
+#else
+            assert(0); // unimplpemented
+#endif
 
             m_enabled = false;
         }

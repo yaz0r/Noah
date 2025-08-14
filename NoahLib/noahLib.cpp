@@ -32,10 +32,10 @@ void _bu_init();
 sWdsFile* wdsFile3 = nullptr;
 sWdsFile* wdsFile5 = nullptr;
 
-#ifdef WIN32 && DEBUG
+#if defined(WIN32) && defined(DEBUG)
 bool enableValidation = true;
 #else
-bool enableValidation = false
+bool enableValidation = false;
 #endif
 
 bool noahInit(int argc, char* argv[])

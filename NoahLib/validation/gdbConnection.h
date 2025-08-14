@@ -100,7 +100,7 @@ public:
     u32 getRegister(int index);
     void setRegister(int index, u32 value);
 private:
-    hSocket m_socket;
+    socketNS::hSocket m_socket;
 
     class SharedMem* m_wramSharedMemory = nullptr;
 };

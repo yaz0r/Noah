@@ -8,6 +8,8 @@
 
 #include "sharedmem.h"
 
+using namespace socketNS;
+
 GDBConnection* g_gdbConnection = nullptr;
 
 u8 calculateChecksum(const std::string& data) {
@@ -108,6 +110,7 @@ bool GDBConnection::openConnection(const std::string& server, u16 port) {
     sendReceivePackage(m_socket, createPacket("!"));
     sendReceivePackage(m_socket, createPacket("Hg0"));
 
+#ifdef WIN32
     std::string sharedmem = decodeEscapedString(sendMonitorCommand("sharedmem wram"));
     if (sharedmem.length()) {
         m_wramSharedMemory = new SharedMem();
@@ -116,6 +119,7 @@ bool GDBConnection::openConnection(const std::string& server, u16 port) {
             m_wramSharedMemory = nullptr;
         }
     }
+#endif
 
     return true;
 }

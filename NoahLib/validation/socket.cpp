@@ -1,7 +1,18 @@
 #include "noahLib.h"
 #include "socket.h"
-#pragma comment (lib, "Ws2_32.lib")
-#include <WinSock2.h>
+
+#ifdef WIN32
+    #pragma comment (lib, "Ws2_32.lib")
+    #include <WinSock2.h>
+#else
+    #include <unistd.h>
+    #include <sys/socket.h>
+    #include <netinet/in.h>
+    #include <netinet/ip.h>
+    #include <arpa/inet.h>
+#endif
+
+namespace socketNS {
 
 bool openSocket(hSocket& socket, const std::string& address, u16 port) {
 #ifdef WIN32
@@ -41,4 +52,5 @@ char readCharacter(const hSocket& socket) {
     char data;
     readBytes(socket, &data, 1);
     return data;
+}
 }
