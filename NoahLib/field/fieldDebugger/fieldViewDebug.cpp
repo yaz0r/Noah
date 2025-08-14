@@ -389,7 +389,8 @@ void fieldViewDebug_step()
             useSnap = !useSnap;
         ImGui::Checkbox("", &useSnap);
         ImGui::SameLine();
-        /*
+        
+        #if 0
         vec_t snap;
         switch (mCurrentGizmoOperation)
         {
@@ -406,8 +407,7 @@ void fieldViewDebug_step()
             ImGui::InputFloat("Scale Snap", &snap.x);
             break;
         }
-        */
-        /*
+        
         ImGuizmo::SetRect(imageStart[0], imageStart[1], currentWindowSize[0], currentWindowSize[1]);
         //ImGuizmo::Manipulate(mtx_view, mtx_projection, mCurrentGizmoOperation, mCurrentGizmoMode, matrix.m16, NULL, useSnap ? &snap.x : NULL);
 

@@ -28,9 +28,9 @@ struct sFieldEntity2dSprite
 
 struct sFieldScriptEntityScriptSlot
 {
-    u16 m0_scriptPC;
-    u8 m2_delay;
-    s8 m3_scriptIndex;
+    u16 m0_scriptPC = 0;
+    u8 m2_delay = 0;
+    s8 m3_scriptIndex = 0;
     union {
         struct {
             u32 m0 : 16;
@@ -43,7 +43,7 @@ struct sFieldScriptEntityScriptSlot
             u32 m27 : 2;
             u32 m28X : 1;
         };
-        u32 raw;
+        u32 raw = 0;
     } m4_flags; // bit 18, size 4
     // size 8
 };
@@ -81,79 +81,85 @@ struct sFieldScriptEntity
 {
     sFieldScriptEntity_flags0 m0_fieldScriptFlags;
     sFieldScriptEntity_flags4 m4_flags;
-    std::array<s16, 4> m8_currentWalkMeshTriangle;
-    u16 m10_walkmeshId;
-    s32 m14_currentTriangleFlag;
-    SFP_VEC3 m18_boundingVolume;
-    s16 m1E_collisionRadius;
-    VECTOR m20_position;
-    VECTOR m30_stepVector;
-    VECTOR m40;
-    VECTOR m50_surfaceNormal;
-    std::array<s16, 3> m60;
-    std::array<s16, 3> m68_oldPosition;
-    s16 m6E;
-    s16 m70_rotationForRendering;
-    s16 m72_elevation;
-    s8 m74;
-    s8 m75;
-    s16 m76;
-    std::array<u16, 4> m78_stack;
-    s8 m80_dialogPortrait;
-    s8 m81_selectedMultichoiceLine;
-    std::array<s8, 2> m82_dialogWindowSize;
-    s32 m84_dialogWindowFlags;
-    std::array<s16, 2> m88_dialogWindowPosition;
+    std::array<s16, 4> m8_currentWalkMeshTriangle = {0,0,0,0};
+    u16 m10_walkmeshId = 0;
+    s32 m14_currentTriangleFlag = 0;
+    SFP_VEC3 m18_boundingVolume = SFP_VEC3::zero();
+    s16 m1E_collisionRadius = 0;
+    VECTOR m20_position = VECTOR::zero();
+    VECTOR m30_stepVector = VECTOR::zero();
+    VECTOR m40 = VECTOR::zero();
+    VECTOR m50_surfaceNormal = VECTOR::zero();
+    std::array<s16, 3> m60 = {0,0,0};
+    std::array<s16, 3> m68_oldPosition = {0,0,0};
+    s16 m6E = 0;
+    s16 m70_rotationForRendering = 0;
+    s16 m72_elevation = 0;
+    s8 m74 = 0;
+    s8 m75 = 0;
+    s16 m76 = 0;
+    std::array<u16, 4> m78_stack = {0,0,0,0};
+    s8 m80_dialogPortrait = 0;
+    s8 m81_selectedMultichoiceLine = 0;
+    std::array<s8, 2> m82_dialogWindowSize = {0,0};
+    s32 m84_dialogWindowFlags = 0;
+    std::array<s16, 2> m88_dialogWindowPosition = {0,0};
     std::array<sFieldScriptEntityScriptSlot, 8> m8C_scriptSlots;
-    u16 mCC_scriptPC;
-    s8 mCE_currentScriptSlot;
-    s8 mCF_scriptSlotWaitedOn;
-    FP_VEC3 mD0_targetPositionOffset;
-    s16 mE0_rotationLimit;
-    s8 mE2;
-    s8 mE3;
-    s16 mE4_playableCharacterId;
-    s16 mE6;
-    s16 mE8_currentAnimationId;
-    s16 mEA_forcedAnimation;
-    s16 mEC_elevation;
-    s32 mF0;
-    std::array<s16, 3> mF4_scale3d;
-    std::array<u8, 3> mFC;
-    std::array<u8, 3> mFF;
-    s16 m102_numSteps;
-    s16 m104_rotation;
-    s16 m106_currentRotation;
-    s16 m108_rotation3;
-    s16 m10A;
-    s8 m10C;
-    s8 m10D;
+    u16 mCC_scriptPC = 0;
+    s8 mCE_currentScriptSlot = 0;
+    s8 mCF_scriptSlotWaitedOn = 0;
+    FP_VEC3 mD0_targetPositionOffset = FP_VEC3::zero();
+    s16 mE0_rotationLimit = 0;
+    s8 mE2 = 0;
+    s8 mE3 = 0;
+    s16 mE4_playableCharacterId = 0;
+    s16 mE6 = 0;
+    s16 mE8_currentAnimationId = 0;
+    s16 mEA_forcedAnimation = 0;
+    s16 mEC_elevation = 0;
+    s32 mF0 = 0;
+    std::array<s16, 3> mF4_scale3d = {0,0,0};
+    std::array<u8, 3> mFC = {0,0,0};
+    std::array<u8, 3> mFF = {0,0,0};
+    s16 m102_numSteps = 0;
+    s16 m104_rotation = 0;
+    s16 m106_currentRotation = 0;
+    s16 m108_rotation3 = 0;
+    s16 m10A = 0;
+    s8 m10C = 0;
+    s8 m10D = 0;
     std::vector<s16> m110_modelRotation2;
     std::vector<sVec2_s16> m114_movementBoundingZone;
     std::vector<s32> m118;
-    s16 m11C;
-    s16 m11E;
-    struct sSpriteActorAnimationBundle* m120_special2dAnimation;
+    s16 m11C = 0;
+    s16 m11E = 0;
+    struct sSpriteActorAnimationBundle* m120_special2dAnimation = nullptr;
     sLoadableDataRaw m120_special2dAnimationRaw;
-    s16 m124_special2dAnimationId;
-    u8 m126;
-    u8 m127;
-    s16 m128;
-    u32 m12C_flags;
-    struct
-    {
-        u32 m0 : 28;
-        u32 m28 : 2;
-        u32 m30_stepVector : 2;
-    }m130;
+    s16 m124_special2dAnimationId = 0;
+    u8 m126 = 0;
+    u8 m127 = 0;
+    s16 m128 = 0;
+    u32 m12C_flags = 0;
+    union {
+        struct
+        {
+            u32 m0 : 28;
+            u32 m28 : 2;
+            u32 m30_stepVector : 2;
+        };
+        u32 m_rawFlags = 0;
+    } m130;
 
-    struct
-    {
-        u32 m0 : 4;
-        u32 m4 : 1;
-        u32 m5 : 2;
-        u32 m7_isModelRotation2Allocated : 1;
-    }m134;
+    union {
+        struct
+        {
+            u32 m0 : 4;
+            u32 m4 : 1;
+            u32 m5 : 2;
+            u32 m7_isModelRotation2Allocated : 1;
+        };
+        u32 m_rawFlags = 0;
+    } m134;
 
     // size 0x138
 };

@@ -26,7 +26,7 @@ struct sSeqFile : sLoadableDataRaw {
 
         m0_magic = READ_LE_U32(it + 0x0);
         m8 = READ_LE_U32(it + 0x8);
-        mC = READ_LE_U32(it + 0xC);
+        mC_checksum = READ_LE_U32(it + 0xC);
         m10 = READ_LE_U16(it + 0x10);
         m14 = READ_LE_U16(it + 0x14);
         m16_sampleBank = READ_LE_U16(it + 0x16);
@@ -41,7 +41,7 @@ struct sSeqFile : sLoadableDataRaw {
 
     u32 m0_magic;
     u32 m8;
-    u32 mC;
+    u32 mC_checksum;
     u16 m10;
     u16 m14;
     u16 m16_sampleBank;

@@ -68,7 +68,7 @@ void averageVector(VECTOR* param_1, VECTOR* param_2, VECTOR* param_3)
     if (iVar2 == 0) {
         assert(0);
     }
-    if ((iVar2 == -1) && (iVar1 == -(s32)0x80000000)) {
+    if ((iVar2 == -1) && (iVar1 == INT32_MIN)) {
         assert(0);
     }
     param_1->vy = iVar3;
@@ -492,7 +492,7 @@ int checkWorldmapPositionSub1_0_2(VECTOR* position, VECTOR* step, std::array<VEC
     if (iVar2 == 0) {
         trap(0x1c00);
     }
-    if ((iVar2 == -1) && (iVar6 == -(s32)0x80000000)) {
+    if ((iVar2 == -1) && (iVar6 == INT32_MIN)) {
         trap(0x1800);
     }
     iVar2 = (position->vz & 0xfff80000U) - position->vz;
@@ -542,7 +542,7 @@ int checkWorldmapPositionSub1_0_5(VECTOR* position, VECTOR* step, std::array<VEC
     if (iVar2 == 0) {
         trap(0x1c00);
     }
-    if ((iVar2 == -1) && (iVar6 == -(s32)0x80000000)) {
+    if ((iVar2 == -1) && (iVar6 == INT32_MIN)) {
         trap(0x1800);
     }
     iVar2 = (output[1].vz & 0xfff80000U) - position->vz;
@@ -593,7 +593,7 @@ int checkWorldmapPositionSub1_0_4(VECTOR* position, VECTOR* step, std::array<VEC
     if (iVar2 == 0) {
         trap(0x1c00);
     }
-    if ((iVar2 == -1) && (iVar7 == -(s32)0x80000000)) {
+    if ((iVar2 == -1) && (iVar7 == INT32_MIN)) {
         trap(0x1800);
     }
     iVar2 = (position->vx & 0xfff80000U) - position->vx;
@@ -644,7 +644,7 @@ int checkWorldmapPositionSub1_0_3(VECTOR* position, VECTOR* step, std::array<VEC
     if (iVar3 == 0) {
         trap(0x1c00);
     }
-    if ((iVar3 == -1) && (iVar7 == -(s32)0x80000000)) {
+    if ((iVar3 == -1) && (iVar7 == INT32_MIN)) {
         trap(0x1800);
     }
     iVar3 = (output[1].vx & 0xfff80000U) - position->vx;

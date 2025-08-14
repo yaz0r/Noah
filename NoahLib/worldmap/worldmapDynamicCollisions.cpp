@@ -22,10 +22,10 @@ void processWorldmapDynamicCollisions(VECTOR* param_1, int param_2, int param_3,
         else {
             iVar2 = entry.m4[1] + entry.m10 * -0x1000;
         }
-        if (iVar4 - iVar2 >> 0xc < param_3 + entry.m10) {
+        if ((iVar4 - iVar2) >> 0xc < param_3 + entry.m10) {
             VECTOR local_50;
-            local_50.vx = entry.m4[0] - param_1->vx >> 0xc;
-            local_50.vz = entry.m4[2] - param_1->vz >> 0xc;
+            local_50.vx = (entry.m4[0] - param_1->vx) >> 0xc;
+            local_50.vz = (entry.m4[2] - param_1->vz) >> 0xc;
             adjustWorldModelLocation(&local_50);
             s32 lVar3 = SquareRoot0(local_50.vx * local_50.vx + local_50.vz * local_50.vz);
             s32 bVar1 = 2;

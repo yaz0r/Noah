@@ -713,7 +713,7 @@ void setupReverb(int mode, s16 param_2, long delay, long feedback) {
 }
 
 void printTextHex16(const std::string& label, u16 value) {
-    ImGui::Text(label.c_str()); ImGui::SameLine(); ImGui::Text("0x%04X", value);
+    ImGui::Text("%s", label.c_str()); ImGui::SameLine(); ImGui::Text("0x%04X", value);
 }
 
 void updateSPUDebugger() {
@@ -723,7 +723,7 @@ void updateSPUDebugger() {
         u32 chanelOn = (((u32)SPURegisterStatus[SPU_REG_CHON_high] << 16) | SPURegisterStatus[SPU_REG_CHON_low]);
 
         for (int i = 0; i < 24; i++) {
-            ImGui::Text((std::string("Voice ") + std::to_string(i)).c_str());
+            ImGui::Text("Voice %d", i);
 
             u32 ADSR = ((u32)SPURegisterStatus[4 + i * 8]) | ((u32)SPURegisterStatus[5 + i * 8]) << 16;
             ImGui::Text("Attack %d", (ADSR >> 8) & 0x7F);

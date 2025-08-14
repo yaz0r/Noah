@@ -649,7 +649,7 @@ char abilitySelectTarget(ushort param_1, byte param_2, byte param_3)
 
     bVar8 = 0xfe;
     abilityTargetSelectionInit(param_1, param_1, param_2, 0, param_3);
-    selectedTarget = abilitySelectedTarget == -1;
+    selectedTarget = abilitySelectedTarget == 0xFF;
     uVar4 = abilityTargetBitmask;
     if (!(bool)selectedTarget) {
         do {

@@ -663,7 +663,7 @@ void renderMechasBattle(MATRIX* pMatrix, MATRIX* param_2, OTTable& OT, int oddOr
     battleMechaVar1 = (ushort)mechaIterationCount2;
     battleMechaVar4 = battleMechaVar4 + 0x80; // TODO: this doesn't exists in field version?
     int angleForMecha = getAngleSin(mechaIterationCount2 * 0x10000 >> 0x10);
-    gMechaAngleBattle = ((short)(((angleForMecha + 0x1000) * 0x51eb851f) >> 0x28) - (short)(angleForMecha + 0x1000 >> 0x1f)) + 4;
+    gMechaAngleBattle = ((short)((((u64)((angleForMecha + 0x1000) * 0x51eb851f) >> 0x28) - (short)(angleForMecha + 0x1000)) >> 0x1f)) + 4;
 
     MissingCode();
 
@@ -759,9 +759,9 @@ void computeBattleCameraParams(uint bitmask) {
             currentBitmask >>= 1;
         }
 
-        positionSum.vx = (minX + maxX) - (minX + maxX >> 0x1f) >> 0x11;
-        positionSum.vy = (maxY + minY) - (maxY + minY >> 0x1f) >> 0x11;
-        positionSum.vz = (minZ + maxZ) - (minZ + maxZ >> 0x1f) >> 0x11;
+        positionSum.vx = ((minX + maxX) - ((minX + maxX) >> 0x1f)) >> 0x11;
+        positionSum.vy = ((maxY + minY) - ((maxY + minY) >> 0x1f)) >> 0x11;
+        positionSum.vz = ((minZ + maxZ) - ((minZ + maxZ) >> 0x1f)) >> 0x11;
 
         MATRIX MStack_f0;
         RotMatrixZYX(&battleCameraParamsVar0, &MStack_f0);
@@ -3639,7 +3639,7 @@ void drawCircleMenuAttackActive(int param_1) {
     case 6:
     case 7:
         param_1 &= 0xFF;
-        if (battleVar2->m0[param_1].m3C_currentTarget != 0xFF) {
+        if (battleVar2->m0[param_1].m3C_currentTarget != -1) {
             startCharacterJumpToEnemyVar0 = 0;
             startCharacterJumpToEnemy(param_1);
             selectDefaultTarget(param_1);
@@ -4388,7 +4388,7 @@ void moveEntityToOtherEntity(byte param_1, uint param_2) {
         battleVisualEntities[param_2 & 0xff].m0_positionSlot) {
         iVar6 = 0;
         if ((param_2 & 0xff) < 3) {
-            iVar6 = (param_1 < 3 ^ 1) << 3;
+            iVar6 = ((param_1 < 3) ^ 1) << 3;
         }
         param_2 = param_2 & 0xff;
         if (battleSlotLayout[(uint)battleVisualEntities[param_2].m0_positionSlot + iVar6][0] < 4) {
@@ -4657,7 +4657,7 @@ int computeBattleDamageSub1() {
             uVar3 = (uVar2 & 0xffff) * (uVar3 & 0xff);
             uVar2 = uVar3 >> 2;
             if (false) { // ?
-                uVar2 = uVar3 + 3 >> 2;
+                uVar2 = (uVar3 + 3) >> 2;
             }
         }
     }
@@ -4786,7 +4786,7 @@ LAB_Battle__80097774:
             uVar5 = (uVar2 & 0xffff) * (4 - (uVar3 & 0xff));
             uVar2 = uVar5 >> 2;
             if ((int)uVar5 < 0) {
-                uVar2 = uVar5 + 3 >> 2;
+                uVar2 = (uVar5 + 3) >> 2;
             }
         }
         if ((((startBattleAttackAnimationVar5->m32 & 2U) != 0) && ((uVar3 & 0xff) != 0)) &&
@@ -5922,7 +5922,7 @@ void setupTurnRenderLoop(int param_1) {
                 battleVar1->mA3 = updateBattleMenuSpriteForMenu(param_1, battleVar2->m2DD_currentActiveBattleMenu, battleVar2->m2E0_isBattleMenuDisabled);
                 battleVar1->mCB = 1;
             }
-            if ((battleInputButton == -1) || (battleRenderDebugAndMain(), battleVar2->m2DB != '\0'))
+            if ((battleInputButton == 0xFF) || (battleRenderDebugAndMain(), battleVar2->m2DB != '\0'))
                 break;
             if (battleVar2->m2E0_isBattleMenuDisabled == '\0') {
                 startCharacterJumpToEnemyVar0 = 1;
@@ -6767,7 +6767,7 @@ void battleSpriteOp89Sub3(sSpriteActorCore* param_1, short param_2)
 
 void createDamageDisplayIfValid(int param_1) {
     if (battleCurrentDamages[allocateJumpAnimationStructVar0 + -1].m18_damageType[param_1] != -1) {
-        if ((battleCurrentDamages[allocateJumpAnimationStructVar0 + -1].m0_damageValue[param_1] != -1) && battleSpriteActorCores[param_1]) {
+        if ((battleCurrentDamages[allocateJumpAnimationStructVar0 + -1].m0_damageValue[param_1] != 0xFFFF) && battleSpriteActorCores[param_1]) {
             damageDisplayVar0 = battleCurrentDamages[allocateJumpAnimationStructVar0 + -1].m24[param_1];
             damageDisplayVar1 = battleCurrentDamages[allocateJumpAnimationStructVar0 + -1].m3C[param_1];
             createDamageDisplay(battleSpriteActorCores[param_1],

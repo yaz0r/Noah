@@ -1909,7 +1909,7 @@ void setSpriteActorAngle(sSpriteActorCore* param_1, short angle)
 		param_1->m54 = param_1->m58_startOfCurrentAnimation + READ_LE_U16(param_1->m58_startOfCurrentAnimation + 4) + 4;
 		break;
     case 1:
-        newAngle = angle + 0x600 >> 10 & 3;
+        newAngle = ((angle + 0x600) >> 10) & 3;
         if (newAngle < 3) {
             uVar2 = READ_LE_U16(param_1->m58_startOfCurrentAnimation + newAngle * 2 + 4);
             param_1->mAC.mx2_facing = 0;
@@ -1923,7 +1923,7 @@ void setSpriteActorAngle(sSpriteActorCore* param_1, short angle)
         break;
 	case 2:
 	{
-		newAngle = (angle + 0x500) >> 9 & 7;
+		newAngle = ((angle + 0x500) >> 9) & 7;
 		if (newAngle > 4)
 		{
 			newAngle = newAngle - 5 ^ 3;

@@ -102,7 +102,7 @@ void loadBattleSpriteVram(sBattleSpriteConfigs* param_1) {
                 for (int entryId = 3; entryId != 0xB; entryId++) {
                     int slotValue = spriteIndicies.m20[entryId];
                     if ((slotValue < 8) && (slotValue == searchedValue) && entryId) {
-                        int flags = -(numUsedEntries < 2 ^ 1) & 2;
+                        int flags = -((numUsedEntries < 2) ^ 1) & 2;
                         if (iDest) {
                             flags = 7;
                             if (numUsedEntries == iDest + 1) {

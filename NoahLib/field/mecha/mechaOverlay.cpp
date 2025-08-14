@@ -1155,7 +1155,7 @@ void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int pa
         }
         break;
         case 0x6F:
-            if ((bytecodeHigher && 0xFF) == 0) {
+            if ((bytecodeHigher & 0xFF) == 0) {
                 pMecha->m3A = -1;
             }
             else {
@@ -2045,7 +2045,7 @@ void renderMechas(MATRIX* pMatrix, MATRIX* param_2, OTTable& OT, int oddOrEven, 
     mechaIterationCount2 = (uint)mechaInitVar1 + (mechaIterationCount2 - mechaIterationCount) * 8;
     mechaInitVar1 = (ushort)mechaIterationCount2;
     int angleForMecha = getAngleSin(mechaIterationCount2 * 0x10000 >> 0x10);
-    gMechaAngle = ((short)(((angleForMecha + 0x1000) * 0x51eb851f) >> 0x28) - (short)(angleForMecha + 0x1000 >> 0x1f)) + 4;
+    gMechaAngle = ((short)((u64)((angleForMecha + 0x1000) * 0x51eb851f) >> 0x28) - (short)((angleForMecha + 0x1000) >> 0x1f)) + 4;
 
     for (int i = 0; i < 10; i++) {
         if (loadedMechas[i]) {

@@ -830,7 +830,7 @@ void OP_UPDATE_CHARACTER()
     int windowIndex = 0;
     for (windowIndex = 0; windowIndex < 4; windowIndex++)
     {
-        if (gDialogWindows[windowIndex].m0 == 0)
+        if (gDialogWindows[windowIndex].m37C == 0)
             break;
     }
     if ((windowIndex != 4) || (fieldRandomBattleVar != 0))

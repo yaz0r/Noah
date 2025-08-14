@@ -168,7 +168,7 @@ byte stepGearAwayFromYggdrasil(sWorldmapStateEntry* param_1)
     bVar3 = iVar1 < 5;
     if (!(bool)bVar3) {
         iVar1 = (uint)(ushort)param_1->m4A << 0x10;
-        (param_1->m28_position).vx = iVar2 + (param_1->m38_step).vx * ((iVar1 >> 0x10) - (iVar1 >> 0x1f) >> 1);
+        (param_1->m28_position).vx = iVar2 + (param_1->m38_step).vx * (((iVar1 >> 0x10) - (iVar1 >> 0x1f)) >> 1);
     }
     iVar2 = (param_1->m28_position).vz;
     iVar1 = param_1->m54 - (iVar2 >> 0xc);
@@ -180,7 +180,7 @@ byte stepGearAwayFromYggdrasil(sWorldmapStateEntry* param_1)
     }
     else {
         iVar1 = (uint)(ushort)param_1->m4A << 0x10;
-        (param_1->m28_position).vz = iVar2 + (param_1->m38_step).vz * ((iVar1 >> 0x10) - (iVar1 >> 0x1f) >> 1);
+        (param_1->m28_position).vz = iVar2 + (param_1->m38_step).vz * (((iVar1 >> 0x10) - (iVar1 >> 0x1f)) >> 1);
     }
     checkWorldmapPositionSub0(&param_1->m28_position);
     iVar1 = worldmapGetAltitudeFor2dPoint((param_1->m28_position).vx, (param_1->m28_position).vz);

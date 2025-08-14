@@ -177,7 +177,7 @@ struct OcornutImguiContext
 					bgfx::TextureHandle th = m_texture;
 					bgfx::ProgramHandle program = m_program;
 
-					if (NULL != cmd->TextureId)
+					if (cmd->TextureId)
 					{
 						union { ImTextureID ptr; struct { bgfx::TextureHandle handle; uint8_t flags; uint8_t mip; } s; } texture = { cmd->TextureId };
 						state |= 0 != (IMGUI_FLAGS_ALPHA_BLEND & texture.s.flags)

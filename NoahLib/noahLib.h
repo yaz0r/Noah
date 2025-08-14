@@ -76,6 +76,14 @@ struct FP_VEC3
     sFixedPoint vy;
     sFixedPoint vz;
 
+    static FP_VEC3 zero() {
+        FP_VEC3 temp;
+        temp.vx = 0;
+        temp.vy = 0;
+        temp.vz = 0;
+        return temp;
+    }
+
     sFixedPoint operator[](size_t idx) const
     {
         switch (idx)
@@ -115,6 +123,15 @@ struct VECTOR
     sFixedPoint vy;
     sFixedPoint vz;
     sFixedPoint pad;
+
+    static VECTOR zero() {
+        VECTOR temp;
+        temp.vx = 0;
+        temp.vy = 0;
+        temp.vz = 0;
+        temp.pad = 0;
+        return temp;
+    }
 
     sFixedPoint operator[](size_t idx) const
     {
@@ -161,6 +178,14 @@ struct SFP_VEC3
     s16 vx;
     s16 vy;
     s16 vz;
+
+    static SFP_VEC3 zero() {
+        SFP_VEC3 temp;
+        temp.vx = 0;
+        temp.vy = 0;
+        temp.vz = 0;
+        return temp;
+    }
 };
 
 struct SVECTOR

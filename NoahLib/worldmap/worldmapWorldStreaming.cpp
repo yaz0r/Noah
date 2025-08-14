@@ -376,7 +376,7 @@ void streamWorldmap1(void)
                     if (worldmapSizeX == 0) {
                         assert(0);
                     }
-                    if ((worldmapSizeX == -1) && (iVar6 == -(s32)0x80000000)) {
+                    if ((worldmapSizeX == -1) && (iVar6 == INT32_MIN)) {
                         assert(0);
                     }
                     iVar14 = (iVar6 % worldmapSizeX) * worldmapSizeY;
@@ -409,7 +409,7 @@ void streamWorldmap1(void)
                     if (worldmapSizeX == 0) {
                         assert(0);
                     }
-                    if ((worldmapSizeX == -1) && (iVar6 == -(s32)0x80000000)) {
+                    if ((worldmapSizeX == -1) && (iVar6 == INT32_MIN)) {
                         assert(0);
                     }
                     pbVar4 = *ppbVar7;
@@ -459,7 +459,7 @@ void streamWorldmap1(void)
                     if (worldmapSizeX == 0) {
                         assert(0);
                     }
-                    if ((worldmapSizeX == -1) && (iVar6 == -(s32)0x80000000)) {
+                    if ((worldmapSizeX == -1) && (iVar6 == INT32_MIN)) {
                         assert(0);
                     }
                     iVar14 = (iVar6 % worldmapSizeX) * 0x800 * worldmapSizeY;
@@ -492,7 +492,7 @@ void streamWorldmap1(void)
                     if (worldmapSizeX == 0) {
                         assert(0);
                     }
-                    if ((worldmapSizeX == -1) && (iVar10 == -(s32)0x80000000)) {
+                    if ((worldmapSizeX == -1) && (iVar10 == INT32_MIN)) {
                         assert(0);
                     }
                     pbVar4 = *ppbVar7;
@@ -747,10 +747,10 @@ s16 computeTileVisibility(SVECTOR* param_1, SVECTOR* param_2, SVECTOR* param_3, 
 
     for (int i = 0; i < 4; i++) {
         results[i] = 0;
-        s32 iVar7 = projectedPoints[0].vx * dots[i].vx + projectedPoints[0].vz * dots[i].vz >> 0xc;
-        s32 iVar2 = projectedPoints[1].vx * dots[i].vx + projectedPoints[1].vz * dots[i].vz >> 0xc;
-        s32 iVar5 = projectedPoints[2].vx * dots[i].vx + projectedPoints[2].vz * dots[i].vz >> 0xc;
-        s32 iVar1 = projectedPoints[3].vx * dots[i].vx + projectedPoints[3].vz * dots[i].vz >> 0xc;
+        s32 iVar7 = (projectedPoints[0].vx * dots[i].vx + projectedPoints[0].vz * dots[i].vz) >> 0xc;
+        s32 iVar2 = (projectedPoints[1].vx * dots[i].vx + projectedPoints[1].vz * dots[i].vz) >> 0xc;
+        s32 iVar5 = (projectedPoints[2].vx * dots[i].vx + projectedPoints[2].vz * dots[i].vz) >> 0xc;
+        s32 iVar1 = (projectedPoints[3].vx * dots[i].vx + projectedPoints[3].vz * dots[i].vz) >> 0xc;
 
         if (iVar7 < 0) {
             if (iVar2 < 0) {
@@ -915,7 +915,7 @@ void worldmapGroundPrepareRenderingTable(VECTOR* param_1) {
     }
 
     // This patches the tile visibility, seems to disable some of the tiles at the edge of the map?
-    u32 mapQuadrant = (param_1->vx >> 0xc & 0x7ffU) < 0x400 ^ 1;
+    u32 mapQuadrant = ((param_1->vx >> 0xc & 0x7ffU) < 0x400) ^ 1;
     if (0x3ff < (param_1->vz >> 0xc & 0x7ffU)) {
         mapQuadrant = mapQuadrant | 2;
     }

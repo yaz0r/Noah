@@ -451,7 +451,7 @@ void tweakWorldmapTexture(std::vector<u16>::iterator param_1, std::vector<u16>::
             if (param_3 == 0) {
                 assert(0);
             }
-            if ((param_3 == -1) && (iVar5 == -(s32)0x80000000)) {
+            if ((param_3 == -1) && (iVar5 == INT32_MIN)) {
                 assert(0);
             }
             s32 iVar7 = 0;
@@ -463,8 +463,10 @@ void tweakWorldmapTexture(std::vector<u16>::iterator param_1, std::vector<u16>::
                     *param_2 = uVar4;
                 }
                 else {
-                    *param_2 = *puVar6 & 0x8000 | (ushort)((uVar4 & 0x1f) * 8 * iVar5 + (uint)bVar1 * iVar9 >> 0xf) | (ushort)(((*puVar6 >> 2 & 0xf8) * iVar5 + (uint)bVar2 * iVar9 >> 0xf) << 5) |
-                        (ushort)(((*puVar6 >> 7 & 0xf8) * iVar5 + (uint)bVar3 * iVar9 >> 0xf) << 10);
+                    *param_2 = *puVar6 & 0x8000 |
+                        (ushort)(((uVar4 & 0x1f) * 8 * iVar5 + (uint)bVar1 * iVar9) >> 0xf) |
+                        (ushort)(((((*puVar6 >> 2) & 0xf8) * iVar5 + (uint)bVar2 * iVar9) >> 0xf) << 5) |
+                        (ushort)(((((*puVar6 >> 7) & 0xf8) * iVar5 + (uint)bVar3 * iVar9) >> 0xf) << 10);
                 }
                 iVar7 = iVar7 + 1;
                 puVar6 = puVar6 + 1;

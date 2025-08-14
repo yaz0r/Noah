@@ -688,7 +688,7 @@ LAB_Field__8009ca64:
 	int flags = 0;
 	if (((pCurrentFieldScriptActor->m84_dialogWindowFlags >> 16) & 0xc) == 0) {
 		windowDisplayMode = getCameraDirection();
-		flags = (((((int)((uint)(ushort)(actorArray[actorId].m4C_scriptEntity)->m106_currentRotation << 0x10) >> 0x19) - (windowDisplayMode & 0xffff)) + 1 & 7) < 4 ^ 1) << 10;
+		flags = ((((((int)((uint)(ushort)(actorArray[actorId].m4C_scriptEntity)->m106_currentRotation << 0x10) >> 0x19) - (windowDisplayMode & 0xffff)) + 1 & 7) < 4) ^ 1) << 10;
 	}
 	else {
 		if (((pCurrentFieldScriptActor->m84_dialogWindowFlags >> 16) & 4) != 0) {

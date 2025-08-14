@@ -280,7 +280,7 @@ int loadBattleMechaAndEnvironment(int battleArenaId, int param_2, sLoadableDataR
     resetMemoryAllocStats(4, 0);
     int iVar1 = getNegativeFileSize(5);
     int iVar5 = battleArenaId * 2;
-    if (battleArenaId < ((iVar1 << 0x10) >> 0x10) - ((iVar1 << 0x10) >> 0x1f) >> 1) {
+    if (battleArenaId < (((iVar1 << 0x10) >> 0x10) - ((iVar1 << 0x10) >> 0x1f)) >> 1) {
         sBattleMechaInitDataFile* pvVar3 = new sBattleMechaInitDataFile(getFileSizeAligned(iVar5 + param_2 + 7));
         flagAllocation(*pvVar3);
         sLoadableDataRaw* pvVar4 = new sLoadableDataRaw(getFileSizeAligned(iVar5 + 6));

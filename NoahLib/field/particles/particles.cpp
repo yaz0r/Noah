@@ -199,7 +199,7 @@ void deleteParticleEffect(int param_1) {
 
 int evalParticleRange(int param_1)
 {
-    return xenoRand() * param_1 + 1 >> 0xf;
+    return (xenoRand() * param_1 + 1) >> 0xf;
 }
 
 static const std::array<u8, 8> cameraToParticleMapping = { {

@@ -7,9 +7,9 @@
 
 sSeqFile* pLoadedSequencesLinkedList = nullptr;
 
-int checkHeaderSub0(sSeqFile* param_1) {
+int checkSeqChecksum(sSeqFile* param_1) {
     int checksum = 0;
-    int size = param_1->m8 + 3U >> 2;
+    int size = (param_1->m8 + 3U) >> 2;
 
     for (int i = 0; i < size; i++) {
         checksum += READ_LE_S32(param_1->getRawData().begin() + i * 4);
@@ -22,8 +22,8 @@ int checkHeader(sSeqFile* param_1, u32 magic, int param_3) {
     if (param_1->m0_magic != magic)
         return 1;
 
-    if (checkHeaderSub0(param_1) == 0)
-        return (param_1->mC != param_3) << 2;
+    if (checkSeqChecksum(param_1) == 0)
+        return (param_1->mC_checksum != param_3) << 2;
 
     return 2;
 }
