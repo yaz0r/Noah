@@ -1,4 +1,5 @@
 # Noah: a Xenogears decompilation.
+[![Build](https://github.com/yaz0r/Noah/actions/workflows/cmake-multi-platform.yml/badge.svg)](https://github.com/yaz0r/Noah/actions/workflows/cmake-multi-platform.yml)
 
 This is a decompilation of Xenogears for PS1, based on the US release. All the code executing has been decompiled and reimplemented. Only the PSX sound chip is emulated.  
 The user must provide their own copy of Xenogears. No game data are provided in this project.
