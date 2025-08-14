@@ -9,7 +9,7 @@ void SPRITE_VM_NAME(sSpriteActorCore* param_1) {
         }
 
 #if !defined(IMPLEMENT_BATTLE_SPECIFIC_CASES)
-        VALIDATE_FIELD(0x8002491c);
+        VALIDATE_FIELD(FCT_KernelSpriteVM, 0x8002491c);
 #endif
 
         std::span<u8>::iterator startOfOpcode = param_1->m64_spriteByteCode.value();
@@ -17,8 +17,8 @@ void SPRITE_VM_NAME(sSpriteActorCore* param_1) {
         std::span<u8>::iterator pEndOfOpcode = startOfOpcode + 1;
 
 #if !defined(IMPLEMENT_BATTLE_SPECIFIC_CASES)
-        VALIDATE_FIELD(0x80024930);
-        VALIDATE_REG(S2, bytecode);
+        VALIDATE_FIELD(FCT_KernelSpriteVM, 0x80024930);
+        VALIDATE_REG(FCT_KernelSpriteVM, S2, bytecode);
 #endif
 
         if (bytecode < 0x80)

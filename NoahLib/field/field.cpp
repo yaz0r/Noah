@@ -388,7 +388,7 @@ void resetFieldDefault()
     resetParticleEffectsTable();
     MissingCode();
 
-    VALIDATE_FIELD(0x80070c7c);
+    VALIDATE_FIELD(FCT_Base, 0x80070c7c);
 }
 
 bool g_LogOpcodes = false;
@@ -457,11 +457,11 @@ void uploadNpcSpriteSheet(std::vector<u8>::const_iterator pImageData, int x, int
 
 void setupField3d(std::vector<u8>::const_iterator input)
 {
-    VALIDATE_FIELD(0x8006fdec);
+    VALIDATE_FIELD(FCT_Base, 0x8006fdec);
     lookAtDivided(&g_cameraMatrix, &g_cameraEye, &g_cameraAt, &g_cameraUp);
     createRotationMatrix(&g_cameraProjectionAngles, &g_currentProjectionMatrix);
     MulRotationMatrix(&g_cameraMatrix, &g_currentProjectionMatrix);
-    VALIDATE_FIELD(0x8006fe3c);
+    VALIDATE_FIELD(FCT_Base, 0x8006fe3c);
 
     MissingCode();
 
@@ -472,7 +472,7 @@ void setupField3d(std::vector<u8>::const_iterator input)
 
     SetRotMatrix(&g_currentProjectionMatrix);
     SetTransMatrix(&g_currentProjectionMatrix);
-    VALIDATE_FIELD(0x80070084);
+    VALIDATE_FIELD(FCT_Base, 0x80070084);
 }
 
 
@@ -3385,7 +3385,7 @@ void exectueEntitiesUpdateFunction()
             {
                 executeFieldScript(8);
             }
-            VALIDATE_FIELD(0x800a2258);
+            VALIDATE_FIELD(FCT_Script, 0x800a2258);
             pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m0_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC;
         }
     }
@@ -4671,7 +4671,7 @@ void EntityMoveCheck0(uint playerEntityIndex, sFieldEntity* pPlayerEntity, sFiel
         if (actorId == playerEntityIndex)
             continue;
 
-        VALIDATE_FIELD(0x8008426c);
+        VALIDATE_FIELD(FCT_MoveCheck, 0x8008426c);
 
         sFieldScriptEntity* pCurrentFieldScriptEntity = actorArray[actorId].m4C_scriptEntity;
         sFieldScriptEntity_flags0 entityFlags = pCurrentFieldScriptEntity->m0_fieldScriptFlags;
@@ -4789,7 +4789,7 @@ LAB_Field__80084520:
         }
     }
 
-    VALIDATE_FIELD(0x800846e0);
+    VALIDATE_FIELD(FCT_MoveCheck, 0x800846e0);
 
     if (updateEntityEventCode3Var1 != 0) {
         finalState = false;
@@ -4813,20 +4813,20 @@ LAB_Field__80084520:
         pPlayerScriptEntity->m74 = -1;
     }
 
-    VALIDATE_FIELD(0x80084854);
+    VALIDATE_FIELD(FCT_MoveCheck, 0x80084854);
 
     if (((pPlayerScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x10000) == 0) && ((pPlayerScriptEntity->m4_flags.m_rawFlags & 0x200000) == 0)) {
         EntityMoveCheck1(playerEntityIndex, bestDistance, pPlayerEntity, pPlayerScriptEntity, 0);
     }
 
-    VALIDATE_FIELD(0x800848b8);
+    VALIDATE_FIELD(FCT_MoveCheck, 0x800848b8);
 
     if ((actorArray[playerEntityIndex].m4_pVramSpriteSheet)->m7C->mC == 1) {
         resetInputs();
         pPlayerScriptEntity->m0_fieldScriptFlags.mx800_isJumping = 0;
     }
 
-    VALIDATE_FIELD(0x800848f0);
+    VALIDATE_FIELD(FCT_MoveCheck, 0x800848f0);
 
     freeScratchBuffer<std::array<VECTOR, 2>>(scratchBuffer);
 }
@@ -5085,7 +5085,7 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
         ((((entityIndex != playerControlledActor || (EntityMoveCheck1Var1 != '\x01')) && ((pSpriteActor->mC_step).vy == 0)) &&
             (!updateEntityEventCode3Sub0(pFieldScriptEntity) && (pSpriteActor->m84_maxY == (pFieldScriptEntity->m20_position.vy >> 16)))))) {
 
-        VALIDATE_FIELD(0x80084b3c);
+        VALIDATE_FIELD(FCT_MoveCheck, 0x80084b3c);
 
         return -1;
     }
@@ -5240,7 +5240,7 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
             pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags &= ~0x401000;
             (pFieldScriptEntity->m20_position).vy = (int)pSpriteActor->m84_maxY << 0x10;
         }
-        VALIDATE_FIELD(0x80085444);
+        VALIDATE_FIELD(FCT_MoveCheck, 0x80085444);
         (pSpriteActor->m0_position).vx = (pFieldScriptEntity->m20_position).vx;
         (pSpriteActor->m0_position).vy = (pFieldScriptEntity->m20_position).vy;
         (pSpriteActor->m0_position).vz = (pFieldScriptEntity->m20_position).vz;
@@ -5275,7 +5275,7 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
         if (pFieldScriptEntity->m10_walkmeshId != sVar2) {
             pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags &= ~0x4000000;
         }
-        VALIDATE_FIELD(0x8008509c);
+        VALIDATE_FIELD(FCT_MoveCheck, 0x8008509c);
         int currentMaxY = (pSpriteActor->m0_spriteActorCore).m84_maxY;
 
         if (!(pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x4000000) && (currentMaxY > (pFieldScriptEntity->m20_position).vy.getIntegerPart())) {
@@ -5296,7 +5296,7 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
             (pFieldScriptEntity->m20_position).vy = (int)(pSpriteActor->m0_spriteActorCore).m84_maxY << 0x10;
         }
         pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags &= ~0x4000000;
-        VALIDATE_FIELD(0x80085160);
+        VALIDATE_FIELD(FCT_MoveCheck, 0x80085160);
 
         int foundEntry = 0;
         if (0 < numWalkMesh + -1) {
@@ -5531,7 +5531,7 @@ void updateScriptAndMoveEntities()
         assert(0); // "MOV CHECK1"
     }
 
-    VALIDATE_FIELD(0x8008141C);
+    VALIDATE_FIELD(FCT_MoveCheck, 0x8008141C);
     for (int i = 0; i < g_totalActors; i++)
     {
         if (actorArray[i].m58_flags & 0xF00)
@@ -5545,17 +5545,17 @@ void updateScriptAndMoveEntities()
                 i != playerControlledActor
                 )
             {
-                VALIDATE_FIELD(0x800814ac);
+                VALIDATE_FIELD(FCT_MoveCheck, 0x800814ac);
                 if (EntityMoveCheck1(i, 0x7fffffff, &actorArray[i], pFieldScriptEntity, 0)) {
                     if (actorArray[i].m4_pVramSpriteSheet->m7C->mC == 1) {
-                        VALIDATE_FIELD(0x800814e4);
+                        VALIDATE_FIELD(FCT_MoveCheck, 0x800814e4);
                         pFieldScriptEntity->m0_fieldScriptFlags.mx800_isJumping = 0;
                     }
                 }
             }
         }
     }
-    VALIDATE_FIELD(0x80081518);
+    VALIDATE_FIELD(FCT_MoveCheck, 0x80081518);
 
     if (fieldDebugDisable == 0) {
         assert(0);
@@ -5609,7 +5609,7 @@ VECTOR g_fieldCameraOffset = { 0,0,0,0 };
 
 void updateCameraInterpolationSub2()
 {
-    VALIDATE_FIELD(0x80072d74);
+    VALIDATE_FIELD(FCT_Rendering, 0x80072d74);
     if ((op99Var7 & 0x10) != 0) {
         if (OP_B6SubVar0 != 0) {
             OP_B6Var2 = OP_B6Var2 + OP_B6Var1;
@@ -5658,7 +5658,7 @@ void updateCameraInterpolationSub2()
         assert(0);
     }
 
-    VALIDATE_FIELD(0x80073228);
+    VALIDATE_FIELD(FCT_Rendering, 0x80073228);
 }
 
 
@@ -6151,7 +6151,7 @@ void computeProjectionMatrix(void)
     MATRIX MStack64;
     long alStack32[2];
 
-    VALIDATE_FIELD(0x80072150);
+    VALIDATE_FIELD(FCT_Rendering, 0x80072150);
 
     createRotationMatrix(&computeProjectionMatrixAngles, &computeProjectionMatrixTempMatrix);
     resetMatrixTranslation(&computeProjectionMatrixTempMatrix);
@@ -6171,7 +6171,7 @@ void computeProjectionMatrix(void)
     SetRotMatrix(&g_currentProjectionMatrix);
     SetTransMatrix(&g_currentProjectionMatrix);
 
-    VALIDATE_FIELD(0x8007224c);
+    VALIDATE_FIELD(FCT_Rendering, 0x8007224c);
 
     return;
 }
@@ -6203,9 +6203,9 @@ void updateAllEntities()
     sCurrentCameraVectors cameraVectors;
     pCurrentCameraVectors = &cameraVectors;
 
-    VALIDATE_FIELD(0x80073ae4);
+    VALIDATE_FIELD(FCT_Rendering, 0x80073ae4);
     updateCameraInterpolation();
-    VALIDATE_FIELD(0x80073aec);
+    VALIDATE_FIELD(FCT_Rendering, 0x80073aec);
 
     (pCurrentCameraVectors->m10_eye).vx = g_cameraEye.vx;
     (pCurrentCameraVectors->m10_eye).vx = g_cameraEye.vx + g_fieldCameraOffset.vx;
@@ -6227,16 +6227,16 @@ void updateAllEntities()
 
     if (g_updateAllEntitiesSub2Var0 == 0) {
         g_cameraMatrix = g_cameraMatrix2;
-        VALIDATE_FIELD(0x80073c3c);
+        VALIDATE_FIELD(FCT_Rendering, 0x80073c3c);
         lookAtDivided(&g_cameraMatrix2, &pCurrentCameraVectors->m10_eye, &pCurrentCameraVectors->m20_at, &g_cameraUp);
     }
     else {
-        VALIDATE_FIELD(0x80073b94);
+        VALIDATE_FIELD(FCT_Rendering, 0x80073b94);
         lookAtDivided(&g_cameraMatrix, &pCurrentCameraVectors->m10_eye, &pCurrentCameraVectors->m20_at, &g_cameraUp);
         g_cameraMatrix2 = g_cameraMatrix;
     }
 
-    VALIDATE_FIELD(0x80073c5c);
+    VALIDATE_FIELD(FCT_Rendering, 0x80073c5c);
     setProjectionMatrixForField();
 
     for (int i = 0; i < g_totalActors; i++)
@@ -6295,7 +6295,7 @@ struct sUpdateCameraAtStruct
 
 void updateCameraAt(VECTOR* pCameraAt)
 {
-    VALIDATE_FIELD(0x80086590);
+    VALIDATE_FIELD(FCT_Rendering, 0x80086590);
 
     sUpdateCameraAtStruct local_98;
     for (int i = 0; i < 3; i++)
@@ -6315,7 +6315,7 @@ void updateCameraAt(VECTOR* pCameraAt)
 
     MissingCode();
 
-    VALIDATE_FIELD(0x80086900);
+    VALIDATE_FIELD(FCT_Rendering, 0x80086900);
 }
 
 void updateCamera()
@@ -7305,17 +7305,16 @@ void renderFieldCharacterSprites(OTTable& OT, int oddOrEven)
                     long mathFlag;
                     s32 spriteDepth = RotTransPers(&tempVector, &onscreenPosition, &p, &mathFlag);
 
-                    VALIDATE_FIELD(0x80075e84);
+                    VALIDATE_FIELD(FCT_Rendering, 0x80075e84);
 
-                    // TODO: this test uses a trick for negative values
-                    if ((((u16)onscreenPosition.vy) + 9U < 323) && ((u16)onscreenPosition.vx + 39U < 399)) {
+                    if (((onscreenPosition.asS32() >> 0x10) + 9U < 323) && ((s16)onscreenPosition.asS32() + 39U < 399)) {
                         pScriptEntity->m4_flags.m_rawFlags &= ~0x200;
                     }
                     else {
                         pScriptEntity->m4_flags.m_rawFlags |= 0x200;
                     }
 
-                    VALIDATE_FIELD(0x80075ed4);
+                    VALIDATE_FIELD(FCT_Rendering, 0x80075ed4);
 
                     if (((disableCharacterShadowsRendering == 0) && ((pFieldEntity->m58_flags & 0x20) == 0)) && (-1 < mathFlag)) {
                         VECTOR VStack200;

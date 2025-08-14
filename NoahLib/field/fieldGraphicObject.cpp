@@ -148,8 +148,8 @@ void executeSpriteBytecode2Sub0Sub0(sSpriteActorCore* param_1, int frameId, sFie
 
 void addToSpriteTransferList(sSpriteActorCore* param_1, short param_2)
 {
-    VALIDATE_FIELD(0x8001d2b0);
-    VALIDATE_REG(A1, param_2);
+    VALIDATE_FIELD(FCT_KernelSpriteVM, 0x8001d2b0);
+    VALIDATE_REG(FCT_KernelSpriteVM, A1, param_2);
 
 	if ((param_1->m3C & 3) == 1) {
         if (param_1->m40 & 0x00100000) {
@@ -1793,8 +1793,8 @@ void executeSpriteBytecode(sSpriteActorCore* param_1, std::span<u8>::iterator pa
 {
 	int unaff_s3;
 
-    VALIDATE_FIELD(0x80022660);
-    VALIDATE_REG(A2, param_3);
+    VALIDATE_FIELD(FCT_KernelSpriteVM, 0x80022660);
+    VALIDATE_REG(FCT_KernelSpriteVM, A2, param_3);
 
     while (true)
 	{
@@ -1805,8 +1805,8 @@ void executeSpriteBytecode(sSpriteActorCore* param_1, std::span<u8>::iterator pa
 
 		u8 bytecode = READ_LE_U8(pBytecode);
 
-        VALIDATE_FIELD(0x800226bc);
-        VALIDATE_REG(S2, bytecode);
+        VALIDATE_FIELD(FCT_KernelSpriteVM, 0x800226bc);
+        VALIDATE_REG(FCT_KernelSpriteVM, S2, bytecode);
 
 		if (bytecode < 0x80)
 		{
@@ -1873,8 +1873,8 @@ void executeSpriteBytecode(sSpriteActorCore* param_1, std::span<u8>::iterator pa
 
 void setSpriteActorAngle(sSpriteActorCore* param_1, short angle)
 {
-    VALIDATE_FIELD(0x800223b0);
-    VALIDATE_REG(A1, angle);
+    VALIDATE_FIELD(FCT_KernelSpriteVM, 0x800223b0);
+    VALIDATE_REG(FCT_KernelSpriteVM, A1, angle);
 
 	short sVar1;
 	ushort uVar2;
@@ -2157,7 +2157,7 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub8(sSpriteActorCore* param1, void(*callback)(sS
 
 void fieldActorCallback(sSpriteActorCore* pThis)
 {
-    VALIDATE_FIELD(0x80076a74);
+    VALIDATE_FIELD(FCT_Rendering, 0x80076a74);
 	actorArray[pThis->m7C->m14_actorId].m4C_scriptEntity->m4_flags.m_rawFlags |= 0x10000;
 }
 

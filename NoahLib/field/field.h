@@ -476,13 +476,4 @@ extern SVECTOR computeProjectionMatrixAngles;
 extern u8* shapeTransfertTableCurrentEntry;
 extern u8* shapeTransfertTableEnd;
 
-#define VALIDATE_FIELD(x) \
-    if (g_gdbConnection) \
-    { \
-        void validateField();\
-        /*g_gdbConnection->executeUntilAddress(x);*/ \
-        /*validateField();*/ \
-    }
-
-#define VALIDATE_REG(reg, value) \
-    /*assert(g_gdbConnection->getRegister(GDBConnection::reg) == value);*/
+#include "validation/field/validateField.h"

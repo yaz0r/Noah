@@ -2230,7 +2230,7 @@ void OP_AB(void)
 
 void OP_SETUP_CAMERA_INTERPOLATION_STEPS()
 {
-    VALIDATE_FIELD(0x800903bc);
+    VALIDATE_FIELD(FCT_Script, 0x800903bc);
     switch (pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1] & 0xf)
     {
     case 0:
@@ -2275,7 +2275,7 @@ void OP_SETUP_CAMERA_INTERPOLATION_STEPS()
         assert(0);
         break;
     }
-    VALIDATE_FIELD(0x80090a08);
+    VALIDATE_FIELD(FCT_Script, 0x80090a08);
     ADVANCE_VM(0x4);
 }
 

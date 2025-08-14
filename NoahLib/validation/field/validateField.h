@@ -1,6 +1,31 @@
 #pragma once
 
+enum fieldValidationContexts {
+    FCT_Base = 0,
+    FCT_MoveCheck,
+    FCT_Script,
+    FCT_Rendering,
+    FCT_KernelSpriteVM, // TODO: move that to kernel
+    
+    FCT_Undefined,
+};
+
+bool isFieldValidationContextEnabled(fieldValidationContexts context);
+void enableFieldValidationContext(fieldValidationContexts context);
+void disableFieldValidationContext(fieldValidationContexts context);
 
 void validateField();
 void validateField_init();
 void validateField_shutdown();
+
+#define VALIDATE_FIELD(context, x) \
+    if (g_gdbConnection && isFieldValidationContextEnabled(context)) \
+    { \
+        void validateField();\
+        g_gdbConnection->executeUntilAddress(x); \
+        validateField(); \
+    }
+
+#define VALIDATE_REG(context, reg, value) \
+    if (g_gdbConnection && isFieldValidationContextEnabled(context)) \
+        assert(g_gdbConnection->getRegister(GDBConnection::reg) == value);

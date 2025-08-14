@@ -8,20 +8,36 @@
 #include "field/fieldScriptSupport.h"
 #include "kernel/playTime.h"
 
+static u64 fieldValidationContextStatus = 0;
+bool isFieldValidationContextEnabled(fieldValidationContexts context) {
+    return fieldValidationContextStatus & (1 << (int)context);
+}
+
+void enableFieldValidationContext(fieldValidationContexts context) {
+    fieldValidationContextStatus |= (1 << (int)context);
+}
+void disableFieldValidationContext(fieldValidationContexts context) {
+    fieldValidationContextStatus &= ~(1 << (int)context);
+}
+
 void EntityMoveCheck0(uint playerEntityIndex, sFieldEntity* pPlayerEntity, sFieldScriptEntity* pPlayerScriptEntity);
 void EntityMoveCheck0_detour(uint playerEntityIndex, sFieldEntity* pPlayerEntity, sFieldScriptEntity* pPlayerScriptEntity);
 interceptor<void, uint, sFieldEntity*, sFieldScriptEntity*> EntityMoveCheck0_intercept(EntityMoveCheck0, EntityMoveCheck0_detour);
 
 void EntityMoveCheck0_detour(uint playerEntityIndex, sFieldEntity* pPlayerEntity, sFieldScriptEntity* pPlayerScriptEntity) {
     // go to start of function and validate input state
-    g_gdbConnection->executeUntilAddress(0x80084158);
-    validateField();
+    if (isFieldValidationContextEnabled(FCT_MoveCheck)) {
+        g_gdbConnection->executeUntilAddress(0x80084158);
+        validateField();
+    }
 
     EntityMoveCheck0_intercept.callUndetoured(playerEntityIndex, pPlayerEntity, pPlayerScriptEntity);
 
-    // go to end of function and validate state
-    g_gdbConnection->executeUntilAddress(0x80084924);
-    validateField();
+    if (isFieldValidationContextEnabled(FCT_MoveCheck)) {
+        // go to end of function and validate state
+        g_gdbConnection->executeUntilAddress(0x80084924);
+        validateField();
+    }
 }
 
 void updateScriptAndMoveEntities();
@@ -108,6 +124,8 @@ sSpriteActor* createSpriteActor_detour(sSpriteActorAnimationBundle* pSetup, int 
 bool bDebugEntityMoves = true;
 
 void validateField_init() {
+    enableFieldValidationContext(FCT_Base);
+
     bootField_intercept.enable();
     createSpriteActor_intercept.enable();
     isLoadCompleted_intercept.enable();
