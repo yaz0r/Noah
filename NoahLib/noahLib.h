@@ -170,6 +170,15 @@ struct SVECTOR
     s16 vz;
     s16 pad;
 
+    static SVECTOR zero() {
+        SVECTOR temp;
+        temp.vx = 0;
+        temp.vy = 0;
+        temp.vz = 0;
+        temp.pad = 0;
+        return temp;
+    }
+
     static SVECTOR FromIt(u8* it)
     {
         SVECTOR temp;

@@ -192,6 +192,18 @@ struct sMenuContext_4E0 {
     u8 m7D;
     u8 m7E_stringWidth;
     u8 m7F;
+
+    // Original code do a bzero on this structure
+    void clear() {
+        m0_polys.fill(POLY_FT4::zero());
+        m50_vertex.fill(SVECTOR::zero());
+        m78_imageData.clear();
+        m70_rect = RECT::zero();
+        m7C_colorMode = 0;
+        m7D = 0;
+        m7E_stringWidth = 0;
+        m7F = 0;
+    }
     // size 0x80
 };
 

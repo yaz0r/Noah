@@ -1727,7 +1727,7 @@ void processLoadSaveMenuSub5(uint param_1)
     do {
         psVar5 = new sMenuContext_4E0;
         gMenuContext->m1DE0[uVar10] = psVar5;
-        memset(psVar5, sizeof(sMenuContext_4E0), 0);
+        psVar5->clear();
         if ((uVar10 & 1) == 0) {
             psVar4 = gMenuContext;
             gMenuContext->m1DE0[uVar10]->m78_imageData.resize(741);

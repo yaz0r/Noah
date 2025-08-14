@@ -89,6 +89,15 @@ struct RECT
     s16 y;
     s16 w;
     s16 h;
+
+    static RECT zero() {
+        RECT temp;
+        temp.x = 0;
+        temp.y = 0;
+        temp.w = 0;
+        temp.h = 0;
+        return temp;
+    }
 };
 
 struct DISPENV
@@ -263,6 +272,12 @@ struct POLY_FT4 : public sTag
     // size 9, code 0x2C
 
     void execute();
+
+    static POLY_FT4 zero() {
+        POLY_FT4 temp;
+        memset(&temp, 0, sizeof(POLY_FT4));
+        return temp;
+    }
 };
 
 struct POLY_G4 : public sTag
