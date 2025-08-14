@@ -749,7 +749,6 @@ void initFieldScriptEntity(int index)
         numInitializedFieldScriptEntities++;
         sFieldScriptEntity* pNewFieldScriptEntity = new sFieldScriptEntity;
         actorArray[index].m4C_scriptEntity = pNewFieldScriptEntity;
-        memset(pNewFieldScriptEntity, 0, sizeof(sFieldScriptEntity));
         new(pNewFieldScriptEntity) sFieldScriptEntity;
 
         actorArray[index].m5A = 0;
@@ -2171,7 +2170,7 @@ void computeBackgroundPoly(sBackgroundPoly* pBackgroundPoly, int param_2, int pa
     if (iVar17 == 0) {
         assert(0);
     }
-    if ((iVar17 == -1) && (iVar15 << 8 == -(s32)0x80000000)) {
+    if ((iVar17 == -1) && (iVar15 << 8 == INT32_MIN)) {
         assert(0);
     }
     s32 iVar10 = (0x140 - (iVar15 << 8) / iVar17) / 2;
@@ -2184,7 +2183,7 @@ void computeBackgroundPoly(sBackgroundPoly* pBackgroundPoly, int param_2, int pa
     if (iVar15 == 0) {
         assert(0);
     }
-    if ((iVar15 == -1) && (iVar23 == -(s32)0x80000000)) {
+    if ((iVar15 == -1) && (iVar23 == INT32_MIN)) {
         assert(0);
     }
     if (iVar10 << 0x10 < 0) {
@@ -2196,7 +2195,7 @@ void computeBackgroundPoly(sBackgroundPoly* pBackgroundPoly, int param_2, int pa
         if (iVar17 == 0) {
             assert(0);
         }
-        if ((iVar17 == -1) && (iVar23 == -(s32)0x80000000)) {
+        if ((iVar17 == -1) && (iVar23 == INT32_MIN)) {
             assert(0);
         }
     }
@@ -2232,7 +2231,7 @@ void computeBackgroundPoly(sBackgroundPoly* pBackgroundPoly, int param_2, int pa
             if (iVar20 == 0) {
                 assert(0);
             }
-            if ((iVar20 == -1) && (iVar10 == -(s32)0x80000000)) {
+            if ((iVar20 == -1) && (iVar10 == INT32_MIN)) {
                 assert(0);
             }
             s32 uVar9 = currentX;
@@ -2249,7 +2248,7 @@ void computeBackgroundPoly(sBackgroundPoly* pBackgroundPoly, int param_2, int pa
             if (iVar13 == 0) {
                 assert(0);
             }
-            if ((iVar13 == -1) && ((short)(sVar16 + sVar7) == -(s32)0x80000000)) {
+            if ((iVar13 == -1) && ((short)(sVar16 + sVar7) == INT32_MIN)) {
                 assert(0);
             }
             currentX = currentX + iVar8;
@@ -7183,7 +7182,7 @@ void renderSpriteSquishedShadow(sSpriteActorCore* pSpriteSheet, sTag* pTag)
     tempVector2.vx = pSpriteSheet->m2C_scale;
     tempVector2.vz = 0;
     s32 scale = pSpriteSheet->m2C_scale << 0x10;
-    tempVector2.vy = (scale >> 0x10) - (scale >> 0x1f) >> 1;
+    tempVector2.vy = ((scale >> 0x10) - (scale >> 0x1f)) >> 1;
     ScaleMatrixL(&tempMatrix, &tempVector2);
     tempSVector1.vy = pSpriteSheet->m84_maxY;
     VECTOR tempVector3;
@@ -7253,13 +7252,13 @@ void renderSpriteSquishedShadow(sSpriteActorCore* pSpriteSheet, sTag* pTag)
                     &pbVar2->x0y0, &pbVar2->x1y1, &pbVar2->x2y2, &pbVar2->x3y3, &lStack_30, &lStack_2c);
 
                 scale = ((uint)pbVar2->x0y0.vy + (uint)pbVar2->x1y1.vy) * 0x10000;
-                auto uVar3 = (s16)((scale >> 0x10) - (scale >> 0x1f) >> 1);
+                auto uVar3 = (s16)(((scale >> 0x10) - (scale >> 0x1f)) >> 1);
 
                 pbVar2->x1y1.vy = uVar3;
                 pbVar2->x0y0.vy = uVar3;
 
                 scale = ((uint)pbVar2->x2y2.vy + (uint)pbVar2->x3y3.vy) * 0x10000;
-                uVar3 = (s16)((scale >> 0x10) - (scale >> 0x1f) >> 1);
+                uVar3 = (s16)(((scale >> 0x10) - (scale >> 0x1f)) >> 1);
 
                 pbVar2->x3y3.vy = uVar3;
                 pbVar2->x2y2.vy = uVar3;
