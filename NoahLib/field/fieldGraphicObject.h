@@ -116,7 +116,7 @@ struct sSpriteActorCore {
     FP_VEC3 m0_position = { 0,0,0 };
     FP_VEC3 mC_step = { 0,0,0 };
     s32 m18_moveSpeed = 0;
-    s32 m1C_gravity = 0;
+    sFixedPoint m1C_gravity = sFixedPoint::fromValue(0);
     sFieldEntitySub4_B4_base* m20 = nullptr;
     sFieldEntitySub4_110* m24_vramData = nullptr;
     sColorAndCode m28_colorAndCode = sColorAndCode::zero();

@@ -116,7 +116,7 @@ public:
         
         ImGui::Text("Num triggers: %lu", fieldTriggerData.size());
         ImGui::Text("Dialog bundle size: %lu", rawFieldDialogBundle.getRawData().size());
-        ImGui::Text("Walkmesh entries: %d", walkMesh.m0_count);
+        ImGui::Text("Walkmesh entries: %d", g_walkMesh.m0_numWalkMeshes);
         ImGui::Text("Map entities size: %lu", fieldActorSetupParams.size());
 
         ImGui::Separator();

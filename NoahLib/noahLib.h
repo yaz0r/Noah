@@ -171,6 +171,13 @@ struct VECTOR
         vz /= value;
         return *this;
     }
+
+    VECTOR& operator+=(const VECTOR& other) {
+        vx += other.vx;
+        vy += other.vy;
+        vz += other.vz;
+        return *this;
+    }
 };
 
 struct SFP_VEC3
@@ -185,6 +192,22 @@ struct SFP_VEC3
         temp.vy = 0;
         temp.vz = 0;
         return temp;
+    }
+
+    s16& operator[](size_t idx)
+    {
+        switch (idx)
+        {
+        case 0:
+            return vx;
+        case 1:
+            return vy;
+        case 2:
+            return vz;
+        default:
+            assert(0);
+            break;
+        }
     }
 };
 

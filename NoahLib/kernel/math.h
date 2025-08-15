@@ -57,8 +57,8 @@ void lookAtDivided(MATRIX* pOutputMatrix, VECTOR* param_2, VECTOR* param_3, VECT
 void lookAtNoDivide(MATRIX* param_1, SVECTOR* param_2, SVECTOR* param_3, SVECTOR* param_4);
 long RotAverage4(SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, SVECTOR* v3, sVec2_s16* sxy0, sVec2_s16* sxy1, sVec2_s16* sxy2, sVec2_s16* sxy3, long* p, long* flag);
 void setIdentityMatrix(MATRIX* param_1);
-int VectorNormal(VECTOR* input, VECTOR* output);
-int VectorNormalS(VECTOR* input, SVECTOR* output);
+void VectorNormal(VECTOR* input, VECTOR* output);
+void VectorNormalS(VECTOR* input, SVECTOR* output);
 void OuterProduct12(VECTOR* a, VECTOR* b, VECTOR* r);
 void OuterProduct0(VECTOR* $2, VECTOR* $3, VECTOR* v2);
 long NCLIP(sVec2_s16 sxy0, sVec2_s16 sxy1, sVec2_s16 sxy2);

@@ -4,6 +4,8 @@
 #include "field/field.h"
 #include "field/fieldGraphicObject.h"
 #include "kernel/playTime.h"
+#include "field/walkMesh.h"
+
 
 void validate(u32 psxBase, const SVECTOR& svector) {
     assert(svector.vx == g_gdbConnection->readS16(psxBase + 0));
@@ -20,9 +22,9 @@ void validate(u32 psxBase, const VECTOR& vector) {
 }
 
 void validate(u32 psxBase, const SFP_VEC3& vector) {
-    assert(vector.vx == g_gdbConnection->readS32(psxBase + 0));
-    assert(vector.vy == g_gdbConnection->readS32(psxBase + 4));
-    assert(vector.vz == g_gdbConnection->readS32(psxBase + 8));
+    assert(vector.vx == g_gdbConnection->readS16(psxBase + 0));
+    assert(vector.vy == g_gdbConnection->readS16(psxBase + 2));
+    assert(vector.vz == g_gdbConnection->readS16(psxBase + 4));
 }
 
 void validate(u32 psxBase, const MATRIX& matrix) {
@@ -69,6 +71,32 @@ void validate(u32 psxBase, const u32& data) {
     assert(data == g_gdbConnection->readU32(psxBase + 0));
 }
 
+template <typename T>
+void validate(u32 psxBase, const T* pPtr) {
+    if (pPtr) {
+        psxBase = g_gdbConnection->readU32(psxBase);
+        assert(psxBase);
+        validate(psxBase, *pPtr);
+    }
+    else {
+        assert(g_gdbConnection->readU32(psxBase) == 0);
+    }
+}
+
+template <typename T, size_t N>
+void validate(u32 psxBase, const std::array<T, N> array) {
+    if constexpr (!std::is_compound<T>()) {
+        for (int i = 0; i < N; i++) {
+            validate(psxBase + i * sizeof(T), array[i]);
+        }
+    }
+    else {
+        for (int i = 0; i < N; i++) {
+            validate(psxBase + i * T::GetPSXSize(), array[i]);
+        }
+    }
+}
+
 void validate(u32 psxBase, const sSpriteActorCore& pSpriteActorCore) {
     validate(psxBase + 0x0, pSpriteActorCore.m0_position);
     validate(psxBase + 0xC, pSpriteActorCore.mC_step);
@@ -97,26 +125,25 @@ void validate(u32 psxBase, const sFieldScriptEntity& pFieldScriptEntity) {
     validate(psxBase + 0x04, pFieldScriptEntity.m4_flags.m_rawFlags);
     validate(psxBase + 0x10, pFieldScriptEntity.m10_walkmeshId);
     validate(psxBase + 0x14, pFieldScriptEntity.m14_currentTriangleFlag);
-    //validate(psxBase + 0x18, pFieldScriptEntity.m18_boundingVolume);
+    validate(psxBase + 0x18, pFieldScriptEntity.m18_boundingVolume);
     validate(psxBase + 0x1E, pFieldScriptEntity.m1E_collisionRadius);
-    //
     validate(psxBase + 0x20, pFieldScriptEntity.m20_position);
     validate(psxBase + 0x30, pFieldScriptEntity.m30_stepVector);
+    validate(psxBase + 0x40, pFieldScriptEntity.m40);
+    validate(psxBase + 0x50, pFieldScriptEntity.m50_surfaceNormal);
+    validate(psxBase + 0x60, pFieldScriptEntity.m60);
+    validate(psxBase + 0x68, pFieldScriptEntity.m68_oldPosition);
+    validate(psxBase + 0x6E, pFieldScriptEntity.m6E);
+    validate(psxBase + 0x70, pFieldScriptEntity.m70_rotationForRendering);
+    validate(psxBase + 0x72, pFieldScriptEntity.m72_elevation);
+    validate(psxBase + 0x74, pFieldScriptEntity.m74);
+    validate(psxBase + 0x75, pFieldScriptEntity.m75);
+    validate(psxBase + 0x76, pFieldScriptEntity.m76);
+    validate(psxBase + 0x78, pFieldScriptEntity.m78_stack);
     //...
     validate(psxBase + 0xCC, pFieldScriptEntity.mCC_scriptPC);
     //...
-}
-
-template <typename T>
-void validate(u32 psxBase, const T* pPtr) {
-    if (pPtr) {
-        psxBase = g_gdbConnection->readU32(psxBase);
-        assert(psxBase);
-        validate(psxBase, *pPtr);
-    }
-    else {
-        assert(g_gdbConnection->readU32(psxBase) == 0);
-    }
+    validate(psxBase + 0xE3, pFieldScriptEntity.mE3);
 }
 
 void validate(u32 entityBase, const sFieldEntity& entity) {
@@ -163,5 +190,27 @@ void validateFieldVars() {
     u32 arrayBase = 0x800c3a68;
     for (int i = 0; i < 0x200; i++) {
         validate(arrayBase + i * 2, fieldVars[i]);
+    }
+}
+
+void validateWalkMeshBundle() {
+    validate(0x800afb54, g_numWalkMesh);
+    validate(0x800afb44, g_walkMeshNumTrianglePerBlock);
+    for (int i = 0; i < g_numWalkMesh; i++) {
+        int numTriangles = g_walkMeshNumTrianglePerBlock[i];
+        auto triangleIt = walkMeshTriangle[i]->begin();
+        
+        for (int j = 0; j < numTriangles; j++) {
+            u32 psxWalkMeshTriangle = g_gdbConnection->readU32(0x800afb24 + i * 4) + 0xE * j;
+            validate(psxWalkMeshTriangle + 0, triangleIt[j].m0_verticeIndex);
+            validate(psxWalkMeshTriangle + 0x6, triangleIt[j].m6_connectivity);
+            validate(psxWalkMeshTriangle + 0xC, triangleIt[j].mC_indexInWalkmeshData1);
+            validate(psxWalkMeshTriangle + 0xD, triangleIt[j].mD);
+        }
+
+        for (int j = 0; j < walkMeshVertices[i]->size(); j++) {
+            u32 psxWalkMeshVertice = g_gdbConnection->readU32(0x800afb34 + i * 4) + 8 * j;
+            validate(psxWalkMeshVertice, walkMeshVertices[i]->at(j));
+        }
     }
 }

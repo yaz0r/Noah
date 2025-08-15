@@ -125,6 +125,7 @@ bool bDebugEntityMoves = true;
 
 void validateField_init() {
     enableFieldValidationContext(FCT_Base);
+    enableFieldValidationContext(FCT_Init);
     enableFieldValidationContext(FCT_MoveCheck);
 
     bootField_intercept.enable();
@@ -154,5 +155,6 @@ void validateField() {
     validateRandomSeed();
     validateFieldVars();
     validateFieldEntities();
+    validateWalkMeshBundle();
     assert(fieldTransitionInProgress == g_gdbConnection->readU32(0x800afd04));
 }

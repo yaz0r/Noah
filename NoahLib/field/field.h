@@ -90,8 +90,8 @@ struct sFieldScriptEntity
     VECTOR m30_stepVector = VECTOR::zero();
     VECTOR m40 = VECTOR::zero();
     VECTOR m50_surfaceNormal = VECTOR::zero();
-    std::array<s16, 3> m60 = {0,0,0};
-    std::array<s16, 3> m68_oldPosition = {0,0,0};
+    SFP_VEC3 m60 = {0,0,0};
+    SFP_VEC3 m68_oldPosition = {0,0,0};
     s16 m6E = 0;
     s16 m70_rotationForRendering = 0;
     s16 m72_elevation = 0;
@@ -117,8 +117,8 @@ struct sFieldScriptEntity
     s16 mE8_currentAnimationId = 0;
     s16 mEA_forcedAnimation = 0;
     s16 mEC_elevation = 0;
-    s32 mF0 = 0;
-    std::array<s16, 3> mF4_scale3d = {0,0,0};
+    sFixedPoint mF0 = sFixedPoint::fromValue(0);
+    SFP_VEC3 mF4_scale3d = {0,0,0};
     std::array<u8, 3> mFC = {0,0,0};
     std::array<u8, 3> mFF = {0,0,0};
     s16 m102_numSteps = 0;

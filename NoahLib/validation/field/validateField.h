@@ -2,6 +2,7 @@
 
 enum fieldValidationContexts {
     FCT_Base = 0,
+    FCT_Init,
     FCT_MoveCheck,
     FCT_Script,
     FCT_Rendering,

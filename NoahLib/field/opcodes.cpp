@@ -19,15 +19,11 @@
 #include "field/fieldInputs.h"
 #include "kernel/kernelVariables.h"
 #include "validation/gdbConnection.h"
+#include "walkMesh.h"
 
 #include "kernel/audio/soundInstance.h"
 
 s32 particleCreationSlot = 0;
-
-// TODO: Cleanup
-s16 findTriangleInWalkMesh(int posX, int posZ, int walkmeshId, SVECTOR* param_4, VECTOR* param_5);
-extern s16 numWalkMesh;
-/////////////////////////
 
 void OP_JUMP_IF()
 {
@@ -1574,7 +1570,7 @@ void OP_57(void)
     case 3:
         if (pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1] == 0xF)
         {
-            for (int i = 0; i < numWalkMesh - 1; i++)
+            for (int i = 0; i < g_numWalkMesh - 1; i++)
             {
                 pCurrentFieldScriptActor->m8_currentWalkMeshTriangle[i] = findTriangleInWalkMesh(pCurrentFieldScriptActor->m20_position.vx >> 0x10, pCurrentFieldScriptActor->m20_position.vz >> 0x10, i, &auStack104[i], &auStack168[i]);
             }
@@ -1812,7 +1808,7 @@ void OP_5C()
         if (!bFieldDifferent) {
             actorArray[currentFieldActorId].m58_flags = actorArray[currentFieldActorId].m58_flags | 0x20;
         }
-        if (numWalkMesh + -1 < (int)pCurrentFieldScriptActor->m10_walkmeshId) {
+        if (g_numWalkMesh + -1 < (int)pCurrentFieldScriptActor->m10_walkmeshId) {
             pCurrentFieldScriptActor->m10_walkmeshId = 0;
         }
         pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags |= 0x20000;

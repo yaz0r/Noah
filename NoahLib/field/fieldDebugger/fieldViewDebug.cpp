@@ -436,7 +436,7 @@ void fieldViewDebug_step()
 
         bgfx::touch(fieldDebugger_bgfxView);
 
-        walkMesh.bgfxRender(fieldDebugger_bgfxView);
+        g_walkMesh.bgfxRender(fieldDebugger_bgfxView);
 
         for (int i=0; i<fieldTriggerData.size(); i++)
         {

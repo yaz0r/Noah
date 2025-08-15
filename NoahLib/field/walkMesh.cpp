@@ -4,21 +4,29 @@
 #include "bgfx/bgfx.h"
 #include "imgui.h"
 
-sWalkMesh walkMesh;
+sWalkMeshBundle g_walkMesh;
 
-void sWalkMesh::init(const std::vector<u8>& input)
+// Walkmesh runtime vars in PSX memory order:
+std::vector<u32>* walkMeshVar1;
+std::array<std::vector<sWalkMeshBundle::sTriangleData>*, 4> walkMeshTriangle;
+std::array<std::vector<SVECTOR>*, 4> walkMeshVertices;
+std::array<s32, 4> g_walkMeshNumTrianglePerBlock;
+s16 g_numWalkMesh = 0;
+
+
+void sWalkMeshBundle::init(const std::vector<u8>& input)
 {
     sLoadableDataRaw::init(input);
 
-    m0_count = READ_LE_U32(input.begin());
-    assert(m0_count <= 4);
+    m0_numWalkMeshes = READ_LE_U32(input.begin());
+    assert(m0_numWalkMeshes <= 4);
 
     int numMaxMaterials = -1;
 
-    m_blocks.resize(m0_count);
-    for (int i=0; i<m0_count; i++)
+    m_walkMeshes.resize(m0_numWalkMeshes);
+    for (int i=0; i<m0_numWalkMeshes; i++)
     {
-        sBlock& newBlock = m_blocks[i];
+        sWalkMesh& walkMesh = m_walkMeshes[i];
 
         u32 block_size = READ_LE_U32(input.begin() + 4 + i * 4);
 
@@ -30,12 +38,12 @@ void sWalkMesh::init(const std::vector<u8>& input)
 
         int maxVertexIndex = -1;
 
-        newBlock.m_triangles.resize(numTrianglesInBlock);
+        walkMesh.m_triangles.resize(numTrianglesInBlock);
         for (int triangleId = 0; triangleId < numTrianglesInBlock; triangleId++)
         {
             std::vector<u8>::const_iterator startOfTriangleBlock = input.begin() + block_start + 0xE * triangleId;
 
-            sTriangleData& newTriangleData = newBlock.m_triangles[triangleId];
+            sTriangleData& newTriangleData = walkMesh.m_triangles[triangleId];
             for (int j=0; j<3; j++)
             {
                 newTriangleData.m0_verticeIndex[j] = READ_LE_S16(startOfTriangleBlock + j * 2);
@@ -51,10 +59,10 @@ void sWalkMesh::init(const std::vector<u8>& input)
             numMaxMaterials = std::max<int>(numMaxMaterials, newTriangleData.mC_indexInWalkmeshData1);
         }
 
-        newBlock.m_vertices.resize(maxVertexIndex + 1);
+        walkMesh.m_vertices.resize(maxVertexIndex + 1);
         for (int vertexId = 0; vertexId < maxVertexIndex + 1; vertexId ++)
         {
-            SVECTOR& vertice = newBlock.m_vertices[vertexId];
+            SVECTOR& vertice = walkMesh.m_vertices[vertexId];
 
             vertice.vx = READ_LE_S16(input.begin() + block_vertex_start + vertexId * 4 * 2 + 0);
             vertice.vy = READ_LE_S16(input.begin() + block_vertex_start + vertexId * 4 * 2 + 2);
@@ -116,7 +124,7 @@ bgfx::ProgramHandle getModelShader() // TODO: move!
     return programHandle;
 }
 
-void sWalkMesh::bgfxRender(int viewIndex)
+void sWalkMeshBundle::bgfxRender(int viewIndex)
 {
     static std::array<bool, 4> enabledWalkmeshRender = { true, false, false, false };
 
@@ -140,12 +148,12 @@ void sWalkMesh::bgfxRender(int viewIndex)
         ImGui::EndMainMenuBar();
     }
 
-    for (int layerId = 0; layerId < m_blocks.size(); layerId++)
+    for (int layerId = 0; layerId < m_walkMeshes.size(); layerId++)
     {
         if (!enabledWalkmeshRender[layerId])
             continue;
 
-        const sBlock& newBlock = m_blocks[layerId];
+        const sWalkMesh& newBlock = m_walkMeshes[layerId];
         bgfx::VertexLayout layout;
         layout
             .begin()
