@@ -2158,7 +2158,7 @@ sBackgroundPoly* createBackgroundPoly(s32 param_1, int param_2, s32 param_3, s32
     return pBackgroundPoly;
 }
 
-void computeBackgroundPoly(sBackgroundPoly* pBackgroundPoly, int param_2, int param_3, int param_4, sTag* pTag, uint oddOrEven)
+void computeBackgroundPoly(sBackgroundPoly* pBackgroundPoly, int param_2, sVec2_s16 param_3, int param_4, sTag* pTag, uint oddOrEven)
 {
     s32 iVar15 = pBackgroundPoly->m328;
     s32 iVar17 = param_4 + 0x100;
@@ -2173,7 +2173,7 @@ void computeBackgroundPoly(sBackgroundPoly* pBackgroundPoly, int param_2, int pa
         iVar10 = (uint) * (ushort*)&pBackgroundPoly->m328 + iVar10;
     }
     iVar15 = 0;
-    if ((-1 < param_3) && (iVar23 = pBackgroundPoly->m32C << 8, param_3 <= pBackgroundPoly->m32C + 0xf0)) {
+    if ((-1 < param_3.vx) && (iVar23 = pBackgroundPoly->m32C << 8, param_3.vx <= pBackgroundPoly->m32C + 0xf0)) {
         iVar15 = iVar23 / iVar17;
     }
 
@@ -2222,7 +2222,7 @@ void computeBackgroundPoly(sBackgroundPoly* pBackgroundPoly, int param_2, int pa
             p.x0y0.vx = uVar9;
             p.x1y1.vx = currentX;
             p.x2y2.vx = uVar9;
-            uVar9 = (s16)param_3;
+            uVar9 = param_3.vy;
             p.x2y2.vy = uVar9;
             p.x3y3.vx = (s16)currentX;
             p.x3y3.vy = uVar9;
@@ -2305,7 +2305,7 @@ void renderBackgroundPoly(sBackgroundPoly* pBackgroundPoly, SVECTOR* eye, SVECTO
     if (iVar5 < 0) {
         iVar5 = iVar5 + 0xfff;
     }
-    computeBackgroundPoly(pBackgroundPoly, iVar5 >> 0xc, (int)projectedPosition.vy, (int)sVar4, pTag, oddOrEven);
+    computeBackgroundPoly(pBackgroundPoly, iVar5 >> 0xc, projectedPosition, (int)sVar4, pTag, oddOrEven);
 
     if (pBackgroundPoly->m344 < 1) {
         return;
