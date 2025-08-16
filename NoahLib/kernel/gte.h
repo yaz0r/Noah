@@ -3,8 +3,8 @@
 #include "math.h"
 
 void setCopControlWord(int cop, int reg, u32 value);
-void setCopControlWord(int cop, int reg, sVec2_s16 value);
-void setCopReg(int, int, sVec2_s16);
+void setCopControlWord(int cop, int reg, const sVec2_s16& value);
+void setCopReg(int, int, const sVec2_s16& );
 void setCopReg(int, int, u32);
 void copFunction(int, u32);
 s32 getCopReg(int, int);

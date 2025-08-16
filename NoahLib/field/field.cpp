@@ -503,6 +503,11 @@ void getTriangleNormalAndAdjustY(const SVECTOR& vec0, const SVECTOR& vec1, const
 
 s16 findTriangleInWalkMesh(int posX, int posZ, int walkmeshId, SVECTOR* position, VECTOR* triangleNormal)
 {
+    VALIDATE_FIELD(FCT_MoveCheck, 0x8007b1c4);
+    VALIDATE_REG(FCT_MoveCheck, A0, posX);
+    VALIDATE_REG(FCT_MoveCheck, A1, posZ);
+    VALIDATE_REG(FCT_MoveCheck, A2, walkmeshId);
+
     SVECTOR resultPosition;
 
     resultPosition.vx = posX;
@@ -2311,17 +2316,19 @@ void renderBackgroundPoly(sBackgroundPoly* pBackgroundPoly, SVECTOR* eye, SVECTO
         return;
     }
 
-    projectedPosition.vx = projectedPosition.vy - pBackgroundPoly->m32C;
-    if (0xf0 < projectedPosition.vx * 0x10000 >> 0x10) {
-        projectedPosition.vx = 0xf0;
+    s16 y = projectedPosition.vy - pBackgroundPoly->m32C;
+    if (0xf0 < y * 0x10000 >> 0x10) {
+        y = 0xf0;
     }
     if (0 < projectedPosition.vx) {
-        pBackgroundPoly->m280_F4[oddOrEven].x2y2.vy = projectedPosition.vx;
-        pBackgroundPoly->m280_F4[oddOrEven].x3y3.vy = projectedPosition.vx;
+        pBackgroundPoly->m280_F4[oddOrEven].x2y2.vy = y;
+        pBackgroundPoly->m280_F4[oddOrEven].x3y3.vy = y;
 
         pBackgroundPoly->m280_F4[oddOrEven].m0_pNext = pTag->m0_pNext;
         pTag->m0_pNext = &pBackgroundPoly->m280_F4[oddOrEven];
     }
+
+    MissingCode("Setup of second poly");
 }
 
 void renderBackgroundPolyIfEnabled() {
@@ -4592,7 +4599,7 @@ void freeScratchBuffer(T* pPtr) {
 }
 
 struct sEntityMoveCheck0Sub1 {
-    s32 m10;
+    sVec2_s16 m10;
     MATRIX m40;
     s32 mA0;
     s32 mA4;
@@ -4603,7 +4610,7 @@ int EntityMoveCheck0Sub1(int actorId, sSpriteActor* param_2, int stepX, int step
     sEntityMoveCheck0Sub1* pScratchData = allocateScratchBufferLocationForMoveCheck<sEntityMoveCheck0Sub1>();
     pScratchData->mA0 = 0x7fffffff;
     pScratchData->mA4 = (param_2->m0_spriteActorCore).m0_position.vz;
-    pScratchData->m10 = stepX * 0x10000 + stepZ;
+    pScratchData->m10.set(stepX, stepZ);
 
     MATRIX* m2;
     MATRIX* pMVar7;
@@ -5780,8 +5787,8 @@ void updateCameraDolly()
 
 int checkCameraCollision(VECTOR* param_1, std::array<SVECTOR, 2>& param_2, std::array<s16, 4>& output)
 {
-    s32 X = param_1->vx >> 16;
-    s32 Z = param_1->vz >> 16;
+    s32 X = param_1->vx.getIntegerPart();
+    s32 Z = param_1->vz.getIntegerPart();
 
     sVec2_s16 refPos = sVec2_s16::fromValue(X, Z);
 

@@ -615,13 +615,13 @@ long RotAverage4(SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, SVECTOR* v3, sVec2_s16* 
 	return getCopReg(2, 0x3800);
 }
 
-void gte_ldsxy3(sVec2_s16& sxy0, sVec2_s16& sxy1, sVec2_s16& sxy2) {
+void gte_ldsxy3(const sVec2_s16& sxy0, const sVec2_s16& sxy1, const sVec2_s16& sxy2) {
     setCopReg(2, 12, sxy0);
     setCopReg(2, 13, sxy1);
     setCopReg(2, 14, sxy2);
 }
 
-long NCLIP(sVec2_s16 sxy0, sVec2_s16 sxy1, sVec2_s16 sxy2)
+long NCLIP(const sVec2_s16& sxy0, const sVec2_s16& sxy1, const sVec2_s16& sxy2)
 {
     gte_ldsxy3(sxy0, sxy1, sxy2);
     gte_nclip();

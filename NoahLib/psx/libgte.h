@@ -13,7 +13,7 @@ struct sVec2_s16
         vy = y;
     }
 
-    void get(s16& x, s16& y)
+    void get(s16& x, s16& y) const
     {
         x = vx;
         y = vy;
@@ -26,21 +26,21 @@ struct sVec2_s16
         return newValue;
     }
 
-    s32 asS32()
+    s32 asS32() const
     {
         u32 temp = 0;
-        temp = vy;
+        temp = vx;
         temp <<= 16;
-        temp |= ((u32)vx) & 0xFFFF;
+        temp |= ((u32)vy) & 0xFFFF;
         return temp;
     }
 
     static sVec2_s16 fromS32(s32 input)
     {
         sVec2_s16 temp;
-        temp.vx = input & 0xFFFF;
-        input >>= 16;
         temp.vy = input & 0xFFFF;
+        input >>= 16;
+        temp.vx = input & 0xFFFF;
         return temp;
     }
 };

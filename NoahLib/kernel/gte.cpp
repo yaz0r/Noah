@@ -5,7 +5,6 @@
 s32 gDepthDivider = 2;
 
 typedef union {
-#if defined(__BIGENDIAN__)
 	struct {
 		uint8_t h3, h2, h, l;
 	} b;
@@ -18,20 +17,6 @@ typedef union {
 	struct {
 		int16_t h, l;
 	} sw;
-#else
-	struct {
-		uint8_t l, h, h2, h3;
-	} b;
-	struct {
-		uint16_t l, h;
-	} w;
-	struct {
-		int8_t l, h, h2, h3;
-	} sb;
-	struct {
-		int16_t l, h;
-	} sw;
-#endif
 	uint32_t d;
 	int32_t sd;
 } PAIR;
@@ -216,7 +201,7 @@ void setCopControlWord(int cop, int reg, u32 value)
 	CP2C.p[reg].d = value;
 }
 
-void setCopControlWord(int cop, int reg, sVec2_s16 value)
+void setCopControlWord(int cop, int reg, const sVec2_s16& value)
 {
 	setCopControlWord(cop, reg, value.asS32());
 }
@@ -261,7 +246,7 @@ void setCopReg(int cop, int reg, u32 value)
 	CP2D.p[reg].d = value;
 }
 
-void setCopReg(int cop, int reg, sVec2_s16 value)
+void setCopReg(int cop, int reg, const sVec2_s16& value)
 {
 	setCopReg(cop, reg, value.asS32());
 }

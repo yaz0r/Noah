@@ -61,7 +61,7 @@ void VectorNormal(VECTOR* input, VECTOR* output);
 void VectorNormalS(VECTOR* input, SVECTOR* output);
 void OuterProduct12(VECTOR* a, VECTOR* b, VECTOR* r);
 void OuterProduct0(VECTOR* $2, VECTOR* $3, VECTOR* v2);
-long NCLIP(sVec2_s16 sxy0, sVec2_s16 sxy1, sVec2_s16 sxy2);
+long NCLIP(const sVec2_s16& sxy0, const sVec2_s16& sxy1, const sVec2_s16& sxy2);
 void copyMatrix(MATRIX* param_1, MATRIX* param_2);
 MATRIX* TransMatrix(MATRIX* m, VECTOR* v);
 MATRIX* RotMatrixZYX(SVECTOR* r, MATRIX* m);
