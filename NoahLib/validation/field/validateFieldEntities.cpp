@@ -6,6 +6,11 @@
 #include "kernel/playTime.h"
 #include "field/walkMesh.h"
 
+void validateXY(u32 psxValue, const sGTE_XY& svector) {
+    assert((s16)(psxValue >> 16) == svector.getX());
+    assert((s16)(psxValue) == svector.getY());
+    //assert(svector.pad == g_gdbConnection->readS16(psxBase + 6));
+}
 
 void validate(u32 psxBase, const SVECTOR& svector) {
     assert(svector.vx == g_gdbConnection->readS16(psxBase + 0));

@@ -615,13 +615,13 @@ long RotAverage4(SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, SVECTOR* v3, sVec2_s16* 
 	return getCopReg(2, 0x3800);
 }
 
-void gte_ldsxy3(const sVec2_s16& sxy0, const sVec2_s16& sxy1, const sVec2_s16& sxy2) {
-    setCopReg(2, 12, sxy0);
-    setCopReg(2, 13, sxy1);
-    setCopReg(2, 14, sxy2);
+void gte_ldsxy3(const sGTE_XY& sxy0, const sGTE_XY& sxy1, const sGTE_XY& sxy2) {
+    setCopReg(2, 12, sxy0.getRawValue());
+    setCopReg(2, 13, sxy1.getRawValue());
+    setCopReg(2, 14, sxy2.getRawValue());
 }
 
-long NCLIP(const sVec2_s16& sxy0, const sVec2_s16& sxy1, const sVec2_s16& sxy2)
+long NormalClip(const sGTE_XY& sxy0, const sGTE_XY& sxy1, const sGTE_XY& sxy2)
 {
     gte_ldsxy3(sxy0, sxy1, sxy2);
     gte_nclip();
@@ -682,22 +682,10 @@ s32 gte_stR33() {
     return getCopControlWord(2, 0x2000);
 }
 
-void gte_ldR11R12(s32 value) {
-    setCopControlWord(2, 0, value);
-}
-
-void gte_ldR22R23(s32 value) {
-    setCopControlWord(2, 0x1000, value);
-}
-
-void gte_ldR33(s32 value) {
-    setCopControlWord(2, 0x2000, value);
-}
-
 void gte_ldopv2(VECTOR* v) {
-    setCopReg(2, 11, v->vz);
     setCopReg(2, 9, v->vx);
     setCopReg(2, 10, v->vy);
+    setCopReg(2, 11, v->vz);
 }
 
 void OuterProduct0(VECTOR* $2, VECTOR* $3, VECTOR* v2)
@@ -731,11 +719,15 @@ void fromFloat(VECTOR* v0, std::array<float, 3>& asFloat)
 	v0->vz = asFloat[2] * (float)0x10000;
 }
 
+void gte_ldsv(s32 x, s32 y, s32 z) {
+    setCopReg(2, 0x4800, x);
+    setCopReg(2, 0x5000, y);
+    setCopReg(2, 0x5800, z);
+}
+
 void VectorNormalInner(VECTOR* input, VECTOR* output)
 {
-	setCopReg(2, 0x4800, input->vx);
-	setCopReg(2, 0x5000, input->vy);
-	setCopReg(2, 0x5800, input->vz);
+    gte_ldsv(input->vx, input->vy, input->vz);
 	copFunction(2, 0xa00428);
 	int iVar2 = getCopReg(2, 0xc800);
 	int iVar3 = getCopReg(2, 0xd000);

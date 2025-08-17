@@ -2104,16 +2104,15 @@ sSpriteActor* initializeSpriteActor(sSpriteActor* param_1, sSpriteActorAnimation
 	return param_1;
 }
 
-void OP_INIT_ENTITY_SCRIPT_sub0Sub4(sSpriteActor* param_1, int param_2, int* param_3, int* param_4, int* param_5)
+void getBoundingVolumeFromSprite(sSpriteActor* param_1, int param_2, sFixedPoint* pX, sFixedPoint* pY, sFixedPoint* pZ)
 {
-    auto startOfAnimation = param_1->m24_vramData->m10_startOfAnimationContainer->getAnimation(0);
-    u16 offset2 = READ_LE_U16(startOfAnimation + 4);
-    byte bVar1 = READ_LE_U8(startOfAnimation + offset2 + 4);
-    uint uVar5 = (uint)bVar1;
+    auto startOfAnimation = param_1->m24_vramData->m10_startOfAnimationContainer->bundle.begin();
+
+    uint uVar5 = startOfAnimation[READ_LE_U16(startOfAnimation + READ_LE_U16(startOfAnimation + 2) + 4) + READ_LE_U16(startOfAnimation + 2) + 4];
 
     sPS1Pointer spriteRawData = param_1->m24_vramData->m0_spriteData->rawPointer;
     int iVar3 = uVar5 << 1;
-	if (bVar1 != 0) {
+	if (uVar5 != 0) {
 		uVar5 = uVar5 - 1;
 		iVar3 = uVar5 * 2;
 	}
@@ -2126,17 +2125,17 @@ void OP_INIT_ENTITY_SCRIPT_sub0Sub4(sSpriteActor* param_1, int param_2, int* par
 	if (iVar3 < 0) {
 		iVar3 = iVar3 + 0xfff;
 	}
-	*param_4 = iVar3 >> 0xc;
+	*pY = iVar3 >> 0xc;
 	iVar3 = READ_LE_U8(spriteRawData + 1) * param_1->m2C_scale;
 	if (iVar3 < 0) {
 		iVar3 = iVar3 + 0xfff;
 	}
-	*param_5 = iVar3 >> 0xc;
+	*pZ = iVar3 >> 0xc;
 	iVar3 = READ_LE_U8(spriteRawData + 2) * param_1->m2C_scale;
 	if (iVar3 < 0) {
 		iVar3 = iVar3 + 0xfff;
 	}
-	*param_3 = iVar3 >> 0xc;
+	*pX = iVar3 >> 0xc;
 }
 
 void OP_INIT_ENTITY_SCRIPT_sub0Sub5(sSpriteActor* param1, int param2)

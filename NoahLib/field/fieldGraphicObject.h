@@ -280,7 +280,7 @@ sSpriteActor* createSpriteActor(sSpriteActorAnimationBundle* pSetup, int param_2
 sSpriteActor* createSpriteActorEX(sSpriteActorAnimationBundle* pSetup, int param_2, int param_3, int vramX, int vramY, int param_6, int param_7);
 
 void OP_INIT_ENTITY_SCRIPT_sub0Sub3(sSpriteActor* param_1, int param_2);
-void OP_INIT_ENTITY_SCRIPT_sub0Sub4(sSpriteActor* param_1, int param_2, int* param_3, int* param_4, int* param_5);
+void getBoundingVolumeFromSprite(sSpriteActor* param_1, int param_2, sFixedPoint* pX, sFixedPoint* pY, sFixedPoint* pZ);
 void OP_INIT_ENTITY_SCRIPT_sub0Sub5(sSpriteActor* param1, int param2);
 
 void OP_INIT_ENTITY_SCRIPT_sub0Sub8(sSpriteActorCore* param1, void(*callback)(sSpriteActorCore*));

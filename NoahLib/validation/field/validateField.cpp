@@ -127,6 +127,7 @@ void validateField_init() {
     enableFieldValidationContext(FCT_Base);
     enableFieldValidationContext(FCT_Init);
     enableFieldValidationContext(FCT_MoveCheck);
+    enableFieldValidationContext(FCT_Rendering);
 
     bootField_intercept.enable();
     createSpriteActor_intercept.enable();

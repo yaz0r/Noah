@@ -2422,26 +2422,25 @@ void OP_CALL_IF_IN_TRIGGER()
     long lVar3;
     uint uVar4;
 
-    sVec2_s16 caracterPosition;
-    caracterPosition.vx = actorArray[g_playerControlledActor].m4C_scriptEntity->m20_position.vz >> 16;
-    caracterPosition.vy = actorArray[g_playerControlledActor].m4C_scriptEntity->m20_position.vx >> 16;
+    // Note: this is done with Z/X and not X/Z coordinates
+
+    sGTE_XY characterPosition(
+        actorArray[g_playerControlledActor].m4C_scriptEntity->m20_position.vz >> 16,
+        actorArray[g_playerControlledActor].m4C_scriptEntity->m20_position.vx >> 16
+    );
 
     sFieldTrigger* psVar5 = &fieldTriggerData[pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1]];
 
-    std::array<sVec2_s16, 4> triggerCorners;
-    triggerCorners[0].vy = psVar5->m0[0];
-    triggerCorners[0].vx = psVar5->m0[2];
-    triggerCorners[1].vy = psVar5->m6[0];
-    triggerCorners[1].vx = psVar5->m6[2];
-    triggerCorners[2].vy = psVar5->mC[0];
-    triggerCorners[2].vx = psVar5->mC[2];
-    triggerCorners[3].vy = psVar5->m12[0];
-    triggerCorners[3].vx = psVar5->m12[2];
+    std::array<sGTE_XY, 4> triggerCorners;
+    triggerCorners[0].set(psVar5->m0[2], psVar5->m0[0]);
+    triggerCorners[1].set(psVar5->m6[2], psVar5->m6[0]);
+    triggerCorners[2].set(psVar5->mC[2], psVar5->mC[0]);
+    triggerCorners[3].set(psVar5->m12[2], psVar5->m12[0]);
 
-    if ((NCLIP(triggerCorners[0], triggerCorners[1], caracterPosition) > -1) &&
-        (NCLIP(triggerCorners[1], triggerCorners[2], caracterPosition) > -1) &&
-        (NCLIP(triggerCorners[2], triggerCorners[3], caracterPosition) > -1) &&
-        (NCLIP(triggerCorners[3], triggerCorners[0], caracterPosition) > -1))
+    if ((NormalClip(triggerCorners[0], triggerCorners[1], characterPosition) > -1) &&
+        (NormalClip(triggerCorners[1], triggerCorners[2], characterPosition) > -1) &&
+        (NormalClip(triggerCorners[2], triggerCorners[3], characterPosition) > -1) &&
+        (NormalClip(triggerCorners[3], triggerCorners[0], characterPosition) > -1))
     {
         if ((pCurrentFieldScriptActor->m12C_flags & 0x1c0) != 0x100)
         {
@@ -3873,23 +3872,24 @@ void OP_IF_PLAYER_IN_TRIGGER2()
     long lVar3;
     uint uVar4;
 
-    sVec2_s16 caracterPosition;
-    caracterPosition.vx = actorArray[g_playerControlledActor].m4C_scriptEntity->m20_position.vz >> 16;
-    caracterPosition.vy = actorArray[g_playerControlledActor].m4C_scriptEntity->m20_position.vx >> 16;
+    sGTE_XY caracterPosition(
+        actorArray[g_playerControlledActor].m4C_scriptEntity->m20_position.vz >> 16,
+        actorArray[g_playerControlledActor].m4C_scriptEntity->m20_position.vx >> 16
+    );
 
     sFieldTrigger* psVar5 = &fieldTriggerData[pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1]];
 
-    std::array<sVec2_s16, 4> triggerCorners;
+    std::array<sGTE_XY, 4> triggerCorners;
     triggerCorners[0].set(psVar5->m0[2], psVar5->m0[0]);
     triggerCorners[1].set(psVar5->m6[2], psVar5->m6[0]);
     triggerCorners[2].set(psVar5->mC[2], psVar5->mC[0]);
     triggerCorners[3].set(psVar5->m12[2], psVar5->m12[0]);
 
 
-    if ((NCLIP(triggerCorners[0], triggerCorners[1], caracterPosition) < 0) ||
-        (NCLIP(triggerCorners[1], triggerCorners[2], caracterPosition) < 0) ||
-        (NCLIP(triggerCorners[2], triggerCorners[3], caracterPosition) < 0) ||
-        (NCLIP(triggerCorners[3], triggerCorners[0], caracterPosition) < 0))
+    if ((NormalClip(triggerCorners[0], triggerCorners[1], caracterPosition) < 0) ||
+        (NormalClip(triggerCorners[1], triggerCorners[2], caracterPosition) < 0) ||
+        (NormalClip(triggerCorners[2], triggerCorners[3], caracterPosition) < 0) ||
+        (NormalClip(triggerCorners[3], triggerCorners[0], caracterPosition) < 0))
     {
         fieldExectuteMaxCycles = fieldExectuteMaxCycles + 1;
         pCurrentFieldScriptActor->mCC_scriptPC = readU16FromScript(2);
@@ -3908,7 +3908,7 @@ void OP_IF_PLAYER_IN_TRIGGER()
     long lVar3;
     uint uVar4;
 
-    sVec2_s16 playerPosition = sVec2_s16::fromValue(actorArray[g_playerControlledActor].m4C_scriptEntity->m20_position.vz.getIntegerPart(), actorArray[g_playerControlledActor].m4C_scriptEntity->m20_position.vx.getIntegerPart());
+    sGTE_XY playerPosition(actorArray[g_playerControlledActor].m4C_scriptEntity->m20_position.vz.getIntegerPart(), actorArray[g_playerControlledActor].m4C_scriptEntity->m20_position.vx.getIntegerPart());
 
     sFieldTrigger* psVar5 = &fieldTriggerData[pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1]];
 
@@ -3916,16 +3916,16 @@ void OP_IF_PLAYER_IN_TRIGGER()
 
     if ((psVar5->m0[1] < playerY) && ((int)(playerY - (uint)(ushort)actorArray[g_playerControlledActor].m4C_scriptEntity->m18_boundingVolume.vy) < (int)psVar5->m0[1]))
     {
-        std::array<sVec2_s16, 4> triggerCorners;
+        std::array<sGTE_XY, 4> triggerCorners;
         triggerCorners[0].set(psVar5->m0[2], psVar5->m0[0]);
         triggerCorners[1].set(psVar5->m6[2], psVar5->m6[0]);
         triggerCorners[2].set(psVar5->mC[2], psVar5->mC[0]);
         triggerCorners[3].set(psVar5->m12[2], psVar5->m12[0]);
 
-        if ((NCLIP(triggerCorners[0], triggerCorners[1], playerPosition) > -1) &&
-            (NCLIP(triggerCorners[1], triggerCorners[2], playerPosition) > -1) &&
-            (NCLIP(triggerCorners[2], triggerCorners[3], playerPosition) > -1) &&
-            (NCLIP(triggerCorners[3], triggerCorners[0], playerPosition) > -1))
+        if ((NormalClip(triggerCorners[0], triggerCorners[1], playerPosition) > -1) &&
+            (NormalClip(triggerCorners[1], triggerCorners[2], playerPosition) > -1) &&
+            (NormalClip(triggerCorners[2], triggerCorners[3], playerPosition) > -1) &&
+            (NormalClip(triggerCorners[3], triggerCorners[0], playerPosition) > -1))
         {
             ADVANCE_VM(0x4);
             return;

@@ -30,3 +30,14 @@ void validateField_shutdown();
 #define VALIDATE_REG(context, reg, value) \
     if (g_gdbConnection && isFieldValidationContextEnabled(context)) \
         assert(g_gdbConnection->getRegister(GDBConnection::reg) == value);
+
+void validate(u32, const SVECTOR&);
+
+#define VALIDATE_REG_PTR(context, reg, value) \
+    if (g_gdbConnection && isFieldValidationContextEnabled(context)) \
+        validate(g_gdbConnection->getRegister(GDBConnection::reg), value);
+
+void validateXY(u32 psxValue, const sGTE_XY& value);
+#define VALIDATE_XY(context, reg, value) \
+    if (g_gdbConnection && isFieldValidationContextEnabled(context)) \
+        validateXY(g_gdbConnection->getRegister(GDBConnection::reg), value);

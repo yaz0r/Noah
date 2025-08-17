@@ -5,6 +5,7 @@
 s32 gDepthDivider = 2;
 
 typedef union {
+#if defined(__BIGENDIAN__)
 	struct {
 		uint8_t h3, h2, h, l;
 	} b;
@@ -17,6 +18,20 @@ typedef union {
 	struct {
 		int16_t h, l;
 	} sw;
+#else
+	struct {
+		uint8_t l, h, h2, h3;
+	} b;
+	struct {
+		uint16_t l, h;
+	} w;
+	struct {
+		int8_t l, h, h2, h3;
+	} sb;
+	struct {
+		int16_t l, h;
+	} sw;
+#endif
 	uint32_t d;
 	int32_t sd;
 } PAIR;
@@ -963,12 +978,31 @@ s32 gte_stSZ3() {
     return getCopReg(2, 0x9800);
 }
 
+void gte_ldR11R12(s32 value) {
+    setCopControlWord(2, 0, value);
+}
+void gte_ldR13R21(s32 value) {
+    setCopControlWord(2, 0x800, value);
+}
+
+void gte_ldR22R23(s32 value) {
+    setCopControlWord(2, 0x1000, value);
+}
+
+void gte_ldR31R32(s32 value) {
+    setCopControlWord(2, 0x1800, value);
+}
+
+void gte_ldR33(s32 value) {
+    setCopControlWord(2, 0x2000, value);
+}
+
 void SetRotMatrix(const MATRIX* m) {
-    setCopControlWord(2, 0, sVec2_s16::fromValue(m->m[0][0], m->m[0][1]));
-    setCopControlWord(2, 0x800, sVec2_s16::fromValue(m->m[0][2], m->m[1][0]));
-    setCopControlWord(2, 0x1000, sVec2_s16::fromValue(m->m[1][1], m->m[1][2]));
-    setCopControlWord(2, 0x1800, sVec2_s16::fromValue(m->m[2][0], m->m[2][1]));
-    setCopControlWord(2, 0x2000, sVec2_s16::fromValue(m->m[2][2], 0));
+    gte_ldR11R12(sVec2_s16::fromValue(m->m[0][0], m->m[0][1]).asS32());
+    gte_ldR13R21(sVec2_s16::fromValue(m->m[0][2], m->m[1][0]).asS32());
+    gte_ldR22R23(sVec2_s16::fromValue(m->m[1][1], m->m[1][2]).asS32());
+    gte_ldR31R32(sVec2_s16::fromValue(m->m[2][0], m->m[2][1]).asS32());
+    gte_ldR33(sVec2_s16::fromValue(m->m[2][2], 0).asS32());
 }
 
 void SetTransMatrix(const MATRIX* m) {

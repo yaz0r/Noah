@@ -493,20 +493,16 @@ void getTriangleNormalAndAdjustY(const SVECTOR& vec0, const SVECTOR& vec1, const
         outputPosition->vy = 0;
     }
     else {
-        s16 offsetFromVec0 = 0;
-        offsetFromVec0 -= pOutputTriangleNormal->vz * (outputPosition->vz - vec0.vz);
-        offsetFromVec0 -= pOutputTriangleNormal->vx * (outputPosition->vx - vec0.vx);
-        offsetFromVec0 /= pOutputTriangleNormal->vy;
-        outputPosition->vy = vec0.vy + offsetFromVec0;
+        outputPosition->vy = vec0.vy + (short)((-(pOutputTriangleNormal->vz * (outputPosition->vz - vec0.vz)) - pOutputTriangleNormal->vx * (outputPosition->vx - vec0.vx)) / pOutputTriangleNormal->vy);
     }
 }
 
 s16 findTriangleInWalkMesh(int posX, int posZ, int walkmeshId, SVECTOR* position, VECTOR* triangleNormal)
 {
     VALIDATE_FIELD(FCT_MoveCheck, 0x8007b1c4);
-    VALIDATE_REG(FCT_MoveCheck, A0, posX);
-    VALIDATE_REG(FCT_MoveCheck, A1, posZ);
-    VALIDATE_REG(FCT_MoveCheck, A2, walkmeshId);
+//     VALIDATE_REG(FCT_MoveCheck, A0, posX);
+//     VALIDATE_REG(FCT_MoveCheck, A1, posZ);
+//     VALIDATE_REG(FCT_MoveCheck, A2, walkmeshId);
 
     SVECTOR resultPosition;
 
@@ -517,23 +513,51 @@ s16 findTriangleInWalkMesh(int posX, int posZ, int walkmeshId, SVECTOR* position
     std::vector<sWalkMeshBundle::sTriangleData>::iterator pTriangle = walkMeshTriangle[walkmeshId]->begin();
     std::vector<SVECTOR>::iterator pVertices = walkMeshVertices[walkmeshId]->begin();
 
-    sVec2_s16 refPos;
-    refPos.set(posX, posZ);
+    sGTE_XY refPos(posX, posZ);
 
     for (int i = 0; i < g_walkMeshNumTrianglePerBlock[walkmeshId]; i++)
     {
-        VALIDATE_FIELD(FCT_MoveCheck, 0x8007b22C);
-        VALIDATE_REG(FCT_MoveCheck, V0, pTriangle->m0_verticeIndex[0]);
-        VALIDATE_FIELD(FCT_MoveCheck, 0x8007b230);
-        VALIDATE_REG(FCT_MoveCheck, V1, pTriangle->m0_verticeIndex[1]);
+//         VALIDATE_FIELD(FCT_MoveCheck, 0x8007b22C);
+//         VALIDATE_REG(FCT_MoveCheck, V0, pTriangle->m0_verticeIndex[0]);
+//         VALIDATE_FIELD(FCT_MoveCheck, 0x8007b230);
+//         VALIDATE_REG(FCT_MoveCheck, V1, pTriangle->m0_verticeIndex[1]);
 
-        sVec2_s16 pos0;
-        sVec2_s16 pos1;
-        sVec2_s16 pos2;
+        sGTE_XY pos0(pVertices[pTriangle->m0_verticeIndex[0]].vx, pVertices[pTriangle->m0_verticeIndex[0]].vz);
+        sGTE_XY pos1(pVertices[pTriangle->m0_verticeIndex[1]].vx, pVertices[pTriangle->m0_verticeIndex[1]].vz);
+        sGTE_XY pos2(pVertices[pTriangle->m0_verticeIndex[2]].vx, pVertices[pTriangle->m0_verticeIndex[2]].vz);
 
-        pos0.set(pVertices[pTriangle->m0_verticeIndex[0]].vx, pVertices[pTriangle->m0_verticeIndex[0]].vz);
-        pos1.set(pVertices[pTriangle->m0_verticeIndex[1]].vx, pVertices[pTriangle->m0_verticeIndex[1]].vz);
-        pos2.set(pVertices[pTriangle->m0_verticeIndex[2]].vx, pVertices[pTriangle->m0_verticeIndex[2]].vz);
+//         VALIDATE_FIELD(FCT_MoveCheck, 0x8007b278);
+//         VALIDATE_XY(FCT_MoveCheck, A1, pos0);
+//         VALIDATE_XY(FCT_MoveCheck, T0, refPos);
+//         VALIDATE_XY(FCT_MoveCheck, A0, pos1);
+        if (NormalClip(pos0, pos1, refPos) > -1) {
+//             VALIDATE_FIELD(FCT_MoveCheck, 0x8007b2b4);
+//             VALIDATE_XY(FCT_MoveCheck, A1, pos0);
+//             VALIDATE_XY(FCT_MoveCheck, T0, refPos);
+//             VALIDATE_XY(FCT_MoveCheck, A0, pos1);
+            if (NormalClip(pos1, pos2, refPos) > -1) {
+//                 VALIDATE_FIELD(FCT_MoveCheck, 0x8007b2e4);
+//                 VALIDATE_XY(FCT_MoveCheck, A1, pos0);
+//                 VALIDATE_XY(FCT_MoveCheck, T0, refPos);
+//                 VALIDATE_XY(FCT_MoveCheck, A0, pos1);
+                if (NormalClip(pos2, pos0, refPos) > -1) {
+                    SVECTOR vec0 = pVertices[pTriangle->m0_verticeIndex[0]];
+                    SVECTOR vec1 = pVertices[pTriangle->m0_verticeIndex[1]];
+                    SVECTOR vec2 = pVertices[pTriangle->m0_verticeIndex[2]];
+
+                    VALIDATE_FIELD(FCT_MoveCheck, 0x8007b404);
+                    //VALIDATE_REG_PTR(FCT_MoveCheck, A0, vec0);
+                    //VALIDATE_REG_PTR(FCT_MoveCheck, A1, vec1);
+                    //VALIDATE_REG_PTR(FCT_MoveCheck, A2, vec2);
+                    getTriangleNormalAndAdjustY(vec0, vec1, vec2, &resultPosition, triangleNormal);
+                    *position = resultPosition;
+
+                    return i;
+                }
+            }
+        }
+
+#if 0
 
         if ((NCLIP(pos0, refPos, pos1) > -1) && (NCLIP(pos1, refPos, pos2) > -1) && (NCLIP(pos2, refPos, pos0) > -1))
         {
@@ -547,6 +571,7 @@ s16 findTriangleInWalkMesh(int posX, int posZ, int walkmeshId, SVECTOR* position
 
             return i;
         }
+#endif
 
         pTriangle++;
     }
@@ -669,9 +694,9 @@ void resetFieldScriptEntityValues(int index)
     SVECTOR walkmeshPositions[4];
     VECTOR walkmeshSurfaceNormals[4];
 
-    for (int i = 0; i < g_numWalkMesh - 1; i++)
+    for (int i = 0; i < g_numWalkMesh -1; i++)
     {
-        pFieldScriptEntity->m8_currentWalkMeshTriangle[i] = findTriangleInWalkMesh(actorArray[index].mC_matrix.t[0], actorArray[index].mC_matrix.t[2], i, &walkmeshPositions[i], &walkmeshSurfaceNormals[i]);
+        pFieldScriptEntity->m8_currentWalkMeshTriangle[i] = findTriangleInWalkMesh(actorArray[index].mC_matrix.t[0].getFragPart(), actorArray[index].mC_matrix.t[2].getFragPart(), i, &walkmeshPositions[i], &walkmeshSurfaceNormals[i]);
         if ((pFieldScriptEntity->m8_currentWalkMeshTriangle[i] != -1) && (g_walkMeshNumTrianglePerBlock[i] <= pFieldScriptEntity->m8_currentWalkMeshTriangle[i]))
         {
             // seems like this would be a bug
@@ -824,19 +849,19 @@ void sprintf_screen(const char* format, ...)
     MissingCode();
 }
 
-void resetFieldScriptEntityGraphicEntity(int actorId, int clutYEntry, sSpriteActorAnimationBundle* pSetup, int param_4, int clutXEntry, int param_6, int param_7)
+void resetFieldScriptEntityGraphicEntity(int actorId, int vramSlotEntry, sSpriteActorAnimationBundle* pSetup, int clutBank, int clutXEntry, int param_6, int param_7)
 {
     resetMemoryAllocStats(8, 0);
-    actorArray[actorId].m4C_scriptEntity->m127 = clutYEntry;
+    actorArray[actorId].m4C_scriptEntity->m127 = vramSlotEntry;
     actorArray[actorId].m4C_scriptEntity->m126 = param_6;
     actorArray[actorId].m4C_scriptEntity->m134.m0 = clutXEntry;
-    actorArray[actorId].m4C_scriptEntity->m130.m28 = param_4;
+    actorArray[actorId].m4C_scriptEntity->m130.m28 = clutBank;
     actorArray[actorId].m4C_scriptEntity->m134.m4 = param_7;
 
-    if (param_4 == 0)
+    if (clutBank == 0)
     {
-        s16 vramX = fieldVramMapping[clutYEntry].m0_vramX;
-        s16 vramY = fieldVramMapping[clutYEntry].m2_vramY;
+        s16 vramX = fieldVramMapping[vramSlotEntry].m0_vramX;
+        s16 vramY = fieldVramMapping[vramSlotEntry].m2_vramY;
 
         if (clutXEntry == 0)
         {
@@ -844,33 +869,34 @@ void resetFieldScriptEntityGraphicEntity(int actorId, int clutYEntry, sSpriteAct
                 deleteFieldEntitySub4(actorArray[actorId].m4_pVramSpriteSheet);
             }
 
-            actorArray[actorId].m4_pVramSpriteSheet = createSpriteActor(pSetup, 0x100, ((clutYEntry + 480) * 0x10000) >> 0x10, vramX, vramY, 0x40);
+            actorArray[actorId].m4_pVramSpriteSheet = createSpriteActor(pSetup, 0x100, ((vramSlotEntry + 480) * 0x10000) >> 0x10, vramX, vramY, 0x40);
         }
         else
         {
             if ((actorArray[actorId].m5A & 1U) != 0) {
                 deleteFieldEntitySub4(actorArray[actorId].m4_pVramSpriteSheet);
             }
-            actorArray[actorId].m4_pVramSpriteSheet = createSpriteActorEX(pSetup, (short)((clutXEntry * 0x10 + 0x100) * 0x10000 >> 0x10), (short)((uint)((clutYEntry + 480) * 0x10000) >> 0x10), vramX, vramY, 0x40, clutXEntry);
+            actorArray[actorId].m4_pVramSpriteSheet = createSpriteActorEX(pSetup, (short)((clutXEntry * 0x10 + 0x100) * 0x10000 >> 0x10), (short)((uint)((vramSlotEntry + 480) * 0x10000) >> 0x10), vramX, vramY, 0x40, clutXEntry);
         }
     }
     else
     {
-        int iVar4;
-        short sVar5;
+        s16 clutX;
+        s16 vramX;
 
         if ((actorArray[actorId].m5A & 1U) != 0) {
             deleteFieldEntitySub4(actorArray[actorId].m4_pVramSpriteSheet);
         }
-        if (param_4 == 1) {
-            iVar4 = clutYEntry + 0xe0;
-            sVar5 = 0x280;
+        if (clutBank == 1) {
+            clutX = vramSlotEntry + 0xe0;
+            vramX = 0x280;
         }
         else {
-            iVar4 = clutYEntry + 0xe3;
-            sVar5 = 0x2a0;
+            // if clutBank is neither 0 or 1
+            clutX = vramSlotEntry + 0xe3;
+            vramX = 0x2a0;
         }
-        actorArray[actorId].m4_pVramSpriteSheet = createSpriteActor(pSetup, 0x100, (short)((uint)(iVar4 * 0x10000) >> 0x10), sVar5, (short)clutYEntry * 0x40 + 0x100, 8);
+        actorArray[actorId].m4_pVramSpriteSheet = createSpriteActor(pSetup, 0x100, clutX, vramX, (short)vramSlotEntry * 0x40 + 0x100, 8);
         OP_INIT_ENTITY_SCRIPT_sub0Sub3(actorArray[actorId].m4_pVramSpriteSheet, 0x20);
     }
 
@@ -878,10 +904,8 @@ void resetFieldScriptEntityGraphicEntity(int actorId, int clutYEntry, sSpriteAct
 
     sSpriteActor* pFieldEntitySub4 = actorArray[actorId].m4_pVramSpriteSheet;
 
-    int temp0;
-    int temp1;
-    int temp2;
-    OP_INIT_ENTITY_SCRIPT_sub0Sub4(pFieldEntitySub4, 0, &temp0, &temp1, &temp2);
+    FP_VEC3 boundingVolume;
+    getBoundingVolumeFromSprite(pFieldEntitySub4, 0, &boundingVolume.vx, &boundingVolume.vy, &boundingVolume.vz);
     OP_INIT_ENTITY_SCRIPT_sub0Sub5(pFieldEntitySub4, 3);
 
     pFieldEntitySub4->m2C_scale = 0xC00;
@@ -897,14 +921,14 @@ void resetFieldScriptEntityGraphicEntity(int actorId, int clutYEntry, sSpriteAct
         pFieldEntitySub4->mC_step.vy = 0;
         pFieldEntitySub4->mC_step.vz = 0;
         pFieldEntitySub4->m1C_gravity = 0x10000;
-        pFieldEntitySub4->m84_maxY = actorArray[actorId].mC_matrix.t[1] & 0xFFFF;
-        if (!param_4)
+        pFieldEntitySub4->m84_maxY = actorArray[actorId].mC_matrix.t[1].getFragPart();
+        if (!clutBank)
         {
-            actorArray[actorId].m4C_scriptEntity->m18_boundingVolume.vx = temp1 * 2;
+            actorArray[actorId].m4C_scriptEntity->m18_boundingVolume.vy = boundingVolume.vy * 2;
         }
         else
         {
-            actorArray[actorId].m4C_scriptEntity->m18_boundingVolume.vx = 0x40;
+            actorArray[actorId].m4C_scriptEntity->m18_boundingVolume.vy = 0x40;
         }
     }
     else
@@ -943,7 +967,7 @@ void resetFieldScriptEntityGraphicEntity(int actorId, int clutYEntry, sSpriteAct
 
     actorArray[actorId].m2C_matrixBackup.t = actorArray[actorId].mC_matrix.t;
 
-    pFieldEntitySub4->m84_maxY = actorArray[actorId].mC_matrix.t[1] & 0xFFFF;
+    pFieldEntitySub4->m84_maxY = actorArray[actorId].mC_matrix.t[1].getFragPart();
 
     pFieldEntitySub4->m0_position.vx = actorArray[actorId].m4C_scriptEntity->m20_position.vx;
     pFieldEntitySub4->m0_position.vy = actorArray[actorId].m4C_scriptEntity->m20_position.vy;
@@ -1109,7 +1133,7 @@ void setCurrentActor2DPosition(int posX, int posZ)
 {
     std::array<VECTOR, 4> alStack136;
     std::array<SVECTOR, 4> auStack72;
-    for (int i = 0; i < g_numWalkMesh; i++)
+    for (int i = 0; i < g_numWalkMesh - 1; i++)
     {
         pCurrentFieldScriptActor->m8_currentWalkMeshTriangle[i] = findTriangleInWalkMesh(posX, posZ, i, &auStack72[i], &alStack136[i]);
     }
@@ -3597,17 +3621,16 @@ int updateEntityEventCode3Sub2(FP_VEC3* param_1, sFieldScriptEntity* param_2)
     std::vector<u16>* pasVar3;
 
     if ((param_2->m12C_flags & 0x1000) != 0) {
-        sVec2_s16 position;
-        position.set((((param_2->m20_position).vx + param_1->vx) >> 0x10), (((param_2->m20_position).vz + param_1->vz) >> 0x10));
+        sGTE_XY position((((param_2->m20_position).vx + param_1->vx) >> 0x10), (((param_2->m20_position).vz + param_1->vz) >> 0x10));
 
         std::vector<sVec2_s16>& pasVar3 = param_2->m114_movementBoundingZone;
-        std::array<sVec2_s16, 4> boundingZone;
+        std::array<sGTE_XY, 4> boundingZone;
         boundingZone[0].set(pasVar3[0].vx, pasVar3[0].vy);
         boundingZone[1].set(pasVar3[1].vx, pasVar3[1].vy);
         boundingZone[2].set(pasVar3[2].vx, pasVar3[2].vy);
         boundingZone[3].set(pasVar3[3].vx, pasVar3[3].vy);
 
-        if ((NCLIP(boundingZone[0], boundingZone[1], position) < 0) || (NCLIP(boundingZone[1], boundingZone[2], position) < 0) || (NCLIP(boundingZone[2], boundingZone[3], position) < 0) || (NCLIP(boundingZone[3], boundingZone[0], position) < 0)) {
+        if ((NormalClip(boundingZone[0], boundingZone[1], position) < 0) || (NormalClip(boundingZone[1], boundingZone[2], position) < 0) || (NormalClip(boundingZone[2], boundingZone[3], position) < 0) || (NormalClip(boundingZone[3], boundingZone[0], position) < 0)) {
             return -1;
         }
     }
@@ -3629,8 +3652,8 @@ int updateEntityEventCode3Sub3Sub1(FP_VEC3* param_1, VECTOR* param_2, sFieldScri
         param_5->vy = 0;
         param_5->vz = (param_2->vz + param_1->vz) >> 16;
 
-        sVec2_s16 refPos = sVec2_s16::fromValue(param_5->vx, param_5->vz);
-        sVec2_s16 refPos2 = sVec2_s16::fromValue(param_2->vx, param_2->vz);
+        sGTE_XY refPos(param_5->vx, param_5->vz);
+        sGTE_XY refPos2(param_2->vx, param_2->vz);
 
         u32 mask = 0;
         if ((pFieldScriptEntity->m4_flags.m_rawFlags >> ((int)pFieldScriptEntity->m10_walkmeshId + 3U & 0x1f) & 1) == 0) {
@@ -3648,27 +3671,23 @@ int updateEntityEventCode3Sub3Sub1(FP_VEC3* param_1, VECTOR* param_2, sFieldScri
         int iterationCount = 0;
         for (iterationCount = 0; iterationCount < 0x20; iterationCount++)
         {
-            sVec2_s16 vert0;
-            sVec2_s16 vert1;
-            sVec2_s16 vert2;
-
             sWalkMeshBundle::sTriangleData& pTriangle = pWalkMeshTriangles[triangleId];
-            vert0.set(pVertices[pTriangle.m0_verticeIndex[0]].vx, pVertices[pTriangle.m0_verticeIndex[0]].vz); // s4
-            vert1.set(pVertices[pTriangle.m0_verticeIndex[1]].vx, pVertices[pTriangle.m0_verticeIndex[1]].vz); // s3
-            vert2.set(pVertices[pTriangle.m0_verticeIndex[2]].vx, pVertices[pTriangle.m0_verticeIndex[2]].vz); // s1
+            sGTE_XY vert0(pVertices[pTriangle.m0_verticeIndex[0]].vx, pVertices[pTriangle.m0_verticeIndex[0]].vz); // s4
+            sGTE_XY vert1(pVertices[pTriangle.m0_verticeIndex[1]].vx, pVertices[pTriangle.m0_verticeIndex[1]].vz); // s3
+            sGTE_XY vert2(pVertices[pTriangle.m0_verticeIndex[2]].vx, pVertices[pTriangle.m0_verticeIndex[2]].vz); // s1
 
             lastTriangle = triangleId;
 
             collisionFlag = 0;
-            if (NCLIP(vert0, vert1, refPos) < 0) {
+            if (NormalClip(vert0, vert1, refPos) < 0) {
                 collisionFlag |= 1;
             }
 
-            if (NCLIP(vert1, vert2, refPos) < 0) {
+            if (NormalClip(vert1, vert2, refPos) < 0) {
                 collisionFlag |= 2;
             }
 
-            if (NCLIP(vert2, vert0, refPos) < 0) {
+            if (NormalClip(vert2, vert0, refPos) < 0) {
                 collisionFlag |= 4;
             }
 
@@ -3685,7 +3704,7 @@ int updateEntityEventCode3Sub3Sub1(FP_VEC3* param_1, VECTOR* param_2, sFieldScri
                     triangleId = pTriangle.m6_connectivity[1];
                     break;
                 case 3:
-                    if (NCLIP(vert1, refPos, refPos2) < 0)
+                    if (NormalClip(vert1, refPos, refPos2) < 0)
                     {
                         triangleId = pTriangle.m6_connectivity[0];
                     }
@@ -3697,7 +3716,7 @@ int updateEntityEventCode3Sub3Sub1(FP_VEC3* param_1, VECTOR* param_2, sFieldScri
                     triangleId = pTriangle.m6_connectivity[2];
                     break;
                 case 5:
-                    if (NCLIP(vert0, refPos, refPos2) < 0)
+                    if (NormalClip(vert0, refPos, refPos2) < 0)
                     {
                         triangleId = pTriangle.m6_connectivity[2];
                     }
@@ -3706,7 +3725,7 @@ int updateEntityEventCode3Sub3Sub1(FP_VEC3* param_1, VECTOR* param_2, sFieldScri
                     }
                     break;
                 case 6:
-                    if (NCLIP(vert2, refPos, refPos2) < 0)
+                    if (NormalClip(vert2, refPos, refPos2) < 0)
                     {
                         triangleId = pTriangle.m6_connectivity[1];
                     }
@@ -3854,10 +3873,8 @@ int updateEntityEventCode3Sub4Sub1(FP_VEC3* deltaStep, VECTOR* position, sFieldS
         param_5->vy = 0;
         param_5->vz = (position->vz + deltaStep->vz) >> 0x10;
 
-        sVec2_s16 startPosition;
-        sVec2_s16 endPosition;
-        startPosition.set((position->vx >> 0x10), (position->vz >> 0x10));
-        endPosition.set((position->vx + deltaStep->vx) >> 0x10, (position->vz + deltaStep->vz) >> 0x10);
+        sGTE_XY startPosition((position->vx >> 0x10), (position->vz >> 0x10));
+        sGTE_XY endPosition((position->vx + deltaStep->vx) >> 0x10, (position->vz + deltaStep->vz) >> 0x10);
 
         u32 mask = 0;
 
@@ -3873,26 +3890,22 @@ int updateEntityEventCode3Sub4Sub1(FP_VEC3* deltaStep, VECTOR* position, sFieldS
         {
             sWalkMeshBundle::sTriangleData* pTriangle = &pWalkMeshTriangles[triangleId];
 
-            sVec2_s16 vert0;
-            sVec2_s16 vert1;
-            sVec2_s16 vert2;
-
-            vert0.set(pWalkMeshVertices[pTriangle->m0_verticeIndex[0]].vx, pWalkMeshVertices[pTriangle->m0_verticeIndex[0]].vz);
-            vert1.set(pWalkMeshVertices[pTriangle->m0_verticeIndex[1]].vx, pWalkMeshVertices[pTriangle->m0_verticeIndex[1]].vz);
-            vert2.set(pWalkMeshVertices[pTriangle->m0_verticeIndex[2]].vx, pWalkMeshVertices[pTriangle->m0_verticeIndex[2]].vz);
+            sGTE_XY vert0(pWalkMeshVertices[pTriangle->m0_verticeIndex[0]].vx, pWalkMeshVertices[pTriangle->m0_verticeIndex[0]].vz);
+            sGTE_XY vert1(pWalkMeshVertices[pTriangle->m0_verticeIndex[1]].vx, pWalkMeshVertices[pTriangle->m0_verticeIndex[1]].vz);
+            sGTE_XY vert2(pWalkMeshVertices[pTriangle->m0_verticeIndex[2]].vx, pWalkMeshVertices[pTriangle->m0_verticeIndex[2]].vz);
 
             tempTriangleId = triangleId;
 
             collisionFlag = 0;
-            if (NCLIP(vert0, vert1, endPosition) < 0) {
+            if (NormalClip(vert0, vert1, endPosition) < 0) {
                 collisionFlag |= 1;
             }
 
-            if (NCLIP(vert1, vert2, endPosition) < 0) {
+            if (NormalClip(vert1, vert2, endPosition) < 0) {
                 collisionFlag |= 2;
             }
 
-            if (NCLIP(vert2, vert0, endPosition) < 0) {
+            if (NormalClip(vert2, vert0, endPosition) < 0) {
                 collisionFlag |= 4;
             }
 
@@ -3909,7 +3922,7 @@ int updateEntityEventCode3Sub4Sub1(FP_VEC3* deltaStep, VECTOR* position, sFieldS
                     triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[1];
                     break;
                 case 3:
-                    if (NCLIP(vert1, endPosition, startPosition) < 0)
+                    if (NormalClip(vert1, endPosition, startPosition) < 0)
                     {
                         triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[0];
                         collisionFlag = 1;
@@ -3923,7 +3936,7 @@ int updateEntityEventCode3Sub4Sub1(FP_VEC3* deltaStep, VECTOR* position, sFieldS
                     triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[2];
                     break;
                 case 5:
-                    if (NCLIP(vert0, endPosition, startPosition) < 0)
+                    if (NormalClip(vert0, endPosition, startPosition) < 0)
                     {
                         triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[2];
                         collisionFlag = 4;
@@ -3934,7 +3947,7 @@ int updateEntityEventCode3Sub4Sub1(FP_VEC3* deltaStep, VECTOR* position, sFieldS
                     }
                     break;
                 case 6:
-                    if (NCLIP(vert2, endPosition, startPosition) < 0)
+                    if (NormalClip(vert2, endPosition, startPosition) < 0)
                     {
                         triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[1];
                         collisionFlag = 2;
@@ -4374,8 +4387,6 @@ LAB_Field__800830ac:
     pFieldScriptEntity->m40.vx = 0;
     pFieldScriptEntity->m40.vy = 0;
     pFieldScriptEntity->m40.vz = 0;
-
-    VALIDATE_FIELD(FCT_MoveCheck, 0x80083170);
 }
 
 int EntityMoveCheck1(int entityIndex, int mask, sFieldEntity* pFieldEntity, sFieldScriptEntity* pFieldScriptEntity, uint param_5);
@@ -4403,19 +4414,19 @@ int isPositionInEntityScriptBoundingVolume(int testedX, int testedZ, sFieldScrip
     s32 minZ = testedScriptEntity->m20_position.vz.getIntegerPart() - testedScriptEntity->m18_boundingVolume.vz - extraRadius;
     s32 maxZ = testedScriptEntity->m20_position.vz.getIntegerPart() + testedScriptEntity->m18_boundingVolume.vz + extraRadius;
 
-    sVec2_s16 minXmaxZ = sVec2_s16::fromValue(minX, maxZ);
-    sVec2_s16 maxXmaxZ = sVec2_s16::fromValue(maxX, maxZ);
-    sVec2_s16 maxXminZ = sVec2_s16::fromValue(maxX, minZ);
-    sVec2_s16 minXminZ = sVec2_s16::fromValue(minX, minZ);
-    sVec2_s16 testedPosition = sVec2_s16::fromValue(testedX, testedZ);
+    sGTE_XY minXmaxZ(minX, maxZ);
+    sGTE_XY maxXmaxZ(maxX, maxZ);
+    sGTE_XY maxXminZ(maxX, minZ);
+    sGTE_XY minXminZ(minX, minZ);
+    sGTE_XY testedPosition(testedX, testedZ);
 
-    if (NCLIP(minXmaxZ, maxXmaxZ, testedPosition) < 0)
+    if (NormalClip(minXmaxZ, maxXmaxZ, testedPosition) < 0)
         return -1;
-    if (NCLIP(maxXmaxZ, maxXminZ, testedPosition) < 0)
+    if (NormalClip(maxXmaxZ, maxXminZ, testedPosition) < 0)
         return -1;
-    if (NCLIP(maxXminZ, minXminZ, testedPosition) < 0)
+    if (NormalClip(maxXminZ, minXminZ, testedPosition) < 0)
         return -1;
-    if (NCLIP(minXminZ, minXmaxZ, testedPosition) < 0)
+    if (NormalClip(minXminZ, minXmaxZ, testedPosition) < 0)
         return -1;
 
     if (fieldDebugDisable == 0) {
@@ -4872,16 +4883,13 @@ s32 EntityMoveCheck1Sub1(sFieldScriptEntity* pFieldScriptEntity, int walkmeshId,
 
     int triangleId = pFieldScriptEntity->m8_currentWalkMeshTriangle[walkmeshId];
 
-    sVec2_s16 refPos;
-    sVec2_s16 refPos2;
-
     SVECTOR testedPosition;
     testedPosition.vx = (pFieldScriptEntity->m20_position.vx + pFieldScriptEntity->m30_stepVector.vx) >> 16;
     testedPosition.vy = 0;
     testedPosition.vz = (pFieldScriptEntity->m20_position.vz + pFieldScriptEntity->m30_stepVector.vz) >> 16;
 
-    refPos.set((pFieldScriptEntity->m20_position.vx + pFieldScriptEntity->m30_stepVector.vx) >> 16, (pFieldScriptEntity->m20_position.vz + pFieldScriptEntity->m30_stepVector.vz) >> 16);
-    refPos2.set(pFieldScriptEntity->m20_position.vx >> 16, pFieldScriptEntity->m20_position.vz >> 16);
+    sGTE_XY refPos((pFieldScriptEntity->m20_position.vx + pFieldScriptEntity->m30_stepVector.vx) >> 16, (pFieldScriptEntity->m20_position.vz + pFieldScriptEntity->m30_stepVector.vz) >> 16);
+    sGTE_XY refPos2(pFieldScriptEntity->m20_position.vx >> 16, pFieldScriptEntity->m20_position.vz >> 16);
 
     int mask = 0;
     if ((pFieldScriptEntity->m4_flags.m_rawFlags >> (walkmeshId + 3U & 0x1f) & 1) == 0) {
@@ -4897,24 +4905,20 @@ s32 EntityMoveCheck1Sub1(sFieldScriptEntity* pFieldScriptEntity, int walkmeshId,
         std::vector<sWalkMeshBundle::sTriangleData>::iterator pWalkMeshTriangles = walkMeshTriangle[walkmeshId]->begin();
         std::vector<SVECTOR>::iterator pVertices = walkMeshVertices[walkmeshId]->begin();
 
-        sVec2_s16 vert0;
-        sVec2_s16 vert1;
-        sVec2_s16 vert2;
-
-        vert0.set(pVertices[pTriangle.m0_verticeIndex[0]].vx, pVertices[pTriangle.m0_verticeIndex[0]].vz);
-        vert1.set(pVertices[pTriangle.m0_verticeIndex[1]].vx, pVertices[pTriangle.m0_verticeIndex[1]].vz);
-        vert2.set(pVertices[pTriangle.m0_verticeIndex[2]].vx, pVertices[pTriangle.m0_verticeIndex[2]].vz);
+        sGTE_XY vert0(pVertices[pTriangle.m0_verticeIndex[0]].vx, pVertices[pTriangle.m0_verticeIndex[0]].vz);
+        sGTE_XY vert1(pVertices[pTriangle.m0_verticeIndex[1]].vx, pVertices[pTriangle.m0_verticeIndex[1]].vz);
+        sGTE_XY vert2(pVertices[pTriangle.m0_verticeIndex[2]].vx, pVertices[pTriangle.m0_verticeIndex[2]].vz);
 
         int collisionFlag = 0;
-        if (NCLIP(vert0, vert1, refPos) < 0) {
+        if (NormalClip(vert0, vert1, refPos) < 0) {
             collisionFlag |= 1;
         }
 
-        if (NCLIP(vert1, vert2, refPos) < 0) {
+        if (NormalClip(vert1, vert2, refPos) < 0) {
             collisionFlag |= 2;
         }
 
-        if (NCLIP(vert2, vert0, refPos) < 0) {
+        if (NormalClip(vert2, vert0, refPos) < 0) {
             collisionFlag |= 4;
         }
 
@@ -4931,7 +4935,7 @@ s32 EntityMoveCheck1Sub1(sFieldScriptEntity* pFieldScriptEntity, int walkmeshId,
                 triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[1];
                 break;
             case 3:
-                if (NCLIP(vert1, refPos, refPos2) < 0)
+                if (NormalClip(vert1, refPos, refPos2) < 0)
                 {
                     triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[0];
                 }
@@ -4943,7 +4947,7 @@ s32 EntityMoveCheck1Sub1(sFieldScriptEntity* pFieldScriptEntity, int walkmeshId,
                 triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[2];
                 break;
             case 5:
-                if (NCLIP(vert0, refPos, refPos2) < 0)
+                if (NormalClip(vert0, refPos, refPos2) < 0)
                 {
                     triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[2];
                 }
@@ -4952,7 +4956,7 @@ s32 EntityMoveCheck1Sub1(sFieldScriptEntity* pFieldScriptEntity, int walkmeshId,
                 }
                 break;
             case 6:
-                if (NCLIP(vert2, refPos, refPos2) < 0)
+                if (NormalClip(vert2, refPos, refPos2) < 0)
                 {
                     triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[1];
                 }
@@ -5790,7 +5794,7 @@ int checkCameraCollision(VECTOR* param_1, std::array<SVECTOR, 2>& param_2, std::
     s32 X = param_1->vx.getIntegerPart();
     s32 Z = param_1->vz.getIntegerPart();
 
-    sVec2_s16 refPos = sVec2_s16::fromValue(X, Z);
+    sGTE_XY refPos(X, Z);
 
     s32 posX = cameraLimits[0];
     if (posX <= X) {
@@ -5810,7 +5814,7 @@ int checkCameraCollision(VECTOR* param_1, std::array<SVECTOR, 2>& param_2, std::
         }
     }
 
-    sVec2_s16 refPos2 = sVec2_s16::fromValue(posX, posZ);
+    sGTE_XY refPos2(posX, posZ);
 
     SVECTOR asStack80;
     VECTOR FStack72;
@@ -5824,27 +5828,23 @@ int checkCameraCollision(VECTOR* param_1, std::array<SVECTOR, 2>& param_2, std::
     int iterationCount = 0;
     for (iterationCount = 0; iterationCount < 0xF0; iterationCount++)
     {
-        sVec2_s16 vert0;
-        sVec2_s16 vert1;
-        sVec2_s16 vert2;
-
         sWalkMeshBundle::sTriangleData& pTriangle = pCollisionTriangles[triangleId];
-        vert0.set(pVertices[pTriangle.m0_verticeIndex[0]].vx, pVertices[pTriangle.m0_verticeIndex[0]].vz); // s4
-        vert1.set(pVertices[pTriangle.m0_verticeIndex[1]].vx, pVertices[pTriangle.m0_verticeIndex[1]].vz); // s3
-        vert2.set(pVertices[pTriangle.m0_verticeIndex[2]].vx, pVertices[pTriangle.m0_verticeIndex[2]].vz); // s1
+        sGTE_XY vert0(pVertices[pTriangle.m0_verticeIndex[0]].vx, pVertices[pTriangle.m0_verticeIndex[0]].vz); // s4
+        sGTE_XY vert1(pVertices[pTriangle.m0_verticeIndex[1]].vx, pVertices[pTriangle.m0_verticeIndex[1]].vz); // s3
+        sGTE_XY vert2(pVertices[pTriangle.m0_verticeIndex[2]].vx, pVertices[pTriangle.m0_verticeIndex[2]].vz); // s1
 
         lastTriangle = triangleId;
 
         collisionFlag = 0;
-        if (NCLIP(vert0, vert1, refPos) < 0) {
+        if (NormalClip(vert0, vert1, refPos) < 0) {
             collisionFlag |= 1;
         }
 
-        if (NCLIP(vert1, vert2, refPos) < 0) {
+        if (NormalClip(vert1, vert2, refPos) < 0) {
             collisionFlag |= 2;
         }
 
-        if (NCLIP(vert2, vert0, refPos) < 0) {
+        if (NormalClip(vert2, vert0, refPos) < 0) {
             collisionFlag |= 4;
         }
         if (collisionFlag < 8) {
@@ -5860,7 +5860,7 @@ int checkCameraCollision(VECTOR* param_1, std::array<SVECTOR, 2>& param_2, std::
                 triangleId = pTriangle.m6_connectivity[1];
                 break;
             case 3:
-                if (NCLIP(vert1, refPos, refPos2) < 0) // a0 s4 s3
+                if (NormalClip(vert1, refPos, refPos2) < 0) // a0 s4 s3
                 {
                     triangleId = pTriangle.m6_connectivity[0];
                 }
@@ -5872,7 +5872,7 @@ int checkCameraCollision(VECTOR* param_1, std::array<SVECTOR, 2>& param_2, std::
                 triangleId = pTriangle.m6_connectivity[2];
                 break;
             case 5:
-                if (NCLIP(vert0, refPos, refPos2) < 0) // a2,s4,s3
+                if (NormalClip(vert0, refPos, refPos2) < 0) // a2,s4,s3
                 {
                     triangleId = pTriangle.m6_connectivity[2];
                 }
@@ -5881,7 +5881,7 @@ int checkCameraCollision(VECTOR* param_1, std::array<SVECTOR, 2>& param_2, std::
                 }
                 break;
             case 6:
-                if (NCLIP(vert2, refPos, refPos2) < 0) // v1,s4,s3
+                if (NormalClip(vert2, refPos, refPos2) < 0) // v1,s4,s3
                 {
                     triangleId = pTriangle.m6_connectivity[1];
                 }

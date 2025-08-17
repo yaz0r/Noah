@@ -55,6 +55,13 @@ void gte_ldVZ1(s16*);
 void gte_ldVXY2(SVECTOR*);
 void gte_ldVZ2(s16*);
 
+void gte_ldR11R12(s32 value);
+void gte_ldR13R21(s32 value);
+void gte_ldR22R23(s32 value);
+void gte_ldR31R32(s32 value);
+void gte_ldR33(s32 value);
+
+
 void gte_stdp(s32* output);
 s32 gte_stSZ3();
 

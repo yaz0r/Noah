@@ -62,7 +62,8 @@ struct sFixedPoint
     operator s32& () { return m_value; }
     sFixedPoint& operator=(s32 value) { m_value = value; return *this; }
 
-    s32 getIntegerPart() { return m_value >> 16; }
+    s16 getIntegerPart() { return m_value >> 16; }
+    s16 getFragPart() { return (s16)m_value; }
     static sFixedPoint fromValue(s32 value) {
         sFixedPoint temp;
         temp.m_value = value;
