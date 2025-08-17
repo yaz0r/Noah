@@ -95,6 +95,23 @@ int isLoadCompleted_detour() {
     return g_gdbConnection->getRegister(GDBConnection::REG_Names::V0);
 }
 
+void updateEntityEventCode3(int index, sFieldEntity* pFieldEntity, sFieldScriptEntity* pFieldScriptEntity);
+void updateEntityEventCode3_detour(int index, sFieldEntity* pFieldEntity, sFieldScriptEntity* pFieldScriptEntity);
+interceptor<void, int, sFieldEntity*, sFieldScriptEntity*> updateEntityEventCode3_intercept(updateEntityEventCode3, updateEntityEventCode3_detour);
+void updateEntityEventCode3_detour(int index, sFieldEntity* pFieldEntity, sFieldScriptEntity* pFieldScriptEntity) {
+    if (isFieldValidationContextEnabled(FCT_MoveCheck)) {
+        g_gdbConnection->executeUntilAddress(0x80082bb8);
+        validateField();
+        assert(index == g_gdbConnection->getRegister(GDBConnection::REG_Names::A0));
+    }
+    updateEntityEventCode3_intercept.callUndetoured(index, pFieldEntity, pFieldScriptEntity);
+
+    if (isFieldValidationContextEnabled(FCT_MoveCheck)) {
+        g_gdbConnection->executeUntilAddress(0x80083170);
+        validateField();
+    }
+}
+
 // Need to sync bootField because of transition effect
 void bootField();
 void bootField_detour();
@@ -127,7 +144,7 @@ void validateField_init() {
     enableFieldValidationContext(FCT_Base);
     enableFieldValidationContext(FCT_Init);
     enableFieldValidationContext(FCT_MoveCheck);
-    enableFieldValidationContext(FCT_Rendering);
+    //enableFieldValidationContext(FCT_Rendering);
 
     bootField_intercept.enable();
     createSpriteActor_intercept.enable();
@@ -137,11 +154,13 @@ void validateField_init() {
     if (bDebugEntityMoves) {
         updateScriptAndMoveEntities_intercept.enable();
         EntityMoveCheck0_intercept.enable();
+        updateEntityEventCode3_intercept.enable();
     }
 }
 
 void validateField_shutdown() {
     if (bDebugEntityMoves) {
+        updateEntityEventCode3_intercept.disable();
         EntityMoveCheck0_intercept.disable(); 
         updateScriptAndMoveEntities_intercept.disable();
     }
