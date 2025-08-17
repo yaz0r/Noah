@@ -141,7 +141,7 @@ void validate(u32 psxBase, const sFieldScriptEntity& pFieldScriptEntity) {
     validate(psxBase + 0x6E, pFieldScriptEntity.m6E);
     validate(psxBase + 0x70, pFieldScriptEntity.m70_rotationForRendering);
     validate(psxBase + 0x72, pFieldScriptEntity.m72_elevation);
-    validate(psxBase + 0x74, pFieldScriptEntity.m74);
+    validate(psxBase + 0x74, pFieldScriptEntity.m74_touchedActor);
     validate(psxBase + 0x75, pFieldScriptEntity.m75);
     validate(psxBase + 0x76, pFieldScriptEntity.m76);
     validate(psxBase + 0x78, pFieldScriptEntity.m78_stack);

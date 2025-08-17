@@ -6,6 +6,7 @@
 #include "kernel/filesystem.h"
 #include "kernel/color.h"
 #include "kernel/3dModel.h"
+#include "field/walkMesh.h"
 
 struct sFieldEntitySub0
 {
@@ -83,7 +84,7 @@ struct sFieldScriptEntity
     sFieldScriptEntity_flags4 m4_flags;
     std::array<s16, 4> m8_currentWalkMeshTriangle = {0,0,0,0};
     u16 m10_walkmeshId = 0;
-    s32 m14_currentTriangleFlag = 0;
+    sWalkmeshTriangleFlags m14_currentTriangleFlag = 0;
     SFP_VEC3 m18_boundingVolume = SFP_VEC3::zero();
     s16 m1E_collisionRadius = 0;
     VECTOR m20_position = VECTOR::zero();
@@ -95,7 +96,7 @@ struct sFieldScriptEntity
     s16 m6E = 0;
     s16 m70_rotationForRendering = 0;
     s16 m72_elevation = 0;
-    s8 m74 = 0;
+    s8 m74_touchedActor = 0;
     s8 m75 = 0;
     s16 m76 = 0;
     std::array<u16, 4> m78_stack = {0,0,0,0};

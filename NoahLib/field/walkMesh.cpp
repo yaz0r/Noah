@@ -7,7 +7,7 @@
 sWalkMeshBundle g_walkMesh;
 
 // Walkmesh runtime vars in PSX memory order:
-std::vector<u32>* walkMeshVar1;
+std::vector<sWalkmeshTriangleFlags>* walkMeshVar1;
 std::array<std::vector<sWalkMeshBundle::sTriangleData>*, 4> walkMeshTriangle;
 std::array<std::vector<SVECTOR>*, 4> walkMeshVertices;
 std::array<s32, 4> g_walkMeshNumTrianglePerBlock;
