@@ -468,6 +468,10 @@ u32 getCameraDirection(void)
 
 uint getPlayerCharacterDir(void)
 {
+    if (g_playerControlledActor >= actorArray.size()) {
+        Hack("Out of bound access in getPlayerCharacterDir while unloading field");
+        return 0;
+    }
 	return (((actorArray[g_playerControlledActor].m4C_scriptEntity)->m106_currentRotation + 0x100) >> 9) + 2U & 7;
 }
 
