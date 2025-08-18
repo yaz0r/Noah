@@ -28,13 +28,13 @@ struct sCustomPolySubBuffer {
 
         std::vector<u8>::iterator currentPrim = currentSubBuffer + m10_offset;
         m1C_packets.resize(m14_count);
-        for (int i = 0; i < m14_count; i++) {
+        for (u32 i = 0; i < m14_count; i++) {
             currentPrim = m1C_packets[i].init(currentPrim);
         }
 
         m_vertices.resize(m4_numVertices);
         std::vector<u8>::iterator currentVertice = currentSubBuffer + m0_offsetToVertices;
-        for (int i = 0; i < m4_numVertices; i++) {
+        for (u32 i = 0; i < m4_numVertices; i++) {
             m_vertices[i].vx = READ_LE_S16(currentVertice + 0);
             m_vertices[i].vy = READ_LE_S16(currentVertice + 2);
             m_vertices[i].vz = READ_LE_S16(currentVertice + 4);
@@ -59,7 +59,7 @@ struct sCustomPolyBuffer {
         mC_buffers.resize(m8_count);
         assert(m8_count == 1);
         std::vector<u8>::iterator currentSubBuffer = buffer.begin() + 0xC;
-        for (int i = 0; i < m8_count; i++) {
+        for (u32 i = 0; i < m8_count; i++) {
             mC_buffers[i].init(currentSubBuffer);
         }
     }

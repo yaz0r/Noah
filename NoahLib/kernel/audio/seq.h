@@ -3,7 +3,7 @@
 #include "kernel/filesystem.h"
 
 struct sSeqFile : sLoadableDataRaw {
-    void init(std::vector<u8>::const_iterator it, int size) {
+    void init(std::vector<u8>::const_iterator it, size_t size) {
         std::vector<u8> temp;
         temp.resize(size);
         for (int i = 0; i < size; i++) {
@@ -11,7 +11,7 @@ struct sSeqFile : sLoadableDataRaw {
         }
         init(temp);
     }
-    void init(std::span<u8>::iterator it, int size) {
+    void init(std::span<u8>::iterator it, size_t size) {
         std::vector<u8> temp;
         temp.resize(size);
         for (int i = 0; i < size; i++) {

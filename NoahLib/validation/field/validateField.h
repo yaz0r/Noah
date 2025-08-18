@@ -31,6 +31,9 @@ void validateField_shutdown();
     if (g_gdbConnection && isFieldValidationContextEnabled(context)) \
         assert(g_gdbConnection->getRegister(GDBConnection::reg) == value);
 
+void validate(u32, const u32&);
+void validate(u32, const s32&);
+void validate(u32, const VECTOR&);
 void validate(u32, const SVECTOR&);
 void validate(u32, const FP_VEC3&);
 

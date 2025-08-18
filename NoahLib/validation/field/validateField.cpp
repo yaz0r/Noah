@@ -20,6 +20,13 @@ void disableFieldValidationContext(fieldValidationContexts context) {
     fieldValidationContextStatus &= ~(1 << (int)context);
 }
 
+void zeroInitStack(size_t size)
+{
+    std::vector<u8> tempStack;
+    tempStack.resize(size, 0);
+    g_gdbConnection->writeMemory(g_gdbConnection->getRegister(GDBConnection::REG_Names::SP), tempStack.data(), tempStack.size());
+}
+
 #define DECLARE_HOOK(name, returnType, ...) \
 returnType name(__VA_ARGS__);\
 returnType name##_detour (__VA_ARGS__);\
@@ -93,7 +100,8 @@ int isLoadCompleted_detour() {
 DECLARE_HOOK(updateEntityEventCode3, void, int, sFieldEntity*, sFieldScriptEntity*);
 void updateEntityEventCode3_detour(int index, sFieldEntity* pFieldEntity, sFieldScriptEntity* pFieldScriptEntity) {
     if (isFieldValidationContextEnabled(FCT_MoveCheck)) {
-        g_gdbConnection->executeUntilAddress(0x80082bb8);
+        g_gdbConnection->executeUntilAddress(0x80082bbc);
+        zeroInitStack(0x58);
         validateField();
         assert(index == g_gdbConnection->getRegister(GDBConnection::REG_Names::A0));
     }
@@ -131,6 +139,7 @@ int updateEntityEventCode3Sub3_detour(FP_VEC3* param_1, sFieldScriptEntity* para
         validate(g_gdbConnection->getRegister(GDBConnection::REG_Names::A0), *param_1);
         validate(g_gdbConnection->getRegister(GDBConnection::REG_Names::A1), *param_2);
         assert(g_gdbConnection->getRegister(GDBConnection::REG_Names::A3) == angle);
+        zeroInitStack(0xA8);
     }
     int result = updateEntityEventCode3Sub3_intercept.callUndetoured(param_1, param_2, param_3, angle);
     if (isFieldValidationContextEnabled(FCT_MoveCheck)) {
@@ -170,6 +179,25 @@ int updateEntityEventCode3Sub4Sub1_detour(FP_VEC3* deltaStep, VECTOR* position, 
     return result;
 }
 
+DECLARE_HOOK(updateEntityEventCode3Sub3Sub1, int, FP_VEC3*, VECTOR*, sFieldScriptEntity*, std::array<SVECTOR, 2>&, SVECTOR*, int, uint*);
+int updateEntityEventCode3Sub3Sub1_detour(FP_VEC3* deltaStep, VECTOR* position, sFieldScriptEntity* pFieldScriptEntity, std::array<SVECTOR, 2>& param_4, SVECTOR* param_5, int param_6, uint* param_7) {
+    if (isFieldValidationContextEnabled(FCT_MoveCheck)) {
+        g_gdbConnection->executeUntilAddress(0x8007bef8);
+        validate(g_gdbConnection->getRegister(GDBConnection::REG_Names::A0), *deltaStep);
+        validate(g_gdbConnection->getRegister(GDBConnection::REG_Names::A1), *position);
+        validate(g_gdbConnection->getRegister(GDBConnection::REG_Names::A2), *pFieldScriptEntity);
+        validate(g_gdbConnection->getRegister(GDBConnection::REG_Names::A3), param_4);
+        validate(g_gdbConnection->readU32(g_gdbConnection->getRegister(GDBConnection::REG_Names::SP) + 0xA0), *param_5);
+    }
+    int result = updateEntityEventCode3Sub3Sub1_intercept.callUndetoured(deltaStep, position, pFieldScriptEntity, param_4, param_5, param_6, param_7);
+    if (isFieldValidationContextEnabled(FCT_MoveCheck)) {
+        g_gdbConnection->executeUntilAddress(0x8007c63c);
+        assert(g_gdbConnection->getRegister(GDBConnection::REG_Names::V0) == result);
+        validate(g_gdbConnection->getRegister(GDBConnection::REG_Names::S7), param_4);
+        validate(g_gdbConnection->readU32(g_gdbConnection->getRegister(GDBConnection::REG_Names::SP) + 0xA0), *param_5);
+    }
+    return result;
+}
 
 bool bDebugEntityMoves = true;
 
@@ -191,11 +219,13 @@ void validateField_init() {
         updateEntityEventCode3Sub3_intercept.enable();
         updateEntityEventCode3Sub4_intercept.enable();
         updateEntityEventCode3Sub4Sub1_intercept.enable();
+        updateEntityEventCode3Sub3Sub1_intercept.enable();
     }
 }
 
 void validateField_shutdown() {
     if (bDebugEntityMoves) {
+        updateEntityEventCode3Sub3Sub1_intercept.disable();
         updateEntityEventCode3Sub4Sub1_intercept.disable();
         updateEntityEventCode3Sub4_intercept.disable();
         updateEntityEventCode3Sub3_intercept.disable();

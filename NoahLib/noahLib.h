@@ -207,6 +207,7 @@ struct SFP_VEC3
             return vz;
         default:
             assert(0);
+            return vx;
             break;
         }
     }

@@ -5,7 +5,7 @@
 #include "customPolyBuffer.h"
 
 void copyCustomPolySubBuffer(const sCustomPolySubBuffer* param_1, std::vector<sAnyPoly>& param_2, int isTransparent, uint isShaded) {
-    for (int i = 0; i < param_1->m14_count; i++) {
+    for (u32 i = 0; i < param_1->m14_count; i++) {
         const sCustomPolySubBufferPacket* polySource = &param_1->m1C_packets[i];
 
         u8 tagSize = polySource->m0_runtimeSizeNeededInWords;
@@ -61,7 +61,7 @@ void renderCustomPolyBuffer(const sCustomPolySubBuffer* param_1, std::vector<sAn
         assert(0);
     }
 
-    for (int i = 0; i < param_1->m14_count; i++) {
+    for (u32 i = 0; i < param_1->m14_count; i++) {
         sAnyPoly& currentAnyPoint = param_2[i];
 
         const sCustomPolySubBufferPacket* polySource = &param_1->m1C_packets[i];
@@ -158,7 +158,7 @@ const sCustomPolySubBuffer* getCustomPolySubBuffer(const sCustomPolyBuffer* para
 
 int getCustomPolySubBufferSize(const sCustomPolySubBuffer* param_1) {
     int count = 0;
-    for (int i = 0; i < param_1->m14_count; i++) {
+    for (u32 i = 0; i < param_1->m14_count; i++) {
         count += (param_1->m1C_packets[i].m0_runtimeSizeNeededInWords + 1) * 4;
     }
     return count;

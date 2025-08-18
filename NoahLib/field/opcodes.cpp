@@ -4936,7 +4936,7 @@ void OP_F9()
 
     uVar1 = readCharacter(1);
     if (uVar1 != 0xff) {
-        pCurrentFieldScriptActor->m75 = (char)uVar1;
+        pCurrentFieldScriptActor->m75_parentActorId = (char)uVar1;
     }
     ADVANCE_VM(0x2);
 }

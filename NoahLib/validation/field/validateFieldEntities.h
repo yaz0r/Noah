@@ -24,7 +24,7 @@ void validate(u32 psxBase, const std::array<T, N>& array) {
     }
     else {
         for (int i = 0; i < N; i++) {
-            validate(psxBase + i * GetPSXSize<T>(), array[i]);
+            validate(psxBase + i * (u32)GetPSXSize<T>(), array[i]);
         }
     }
 }

@@ -234,7 +234,7 @@ struct sBattle800c3e24 {
 extern sBattle800c3e24* battleG3;
 
 struct sBattleMechaInitData {
-    void init(std::vector<u8>::const_iterator it, u32 size) {
+    void init(std::vector<u8>::const_iterator it, size_t size) {
         mData.insert(mData.begin(), it, it+size);
 
         {

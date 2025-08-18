@@ -97,7 +97,7 @@ struct sFieldScriptEntity
     s16 m70_rotationForRendering = 0;
     s16 m72_elevation = 0;
     s8 m74_touchedActor = 0;
-    s8 m75 = 0;
+    s8 m75_parentActorId = 0;
     s16 m76 = 0;
     std::array<u16, 4> m78_stack = {0,0,0,0};
     s8 m80_dialogPortrait = 0;
