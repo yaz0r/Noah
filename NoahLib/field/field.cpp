@@ -3787,7 +3787,7 @@ int updateEntityEventCode3Sub3Sub1(FP_VEC3* param_1, VECTOR* param_2, sFieldScri
         else {
             if (collisionFlag < 3) {
                 if (collisionFlag != 1) {
-                    return 0xffffffff;
+                    return -1;
                 }
                 sWalkMeshBundle::sTriangleData& pTriangle = pWalkMeshTriangles[lastTriangle];
                 param_4[0].vx = pVertices[pTriangle.m0_verticeIndex[0]].vx;
@@ -3861,164 +3861,162 @@ uint updateEntityEventCode3Sub3Sub2(short param_1, std::array<SVECTOR, 2>& param
 int updateEntityEventCode3Sub4Sub1(FP_VEC3* deltaStep, VECTOR* position, sFieldScriptEntity* pFieldScriptEntity, std::array<SVECTOR, 2>& param_4, SVECTOR* param_5, int param_6)
 {
     int collisionFlag;
-    int uVar2;
 
     int triangleId = (int)pFieldScriptEntity->m8_currentWalkMeshTriangle[pFieldScriptEntity->m10_walkmeshId];
     std::vector<sWalkMeshBundle::sTriangleData>& pWalkMeshTriangles = *walkMeshTriangle[pFieldScriptEntity->m10_walkmeshId];
     std::vector<SVECTOR>& pWalkMeshVertices = *walkMeshVertices[pFieldScriptEntity->m10_walkmeshId];
 
     if (triangleId == -1) {
-        uVar2 = -1;
+        return -1;
     }
-    else {
-        param_5->vx = (position->vx + deltaStep->vx) >> 0x10;
-        param_5->vy = 0;
-        param_5->vz = (position->vz + deltaStep->vz) >> 0x10;
 
-        sGTE_XY startPosition((position->vx >> 0x10), (position->vz >> 0x10));
-        sGTE_XY endPosition((position->vx + deltaStep->vx) >> 0x10, (position->vz + deltaStep->vz) >> 0x10);
+    param_5->vx = (position->vx + deltaStep->vx) >> 0x10;
+    param_5->vy = 0;
+    param_5->vz = (position->vz + deltaStep->vz) >> 0x10;
 
-        u32 mask = 0;
+    sGTE_XY startPosition((position->vx >> 0x10), (position->vz >> 0x10));
+    sGTE_XY endPosition((position->vx + deltaStep->vx) >> 0x10, (position->vz + deltaStep->vz) >> 0x10);
 
-        if ((pFieldScriptEntity->m4_flags.m_rawFlags >> ((int)pFieldScriptEntity->m10_walkmeshId + 3U & 0x1f) & 1) == 0) {
-            mask = -(s32)(noUpdatesToPartyMemebers == '\0');
+    u32 mask = 0;
+
+    if ((pFieldScriptEntity->m4_flags.m_rawFlags >> ((int)pFieldScriptEntity->m10_walkmeshId + 3U & 0x1f) & 1) == 0) {
+        mask = -(s32)(noUpdatesToPartyMemebers == '\0');
+    }
+
+    int tempTriangleId;
+
+    sFieldScriptEntity* local_58 = pFieldScriptEntity;
+    int iterationCount = 0;
+    for (iterationCount = 0; iterationCount < 0x20; iterationCount++)
+    {
+        sWalkMeshBundle::sTriangleData* pTriangle = &pWalkMeshTriangles[triangleId];
+
+        sGTE_XY vert0(pWalkMeshVertices[pTriangle->m0_verticeIndex[0]].vx, pWalkMeshVertices[pTriangle->m0_verticeIndex[0]].vz);
+        sGTE_XY vert1(pWalkMeshVertices[pTriangle->m0_verticeIndex[1]].vx, pWalkMeshVertices[pTriangle->m0_verticeIndex[1]].vz);
+        sGTE_XY vert2(pWalkMeshVertices[pTriangle->m0_verticeIndex[2]].vx, pWalkMeshVertices[pTriangle->m0_verticeIndex[2]].vz);
+
+        tempTriangleId = triangleId;
+
+        collisionFlag = 0;
+        if (NormalClip(vert0, vert1, endPosition) < 0) {
+            collisionFlag |= 1;
         }
 
-        int tempTriangleId;
-
-        sFieldScriptEntity* local_58 = pFieldScriptEntity;
-        int iterationCount = 0;
-        for (iterationCount = 0; iterationCount < 0x20; iterationCount++)
-        {
-            sWalkMeshBundle::sTriangleData* pTriangle = &pWalkMeshTriangles[triangleId];
-
-            sGTE_XY vert0(pWalkMeshVertices[pTriangle->m0_verticeIndex[0]].vx, pWalkMeshVertices[pTriangle->m0_verticeIndex[0]].vz);
-            sGTE_XY vert1(pWalkMeshVertices[pTriangle->m0_verticeIndex[1]].vx, pWalkMeshVertices[pTriangle->m0_verticeIndex[1]].vz);
-            sGTE_XY vert2(pWalkMeshVertices[pTriangle->m0_verticeIndex[2]].vx, pWalkMeshVertices[pTriangle->m0_verticeIndex[2]].vz);
-
-            tempTriangleId = triangleId;
-
-            collisionFlag = 0;
-            if (NormalClip(vert0, vert1, endPosition) < 0) {
-                collisionFlag |= 1;
-            }
-
-            if (NormalClip(vert1, vert2, endPosition) < 0) {
-                collisionFlag |= 2;
-            }
-
-            if (NormalClip(vert2, vert0, endPosition) < 0) {
-                collisionFlag |= 4;
-            }
-
-            if (collisionFlag < 8) {
-                switch (collisionFlag)
-                {
-                case 0:
-                    mask = 0xFF;
-                    break;
-                case 1:
-                    triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[0];
-                    break;
-                case 2:
-                    triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[1];
-                    break;
-                case 3:
-                    if (NormalClip(vert1, endPosition, startPosition) < 0)
-                    {
-                        triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[0];
-                        collisionFlag = 1;
-                    }
-                    else {
-                        triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[1];
-                        collisionFlag = 2;
-                    }
-                    break;
-                case 4:
-                    triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[2];
-                    break;
-                case 5:
-                    if (NormalClip(vert0, endPosition, startPosition) < 0)
-                    {
-                        triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[2];
-                        collisionFlag = 4;
-                    }
-                    else {
-                        triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[0];
-                        collisionFlag = 1;
-                    }
-                    break;
-                case 6:
-                    if (NormalClip(vert2, endPosition, startPosition) < 0)
-                    {
-                        triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[1];
-                        collisionFlag = 2;
-                    }
-                    else {
-                        triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[2];
-                        collisionFlag = 4;
-                    }
-                    break;
-                case 7:
-                    triangleId = -1;
-                    break;
-                default:
-                    assert(0);
-                }
-            }
-
-            // todo: does this really happen to be -1?
-            if (triangleId == -1)
-            {
-                return -1;
-            }
-            u32 uVar4 = ((*walkMeshVar1)[pWalkMeshTriangles[triangleId].mC_indexInWalkmeshData1]) & mask;
-            if ((((local_58->m0_fieldScriptFlags.m_rawFlags >> 9 & 3 & uVar4 >> 3) != 0) || ((local_58->m0_fieldScriptFlags.m_rawFlags >> 8 & 7 & uVar4 >> 5) != 0)) || (((uVar4 & 0x800000) != 0 && (local_58->m10_walkmeshId == 0)))) {
-                triangleId = -1;
-                break;
-            }
-
-            if (triangleId == -1)
-                break;
+        if (NormalClip(vert1, vert2, endPosition) < 0) {
+            collisionFlag |= 2;
         }
 
-        if ((triangleId == -1) || (iterationCount == 0x20)) {
+        if (NormalClip(vert2, vert0, endPosition) < 0) {
+            collisionFlag |= 4;
+        }
 
+        if (collisionFlag < 8) {
             switch (collisionFlag)
             {
             case 0:
-                return -1;
+                iterationCount = 0xFF;
+                break;
             case 1:
-                param_4[0] = pWalkMeshVertices[pWalkMeshTriangles[tempTriangleId].m0_verticeIndex[1]];
-                param_4[1] = pWalkMeshVertices[pWalkMeshTriangles[tempTriangleId].m0_verticeIndex[2]];
+                triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[0];
                 break;
             case 2:
-                param_4[0] = pWalkMeshVertices[pWalkMeshTriangles[tempTriangleId].m0_verticeIndex[1]];
-                param_4[1] = pWalkMeshVertices[pWalkMeshTriangles[tempTriangleId].m0_verticeIndex[2]];
+                triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[1];
+                break;
+            case 3:
+                if (NormalClip(vert1, endPosition, startPosition) < 0)
+                {
+                    triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[0];
+                    collisionFlag = 1;
+                }
+                else {
+                    triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[1];
+                    collisionFlag = 2;
+                }
                 break;
             case 4:
-                param_4[0] = pWalkMeshVertices[pWalkMeshTriangles[tempTriangleId].m0_verticeIndex[1]];
-                param_4[1] = pWalkMeshVertices[pWalkMeshTriangles[tempTriangleId].m0_verticeIndex[2]];
+                triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[2];
+                break;
+            case 5:
+                if (NormalClip(vert0, endPosition, startPosition) < 0)
+                {
+                    triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[2];
+                    collisionFlag = 4;
+                }
+                else {
+                    triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[0];
+                    collisionFlag = 1;
+                }
+                break;
+            case 6:
+                if (NormalClip(vert2, endPosition, startPosition) < 0)
+                {
+                    triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[1];
+                    collisionFlag = 2;
+                }
+                else {
+                    triangleId = pWalkMeshTriangles[triangleId].m6_connectivity[2];
+                    collisionFlag = 4;
+                }
+                break;
+            case 7:
+                triangleId = -1;
                 break;
             default:
                 assert(0);
-                return -1;
-            }
-            uVar2 = -1;
-        }
-        else {
-            if (param_6 == -1) {
-                uVar2 = 0;
-            }
-            else {
-                //psVar6 = (short*)(puVar9 + iVar8 * 0xe);
-                assert(0);
-                //FUN_Field__8007b07c((short*)(puVar10 + *psVar6 * 8), (short*)(puVar10 + psVar6[1] * 8), (short*)(puVar10 + psVar6[2] * 8), param_5, &sStack104);
-                uVar2 = 0;
             }
         }
+
+        // todo: does this really happen to be -1?
+        if (triangleId == -1)
+        {
+            return -1;
+        }
+        u32 uVar4 = ((*walkMeshVar1)[pWalkMeshTriangles[triangleId].mC_indexInWalkmeshData1]) & mask;
+        if ((((local_58->m0_fieldScriptFlags.m_rawFlags >> 9 & 3 & uVar4 >> 3) != 0) || ((local_58->m0_fieldScriptFlags.m_rawFlags >> 8 & 7 & uVar4 >> 5) != 0)) || (((uVar4 & 0x800000) != 0 && (local_58->m10_walkmeshId == 0)))) {
+            triangleId = -1;
+            break;
+        }
+
+        if (triangleId == -1)
+            break;
     }
-    return uVar2;
+
+    if ((triangleId == -1) || (iterationCount == 0x20)) {
+
+        switch (collisionFlag)
+        {
+        case 0:
+            return -1;
+        case 1:
+            param_4[0] = pWalkMeshVertices[pWalkMeshTriangles[tempTriangleId].m0_verticeIndex[0]];
+            param_4[1] = pWalkMeshVertices[pWalkMeshTriangles[tempTriangleId].m0_verticeIndex[1]];
+            break;
+        case 2:
+            param_4[0] = pWalkMeshVertices[pWalkMeshTriangles[tempTriangleId].m0_verticeIndex[1]];
+            param_4[1] = pWalkMeshVertices[pWalkMeshTriangles[tempTriangleId].m0_verticeIndex[2]];
+            break;
+        case 4:
+            param_4[0] = pWalkMeshVertices[pWalkMeshTriangles[tempTriangleId].m0_verticeIndex[2]];
+            param_4[1] = pWalkMeshVertices[pWalkMeshTriangles[tempTriangleId].m0_verticeIndex[0]];
+            break;
+        default:
+            assert(0);
+            return -1;
+        }
+        return -1;
+    }
+
+    if (param_6 == -1) {
+        return 0;
+    }
+
+    VECTOR dummyNormal;
+    getTriangleNormalAndAdjustY(
+        pWalkMeshVertices[pWalkMeshTriangles[tempTriangleId].m0_verticeIndex[0]],
+        pWalkMeshVertices[pWalkMeshTriangles[tempTriangleId].m0_verticeIndex[1]],
+        pWalkMeshVertices[pWalkMeshTriangles[tempTriangleId].m0_verticeIndex[2]],
+        param_5, &dummyNormal);
+    return 0;
 }
 
 int updateEntityEventCode3Sub4(FP_VEC3* position, sFieldScriptEntity* param_2, std::array<SVECTOR, 2>& param_3, s16 angle)
@@ -4278,6 +4276,9 @@ void updateEntityEventCode3(int index, sFieldEntity* pFieldEntity, sFieldScriptE
             rotation = pFieldScriptEntity->m106_currentRotation & 0xfff;
         }
 
+        VALIDATE_FIELD(FCT_MoveCheck, 0x80082d94);
+        VALIDATE_STACK_VAR(FCT_MoveCheck, 0x10, stepVector);
+
         if (updateEntityEventCode3Sub2(&stepVector, pFieldScriptEntity) != 0)
         {
             bMoved = false;
@@ -4316,7 +4317,7 @@ void updateEntityEventCode3(int index, sFieldEntity* pFieldEntity, sFieldScriptE
     else
     {
         animationId = pFieldScriptEntity->mE6;
-        pFieldScriptEntity->m104_rotation = pFieldScriptEntity->m104_rotation | 0x8000;
+        pFieldScriptEntity->m104_rotation |= 0x8000;
 
         bMoved = false;
     }
@@ -4381,6 +4382,9 @@ LAB_Field__800830ac:
         stepVector.vx/=2;
         stepVector.vz/=2;
     }
+
+    VALIDATE_FIELD(FCT_MoveCheck, 0x80083120);
+    VALIDATE_STACK_VAR(FCT_MoveCheck, 0x10, stepVector);
 
     pFieldScriptEntity->m30_stepVector.vx = stepVector.vx;
     pFieldScriptEntity->m30_stepVector.vy = stepVector.vy;

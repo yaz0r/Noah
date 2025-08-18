@@ -32,6 +32,7 @@ void validateField_shutdown();
         assert(g_gdbConnection->getRegister(GDBConnection::reg) == value);
 
 void validate(u32, const SVECTOR&);
+void validate(u32, const FP_VEC3&);
 
 #define VALIDATE_REG_PTR(context, reg, value) \
     if (g_gdbConnection && isFieldValidationContextEnabled(context)) \
@@ -41,3 +42,7 @@ void validateXY(u32 psxValue, const sGTE_XY& value);
 #define VALIDATE_XY(context, reg, value) \
     if (g_gdbConnection && isFieldValidationContextEnabled(context)) \
         validateXY(g_gdbConnection->getRegister(GDBConnection::reg), value);
+
+#define VALIDATE_STACK_VAR(context, stackOffset, value) \
+    if(g_gdbConnection && isFieldValidationContextEnabled(context)) \
+        validate(g_gdbConnection->getRegister(GDBConnection::REG_Names::SP) + stackOffset, value);

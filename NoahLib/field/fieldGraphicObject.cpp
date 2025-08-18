@@ -10,7 +10,6 @@
 int battleDefaultEntityScale = 0x2000;
 int fieldDrawEnvsInitialized = 0;
 s8 isBattleOverlayLoaded = 0;
-s32 initFieldVar2 = 0;
 int initFieldVar4 = 0;
 int initFieldVar5 = 0;
 int loadVramSpriteParam = 0;
@@ -2082,7 +2081,9 @@ sSpriteActor* initializeSpriteActor(sSpriteActor* param_1, sSpriteActorAnimation
 	}
 
 	param_1->m6C_pointerToOwnerStructureSpriteActor = param_1;
-	param_1->m3C = param_1->m3C & 0xff00ffff | (initFieldVar2 & 0xf) << 0x14 | (initFieldVar2 & 0xf) << 0x10;;
+    param_1->m3C &= ~0xFF0000;
+    param_1->m3C |= (loadVramSpriteParam & 0xf) << 0x14;
+    param_1->m3C |= (loadVramSpriteParam & 0xf) << 0x10;
 
 	int count = initFieldEntitySub4Sub4(&pSetup->m8_pData);
 	param_1->m20->getAsSprite()->m2C = param_1->m20->getAsSprite()->m30 = new std::vector<sFieldEntitySub4_B4_sub>;

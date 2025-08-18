@@ -88,18 +88,12 @@ void validate(u32 psxBase, const T* pPtr) {
     }
 }
 
-template <typename T, size_t N>
-void validate(u32 psxBase, const std::array<T, N> array) {
-    if constexpr (!std::is_compound<T>()) {
-        for (int i = 0; i < N; i++) {
-            validate(psxBase + i * sizeof(T), array[i]);
-        }
-    }
-    else {
-        for (int i = 0; i < N; i++) {
-            validate(psxBase + i * T::GetPSXSize(), array[i]);
-        }
-    }
+//template
+//void validate<FP_VEC3>(u32 psxBase, const FP_VEC3* pPtr);
+
+template<>
+size_t GetPSXSize<SVECTOR>() {
+    return 2 * 4;
 }
 
 void validate(u32 psxBase, const sSpriteActorCore& pSpriteActorCore) {
