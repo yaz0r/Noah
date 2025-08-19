@@ -4002,13 +4002,20 @@ int updateEntityEventCode3Sub4Sub1(FP_VEC3* deltaStep, VECTOR* position, sFieldS
             }
         }
 
+        u32 uVar4;
         // todo: does this really happen to be -1?
         if (triangleId == -1)
         {
-            assert(0); // This can happen in the game code, behavior is then very undefined as we will access triangle -1
-            return -1;
+            Hack("Prevent out of bound access in walkmesh code");
+            // Game will happily load the data for triangle -1, and use its material ID.
+            // In practice, this seems to (usually) result in material ID 0 to be used.
+            // The results will end up being thrown away, but this just make validation harder
+            uVar4 = (*walkMeshVar1)[0] & mask;
         }
-        u32 uVar4 = ((*walkMeshVar1)[pWalkMeshTriangles[triangleId].mC_indexInWalkmeshData1]) & mask;
+        else {
+            uVar4 = ((*walkMeshVar1)[pWalkMeshTriangles[triangleId].mC_indexInWalkmeshData1]) & mask;
+        }
+        
         if ((((local_58->m0_fieldScriptFlags.m_rawFlags >> 9 & 3 & uVar4 >> 3) != 0) || ((local_58->m0_fieldScriptFlags.m_rawFlags >> 8 & 7 & uVar4 >> 5) != 0)) || (((uVar4 & 0x800000) != 0 && (local_58->m10_walkmeshId == 0)))) {
             triangleId = -1;
             break;
