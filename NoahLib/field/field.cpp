@@ -2970,6 +2970,12 @@ void initFontSystem()
     initFontPalettes(0x100, 0xf0);
 }
 
+
+void flushFrame() {
+    DrawSync(0);
+    VSync(0);
+}
+
 u8 returnToFieldFromBattleSpecial = 0;
 
 void bootField()
@@ -3008,9 +3014,16 @@ void bootField()
         fieldGraphicsUploaded = 0;
         MissingCode();
     }
-
     MissingCode();
-
+    if (worldmapSoundFilesPendingCount != 0) {
+        startMusicInstanceSub0(pMusic);
+        freeSoundInstance(pMusic);
+        unloadWds(worldmapWdsResult);
+        worldmapSoundFilesPendingCount = 0;
+    }
+    MissingCode();
+    fieldScriptEntityAlreadyInitialized = 0;
+    flushFrame();
     resetInputs();
     fieldMusicLoadPending = 0;
     if (menuReturnState0 == 1) {
@@ -8037,11 +8050,6 @@ void renderFullScreenTransitionEffect() {
 bool isFieldTransitionPermittedByLoading() {
     MissingCode();
     return false;
-}
-
-void flushFrame() {
-    DrawSync(0);
-    VSync(0);
 }
 
 void startFieldTransition(void) {

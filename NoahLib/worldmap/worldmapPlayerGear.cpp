@@ -75,6 +75,7 @@ int createWorldmapGear(sWorldmapStateEntry* param_1, int param_2)
             (param_1->m28_position).vz = 0;
             (param_1->m28_position).vx = 0;
             break;
+        case 5:
         case 7:
             createGearSpriteActor(param_1, param_2);
             param_1->m24 = 0;

@@ -786,7 +786,7 @@ void worldmapMode0_free(void) {
     if (exitWorldMapMode == 0) {
         playBattleMusic(pMusic, 0, 0xf0);
     }
-    MissingCode();
+    stopAllSounds();
     unloadSequence(fieldSeq);
     delete fieldSeq; fieldSeq = nullptr;
     MissingCode();

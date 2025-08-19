@@ -554,3 +554,15 @@ void PlaySoundEffect2(int param_1, uint param_2, int param_3, int param_4)
     }
     return;
 }
+
+void stopAllSounds() {
+    DisableEvent(audioTickEvent);
+    for (int i = 0; i < numMaxSoundEffectInstances; i++) {
+        auto& instance = pSoundEffectsInstances->m94_events[i];
+        if (instance.m0 & 1) {
+            instance.m0 = 0;
+            playSoundEffectSubSub0(&instance.m30, instance.m27);
+        }
+    }
+    EnableEvent(audioTickEvent);
+}

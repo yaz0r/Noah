@@ -183,3 +183,4 @@ void StopSoundEffect(uint param_1);
 void PlaySoundEffect2(int param_1, uint param_2, int param_3, int param_4);
 
 void playBattleMusic(sSoundInstance* param_1, int param_2, int param_3);
+void stopAllSounds();

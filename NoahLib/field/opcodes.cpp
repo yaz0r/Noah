@@ -731,7 +731,7 @@ void checkForRandomEncounter()
 
     if (((((playMusicAuthorized != 0) && (fieldExecuteVar3 != 0)) && (fieldChangePrevented != 0)) &&
         ((fieldMusicLoadPending != -1 && (encounterTimer != 0)))) &&
-        ((fieldRandomBattleVar != -1 && ((loadCompleted != 1 && (/*fieldTransitionCompleted != 0*/ -1 != 0))))))
+        ((fieldRandomBattleVar != -1 && ((loadCompleted != 1 && (fieldTransitionCompleted != 0))))))
     {
         encounterDataCountdown--;
         if (encounterDataCountdown == 0) {
