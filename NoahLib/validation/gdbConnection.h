@@ -7,7 +7,7 @@ public:
     bool openConnection(const std::string& server, u16 port);
     void closeConnection();
 
-    std::vector<u8> readMemory(u64 address, size_t size);
+    bool readMemory(u64 address, void* buffer, size_t size);
     void writeMemory(u64 address, const void* buffer, size_t size);
 
     u8 readU8(u64 address);

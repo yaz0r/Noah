@@ -183,14 +183,12 @@ std::vector<u8> decodeMemoryResponse(const std::string& response) {
     return decoded;
 }
 
-std::vector<u8> GDBConnection::readMemory(u64 address, size_t size) {
+bool GDBConnection::readMemory(u64 address, void* buffer, size_t size) {
     if (m_wramSharedMemory) {
         u8* pPtrBase = m_wramSharedMemory->getPtr();
         pPtrBase += address & 0x007FFFFF;
-        std::vector<u8> data;
-        data.resize(size);
-        memcpy(data.data(), pPtrBase, size);
-        return data;
+        memcpy(buffer, pPtrBase, size);
+        return true;
     }
     else {
         std::string packet = createPacket(std::format("m{:X},{:X}", address, size));
@@ -199,7 +197,7 @@ std::vector<u8> GDBConnection::readMemory(u64 address, size_t size) {
 
         auto receivedData = parsePacket(receivedPacket);
         if (!receivedData.has_value())
-            return {};
+            return false;
 
         sendAck(m_socket);
 
@@ -207,8 +205,8 @@ std::vector<u8> GDBConnection::readMemory(u64 address, size_t size) {
             return {};
 
         auto data = decodeMemoryResponse(*receivedData);
-        data.resize(size);
-        return data;
+        memcpy(buffer, data.data(), size);
+        return true;
     }
 }
 
@@ -411,18 +409,21 @@ void GDBConnection::executeUntilAddress(u32 address) {
 }
 
 u8 GDBConnection::readU8(u64 address) {
-    std::vector<u8> data = readMemory(address, 1);
-    return (*(u8*)data.data());
+    u8 data;
+    readMemory(address, &data, 1);
+    return data;
 }
 
 u16 GDBConnection::readU16(u64 address) {
-    std::vector<u8> data = readMemory(address, 2);
-    return (*(u16*)data.data());
+    u16 data;
+    readMemory(address, &data, 2);
+    return data;
 }
 
 u32 GDBConnection::readU32(u64 address) {
-    std::vector<u8> data = readMemory(address, 4);
-    return (*(u32*)data.data());
+    u32 data;
+    readMemory(address, &data, 4);
+    return data;
 }
 
 void GDBConnection::writeU32(u64 address, u32 value) {
