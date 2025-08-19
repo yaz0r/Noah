@@ -3731,9 +3731,11 @@ int updateEntityEventCode3Sub3Sub1(FP_VEC3* param_1, VECTOR* param_2, sFieldScri
                 if (NormalClip(vert1, refPos, refPos2) < 0)
                 {
                     triangleId = pTriangle.m6_connectivity[0];
+                    collisionFlag = 1;
                 }
                 else {
                     triangleId = pTriangle.m6_connectivity[1];
+                    collisionFlag = 2;
                 }
                 break;
             case 4:
@@ -3743,18 +3745,22 @@ int updateEntityEventCode3Sub3Sub1(FP_VEC3* param_1, VECTOR* param_2, sFieldScri
                 if (NormalClip(vert0, refPos, refPos2) < 0)
                 {
                     triangleId = pTriangle.m6_connectivity[2];
+                    collisionFlag = 4;
                 }
                 else {
                     triangleId = pTriangle.m6_connectivity[0];
+                    collisionFlag = 1;
                 }
                 break;
             case 6:
                 if (NormalClip(vert2, refPos, refPos2) < 0)
                 {
                     triangleId = pTriangle.m6_connectivity[1];
+                    collisionFlag = 2;
                 }
                 else {
                     triangleId = pTriangle.m6_connectivity[2];
+                    collisionFlag = 4;
                 }
                 break;
             case 7:
@@ -3783,6 +3789,7 @@ int updateEntityEventCode3Sub3Sub1(FP_VEC3* param_1, VECTOR* param_2, sFieldScri
         VALIDATE_FIELD(FCT_MoveCheck, 0x8007c284);
         VALIDATE_REG(FCT_MoveCheck, S0, triangleId);
         VALIDATE_REG(FCT_MoveCheck, A0, uVar3);
+        VALIDATE_REG(FCT_MoveCheck, S2, collisionFlag);
 
         *param_7 = uVar3;
 
@@ -4490,7 +4497,7 @@ void  startScriptsForCollisions(uint playerEntityIndex, sFieldEntity* pPlayerEnt
                 else {
                     if ((((padButtonForDialogs & controllerButtons::INTERACT) == 0) || (bTrigger)) || ((pTestedScriptEntity->m4_flags.m_rawFlags & 0x4000000) != 0)) {
                         if ((pTestedScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0xa20000) == 0) {
-                            scriptIndexToStart = '\x03';
+                            scriptIndexToStart = 3;
                             newValueInFlags = 4;
                             VECTOR tempVec1;
                             tempVec1.vx = (((int)(pTestedScriptEntity->m20_position).vx.getIntegerPart()) - pPlayerScriptEntity->m20_position.vx.getIntegerPart()) + (int)pTestedScriptEntity->m60[0];
@@ -4507,7 +4514,7 @@ void  startScriptsForCollisions(uint playerEntityIndex, sFieldEntity* pPlayerEnt
                     else {
                         if (((pTestedScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x220000) == 0) && (windowOpenBF == 0)) {
                             bTrigger = true;
-                            scriptIndexToStart = '\x02';
+                            scriptIndexToStart = 2;
                             newValueInFlags = 3;
                             VECTOR tempVec1;
                             tempVec1.vx = (((int)(pTestedScriptEntity->m20_position).vx.getIntegerPart()) - pPlayerScriptEntity->m20_position.vx.getIntegerPart()) + (int)pTestedScriptEntity->m60[0];
@@ -5502,7 +5509,7 @@ void updatePartyFollowLeader() {
                         if (!uVar7.mx800_isJumping) {
                             pScriptEntity->m4_flags.m_rawFlags &= ~0x1000;
                             if ((pScriptEntity->m14_currentTriangleFlag & 0x420000U) != 0)
-                                assert(0);
+                                goto LAB_Field__800818c8;
                             if (entityUpdateVar0 != -1) {
                                 int iVar8 = 0x14;
                                 if (partyPosition == 1) {
