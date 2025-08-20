@@ -228,7 +228,7 @@ void resetCameraData()
 int linkOTIndex;
 s8 g_PartyFollowDisabled = 0;
 char fieldObjectRenderingVar3 = 0;
-char noUpdatesToPartyMemebers = 0;
+char noUpdatesToPartyMembers = 0;
 int onlyUpdateDirector = 0;
 s16 playerCanRun = 1;
 s32 updateEntityEventCode3Var0 = 0;
@@ -281,7 +281,7 @@ void resetFieldDefault()
     fieldBackgroundClearColor[2] = 0;
     fieldBackgroundClearColor[1] = 0;
     fieldBackgroundClearColor[0] = 0;
-    noUpdatesToPartyMemebers = 0;
+    noUpdatesToPartyMembers = 0;
     g_PartyFollowDisabled = 0;
     fieldObjectRenderingVar3 = 0;
     onlyUpdateDirector = 0;
@@ -3401,7 +3401,7 @@ void exectueEntitiesUpdateFunction()
             pCurrentFieldEntity = pFieldEntity;
 
             int maxScriptIndex = 0xF;
-            if (noUpdatesToPartyMemebers)
+            if (noUpdatesToPartyMembers)
             {
                 assert(0);
             }
@@ -3460,7 +3460,7 @@ void computeDeltaMove(VECTOR* param_1, int param_2, uint param_3)
 void updateEntityEventCode2(int index, sFieldEntity* pFieldEntity, sFieldScriptEntity* pFieldScriptEntity)
 {
     sWalkmeshTriangleFlags triangleFlags = 0;
-    if (((pFieldScriptEntity->m4_flags.m_rawFlags >> ((int)(short)pFieldScriptEntity->m10_walkmeshId + 3U & 0x1f) & 1) == 0) && (noUpdatesToPartyMemebers == '\0')) {
+    if (((pFieldScriptEntity->m4_flags.m_rawFlags >> ((int)(short)pFieldScriptEntity->m10_walkmeshId + 3U & 0x1f) & 1) == 0) && (noUpdatesToPartyMembers == '\0')) {
         triangleFlags = pFieldScriptEntity->m14_currentTriangleFlag;
     }
 
@@ -3673,7 +3673,7 @@ int updateEntityEventCode3Sub3Sub1(FP_VEC3* param_1, VECTOR* param_2, sFieldScri
 
     u32 mask = 0;
     if ((pFieldScriptEntity->m4_flags.m_rawFlags >> ((int)pFieldScriptEntity->m10_walkmeshId + 3U & 0x1f) & 1) == 0) {
-        mask = -(s32)(noUpdatesToPartyMemebers == '\0');
+        mask = -(s32)(noUpdatesToPartyMembers == '\0');
     }
 
     int local_38;
@@ -3916,7 +3916,7 @@ int updateEntityEventCode3Sub4Sub1(FP_VEC3* deltaStep, VECTOR* position, sFieldS
     u32 mask = 0;
 
     if ((pFieldScriptEntity->m4_flags.m_rawFlags >> ((int)pFieldScriptEntity->m10_walkmeshId + 3U & 0x1f) & 1) == 0) {
-        mask = -(s32)(noUpdatesToPartyMemebers == '\0');
+        mask = -(s32)(noUpdatesToPartyMembers == '\0');
     }
 
     int tempTriangleId;
@@ -4275,16 +4275,16 @@ void updateEntityEventCode3(int index, sFieldEntity* pFieldEntity, sFieldScriptE
         return;
     }
 
-    int animationId = 1;
+    int walkSpeed = 1;
     if (((pFieldScriptEntity->m0_fieldScriptFlags.m14_isPlayerControlled) && ((padButtonForScripts[0].m0_buttons & controllerButtons::CROSS) != 0)) && (playerCanRun == 1)) {
-        animationId = 2; // run
+        walkSpeed = 2; // run
     }
-    if (((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x1800) != 0) && (pFieldScriptEntity->mE8_currentAnimationId != animationId)) {
+    if (((pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x1800) != 0) && (pFieldScriptEntity->mE8_currentAnimationId != walkSpeed)) {
         if (pFieldScriptEntity->mE8_currentAnimationId == 1) {
-            animationId = 1;
+            walkSpeed = 1;
         }
         else if (pFieldScriptEntity->mE8_currentAnimationId == 2) {
-            animationId = 2;
+            walkSpeed = 2;
         }
     }
 
@@ -4360,7 +4360,7 @@ void updateEntityEventCode3(int index, sFieldEntity* pFieldEntity, sFieldScriptE
     }
     else
     {
-        animationId = pFieldScriptEntity->mE6;
+        walkSpeed = pFieldScriptEntity->mE6;
         pFieldScriptEntity->m104_rotation |= 0x8000;
 
         bMoved = false;
@@ -4378,11 +4378,13 @@ void updateEntityEventCode3(int index, sFieldEntity* pFieldEntity, sFieldScriptE
 
     pFieldScriptEntity->m4_flags.m_rawFlags &= ~0x1000;
 
+    int animationId = walkSpeed;
     if (!pFieldScriptEntity->m0_fieldScriptFlags.mx800_isJumping) {
         if (((int)pFieldScriptEntity->m104_rotation & 0x8000U) != 0) {
-            animationId = pFieldScriptEntity->mE6;
+            walkSpeed = pFieldScriptEntity->mE6;
         }
         moveMask = getWalkmeshTriangleFlag(pFieldScriptEntity);
+        animationId = walkSpeed;
         if ((moveMask & 0x200000) != 0) {
             if (((int)pFieldScriptEntity->m104_rotation & 0x8000U) != 0) {
                 animationId = 6;
@@ -4401,7 +4403,7 @@ void updateEntityEventCode3(int index, sFieldEntity* pFieldEntity, sFieldScriptE
                 animationId = jumpAnimationId;
             }
             else {
-                if (animationId == 2) {
+                if (walkSpeed == 2) {
                     pFieldEntity->m4_pVramSpriteSheet->m18_moveSpeed = pFieldEntity->m4_pVramSpriteSheet->m82 * 0x60;
                     animationId = jumpAnimationId;
                 }
@@ -4802,7 +4804,7 @@ void EntityMoveCheck0(uint playerEntityIndex, sFieldEntity* pPlayerEntity, sFiel
                 if (testedEntityY == 0) {
                 LAB_Field__80084438:
                     if ((pPlayerScriptEntity->m14_currentTriangleFlag & 0x400000U) == 0) {
-                        if ((((pCurrentFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags | playerFlags.m_rawFlags) & 0x80) == 0) && (noUpdatesToPartyMemebers == 0)) {
+                        if ((((pCurrentFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags | playerFlags.m_rawFlags) & 0x80) == 0) && (noUpdatesToPartyMembers == 0)) {
                             testedEntityY = pCurrentFieldScriptEntity->m20_position.vy.getIntegerPart();
                             testedEntityYWithOffset = testedEntityY - pCurrentFieldScriptEntity->m18_boundingVolume.vy;
                             goto LAB_Field__800844b8;
@@ -4981,7 +4983,7 @@ s32 EntityMoveCheck1Sub1(sFieldScriptEntity* pFieldScriptEntity, int walkmeshId,
 
     int mask = 0;
     if ((pFieldScriptEntity->m4_flags.m_rawFlags >> (walkmeshId + 3U & 0x1f) & 1) == 0) {
-        mask = -(s32)(noUpdatesToPartyMemebers == '\0');
+        mask = -(s32)(noUpdatesToPartyMembers == '\0');
     }
 
     int oldWalkmeshId = walkmeshId;
@@ -5138,7 +5140,7 @@ void initFollowStructForPlayer(s32 entityIndex) {
     sFieldScriptEntity* pScriptEntity = actorArray[entityIndex].m4C_scriptEntity;
     sSpriteActor* pSpriteActor = actorArray[entityIndex].m4_pVramSpriteSheet;
     if (entityIndex == g_playerControlledActor) {
-        if (!noUpdatesToPartyMemebers) {
+        if (!noUpdatesToPartyMembers) {
             followDataTable[partyToFollowStructMapping[0]].m20.vx = (pSpriteActor->m0_spriteActorCore).mC_step.vx;
             followDataTable[partyToFollowStructMapping[0]].m20.vy = (pSpriteActor->m0_spriteActorCore).mC_step.vy;
             followDataTable[partyToFollowStructMapping[0]].m20.vz = (pSpriteActor->m0_spriteActorCore).mC_step.vz;
@@ -5626,14 +5628,14 @@ void updateScriptAndMoveEntities()
 
     if (fieldDebugDisable == 0)
     {
-        assert(0); // "MOV CHECK0"
+        logFieldRenderingEvent("MOV CHECK0");
     }
 
     EntityMoveCheck0(g_playerControlledActor, &actorArray[g_playerControlledActor], actorArray[g_playerControlledActor].m4C_scriptEntity);
 
     if (fieldDebugDisable == 0)
     {
-        assert(0); // "MOV CHECK1"
+        logFieldRenderingEvent("MOV CHECK1");
     }
 
     VALIDATE_FIELD(FCT_MoveCheck, 0x8008141C);
@@ -5663,9 +5665,9 @@ void updateScriptAndMoveEntities()
     VALIDATE_FIELD(FCT_MoveCheck, 0x80081518);
 
     if (fieldDebugDisable == 0) {
-        assert(0);
+        logFieldRenderingEvent("MOV CHECK2");
     }
-    if ((fieldRandomBattleVar == 0) && (noUpdatesToPartyMemebers == '\0')) {
+    if (!fieldRandomBattleVar && !noUpdatesToPartyMembers) {
         startScriptsForCollisions(g_playerControlledActor, &actorArray[g_playerControlledActor], actorArray[g_playerControlledActor].m4C_scriptEntity);
     }
 
@@ -5674,7 +5676,7 @@ void updateScriptAndMoveEntities()
 
     if (fieldDebugDisable == 0)
     {
-        assert(0); // "MOV CHECK3"
+        logFieldRenderingEvent("MOV CHECK3");
     }
 }
 

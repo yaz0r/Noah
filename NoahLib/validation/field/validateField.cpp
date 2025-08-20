@@ -57,14 +57,17 @@ void EntityMoveCheck0_detour(uint playerEntityIndex, sFieldEntity* pPlayerEntity
 DECLARE_HOOK_VOID(updateScriptAndMoveEntities, void);
 void updateScriptAndMoveEntities_detour() {
     // go to start of function and validate input state
-    g_gdbConnection->executeUntilAddress(0x8008110c);
-    validateField();
-
+    if (isFieldValidationContextEnabled(FCT_MoveCheck)) {
+        g_gdbConnection->executeUntilAddress(0x8008110c);
+        validateField();
+    }
     updateScriptAndMoveEntities_intercept.callUndetoured();
 
-    // go to end of function and validate state
-    g_gdbConnection->executeUntilAddress(0x800815e8);
-    validateField();
+    if (isFieldValidationContextEnabled(FCT_MoveCheck)) {
+        // go to end of function and validate state
+        g_gdbConnection->executeUntilAddress(0x800815e8);
+        validateField();
+    }
 }
 
 DECLARE_HOOK_VOID(initFieldData, void);

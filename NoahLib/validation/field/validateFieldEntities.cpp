@@ -111,6 +111,8 @@ void validate(u32 psxBase, const sSpriteActorCore& pSpriteActorCore) {
     validate(psxBase + 0x38, pSpriteActorCore.m38);
     validate(psxBase + 0x3A, pSpriteActorCore.m3A);
     validate(psxBase + 0x3C, pSpriteActorCore.m3C);
+    //...
+    validate(psxBase + 0x82, pSpriteActorCore.m82);
 
 }
 
