@@ -643,6 +643,7 @@ void resetFieldScriptEntityValues(int index)
     {
         pFieldScriptEntity->m8C_scriptSlots[i].m2_delay = 0;
         pFieldScriptEntity->m8C_scriptSlots[i].m0_scriptPC = -1;
+        pFieldScriptEntity->m8C_scriptSlots[i].m3_scriptIndex = -1;
         pFieldScriptEntity->m8C_scriptSlots[i].m4_flags.m16_status = 0;
         pFieldScriptEntity->m8C_scriptSlots[i].m4_flags.m18 = 0xF;
         pFieldScriptEntity->m8C_scriptSlots[i].m4_flags.m22 = 0;
@@ -1267,7 +1268,7 @@ int spriteWalkToPositionOrActor(int param_1)
     int destinationZ;
 
     int lVar13 = 0;
-    int lVar14 = 0;
+    int collisionRadius = 0;
 
     s32 stepLength = length1d(actorArray[currentFieldActorId].m4_pVramSpriteSheet->m18_moveSpeed >> 15);
 
@@ -1289,7 +1290,7 @@ int spriteWalkToPositionOrActor(int param_1)
         {
             return 0;
         }
-        lVar14 = length1d(actorArray[readCharacter(1)].m4C_scriptEntity->m1E_collisionRadius + pCurrentFieldScriptActor->m1E_collisionRadius);
+        collisionRadius = length1d(actorArray[readCharacter(1)].m4C_scriptEntity->m1E_collisionRadius + pCurrentFieldScriptActor->m1E_collisionRadius);
         destinationX = actorArray[readCharacter(1)].m4C_scriptEntity->m20_position.vx >> 16;
         destinationZ = actorArray[readCharacter(1)].m4C_scriptEntity->m20_position.vz >> 16;
         if (pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1] == g_playerControlledActor)
@@ -1310,13 +1311,13 @@ int spriteWalkToPositionOrActor(int param_1)
     travelDelta[1] = 0;
     travelDelta[2] = destinationZ - currentZ;
 
-    pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags |= 0x400000;
-
     // Reached destination yet?
     s32 distanceToDestination = length2d(travelDelta[0], travelDelta[2]);
 
+    pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags |= 0x400000;
+
     if ((pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0 == 0) ||
-        (distanceToDestination <= (stepLength + 1 + lVar14)))
+        (distanceToDestination <= (stepLength + 1 + collisionRadius)))
     {
         //reached location
         if (param_1 == 0)
@@ -1335,10 +1336,11 @@ int spriteWalkToPositionOrActor(int param_1)
             }
         }
 
-        pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0 = 0xFFFF;
+        pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0 = -1;
         pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m23_walkMode = 0;
         pCurrentFieldScriptActor->m0_fieldScriptFlags.mx800_isJumping = 0;
         pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags &= ~0x2200000;
+       
         return 0;
     }
     else
@@ -1346,6 +1348,7 @@ int spriteWalkToPositionOrActor(int param_1)
         pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0--;
         pCurrentFieldScriptActor->m106_currentRotation = pCurrentFieldScriptActor->m104_rotation = fp_atan2(travelDelta);
         breakCurrentScript = 1;
+        
         return -1;
     }
 }
@@ -1777,9 +1780,9 @@ void executeFieldScript(int param)
                 return;
             }
 
-            //_CrtCheckMemory();
+            VALIDATE_FIELD(FCT_Script, 0x800a1f68);
             fieldScriptOpcodes[opcodeId]();
-            //_CrtCheckMemory();
+            VALIDATE_FIELD(FCT_Script, 0x800a1f78);
 
             if (currentScriptFinished == 0) {
                 fieldExectuteMaxCycles = 0xffff;

@@ -202,11 +202,11 @@ int updateEntityEventCode3Sub3Sub1_detour(FP_VEC3* deltaStep, VECTOR* position, 
     return result;
 }
 
-bool bDebugEntityMoves = true;
 
 void validateField_init() {
     enableFieldValidationContext(FCT_Base);
     enableFieldValidationContext(FCT_Init);
+    //enableFieldValidationContext(FCT_Script);
     //enableFieldValidationContext(FCT_MoveCheck);
     //enableFieldValidationContext(FCT_Rendering);
 
@@ -215,27 +215,25 @@ void validateField_init() {
     isLoadCompleted_intercept.enable();
     initFieldData_intercept.enable();
     startAllEntityScripts_intercept.enable();
-    if (bDebugEntityMoves) {
-        updateScriptAndMoveEntities_intercept.enable();
-        EntityMoveCheck0_intercept.enable();
-        updateEntityEventCode3_intercept.enable();
-        updateEntityEventCode3Sub3_intercept.enable();
-        updateEntityEventCode3Sub4_intercept.enable();
-        updateEntityEventCode3Sub4Sub1_intercept.enable();
-        updateEntityEventCode3Sub3Sub1_intercept.enable();
-    }
+
+    updateScriptAndMoveEntities_intercept.enable();
+    EntityMoveCheck0_intercept.enable();
+    updateEntityEventCode3_intercept.enable();
+    updateEntityEventCode3Sub3_intercept.enable();
+    updateEntityEventCode3Sub4_intercept.enable();
+    updateEntityEventCode3Sub4Sub1_intercept.enable();
+    updateEntityEventCode3Sub3Sub1_intercept.enable();
 }
 
 void validateField_shutdown() {
-    if (bDebugEntityMoves) {
-        updateEntityEventCode3Sub3Sub1_intercept.disable();
-        updateEntityEventCode3Sub4Sub1_intercept.disable();
-        updateEntityEventCode3Sub4_intercept.disable();
-        updateEntityEventCode3Sub3_intercept.disable();
-        updateEntityEventCode3_intercept.disable();
-        EntityMoveCheck0_intercept.disable(); 
-        updateScriptAndMoveEntities_intercept.disable();
-    }
+    updateEntityEventCode3Sub3Sub1_intercept.disable();
+    updateEntityEventCode3Sub4Sub1_intercept.disable();
+    updateEntityEventCode3Sub4_intercept.disable();
+    updateEntityEventCode3Sub3_intercept.disable();
+    updateEntityEventCode3_intercept.disable();
+    EntityMoveCheck0_intercept.disable();
+    updateScriptAndMoveEntities_intercept.disable();
+
     startAllEntityScripts_intercept.disable();
     initFieldData_intercept.disable();
     isLoadCompleted_intercept.disable();

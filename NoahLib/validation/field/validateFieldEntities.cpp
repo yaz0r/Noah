@@ -121,6 +121,17 @@ void validate(u32 psxBase, const sSpriteActor& pSpriteActor) {
     //...
 }
 
+template<>
+size_t GetPSXSize<sFieldScriptEntityScriptSlot>() {
+    return 8;
+}
+void validate(u32 psxBase, const sFieldScriptEntityScriptSlot& pSlot) {
+    validate(psxBase + 0x00, pSlot.m0_scriptPC);
+    validate(psxBase + 0x02, pSlot.m2_delay);
+    validate(psxBase + 0x03, pSlot.m3_scriptIndex);
+    validate(psxBase + 0x04, pSlot.m4_flags.raw);
+}
+
 void validate(u32 psxBase, const sFieldScriptEntity& pFieldScriptEntity) {
     validate(psxBase + 0x00, pFieldScriptEntity.m0_fieldScriptFlags.m_rawFlags);
     validate(psxBase + 0x04, pFieldScriptEntity.m4_flags.m_rawFlags);
@@ -141,6 +152,8 @@ void validate(u32 psxBase, const sFieldScriptEntity& pFieldScriptEntity) {
     validate(psxBase + 0x75, pFieldScriptEntity.m75_parentActorId);
     validate(psxBase + 0x76, pFieldScriptEntity.m76);
     validate(psxBase + 0x78, pFieldScriptEntity.m78_stack);
+    //...
+    validate(psxBase + 0x8C, pFieldScriptEntity.m8C_scriptSlots);
     //...
     validate(psxBase + 0xCC, pFieldScriptEntity.mCC_scriptPC);
     //...

@@ -34,7 +34,7 @@ struct sFieldScriptEntityScriptSlot
     s8 m3_scriptIndex = 0;
     union {
         struct {
-            u32 m0 : 16;
+            s32 m0 : 16;
             u32 m16_status : 2;
             u32 m18 : 4;
             u32 m22 : 1;

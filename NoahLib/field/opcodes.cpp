@@ -1350,9 +1350,9 @@ void OP_44()
     {
         pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m23_walkMode = 3;
 
-        pCurrentFieldScriptActor->mD0_targetPositionOffset[0] = pCurrentFieldScriptActor->m20_position.vx >> 0x10;
-        pCurrentFieldScriptActor->mD0_targetPositionOffset[1] = pCurrentFieldScriptActor->m20_position.vy >> 0x10;
-        pCurrentFieldScriptActor->mD0_targetPositionOffset[2] = pCurrentFieldScriptActor->m20_position.vz >> 0x10;
+        pCurrentFieldScriptActor->mD0_targetPositionOffset[0] = pCurrentFieldScriptActor->m20_position.vx.getIntegerPart();
+        pCurrentFieldScriptActor->mD0_targetPositionOffset[1] = pCurrentFieldScriptActor->m20_position.vy.getIntegerPart();
+        pCurrentFieldScriptActor->mD0_targetPositionOffset[2] = pCurrentFieldScriptActor->m20_position.vz.getIntegerPart();
     }
 
     if (pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0 == -1)
@@ -1479,7 +1479,7 @@ void OP_WALK_AND_CHANGE_FIELD()
 void  OP_SPRITE_WALK_TO_POSITION_AND_WAIT()
 {
     pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m23_walkMode = 0;
-    pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0 = 0xffff;
+    pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0 = -1;
     if (spriteWalkToPositionOrActor(-1) == 0) {
         ADVANCE_VM(0x6);
     }
@@ -1488,7 +1488,7 @@ void  OP_SPRITE_WALK_TO_POSITION_AND_WAIT()
 void OP_4B()
 {
     pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m23_walkMode = 0;
-    if (pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0 == 0xFFFF) {
+    if (pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0 == -1) {
         pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0 = getImmediateOrVariableUnsigned(6);
     }
     if (spriteWalkToPositionOrActor(getImmediateOrVariableUnsigned(6)) == 0) {
@@ -1498,7 +1498,7 @@ void OP_4B()
 
 void OP_4C()
 {
-    pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0 = 0xFFFF;
+    pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0 = -1;
     MissingCode();
     ADVANCE_VM(0x8);
 }
@@ -1506,7 +1506,7 @@ void OP_4C()
 void OP_52(void)
 {
     pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m23_walkMode = 2;
-    pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0 = 0xffff;
+    pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0 = -1;
     if (spriteWalkToPositionOrActor(0xffff) == 0) {
         ADVANCE_VM(0x2);
     }
@@ -1516,7 +1516,7 @@ void OP_52(void)
 void OP_FOLLOW_CHARACTER(void)
 {
     pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m23_walkMode = 2;
-    if (pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0 == 0xFFFF)
+    if (pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0 == -1)
     {
         pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0 = getImmediateOrVariableUnsigned(2);
     }
@@ -4749,7 +4749,7 @@ void OP_RUN_ENTITY_SCRIPT_UNKMODE()
                     return;
                 }
 
-                u8 param = pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 2] & 0x1f;
+                u8 param = pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 2];
                 u8 scriptId = param & 0x1F;
 
                 pEntity->m8C_scriptSlots[foundSlot].m0_scriptPC = getScriptEntryPoint(entityId, scriptId);
