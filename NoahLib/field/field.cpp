@@ -6662,12 +6662,12 @@ std::array<SVECTOR, 4> shadowProjectionWorkArea;
 
 void uploadCharacterSpriteSub1(sSpriteActorCore* param_1, int param_2, sFieldEntitySub4_110* param_3)
 {
-    sPS1Pointer puVar16 = param_3->m0_spriteData->rawPointer;
-    sPS1Pointer pbVar13 = puVar16 + READ_LE_U16(puVar16 + param_2 * 2);
+    std::span<u8>::iterator puVar16 = param_3->m0_spriteData->rawPointer;
+    std::span<u8>::iterator pbVar13 = puVar16 + READ_LE_U16(puVar16 + param_2 * 2);
     int iVar23 = READ_LE_U8(pbVar13 + 3) * param_1->m2C_scale;
     int bVar2 = READ_LE_U8(pbVar13);
-    sPS1Pointer local_54 = pbVar13 + 4;
-    sPS1Pointer pbVar18 = pbVar13 + (bVar2 & 0x3f) * 2 + 4;
+    std::span<u8>::iterator local_54 = pbVar13 + 4;
+    std::span<u8>::iterator pbVar18 = pbVar13 + (bVar2 & 0x3f) * 2 + 4;
     std::vector<sFieldEntitySub4_B4_sub>::iterator psVar13 = param_1->m20->getAsSprite()->m30->begin();
     short sVar8 = (short)(iVar23 >> 0xc);
     if (iVar23 < 0) {
@@ -6694,7 +6694,7 @@ void uploadCharacterSpriteSub1(sSpriteActorCore* param_1, int param_2, sFieldEnt
                 u8 transformData = READ_LE_U8(pbVar18);
                 if ((transformData & 0x80) == 0)
                     break;
-                sPS1Pointer pbVar19 = pbVar18 + 1;
+                std::span<u8>::iterator pbVar19 = pbVar18 + 1;
                 if ((transformData & 0x40) == 0) {
                     if ((transformData & 4) != 0) {
                         psVar13->m14.m0x20_tileFlipY = 1;
@@ -6732,7 +6732,7 @@ void uploadCharacterSpriteSub1(sSpriteActorCore* param_1, int param_2, sFieldEnt
                     }
                 }
             }
-            sPS1Pointer pbVar19 = puVar16 + READ_LE_U16(local_54);
+            std::span<u8>::iterator pbVar19 = puVar16 + READ_LE_U16(local_54);
             u8 bVar4 = READ_LE_U8(pbVar19);
             u32 uVar17 = (uint)bVar4;
             local_54 = local_54 + 2;
@@ -6756,9 +6756,9 @@ void uploadCharacterSpriteSub1(sSpriteActorCore* param_1, int param_2, sFieldEnt
                 psVar13->m10_colorAndCode.m3_code |= 2;
             }
             if (((int)uVar17 >> 4 & 1U) == 0) {
-                std::optional<sPS1Pointer> iVar12;
+                std::optional<std::span<u8>::iterator> iVar12;
                 if (((param_1->mA8.mx0) == 1) && (iVar12 = param_1->m7C->m18, iVar12.has_value() != 0)) {
-                    sPS1Pointer puVar11 = iVar12.value() + ((uVar17 & 0xe) * 2);
+                    std::span<u8>::iterator puVar11 = iVar12.value() + ((uVar17 & 0xe) * 2);
                     u16 uVar6 = READ_LE_U16(puVar11 + 2);
                     u16 uVar14 = READ_LE_U16(puVar11);
                     texcoordStartY = uVar6 & 0xff;
@@ -6794,7 +6794,7 @@ void uploadCharacterSpriteSub1(sSpriteActorCore* param_1, int param_2, sFieldEnt
             else {
                 psVar13->m0 = (s16)READ_LE_U8(pbVar18 + 1) | (ushort)(((uint)READ_LE_S8(pbVar18 + 2) << 0x18) >> 0x10);
                 pbVar19 = pbVar18 + 3;
-                sPS1Pointer pbVar1 = pbVar18 + 4;
+                std::span<u8>::iterator pbVar1 = pbVar18 + 4;
                 pbVar18 = pbVar18 + 2;
                 psVar13->m2 = (ushort)READ_LE_U8(pbVar19) | (ushort)(((uint)READ_LE_U8(pbVar1) << 0x18) >> 0x10);
             }
@@ -6827,7 +6827,7 @@ sVec2_s16* allocateSpecialEffectSpriteVram(sVec2_s16* param_1, int param_2) {
 void uploadCharacterSprite(sSpriteActorCore* param_1, int spriteFrame, sFieldEntitySub4_110* param_3)
 {
     param_1->m40 &= ~0x000a0000;
-    sPS1Pointer dataPtr = param_3->m0_spriteData->rawPointer;
+    std::span<u8>::iterator dataPtr = param_3->m0_spriteData->rawPointer;
     if (spriteFrame < param_3->m0_spriteData->m0_header.mx01FF_frameCount + 1) {
         if ((param_1->m3C >> 0x1e & 1) != 0) {
             param_1->m3C &= ~0x40000000;
@@ -6842,7 +6842,7 @@ void uploadCharacterSprite(sSpriteActorCore* param_1, int spriteFrame, sFieldEnt
         if (!param_3->m0_spriteData->m0_header.mx8000_isVramPrebacked) {
             // character sprite needs to be uploaded every frame (playable characters)
             sVec2_s16 vramLocation = param_1->m24_vramData->m4_vramLocation;
-            sPS1Pointer framePtr = param_3->m0_spriteData->m4_frames[spriteFrame].rawPointer;
+            std::span<u8>::iterator framePtr = param_3->m0_spriteData->m4_frames[spriteFrame].rawPointer;
             sFieldEntitySub4_110_0_frame& frame = param_3->m0_spriteData->m4_frames[spriteFrame];
 
             if ((param_1->m40 >> 0xd & 0xf) == 0xe) {
@@ -6851,8 +6851,8 @@ void uploadCharacterSprite(sSpriteActorCore* param_1, int spriteFrame, sFieldEnt
 
             u8 frameHeader = READ_LE_U8(framePtr);
             u8 numSubSprites = (frameHeader & 0x3f);
-            sPS1Pointer puVar19 = framePtr + 6;
-            sPS1Pointer pSubSprite = framePtr + 6 + numSubSprites * 4;
+            std::span<u8>::iterator puVar19 = framePtr + 6;
+            std::span<u8>::iterator pSubSprite = framePtr + 6 + numSubSprites * 4;
             int height = READ_LE_U8(framePtr + 3) * param_1->m2C_scale;
             if (height < 0) {
                 height += 0xfff;
@@ -6900,7 +6900,7 @@ void uploadCharacterSprite(sSpriteActorCore* param_1, int spriteFrame, sFieldEnt
                             }
                         }
                         else {
-                            sPS1Pointer pbVar17 = pSubSprite + 1;
+                            std::span<u8>::iterator pbVar17 = pSubSprite + 1;
                             if (param_1->m20->getAsSprite()->m34_perSubgroupTransform == nullptr) {
                                 param_1->m20->getAsSprite()->m34_perSubgroupTransform = new std::array<sFieldEntitySub4_124, 8>;
                                 resetPerSubgroupTransforms(param_1);
@@ -6922,7 +6922,7 @@ void uploadCharacterSprite(sSpriteActorCore* param_1, int spriteFrame, sFieldEnt
                             }
                         }
                     }
-                    sPS1Pointer pbVar17 = dataPtr + READ_LE_U16(puVar19) * 4;
+                    std::span<u8>::iterator pbVar17 = dataPtr + READ_LE_U16(puVar19) * 4;
 
                     int uVar5 = READ_LE_U16(puVar19 + 2);
                     int uVar6 = READ_LE_U16(pbVar17 + 2);
@@ -6976,7 +6976,7 @@ void uploadCharacterSprite(sSpriteActorCore* param_1, int spriteFrame, sFieldEnt
                     else {
                         pFieldEntitySub4_B4_sub->m0 = (ushort)READ_LE_U8(pSubSprite + 1) | (ushort)(((uint)READ_LE_U8(pSubSprite + 2) << 0x18) >> 0x10);
                         pbVar17 = pSubSprite + 3;
-                        sPS1Pointer pbVar1 = pSubSprite + 4;
+                        std::span<u8>::iterator pbVar1 = pSubSprite + 4;
                         pSubSprite = pSubSprite + 2;
                         pFieldEntitySub4_B4_sub->m2 = (ushort)READ_LE_U8(pbVar17) | (ushort)(((uint)READ_LE_U8(pbVar1) << 0x18) >> 0x10);
                     }

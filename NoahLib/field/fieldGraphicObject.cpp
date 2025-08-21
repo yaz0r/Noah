@@ -37,16 +37,16 @@ void resetPerSubgroupTransforms(sSpriteActorCore* param_1)
 
 void executeSpriteBytecode2Sub0Sub0sub0(sSpriteActorCore* param_1, int param_2, sFieldEntitySub4_110* param_3)
 {
-	sPS1Pointer psVar4 = param_3->m0_spriteData->rawPointer + READ_LE_U16(param_3->m0_spriteData->rawPointer + param_2 * 2);
+	std::span<u8>::iterator psVar4 = param_3->m0_spriteData->rawPointer + READ_LE_U16(param_3->m0_spriteData->rawPointer + param_2 * 2);
 	u32 bVar1 = READ_LE_U8(psVar4);
 	u32 uVar7 = 0;
-	sPS1Pointer pbVar4 = psVar4 + (bVar1 & 0x3f) * 2 + 4;
+	std::span<u8>::iterator pbVar4 = psVar4 + (bVar1 & 0x3f) * 2 + 4;
 	if ((bVar1 & 0x3f) != 0) {
 		do {
 			while (true) {
 				u8 bVar2 = READ_LE_U8(psVar4);
 				if ((bVar2 & 0x80) == 0) break;
-				sPS1Pointer pbVar5 = pbVar4 + 1;
+				std::span<u8>::iterator pbVar5 = pbVar4 + 1;
 				if ((bVar2 & 0x40) == 0) {
 					if ((bVar2 & 1) != 0) {
 						pbVar5 = pbVar4 + 2;
@@ -88,18 +88,18 @@ void executeSpriteBytecode2Sub0Sub0sub0(sSpriteActorCore* param_1, int param_2, 
 
 void executeSpriteBytecode2Sub0Sub0(sSpriteActorCore* param_1, int frameId, sFieldEntitySub4_110* param_3)
 {
-	sPS1Pointer puVar4 = param_3->m0_spriteData->rawPointer;
+	std::span<u8>::iterator puVar4 = param_3->m0_spriteData->rawPointer;
 	if (frameId < param_3->m0_spriteData->m0_header.mx01FF_frameCount + 1) {
 		if ((READ_LE_U16(puVar4) & 0x8000) == 0) {
 			u8 bVar1 = READ_LE_U8(puVar4 + READ_LE_U16(puVar4 + frameId * 2));
 			uint uVar7 = 0;
-			sPS1Pointer pbVar5 = puVar4 + READ_LE_U16(puVar4 + frameId * 2) + (bVar1 & 0x3f) * 4 + 6;
+			std::span<u8>::iterator pbVar5 = puVar4 + READ_LE_U16(puVar4 + frameId * 2) + (bVar1 & 0x3f) * 4 + 6;
 			if ((bVar1 & 0x3f) != 0) {
 				do {
 					while (true) {
 						u8 bVar2 = READ_LE_U8(pbVar5);
 						if ((bVar2 & 0x80) == 0) break;
-						sPS1Pointer pbVar6 = pbVar5 + 1;
+						std::span<u8>::iterator pbVar6 = pbVar5 + 1;
 						if ((bVar2 & 0x40) == 0) {
 							if ((bVar2 & 1) != 0) {
 								pbVar6 = pbVar5 + 2;
@@ -869,7 +869,7 @@ void computeStepFromMoveSpeed(sSpriteActorCore* param1)
 	param1->mC_step.vz = -((getAngleCos((int)param1->m32_direction) >> 2) * iVar2) >> 6;
 }
 
-sStackElement* executeSpriteBytecode2Sub3(sSpriteActorCore* param_1, sPS1Pointer param_2)
+sStackElement* executeSpriteBytecode2Sub3(sSpriteActorCore* param_1, std::span<u8>::iterator param_2)
 {
 	byte bVar1;
 
@@ -2098,7 +2098,7 @@ sSpriteActor* initializeSpriteActor(sSpriteActor* param_1, sSpriteActorAnimation
 
 	setAnimationBundle(param_1, pSetup);
 
-    sPS1Pointer pAnim = param_1->m24_vramData->m10_startOfAnimationContainer->getAnimation(0);
+    std::span<u8>::iterator pAnim = param_1->m24_vramData->m10_startOfAnimationContainer->getAnimation(0);
     param_1->m60_endOfAnimationContainer = pAnim + ((READ_LE_U16(pAnim) & 0x3F) + 1) * 2;
 	spriteActorSetPlayingAnimation(param_1, 0);
 
@@ -2111,7 +2111,7 @@ void getBoundingVolumeFromSprite(sSpriteActor* param_1, int param_2, sFixedPoint
 
     uint uVar5 = startOfAnimation[READ_LE_U16(startOfAnimation + READ_LE_U16(startOfAnimation + 2) + 4) + READ_LE_U16(startOfAnimation + 2) + 4];
 
-    sPS1Pointer spriteRawData = param_1->m24_vramData->m0_spriteData->rawPointer;
+    std::span<u8>::iterator spriteRawData = param_1->m24_vramData->m0_spriteData->rawPointer;
     int iVar3 = uVar5 << 1;
 	if (uVar5 != 0) {
 		uVar5 = uVar5 - 1;

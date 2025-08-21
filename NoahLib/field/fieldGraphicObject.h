@@ -28,7 +28,7 @@ struct sFieldEntitySub4_F4
     s16 mC;
     sVec2_s16 mE_vramLocation;
     s16 m14_actorId;
-    std::optional<sPS1Pointer> m18;
+    std::optional<std::span<u8>::iterator> m18;
     //size ???
 };
 

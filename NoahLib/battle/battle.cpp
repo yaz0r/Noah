@@ -247,7 +247,7 @@ std::array<struct sBackgroundPoly*, 2> battleEnvBackgroundPolys;
 
 std::array<sLoadedMechas*, 32> battleMechas;
 
-void uploadTextureToVram(sPS1Pointer param_1, short param_2, short tpageX, short tpageY, short param_5, short clutX, short clutY);
+void uploadTextureToVram(std::span<u8>::iterator param_1, short param_2, short tpageX, short tpageY, short param_5, short clutX, short clutY);
 
 std::array<sMechaInitVar4, 0x14> battleMechaInitVar4;
 void sMechaModel_init(sModel& modelBlock, sMechaInitVar4* param_2);

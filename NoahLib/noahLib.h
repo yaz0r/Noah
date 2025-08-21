@@ -22,15 +22,6 @@ typedef u8 byte;
 typedef u16 ushort;
 typedef u32 uint;
 
-typedef std::span<u8>::iterator sPS1Pointer;
-
-u8 READ_LE_U8(const sPS1Pointer&);
-s8 READ_LE_S8(const sPS1Pointer&);
-u16 READ_LE_U16(const sPS1Pointer&);
-s16 READ_LE_S16(const sPS1Pointer&);
-u32 READ_LE_U32(const sPS1Pointer&);
-s32 READ_LE_S32(const sPS1Pointer&);
-
 u8 READ_LE_U8(const void* ptr);
 s8 READ_LE_S8(const void* ptr);
 u16 READ_LE_U16(const void* ptr);

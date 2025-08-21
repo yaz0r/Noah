@@ -8,7 +8,7 @@ struct sFieldEntitySub4_110_0_frame {
         rawPointer = data;
     }
 
-    sPS1Pointer rawPointer;
+    std::span<u8>::iterator rawPointer;
 };
 
 struct sFieldEntitySub4_110_0 {
@@ -34,7 +34,7 @@ struct sFieldEntitySub4_110_0 {
 
     std::vector<sFieldEntitySub4_110_0_frame> m4_frames;
 
-    sPS1Pointer rawPointer;
+    std::span<u8>::iterator rawPointer;
 };
 
 struct sSpriteActorAnimationBundle : public sLoadableDataRaw
