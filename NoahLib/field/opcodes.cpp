@@ -4363,7 +4363,7 @@ void OP_DA() {
     ADVANCE_VM(0x11);
 }
 
-void OP_DB()
+void OP_SET_DEFORMATION_STRENGTH()
 {
     int iVar1;
     int iVar2;
@@ -4374,7 +4374,7 @@ void OP_DB()
         iVar2 = 0xfff;
     }
     if ((actorArray[currentFieldActorId].m58_flags & 0x2000) != 0) {
-        pCurrentFieldScriptActor->m118[iVar1] = iVar2;
+        pCurrentFieldScriptActor->m118_deformationStrength[iVar1] = iVar2;
     }
     ADVANCE_VM(0x5);
 }

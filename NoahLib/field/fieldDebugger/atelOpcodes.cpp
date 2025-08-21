@@ -260,7 +260,7 @@ void initOpcodeTable()
 		.end();
 
 	m_opcode[0x39]
-		.setName("SET_VAR_ADD")
+		.setName("SET_VAR_SUBSTRACT")
 		.addArgumentVarIndex()
 		.addArgumentS16OrVar(0x40)
 		.addSignControlByte()
@@ -833,8 +833,9 @@ void initOpcodeTable()
         .end();
 
 	m_opcode[0xDB]
-		.addArgumentU16OrVar()
-		.addArgumentU16OrVar()
+        .setName("SET_DEFORMATION_STRENGTH")
+		.addArgumentU16OrVar("slotIndex")
+		.addArgumentU16OrVar("strength")
 		.end();
 
 	m_opcode[0xE1]

@@ -154,7 +154,7 @@ void initOpcodes()
     fieldScriptOpcodes[0xD7] = OP_SET_OBJECT_SWIVEL_ON_X_AXIS;
     fieldScriptOpcodes[0xD9] = OP_SET_OBJECT_SWIVEL_ON_Z_AXIS;
     fieldScriptOpcodes[0xDA] = OP_DA;
-    fieldScriptOpcodes[0xDB] = OP_DB;
+    fieldScriptOpcodes[0xDB] = OP_SET_DEFORMATION_STRENGTH;
     fieldScriptOpcodes[0xDC] = OP_DC;
     fieldScriptOpcodes[0xDE] = OP_DE;
     fieldScriptOpcodes[0xDF] = OP_DF;

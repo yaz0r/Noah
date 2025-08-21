@@ -132,7 +132,7 @@ struct sFieldScriptEntity
     s8 m10D = 0;
     std::vector<s16> m110_modelRotation2;
     std::vector<sVec2_s16> m114_movementBoundingZone;
-    std::vector<s32> m118;
+    std::vector<s32> m118_deformationStrength;
     s16 m11C = 0;
     s16 m11E = 0;
     struct sSpriteActorAnimationBundle* m120_special2dAnimation = nullptr;

@@ -772,7 +772,7 @@ int fieldModelDynamicVerticesUpdate_nodeIndex;
 int fieldModelDynamicVerticesUpdate_actorIndex;
 
 int fieldModelDynamicVerticesUpdate(sDynamicVerticesData*) {
-    return(actorArray[fieldModelDynamicVerticesUpdate_actorIndex].m4C_scriptEntity->m118[fieldModelDynamicVerticesUpdate_nodeIndex++]);
+    return(actorArray[fieldModelDynamicVerticesUpdate_actorIndex].m4C_scriptEntity->m118_deformationStrength[fieldModelDynamicVerticesUpdate_nodeIndex++]);
 }
 
 void initFieldScriptEntity(int index)
@@ -788,11 +788,11 @@ void initFieldScriptEntity(int index)
 
         if (actorArray[index].m58_flags & 0x2000)
         {
-            pNewFieldScriptEntity->m118.resize(32);
+            pNewFieldScriptEntity->m118_deformationStrength.resize(32);
             if (actorArray[index].m0->m14_dynamicVertices) {
                 for (int i = 0; i < actorArray[index].m0->m14_dynamicVertices->mC_numDynamicVertices; i++) {
                     actorArray[index].m0->m14_dynamicVertices->m10_perVerticeData[i].m0_getScaleFunction = fieldModelDynamicVerticesUpdate;
-                    pNewFieldScriptEntity->m118[i] = 0;
+                    pNewFieldScriptEntity->m118_deformationStrength[i] = 0;
                 }
             }
         }

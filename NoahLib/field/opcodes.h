@@ -150,7 +150,7 @@ void OP_D6();
 void OP_SET_OBJECT_SWIVEL_ON_X_AXIS();
 void OP_SET_OBJECT_SWIVEL_ON_Z_AXIS();
 void OP_DA();
-void OP_DB();
+void OP_SET_DEFORMATION_STRENGTH();
 void OP_DC();
 void OP_DE();
 void OP_DF();
