@@ -187,7 +187,8 @@ void battleSpriteDelete(sTaskHeader*) {
 
 extern int loadVramSpriteParam;
 void initBattleSpriteActorVram(sSpriteActor* param_1, sSpriteActorAnimationBundle* param_2, short clutX, short clutY, short vramX, short vramY, s32 param_7, s32 param_8) {
-    loadVramSpriteParam = param_8;
+    //loadVramSpriteParam = param_8;
+    Hack("Disabled vram sprite param to prevent crash in battle");
     initializeSpriteActor(param_1, param_2, clutX, clutY, vramX, vramY, param_7);
     loadVramSpriteParam = 0;
 }
