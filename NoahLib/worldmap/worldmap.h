@@ -122,16 +122,14 @@ extern std::vector<sWorldmapModel> worldmapModels;
 extern std::array<u16, 0x40> USHORT_ARRAY_8009ccb4;
 extern std::array<u16, 8> USHORT_ARRAY_8009cd54;
 
-extern std::array<struct sSpriteActorAnimationBundle*, 3 > worldmapPartySprites;
-extern std::array<sSpriteActorAnimationBundle*, 3 > worldmapPartyGearSprites;
+extern std::array<struct sSpriteActorAnimationBundle, 3 > worldmapPartySprites;
+extern std::array<sSpriteActorAnimationBundle, 3 > worldmapPartyGearSprites;
 
 extern s32 worldmapNumActivePartyMembers;
 extern u8 adjustLocationAfterCollisionVar0;
 extern u8 targetVehicleEntityIndex;
 
 extern s32 currentWorldmapMode;
-
-extern std::array<sLoadableDataRaw, 3 > worldmapPartyGearSpritesRaw;
 
 s32 worldmapGetAltitudeFor2dPoint(s32 x, s32 y);
 void worldmapEntryPoint(void);

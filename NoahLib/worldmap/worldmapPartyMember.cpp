@@ -23,7 +23,7 @@ s32 worldmapMode0_task_partyMember1_init(s32  param_1) {
         iVar7 = 3;
     }
     else {
-        psVar3 = createSpriteActor(worldmapPartySprites[1], 0x110, 0x1e0, 0x150, 0x100, 0x40);
+        psVar3 = createSpriteActor(&worldmapPartySprites[1], 0x110, 0x1e0, 0x150, 0x100, 0x40);
         psVar1->m0[param_1].m4C = psVar3;
         spriteActorSetPlayingAnimation(psVar3, 0);
         setGraphicEntityScale(&(psVar1->m0[param_1].m4C)->m0_spriteActorCore, 0x1800);
@@ -103,7 +103,7 @@ s32 worldmapMode0_task_partyMember2_init(s32 param_1) {
         uVar7 = 3;
     }
     else {
-        psVar3 = createSpriteActor(worldmapPartySprites[2], 0x120, 0x1e0, 0x160, 0x100, 0x40);
+        psVar3 = createSpriteActor(&worldmapPartySprites[2], 0x120, 0x1e0, 0x160, 0x100, 0x40);
         psVar1->m0[param_1].m4C = psVar3;
         spriteActorSetPlayingAnimation(psVar3, 0);
         setGraphicEntityScale(&(psVar1->m0[param_1].m4C)->m0_spriteActorCore, 0x1800);

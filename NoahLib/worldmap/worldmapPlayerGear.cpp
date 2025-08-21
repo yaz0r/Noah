@@ -20,7 +20,7 @@ void createGearSpriteActor(sWorldmapStateEntry* param_1, int param_2)
     sSpriteActor* psVar1;
     uint uVar2;
 
-    psVar1 = createSpriteActor(worldmapPartyGearSprites[param_2], SHORT_ARRAY_worldmap__8009b18c[param_2], SHORT_ARRAY_worldmap__8009b194[param_2], SHORT_ARRAY_worldmap__8009b19c[param_2],
+    psVar1 = createSpriteActor(&worldmapPartyGearSprites[param_2], SHORT_ARRAY_worldmap__8009b18c[param_2], SHORT_ARRAY_worldmap__8009b194[param_2], SHORT_ARRAY_worldmap__8009b19c[param_2],
         SHORT_ARRAY_worldmap__8009b1a4[param_2], 0x40);
     param_1->m4C = psVar1;
     uVar2 = 3;

@@ -73,10 +73,8 @@ struct sWorldmapModes {
     void (*m8_free)();
 };
 
-std::array<sSpriteActorAnimationBundle*, 3 > worldmapPartySprites;
-std::array<sLoadableDataRaw, 3 > worldmapPartySpritesRaw;
-std::array<sSpriteActorAnimationBundle*, 3 > worldmapPartyGearSprites;
-std::array<sLoadableDataRaw, 3 > worldmapPartyGearSpritesRaw;
+std::array<sSpriteActorAnimationBundle, 3 > worldmapPartySprites;
+std::array<sSpriteActorAnimationBundle, 3 > worldmapPartyGearSprites;
 s32 worldmapNumActivePartyMembers = 0;
 
 std::array<sLoadingBatchCommands, 16> worldmapLoadingCommands;
@@ -91,16 +89,16 @@ sWorldmapCameraState worldmapCameraVector;
 void worldmapMode0_init(void) {
     for (int i = 0; i < 3; i++) {
         if (gameState.m1D34_currentParty[i] == 0xFF) {
-            worldmapPartySpritesRaw[i].clear();
-            worldmapPartyGearSpritesRaw[i].clear();
+            worldmapPartySprites[i].clear();
+            worldmapPartyGearSprites[i].clear();
         }
         else {
-            worldmapPartySpritesRaw[i].resize(getFileSizeAligned(gameState.m1D34_currentParty[i] + 2));
+            worldmapPartySprites[i].resize(getFileSizeAligned(gameState.m1D34_currentParty[i] + 2));
             if (gameState.m26C_party[i].mA0_partyData_gearNum == -1) {
-                worldmapPartyGearSpritesRaw[i].clear();
+                worldmapPartyGearSprites[i].clear();
             }
             else {
-                worldmapPartyGearSpritesRaw[i].resize(getFileSizeAligned(gameState.m26C_party[i].mA0_partyData_gearNum + 0x19));
+                worldmapPartyGearSprites[i].resize(getFileSizeAligned(gameState.m26C_party[i].mA0_partyData_gearNum + 0x19));
             }
         }
     }
@@ -111,12 +109,12 @@ void worldmapMode0_init(void) {
     for (int i = 0; i < 3; i++) {
         if (gameState.m1D34_currentParty[i] != 0xFF) {
             it->m0_fileIndex = gameState.m1D34_currentParty[i] + 2;
-            it->m4_loadPtr = &worldmapPartySpritesRaw[i];
+            it->m4_loadPtr = &worldmapPartySprites[i];
             it++;
             worldmapNumActivePartyMembers++;
             if (gameState.m26C_party[i].mA0_partyData_gearNum != -1) {
                 it->m0_fileIndex = gameState.m26C_party[i].mA0_partyData_gearNum + 0x13;
-                it->m4_loadPtr = &worldmapPartyGearSpritesRaw[i];
+                it->m4_loadPtr = &worldmapPartyGearSprites[i];
                 it++;
             }
         }
@@ -655,27 +653,6 @@ void worldmapMode0_update(void) {
     MoveImage(&local_18, 0x2c0, 0x100);
     worldmapFadeIn(0x40, 0, 4, 2);
     waitReadCompletion(0);
-    //################
-    for (int i = 0; i < 3; i++) {
-        if(worldmapPartySpritesRaw[i].getRawData().size())
-        {
-            worldmapPartySprites[i] = new sSpriteActorAnimationBundle();
-            worldmapPartySprites[i]->init(worldmapPartySpritesRaw[i].beginSpan());
-        }
-        else {
-            worldmapPartySprites[i] = nullptr;
-        }
-
-        if (worldmapPartyGearSpritesRaw[i].getRawData().size())
-        {
-            worldmapPartyGearSprites[i] = new sSpriteActorAnimationBundle();
-            worldmapPartyGearSprites[i]->init(worldmapPartyGearSpritesRaw[i].beginSpan());
-        }
-        else {
-            worldmapPartyGearSprites[i] = nullptr;
-        }
-    }
-    //################
     worldmapMode8_init();
     do {
     } while (2 < isCDBusy());
