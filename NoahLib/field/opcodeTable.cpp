@@ -52,7 +52,7 @@ void initOpcodes()
     fieldScriptOpcodes[0x36] = OP_SET_VAR_TRUE;
     fieldScriptOpcodes[0x37] = OP_SET_VAR_FALSE;
     fieldScriptOpcodes[0x38] = OP_SET_VAR_ADD;
-    fieldScriptOpcodes[0x39] = OP_SET_VAR_SUBSTRACT;
+    fieldScriptOpcodes[0x39] = OP_SET_VAR_SUBTRACT;
     fieldScriptOpcodes[0x3A] = OP_SET_VARBIT_TRUE;
     fieldScriptOpcodes[0x3B] = OP_SET_VARBIT_FALSE;
     fieldScriptOpcodes[0x3C] = OP_SET_VAR_INC;
@@ -133,11 +133,11 @@ void initOpcodes()
     fieldScriptOpcodes[0xBA] = OP_ADD_TO_AVAILABLE_PARTY;
     fieldScriptOpcodes[0xBB] = OP_REMOVE_FROM_AVAILABLE_PARTY;
     fieldScriptOpcodes[0xBC] = OP_INIT_ENTITY_SCRIPT;
-    fieldScriptOpcodes[0xBE] = OP_ROTATION_3D_YAW_SUBSTRACT;
+    fieldScriptOpcodes[0xBE] = OP_ROTATION_3D_YAW_SUBTRACT;
     fieldScriptOpcodes[0xBF] = OP_ROTATION_3D_PITCH_ADD;
-    fieldScriptOpcodes[0xC0] = OP_ROTATION_3D_PITCH_SUBSTRACT;
+    fieldScriptOpcodes[0xC0] = OP_ROTATION_3D_PITCH_SUBTRACT;
     fieldScriptOpcodes[0xC1] = OP_ROTATION_3D_ROLL_ADD;
-    fieldScriptOpcodes[0xC2] = OP_ROTATION_3D_ROLL_SUBSTRACT;
+    fieldScriptOpcodes[0xC2] = OP_ROTATION_3D_ROLL_SUBTRACT;
     fieldScriptOpcodes[0xC4] = OP_OPEN_DOOR;
     fieldScriptOpcodes[0xC5] = OP_CLOSE_DOOR;
     fieldScriptOpcodes[0xC6] = OP_INCREASE_FIELD_EXECUTION_MAX_CYCLES;

@@ -4110,7 +4110,7 @@ void OP_SET_VAR_ADD(void)
     return;
 }
 
-void OP_SET_VAR_SUBSTRACT()
+void OP_SET_VAR_SUBTRACT()
 {
     ushort uVar1;
     int iVar2;
@@ -4438,7 +4438,7 @@ void OP_SET_CAMERA_LIMITS(void)
     ADVANCE_VM(0x9);
 }
 
-void OP_ROTATION_3D_YAW_SUBSTRACT()
+void OP_ROTATION_3D_YAW_SUBTRACT()
 {
     int iVar1;
     sFieldScriptEntity* psVar2;
@@ -4465,7 +4465,7 @@ void OP_ROTATION_3D_PITCH_ADD()
     updateScriptActor3dRotation(iVar1);
 }
 
-void OP_ROTATION_3D_PITCH_SUBSTRACT()
+void OP_ROTATION_3D_PITCH_SUBTRACT()
 {
     int iVar1;
     sFieldScriptEntity* psVar2;
@@ -4493,7 +4493,7 @@ void OP_ROTATION_3D_ROLL_ADD()
     updateScriptActor3dRotation(iVar1);
 }
 
-void OP_ROTATION_3D_ROLL_SUBSTRACT()
+void OP_ROTATION_3D_ROLL_SUBTRACT()
 {
     int iVar1;
     sFieldScriptEntity* psVar2;

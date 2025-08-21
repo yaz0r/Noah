@@ -260,7 +260,7 @@ void initOpcodeTable()
 		.end();
 
 	m_opcode[0x39]
-		.setName("SET_VAR_SUBSTRACT")
+		.setName("SET_VAR_SUBTRACT")
 		.addArgumentVarIndex()
 		.addArgumentS16OrVar(0x40)
 		.addSignControlByte()
@@ -724,7 +724,7 @@ void initOpcodeTable()
 		.end();
 
 	m_opcode[0xBE]
-		.setName("ROTATION_3D_YAW_SUBSTRACT")
+		.setName("ROTATION_3D_YAW_SUBTRACT")
 		.addArgumentU16OrVar()
 		.end();
 
@@ -734,7 +734,7 @@ void initOpcodeTable()
 		.end();
 
 	m_opcode[0xC0]
-		.setName("ROTATION_3D_PITCH_SUBSTRACT")
+		.setName("ROTATION_3D_PITCH_SUBTRACT")
 		.addArgumentU16OrVar()
 		.end();
 
@@ -744,7 +744,7 @@ void initOpcodeTable()
 		.end();
 
 	m_opcode[0xC2]
-		.setName("ROTATION_3D_ROLL_SUBSTRACT")
+		.setName("ROTATION_3D_ROLL_SUBTRACT")
 		.addArgumentU16OrVar()
 		.end();
 
