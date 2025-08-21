@@ -15,8 +15,8 @@ s32 primD_initSub0Sub1Var1 = 0;
 int initModel2Sub0Var1 = 1;
 
 u8* currentModeBlock18;
-u8* currentModelBlockVertices;
-u8* currentModelBlockNormals;
+std::vector<SVECTOR>* currentModelBlockVertices;
+std::vector<SVECTOR>* currentModelBlockNormals;
 
 s32 fieldPolyCount;
 s32 objectClippingMask = 1;
@@ -132,9 +132,9 @@ int prim0_init(u8* displayList, u8* meshBlock, int initParam)
         if ((initParam & 2) == 0) {
             SVECTOR faceNormal;
             computeFaceNormal(
-                SVECTOR::FromIt(currentModelBlockVertices + READ_LE_U16(meshBlock) * 8),
-                SVECTOR::FromIt(currentModelBlockVertices + READ_LE_U16(meshBlock + 2) * 8),
-                SVECTOR::FromIt(currentModelBlockVertices + READ_LE_U16(meshBlock + 4) * 8),
+                currentModelBlockNormals->at(READ_LE_U16(meshBlock)),
+                currentModelBlockNormals->at(READ_LE_U16(meshBlock + 2)),
+                currentModelBlockNormals->at(READ_LE_U16(meshBlock + 4)),
                 &faceNormal
             );
             NormalColorCol(&faceNormal, displayList, pNewPoly);
@@ -146,9 +146,9 @@ int prim0_init(u8* displayList, u8* meshBlock, int initParam)
         currentModeBlock18 = currentModeBlock18 + 4;
 
         computeFaceNormal(
-            SVECTOR::FromIt(currentModelBlockVertices + READ_LE_U16(meshBlock) * 8),
-            SVECTOR::FromIt(currentModelBlockVertices + READ_LE_U16(meshBlock + 2) * 8),
-            SVECTOR::FromIt(currentModelBlockVertices + READ_LE_U16(meshBlock + 4) * 8),
+            currentModelBlockNormals->at(READ_LE_U16(meshBlock)),
+            currentModelBlockNormals->at(READ_LE_U16(meshBlock + 2)),
+            currentModelBlockNormals->at(READ_LE_U16(meshBlock + 4)),
             (SVECTOR*)&(*currentModeBlock18)
         );
     }
@@ -223,11 +223,11 @@ int prim3_init(u8* displayList, u8* meshBlock, int initParam)
 
         pNewPoly->m3_size = 9;
 
-        SVECTOR n0 = SVECTOR::FromIt(currentModelBlockNormals + READ_LE_U16(meshBlock) * 8);
-        SVECTOR n1 = SVECTOR::FromIt(currentModelBlockNormals + READ_LE_U16(meshBlock + 2) * 8);
-        SVECTOR n2 = SVECTOR::FromIt(currentModelBlockNormals + READ_LE_U16(meshBlock + 4) * 8);
+        SVECTOR* n0 = &currentModelBlockNormals->at(READ_LE_U16(meshBlock));
+        SVECTOR* n1 = &currentModelBlockNormals->at(READ_LE_U16(meshBlock + 2));
+        SVECTOR* n2 = &currentModelBlockNormals->at(READ_LE_U16(meshBlock + 4));
 
-        NormalColor3(&n0, &n1, &n2, (CVECTOR*)&pNewPoly->r0, (CVECTOR*)&pNewPoly->r1, (CVECTOR*)&pNewPoly->r2);
+        NormalColor3(n0, n1, n2, (CVECTOR*)&pNewPoly->r0, (CVECTOR*)&pNewPoly->r1, (CVECTOR*)&pNewPoly->r2);
 
         pNewPoly->code = READ_LE_U8(displayList + 3);
         pNewPoly->u0 = READ_LE_U8(displayList + 4);
@@ -391,9 +391,9 @@ void genericTrianglePrim_14(u8* meshSubBlock, int count, int outputPrimSize, uin
         currentModelInstanceDrawPrims++;
         assert(outputPrimSize == 0x14);
 
-        u8* pVertices1 = currentModelBlockVertices + READ_LE_U16(meshSubBlock) * 8;
-        u8* pVertices2 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 2) * 8;
-        u8* pVertices3 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 4) * 8;
+        SVECTOR* pVertices1 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock));
+        SVECTOR* pVertices2 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 2));
+        SVECTOR* pVertices3 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 4));
         meshSubBlock += 8;
 
         gte_ldv3(pVertices1, pVertices2, pVertices3);
@@ -467,9 +467,9 @@ void genericTrianglePrim_28(u8* meshSubBlock, int count, int outputPrimSize, uin
         currentModelInstanceDrawPrims++;
         assert(outputPrimSize == 0x28);
 
-        u8* pVertices1 = currentModelBlockVertices + READ_LE_U16(meshSubBlock) * 8;
-        u8* pVertices2 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 2) * 8;
-        u8* pVertices3 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 4) * 8;
+        SVECTOR* pVertices1 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock));
+        SVECTOR* pVertices2 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 2));
+        SVECTOR* pVertices3 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 4));
         meshSubBlock += 8;
 
         gte_ldv3(pVertices1, pVertices2, pVertices3);
@@ -543,9 +543,9 @@ void F4_FAKE(u8* meshSubBlock, int count) {
         POLY_F4* pOutputPrim = (POLY_F4*)*currentModelInstanceDrawPrims;
         currentModelInstanceDrawPrims++;
 
-        u8* pVertices1 = currentModelBlockVertices + READ_LE_U16(meshSubBlock) * 8;
-        u8* pVertices2 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 2) * 8;
-        u8* pVertices3 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 4) * 8;
+        SVECTOR* pVertices1 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock));
+        SVECTOR* pVertices2 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 2));
+        SVECTOR* pVertices3 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 4));
         meshSubBlock += 8;
 
         gte_ldv3(pVertices1, pVertices2, pVertices3);
@@ -617,9 +617,9 @@ void FT3_FAKE(u8* meshSubBlock, int count) {
         POLY_FT3* pOutputPrim = (POLY_FT3*)*currentModelInstanceDrawPrims;
         currentModelInstanceDrawPrims++;
 
-        u8* pVertices1 = currentModelBlockVertices + READ_LE_U16(meshSubBlock) * 8;
-        u8* pVertices2 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 2) * 8;
-        u8* pVertices3 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 4) * 8;
+        SVECTOR* pVertices1 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock));
+        SVECTOR* pVertices2 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 2));
+        SVECTOR* pVertices3 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 4));
         meshSubBlock += 8;
 
         gte_ldv3(pVertices1, pVertices2, pVertices3);
@@ -690,9 +690,9 @@ void genericTrianglePrim_20(u8* meshSubBlock, int count, int outputPrimSize, uin
         currentModelInstanceDrawPrims++;
         assert(outputPrimSize == 0x20);
 
-        u8* pVertices1 = currentModelBlockVertices + READ_LE_U16(meshSubBlock) * 8;
-        u8* pVertices2 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 2) * 8;
-        u8* pVertices3 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 4) * 8;
+        SVECTOR* pVertices1 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock));
+        SVECTOR* pVertices2 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 2));
+        SVECTOR* pVertices3 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 4));
         meshSubBlock += 8;
 
         gte_ldv3(pVertices1, pVertices2, pVertices3);
@@ -775,9 +775,9 @@ void prim5_2generic(u8* meshSubBlock, int count, int outputPrimSize, uint primSi
         currentModelInstanceDrawPrims++;
         assert(outputPrimSize == 0x20);
 
-        u8* pVertices1 = currentModelBlockVertices + READ_LE_U16(meshSubBlock) * 8;
-        u8* pVertices2 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 2) * 8;
-        u8* pVertices3 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 4) * 8;
+        SVECTOR* pVertices1 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock));
+        SVECTOR* pVertices2 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 2));
+        SVECTOR* pVertices3 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 4));
         meshSubBlock += 8;
 
         gte_ldv3(pVertices1, pVertices2, pVertices3);
@@ -856,9 +856,9 @@ void GT3_FAKE(u8* meshSubBlock, int count)
         POLY_GT3* pOutputPrim = (POLY_GT3*)*currentModelInstanceDrawPrims;
         currentModelInstanceDrawPrims++;
 
-        u8* pVertices1 = currentModelBlockVertices + READ_LE_U16(meshSubBlock) * 8;
-        u8* pVertices2 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 2) * 8;
-        u8* pVertices3 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 4) * 8;
+        SVECTOR* pVertices1 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock));
+        SVECTOR* pVertices2 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 2));
+        SVECTOR* pVertices3 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 4));
         meshSubBlock += 8;
 
         gte_ldv3(pVertices1, pVertices2, pVertices3);
@@ -949,10 +949,10 @@ void primD_2generic(u8* meshSubBlock, int count, int outputPrimSize, uint primSi
         currentModelInstanceDrawPrims++;
         assert(outputPrimSize == 0x28);
 
-        u8* pVertices1 = currentModelBlockVertices + READ_LE_U16(meshSubBlock) * 8;
-        u8* pVertices2 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 2) * 8;
-        u8* pVertices3 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 4) * 8;
-        u8* pVertices4 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 6) * 8;
+        SVECTOR* pVertices1 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock));
+        SVECTOR* pVertices2 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 2));
+        SVECTOR* pVertices3 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 4));
+        SVECTOR* pVertices4 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 6));
         meshSubBlock += 8;
 
         gte_ldv3(pVertices1, pVertices2, pVertices3);
@@ -1046,10 +1046,10 @@ void primD_0generic(u8* meshSubBlock, int count, int outputPrimSize, uint primSi
         currentModelInstanceDrawPrims++;
         assert(outputPrimSize == 0x28);
 
-        u8* pVertices1 = currentModelBlockVertices + READ_LE_U16(meshSubBlock) * 8;
-        u8* pVertices2 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 2) * 8;
-        u8* pVertices3 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 4) * 8;
-        u8* pVertices4 = currentModelBlockVertices + READ_LE_U16(meshSubBlock + 6) * 8;
+        SVECTOR* pVertices1 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock));
+        SVECTOR* pVertices2 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 2));
+        SVECTOR* pVertices3 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 4));
+        SVECTOR* pVertices4 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 6));
         meshSubBlock += 8;
 
         gte_ldv3(pVertices1, pVertices2, pVertices3);
@@ -1201,8 +1201,8 @@ bool submitModelForRendering(sModelBlock* param_1, std::vector<sTag*>& param_2, 
     }
 
     currentModeBlock18 = param_1->m18.data();
-    currentModelBlockNormals = param_1->m_baseItForRelocation + param_1->mC_offsetNormals;
-    currentModelBlockVertices = param_1->m_baseItForRelocation + param_1->m8_offsetVertices;
+    currentModelBlockNormals = &param_1->mC_normals;
+    currentModelBlockVertices = &param_1->m8_vertices;
     fieldPolyCount2 += param_1->m4_numPrims;
     currentModelInstanceDrawPrims = param_2.begin();
     currentOTEntry = OT;

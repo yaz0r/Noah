@@ -5,8 +5,8 @@
 
 extern std::vector<struct sTag*>::iterator currentModelInstanceDrawPrims;
 extern u8* currentModeBlock18;
-extern u8* currentModelBlockVertices;
-extern u8* currentModelBlockNormals;
+extern std::vector<SVECTOR>* currentModelBlockVertices;
+extern std::vector<SVECTOR>* currentModelBlockNormals;
 extern s32 fieldPolyCount;
 extern s32 objectClippingMask;
 extern s32 fieldPolyCount2;

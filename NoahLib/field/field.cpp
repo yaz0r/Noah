@@ -768,6 +768,13 @@ void initCharacterShadowPoly(sFieldEntity2dSprite* pSprite)
 
 int numInitializedFieldScriptEntities = 0;
 
+int fieldModelDynamicVerticesUpdate_nodeIndex;
+int fieldModelDynamicVerticesUpdate_actorIndex;
+
+int fieldModelDynamicVerticesUpdate(sDynamicVerticesData*) {
+    return(actorArray[fieldModelDynamicVerticesUpdate_actorIndex].m4C_scriptEntity->m118[fieldModelDynamicVerticesUpdate_nodeIndex++]);
+}
+
 void initFieldScriptEntity(int index)
 {
     if (index < g_totalActors)
@@ -782,7 +789,12 @@ void initFieldScriptEntity(int index)
         if (actorArray[index].m58_flags & 0x2000)
         {
             pNewFieldScriptEntity->m118.resize(32);
-            MissingCode();
+            if (actorArray[index].m0->m14_dynamicVertices) {
+                for (int i = 0; i < actorArray[index].m0->m14_dynamicVertices->mC_numDynamicVertices; i++) {
+                    actorArray[index].m0->m14_dynamicVertices->m10_perVerticeData[i].m0_getScaleFunction = fieldModelDynamicVerticesUpdate;
+                    pNewFieldScriptEntity->m118[i] = 0;
+                }
+            }
         }
 
         resetFieldScriptEntityValues(index);
@@ -807,12 +819,6 @@ void initModel5(sModel* pModelBlock)
 void initModel5(sModelBlock* pModelBlock)
 {
     MissingCode();
-}
-
-void* initModelDynamicVertices(sModelBlock* pModelBlock)
-{
-    MissingCode();
-    return nullptr;
 }
 
 // 0: scenarioFlag
@@ -2628,7 +2634,7 @@ void initFieldData()
             if (actorArray[i].m58_flags & 0x2000)
             {
                 resetMemoryAllocStats(3, 0);
-                actorArray[i].m0->m14 = initModelDynamicVertices(&(*actorArray[i].m0->m4_pModelBlock));
+                actorArray[i].m0->m14_dynamicVertices = initModelDynamicVertices(&(*actorArray[i].m0->m4_pModelBlock));
                 resetMemoryAllocStats(8, 0);
             }
             initModel5(&(*actorArray[i].m0->m4_pModelBlock));
@@ -6610,9 +6616,11 @@ void renderObjects()
 
             if (!(actorArray[i].m58_flags & 0x20))
             {
-                if ((actorArray[i].m58_flags & 0x2000) && (pFieldEntity->m0->m14))
+                if ((actorArray[i].m58_flags & 0x2000) && (pFieldEntity->m0->m14_dynamicVertices))
                 {
-                    MissingCode();
+                    fieldModelDynamicVerticesUpdate_nodeIndex = 0;
+                    fieldModelDynamicVerticesUpdate_actorIndex = i;
+                    updateDynamicVertices(pFieldEntity->m0->m14_dynamicVertices);
                 }
 
                 SetRotMatrix(&projectedMatrix);

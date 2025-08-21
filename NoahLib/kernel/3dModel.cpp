@@ -21,8 +21,27 @@ void sModelBlock::init(const u8* blockData) {
     m2_numVertices = READ_LE_U16(blockData + 2);
     m4_numPrims = READ_LE_U16(blockData + 4);
     m6_numMeshBlock = READ_LE_U16(blockData + 6);
-    m8_offsetVertices = READ_LE_U32(blockData + 8);
-    mC_offsetNormals = READ_LE_U32(blockData + 0xC);
+    int offsetVertices = READ_LE_U32(blockData + 8);
+    m8_vertices.resize(m2_numVertices);
+    for (int i = 0; i < m2_numVertices; i++) {
+        m8_vertices[i][0] = READ_LE_S16(m_baseItForRelocation + offsetVertices + i * 8 + 0);
+        m8_vertices[i][1] = READ_LE_S16(m_baseItForRelocation + offsetVertices + i * 8 + 2);
+        m8_vertices[i][2] = READ_LE_S16(m_baseItForRelocation + offsetVertices + i * 8 + 4);
+        m8_vertices[i][3] = READ_LE_S16(m_baseItForRelocation + offsetVertices + i * 8 + 6);
+    }
+
+    int offsetNormals = READ_LE_U32(blockData + 0xC);
+    if (offsetNormals != offsetVertices) {
+        assert(m0_flags & 0x10);
+        mC_normals.resize(m2_numVertices);
+        for (int i = 0; i < m2_numVertices; i++) {
+            mC_normals[i][0] = READ_LE_S16(m_baseItForRelocation + offsetNormals + i * 8 + 0);
+            mC_normals[i][1] = READ_LE_S16(m_baseItForRelocation + offsetNormals + i * 8 + 2);
+            mC_normals[i][2] = READ_LE_S16(m_baseItForRelocation + offsetNormals + i * 8 + 4);
+            mC_normals[i][3] = READ_LE_S16(m_baseItForRelocation + offsetNormals + i * 8 + 6);
+        }
+    }
+
     m10_offsetMeshBlocks = READ_LE_U32(blockData + 0x10);
     m14_offsetDisplayList = READ_LE_U32(blockData + 0x14);
 
@@ -30,6 +49,41 @@ void sModelBlock::init(const u8* blockData) {
     if (READ_LE_U32(blockData + 0x18)) {
         m18.resize(1);
         MissingCode();
+    }
+
+    int offsetDynamicVertices = READ_LE_U32(blockData + 0x1C);
+    if (offsetDynamicVertices) {
+        m1C_dynamicVertices = new sModelDynamicVertices;
+        m1C_dynamicVertices->m0_count = READ_LE_U32(m_baseItForRelocation + offsetDynamicVertices + 0);
+        m1C_dynamicVertices->m4_data.resize(m1C_dynamicVertices->m0_count + 1);
+        for (int i = 0; i < m1C_dynamicVertices->m0_count + 1; i++) {
+            m1C_dynamicVertices->m4_data[i].m0_count = READ_LE_S32(m_baseItForRelocation + offsetDynamicVertices + 4 + i * 0xC + 0);
+            m1C_dynamicVertices->m4_data[i].m4_positionOffsets.resize(m1C_dynamicVertices->m4_data[i].m0_count);
+            s32 offsetToDynamicPositions = READ_LE_S32(m_baseItForRelocation + offsetDynamicVertices + 4 + i * 0xC + 4);
+            for (int j = 0; j < m1C_dynamicVertices->m4_data[i].m0_count; j++) {
+                m1C_dynamicVertices->m4_data[i].m4_positionOffsets[j].m0_offset[0] = READ_LE_S16(m_baseItForRelocation + offsetToDynamicPositions + 8 * j + 0);
+                m1C_dynamicVertices->m4_data[i].m4_positionOffsets[j].m0_offset[1] = READ_LE_S16(m_baseItForRelocation + offsetToDynamicPositions + 8 * j + 2);
+                m1C_dynamicVertices->m4_data[i].m4_positionOffsets[j].m0_offset[2] = READ_LE_S16(m_baseItForRelocation + offsetToDynamicPositions + 8 * j + 4);
+                m1C_dynamicVertices->m4_data[i].m4_positionOffsets[j].m6_index = READ_LE_U16(m_baseItForRelocation + offsetToDynamicPositions + 8 * j + 6);
+            }
+            s32 offsetToDynamicNormals = READ_LE_S32(m_baseItForRelocation + offsetDynamicVertices + 4 + i * 0xC + 8);
+            if (offsetToDynamicNormals != offsetToDynamicPositions) {
+                assert(m0_flags & 0x10);
+                m1C_dynamicVertices->m4_data[i].m8_normalOffsets.resize(m1C_dynamicVertices->m4_data[i].m0_count);
+                for (int j = 0; j < m1C_dynamicVertices->m4_data[i].m0_count; j++) {
+                    m1C_dynamicVertices->m4_data[i].m8_normalOffsets[j].m0_offset[0] = READ_LE_S16(m_baseItForRelocation + offsetToDynamicNormals + 8 * j + 0);
+                    m1C_dynamicVertices->m4_data[i].m8_normalOffsets[j].m0_offset[1] = READ_LE_S16(m_baseItForRelocation + offsetToDynamicNormals + 8 * j + 2);
+                    m1C_dynamicVertices->m4_data[i].m8_normalOffsets[j].m0_offset[2] = READ_LE_S16(m_baseItForRelocation + offsetToDynamicNormals + 8 * j + 4);
+                    m1C_dynamicVertices->m4_data[i].m8_normalOffsets[j].m6_index = READ_LE_U16(m_baseItForRelocation + offsetToDynamicNormals + 8 * j + 6);
+                }
+            }
+        }
+        m1C_dynamicVertices->m_indexCount = READ_LE_S32(m_baseItForRelocation + offsetDynamicVertices + 4 + m1C_dynamicVertices->m0_count * 0xC);
+        m1C_dynamicVertices->m_indices.resize(m1C_dynamicVertices->m_indexCount);
+        s32 offsetToIndices = READ_LE_S32(m_baseItForRelocation + offsetDynamicVertices + 4 + m1C_dynamicVertices->m0_count * 0xC + 4);
+        for (int i = 0; i < m1C_dynamicVertices->m_indexCount; i++) {
+            m1C_dynamicVertices->m_indices[i] = READ_LE_U16(m_baseItForRelocation + offsetToIndices + 2 * i);
+        }
     }
 
     m20 = READ_LE_S16(blockData + 0x20);
@@ -85,8 +139,8 @@ void initModel2(sModelBlock* pModelBlock, std::vector<sTag*>& outputBuffer, int 
 
     currentModelBlockDisplayLists = pModelBlock->m_baseItForRelocation + pModelBlock->m14_offsetDisplayList;
     g_currentModelBlockSubBlocks = pModelBlock->m_baseItForRelocation + pModelBlock->m10_offsetMeshBlocks;
-    currentModelBlockNormals = pModelBlock->m_baseItForRelocation + pModelBlock->mC_offsetNormals;
-    currentModelBlockVertices = pModelBlock->m_baseItForRelocation + pModelBlock->m8_offsetVertices;
+    currentModelBlockNormals = &pModelBlock->mC_normals;
+    currentModelBlockVertices = &pModelBlock->m8_vertices;
     currentModeBlock18 = nullptr;
     if (pModelBlock->m18.size())
     {

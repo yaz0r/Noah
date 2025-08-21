@@ -7,13 +7,14 @@
 #include "kernel/color.h"
 #include "kernel/3dModel.h"
 #include "field/walkMesh.h"
+#include "kernel/modelDynamicVertices.h"
 
 struct sFieldEntitySub0
 {
     std::vector<sModelBlock>::iterator m4_pModelBlock;
     std::array<std::vector<sTag*>,2> m8;
     s16 m12_renderMode;
-    void* m14;
+    sDynamicVertices* m14_dynamicVertices;
     SVECTOR m18;
     s16 m20;
     //size 0x24

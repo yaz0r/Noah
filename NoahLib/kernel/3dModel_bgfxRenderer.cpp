@@ -178,7 +178,7 @@ void flushTriangles(sModelBlock* pThis, int viewIndex, bgfx::TextureHandle textu
     currentIndices.clear();
 }
 
-void renderTriangleWithTexture(int viewIndex, u8*& mesh_blocks, u8*& displaylist, u8*& vertices, u32 cmd)
+void renderTriangleWithTexture(int viewIndex, u8*& mesh_blocks, u8*& displaylist, std::vector<SVECTOR>& vertices, u32 cmd)
 {
     std::array<float, 2> uv[4];
     uv[0][0] = displaylist[0];
@@ -194,9 +194,9 @@ void renderTriangleWithTexture(int viewIndex, u8*& mesh_blocks, u8*& displaylist
     for (int j = 0; j < 3; j++)
     {
         int vtx = READ_LE_U16(mesh_blocks + j * 2);
-        int x = (s16)READ_LE_S16(vertices + vtx * 8 + 0);
-        int y = (s16)READ_LE_S16(vertices + vtx * 8 + 2);
-        int z = (s16)READ_LE_S16(vertices + vtx * 8 + 4);
+        int x = vertices[vtx].vx;
+        int y = vertices[vtx].vy;
+        int z = vertices[vtx].vz;
 
         sVertice newVertice;
 
@@ -221,16 +221,16 @@ void renderTriangleWithTexture(int viewIndex, u8*& mesh_blocks, u8*& displaylist
     currentIndices.push_back(startIndex + 2);
 }
 
-void renderTriangleWithColor(int viewIndex, u8*& mesh_blocks, u8*& displaylist, u8*& vertices, u32 cmd)
+void renderTriangleWithColor(int viewIndex, u8*& mesh_blocks, u8*& displaylist, std::vector<SVECTOR>& vertices, u32 cmd)
 {
     int startIndex = currentVertices.size();
 
     for (int j = 0; j < 3; j++)
     {
         int vtx = READ_LE_U16(mesh_blocks + j * 2);
-        int x = (s16)READ_LE_S16(vertices + vtx * 8 + 0);
-        int y = (s16)READ_LE_S16(vertices + vtx * 8 + 2);
-        int z = (s16)READ_LE_S16(vertices + vtx * 8 + 4);
+        int x = vertices[vtx].vx;
+        int y = vertices[vtx].vy;
+        int z = vertices[vtx].vz;
 
         sVertice newVertice;
 
@@ -255,16 +255,16 @@ void renderTriangleWithColor(int viewIndex, u8*& mesh_blocks, u8*& displaylist, 
     currentIndices.push_back(startIndex + 2);
 }
 
-void renderQuadWithColor(int viewIndex, u8*& mesh_blocks, u8*& displaylist, u8*& vertices, u32 cmd)
+void renderQuadWithColor(int viewIndex, u8*& mesh_blocks, u8*& displaylist, std::vector<SVECTOR>& vertices, u32 cmd)
 {
     int startIndex = currentVertices.size();
 
     for (int j = 0; j < 4; j++)
     {
         int vtx = READ_LE_U16(mesh_blocks + j * 2);
-        int x = (s16)READ_LE_S16(vertices + vtx * 8 + 0);
-        int y = (s16)READ_LE_S16(vertices + vtx * 8 + 2);
-        int z = (s16)READ_LE_S16(vertices + vtx * 8 + 4);
+        int x = vertices[vtx].vx;
+        int y = vertices[vtx].vy;
+        int z = vertices[vtx].vz;
 
         sVertice newVertice;
 
@@ -293,7 +293,7 @@ void renderQuadWithColor(int viewIndex, u8*& mesh_blocks, u8*& displaylist, u8*&
     currentIndices.push_back(startIndex + 1);
 }
 
-void renderQuadWithTexture(int viewIndex, u8*& mesh_blocks, u8*& displaylist, u8*& vertices)
+void renderQuadWithTexture(int viewIndex, u8*& mesh_blocks, u8*& displaylist, std::vector<SVECTOR>& vertices)
 {
     std::array<float, 2> uv[4];
     uv[0][0] = displaylist[0];
@@ -311,9 +311,9 @@ void renderQuadWithTexture(int viewIndex, u8*& mesh_blocks, u8*& displaylist, u8
     for (int j = 0; j < 4; j++)
     {
         int vtx = READ_LE_U16(mesh_blocks + j * 2);
-        int x = (s16)READ_LE_S16(vertices + vtx * 8 + 0);
-        int y = (s16)READ_LE_S16(vertices + vtx * 8 + 2);
-        int z = (s16)READ_LE_S16(vertices + vtx * 8 + 4);
+        int x = vertices[vtx].vx;
+        int y = vertices[vtx].vy;
+        int z = vertices[vtx].vz;
 
         sVertice newVertice;
 
@@ -390,7 +390,7 @@ void sBgfxRendererData::buildDrawcall(sModelBlock* pModelBlock, int viewIndex)
 {
     u8* mesh_blocks = pModelBlock->m_baseItForRelocation + pModelBlock->m10_offsetMeshBlocks;
     u8* displaylist = pModelBlock->m_baseItForRelocation + pModelBlock->m14_offsetDisplayList;
-    u8* vertices = pModelBlock->m_baseItForRelocation + pModelBlock->m8_offsetVertices;
+    std::vector<SVECTOR>& vertices = pModelBlock->m8_vertices;
 
     bool quad_block = false;
     int poly_available = 0;

@@ -9,11 +9,26 @@ struct sModelBlock
     s16 m2_numVertices;
     s16 m4_numPrims;
     s16 m6_numMeshBlock;
-    u32 m8_offsetVertices;
-    u32 mC_offsetNormals;
+    std::vector<SVECTOR> m8_vertices;
+    std::vector<SVECTOR> mC_normals;
     u32 m10_offsetMeshBlocks;
     u32 m14_offsetDisplayList;
     std::vector<u8> m18;
+    struct sModelDynamicVertices {
+        u32 m0_count = 0;
+        struct sData {
+            s32 m0_count;
+            struct sOffsetData {
+                std::array<s16, 3> m0_offset;
+                u16 m6_index;
+            };
+            std::vector<sOffsetData> m4_positionOffsets;
+            std::vector<sOffsetData> m8_normalOffsets;
+        };
+        std::vector<sData> m4_data;
+        s32 m_indexCount;
+        std::vector<u16> m_indices;
+    }* m1C_dynamicVertices = nullptr;
     s16 m20;
     s16 m22;
     s16 m24;
@@ -23,9 +38,6 @@ struct sModelBlock
     int m30;
     int m34_instanceBufferSize;
     // size 0x38
-
-    std::vector<std::array<s16, 3>> m_vertices;
-    std::vector<std::array<s16, 3>> m_normals;
 
     struct sMeshBlock
     {
