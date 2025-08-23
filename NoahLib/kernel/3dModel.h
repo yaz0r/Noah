@@ -5,6 +5,14 @@ struct sModelBlock
     ~sModelBlock();
     void init(const u8* input, u8* baseItForRelocation);
 
+    struct sMeshBlock
+    {
+        u8 m0_primType;
+        u8 m1;
+        u16 m2_primCount;
+        std::vector<std::array<u16, 4>> m4_indices;
+    };
+
     u16 m0_flags;
     s16 m2_numVertices;
     s16 m4_numPrims;
@@ -12,6 +20,7 @@ struct sModelBlock
     std::vector<SVECTOR> m8_vertices;
     std::vector<SVECTOR> mC_normals;
     u32 m10_offsetMeshBlocks;
+    std::vector<sMeshBlock> m10_meshBlocks;
     u32 m14_offsetDisplayList;
     std::vector<u8> m18;
     struct sModelDynamicVertices {
@@ -38,14 +47,6 @@ struct sModelBlock
     int m30;
     int m34_instanceBufferSize;
     // size 0x38
-
-    struct sMeshBlock
-    {
-        u16 m0;
-        u16 m2;
-    };
-
-    std::vector<sMeshBlock> m_meshBlocks;
 
     u8* m_baseItForRelocation;
 

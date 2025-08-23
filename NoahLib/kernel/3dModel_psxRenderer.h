@@ -12,11 +12,11 @@ extern s32 objectClippingMask;
 extern s32 fieldPolyCount2;
 extern int overrideTPageMode;
 extern int initModel2Sub0Var1;
-extern u8* currentModelBlockDisplayLists;
-extern u8* g_currentModelBlockSubBlocks;
+extern u8* g_currentModelBlockDisplayLists;
+extern std::vector<sModelBlock::sMeshBlock>::iterator g_currentModelBlockSubBlocks;
 
-typedef void(*t_primRenderFunc)(u8* meshSubBlock, int count);
-typedef int(*t_primInitFunc)(u8* displayList, u8* meshBlock, int initParam);
+typedef void(*t_primRenderFunc)(std::vector<std::array<u16, 4>>::const_iterator& primitiveIndices, int count);
+typedef int(*t_primInitFunc)(u8* displayList, const std::array<u16, 4>& meshBlock, int initParam);
 
 struct sPolyTypeRenderDefinition
 {

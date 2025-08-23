@@ -22,8 +22,8 @@ s32 fieldPolyCount;
 s32 objectClippingMask = 1;
 s32 fieldPolyCount2;
 
-u8* currentModelBlockDisplayLists;
-u8* g_currentModelBlockSubBlocks;
+u8* g_currentModelBlockDisplayLists;
+std::vector<sModelBlock::sMeshBlock>::iterator g_currentModelBlockSubBlocks;
 
 
 std::vector<sTag*>::iterator currentModelInstanceDrawPrims;
@@ -110,7 +110,7 @@ void NormalColor(SVECTOR* $2, std::array<u8, 4> $3)
     MissingCode();
 }
 
-int prim0_init(u8* displayList, u8* meshBlock, int initParam)
+int prim0_init(u8* displayList, const std::array<u16, 4>& primitiveIndices, int initParam)
 {
     POLY_FT3* pNewPoly = new POLY_FT3;
     *currentModelInstanceDrawPrims = pNewPoly;
@@ -132,9 +132,9 @@ int prim0_init(u8* displayList, u8* meshBlock, int initParam)
         if ((initParam & 2) == 0) {
             SVECTOR faceNormal;
             computeFaceNormal(
-                currentModelBlockNormals->at(READ_LE_U16(meshBlock)),
-                currentModelBlockNormals->at(READ_LE_U16(meshBlock + 2)),
-                currentModelBlockNormals->at(READ_LE_U16(meshBlock + 4)),
+                currentModelBlockVertices->at(primitiveIndices[0]),
+                currentModelBlockVertices->at(primitiveIndices[1]),
+                currentModelBlockVertices->at(primitiveIndices[2]),
                 &faceNormal
             );
             NormalColorCol(&faceNormal, displayList, pNewPoly);
@@ -146,9 +146,9 @@ int prim0_init(u8* displayList, u8* meshBlock, int initParam)
         currentModeBlock18 = currentModeBlock18 + 4;
 
         computeFaceNormal(
-            currentModelBlockNormals->at(READ_LE_U16(meshBlock)),
-            currentModelBlockNormals->at(READ_LE_U16(meshBlock + 2)),
-            currentModelBlockNormals->at(READ_LE_U16(meshBlock + 4)),
+            currentModelBlockVertices->at(primitiveIndices[0]),
+            currentModelBlockVertices->at(primitiveIndices[1]),
+            currentModelBlockVertices->at(primitiveIndices[2]),
             (SVECTOR*)&(*currentModeBlock18)
         );
     }
@@ -158,7 +158,7 @@ int prim0_init(u8* displayList, u8* meshBlock, int initParam)
     return 1;
 }
 
-int prim1_init(u8* displayList, u8* meshBlock, int initParam)
+int prim1_init(u8* displayList, const std::array<u16, 4>& primitiveIndices, int initParam)
 {
     if (primD_isValid(displayList))
     {
@@ -196,7 +196,7 @@ int prim1_init(u8* displayList, u8* meshBlock, int initParam)
     return 0;
 }
 
-int prim2_init(u8* displayList, u8* meshBlock, int initParam) {
+int prim2_init(u8* displayList, const std::array<u16, 4>& primitiveIndices, int initParam) {
     MissingCode();
     return 1;
 }
@@ -213,7 +213,7 @@ void NormalColor3(SVECTOR* $2, SVECTOR* $3, SVECTOR* v2, CVECTOR* v3, CVECTOR* v
     MissingCode();
 }
 
-int prim3_init(u8* displayList, u8* meshBlock, int initParam)
+int prim3_init(u8* displayList, const std::array<u16, 4>& primitiveIndices, int initParam)
 {
     if (primD_isValid(displayList))
     {
@@ -223,9 +223,9 @@ int prim3_init(u8* displayList, u8* meshBlock, int initParam)
 
         pNewPoly->m3_size = 9;
 
-        SVECTOR* n0 = &currentModelBlockNormals->at(READ_LE_U16(meshBlock));
-        SVECTOR* n1 = &currentModelBlockNormals->at(READ_LE_U16(meshBlock + 2));
-        SVECTOR* n2 = &currentModelBlockNormals->at(READ_LE_U16(meshBlock + 4));
+        SVECTOR* n0 = &currentModelBlockNormals->at(primitiveIndices[0]);
+        SVECTOR* n1 = &currentModelBlockNormals->at(primitiveIndices[1]);
+        SVECTOR* n2 = &currentModelBlockNormals->at(primitiveIndices[2]);
 
         NormalColor3(n0, n1, n2, (CVECTOR*)&pNewPoly->r0, (CVECTOR*)&pNewPoly->r1, (CVECTOR*)&pNewPoly->r2);
 
@@ -246,7 +246,7 @@ int prim3_init(u8* displayList, u8* meshBlock, int initParam)
     return 0;
 }
 
-int prim4_init(u8* displayList, u8* meshBlock, int initParam)
+int prim4_init(u8* displayList, const std::array<u16, 4>& primitiveIndices, int initParam)
 {
     //assert(READ_LE_U8(displayList + 3) == 0x20); // colored triangle
 
@@ -263,7 +263,7 @@ int prim4_init(u8* displayList, u8* meshBlock, int initParam)
     return 1;
 }
 
-int prim5_init(u8* displayList, u8* meshBlock, int initParam)
+int prim5_init(u8* displayList, const std::array<u16, 4>& primitiveIndices, int initParam)
 {
     if (primD_isValid(displayList))
     {
@@ -289,7 +289,7 @@ int prim5_init(u8* displayList, u8* meshBlock, int initParam)
     return 0;
 }
 
-int prim8_init(u8* displayList, u8* meshBlock, int initParam)
+int prim8_init(u8* displayList, const std::array<u16, 4>& primitiveIndices, int initParam)
 {
     assert(READ_LE_U8(displayList + 3) == 0x28); // quad with color
 
@@ -317,7 +317,7 @@ int prim8_init(u8* displayList, u8* meshBlock, int initParam)
     return 1;
 }
 
-int prim9_init(u8* displayList, u8* meshBlock, int initParam)
+int prim9_init(u8* displayList, const std::array<u16, 4>& primitiveIndices, int initParam)
 {
     if (primD_isValid(displayList))
     {
@@ -350,7 +350,7 @@ int prim9_init(u8* displayList, u8* meshBlock, int initParam)
 }
 
 
-int primC_init(u8* displayList, u8* meshBlock, int initParam)
+int primC_init(u8* displayList, const std::array<u16, 4>& primitiveIndices, int initParam)
 {
     //assert(READ_LE_U8(displayList + 3) == 0x28); // quad with color
 
@@ -380,7 +380,7 @@ void initFieldDrawEnvsSub0(int param_1, int param_2)
 
 OTTable::iterator currentOTEntry;
 
-void genericTrianglePrim_14(u8* meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
+void genericTrianglePrim_14(std::vector<std::array<u16, 4>>::const_iterator& primitiveIndices, int count, int outputPrimSize, uint primSize, int outputStride)
 {
     OTTable::iterator pOT = currentOTEntry;
     int depthGranularity = gDepthDivider + 2;
@@ -391,10 +391,10 @@ void genericTrianglePrim_14(u8* meshSubBlock, int count, int outputPrimSize, uin
         currentModelInstanceDrawPrims++;
         assert(outputPrimSize == 0x14);
 
-        SVECTOR* pVertices1 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock));
-        SVECTOR* pVertices2 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 2));
-        SVECTOR* pVertices3 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 4));
-        meshSubBlock += 8;
+        SVECTOR* pVertices1 = &currentModelBlockVertices->at((*primitiveIndices)[0]);
+        SVECTOR* pVertices2 = &currentModelBlockVertices->at((*primitiveIndices)[1]);
+        SVECTOR* pVertices3 = &currentModelBlockVertices->at((*primitiveIndices)[2]);
+        primitiveIndices++;
 
         gte_ldv3(pVertices1, pVertices2, pVertices3);
         gte_rtpt();
@@ -456,7 +456,7 @@ void genericTrianglePrim_14(u8* meshSubBlock, int count, int outputPrimSize, uin
     }
 }
 
-void genericTrianglePrim_28(u8* meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
+void genericTrianglePrim_28(std::vector<std::array<u16, 4>>::const_iterator& primitiveIndices, int count, int outputPrimSize, uint primSize, int outputStride)
 {
     OTTable::iterator pOT = currentOTEntry;
     int depthGranularity = gDepthDivider + 2;
@@ -467,10 +467,10 @@ void genericTrianglePrim_28(u8* meshSubBlock, int count, int outputPrimSize, uin
         currentModelInstanceDrawPrims++;
         assert(outputPrimSize == 0x28);
 
-        SVECTOR* pVertices1 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock));
-        SVECTOR* pVertices2 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 2));
-        SVECTOR* pVertices3 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 4));
-        meshSubBlock += 8;
+        SVECTOR* pVertices1 = &currentModelBlockVertices->at((*primitiveIndices)[0]);
+        SVECTOR* pVertices2 = &currentModelBlockVertices->at((*primitiveIndices)[1]);
+        SVECTOR* pVertices3 = &currentModelBlockVertices->at((*primitiveIndices)[2]);
+        primitiveIndices++;
 
         gte_ldv3(pVertices1, pVertices2, pVertices3);
         gte_rtpt();
@@ -531,7 +531,7 @@ void genericTrianglePrim_28(u8* meshSubBlock, int count, int outputPrimSize, uin
     }
 }
 
-void F4_FAKE(u8* meshSubBlock, int count) {
+void F4_FAKE(std::vector<std::array<u16, 4>>::const_iterator& primitiveIndices, int count) {
     MissingCode();
     Hack("TODO: this is not correct and implemented as a shortcut");
 
@@ -543,10 +543,10 @@ void F4_FAKE(u8* meshSubBlock, int count) {
         POLY_F4* pOutputPrim = (POLY_F4*)*currentModelInstanceDrawPrims;
         currentModelInstanceDrawPrims++;
 
-        SVECTOR* pVertices1 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock));
-        SVECTOR* pVertices2 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 2));
-        SVECTOR* pVertices3 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 4));
-        meshSubBlock += 8;
+        SVECTOR* pVertices1 = &currentModelBlockVertices->at((*primitiveIndices)[0]);
+        SVECTOR* pVertices2 = &currentModelBlockVertices->at((*primitiveIndices)[1]);
+        SVECTOR* pVertices3 = &currentModelBlockVertices->at((*primitiveIndices)[2]);
+        primitiveIndices++;
 
         gte_ldv3(pVertices1, pVertices2, pVertices3);
         gte_rtpt();
@@ -605,7 +605,7 @@ void F4_FAKE(u8* meshSubBlock, int count) {
     }
 }
 
-void FT3_FAKE(u8* meshSubBlock, int count) {
+void FT3_FAKE(std::vector<std::array<u16, 4>>::const_iterator& primitiveIndices, int count) {
     MissingCode();
     Hack("TODO: this is not correct and implemented as a shortcut");
 
@@ -617,10 +617,10 @@ void FT3_FAKE(u8* meshSubBlock, int count) {
         POLY_FT3* pOutputPrim = (POLY_FT3*)*currentModelInstanceDrawPrims;
         currentModelInstanceDrawPrims++;
 
-        SVECTOR* pVertices1 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock));
-        SVECTOR* pVertices2 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 2));
-        SVECTOR* pVertices3 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 4));
-        meshSubBlock += 8;
+        SVECTOR* pVertices1 = &currentModelBlockVertices->at((*primitiveIndices)[0]);
+        SVECTOR* pVertices2 = &currentModelBlockVertices->at((*primitiveIndices)[1]);
+        SVECTOR* pVertices3 = &currentModelBlockVertices->at((*primitiveIndices)[2]);
+        primitiveIndices++;
 
         gte_ldv3(pVertices1, pVertices2, pVertices3);
         gte_rtpt();
@@ -679,7 +679,7 @@ void FT3_FAKE(u8* meshSubBlock, int count) {
     }
 }
 
-void genericTrianglePrim_20(u8* meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
+void genericTrianglePrim_20(std::vector<std::array<u16, 4>>::const_iterator& primitiveIndices, int count, int outputPrimSize, uint primSize, int outputStride)
 {
     OTTable::iterator pOT = currentOTEntry;
     int depthGranularity = gDepthDivider + 2;
@@ -690,10 +690,10 @@ void genericTrianglePrim_20(u8* meshSubBlock, int count, int outputPrimSize, uin
         currentModelInstanceDrawPrims++;
         assert(outputPrimSize == 0x20);
 
-        SVECTOR* pVertices1 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock));
-        SVECTOR* pVertices2 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 2));
-        SVECTOR* pVertices3 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 4));
-        meshSubBlock += 8;
+        SVECTOR* pVertices1 = &currentModelBlockVertices->at((*primitiveIndices)[0]);
+        SVECTOR* pVertices2 = &currentModelBlockVertices->at((*primitiveIndices)[1]);
+        SVECTOR* pVertices3 = &currentModelBlockVertices->at((*primitiveIndices)[2]);
+        primitiveIndices++;
 
         gte_ldv3(pVertices1, pVertices2, pVertices3);
         gte_rtpt();
@@ -754,17 +754,17 @@ void genericTrianglePrim_20(u8* meshSubBlock, int count, int outputPrimSize, uin
     }
 }
 
-void prim5_0(u8* meshSubBlock, int count)
+void prim5_0(std::vector<std::array<u16, 4>>::const_iterator& primitiveIndices, int count)
 {
-    genericTrianglePrim_20(meshSubBlock, count, 0x20, 0x7, 0x8);
+    genericTrianglePrim_20(primitiveIndices, count, 0x20, 0x7, 0x8);
 }
 
-void prim5_4(u8* meshSubBlock, int count) {
+void prim5_4(std::vector<std::array<u16, 4>>::const_iterator& primitiveIndices, int count) {
     Noah_MissingCode("Incorrect prim5_4");
-    genericTrianglePrim_20(meshSubBlock, count, 0x20, 0x7, 0x8);
+    genericTrianglePrim_20(primitiveIndices, count, 0x20, 0x7, 0x8);
 }
 
-void prim5_2generic(u8* meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
+void prim5_2generic(std::vector<std::array<u16, 4>>::const_iterator& primitiveIndices, int count, int outputPrimSize, uint primSize, int outputStride)
 {
     OTTable::iterator pOT = currentOTEntry;
     int depthGranularity = gDepthDivider + 2;
@@ -775,10 +775,10 @@ void prim5_2generic(u8* meshSubBlock, int count, int outputPrimSize, uint primSi
         currentModelInstanceDrawPrims++;
         assert(outputPrimSize == 0x20);
 
-        SVECTOR* pVertices1 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock));
-        SVECTOR* pVertices2 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 2));
-        SVECTOR* pVertices3 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 4));
-        meshSubBlock += 8;
+        SVECTOR* pVertices1 = &currentModelBlockVertices->at((*primitiveIndices)[0]);
+        SVECTOR* pVertices2 = &currentModelBlockVertices->at((*primitiveIndices)[1]);
+        SVECTOR* pVertices3 = &currentModelBlockVertices->at((*primitiveIndices)[2]);
+        primitiveIndices++;
 
         gte_ldv3(pVertices1, pVertices2, pVertices3);
         gte_rtpt();
@@ -839,12 +839,12 @@ void prim5_2generic(u8* meshSubBlock, int count, int outputPrimSize, uint primSi
     }
 }
 
-void prim3_0(u8* meshSubBlock, int count)
+void prim3_0(std::vector<std::array<u16, 4>>::const_iterator& primitiveIndices, int count)
 {
-    genericTrianglePrim_28(meshSubBlock, count, 0x28, 0x9, 0xc);
+    genericTrianglePrim_28(primitiveIndices, count, 0x28, 0x9, 0xc);
 }
 
-void GT3_FAKE(u8* meshSubBlock, int count)
+void GT3_FAKE(std::vector<std::array<u16, 4>>::const_iterator& primitiveIndices, int count)
 {
     Hack("Not how it's supposed to work");
 
@@ -856,10 +856,10 @@ void GT3_FAKE(u8* meshSubBlock, int count)
         POLY_GT3* pOutputPrim = (POLY_GT3*)*currentModelInstanceDrawPrims;
         currentModelInstanceDrawPrims++;
 
-        SVECTOR* pVertices1 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock));
-        SVECTOR* pVertices2 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 2));
-        SVECTOR* pVertices3 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 4));
-        meshSubBlock += 8;
+        SVECTOR* pVertices1 = &currentModelBlockVertices->at((*primitiveIndices)[0]);
+        SVECTOR* pVertices2 = &currentModelBlockVertices->at((*primitiveIndices)[1]);
+        SVECTOR* pVertices3 = &currentModelBlockVertices->at((*primitiveIndices)[2]);
+        primitiveIndices++;
 
         gte_ldv3(pVertices1, pVertices2, pVertices3);
         gte_rtpt();
@@ -918,27 +918,27 @@ void GT3_FAKE(u8* meshSubBlock, int count)
     }
 }
 
-void prim4_0(u8* meshSubBlock, int count)
+void prim4_0(std::vector<std::array<u16, 4>>::const_iterator& primitiveIndices, int count)
 {
-    genericTrianglePrim_14(meshSubBlock, count, 0x14, 0x4, 4);
+    genericTrianglePrim_14(primitiveIndices, count, 0x14, 0x4, 4);
 }
 
-void prim5_2(u8* meshSubBlock, int count)
+void prim5_2(std::vector<std::array<u16, 4>>::const_iterator& primitiveIndices, int count)
 {
-    prim5_2generic(meshSubBlock, count, 0x20, 0x7, 0x8);
+    prim5_2generic(primitiveIndices, count, 0x20, 0x7, 0x8);
 }
 
-void prim6_2(u8* meshSubBlock, int count)
+void prim6_2(std::vector<std::array<u16, 4>>::const_iterator& primitiveIndices, int count)
 {
-    prim5_2generic(meshSubBlock, count, 0x28, 0x9, 0xC);
+    prim5_2generic(primitiveIndices, count, 0x28, 0x9, 0xC);
 }
 
-void prim6_3(u8* meshSubBlock, int count)
+void prim6_3(std::vector<std::array<u16, 4>>::const_iterator& primitiveIndices, int count)
 {
     assert(0);
 }
 
-void primD_2generic(u8* meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
+void primD_2generic(std::vector<std::array<u16, 4>>::const_iterator& primitiveIndices, int count, int outputPrimSize, uint primSize, int outputStride)
 {
     OTTable::iterator pOT = currentOTEntry;
     int depthGranularity = gDepthDivider + 2;
@@ -949,11 +949,11 @@ void primD_2generic(u8* meshSubBlock, int count, int outputPrimSize, uint primSi
         currentModelInstanceDrawPrims++;
         assert(outputPrimSize == 0x28);
 
-        SVECTOR* pVertices1 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock));
-        SVECTOR* pVertices2 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 2));
-        SVECTOR* pVertices3 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 4));
-        SVECTOR* pVertices4 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 6));
-        meshSubBlock += 8;
+        SVECTOR* pVertices1 = &currentModelBlockVertices->at((*primitiveIndices)[0]);
+        SVECTOR* pVertices2 = &currentModelBlockVertices->at((*primitiveIndices)[1]);
+        SVECTOR* pVertices3 = &currentModelBlockVertices->at((*primitiveIndices)[2]);
+        SVECTOR* pVertices4 = &currentModelBlockVertices->at((*primitiveIndices)[3]);
+        primitiveIndices++;
 
         gte_ldv3(pVertices1, pVertices2, pVertices3);
         gte_rtpt();
@@ -1030,12 +1030,12 @@ void primD_2generic(u8* meshSubBlock, int count, int outputPrimSize, uint primSi
     }
 }
 
-void primD_2(u8* meshSubBlock, int count)
+void primD_2(std::vector<std::array<u16, 4>>::const_iterator& primitiveIndices, int count)
 {
-    primD_2generic(meshSubBlock, count, 0x28, 0x9, 0x8);
+    primD_2generic(primitiveIndices, count, 0x28, 0x9, 0x8);
 }
 
-void primD_0generic(u8* meshSubBlock, int count, int outputPrimSize, uint primSize, int outputStride)
+void primD_0generic(std::vector<std::array<u16, 4>>::const_iterator& primitiveIndices, int count, int outputPrimSize, uint primSize, int outputStride)
 {
     OTTable::iterator pOT = currentOTEntry;
     int depthGranularity = gDepthDivider + 2;
@@ -1046,11 +1046,11 @@ void primD_0generic(u8* meshSubBlock, int count, int outputPrimSize, uint primSi
         currentModelInstanceDrawPrims++;
         assert(outputPrimSize == 0x28);
 
-        SVECTOR* pVertices1 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock));
-        SVECTOR* pVertices2 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 2));
-        SVECTOR* pVertices3 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 4));
-        SVECTOR* pVertices4 = &currentModelBlockVertices->at(READ_LE_U16(meshSubBlock + 6));
-        meshSubBlock += 8;
+        SVECTOR* pVertices1 = &currentModelBlockVertices->at((*primitiveIndices)[0]);
+        SVECTOR* pVertices2 = &currentModelBlockVertices->at((*primitiveIndices)[1]);
+        SVECTOR* pVertices3 = &currentModelBlockVertices->at((*primitiveIndices)[2]);
+        SVECTOR* pVertices4 = &currentModelBlockVertices->at((*primitiveIndices)[3]);
+        primitiveIndices++;
 
         gte_ldv3(pVertices1, pVertices2, pVertices3);
         gte_rtpt();
@@ -1127,25 +1127,25 @@ void primD_0generic(u8* meshSubBlock, int count, int outputPrimSize, uint primSi
     }
 }
 
-void primD_0(u8* meshSubBlock, int count)
+void primD_0(std::vector<std::array<u16, 4>>::const_iterator& primitiveIndices, int count)
 {
-    primD_0generic(meshSubBlock, count, 0x28, 0x9, 0x8);
+    primD_0generic(primitiveIndices, count, 0x28, 0x9, 0x8);
 }
 
-void primD_1(u8* meshSubBlock, int count)
+void primD_1(std::vector<std::array<u16, 4>>::const_iterator& primitiveIndices, int count)
 {
     Hack("hacked primD_1");
-    primD_0generic(meshSubBlock, count, 0x28, 0x9, 0x8);
+    primD_0generic(primitiveIndices, count, 0x28, 0x9, 0x8);
 }
 
 
-void primD_4(u8* meshSubBlock, int count)
+void primD_4(std::vector<std::array<u16, 4>>::const_iterator& primitiveIndices, int count)
 {
     Noah_MissingCode("primD_4");
-    primD_0generic(meshSubBlock, count, 0x28, 0x9, 0x8);
+    primD_0generic(primitiveIndices, count, 0x28, 0x9, 0x8);
 }
 
-int primD_init(u8* displayList, u8* meshBlock, int initParam)
+int primD_init(u8* displayList, const std::array<u16, 4>& primitiveIndices, int initParam)
 {
     if (primD_isValid(displayList))
     {
@@ -1207,10 +1207,10 @@ bool submitModelForRendering(sModelBlock* param_1, std::vector<sTag*>& param_2, 
     currentModelInstanceDrawPrims = param_2.begin();
     currentOTEntry = OT;
 
-    int numMeshBlockLeft = param_1->m6_numMeshBlock;
-    u8* currentModelBlockSubBlocks = param_1->m_baseItForRelocation + param_1->m10_offsetMeshBlocks;
-    while (numMeshBlockLeft = numMeshBlockLeft - 1, numMeshBlockLeft != 0xffffffff) {
-        int primType = READ_LE_U8(currentModelBlockSubBlocks);
+    for(int i=0; i< param_1->m6_numMeshBlock; i++) {
+        g_currentModelBlockSubBlocks = param_1->m10_meshBlocks.begin() + i;
+        auto& currentModelBlockSubBlocks = param_1->m10_meshBlocks[i];
+        int primType = currentModelBlockSubBlocks.m0_primType;
         t_primRenderFunc primRenderFunc = nullptr;
         switch (renderMode) {
         case 0:
@@ -1234,18 +1234,18 @@ bool submitModelForRendering(sModelBlock* param_1, std::vector<sTag*>& param_2, 
         default:
             assert(0);
         }
-        g_currentModelBlockSubBlocks = currentModelBlockSubBlocks + 4;
+
         if (primRenderFunc)
         {
-            primRenderFunc(g_currentModelBlockSubBlocks, READ_LE_U16(currentModelBlockSubBlocks + 2));
+            auto it = currentModelBlockSubBlocks.m4_indices.begin();
+            primRenderFunc(it, currentModelBlockSubBlocks.m2_primCount);
         }
         else
         {
-            currentModelInstanceDrawPrims += READ_LE_U16(currentModelBlockSubBlocks + 2);
+            currentModelInstanceDrawPrims += currentModelBlockSubBlocks.m2_primCount;
         }
-        currentModelBlockSubBlocks = g_currentModelBlockSubBlocks + READ_LE_U16(currentModelBlockSubBlocks + 2) * polyRenderDefs[primType].m1C_size;
+        assert(polyRenderDefs[primType].m1C_size == 0x8);
     }
-    g_currentModelBlockSubBlocks = currentModelBlockSubBlocks;
     return 1;
 }
 

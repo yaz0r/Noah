@@ -45,6 +45,24 @@ void sModelBlock::init(const u8* blockData, u8* baseItForRelocation) {
     }
 
     m10_offsetMeshBlocks = READ_LE_U32(blockData + 0x10);
+    {
+        m10_meshBlocks.resize(m6_numMeshBlock);
+        auto meshBlocksId = baseItForRelocation + m10_offsetMeshBlocks;
+        for (int i = 0; i < m6_numMeshBlock; i++) {
+            m10_meshBlocks[i].m0_primType = READ_LE_U8(meshBlocksId); meshBlocksId++;
+            m10_meshBlocks[i].m1 = READ_LE_U8(meshBlocksId); meshBlocksId++;
+            m10_meshBlocks[i].m2_primCount = READ_LE_U16(meshBlocksId); meshBlocksId += 2;
+            m10_meshBlocks[i].m4_indices.resize(m10_meshBlocks[i].m2_primCount);
+            for (int j = 0; j < m10_meshBlocks[i].m2_primCount; j++) {
+                m10_meshBlocks[i].m4_indices[j][0] = READ_LE_U16(meshBlocksId); meshBlocksId += 2;
+                m10_meshBlocks[i].m4_indices[j][1] = READ_LE_U16(meshBlocksId); meshBlocksId += 2;
+                m10_meshBlocks[i].m4_indices[j][2] = READ_LE_U16(meshBlocksId); meshBlocksId += 2;
+                m10_meshBlocks[i].m4_indices[j][3] = READ_LE_U16(meshBlocksId); meshBlocksId += 2;
+
+            }
+        }
+    }
+
     m14_offsetDisplayList = READ_LE_U32(blockData + 0x14);
 
     //assert(READ_LE_U32(blockData + 0x18) == 0);
@@ -137,8 +155,7 @@ void initModel2(sModelBlock* pModelBlock, std::vector<sTag*>& outputBuffer, int 
         pModelBlock->m0_flags |= 1;
     }
 
-    currentModelBlockDisplayLists = pModelBlock->m_baseItForRelocation + pModelBlock->m14_offsetDisplayList;
-    g_currentModelBlockSubBlocks = pModelBlock->m_baseItForRelocation + pModelBlock->m10_offsetMeshBlocks;
+    g_currentModelBlockDisplayLists = pModelBlock->m_baseItForRelocation + pModelBlock->m14_offsetDisplayList;
     currentModelBlockNormals = &pModelBlock->mC_normals;
     currentModelBlockVertices = &pModelBlock->m8_vertices;
     currentModeBlock18 = nullptr;
@@ -188,25 +205,26 @@ void initModel2(sModelBlock* pModelBlock, std::vector<sTag*>& outputBuffer, int 
 
     fieldPolyCount2 += pModelBlock->m4_numPrims;
 
-    int currentMeshBlockCount = pModelBlock->m6_numMeshBlock;
-    while (currentMeshBlockCount = currentMeshBlockCount - 1, currentMeshBlockCount != 0xffffffff) {
-        int primType = READ_LE_U8(g_currentModelBlockSubBlocks);
-        int numPrims = READ_LE_U16(g_currentModelBlockSubBlocks + 2) - 1;
+    for(int j=0; j< pModelBlock->m6_numMeshBlock; j++) {
+        g_currentModelBlockSubBlocks = pModelBlock->m10_meshBlocks.begin() + j;
+        int primType = g_currentModelBlockSubBlocks->m0_primType;
+        int numPrims = g_currentModelBlockSubBlocks->m2_primCount;
 
         t_primInitFunc pInitFunction = polyRenderDefs[primType].m18_init;
-        g_currentModelBlockSubBlocks += 4;
-        while (numPrims != -1)
+        auto indicesIterator = g_currentModelBlockSubBlocks->m4_indices.begin();
+        for(int i=0; i<numPrims;)
         {
-            if (pInitFunction(currentModelBlockDisplayLists, g_currentModelBlockSubBlocks, (int)initParam) == 0)
+            if (pInitFunction(g_currentModelBlockDisplayLists, *indicesIterator, (int)initParam) == 0)
             {
-                currentModelBlockDisplayLists += 4;
+                g_currentModelBlockDisplayLists += 4;
             }
             else
             {
-                g_currentModelBlockSubBlocks += polyRenderDefs[primType].m1C_size;
+                assert(polyRenderDefs[primType].m1C_size == 8);
+                indicesIterator++;
+                i++;
                 //currentModelInstanceArray8 += polyRenderDefs[primType].m24_sizeInstanceArray;
-                currentModelBlockDisplayLists += polyRenderDefs[primType].m20_sizeDisplayList;
-                numPrims = numPrims + -1;
+                g_currentModelBlockDisplayLists += polyRenderDefs[primType].m20_sizeDisplayList;
 
             }
         }
