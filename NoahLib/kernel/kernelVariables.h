@@ -12,7 +12,7 @@ extern int needReloadWds;
 extern int characterOrGearsLoadingInProgress;
 extern int updateMusicState2Var1;
 extern int musicVar2;
-extern s32 menuOpenCount;
+extern s32 g_menuOpenCount;
 extern int compassGraphicDataLoaded;
 extern int updateMusicState2Var2;
 extern int worldmapSoundFilesPendingCount;

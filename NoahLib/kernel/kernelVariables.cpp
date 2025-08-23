@@ -33,7 +33,7 @@ int musicVar1 = -1;
 int compassGraphicDataLoaded = 0;
 int updateMusicState2Var2 = 0;
 s32 fieldMapNumber = -1;
-s32 menuOpenCount = 0;
+s32 g_menuOpenCount = 0;
 int musicVar2 = 0;
 int updateMusicState2Var1 = 0;
 int needStartMusicInstanceSub0 = 0;
@@ -66,7 +66,7 @@ void initKernelVariables() {
     characterOrGearsLoadingInProgress = 0;
     updateMusicState2Var1 = 0;
     musicVar2 = 0;
-    menuOpenCount = 0;
+    g_menuOpenCount = 0;
     MissingCode();
     compassGraphicDataLoaded = 0;
     updateMusicState2Var2 = 0;

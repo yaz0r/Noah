@@ -6,36 +6,57 @@
 #include "kernel/playTime.h"
 #include "field/walkMesh.h"
 
+#ifdef WIN32
+namespace windows {
+#include <windows.h>
+}
+#endif
+
+void validateAssert(bool result) {
+#ifdef WIN32
+    if(!result)
+    {
+        static bool bBreakOnValidationError = true;
+        if (windows::IsDebuggerPresent() && bBreakOnValidationError) {
+            __debugbreak();
+            bBreakOnValidationError = false;
+        }
+    }
+#else 
+    assert(result);
+#endif
+}
+
 void validateXY(u32 psxValue, const sGTE_XY& svector) {
-    assert((s16)(psxValue >> 16) == svector.getX());
-    assert((s16)(psxValue) == svector.getY());
-    //assert(svector.pad == g_gdbConnection->readS16(psxBase + 6));
+    validateAssert((s16)(psxValue >> 16) == svector.getX());
+    validateAssert((s16)(psxValue) == svector.getY());
+    //validateAssert(svector.pad == g_gdbConnection->readS16(psxBase + 6));
 }
 
 void validate(u32 psxBase, const SVECTOR& svector) {
-    assert(svector.vx == g_gdbConnection->readS16(psxBase + 0));
-    assert(svector.vy == g_gdbConnection->readS16(psxBase + 2));
-    assert(svector.vz == g_gdbConnection->readS16(psxBase + 4));
-    //assert(svector.pad == g_gdbConnection->readS16(psxBase + 6));
+    validateAssert(svector.vx == g_gdbConnection->readS16(psxBase + 0));
+    validateAssert(svector.vy == g_gdbConnection->readS16(psxBase + 2));
+    validateAssert(svector.vz == g_gdbConnection->readS16(psxBase + 4));
+    //validateAssert(svector.pad == g_gdbConnection->readS16(psxBase + 6));
 }
 
 void validate(u32 psxBase, const VECTOR& vector) {
-    assert(vector.vx == g_gdbConnection->readS32(psxBase + 0));
-    assert(vector.vy == g_gdbConnection->readS32(psxBase + 4));
-    assert(vector.vz == g_gdbConnection->readS32(psxBase + 8));
-    //assert(vector.pad == g_gdbConnection->readS32(psxBase + 0xC));
+    validateAssert(vector.vx == g_gdbConnection->readS32(psxBase + 0));
+    validateAssert(vector.vy == g_gdbConnection->readS32(psxBase + 4));
+    validateAssert(vector.vz == g_gdbConnection->readS32(psxBase + 8));
+    //validateAssert(vector.pad == g_gdbConnection->readS32(psxBase + 0xC));
 }
 
 void validate(u32 psxBase, const SFP_VEC3& vector) {
-    assert(vector.vx == g_gdbConnection->readS16(psxBase + 0));
-    assert(vector.vy == g_gdbConnection->readS16(psxBase + 2));
-    assert(vector.vz == g_gdbConnection->readS16(psxBase + 4));
+    validateAssert(vector.vx == g_gdbConnection->readS16(psxBase + 0));
+    validateAssert(vector.vy == g_gdbConnection->readS16(psxBase + 2));
+    validateAssert(vector.vz == g_gdbConnection->readS16(psxBase + 4));
 }
 
 void validate(u32 psxBase, const MATRIX& matrix) {
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
-            assert(g_gdbConnection->readS16(psxBase + 2 * (j * 3 + i)) == matrix.m[j][i]);
+            validateAssert(g_gdbConnection->readS16(psxBase + 2 * (j * 3 + i)) == matrix.m[j][i]);
         }
     }
 
@@ -43,7 +64,7 @@ void validate(u32 psxBase, const MATRIX& matrix) {
 }
 
 void validate(u32 psxBase, const sFixedPoint& data) {
-    assert(data.m_value == g_gdbConnection->readS32(psxBase));
+    validateAssert(data.m_value == g_gdbConnection->readS32(psxBase));
 }
 
 void validate(u32 psxBase, const FP_VEC3& vec3) {
@@ -53,27 +74,27 @@ void validate(u32 psxBase, const FP_VEC3& vec3) {
 }
 
 void validate(u32 psxBase, const s8& data) {
-    assert(data == g_gdbConnection->readS8(psxBase + 0));
+    validateAssert(data == g_gdbConnection->readS8(psxBase + 0));
 }
 
 void validate(u32 psxBase, const u8& data) {
-    assert(data == g_gdbConnection->readU8(psxBase + 0));
+    validateAssert(data == g_gdbConnection->readU8(psxBase + 0));
 }
 
 void validate(u32 psxBase, const s16& data) {
-    assert(data == g_gdbConnection->readS16(psxBase + 0));
+    validateAssert(data == g_gdbConnection->readS16(psxBase + 0));
 }
 
 void validate(u32 psxBase, const u16& data) {
-    assert(data == g_gdbConnection->readU16(psxBase + 0));
+    validateAssert(data == g_gdbConnection->readU16(psxBase + 0));
 }
 
 void validate(u32 psxBase, const s32& data) {
-    assert(data == g_gdbConnection->readS32(psxBase + 0));
+    validateAssert(data == g_gdbConnection->readS32(psxBase + 0));
 }
 
 void validate(u32 psxBase, const u32& data) {
-    assert(data == g_gdbConnection->readU32(psxBase + 0));
+    validateAssert(data == g_gdbConnection->readU32(psxBase + 0));
 }
 
 template <typename T>
@@ -84,7 +105,7 @@ void validate(u32 psxBase, const T* pPtr) {
         validate(psxBase, *pPtr);
     }
     else {
-        assert(g_gdbConnection->readU32(psxBase) == 0);
+        validateAssert(g_gdbConnection->readU32(psxBase) == 0);
     }
 }
 

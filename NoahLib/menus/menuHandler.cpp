@@ -28,7 +28,7 @@ sMenuContext *gMenuContext = nullptr;
 
 void updateMenuSelection(u8 count, u8 selectedEntry, std::span<std::array<u32, 2>>::iterator config);
 void updateMenuSelection2(int param_1, sMenuContext_4E0* param_2, void* param_3_unused, std::span<int>::iterator param_4, std::span<s8>::iterator param_5, byte param_6, byte param_7, int param_8);
-s32 menuIdToOpen = 0xFF;
+s32 g_menuIdToOpen = 0xFF;
 
 u8 useDebugMenuList = 1;
 u8 menuToEnter = 0;
@@ -303,7 +303,7 @@ void loadMenuSharedResources() {
     gMenuContext->m2E4_musicSequence = fieldSeq;
 }
 
-u8 menuOpenArg = 0;
+u8 g_menuOpenArg = 0;
 u8 defaultSelectedMenuEntry = 0;
 
 ushort menu2CheckBitmask(ushort param_1, uint param_2)
@@ -319,7 +319,7 @@ ushort menu2CheckBitmask(ushort param_1, uint param_2)
 
 void initMenuGlobals() {
 
-    if ((menuToEnter == '\0') && (menuOpenArg == '\0')) {
+    if ((menuToEnter == '\0') && (g_menuOpenArg == '\0')) {
         gMenuContext->m336_menuSelectedEntry = defaultSelectedMenuEntry;
     }
     else {
@@ -2284,7 +2284,7 @@ bool processLoadSaveMenu(char param_1, byte param_2)
     menuVarUnk0 = 0;
     gMenuContext->m338_currentSelectedSubMenuEntry = 2;
     uVar6 = 0;
-    if ((menuToEnter == 0) && (menuOpenArg == 0)) {
+    if ((menuToEnter == 0) && (g_menuOpenArg == 0)) {
         gMenuContext->m338_currentSelectedSubMenuEntry = 1;
     }
     gMenuContext->m339_previousSelectedSubMenuEntry = -1;
@@ -2308,7 +2308,7 @@ bool processLoadSaveMenu(char param_1, byte param_2)
                 break;
             case 0:
                 processLoadSaveMenuSub2(0, 0);
-                if (menuOpenArg == 0) {
+                if (g_menuOpenArg == 0) {
                     uVar6 = 9;
                 }
                 break;
@@ -3728,7 +3728,7 @@ void menu2_mainLoop(void)
         processLoadSaveMenuSub2(0, 0);
         gMenuContext->m33C->m6_drawPlayTime = 0;
         gMenuContext->m33C->m5_drawGold = 0;
-        if (menuOpenArg == 0) {
+        if (g_menuOpenArg == 0) {
             defaultSelectedMenuEntry = gMenuContext->m336_menuSelectedEntry;
         }
     }
@@ -3983,7 +3983,7 @@ void processDebugMenuForMenuList(void) {
             drawMenuDebug();
         }
         menuToEnter = (byte)currentDebugMenu;
-        menuOpenArg = (byte)currentDebugSubMenu;
+        g_menuOpenArg = (byte)currentDebugSubMenu;
         gMenuContext->m6C_drawContexts[0].m0_DrawEnv.isbg = '\0';
         gMenuContext->m6C_drawContexts[1].m0_DrawEnv.isbg = '\0';
         SetDispMask(0);
@@ -4060,7 +4060,7 @@ void enterMenu(void)
 
 void loadAndOpenMenu(void)
 {
-    if ((menuIdToOpen != 0x80) || (g_menuDisabled == 0)) {
+    if ((g_menuIdToOpen != 0x80) || (g_menuDisabled == 0)) {
         MissingCode();
 
         setCurrentDirectory(0x10, 0);
@@ -4070,7 +4070,7 @@ void loadAndOpenMenu(void)
         sLoadingBatchCommands menuLoadCommands[3];
         menuLoadCommands[0].m0_fileIndex = 1;
         menuLoadCommands[0].m4_loadPtr = &menuSharedResources;
-        menuLoadCommands[1].m0_fileIndex = (menuIdToOpen & 0x7f) + 5;
+        menuLoadCommands[1].m0_fileIndex = (g_menuIdToOpen & 0x7f) + 5;
         menuLoadCommands[1].m4_loadPtr = &menuOverlay;
         menuLoadCommands[2].m0_fileIndex = 0;
         menuLoadCommands[2].m4_loadPtr = nullptr;
@@ -4091,7 +4091,7 @@ void loadAndOpenMenu(void)
         MissingCode();
 
         useDebugMenuList = 0;
-        menuToEnter = menuIdToOpen & 0x7f;
+        menuToEnter = g_menuIdToOpen & 0x7f;
 
         MissingCode();
 
@@ -4099,7 +4099,7 @@ void loadAndOpenMenu(void)
         enterMenu();
         ClearCacheAfterOverlayLoad();
         gDepthDivider = 2;
-        if ((menuReturnState0 == '\0') && ((menuIdToOpen & 0x7f) == 2)) {
+        if ((menuReturnState0 == '\0') && ((g_menuIdToOpen & 0x7f) == 2)) {
             //kernelAndFieldStatesSynced = 1;
             MissingCode();
             setVar(0x46, 0);
@@ -4121,9 +4121,9 @@ void loadAndOpenMenu(void)
 
         MissingCode();
 
-        menuIdToOpen = 0xff;
+        g_menuIdToOpen = 0xff;
         initFontSystem();
-        menuOpenCount = 0;
+        g_menuOpenCount = 0;
     }
 }
 

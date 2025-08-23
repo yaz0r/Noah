@@ -205,11 +205,11 @@ void playMusicFromScript()
     else {
         iVar3 = isLoadCompleted();
         if ((iVar3 != 0) || (playMusicAuthorized == 0)) {
-            breakCurrentScript = 1;
+            g_breakCurrentScript = 1;
             return;
         }
         if ((musicVar2 == 1) || (fieldMusicLoadPending == -1)) {
-            breakCurrentScript = 1;
+            g_breakCurrentScript = 1;
             return;
         }
         if (iVar2 != currentlyPlayingMusic) {
@@ -515,10 +515,10 @@ int showDialogWindowForActor(int actorId, int mode)
     if (loadCompleted ||
         fieldTransitionInProgress || // we in the field transition effect
         numDialogWindowsCreatedThisFrame || // can only create 1 dialog window per frame
-        (menuIdToOpen != 0xff) || // pending menu update
+        (g_menuIdToOpen != 0xff) || // pending menu update
         (!iRam800adb70 && isLoadCompleted()) ||
         ((pCurrentFieldScriptActor->m80_dialogPortrait != -1) && (isDialogAvatarLoaded((uint)pCurrentFieldScriptActor->m80_dialogPortrait) == -1))) { // we need a dialog portrait and it's not loaded yet
-        breakCurrentScript = 1;
+        g_breakCurrentScript = 1;
         return -1;
     }
 
@@ -526,7 +526,7 @@ int showDialogWindowForActor(int actorId, int mode)
 
     int dialogWindow;
 	if (findDialogWindowForCurrentActor(&dialogWindow) != -1) {
-		breakCurrentScript = 1;
+		g_breakCurrentScript = 1;
         gDialogWindows[dialogWindow].m414 = 0;
 		return -1;
 	}
@@ -542,7 +542,7 @@ int showDialogWindowForActor(int actorId, int mode)
 		windowIndex = getWindowWithLowestPriority();
 		if (windowIndex != -1) {
 			gDialogWindows[windowIndex].m414 = 0;
-			breakCurrentScript = 1;
+			g_breakCurrentScript = 1;
 			return -1;
 		}
     }

@@ -3,7 +3,7 @@
 #include "kernel/graphics.h"
 #include "kernel/font.h"
 
-extern s32 menuIdToOpen;
+extern s32 g_menuIdToOpen;
 
 struct sMenuContext_1D4 {
     DRAWENV m0_DrawEnv;
@@ -375,6 +375,7 @@ extern std::array<s32, 11> cursorPosYTable;
 extern std::array<int, 19> infocardNameU;
 extern std::array<int, 19> infocardNameV;
 
+extern u8 g_menuOpenArg;
 
 void enterMenu(void);
 

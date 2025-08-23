@@ -1476,6 +1476,7 @@ void initExtendedOpcodeTable()
 		.end();
 
     m_extendedOpcode[0x99]
+        .setName("SET_MENU_OPEN_ARG")
         .addArgumentByte()
         .end();
 

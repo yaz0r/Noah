@@ -24,6 +24,7 @@
 #include "kernel/audio/soundInstance.h"
 
 s32 particleCreationSlot = 0;
+u16 g_menuOpenArgFromScript = 0;
 
 void OP_JUMP_IF()
 {
@@ -146,7 +147,7 @@ void OP_4()
 
     pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m18 = 0xF;
     pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m3_scriptIndex = -1;
-    breakCurrentScript = 1;
+    g_breakCurrentScript = 1;
 }
 
 void OP_CALL()
@@ -160,7 +161,7 @@ void OP_CALL()
             //sprintf_screen(s_STACKERR_ACT = % d_Field__8006fd44, currentFieldActorId);
             assert(0);
         }
-        breakCurrentScript = 1;
+        g_breakCurrentScript = 1;
     }
     else {
         pCurrentFieldScriptActor->m78_stack[pCurrentFieldScriptActor->m12C_flags >> 5 & 0xe] = pCurrentFieldScriptActor->mCC_scriptPC + 3;
@@ -186,7 +187,7 @@ void OP_RETURN()
         pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m18 = 0xF;
         pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m3_scriptIndex = -1;
         currentScriptFinished = 1;
-        breakCurrentScript = 1;
+        g_breakCurrentScript = 1;
     }
     else {
         uVar3 = ((uVar2 >> 6 & 7) - 1 & 7) << 6;
@@ -279,7 +280,7 @@ void OP_10Sub(int param_1)
             pCurrentFieldScriptActor->m30_stepVector.vy = pCurrentFieldScriptActor->mD0_targetPositionOffset[1];
             pCurrentFieldScriptActor->m30_stepVector.vz = pCurrentFieldScriptActor->mD0_targetPositionOffset[2];
 
-            breakCurrentScript = 1;
+            g_breakCurrentScript = 1;
             pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0--;
         }
 
@@ -315,7 +316,7 @@ void OP_10()
 void OP_CUSTOM_FIELD_TRANSITION()
 {
     if ((((playMusicAuthorized == 0) || (fieldExecuteVar3 == 0)) || (loadCompleted != 0)) || ((fieldMusicLoadPending == -1 || (load2dAnimVar != 0)))) {
-        breakCurrentScript = 1;
+        g_breakCurrentScript = 1;
     }
     else {
         OP_CHANGE_FIELD_WHEN_READY2();
@@ -360,7 +361,7 @@ void OP_ADD_TO_CURRENT_PARTY()
     }
     else
     {
-        breakCurrentScript = 1;
+        g_breakCurrentScript = 1;
         ADVANCE_VM(-0x1);
     }
 }
@@ -369,7 +370,7 @@ void  OP_REMOVE_FROM_CURRENT_PARTY()
 {
     int iVar1 = asyncLoadingVar1;
     if (asyncLoadingVar1 != 0xff) {
-        breakCurrentScript = 1;
+        g_breakCurrentScript = 1;
         pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC - 1;
         return;
     }
@@ -473,7 +474,7 @@ void  OP_REMOVE_FROM_CURRENT_PARTY()
 void OP_FINALIZE_PARTY_CHARACTER_LOADING()
 {
     if ((asyncLoadingVar1 == 0xff) || isCDBusy()) {
-        breakCurrentScript = 1;
+        g_breakCurrentScript = 1;
         ADVANCE_VM(-0x1);
     }
     else {
@@ -483,7 +484,7 @@ void OP_FINALIZE_PARTY_CHARACTER_LOADING()
         partyCharacterBuffers[asyncPartyCharacterLoadingIndex].init(partyCharacterBuffersRaw[asyncPartyCharacterLoadingIndex].beginSpan());
         runInitScriptForNewlyLoadedPC(asyncPartyCharacterLoadingCharacterIndex);
         asyncLoadingVar1 = 0xff;
-        breakCurrentScript = 1;
+        g_breakCurrentScript = 1;
         ADVANCE_VM(0x1);
     }
 }
@@ -573,7 +574,7 @@ void OP_STOP(void)
     pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m18 = 0xF;
     pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m3_scriptIndex = -1;
     currentScriptFinished = 1;
-    breakCurrentScript = 1;
+    g_breakCurrentScript = 1;
     return;
 }
 
@@ -638,7 +639,7 @@ s16 updateCharacterVar2 = 0;
 s16 updateCharacterVar2ResetValue = 0;
 s8 updateCharacterVar4 = 0;
 int numFollowStruct2 = 0;
-extern s32 menuIdToOpen;
+extern s32 g_menuIdToOpen;
 extern s16 updateEntityEventCode4Var0;
 
 std::array<u16, 16> updateCharacterRotationOrder1 = {
@@ -855,12 +856,12 @@ void OP_UPDATE_CHARACTER()
     }
 
     // handle jump
-    if (((updateCharacterVar1 < 0x21) || (updateCharacterVar1 = 0x20, (padButtonForScripts[0].m0_buttons & controllerButtons::JUMP) == 0)) || (((pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags & 0x1800) != 0 || (menuIdToOpen != 0xff)))) {
+    if (((updateCharacterVar1 < 0x21) || (updateCharacterVar1 = 0x20, (padButtonForScripts[0].m0_buttons & controllerButtons::JUMP) == 0)) || (((pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags & 0x1800) != 0 || (g_menuIdToOpen != 0xff)))) {
         if (updateEntityEventCode4Var0 == 0) {
             if (padButtonForDialogs & controllerButtons::JUMP) {
                 if ((pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags & 0x1800) == 0) {
                     if ((pCurrentFieldScriptActor->m14_currentTriangleFlag & 0x400000U) == 0) {
-                        if (menuIdToOpen == 0xff) {
+                        if (g_menuIdToOpen == 0xff) {
                             if (!OP_UPDATE_CHARACTER_Sub0(pCurrentFieldScriptActor)) {
                                 pCurrentFieldScriptActor->m0_fieldScriptFlags.mx800_isJumping = 1;
                                 numFollowStruct2 = partyToFollowStructMapping[0];
@@ -878,7 +879,7 @@ void OP_UPDATE_CHARACTER()
             }
             else {
                 if (updateCharacterVar2 == 0) {
-                    if ((menuIdToOpen == 0xff) && !OP_UPDATE_CHARACTER_Sub0(pCurrentFieldScriptActor)) {
+                    if ((g_menuIdToOpen == 0xff) && !OP_UPDATE_CHARACTER_Sub0(pCurrentFieldScriptActor)) {
                         pCurrentFieldScriptActor->m0_fieldScriptFlags.mx800_isJumping = 1;
                         numFollowStruct2 = partyToFollowStructMapping[0];
                         pCurrentFieldScriptActor->mE8_currentAnimationId = 0xff;
@@ -919,7 +920,7 @@ void OP_UPDATE_CHARACTER_INFINITLY()
 
     uVar1 = pCurrentFieldScriptActor->mCC_scriptPC;
     OP_UPDATE_CHARACTER();
-    breakCurrentScript = 1;
+    g_breakCurrentScript = 1;
     pCurrentFieldScriptActor->mCC_scriptPC = uVar1;
 }
 
@@ -1019,7 +1020,7 @@ void OP_INIT_ENTITY_PC(void)
         psVar7 = pCurrentFieldScriptActor;
         pCurrentFieldScriptActor->m0_fieldScriptFlags.m0_updateScriptDisabled = 1;
         currentScriptFinished = 1;
-        breakCurrentScript = 1;
+        g_breakCurrentScript = 1;
         uVar5 = psVar7->m4_flags.m_rawFlags | 0x100000;
     }
     else {
@@ -1133,7 +1134,7 @@ void OP_RAND_ROTATION()
         uVar5 = uVar5 & 0xfff;
     }
 
-    breakCurrentScript = 1;
+    g_breakCurrentScript = 1;
     pCurrentFieldScriptActor->m104_rotation = uVar5;
     ADVANCE_VM(0x1);
 }
@@ -1182,7 +1183,7 @@ void OP_IF_CHARACTER_IN_VIEW() {
         else {
             pCurrentFieldScriptActor->mCC_scriptPC = readU16FromScript(2);
         }
-        breakCurrentScript = 1;
+        g_breakCurrentScript = 1;
     }
     else {
         ADVANCE_VM(0x4);
@@ -1256,7 +1257,7 @@ void OP_CLOSE_CURRENT_ACTOR_DIALOG()
         uVar3 = *puVar1 + 2;
     }
     psVar5->mCC_scriptPC = uVar3;
-    breakCurrentScript = 1;
+    g_breakCurrentScript = 1;
 }
 
 void OP_SHOW_DIALOG_WINDOW_FOR_CURRENT_ACTOR_MODE3()
@@ -1403,7 +1404,7 @@ int walkAndChangeField(int param_1, int param_2, int param_3, int param_4)
 
     if (param_2 == 0) {
         if ((playMusicAuthorized == 0) || (fieldExecuteVar3 == 0)) {
-            breakCurrentScript = 1;
+            g_breakCurrentScript = 1;
         }
         if (fieldChangePrevented != 0) {
             int sVar3 = getImmediateOrVariableUnsigned(4);
@@ -1437,9 +1438,9 @@ int walkAndChangeField(int param_1, int param_2, int param_3, int param_4)
             sVar5 = fp_atan2(local_38);
             psVar11->m104_rotation = sVar5;
             psVar11->m106_currentRotation = sVar5;
-            breakCurrentScript = 1;
+            g_breakCurrentScript = 1;
             if (param_2 == 0) {
-                breakCurrentScript = 1;
+                g_breakCurrentScript = 1;
                 return -1;
             }
             pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC - 1;
@@ -1453,7 +1454,7 @@ int walkAndChangeField(int param_1, int param_2, int param_3, int param_4)
     psVar12->m18_moveSpeed = 0;
     psVar11->mE8_currentAnimationId = 0;
     setVisualAnimation(psVar12, 0, &actorArray[g_playerControlledActor]);
-    breakCurrentScript = 1;
+    g_breakCurrentScript = 1;
     psVar11->m8C_scriptSlots[psVar11->mCE_currentScriptSlot].m4_flags.raw = 0xffff;
     psVar11->m8C_scriptSlots[psVar11->mCE_currentScriptSlot].m4_flags.raw &= 0xfe7fffff;
     psVar11->m0_fieldScriptFlags.m_rawFlags = psVar11->m0_fieldScriptFlags.m_rawFlags & 0xffdfffff;
@@ -1468,7 +1469,7 @@ int walkAndChangeField(int param_1, int param_2, int param_3, int param_4)
 void OP_WALK_AND_CHANGE_FIELD()
 {
     if ((((playMusicAuthorized == 0) || (fieldExecuteVar3 == 0)) || (loadCompleted != 0)) || ((fieldMusicLoadPending == -1 || (load2dAnimVar != 0)))) {
-        breakCurrentScript = 1;
+        g_breakCurrentScript = 1;
     }
     else {
         enablePlayerFlag80();
@@ -1534,7 +1535,7 @@ void OP_55(void)
 
 void OP_WORLDMAP(void) {
     if ((((playMusicAuthorized == 0) || (fieldExecuteVar3 == 0)) || (loadCompleted != 0)) || ((fieldMusicLoadPending == -1 || (load2dAnimVar != 0)))) {
-        breakCurrentScript = 1;
+        g_breakCurrentScript = 1;
     }
     else {
         fieldPerFrameReset();
@@ -1550,7 +1551,7 @@ void OP_WORLDMAP(void) {
         pKernelGameState->m2320_worldmapMode = getVar10(7, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 9]);
         OP_CHANGE_FIELD_WHEN_READY_Sub();
         kernelAndFieldStatesSynced = 1;
-        breakCurrentScript = 1;
+        g_breakCurrentScript = 1;
         ADVANCE_VM(0xA);
     }
 }
@@ -1577,7 +1578,7 @@ void OP_57(void)
             pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags &= ~0x10000;
             pCurrentFieldScriptActor->m4_flags.m_rawFlags = pCurrentFieldScriptActor->m4_flags.m_rawFlags & 0xffdfffff;
             pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 2;
-            breakCurrentScript = 1;
+            g_breakCurrentScript = 1;
             return;
         }
 
@@ -1624,7 +1625,7 @@ void OP_57(void)
         actorArray[currentFieldActorId].m4_pVramSpriteSheet->m0_position.vy = (pCurrentFieldScriptActor->m20_position).vy;
         actorArray[currentFieldActorId].m4_pVramSpriteSheet->m0_position.vz = (pCurrentFieldScriptActor->m20_position).vz;
         pCurrentFieldScriptActor->m102_numSteps = pCurrentFieldScriptActor->m102_numSteps + 1;
-        breakCurrentScript = 1;
+        g_breakCurrentScript = 1;
         return;
     default:
         assert(0);
@@ -1658,7 +1659,7 @@ void OP_57(void)
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 0xb;
     pCurrentFieldScriptActor->mD0_targetPositionOffset[0] = (iVar7 * 0x10000 - iVar9) / (iVar6 + 1);
     pCurrentFieldScriptActor->mD0_targetPositionOffset[2] = (iVar8 * 0x10000 - iVar15) / (iVar6 + 1);
-    breakCurrentScript = 1;
+    g_breakCurrentScript = 1;
 }
 
 void OP_SET_ANGLE_AXIS_ROTATION()
@@ -1709,7 +1710,7 @@ void OP_WALK_RANDOM_DIRECTION()
             pCurrentFieldScriptActor->m106_currentRotation = newRotation;
         }
     }
-    breakCurrentScript = 1;
+    g_breakCurrentScript = 1;
     pCurrentFieldScriptActor->m104_rotation = newRotation;
     ADVANCE_VM(0x1);
 }
@@ -1837,7 +1838,7 @@ void OP_CHANGE_FIELD_WHEN_READY2()
     int uVar2;
 
     if ((((playMusicAuthorized == 0) || (fieldExecuteVar3 == 0)) || (loadCompleted != 0)) || (((fieldMusicLoadPending == -1 || (load2dAnimVar != 0)) || (iRam800adb70 != 0)))) {
-        breakCurrentScript = 1;
+        g_breakCurrentScript = 1;
     }
     else {
         fieldRandomBattleVar = -1;
@@ -1850,7 +1851,7 @@ void OP_CHANGE_FIELD_WHEN_READY2()
             fieldMapNumber = uVar2;
             OP_CHANGE_FIELD_WHEN_READY_Sub();
         }
-        breakCurrentScript = 1;
+        g_breakCurrentScript = 1;
         ADVANCE_VM(0x5);
     }
 }
@@ -2001,7 +2002,7 @@ void OP_92()
     pCurrentFieldScriptActor->mCF_scriptSlotWaitedOn = 0;
     pCurrentFieldScriptActor->m84_dialogWindowFlags = 0;
     pCurrentFieldScriptActor->m12C_flags &=  0xfffffe3f;
-    breakCurrentScript = 1;
+    g_breakCurrentScript = 1;
 }
 
 void OP_ADD_ENDITY_TO_MECHA_LIST()
@@ -2057,7 +2058,7 @@ void OP_WAIT_DIALOG()
                 gDialogWindows[windowIndex].m414 = 0;
             }
         }
-        breakCurrentScript = 1;
+        g_breakCurrentScript = 1;
     }
 }
 
@@ -2100,7 +2101,7 @@ void OP_WAIT_FOR_CAMERA_ANIMATION_FLAG_CLEAR()
         ADVANCE_VM(0x2);
     }
     else {
-        breakCurrentScript = 1;
+        g_breakCurrentScript = 1;
     }
 }
 
@@ -2153,11 +2154,11 @@ void OP_SETUP_MULTICHOICE()
         psVar4 = pCurrentFieldScriptActor;
         if (iVar5 != 1) {
             if (gDialogWindows[dialogWindowId].m18.m84_delay == 0) {
-                breakCurrentScript = 1;
+                g_breakCurrentScript = 1;
                 return;
             }
             if (gDialogWindows[dialogWindowId].m18.m6C_autoClose == 0) {
-                breakCurrentScript = 1;
+                g_breakCurrentScript = 1;
                 return;
             }
         }
@@ -2172,7 +2173,7 @@ void OP_SETUP_MULTICHOICE()
         setupMultiChoiceColor(&gDialogWindows[dialogWindowId].m18, 0xef, 0x1e, 0xf0);
     }
     ADVANCE_VM(0x2);
-    breakCurrentScript = 1;
+    g_breakCurrentScript = 1;
 }
 
 void OP_A8()
@@ -2408,7 +2409,7 @@ void OP_SET_CURRENT_ACTOR_ROTATION(void)
 void OP_15()
 {
     if ((playMusicAuthorized == 0) || (fieldExecuteVar3 == 0)) {
-        breakCurrentScript = 1;
+        g_breakCurrentScript = 1;
     }
     else {
         fieldRandomBattleVar = -1;
@@ -2500,7 +2501,7 @@ void OP_ROTATE_AWAY_FROM_ACTOR()
 void OP_72()
 {
     if (playMusicAuthorized == 0) {
-        breakCurrentScript = 1;
+        g_breakCurrentScript = 1;
     }
     else {
         musicVar1 = 0;
@@ -2535,7 +2536,7 @@ void OP_PLAY_SOUND_EFFECT()
 void OP_PLAY_MUSIC()
 {
     if (playMusicAuthorized == 0) {
-        breakCurrentScript = 1;
+        g_breakCurrentScript = 1;
     }
     else {
         musicVar1 = -1;
@@ -2612,7 +2613,7 @@ void OP_LOAD_SPECIAL_2D_ANIMATION()
     if ((load2dAnimVar == 0) && (loadCompleted == 0)) {
         iVar1 = isLoadCompleted();
         if (iVar1 != 0) {
-            breakCurrentScript = 1;
+            g_breakCurrentScript = 1;
             pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC - 1;
             return;
         }
@@ -2644,7 +2645,7 @@ void OP_LOAD_SPECIAL_2D_ANIMATION()
     else {
         pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC - 1;
     }
-    breakCurrentScript = 1;
+    g_breakCurrentScript = 1;
 }
 
 void OP_WAIT_LOADING_SPECIAL_2D_ANIMATION()
@@ -2662,7 +2663,7 @@ void OP_WAIT_LOADING_SPECIAL_2D_ANIMATION()
         uVar1 = pCurrentFieldScriptActor->mCC_scriptPC - 1;
     }
     pCurrentFieldScriptActor->mCC_scriptPC = uVar1;
-    breakCurrentScript = 1;
+    g_breakCurrentScript = 1;
 }
 
 void OPX_4D(void)
@@ -2690,7 +2691,7 @@ void OP_FREE_SPECIAL_2D_ANIMATION()
         pCurrentFieldScriptActor->m120_special2dAnimation = nullptr; // not in original
         pCurrentFieldScriptActor->m124_special2dAnimationId = -1;
     }
-    breakCurrentScript = 1;
+    g_breakCurrentScript = 1;
     ADVANCE_VM(0x1);
 }
 
@@ -2747,14 +2748,14 @@ void OP_ENABLE_PLAYER_CONTROLS()
     ADVANCE_VM(0x1);
 }
 
-void OPX_START_CINEMATIC(void)
+void OP_START_CINEMATIC(void)
 {
     fieldRandomBattleVar = -1;
     g_menuDisabled = 1;
     g_compassDisabled = 1;
     op99Var7 = op99Var7 | 0xc000;
     if ((playMusicAuthorized == 0) || (fieldExecuteVar3 == 0)) {
-        breakCurrentScript = 1;
+        g_breakCurrentScript = 1;
         ADVANCE_VM(-0x1);
     }
     else {
@@ -2763,11 +2764,22 @@ void OPX_START_CINEMATIC(void)
     return;
 }
 
+void OP_OPEN_NORMAL_MENU(void)
+{
+    g_breakCurrentScript = 1;
+    g_menuIdToOpen = 0;
+    g_menuOpenArg = (byte)g_menuOpenArgFromScript;
+    g_menuOpenCount++;
+    ADVANCE_VM(0x1);
+    return;
+}
+
+
 void OP_OPEN_LOAD_GAME_MENU()
 {
-    menuIdToOpen = 2;
-    breakCurrentScript = 1;
-    menuOpenCount = menuOpenCount + 1;
+    g_menuIdToOpen = 2;
+    g_breakCurrentScript = 1;
+    g_menuOpenCount++;
     ADVANCE_VM(0x1);
 }
 
@@ -2780,7 +2792,7 @@ void OP_LOAD_NEW_MECHA(void)
 {
     int iVar5;
     if ((loadCompleted != 0) || (iVar5 = isLoadCompleted(), iVar5 != 0)) {
-        breakCurrentScript = 1;
+        g_breakCurrentScript = 1;
         pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC - 1;
         return;
     }
@@ -2850,7 +2862,7 @@ void OP_LOAD_NEW_MECHA(void)
         assert(0);
     }
 
-    breakCurrentScript = 1;
+    g_breakCurrentScript = 1;
 }
 
 void OPX_5D()
@@ -2897,7 +2909,7 @@ void OPX_61()
 {
     MissingCode();
     ADVANCE_VM(0x1);
-    breakCurrentScript = 1;
+    g_breakCurrentScript = 1;
 }
 
 void OPX_62(void)
@@ -2949,7 +2961,7 @@ void OPX_7F()
         uVar1 = pCurrentFieldScriptActor->mCC_scriptPC - 1;
     }*/
     ADVANCE_VM(0x1);
-    breakCurrentScript = 1;
+    g_breakCurrentScript = 1;
 }
 
 void OPX_80(void)
@@ -3013,7 +3025,7 @@ s32 battleStartSaveWritePending = 0;
 void OPX_84()
 {
     if ((((playMusicAuthorized == 0) || (fieldExecuteVar3 == 0)) || (fieldChangePrevented == 0)) || (((loadCompleted != 0 || (fieldMusicLoadPending == -1)) || (load2dAnimVar != 0)))) {
-        breakCurrentScript = 1;
+        g_breakCurrentScript = 1;
         pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC - 1;
     }
     else {
@@ -3031,7 +3043,7 @@ void OPX_84()
             battleStartSaveWritePending = 1;
             fieldMapNumber = nextField;
         }
-        breakCurrentScript = 1;
+        g_breakCurrentScript = 1;
         ADVANCE_VM(0x9);
     }
 }
@@ -3050,13 +3062,13 @@ void OPX_86(void)
 
 void OP_WAIT_MENU()
 {
-    if (menuOpenCount == 0) {
+    if (g_menuOpenCount == 0) {
         ADVANCE_VM(0x1);
     }
     else {
         ADVANCE_VM(-0x1);
     }
-    breakCurrentScript = 1;
+    g_breakCurrentScript = 1;
 }
 
 void OP_SETUP_MECHA_FIELD_ARGS()
@@ -3231,10 +3243,11 @@ void OPX_98()
     ADVANCE_VM(0x3);
 }
 
-void OPX_99()
+void OP_SET_MENU_OPEN_ARG()
 {
-    MissingCode();
-    ADVANCE_VM(0x3);
+    u8 param = pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1];
+    g_menuOpenArgFromScript = param ^ 1;
+    ADVANCE_VM(0x2);
 }
 
 void OPX_9A()
@@ -3394,7 +3407,7 @@ void OPX_C8()
 
 void OPX_CB()
 {
-    breakCurrentScript = 1;
+    g_breakCurrentScript = 1;
     MissingCode();
     ADVANCE_VM(0x1);
 }
@@ -3410,7 +3423,7 @@ void OPX_CC(void)
         uVar1 = pCurrentFieldScriptActor->mCC_scriptPC - 1;
     }
     pCurrentFieldScriptActor->mCC_scriptPC = uVar1;
-    breakCurrentScript = 1;
+    g_breakCurrentScript = 1;
     return;
 }
 
@@ -3425,7 +3438,7 @@ void OPX_A2(void)
         uVar1 = pCurrentFieldScriptActor->mCC_scriptPC + 1;
     }
     pCurrentFieldScriptActor->mCC_scriptPC = uVar1;
-    breakCurrentScript = 1;
+    g_breakCurrentScript = 1;
 }
 
 void OPX_13()
@@ -3485,7 +3498,7 @@ void OP_SCREEN_DISTORTION_FADE_OUT()
         assert(0);
     }
 
-    breakCurrentScript = 1;
+    g_breakCurrentScript = 1;
 }
 
 void OP_SET_PARTY_FRAME_MASK()
@@ -3629,7 +3642,7 @@ void OPX_21()
         psVar1 = pCurrentFieldScriptActor;
         pCurrentFieldScriptActor->m0_fieldScriptFlags.m0_updateScriptDisabled = 1;
         currentScriptFinished = 1;
-        breakCurrentScript = 1;
+        g_breakCurrentScript = 1;
         psVar1->m4_flags.m_rawFlags = psVar1->m4_flags.m_rawFlags | 0x100000;
     }
     else {
@@ -3781,13 +3794,13 @@ void OP_B5()
     }
     else {
         if (cameraDollyVar0 != 0) {
-            breakCurrentScript = 1;
+            g_breakCurrentScript = 1;
             return;
         }
         OP_B5Sub(iVar1, uVar2);
     }
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 5;
-    breakCurrentScript = 1;
+    g_breakCurrentScript = 1;
 }
 
 void OP_B6()
@@ -3861,7 +3874,7 @@ void OP_C8()
 {
     MissingCode();
     ADVANCE_VM(0x3);
-    breakCurrentScript = 1;
+    g_breakCurrentScript = 1;
     return;
 }
 
@@ -4059,7 +4072,7 @@ void OP_WAIT_CAMERA()
     if (cameraInterpolationPositionNumSteps == 0) {
         uVar2 = uVar2 & 1;
     }
-    breakCurrentScript = 1;
+    g_breakCurrentScript = 1;
     if ((uVar2 & uVar1) == 0) {
         ADVANCE_VM(0x3);;
     }
@@ -4239,7 +4252,7 @@ void OP_WAIT()
     if (pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m2_delay == 0) {
         ADVANCE_VM(0x3);
     }
-    breakCurrentScript = 1;
+    g_breakCurrentScript = 1;
 }
 
 void OP_RESET_CHARACTER()
@@ -4678,12 +4691,12 @@ void OP_RUN_ENTITY_SCRIPT_BLOCKING()
                     pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m16_status = 2;
                     return;
                 }
-                breakCurrentScript = 1;
+                g_breakCurrentScript = 1;
                 return;
             case 2: // cleanup
                 if (pTargetEntity->m8C_scriptSlots[pCurrentFieldScriptActor->mCF_scriptSlotWaitedOn].m4_flags.m18 != 0xF)
                 {
-                    breakCurrentScript = 1;
+                    g_breakCurrentScript = 1;
                     return;
                 }
                 pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m16_status = 0;
@@ -4722,7 +4735,7 @@ void OP_RUN_ENTITY_SCRIPT_UNKMODE()
                 }
                 if ((pEntity->mCE_currentScriptSlot != pCurrentFieldScriptActor->mCF_scriptSlotWaitedOn) && (pEntity->m8C_scriptSlots[pCurrentFieldScriptActor->mCF_scriptSlotWaitedOn].m4_flags.m18 != 0xf))
                 {
-                    breakCurrentScript = 1;
+                    g_breakCurrentScript = 1;
                     return;
                 }
 
@@ -4920,14 +4933,14 @@ void OP_SET_MUSIC_PARAMS()
 {
     MissingCode();
     ADVANCE_VM(0x5);
-    breakCurrentScript = 1;
+    g_breakCurrentScript = 1;
 }
 
 void OPX_SET_TEMPO()
 {
     MissingCode();
     ADVANCE_VM(0x5);
-    breakCurrentScript = 1;
+    g_breakCurrentScript = 1;
 }
 
 void OP_F9()
@@ -4983,7 +4996,7 @@ void OP_EXTENDED_OPCODE()
         LogMissingOpcode(currentFieldActorId, pCurrentFieldScriptActor->mCC_scriptPC, 0xFE00 | opcodeEX);
 
         pCurrentFieldScriptActor->mCC_scriptPC--;
-        breakCurrentScript = 1;
+        g_breakCurrentScript = 1;
         return;
     }
 

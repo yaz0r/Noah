@@ -317,7 +317,7 @@ void resetFieldDefault()
     actorCameraTracked = 0;
     MissingCode();
     disableParticles = 0;
-    menuIdToOpen = 0xff;
+    g_menuIdToOpen = 0xff;
     MissingCode();
 
     op99Var4 = 0x1000;
@@ -845,7 +845,7 @@ u16 getScriptEntryPoint(int entityId, int scriptIndex)
     return READ_LE_U16(rawFieldScriptData.begin() + (entityId * 0x20 + scriptIndex) * 2 + 0x84);
 }
 
-int breakCurrentScript;
+int g_breakCurrentScript;
 int fieldExectuteMaxCycles;
 
 int fieldDebugDisable = 0;
@@ -1074,7 +1074,7 @@ void emptyPartySlot(int param_1)
         actorArray[fieldEntity].m58_flags = (actorArray[fieldEntity].m58_flags & 0xf07f) | 0x200;
         resetFieldScriptEntityGraphicEntity(fieldEntity, 0, &partyCharacterBuffers[0], 1, 0, 0, 1);
         pCurrentFieldScriptActor->m0_fieldScriptFlags.m0_updateScriptDisabled = 1;
-        breakCurrentScript = 0;
+        g_breakCurrentScript = 0;
 
         // restore values from backup
         currentFieldActorId = backupCurrentFieldActorId;
@@ -1353,7 +1353,7 @@ int spriteWalkToPositionOrActor(int param_1)
     {
         pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0--;
         pCurrentFieldScriptActor->m106_currentRotation = pCurrentFieldScriptActor->m104_rotation = fp_atan2(travelDelta);
-        breakCurrentScript = 1;
+        g_breakCurrentScript = 1;
         
         return -1;
     }
@@ -1361,7 +1361,7 @@ int spriteWalkToPositionOrActor(int param_1)
 
 void resetFieldScriptActor()
 {
-    breakCurrentScript = 1;
+    g_breakCurrentScript = 1;
     pCurrentFieldScriptActor->m30_stepVector.vx = 0;
     pCurrentFieldScriptActor->m30_stepVector.vy = 0;
     pCurrentFieldScriptActor->m30_stepVector.vz = 0;
@@ -1767,7 +1767,7 @@ void executeFieldScript(int param)
     {
         return;
     }
-    breakCurrentScript = 0;
+    g_breakCurrentScript = 0;
     fieldExectuteMaxCycles = param;
     int cycles = 0;
     if (param > 0)
@@ -1782,7 +1782,7 @@ void executeFieldScript(int param)
             if (fieldScriptOpcodes[opcodeId] == nullptr)
             {
                 LogMissingOpcode(currentFieldActorId, pCurrentFieldScriptActor->mCC_scriptPC, opcodeId);
-                breakCurrentScript = 1;
+                g_breakCurrentScript = 1;
                 return;
             }
 
@@ -1804,7 +1804,7 @@ void executeFieldScript(int param)
                     return;
                 }
             }
-            if ((breakCurrentScript == 1) && (currentScriptFinished == 1)) {
+            if ((g_breakCurrentScript == 1) && (currentScriptFinished == 1)) {
                 return;
             }
 
@@ -8321,15 +8321,15 @@ void fieldEntryPoint()
 
         // TODO: this is within a larger test
         {
-            if (((menuIdToOpen != 0xff) && (g_frameOddOrEven == 0)) && (((actorArray[g_playerControlledActor].m4C_scriptEntity)->m0_fieldScriptFlags.m_rawFlags & 0x1800) == 0)) {
+            if (((g_menuIdToOpen != 0xff) && (g_frameOddOrEven == 0)) && (((actorArray[g_playerControlledActor].m4C_scriptEntity)->m0_fieldScriptFlags.m_rawFlags & 0x1800) == 0)) {
                 //releaseAllDialogWindows();
                 MissingCode();
                 loadAndOpenMenu();
-                menuIdToOpen = 0xff;
+                g_menuIdToOpen = 0xff;
             }
 
-            if ((((g_padButtonForField & 0x10) != 0) && (g_menuDisabled == '\0')) && ((menuIdToOpen == 0xff && (playerCanRun == 1)))) {
-                menuIdToOpen = 0x80;
+            if ((((g_padButtonForField & 0x10) != 0) && (g_menuDisabled == '\0')) && ((g_menuIdToOpen == 0xff && (playerCanRun == 1)))) {
+                g_menuIdToOpen = 0x80;
                 //menuOpenArg = (byte)DAT_Field__800b236c;
             }
         }
@@ -8355,13 +8355,13 @@ void fieldEntryPoint()
                 startFieldTransition();
                 iRam800adb70 = 0;
             }
-            if (((menuIdToOpen != 0xff) && (g_frameOddOrEven == 0)) && (((actorArray[g_playerControlledActor].m4C_scriptEntity)->m0_fieldScriptFlags.m_rawFlags & 0x1800) == 0)) {
+            if (((g_menuIdToOpen != 0xff) && (g_frameOddOrEven == 0)) && (((actorArray[g_playerControlledActor].m4C_scriptEntity)->m0_fieldScriptFlags.m_rawFlags & 0x1800) == 0)) {
                 releaseAllDialogWindows();
                 loadAndOpenMenu();
-                menuIdToOpen = 0xff;
+                g_menuIdToOpen = 0xff;
             }
-            if ((((g_padButtonForField & 0x10) != 0) && (g_menuDisabled == '\0')) && ((menuIdToOpen == 0xff && (playerCanRun == 1)))) {
-                menuIdToOpen = 0x80;
+            if ((((g_padButtonForField & 0x10) != 0) && (g_menuDisabled == '\0')) && ((g_menuIdToOpen == 0xff && (playerCanRun == 1)))) {
+                g_menuIdToOpen = 0x80;
                 //menuOpenArg = (byte)DAT_Field__800b236c;
             }
         }
@@ -8420,7 +8420,7 @@ void runInitScriptForNewlyLoadedPC(uint param_1) {
 
     pKernelGameState->m1D30_partyMemberBitField |= 1 << (asyncPartyCharacterLoadingCharacterIndex & 0x1f);
 
-    int backupBreakCurrentScript = breakCurrentScript;
+    int backupBreakCurrentScript = g_breakCurrentScript;
     int backupCurrentFieldActorId = currentFieldActorId;
     int backupFieldExecuteMaxCycles = fieldExectuteMaxCycles;
 
@@ -8452,7 +8452,7 @@ void runInitScriptForNewlyLoadedPC(uint param_1) {
         fieldExectuteMaxCycles = backupFieldExecuteMaxCycles;
         currentFieldActorId = backupCurrentFieldActorId;
         pCurrentFieldScriptActor = backupCurrentFieldScriptActor;
-        breakCurrentScript = backupBreakCurrentScript;
+        g_breakCurrentScript = backupBreakCurrentScript;
         pCurrentFieldEntity = backupCurrentFieldEntity;
         backupCurrentFieldScriptActor->mCC_scriptPC = backScriptPC;
     }

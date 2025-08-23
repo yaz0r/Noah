@@ -191,7 +191,7 @@ extern s32 fieldChangePrevented;
 extern std::array<s16, 1024> fieldVars;
 extern std::vector<u8> rawFieldScriptData;
 
-extern int breakCurrentScript;
+extern int g_breakCurrentScript;
 extern int fieldExectuteMaxCycles;
 extern int fieldDebugDisable;
 extern int renderCharsDisabled;

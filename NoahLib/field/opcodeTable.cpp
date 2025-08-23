@@ -225,7 +225,8 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0x50] = OP_DISABLE_MENU;
     fieldScriptOpcodes_EX[0x52] = OP_DISABLE_COMPASS;
     fieldScriptOpcodes_EX[0x53] = OP_ENABLE_PLAYER_CONTROLS;
-    fieldScriptOpcodes_EX[0x54] = OPX_START_CINEMATIC;
+    fieldScriptOpcodes_EX[0x54] = OP_START_CINEMATIC;
+    fieldScriptOpcodes_EX[0x55] = OP_OPEN_NORMAL_MENU;
     fieldScriptOpcodes_EX[0x57] = OP_OPEN_LOAD_GAME_MENU;
     fieldScriptOpcodes_EX[0x5B] = OPX_5B;
     fieldScriptOpcodes_EX[0x5C] = OP_LOAD_NEW_MECHA;
@@ -263,7 +264,7 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0x96] = OP_CREATE_PARTICLE_EFFECT_FOR_CURRENT_ACTOR;
     fieldScriptOpcodes_EX[0x97] = OPX_97;
     fieldScriptOpcodes_EX[0x98] = OPX_98;
-    fieldScriptOpcodes_EX[0x99] = OPX_99;
+    fieldScriptOpcodes_EX[0x99] = OP_SET_MENU_OPEN_ARG;
     fieldScriptOpcodes_EX[0x9A] = OPX_9A;
     fieldScriptOpcodes_EX[0x9B] = OP_TRANSITION_EFFECT_1;
     fieldScriptOpcodes_EX[0x9C] = OP_TRANSITION_EFFECT_2;
