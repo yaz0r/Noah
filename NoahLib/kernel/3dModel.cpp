@@ -16,7 +16,9 @@ sBgfxRendererData* sModelBlock::getBgfxData() {
     return m_pBgfxRendererData;
 }
 
-void sModelBlock::init(const u8* blockData) {
+void sModelBlock::init(const u8* blockData, u8* baseItForRelocation) {
+    m_baseItForRelocation = baseItForRelocation;
+
     m0_flags = READ_LE_U16(blockData + 0);
     m2_numVertices = READ_LE_U16(blockData + 2);
     m4_numPrims = READ_LE_U16(blockData + 4);
@@ -24,10 +26,10 @@ void sModelBlock::init(const u8* blockData) {
     int offsetVertices = READ_LE_U32(blockData + 8);
     m8_vertices.resize(m2_numVertices);
     for (int i = 0; i < m2_numVertices; i++) {
-        m8_vertices[i][0] = READ_LE_S16(m_baseItForRelocation + offsetVertices + i * 8 + 0);
-        m8_vertices[i][1] = READ_LE_S16(m_baseItForRelocation + offsetVertices + i * 8 + 2);
-        m8_vertices[i][2] = READ_LE_S16(m_baseItForRelocation + offsetVertices + i * 8 + 4);
-        m8_vertices[i][3] = READ_LE_S16(m_baseItForRelocation + offsetVertices + i * 8 + 6);
+        m8_vertices[i][0] = READ_LE_S16(baseItForRelocation + offsetVertices + i * 8 + 0);
+        m8_vertices[i][1] = READ_LE_S16(baseItForRelocation + offsetVertices + i * 8 + 2);
+        m8_vertices[i][2] = READ_LE_S16(baseItForRelocation + offsetVertices + i * 8 + 4);
+        m8_vertices[i][3] = READ_LE_S16(baseItForRelocation + offsetVertices + i * 8 + 6);
     }
 
     int offsetNormals = READ_LE_U32(blockData + 0xC);
@@ -35,10 +37,10 @@ void sModelBlock::init(const u8* blockData) {
         assert(m0_flags & 0x10);
         mC_normals.resize(m2_numVertices);
         for (int i = 0; i < m2_numVertices; i++) {
-            mC_normals[i][0] = READ_LE_S16(m_baseItForRelocation + offsetNormals + i * 8 + 0);
-            mC_normals[i][1] = READ_LE_S16(m_baseItForRelocation + offsetNormals + i * 8 + 2);
-            mC_normals[i][2] = READ_LE_S16(m_baseItForRelocation + offsetNormals + i * 8 + 4);
-            mC_normals[i][3] = READ_LE_S16(m_baseItForRelocation + offsetNormals + i * 8 + 6);
+            mC_normals[i][0] = READ_LE_S16(baseItForRelocation + offsetNormals + i * 8 + 0);
+            mC_normals[i][1] = READ_LE_S16(baseItForRelocation + offsetNormals + i * 8 + 2);
+            mC_normals[i][2] = READ_LE_S16(baseItForRelocation + offsetNormals + i * 8 + 4);
+            mC_normals[i][3] = READ_LE_S16(baseItForRelocation + offsetNormals + i * 8 + 6);
         }
     }
 
@@ -54,35 +56,35 @@ void sModelBlock::init(const u8* blockData) {
     int offsetDynamicVertices = READ_LE_U32(blockData + 0x1C);
     if (offsetDynamicVertices) {
         m1C_dynamicVertices = new sModelDynamicVertices;
-        m1C_dynamicVertices->m0_count = READ_LE_U32(m_baseItForRelocation + offsetDynamicVertices + 0);
+        m1C_dynamicVertices->m0_count = READ_LE_U32(baseItForRelocation + offsetDynamicVertices + 0);
         m1C_dynamicVertices->m4_data.resize(m1C_dynamicVertices->m0_count + 1);
         for (int i = 0; i < m1C_dynamicVertices->m0_count + 1; i++) {
-            m1C_dynamicVertices->m4_data[i].m0_count = READ_LE_S32(m_baseItForRelocation + offsetDynamicVertices + 4 + i * 0xC + 0);
+            m1C_dynamicVertices->m4_data[i].m0_count = READ_LE_S32(baseItForRelocation + offsetDynamicVertices + 4 + i * 0xC + 0);
             m1C_dynamicVertices->m4_data[i].m4_positionOffsets.resize(m1C_dynamicVertices->m4_data[i].m0_count);
-            s32 offsetToDynamicPositions = READ_LE_S32(m_baseItForRelocation + offsetDynamicVertices + 4 + i * 0xC + 4);
+            s32 offsetToDynamicPositions = READ_LE_S32(baseItForRelocation + offsetDynamicVertices + 4 + i * 0xC + 4);
             for (int j = 0; j < m1C_dynamicVertices->m4_data[i].m0_count; j++) {
-                m1C_dynamicVertices->m4_data[i].m4_positionOffsets[j].m0_offset[0] = READ_LE_S16(m_baseItForRelocation + offsetToDynamicPositions + 8 * j + 0);
-                m1C_dynamicVertices->m4_data[i].m4_positionOffsets[j].m0_offset[1] = READ_LE_S16(m_baseItForRelocation + offsetToDynamicPositions + 8 * j + 2);
-                m1C_dynamicVertices->m4_data[i].m4_positionOffsets[j].m0_offset[2] = READ_LE_S16(m_baseItForRelocation + offsetToDynamicPositions + 8 * j + 4);
-                m1C_dynamicVertices->m4_data[i].m4_positionOffsets[j].m6_index = READ_LE_U16(m_baseItForRelocation + offsetToDynamicPositions + 8 * j + 6);
+                m1C_dynamicVertices->m4_data[i].m4_positionOffsets[j].m0_offset[0] = READ_LE_S16(baseItForRelocation + offsetToDynamicPositions + 8 * j + 0);
+                m1C_dynamicVertices->m4_data[i].m4_positionOffsets[j].m0_offset[1] = READ_LE_S16(baseItForRelocation + offsetToDynamicPositions + 8 * j + 2);
+                m1C_dynamicVertices->m4_data[i].m4_positionOffsets[j].m0_offset[2] = READ_LE_S16(baseItForRelocation + offsetToDynamicPositions + 8 * j + 4);
+                m1C_dynamicVertices->m4_data[i].m4_positionOffsets[j].m6_index = READ_LE_U16(baseItForRelocation + offsetToDynamicPositions + 8 * j + 6);
             }
-            s32 offsetToDynamicNormals = READ_LE_S32(m_baseItForRelocation + offsetDynamicVertices + 4 + i * 0xC + 8);
+            s32 offsetToDynamicNormals = READ_LE_S32(baseItForRelocation + offsetDynamicVertices + 4 + i * 0xC + 8);
             if (offsetToDynamicNormals != offsetToDynamicPositions) {
                 assert(m0_flags & 0x10);
                 m1C_dynamicVertices->m4_data[i].m8_normalOffsets.resize(m1C_dynamicVertices->m4_data[i].m0_count);
                 for (int j = 0; j < m1C_dynamicVertices->m4_data[i].m0_count; j++) {
-                    m1C_dynamicVertices->m4_data[i].m8_normalOffsets[j].m0_offset[0] = READ_LE_S16(m_baseItForRelocation + offsetToDynamicNormals + 8 * j + 0);
-                    m1C_dynamicVertices->m4_data[i].m8_normalOffsets[j].m0_offset[1] = READ_LE_S16(m_baseItForRelocation + offsetToDynamicNormals + 8 * j + 2);
-                    m1C_dynamicVertices->m4_data[i].m8_normalOffsets[j].m0_offset[2] = READ_LE_S16(m_baseItForRelocation + offsetToDynamicNormals + 8 * j + 4);
-                    m1C_dynamicVertices->m4_data[i].m8_normalOffsets[j].m6_index = READ_LE_U16(m_baseItForRelocation + offsetToDynamicNormals + 8 * j + 6);
+                    m1C_dynamicVertices->m4_data[i].m8_normalOffsets[j].m0_offset[0] = READ_LE_S16(baseItForRelocation + offsetToDynamicNormals + 8 * j + 0);
+                    m1C_dynamicVertices->m4_data[i].m8_normalOffsets[j].m0_offset[1] = READ_LE_S16(baseItForRelocation + offsetToDynamicNormals + 8 * j + 2);
+                    m1C_dynamicVertices->m4_data[i].m8_normalOffsets[j].m0_offset[2] = READ_LE_S16(baseItForRelocation + offsetToDynamicNormals + 8 * j + 4);
+                    m1C_dynamicVertices->m4_data[i].m8_normalOffsets[j].m6_index = READ_LE_U16(baseItForRelocation + offsetToDynamicNormals + 8 * j + 6);
                 }
             }
         }
-        m1C_dynamicVertices->m_indexCount = READ_LE_S32(m_baseItForRelocation + offsetDynamicVertices + 4 + m1C_dynamicVertices->m0_count * 0xC);
+        m1C_dynamicVertices->m_indexCount = READ_LE_S32(baseItForRelocation + offsetDynamicVertices + 4 + m1C_dynamicVertices->m0_count * 0xC);
         m1C_dynamicVertices->m_indices.resize(m1C_dynamicVertices->m_indexCount);
-        s32 offsetToIndices = READ_LE_S32(m_baseItForRelocation + offsetDynamicVertices + 4 + m1C_dynamicVertices->m0_count * 0xC + 4);
+        s32 offsetToIndices = READ_LE_S32(baseItForRelocation + offsetDynamicVertices + 4 + m1C_dynamicVertices->m0_count * 0xC + 4);
         for (int i = 0; i < m1C_dynamicVertices->m_indexCount; i++) {
-            m1C_dynamicVertices->m_indices[i] = READ_LE_U16(m_baseItForRelocation + offsetToIndices + 2 * i);
+            m1C_dynamicVertices->m_indices[i] = READ_LE_U16(baseItForRelocation + offsetToIndices + 2 * i);
         }
     }
 
@@ -112,11 +114,9 @@ void sModel::init(std::vector<u8>::const_iterator input, int dataSize)
     m10_blocks.resize(m0_numBlocks);
     for (int i = 0; i < m0_numBlocks; i++)
     {
-        m10_blocks[i].m_baseItForRelocation = &mRawData[0];
-
         std::vector<u8>::iterator blockData = inputData + i * 0x38;
 
-        m10_blocks[i].init(&blockData[0]);
+        m10_blocks[i].init(&blockData[0], &mRawData[0]);
     }
 }
 

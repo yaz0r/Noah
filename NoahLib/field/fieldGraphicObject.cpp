@@ -1534,8 +1534,7 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, std
         s32 offsetToMesh = READ_LE_U8(param_3) + READ_LE_U8(param_3 + 1) * 0x100 + READ_LE_U8(param_3 + 2) * 0x10000;
         std::span<u8>::iterator meshBlock = param_3 + offsetToMesh;
         sModelBlock* pNewModelBlock = new sModelBlock;
-        pNewModelBlock->init(&meshBlock[0]);
-        pNewModelBlock->m_baseItForRelocation = &meshBlock[0];
+        pNewModelBlock->init(&meshBlock[0], &meshBlock[0]);
         if (param_1->m20->getAsObject()->m2C[0].size()) {
             param_1->m20->getAsObject()->m2C[0].clear();
             param_1->m20->getAsObject()->m2C[1].clear();

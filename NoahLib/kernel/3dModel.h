@@ -3,7 +3,7 @@
 struct sModelBlock
 {
     ~sModelBlock();
-    void init(const u8* input);
+    void init(const u8* input, u8* baseItForRelocation);
 
     u16 m0_flags;
     s16 m2_numVertices;
