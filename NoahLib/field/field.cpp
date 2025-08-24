@@ -379,7 +379,7 @@ void resetFieldDefault()
     resetParticleEffectsTable();
     MissingCode();
 
-    VALIDATE_FIELD(FCT_Base, 0x80070c7c);
+    //VALIDATE_FIELD(FCT_Base, 0x80070c7c);
 }
 
 bool g_LogOpcodes = false;
@@ -448,11 +448,11 @@ void uploadNpcSpriteSheet(std::vector<u8>::const_iterator pImageData, int x, int
 
 void setupField3d(std::vector<u8>::const_iterator input)
 {
-    VALIDATE_FIELD(FCT_Base, 0x8006fdec);
+    //VALIDATE_FIELD(FCT_Base, 0x8006fdec);
     lookAtDivided(&g_cameraMatrix, &g_cameraEye, &g_cameraAt, &g_cameraUp);
     createRotationMatrix(&g_cameraProjectionAngles, &g_currentProjectionMatrix);
     MulRotationMatrix(&g_cameraMatrix, &g_currentProjectionMatrix);
-    VALIDATE_FIELD(FCT_Base, 0x8006fe3c);
+    //VALIDATE_FIELD(FCT_Base, 0x8006fe3c);
 
     MissingCode();
 
@@ -463,7 +463,7 @@ void setupField3d(std::vector<u8>::const_iterator input)
 
     SetRotMatrix(&g_currentProjectionMatrix);
     SetTransMatrix(&g_currentProjectionMatrix);
-    VALIDATE_FIELD(FCT_Base, 0x80070084);
+    //VALIDATE_FIELD(FCT_Base, 0x80070084);
 }
 
 
@@ -3322,15 +3322,39 @@ void transitionFields()
         MissingCode();
         startLoadingPlayableCharacters();
         finalizeLoadPlayableCharacters();
-        initFieldData();
-        loadFieldGraphics();
-        if (fieldGraphicsUploaded == 1)
         {
-            MissingCode();
-            fieldGraphicsUploaded = 0;
-            MissingCode();
+            int backupFieldTransitionFadeInLength = fieldTransitionFadeInLength;
+            int backupFieldTransitionMode = fieldTransitionMode;
+            initFieldData();
+            loadFieldGraphics();
+            if (fieldGraphicsUploaded == 1)
+            {
+                MissingCode();
+                fieldGraphicsUploaded = 0;
+                MissingCode();
+            }
+            fieldTransitionInProgress = 1;
+            fieldTransitionFadeInLength = backupFieldTransitionFadeInLength;
+            fieldTransitionMode = backupFieldTransitionMode;
+            if (fieldMusicLoadPending == -1) {
+                playMusic(currentlyPlayingMusic);
+            }
+            int fadeValue = 0x800000;
+            setupRGBFaderSlot0_fadeIn(fieldTransitionFadeInLength);
+            for (int i = 0; i < fieldTransitionFadeInLength; i++) {
+                fieldPerFrameReset();
+                renderScreenTransitionPoly();
+                updateAndRenderField();
+                updateMusicState();
+                //setFieldTransitionPolyColor(fadeValue >> 0x10);
+                MissingCode();
+                fadeValue = fadeValue - 0x800000 / fieldTransitionFadeInLength;
+                if (fadeValue < 0) {
+                    fadeValue = 0;
+                }
+                MissingCode();
+            }
         }
-        fieldTransitionInProgress = 1;
 
         MissingCode();
         break;
@@ -8253,16 +8277,22 @@ void fieldEntryPoint()
                 setCurrentDirectory(4, 0); //TODO: shouldn't be necessary!
                 if (loadNewField((fieldMapNumber & 0xfff) * 2, 0) == 0)
                 {
-                    if (isCDBusy() == 0)
+                    bool bCdBusy = isCDBusy();
+                    if (isFieldValidationContextEnabled(FCT_Base)) {
+                        VALIDATE_FIELD(FCT_Base, 0x8007850c);
+                        bCdBusy = g_gdbConnection->getRegister(GDBConnection::REG_Names::V0);
+                    }
+                    if (!bCdBusy)
                     {
-                        //if (screenEffects[0].m3C_duration == 0)
+                        if (screenEffects[0].m54_duration == 0)
                         {
-                            //fieldTransitionCompleted = 0;
-                            //saveStateToKernel();
+                            // Transition to another field
+                            fieldTransitionCompleted = 0;
+                            saveStateToKernel();
                             waitReadCompletion(0);
                             transitionFields();
-                            //resetInputs();
-                            //fieldTransitionCompleted = 1;
+                            resetInputs();
+                            fieldTransitionCompleted = 1;
                         }
                     }
                 }
