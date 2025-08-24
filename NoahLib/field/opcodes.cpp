@@ -3501,6 +3501,14 @@ void OP_SCREEN_DISTORTION_FADE_OUT()
     g_breakCurrentScript = 1;
 }
 
+void OP_JUMP_IF_ACTOR_LOWER_FLAGS() {
+    jumpIfMask3(actorArray[readCharacter(3)].m4C_scriptEntity->m4_flags.m_rawLower);
+}
+
+void OP_JUMP_IF_ACTOR_UPPER_FLAGS() {
+    jumpIfMask3(actorArray[readCharacter(3)].m4C_scriptEntity->m4_flags.m_rawUpper);
+}
+
 void OP_SET_PARTY_FRAME_MASK()
 {
     int uVar1;

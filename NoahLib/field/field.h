@@ -75,6 +75,10 @@ struct sFieldScriptEntity_flags4
             u32 m0_unk : 11;
             u32 m_x800 : 1;
         };
+        struct {
+            u16 m_rawLower;
+            u16 m_rawUpper;
+        };
         u32 m_rawFlags = 0;
     };
 };

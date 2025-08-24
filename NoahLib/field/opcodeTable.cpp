@@ -205,6 +205,8 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0x23] = OPX_23;
     fieldScriptOpcodes_EX[0x26] = OP_SETUP_SCREEN_DISTORTION;
     fieldScriptOpcodes_EX[0x27] = OP_SCREEN_DISTORTION_FADE_OUT;
+    fieldScriptOpcodes_EX[0x36] = OP_JUMP_IF_ACTOR_LOWER_FLAGS;
+    fieldScriptOpcodes_EX[0x37] = OP_JUMP_IF_ACTOR_UPPER_FLAGS;
     fieldScriptOpcodes_EX[0x3A] = OP_SET_PARTY_FRAME_MASK;
     fieldScriptOpcodes_EX[0x3B] = OP_CLEAR_PARTY_FRAME_MASK;
     fieldScriptOpcodes_EX[0x3C] = OP_MECHA_PLAY_ANIMATION;

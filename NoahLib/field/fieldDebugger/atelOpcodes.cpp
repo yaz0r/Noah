@@ -1110,6 +1110,20 @@ void initExtendedOpcodeTable()
 
 	// 0x27 is dynamic
 
+    m_extendedOpcode[0x36]
+        .setName("JUMP_IF_ACTOR_LOWER_FLAGS")
+        .addArgumentU16()
+        .addArgumentCharacter()
+        .addArgumentJumpLocation()
+        .end();
+
+    m_extendedOpcode[0x37]
+        .setName("JUMP_IF_ACTOR_UPPER_FLAGS")
+        .addArgumentU16()
+        .addArgumentCharacter()
+        .addArgumentJumpLocation()
+        .end();
+
     m_extendedOpcode[0x3A]
         .setName("SET_PARTY_FRAME_MASK")
         .addArgumentU16OrVar()

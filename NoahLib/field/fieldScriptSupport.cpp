@@ -235,6 +235,31 @@ void jumpIfMask(u16 mask)
     pCurrentFieldScriptActor->mCC_scriptPC = uVar1;
 }
 
+void jumpIfMask2(u16 mask)
+{
+    u16 uVar1 = readU16FromScript(1);
+    if ((uVar1 & mask) == 0) {
+        uVar1 = readU16FromScript(3);
+    }
+    else {
+        uVar1 = pCurrentFieldScriptActor->mCC_scriptPC + 5;
+    }
+    pCurrentFieldScriptActor->mCC_scriptPC = uVar1;
+}
+
+
+void jumpIfMask3(u16 mask)
+{
+    u16 uVar1 = readU16FromScript(1);
+    if ((uVar1 & mask) == 0) {
+        uVar1 = readU16FromScript(4);
+    }
+    else {
+        uVar1 = pCurrentFieldScriptActor->mCC_scriptPC + 6;
+    }
+    pCurrentFieldScriptActor->mCC_scriptPC = uVar1;
+}
+
 struct sPortraitLoadingStatus {
     s16 m0_id;
     s16 m2_status;
