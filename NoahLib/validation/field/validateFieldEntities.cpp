@@ -27,10 +27,14 @@ void validateAssert(bool result) {
 #endif
 }
 
-void validateXY(u32 psxValue, const sGTE_XY& svector) {
+void validateValue(u32 psxValue, const sGTE_XY& svector) {
     validateAssert((s16)(psxValue >> 16) == svector.getX());
     validateAssert((s16)(psxValue) == svector.getY());
-    //validateAssert(svector.pad == g_gdbConnection->readS16(psxBase + 6));
+}
+
+void validate(u32 psxBase, const sGTE_XY& svector) {
+    u32 psxValue = g_gdbConnection->readU32(psxBase);
+    validateValue(psxValue, svector);
 }
 
 void validate(u32 psxBase, const SVECTOR& svector) {
@@ -97,6 +101,10 @@ void validate(u32 psxBase, const u32& data) {
     validateAssert(data == g_gdbConnection->readU32(psxBase + 0));
 }
 
+void validate(u32 psxBase, const long& data) {
+    validateAssert(data == g_gdbConnection->readS32(psxBase + 0));
+}
+
 template <typename T>
 void validate(u32 psxBase, const T* pPtr) {
     if (pPtr) {
@@ -115,6 +123,11 @@ void validate(u32 psxBase, const T* pPtr) {
 template<>
 size_t GetPSXSize<SVECTOR>() {
     return 2 * 4;
+}
+
+template<>
+size_t GetPSXSize<sGTE_XY>() {
+    return 4;
 }
 
 void validate(u32 psxBase, const sSpriteActorCore& pSpriteActorCore) {

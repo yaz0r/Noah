@@ -13,6 +13,8 @@
 
 #include "kernel/playTime.h"
 
+extern bool g_debugEncounterTriggerDisabled;
+
 void fieldPerFrameReset();
 void fieldPerFrameReset_detour();
 
@@ -36,6 +38,11 @@ void fieldPerFrameReset_detour() {
     padButtonForDialogs = g_gdbConnection->readU16(0x800c2694);
     g_padButtonForField = g_gdbConnection->readU16(0x800c3900);
     validateField();
+
+    g_debugEncounterTriggerDisabled = true;
+    if (g_debugEncounterTriggerDisabled) {
+        g_gdbConnection->writeU32(0x800b2298, 0);
+    }
 }
 
 void fieldInputsValidation_init() {

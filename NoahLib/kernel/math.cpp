@@ -271,8 +271,7 @@ MATRIX* CompMatrix(const MATRIX* m0, const MATRIX* m1, MATRIX* m2)
 
 void RotTrans(SVECTOR* rotation, VECTOR* output, long* flag)
 {
-	setCopReg(2, 0, sVec2_s16::fromValue(rotation->vx, rotation->vy));
-	setCopReg(2, 1, sVec2_s16::fromValue(rotation->vz, 0));
+    gte_ldv0(rotation);
 	copFunction(2, 0x480012);
 	output->vx = getCopReg(2, 0x19);
 	output->vy = getCopReg(2, 0x1a);
@@ -280,6 +279,18 @@ void RotTrans(SVECTOR* rotation, VECTOR* output, long* flag)
     if (flag) {
         *flag = getCopControlWord(2, 0xF800);
     }
+}
+
+void RotTransSV(SVECTOR* rotation, SVECTOR* output, long* flag) {
+    gte_ldv0(rotation);
+    copFunction(2, 0x480012);
+    output->vx = gte_stIR1();
+    output->vy = gte_stIR2();
+    output->vz = gte_stIR3();
+    if (flag) {
+        *flag = getCopControlWord(2, 0xF800);
+    }
+
 }
 
 void Square0(VECTOR* v0, VECTOR* v1)

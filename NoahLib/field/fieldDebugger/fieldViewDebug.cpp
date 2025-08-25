@@ -15,6 +15,8 @@
 #include "kernel/3dModel_bgfxRenderer.h"
 #include "kernel/kernelVariables.h"
 
+#include "field/fieldRandomBattles.h"
+
 #include <tgmath.h>
 
 int fieldDebugger_bgfxView = 1;
@@ -196,25 +198,30 @@ void drawCube(int viewIndex, float* modelMatrix)
     }
 }
 
+bool g_debugEncounterTriggerDisabled = true;
+
 void fieldViewDebug_step()
 {
     // TODO: Move to a separate file
     if (ImGui::Begin("Field encounter data"))
     {
-        ImGui::Checkbox("Disable encounters", &debugEncounterTriggerDisabled);
-        ImGui::Text("Timer: %d\nCount: %d", encounterTimer, encounterCount);
+        ImGui::Checkbox("Disable encounters", &g_debugEncounterTriggerDisabled);
+        if (g_debugEncounterTriggerDisabled) {
+            g_encounterTimer = 0;
+        }
+        ImGui::Text("Timer: %d\nCount: %d", g_encounterTimer, g_encounterCount);
         
         ImGui::Text("playMusicAuthorized: %d\nfieldExecuteVar3: %d\nfieldChangePrevented: %d", playMusicAuthorized, fieldExecuteVar3, fieldChangePrevented);
         ImGui::Text("fieldMusicLoadPending: %d\nfieldRandomBattleVar: %d\nloadCompleted: %d", fieldMusicLoadPending, fieldRandomBattleVar, loadCompleted);
                 
         ImGui::Text("Encounter timers:");
 
-        for (int encounterId = 0; encounterId < encounterCount; encounterId++)
+        for (int encounterId = 0; encounterId < g_encounterCount; encounterId++)
         {
-            ImGui::Text("%d", encounterTriggerTime[encounterId]);
+            ImGui::Text("%d", g_encounterTriggerTime[encounterId]);
             ImGui::SameLine();
             if (ImGui::Button("Trigger")){
-                encounterTriggerTime[encounterId] = 0;
+                g_encounterTriggerTime[encounterId] = 0;
             }
         }
 
@@ -229,9 +236,9 @@ void fieldViewDebug_step()
             for (int i = 0; i < 0x10; i++) {
                 ImGui::Text("%d | %d%%", encounterProbabilityWeight[i], (int)round(encounterProbabilityWeight[i] / total * 100));
                 ImGui::SameLine();
-                if (ImGui::Button("Trigger")) {
-                    debugForcedEncounter = i;
-                }
+                //if (ImGui::Button("Trigger")) {
+                //    debugForcedEncounter = i;
+                //}
             }
         }
     }

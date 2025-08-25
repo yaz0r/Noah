@@ -899,6 +899,21 @@ s32 gte_stIR0()
     return getCopReg(2, 0x800 * 8);
 }
 
+s32 gte_stIR1()
+{
+    return getCopReg(2, 0x800 * 9);
+}
+
+s32 gte_stIR2()
+{
+    return getCopReg(2, 0x800 * 10);
+}
+
+s32 gte_stIR3()
+{
+    return getCopReg(2, 0x800 * 11);
+}
+
 s32 gte_stSXY0()
 {
     return getCopReg(2, 0x800 * 12);

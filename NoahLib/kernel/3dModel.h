@@ -11,6 +11,7 @@ struct sModelBlock
         u8 m1;
         u16 m2_primCount;
         std::vector<std::array<u16, 4>> m4_indices;
+        // size 0x8
     };
 
     u16 m0_flags;

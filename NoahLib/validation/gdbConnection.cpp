@@ -184,7 +184,12 @@ std::vector<u8> decodeMemoryResponse(const std::string& response) {
 }
 
 bool GDBConnection::readMemory(u64 address, void* buffer, size_t size) {
-    if (m_wramSharedMemory) {
+    bool isScratchPad = false;
+    if ((address >= 0x1F800000) && (address <= 0x1F800400)) {
+        isScratchPad = true;
+    }
+
+    if (m_wramSharedMemory && !isScratchPad) {
         u8* pPtrBase = m_wramSharedMemory->getPtr();
         pPtrBase += address & 0x007FFFFF;
         memcpy(buffer, pPtrBase, size);
@@ -405,6 +410,7 @@ void GDBConnection::executeUntilAddress(u32 address) {
     setBreakpoint(address);
     u32 PC = executeToNextTrap();
     assert(PC == address);
+    //printf("PC= 0x%08X\n", PC);
    // removeBreakpoint(address);
 }
 

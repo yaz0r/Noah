@@ -22,8 +22,8 @@ void initSoundInstanceDefaults(sSoundInstance* pSoundInstance) {
     pSoundInstance->m32 = 1;
     pSoundInstance->m36 = 1;
     pSoundInstance->m3A = 0x30;
-    pSoundInstance->m64.m0 = 0x1000000;
-    pSoundInstance->m70.m0 = 0x7f000000;
+    pSoundInstance->m64.m0_currentValue = 0x1000000;
+    pSoundInstance->m70.m0_currentValue = 0x7f000000;
     pSoundInstance->m58 = 0x660000;
     pSoundInstance->m54 = 0x6600;
     pSoundInstance->m1A = 0;
@@ -37,12 +37,12 @@ void initSoundInstanceDefaults(sSoundInstance* pSoundInstance) {
     pSoundInstance->m24 = 0;
     pSoundInstance->m20 = 0;
     pSoundInstance->m48_activeVoicesBF = 0;
-    pSoundInstance->m7C.m0 = 0;
-    pSoundInstance->m88.m0 = 0;
-    pSoundInstance->m64.m8 = 0;
-    pSoundInstance->m70.m8 = 0;
-    pSoundInstance->m7C.m8 = 0;
-    pSoundInstance->m88.m8 = 0;
+    pSoundInstance->m7C.m0_currentValue = 0;
+    pSoundInstance->m88.m0_currentValue = 0;
+    pSoundInstance->m64.m8_counter = 0;
+    pSoundInstance->m70.m8_counter = 0;
+    pSoundInstance->m7C.m8_counter = 0;
+    pSoundInstance->m88.m8_counter = 0;
     pSoundInstance->m5C = 0;
     pSoundInstance->m60 = 0;
     pSoundInstance->m50 = 0x10000;
@@ -409,19 +409,19 @@ void playBattleMusicSub1(sSoundInstance* param_1) {
 }
 
 void playBattleMusic(sSoundInstance* param_1, int param_2, int param_3) {
-    param_1->m70.mA = (short)(param_2 << 8);
+    param_1->m70.mA_targetValue = (short)(param_2 << 8);
     if (param_3 == 0) {
-        param_1->m70.m0 = param_2 << 0x18;
-        param_1->m70.m8 = 0;
+        param_1->m70.m0_currentValue = param_2 << 0x18;
+        param_1->m70.m8_counter = 0;
         applyFlagToAllVoices(0x100, param_1);
     }
     else {
-        int iVar1 = param_2 * 0x10000 - (param_1->m70.m0 >> 8);
+        int iVar1 = param_2 * 0x10000 - (param_1->m70.m0_currentValue >> 8);
         if (iVar1 == 0) {
             return;
         }
-        (param_1->m70).m8 = (short)param_3;
-        (param_1->m70).m4 = iVar1 / param_3 << 8;
+        (param_1->m70).m8_counter = (short)param_3;
+        (param_1->m70).m4_stepIncrement = iVar1 / param_3 << 8;
     }
     if (((param_1->m10_flags & 0x100) != 0) && (param_2 != 0)) {
         playBattleMusicSub1(param_1);
@@ -442,7 +442,7 @@ void startMusicInstance(sSoundInstance* param_1, int param_2, int param_3) {
             DisableEvent(audioTickEvent);
             initSoundInstance(param_1);
             initSoundInstanceTracks(param_1);
-            param_1->m70.m0 = 0;
+            param_1->m70.m0_currentValue = 0;
             playBattleMusic(param_1, param_2, param_3);
             param_1->m10_flags = param_1->m10_flags | 0x8000;
             EnableEvent(audioTickEvent);

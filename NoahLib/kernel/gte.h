@@ -72,6 +72,9 @@ s32 gte_stSXY2();
 
 s32 gte_stMAC0();
 s32 gte_stIR0();
+s32 gte_stIR1();
+s32 gte_stIR2();
+s32 gte_stIR3();
 
 s32 gte_stH();
 s32 gte_stOFX();

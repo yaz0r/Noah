@@ -21,6 +21,7 @@ long RotTransPers4(SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, SVECTOR* v3, sVec2_s16
 void resetMatrixTranslation(MATRIX* m);
 MATRIX* MulRotationMatrix(const MATRIX* m0, MATRIX* m1);
 void RotTrans(SVECTOR* rotation, VECTOR* output, long* flag);
+void RotTransSV(SVECTOR* rotation, SVECTOR* output, long* flag);
 void copyRotationMatrix(MATRIX* param_1, MATRIX* param_2);
 VECTOR* ApplyMatrix(MATRIX* m, SVECTOR* inputVector, VECTOR* outputVector);
 

@@ -37,6 +37,8 @@
 #include "kernel/3dModel_bgfxRenderer.h"
 #include "kernel/kernelVariables.h"
 #include "kernel/debugText.h"
+#include "field/fieldRandomBattles.h"
+
 #include "validation/gdbConnection.h"
 
 MATRIX computeProjectionMatrixTempMatrix2;
@@ -152,16 +154,7 @@ int fieldModelRelocation(std::vector<u8>::iterator pModelData)
 s32 fieldChangePrevented = -1;
 s32 fieldTransitionMode = 0;
 s32 fieldTransitionFadeInLength = 0;
-s32 encounterTimer = 0;
 s32 fieldTransitionCompleted = 0;
-int encounterDataCountdown = 0;
-int encounterCount = 0;
-std::array<s32, 32> encounterTriggerTime;
-std::array<u8, 16> encounterProbabilityWeight;
-bool bBattleSequenceInitialized = false;
-
-bool debugEncounterTriggerDisabled = false;
-int debugForcedEncounter = -1;
 
 u16 inputAllowedMask = 0xFFFF;
 u16 padButtonForField2;
@@ -4694,42 +4687,61 @@ void freeScratchBuffer(T* pPtr) {
 }
 
 struct sEntityMoveCheck0Sub1 {
-    sVec2_s16 m10;
+    std::array<sGTE_XY, 4> m0_gteXY;
+    sGTE_XY m10;
+    std::array<SVECTOR, 4> m14;
+    SVECTOR m34;
+    long m3C_clipFlag;
     MATRIX m40;
     MATRIX m60;
     MATRIX m80;
-    s32 mA0;
-    s32 mA4;
+    s32 mA0_smallestY;
+    std::vector<SVECTOR>::iterator mA4;
+    u32 mAC;
     SVECTOR mB0;
 };
 
-int EntityMoveCheck0Sub1(int actorId, sSpriteActor* param_2, int stepX, int stepZ, int* param_5, VECTOR* outputNormal)
+void validate(u32 psxBase, const sEntityMoveCheck0Sub1& data) {
+    validate(psxBase + 0, data.m0_gteXY);
+    validate(psxBase + 0x10, data.m10);
+    validate(psxBase + 0x14, data.m14);
+    validate(psxBase + 0x34, data.m34);
+    validate(psxBase + 0x3C, data.m3C_clipFlag);
+    validate(psxBase + 0x40, data.m40);
+    validate(psxBase + 0x60, data.m60);
+    validate(psxBase + 0x80, data.m80);
+    validate(psxBase + 0xA0, data.mA0_smallestY);
+    validate(psxBase + 0xAC, data.mAC);
+    validate(psxBase + 0xB0, data.mB0);
+}
+
+int CheckCollisionWithMesh(int actorId, sModelBlock* param_2, int stepX, int stepZ, int* outputY, VECTOR* outputNormal)
 {
     sEntityMoveCheck0Sub1* pScratchData = allocateScratchBufferLocationForMoveCheck<sEntityMoveCheck0Sub1>();
-    pScratchData->mA0 = 0x7fffffff;
-    pScratchData->mA4 = (param_2->m0_spriteActorCore).m0_position.vz;
+    pScratchData->mA0_smallestY = 0x7fffffff;
+    pScratchData->mA4 = param_2->m8_vertices.begin();
     pScratchData->m10.set(stepX, stepZ);
 
     MATRIX* m1;
     MATRIX* m2;
-    MATRIX* pMVar7;
+    MATRIX* m3;
     u8 attachementMode = (actorArray[actorId].m4C_scriptEntity)->m12C_flags & 3;
     if (attachementMode == 0) {
         pScratchData->m40.t = VECTOR::zero();
         pScratchData->m80.t = VECTOR::zero();
         m2 = &pScratchData->m80;
         if (actorArray[actorId].m4C_scriptEntity->m75_parentActorId == -1) {
-            pMVar7 = &computeProjectionMatrixTempMatrix2;
+            m3 = &computeProjectionMatrixTempMatrix2;
             m1 = &renderModelRotationMatrix;
         }
         else {
             CompMatrix(&computeProjectionMatrixTempMatrix2, &renderModelRotationMatrix, m2);
             m1 = &actorArray[actorArray[actorId].m4C_scriptEntity->m75_parentActorId].m2C_matrixBackup;
-            pMVar7 = m2;
+            m3 = m2;
             m2 = &pScratchData->m60;
         }
-        CompMatrix(pMVar7, m1, m2);
-        pMVar7 = &actorArray[actorId].mC_matrix;
+        CompMatrix(m3, m1, m2);
+        m3 = &actorArray[actorId].mC_matrix;
     }
     else {
         switch (attachementMode) {
@@ -4746,30 +4758,80 @@ int EntityMoveCheck0Sub1(int actorId, sSpriteActor* param_2, int stepX, int step
             assert(0);
             break;
         }
-        pMVar7 = &pScratchData->m60;
-        createRotationMatrix(&pScratchData->mB0, pMVar7);
-        MulRotationMatrix(&actorArray[actorId].mC_matrix, pMVar7);
+        m3 = &pScratchData->m60;
+        createRotationMatrix(&pScratchData->mB0, m3);
+        MulRotationMatrix(&actorArray[actorId].mC_matrix, m3);
         pScratchData->m60.t = actorArray[actorId].mC_matrix.t;
         m2 = &computeProjectionMatrixTempMatrix2;
     }
 
-    CompMatrix(m2, pMVar7, &pScratchData->m40);
+    CompMatrix(m2, m3, &pScratchData->m40);
     SetRotMatrix(&pScratchData->m40);
     SetTransMatrix(&pScratchData->m40);
 
-    if (param_2->m0_spriteActorCore.m0_position.vy.getIntegerPart()) {
-        assert(0);
+    VALIDATE_FIELD(FCT_Base, 0x80083564);
+
+    for (int i = 0; i < param_2->m6_numMeshBlock; i++) {
+        sModelBlock::sMeshBlock& pModelBlock = param_2->m10_meshBlocks[i];
+        u8 primType = pModelBlock.m0_primType;
+        u32 numPrims = pModelBlock.m2_primCount;
+        pScratchData->mAC = primType;
+        if (primType == 0xC4 || primType == 0xC8) {
+            continue;
+        }
+        
+        if (!(pModelBlock.m0_primType & 8)) {
+            // Triangles
+            assert(0);
+        }
+        else {
+            // Quads
+            for (int i = 0; i < numPrims; i++) {
+                RotTransSV(&pScratchData->mA4[pModelBlock.m4_indices[i][0]], &pScratchData->m14[0], &pScratchData->m3C_clipFlag);
+                RotTransSV(&pScratchData->mA4[pModelBlock.m4_indices[i][1]], &pScratchData->m14[1], &pScratchData->m3C_clipFlag);
+                RotTransSV(&pScratchData->mA4[pModelBlock.m4_indices[i][2]], &pScratchData->m14[2], &pScratchData->m3C_clipFlag);
+                RotTransSV(&pScratchData->mA4[pModelBlock.m4_indices[i][3]], &pScratchData->m14[3], &pScratchData->m3C_clipFlag);
+                pScratchData->m0_gteXY[0].set(pScratchData->m14[0].vx, pScratchData->m14[0].vz);
+                pScratchData->m0_gteXY[1].set(pScratchData->m14[1].vx, pScratchData->m14[1].vz);
+                pScratchData->m0_gteXY[2].set(pScratchData->m14[2].vx, pScratchData->m14[2].vz);
+                pScratchData->m0_gteXY[3].set(pScratchData->m14[3].vx, pScratchData->m14[3].vz);
+
+                // Are we in the quad?
+                if ((NormalClip(pScratchData->m0_gteXY[0], pScratchData->m0_gteXY[1], pScratchData->m10) > -1) &&
+                    (NormalClip(pScratchData->m0_gteXY[1], pScratchData->m0_gteXY[3], pScratchData->m10) > -1) &&
+                    (NormalClip(pScratchData->m0_gteXY[3], pScratchData->m0_gteXY[2], pScratchData->m10) > -1) &&
+                    (NormalClip(pScratchData->m0_gteXY[2], pScratchData->m0_gteXY[0], pScratchData->m10) > -1) &&
+                    (NormalClip(pScratchData->m0_gteXY[0], pScratchData->m0_gteXY[1], pScratchData->m10) > -1) // that last test is a duplicate of the 1st and is technically useless
+                    ) {
+                    pScratchData->m34.vx = stepX;
+                    pScratchData->m34.vz = stepZ;
+
+                    SVECTOR* pSVar7 = &pScratchData->m14[1];
+                    SVECTOR* vec1 = &pScratchData->m14[3];
+
+                    // what triangle of the quad are we in?
+                    if (NormalClip(pScratchData->m0_gteXY[1], pScratchData->m0_gteXY[2], pScratchData->m10) > -1) {
+                        pSVar7 = &pScratchData->m14[0];
+                        vec1 = &pScratchData->m14[1];
+                    }
+                    getTriangleNormalAndAdjustY(*pSVar7, *vec1, pScratchData->m14[2], &pScratchData->m34, outputNormal);
+                    if (pScratchData->m34.vy < pScratchData->mA0_smallestY) {
+                        pScratchData->mA0_smallestY = pScratchData->m34.vy;
+                    }
+                }
+            }
+        }
     }
 
-    if (pScratchData->mA0 == 0x7fffffff) {
-        freeScratchBuffer<sEntityMoveCheck0Sub1>(pScratchData);
+    freeScratchBuffer<sEntityMoveCheck0Sub1>(pScratchData);
+
+    VALIDATE_FIELD(FCT_Base, 0x80083930);
+    VALIDATE_REG(FCT_Base, A0, pScratchData->mA0_smallestY);
+    if (pScratchData->mA0_smallestY == 0x7fffffff) {
         return -1;
     }
-    else {
-        *param_5 = pScratchData->mA0;
-        freeScratchBuffer<sEntityMoveCheck0Sub1>(pScratchData);
-        return 0;
-    }
+    *outputY = pScratchData->mA0_smallestY;
+    return 0;
 }
 
 
@@ -4810,34 +4872,41 @@ void EntityMoveCheck0(uint playerEntityIndex, sFieldEntity* pPlayerEntity, sFiel
         if (actorId == playerEntityIndex)
             continue;
 
-        VALIDATE_FIELD(FCT_MoveCheck, 0x8008426c);
-
         sFieldScriptEntity* pCurrentFieldScriptEntity = actorArray[actorId].m4C_scriptEntity;
         sFieldScriptEntity_flags0 entityFlags = pCurrentFieldScriptEntity->m0_fieldScriptFlags;
 
         if (entityFlags.m0_updateScriptDisabled != 0)
             continue;
 
+        //VALIDATE_FIELD(FCT_Base, 0x800842a0);
+
         pCurrentFieldScriptEntity->m4_flags.m_rawFlags &= ~0xC100;
         if ((pCurrentFieldScriptEntity->m4_flags.m_rawFlags & 0x80) == 0)
         {
+//            VALIDATE_FIELD(FCT_Base, 0x80084384);
             if ((entityFlags.m_rawFlags & 0x2000) == 0)
             {
+ //               VALIDATE_FIELD(FCT_Base, 0x800843b8);
                 pScratchBuffer->vx = (((pCurrentFieldScriptEntity->m20_position).vx + (pCurrentFieldScriptEntity->m30_stepVector).vx) >> 0x10) - SFPStepAsInts[0];
                 pScratchBuffer->vz = (((pCurrentFieldScriptEntity->m20_position).vz + (pCurrentFieldScriptEntity->m30_stepVector).vz) >> 0x10) - SFPStepAsInts[2];
                 pScratchBuffer->vy = pPlayerScriptEntity->m1E_collisionRadius + pCurrentFieldScriptEntity->m1E_collisionRadius;
                 Square0(&pScratchBuffer[0], &pScratchBuffer[1]);
                 if (pScratchBuffer[1].vx + pScratchBuffer[1].vz < pScratchBuffer[1].vy) // player is in collision radius
                     goto LAB_Field__80084438;
+//                VALIDATE_FIELD(FCT_Base, 0x80084430);
                 pCurrentFieldScriptEntity->m4_flags.m_rawFlags &= ~0xC00000;
             }
             else
             {
+ //               VALIDATE_FIELD(FCT_Base, 0x80084398);
                 testedEntityY = isPositionInEntityScriptBoundingVolume(SFPStepAsInts[0], SFPStepAsInts[2], pCurrentFieldScriptEntity, 0);
                 if (testedEntityY == 0) {
                 LAB_Field__80084438:
+ //                   VALIDATE_FIELD(FCT_Base, 0x80084438);
                     if ((pPlayerScriptEntity->m14_currentTriangleFlag & 0x400000U) == 0) {
+ //                       VALIDATE_FIELD(FCT_Base, 0x80084478);
                         if ((((pCurrentFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags | playerFlags.m_rawFlags) & 0x80) == 0) && (noUpdatesToPartyMembers == 0)) {
+ //                           VALIDATE_FIELD(FCT_Base, 0x800844a4);
                             testedEntityY = pCurrentFieldScriptEntity->m20_position.vy.getIntegerPart();
                             testedEntityYWithOffset = testedEntityY - pCurrentFieldScriptEntity->m18_boundingVolume.vy;
                             goto LAB_Field__800844b8;
@@ -4855,8 +4924,10 @@ void EntityMoveCheck0(uint playerEntityIndex, sFieldEntity* pPlayerEntity, sFiel
         }
         else
         {
-            VECTOR local_98;
-            testedEntityY = EntityMoveCheck0Sub1(actorId, actorArray[actorId].m4_pVramSpriteSheet, SFPStepAsInts[0], SFPStepAsInts[2], &testedEntityYWithOffset, &local_98);
+            VECTOR surfaceNormal;
+            testedEntityY = CheckCollisionWithMesh(actorId, &*actorArray[actorId].m0->m4_pModelBlock, SFPStepAsInts[0], SFPStepAsInts[2], &testedEntityYWithOffset, &surfaceNormal);
+            //VALIDATE_FIELD(FCT_Base, 0x800842ec);
+            //VALIDATE_REG(FCT_Base, V0, testedEntityY);
             if (testedEntityY != 0) {
                 pCurrentFieldScriptEntity->m4_flags.m_rawFlags = pCurrentFieldScriptEntity->m4_flags.m_rawFlags & 0xff3fffff;
                 continue;
@@ -4869,14 +4940,18 @@ void EntityMoveCheck0(uint playerEntityIndex, sFieldEntity* pPlayerEntity, sFiel
             if ((byte)pPlayerScriptEntity->m74_touchedActor != actorId) {
                 testedEntityY = testedEntityYWithOffset + testedEntityY;
             }
-            (pPlayerScriptEntity->m50_surfaceNormal).vx = local_98[0];
-            (pPlayerScriptEntity->m50_surfaceNormal).vy = local_98[1];
-            (pPlayerScriptEntity->m50_surfaceNormal).vz = local_98[2];
+            (pPlayerScriptEntity->m50_surfaceNormal).vx = surfaceNormal[0];
+            (pPlayerScriptEntity->m50_surfaceNormal).vy = surfaceNormal[1];
+            (pPlayerScriptEntity->m50_surfaceNormal).vz = surfaceNormal[2];
             pCurrentFieldScriptEntity->m4_flags.m_rawFlags |= 0x4000;
 
-LAB_Field__800844b8:
+        LAB_Field__800844b8:
+
+            //VALIDATE_FIELD(FCT_Base, 0x800844b8);
+
             if ((pPlayerScriptEntity->m74_touchedActor == actorId) && (playerFlags40800 == 0)) {
-LAB_Field__80084520:
+            LAB_Field__80084520:
+                //VALIDATE_FIELD(FCT_Base, 0x80084520);
                 pCurrentFieldScriptEntity->m4_flags.m_rawFlags = pCurrentFieldScriptEntity->m4_flags.m_rawFlags | 0x800000;
                 (pPlayerScriptEntity->m40).vx = (pCurrentFieldScriptEntity->m30_stepVector).vx;
                 (pPlayerScriptEntity->m40).vy = (pCurrentFieldScriptEntity->m30_stepVector).vy;
@@ -4888,47 +4963,46 @@ LAB_Field__80084520:
                     finalState = true;
                 }
             }
-            else
-            {
-                if ((testedEntityY < (int)(playerY - (uint)(ushort)initialActor18Y)) || (playerY < testedEntityYWithOffset)) {
-                    u32 tempFlags = pCurrentFieldScriptEntity->m4_flags.m_rawFlags;
-                    pCurrentFieldScriptEntity->m4_flags.m_rawFlags = tempFlags & 0xfffffeff;
-                    if (playerY < testedEntityYWithOffset) {
-                        pCurrentFieldScriptEntity->m4_flags.m_rawFlags = tempFlags & 0xfffffeff | 0x800000;
-                        if (testedEntityYWithOffset < bestDistance) {
-                            bestDistance = testedEntityYWithOffset;
-                        }
-                    }
-                    else {
-                        pCurrentFieldScriptEntity->m4_flags.m_rawFlags = tempFlags & 0xff7ffeff;
+            else if((testedEntityY < (int)(playerY - (uint)(ushort)initialActor18Y)) || (playerY < testedEntityYWithOffset)) {
+                u32 tempFlags = pCurrentFieldScriptEntity->m4_flags.m_rawFlags;
+                pCurrentFieldScriptEntity->m4_flags.m_rawFlags = tempFlags & 0xfffffeff;
+                if (playerY < testedEntityYWithOffset) {
+                    //VALIDATE_FIELD(FCT_Base, 0x8008467c);
+                    pCurrentFieldScriptEntity->m4_flags.m_rawFlags = tempFlags & 0xfffffeff | 0x800000;
+                    if (testedEntityYWithOffset < bestDistance) {
+                        bestDistance = testedEntityYWithOffset;
                     }
                 }
-                else
-                {
-                    if ((playerY < testedEntityYWithOffset + 0x10) || ((pCurrentFieldScriptEntity->m4_flags.m_rawFlags & 0x800000) != 0))
-                        goto LAB_Field__80084520;
-                    if ((entityFlags.m_rawFlags & 0x10) == 0) {
-                        assert(0);
-                    }
-                    (pCurrentFieldScriptEntity->m40).vx = 0;
-                    (pCurrentFieldScriptEntity->m40).vy = 0;
-                    (pCurrentFieldScriptEntity->m40).vz = 0;
-                    (pCurrentFieldScriptEntity->m30_stepVector).vx = 0;
-                    (pCurrentFieldScriptEntity->m30_stepVector).vy = 0;
-                    (pCurrentFieldScriptEntity->m30_stepVector).vz = 0;
-                    (pPlayerScriptEntity->m30_stepVector).vx = 0;
-                    (pPlayerScriptEntity->m30_stepVector).vy = 0;
-                    (pPlayerScriptEntity->m30_stepVector).vz = 0;
-                    (pPlayerScriptEntity->m40).vx = 0;
-                    (pPlayerScriptEntity->m40).vy = 0;
-                    (pPlayerScriptEntity->m40).vz = 0;
+                else {
+                    pCurrentFieldScriptEntity->m4_flags.m_rawFlags = tempFlags & 0xff7ffeff;
                 }
             }
+            else
+            {
+                if ((playerY < testedEntityYWithOffset + 0x10) || ((pCurrentFieldScriptEntity->m4_flags.m_rawFlags & 0x800000) != 0))
+                    goto LAB_Field__80084520;
+                if ((entityFlags.m_rawFlags & 0x10) == 0) {
+                    assert(0);
+                }
+                (pCurrentFieldScriptEntity->m40).vx = 0;
+                (pCurrentFieldScriptEntity->m40).vy = 0;
+                (pCurrentFieldScriptEntity->m40).vz = 0;
+                (pCurrentFieldScriptEntity->m30_stepVector).vx = 0;
+                (pCurrentFieldScriptEntity->m30_stepVector).vy = 0;
+                (pCurrentFieldScriptEntity->m30_stepVector).vz = 0;
+                (pPlayerScriptEntity->m30_stepVector).vx = 0;
+                (pPlayerScriptEntity->m30_stepVector).vy = 0;
+                (pPlayerScriptEntity->m30_stepVector).vz = 0;
+                (pPlayerScriptEntity->m40).vx = 0;
+                (pPlayerScriptEntity->m40).vy = 0;
+                (pPlayerScriptEntity->m40).vz = 0;
+            }
+            //VALIDATE_FIELD(FCT_Base, 0x800846a8);
             pCurrentFieldScriptEntity->m4_flags.m_rawFlags |= 0x400000;
         }
     }
 
-    VALIDATE_FIELD(FCT_MoveCheck, 0x800846e0);
+    //VALIDATE_FIELD(FCT_Base, 0x800846e0);
 
     if (updateEntityEventCode3Var1 != 0) {
         finalState = false;

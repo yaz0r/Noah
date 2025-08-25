@@ -94,10 +94,10 @@ struct sPercussionData {
 };
 
 struct sInterpolatableAudioParam {
-    sFixedPoint m0;
-    s32 m4;
-    s16 m8;
-    s16 mA;
+    sFixedPoint m0_currentValue;
+    s32 m4_stepIncrement;
+    s16 m8_counter;
+    s16 mA_targetValue;
 };
 
 struct sSoundInstance {

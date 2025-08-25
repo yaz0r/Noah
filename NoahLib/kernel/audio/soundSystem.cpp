@@ -123,7 +123,7 @@ void executeSequenceEvents2(sSoundInstance* param_1, std::vector<sSoundInstanceE
             param_1->m58 += param_1->m5C;
         }
         param_1->m60--;
-        param_1->m54 = (param_1->m58 >> 16) * (param_1->m64.m0.getIntegerPart());
+        param_1->m54 = (param_1->m58 >> 16) * (param_1->m64.m0_currentValue.getIntegerPart());
     }
 
     for (int i = 0; i < param_3; i++) {
@@ -452,7 +452,7 @@ void voicePostUpdate2(sSoundInstance* pSoundInstance, std::vector<sSoundInstance
                     if (volumeTarget < 0) {
                         volumeTarget = 0;
                     }
-                    s32 panTarget = pVoice->m74_pan + pVoice->mD4 + (pSoundInstance->m88.m0.getIntegerPart());
+                    s32 panTarget = pVoice->m74_pan + pVoice->mD4 + (pSoundInstance->m88.m0_currentValue.getIntegerPart());
                     
                     if (panTarget > 0x7FFF) {
                         panTarget = 0x7FFF;
@@ -461,7 +461,7 @@ void voicePostUpdate2(sSoundInstance* pSoundInstance, std::vector<sSoundInstance
                         panTarget = 0;
                     }
 
-                    volumeTarget = ((pSoundInstance->m70.m0.getIntegerPart()) * ((pVoice->m76 * volumeTarget) >> 0xF)) >> 0x10;
+                    volumeTarget = ((pSoundInstance->m70.m0_currentValue.getIntegerPart()) * ((pVoice->m76 * volumeTarget) >> 0xF)) >> 0x10;
 
                     int volumeLeft;
                     int volumeRight;
@@ -488,7 +488,7 @@ void voicePostUpdate2(sSoundInstance* pSoundInstance, std::vector<sSoundInstance
                     pVoice->m30.mA_volumeRight = volumeRight;
                 }
                 if (pVoice->m2 & 0x200) {
-                    int value = (((pVoice->m68_finalNoteToPlay >> 16) + (int)pVoice->mD0 + (int)(pSoundInstance->m7C.m0.getIntegerPart())) * 0x10000) >> 0x10;
+                    int value = (((pVoice->m68_finalNoteToPlay >> 16) + (int)pVoice->mD0 + (int)(pSoundInstance->m7C.m0_currentValue.getIntegerPart())) * 0x10000) >> 0x10;
                     int sampleRate = computeSampleRate(value);
                     pVoice->m30.m14_ADPCM_SampleRate = sampleRate & 0x3FFF;
                     pVoice->m30.m6 |= 4;
@@ -505,14 +505,19 @@ void voicePostUpdate2(sSoundInstance* pSoundInstance, std::vector<sSoundInstance
     }
 }
 
-u16 needUpdateMasterVolume = 0;
-u16 needToUpdateSPUCDVolume = 0;
-
 struct sSpuCommonAttributes {
     u32 mask = 0;
 };
 
-sSpuCommonAttributes spuCommonAttributes;
+struct sSpuVolumes {
+    sSpuCommonAttributes m0_spuCommonAttributes;
+    s16 m28_currentMasterVolume;
+    s16 m2A_currentCDVolume;
+    sInterpolatableAudioParam m30_masterInterpolator;
+    sInterpolatableAudioParam m3C_cdInterpolator;
+};
+
+sSpuVolumes g_spuVolumes;
 
 void audioTickSub1() {
     if (pendingKeyOff) {
@@ -537,15 +542,15 @@ void interpolateAudioParam(sInterpolatableAudioParam* param_1) {
     short sVar1;
     int iVar2;
 
-    sVar1 = param_1->m8;
-    param_1->m8 = sVar1 + -1;
+    sVar1 = param_1->m8_counter;
+    param_1->m8_counter = sVar1 + -1;
     if (sVar1 == 1) {
-        iVar2 = (int)param_1->mA << 0x10;
+        iVar2 = (int)param_1->mA_targetValue << 0x10;
     }
     else {
-        iVar2 = param_1->m0 + param_1->m4;
+        iVar2 = param_1->m0_currentValue + param_1->m4_stepIncrement;
     }
-    param_1->m0 = iVar2;
+    param_1->m0_currentValue = iVar2;
 }
 
 void audioTick() {
@@ -555,13 +560,13 @@ void audioTick() {
         spuUpdateCounter++;
 
         if (oddUpdate) {
-            if (needUpdateMasterVolume != 0) {
+            if (g_spuVolumes.m30_masterInterpolator.m8_counter != 0) {
                 assert(0);
             }
-            if (needToUpdateSPUCDVolume != 0) {
+            if (g_spuVolumes.m3C_cdInterpolator.m8_counter != 0) {
                 assert(0);
             }
-            if (spuCommonAttributes.mask != 0) {
+            if (g_spuVolumes.m0_spuCommonAttributes.mask != 0) {
                 assert(0);
             }
         }
@@ -573,22 +578,22 @@ void audioTick() {
                 if ((pSoundInstance->m2C != 0) && ((uint)pSoundInstance->m2C <= (uint)pSoundInstance->m24)) {
                     assert(0);
                 }
-                if (pSoundInstance->m64.m8 != 0) {
+                if (pSoundInstance->m64.m8_counter != 0) {
                     assert(0);
                 }
-                if (pSoundInstance->m70.m8 != 0) {
+                if (pSoundInstance->m70.m8_counter != 0) {
                     interpolateAudioParam(&pSoundInstance->m70);
                     applyFlagToAllVoices(0x100, pSoundInstance);
                 }
-                if (pSoundInstance->m7C.m8 != 0) {
+                if (pSoundInstance->m7C.m8_counter != 0) {
                     assert(0);
                 }
-                if (pSoundInstance->m88.m8 != 0) {
+                if (pSoundInstance->m88.m8_counter != 0) {
                     assert(0);
                 }
 
                 pSoundInstance->m20++;
-                pSoundInstance->m28 += pSoundInstance->m64.m0.getIntegerPart();
+                pSoundInstance->m28 += pSoundInstance->m64.m0_currentValue.getIntegerPart();
                 pSoundInstance->m50 -= pSoundInstance->m54;
                 while (pSoundInstance->m50 < 0) {
                     pSoundInstance->m36--;
@@ -612,7 +617,7 @@ void audioTick() {
                         break;
                     }
                     pSoundInstance->m24++;
-                    if (pSoundInstance->m70.m0 == 0) {
+                    if (pSoundInstance->m70.m0_currentValue == 0) {
                         startMusicInstanceSub0(pSoundInstance);
                     }
                     if (pSoundInstance->m32 == pSoundInstance->m1E) {
@@ -630,8 +635,10 @@ void audioTick() {
         pSoundInstance = pPlayingSoundsLinkedList;
         while (pSoundInstance) {
             if ((short)pSoundInstance->m10_flags < 0) {
-                voicePostUpdate1(pSoundInstance, pSoundInstance->m94_events, pSoundInstance->m14_count);
-                voicePostUpdate2(pSoundInstance, pSoundInstance->m94_events, pSoundInstance->m14_count);
+                if(pSoundInstance->m14_count) {
+                    voicePostUpdate1(pSoundInstance, pSoundInstance->m94_events, pSoundInstance->m14_count);
+                    voicePostUpdate2(pSoundInstance, pSoundInstance->m94_events, pSoundInstance->m14_count);
+                }
             }
 
             pSoundInstance = pSoundInstance->m0_pNext;

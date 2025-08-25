@@ -30,7 +30,7 @@ bool validationInit() {
     g_gdbConnection->writeU32(0x80019930, 0x34040000); 
     
     // Patch game state to enter debug room from kernel
-    gameState.m231A_fieldID = 5;
+    gameState.m231A_fieldID = 15;
     g_gdbConnection->writeU16(0x8006f94e, gameState.m231A_fieldID);
 
     // Sync random seed

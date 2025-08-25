@@ -100,7 +100,7 @@ std::vector<u8>::const_iterator seqOP_1A(std::vector<u8>::const_iterator it, sSo
 
 std::vector<u8>::const_iterator seqOP_20_setTempo(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     pInstance->m58 = (int)it[0] << 0x10;
-    pInstance->m54 = (int)it[0] * (pInstance->m64.m0.getIntegerPart());
+    pInstance->m54 = (int)it[0] * (pInstance->m64.m0_currentValue.getIntegerPart());
     return it + 1;
 }
 
