@@ -1853,7 +1853,7 @@ void OP_92()
     g_breakCurrentScript = 1;
 }
 
-void OP_ADD_ENDITY_TO_MECHA_LIST()
+void OP_ADD_ENTITY_TO_MECHA_LIST()
 {
     actorArray[currentFieldActorId].m58_flags = actorArray[currentFieldActorId].m58_flags & 0xf07f | 0x200;
     int iVar3 = getImmediateOrVariableUnsigned(1);
@@ -4064,6 +4064,15 @@ void OP_SET_VAR_TRUE(void)
 void OP_JUMP_IF_PAD_MASK()
 {
     jumpIfMask(padButtonForScripts[0].m0_buttons);
+}
+
+void OP_JUMP_IF_ACCUMULATED_INPUT_MASK() {
+    jumpIfMask(padButtonForScripts2);
+}
+
+void OP_RESET_ACCUMULATED_INPUT_MASK() {
+    padButtonForScripts2 = 0;
+    ADVANCE_VM(1);
 }
 
 void OP_SET_CURRENT_ACTOR_FLAGS()

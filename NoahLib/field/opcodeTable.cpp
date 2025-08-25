@@ -48,6 +48,8 @@ void initOpcodes()
     fieldScriptOpcodes[0x2D] = OP_GET_ACTOR_POSITION;
     fieldScriptOpcodes[0x2E] = OP_GET_ACTOR_FACING_ANGLE;
     fieldScriptOpcodes[0x31] = OP_JUMP_IF_PAD_MASK;
+    fieldScriptOpcodes[0x32] = OP_JUMP_IF_ACCUMULATED_INPUT_MASK;
+    fieldScriptOpcodes[0x33] = OP_RESET_ACCUMULATED_INPUT_MASK;
     fieldScriptOpcodes[0x35] = OP_SET_VAR_FROM_S16;
     fieldScriptOpcodes[0x36] = OP_SET_VAR_TRUE;
     fieldScriptOpcodes[0x37] = OP_SET_VAR_FALSE;
@@ -105,7 +107,7 @@ void initOpcodes()
     fieldScriptOpcodes[0x8F] = OP_ADD_GOLD;
     fieldScriptOpcodes[0x91] = OP_IF_CHARACTER_IN_PARTY;
     fieldScriptOpcodes[0x92] = OP_92;
-    fieldScriptOpcodes[0x93] = OP_ADD_ENDITY_TO_MECHA_LIST;
+    fieldScriptOpcodes[0x93] = OP_ADD_ENTITY_TO_MECHA_LIST;
     fieldScriptOpcodes[0x98] = OP_CHANGE_FIELD_WHEN_READY2;
     fieldScriptOpcodes[0x99] = OP_99;
     fieldScriptOpcodes[0x9A] = OP_9A;

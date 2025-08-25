@@ -1733,9 +1733,6 @@ void OPX_13Sub(int)
 }
 
 
-std::array<sGameController, 2> padButtonForScripts;
-
-
 int isScriptAlreadyRunning(sFieldScriptEntity* pEntity, int scriptIndex)
 {
     for (int i = 0; i < 8; i++)
@@ -8008,7 +8005,7 @@ void saveStateToKernel(void)
 void syncKernelAndFieldStates()
 {
     if (kernelAndFieldStatesSynced != 1) {
-        MissingCode();
+        padButtonForScripts2 |= padButtonForScripts[0].m0_buttons;
         for (int i = 0; i < 3; i++) {
             pKernelGameState->m1D34_currentParty[i] = currentParty[i];
         }

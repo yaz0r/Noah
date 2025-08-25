@@ -235,6 +235,16 @@ void initOpcodeTable()
 		.addArgumentJumpLocation()
 		.end();
 
+    m_opcode[0x32]
+        .setName("JUMP_IF_ACCUMULATED_INPUT_MASK")
+        .addArgumentU16()
+        .addArgumentJumpLocation()
+        .end();
+
+    m_opcode[0x33]
+        .setName("RESET_ACCUMULATED_INPUT_MASK")
+        .end();
+
 	m_opcode[0x35]
 		.setName("SET_VAR_FROM_S16")
 		.addArgumentVarIndex()
