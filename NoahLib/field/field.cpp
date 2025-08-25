@@ -4864,7 +4864,7 @@ void EntityMoveCheck0(uint playerEntityIndex, sFieldEntity* pPlayerEntity, sFiel
     s32 playerY = pPlayerScriptEntity->m20_position.vy.getIntegerPart();
     s32 testedEntityY;
     s16 initialActor18Y = pPlayerScriptEntity->m18_boundingVolume.vy;
-    s32 finalCount;
+    s32 finalCount = 0;
     s8 playerVar74 = pPlayerScriptEntity->m74_touchedActor;
 
     for (int actorId=0; actorId < g_totalActors; actorId++)
@@ -4883,59 +4883,52 @@ void EntityMoveCheck0(uint playerEntityIndex, sFieldEntity* pPlayerEntity, sFiel
         pCurrentFieldScriptEntity->m4_flags.m_rawFlags &= ~0xC100;
         if ((pCurrentFieldScriptEntity->m4_flags.m_rawFlags & 0x80) == 0)
         {
-//            VALIDATE_FIELD(FCT_Base, 0x80084384);
             if ((entityFlags.m_rawFlags & 0x2000) == 0)
             {
- //               VALIDATE_FIELD(FCT_Base, 0x800843b8);
                 pScratchBuffer->vx = (((pCurrentFieldScriptEntity->m20_position).vx + (pCurrentFieldScriptEntity->m30_stepVector).vx) >> 0x10) - SFPStepAsInts[0];
                 pScratchBuffer->vz = (((pCurrentFieldScriptEntity->m20_position).vz + (pCurrentFieldScriptEntity->m30_stepVector).vz) >> 0x10) - SFPStepAsInts[2];
                 pScratchBuffer->vy = pPlayerScriptEntity->m1E_collisionRadius + pCurrentFieldScriptEntity->m1E_collisionRadius;
                 Square0(&pScratchBuffer[0], &pScratchBuffer[1]);
-                if (pScratchBuffer[1].vx + pScratchBuffer[1].vz < pScratchBuffer[1].vy) // player is in collision radius
-                    goto LAB_Field__80084438;
-//                VALIDATE_FIELD(FCT_Base, 0x80084430);
-                pCurrentFieldScriptEntity->m4_flags.m_rawFlags &= ~0xC00000;
+                if (pScratchBuffer[1].vx + pScratchBuffer[1].vz >= pScratchBuffer[1].vy) // player is in collision radius
+                {
+                    pCurrentFieldScriptEntity->m4_flags.m_rawFlags &= ~0xC00000;
+                    continue;
+                }
+                
             }
             else
             {
- //               VALIDATE_FIELD(FCT_Base, 0x80084398);
-                testedEntityY = isPositionInEntityScriptBoundingVolume(SFPStepAsInts[0], SFPStepAsInts[2], pCurrentFieldScriptEntity, 0);
-                if (testedEntityY == 0) {
-                LAB_Field__80084438:
- //                   VALIDATE_FIELD(FCT_Base, 0x80084438);
-                    if ((pPlayerScriptEntity->m14_currentTriangleFlag & 0x400000U) == 0) {
- //                       VALIDATE_FIELD(FCT_Base, 0x80084478);
-                        if ((((pCurrentFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags | playerFlags.m_rawFlags) & 0x80) == 0) && (noUpdatesToPartyMembers == 0)) {
- //                           VALIDATE_FIELD(FCT_Base, 0x800844a4);
-                            testedEntityY = pCurrentFieldScriptEntity->m20_position.vy.getIntegerPart();
-                            testedEntityYWithOffset = testedEntityY - pCurrentFieldScriptEntity->m18_boundingVolume.vy;
-                            goto LAB_Field__800844b8;
-                        }
-                    }
-                    else {
-                        if (fieldDebugDisable == 0) {
-                            logToScreen("HITOFF\n");
-                        }
-                    }
+                if (isPositionInEntityScriptBoundingVolume(SFPStepAsInts[0], SFPStepAsInts[2], pCurrentFieldScriptEntity, 0)) {
+                    pCurrentFieldScriptEntity->m4_flags.m_rawFlags &= ~0xC00000;
                     continue;
                 }
-                pCurrentFieldScriptEntity->m4_flags.m_rawFlags &= ~0xC00000;
+            }
+
+            if (pPlayerScriptEntity->m14_currentTriangleFlag & 0x400000U) {
+                logToScreen("HITOFF\n");
+                continue;
+            }
+
+            if ((((pCurrentFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags | playerFlags.m_rawFlags) & 0x80) == 0) && (noUpdatesToPartyMembers == 0)) {
+                testedEntityY = pCurrentFieldScriptEntity->m20_position.vy.getIntegerPart();
+                testedEntityYWithOffset = testedEntityY - pCurrentFieldScriptEntity->m18_boundingVolume.vy;
+            }
+            else {
+                continue;
             }
         }
         else
         {
             VECTOR surfaceNormal;
-            testedEntityY = CheckCollisionWithMesh(actorId, &*actorArray[actorId].m0->m4_pModelBlock, SFPStepAsInts[0], SFPStepAsInts[2], &testedEntityYWithOffset, &surfaceNormal);
-            //VALIDATE_FIELD(FCT_Base, 0x800842ec);
-            //VALIDATE_REG(FCT_Base, V0, testedEntityY);
-            if (testedEntityY != 0) {
-                pCurrentFieldScriptEntity->m4_flags.m_rawFlags = pCurrentFieldScriptEntity->m4_flags.m_rawFlags & 0xff3fffff;
+            if (CheckCollisionWithMesh(actorId, &*actorArray[actorId].m0->m4_pModelBlock, SFPStepAsInts[0], SFPStepAsInts[2], &testedEntityYWithOffset, &surfaceNormal)) {
+                pCurrentFieldScriptEntity->m4_flags.m_rawFlags &= ~0xC00000;
                 continue;
             }
+
             if (fieldDebugDisable == 0) {
                 logToScreen("POLYCHECK %d\n", actorId);
             }
-            pCurrentFieldScriptEntity->m4_flags.m_rawFlags = pCurrentFieldScriptEntity->m4_flags.m_rawFlags | 0x100;
+            pCurrentFieldScriptEntity->m4_flags.m_rawFlags |= 0x100;
             testedEntityY = testedEntityYWithOffset + (uint)(ushort)pCurrentFieldScriptEntity->m18_boundingVolume.vy;
             if ((byte)pPlayerScriptEntity->m74_touchedActor != actorId) {
                 testedEntityY = testedEntityYWithOffset + testedEntityY;
@@ -4944,46 +4937,81 @@ void EntityMoveCheck0(uint playerEntityIndex, sFieldEntity* pPlayerEntity, sFiel
             (pPlayerScriptEntity->m50_surfaceNormal).vy = surfaceNormal[1];
             (pPlayerScriptEntity->m50_surfaceNormal).vz = surfaceNormal[2];
             pCurrentFieldScriptEntity->m4_flags.m_rawFlags |= 0x4000;
+        }
 
-        LAB_Field__800844b8:
+        // if we get here, it means we have a collision against another actor
 
-            //VALIDATE_FIELD(FCT_Base, 0x800844b8);
+        VALIDATE_FIELD(FCT_Base, 0x800844b8);
 
-            if ((pPlayerScriptEntity->m74_touchedActor == actorId) && (playerFlags40800 == 0)) {
-            LAB_Field__80084520:
-                //VALIDATE_FIELD(FCT_Base, 0x80084520);
-                pCurrentFieldScriptEntity->m4_flags.m_rawFlags = pCurrentFieldScriptEntity->m4_flags.m_rawFlags | 0x800000;
-                (pPlayerScriptEntity->m40).vx = (pCurrentFieldScriptEntity->m30_stepVector).vx;
-                (pPlayerScriptEntity->m40).vy = (pCurrentFieldScriptEntity->m30_stepVector).vy;
-                finalCount = 2;
-                (pPlayerScriptEntity->m40).vz = (pCurrentFieldScriptEntity->m30_stepVector).vz;
-                bestDistance = testedEntityYWithOffset;
-                if (playerFlags40800 == 0) {
-                    pPlayerScriptEntity->m74_touchedActor = (byte)actorId;
-                    finalState = true;
+        if ((pPlayerScriptEntity->m74_touchedActor == actorId) && (playerFlags40800 == 0)) {
+        LAB_Field__80084520:
+            VALIDATE_FIELD(FCT_Base, 0x80084520);
+            pCurrentFieldScriptEntity->m4_flags.m_rawFlags |= 0x800000;
+            (pPlayerScriptEntity->m40).vx = (pCurrentFieldScriptEntity->m30_stepVector).vx;
+            (pPlayerScriptEntity->m40).vy = (pCurrentFieldScriptEntity->m30_stepVector).vy;
+            (pPlayerScriptEntity->m40).vz = (pCurrentFieldScriptEntity->m30_stepVector).vz;
+            finalCount = 2;
+            bestDistance = testedEntityYWithOffset;
+            if (playerFlags40800 == 0) {
+                pPlayerScriptEntity->m74_touchedActor = (byte)actorId;
+                finalState = true;
+            }
+        }
+        else if ((testedEntityY < (int)(playerY - (uint)(ushort)initialActor18Y)) || (playerY < testedEntityYWithOffset)) {
+            pCurrentFieldScriptEntity->m4_flags.m_rawFlags &= ~0x100;
+            if (playerY < testedEntityYWithOffset) {
+                VALIDATE_FIELD(FCT_Base, 0x8008467c);
+                pCurrentFieldScriptEntity->m4_flags.m_rawFlags |= 0x800000;
+                if (testedEntityYWithOffset < bestDistance) {
+                    bestDistance = testedEntityYWithOffset;
                 }
             }
-            else if((testedEntityY < (int)(playerY - (uint)(ushort)initialActor18Y)) || (playerY < testedEntityYWithOffset)) {
-                u32 tempFlags = pCurrentFieldScriptEntity->m4_flags.m_rawFlags;
-                pCurrentFieldScriptEntity->m4_flags.m_rawFlags = tempFlags & 0xfffffeff;
-                if (playerY < testedEntityYWithOffset) {
-                    //VALIDATE_FIELD(FCT_Base, 0x8008467c);
-                    pCurrentFieldScriptEntity->m4_flags.m_rawFlags = tempFlags & 0xfffffeff | 0x800000;
-                    if (testedEntityYWithOffset < bestDistance) {
-                        bestDistance = testedEntityYWithOffset;
+            else {
+                pCurrentFieldScriptEntity->m4_flags.m_rawFlags &= ~0x800000;
+            }
+        }
+        else
+        {
+            if ((playerY < testedEntityYWithOffset + 0x10) || ((pCurrentFieldScriptEntity->m4_flags.m_rawFlags & 0x800000) != 0))
+                goto LAB_Field__80084520;
+            if ((entityFlags.m_rawFlags & 0x10) == 0) {
+                if (pCurrentFieldScriptEntity->mE3 < 0x30) {
+                    pCurrentFieldScriptEntity->mE3 = pCurrentFieldScriptEntity->mE3 + 2;
+                }
+                if (0x20 < pCurrentFieldScriptEntity->mE3) {
+                    
+                    int tempX = (pPlayerScriptEntity->m30_stepVector).vx;
+                    if (tempX < 0) {
+                        tempX += 3;
                     }
-                }
-                else {
-                    pCurrentFieldScriptEntity->m4_flags.m_rawFlags = tempFlags & 0xff7ffeff;
+                    (pCurrentFieldScriptEntity->m40).vx += tempX >> 2;
+
+                    int tempZ = (pPlayerScriptEntity->m30_stepVector).vz;
+                    if (tempZ < 0) {
+                        tempZ += 3;
+                    }
+                    (pCurrentFieldScriptEntity->m40).vz += tempZ >> 2;
+
+                    (pPlayerScriptEntity->m30_stepVector).vx = 0;
+                    (pPlayerScriptEntity->m30_stepVector).vy = 0;
+                    (pPlayerScriptEntity->m30_stepVector).vz = 0;
+
+                    tempX = (pPlayerScriptEntity->m30_stepVector).vx;
+                    if (tempX < 0) {
+                        tempX += 3;
+                    }
+                    (pPlayerScriptEntity->m40).vx = tempX >> 2;
+
+                    (pPlayerScriptEntity->m40).vy = 0;
+
+                    tempZ = (pPlayerScriptEntity->m30_stepVector).vz;
+                    if (tempZ < 0) {
+                        tempZ += 3;
+                    }
+                    (pPlayerScriptEntity->m40).vz = tempZ >> 2;
                 }
             }
-            else
-            {
-                if ((playerY < testedEntityYWithOffset + 0x10) || ((pCurrentFieldScriptEntity->m4_flags.m_rawFlags & 0x800000) != 0))
-                    goto LAB_Field__80084520;
-                if ((entityFlags.m_rawFlags & 0x10) == 0) {
-                    assert(0);
-                }
+            else {
                 (pCurrentFieldScriptEntity->m40).vx = 0;
                 (pCurrentFieldScriptEntity->m40).vy = 0;
                 (pCurrentFieldScriptEntity->m40).vz = 0;
@@ -4997,16 +5025,16 @@ void EntityMoveCheck0(uint playerEntityIndex, sFieldEntity* pPlayerEntity, sFiel
                 (pPlayerScriptEntity->m40).vy = 0;
                 (pPlayerScriptEntity->m40).vz = 0;
             }
-            //VALIDATE_FIELD(FCT_Base, 0x800846a8);
-            pCurrentFieldScriptEntity->m4_flags.m_rawFlags |= 0x400000;
         }
+        VALIDATE_FIELD(FCT_Base, 0x800846a8);
+        pCurrentFieldScriptEntity->m4_flags.m_rawFlags |= 0x400000;
     }
 
     //VALIDATE_FIELD(FCT_Base, 0x800846e0);
 
     if (updateEntityEventCode3Var1 != 0) {
         finalState = false;
-        finalCount = finalCount + 1;
+        finalCount++;
         bestDistance = EntityMoveCheck0Var0;
     }
     if (finalState) {
@@ -5029,7 +5057,7 @@ void EntityMoveCheck0(uint playerEntityIndex, sFieldEntity* pPlayerEntity, sFiel
     VALIDATE_FIELD(FCT_MoveCheck, 0x80084854);
 
     if (((pPlayerScriptEntity->m0_fieldScriptFlags.m_rawFlags & 0x10000) == 0) && ((pPlayerScriptEntity->m4_flags.m_rawFlags & 0x200000) == 0)) {
-        EntityMoveCheck1(playerEntityIndex, bestDistance, pPlayerEntity, pPlayerScriptEntity, 0);
+        EntityMoveCheck1(playerEntityIndex, bestDistance, pPlayerEntity, pPlayerScriptEntity, finalCount);
     }
 
     VALIDATE_FIELD(FCT_MoveCheck, 0x800848b8);
