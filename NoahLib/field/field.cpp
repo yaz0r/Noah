@@ -4807,14 +4807,14 @@ int CheckCollisionWithMesh(int actorId, sModelBlock* param_2, int stepX, int ste
                     SVECTOR* vec1 = &pScratchData->m14[3];
 
                     // what triangle of the quad are we in?
-                    if (NormalClip(pScratchData->m0_gteXY[1], pScratchData->m0_gteXY[2], pScratchData->m10) > -1) {
-                        pSVar7 = &pScratchData->m14[0];
-                        vec1 = &pScratchData->m14[1];
-                    }
-                    getTriangleNormalAndAdjustY(*pSVar7, *vec1, pScratchData->m14[2], &pScratchData->m34, outputNormal);
-                    if (pScratchData->m34.vy < pScratchData->mA0_smallestY) {
-                        pScratchData->mA0_smallestY = pScratchData->m34.vy;
-                    }
+if (NormalClip(pScratchData->m0_gteXY[1], pScratchData->m0_gteXY[2], pScratchData->m10) > -1) {
+    pSVar7 = &pScratchData->m14[0];
+    vec1 = &pScratchData->m14[1];
+}
+getTriangleNormalAndAdjustY(*pSVar7, *vec1, pScratchData->m14[2], &pScratchData->m34, outputNormal);
+if (pScratchData->m34.vy < pScratchData->mA0_smallestY) {
+    pScratchData->mA0_smallestY = pScratchData->m34.vy;
+}
                 }
             }
         }
@@ -4864,7 +4864,7 @@ void EntityMoveCheck0(uint playerEntityIndex, sFieldEntity* pPlayerEntity, sFiel
     s32 finalCount = 0;
     s8 playerVar74 = pPlayerScriptEntity->m74_touchedActor;
 
-    for (int actorId=0; actorId < g_totalActors; actorId++)
+    for (int actorId = 0; actorId < g_totalActors; actorId++)
     {
         if (actorId == playerEntityIndex)
             continue;
@@ -4878,43 +4878,7 @@ void EntityMoveCheck0(uint playerEntityIndex, sFieldEntity* pPlayerEntity, sFiel
         //VALIDATE_FIELD(FCT_Base, 0x800842a0);
 
         pCurrentFieldScriptEntity->m4_flags.m_rawFlags &= ~0xC100;
-        if ((pCurrentFieldScriptEntity->m4_flags.m_rawFlags & 0x80) == 0)
-        {
-            if ((entityFlags.m_rawFlags & 0x2000) == 0)
-            {
-                pScratchBuffer->vx = (((pCurrentFieldScriptEntity->m20_position).vx + (pCurrentFieldScriptEntity->m30_stepVector).vx) >> 0x10) - SFPStepAsInts[0];
-                pScratchBuffer->vz = (((pCurrentFieldScriptEntity->m20_position).vz + (pCurrentFieldScriptEntity->m30_stepVector).vz) >> 0x10) - SFPStepAsInts[2];
-                pScratchBuffer->vy = pPlayerScriptEntity->m1E_collisionRadius + pCurrentFieldScriptEntity->m1E_collisionRadius;
-                Square0(&pScratchBuffer[0], &pScratchBuffer[1]);
-                if (pScratchBuffer[1].vx + pScratchBuffer[1].vz >= pScratchBuffer[1].vy) // player is in collision radius
-                {
-                    pCurrentFieldScriptEntity->m4_flags.m_rawFlags &= ~0xC00000;
-                    continue;
-                }
-                
-            }
-            else
-            {
-                if (isPositionInEntityScriptBoundingVolume(SFPStepAsInts[0], SFPStepAsInts[2], pCurrentFieldScriptEntity, 0)) {
-                    pCurrentFieldScriptEntity->m4_flags.m_rawFlags &= ~0xC00000;
-                    continue;
-                }
-            }
-
-            if (pPlayerScriptEntity->m14_currentTriangleFlag & 0x400000U) {
-                logToScreen("HITOFF\n");
-                continue;
-            }
-
-            if ((((pCurrentFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags | playerFlags.m_rawFlags) & 0x80) == 0) && (noUpdatesToPartyMembers == 0)) {
-                testedEntityY = pCurrentFieldScriptEntity->m20_position.vy.getIntegerPart();
-                testedEntityYWithOffset = testedEntityY - pCurrentFieldScriptEntity->m18_boundingVolume.vy;
-            }
-            else {
-                continue;
-            }
-        }
-        else
+        if (pCurrentFieldScriptEntity->m4_flags.m_rawFlags & 0x80)
         {
             VECTOR surfaceNormal;
             if (CheckCollisionWithMesh(actorId, &*actorArray[actorId].m0->m4_pModelBlock, SFPStepAsInts[0], SFPStepAsInts[2], &testedEntityYWithOffset, &surfaceNormal)) {
@@ -4934,6 +4898,45 @@ void EntityMoveCheck0(uint playerEntityIndex, sFieldEntity* pPlayerEntity, sFiel
             (pPlayerScriptEntity->m50_surfaceNormal).vy = surfaceNormal[1];
             (pPlayerScriptEntity->m50_surfaceNormal).vz = surfaceNormal[2];
             pCurrentFieldScriptEntity->m4_flags.m_rawFlags |= 0x4000;
+        }
+        else
+        {
+            if ((entityFlags.m_rawFlags & 0x2000) == 0)
+            {
+                pScratchBuffer->vx = (((pCurrentFieldScriptEntity->m20_position).vx + (pCurrentFieldScriptEntity->m30_stepVector).vx) >> 0x10) - SFPStepAsInts[0];
+                pScratchBuffer->vz = (((pCurrentFieldScriptEntity->m20_position).vz + (pCurrentFieldScriptEntity->m30_stepVector).vz) >> 0x10) - SFPStepAsInts[2];
+                pScratchBuffer->vy = pPlayerScriptEntity->m1E_collisionRadius + pCurrentFieldScriptEntity->m1E_collisionRadius;
+                Square0(&pScratchBuffer[0], &pScratchBuffer[1]);
+                if (pScratchBuffer[1].vx + pScratchBuffer[1].vz >= pScratchBuffer[1].vy) // player is in collision radius
+                {
+                    pCurrentFieldScriptEntity->m4_flags.m_rawFlags &= ~0xC00000;
+                    continue;
+                }
+
+            }
+            else
+            {
+                if (isPositionInEntityScriptBoundingVolume(SFPStepAsInts[0], SFPStepAsInts[2], pCurrentFieldScriptEntity, 0)) {
+                    pCurrentFieldScriptEntity->m4_flags.m_rawFlags &= ~0xC00000;
+                    continue;
+                }
+            }
+
+            if (pPlayerScriptEntity->m14_currentTriangleFlag & 0x400000U) {
+                logToScreen("HITOFF\n");
+                continue;
+            }
+
+            if ((pCurrentFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags | playerFlags.m_rawFlags) & 0x80) {
+                continue;
+            }
+
+            if (!noUpdatesToPartyMembers)
+                continue;
+
+            // We are colliding
+            testedEntityY = pCurrentFieldScriptEntity->m20_position.vy.getIntegerPart();
+            testedEntityYWithOffset = testedEntityY - pCurrentFieldScriptEntity->m18_boundingVolume.vy;
         }
 
         // if we get here, it means we have a collision against another actor
