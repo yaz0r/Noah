@@ -35,15 +35,15 @@ struct sFieldScriptEntityScriptSlot
     s8 m3_scriptIndex = 0;
     union {
         struct {
-            s32 m0 : 16;
-            u32 m16_status : 2;
-            u32 m18 : 4;
-            u32 m22 : 1;
-            u32 m23_walkMode : 2;
-            u32 m25 : 1;
-            u32 m26 : 1;
-            u32 m27 : 2;
-            u32 m28X : 1;
+            s32 _FFFF_numSteps : 16; // < Num steps left to be taken in current direction
+            u32 _30000_status : 2;
+            u32 _3C0000 : 4;
+            u32 _400000 : 1;
+            u32 _C00000_walkMode : 2;
+            u32 _1000000 : 1;
+            u32 _2000000 : 1;
+            u32 _C000000 : 2;
+            u32 _10000000 : 1;
         };
         u32 raw = 0;
     } m4_flags; // bit 18, size 4
@@ -54,14 +54,14 @@ struct sFieldScriptEntity_flags0
 {
     union {
         struct {
-            u32 m0_updateScriptDisabled : 1;
-            u32 m1_unk : 6;
-            u32 m7 : 1;
-            u32 m8 : 3;
-            u32 mx800_isJumping : 1; // 0x800
-            u32 m12_unk : 1; // 0x1000
-            u32 m13_unk : 1; // 0x2000
-            u32 m14_isPlayerControlled : 1; // 0x4000
+            u32 _1_updateScriptDisabled : 1;
+            u32 _7E_unk : 6;
+            u32 _80 : 1;
+            u32 _700 : 3;
+            u32 _800_isJumping : 1; // 0x800
+            u32 _1000 : 1; // 0x1000
+            u32 _2000 : 1; // 0x2000
+            u32 _4000_isPlayerControlled : 1; // 0x4000
         };
         u32 m_rawFlags = 0;
     };

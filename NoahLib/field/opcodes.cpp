@@ -140,13 +140,13 @@ void OP_4()
 {
     for (int i = 0; i < 8; i++)
     {
-        if (pCurrentFieldScriptActor->m8C_scriptSlots[i].m4_flags.m18 == 7)
+        if (pCurrentFieldScriptActor->m8C_scriptSlots[i].m4_flags._3C0000 == 7)
         {
             pCurrentFieldScriptActor->m8C_scriptSlots[i].m0_scriptPC = getScriptEntryPoint(currentFieldActorId, 1);
         }
     }
 
-    pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m18 = 0xF;
+    pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags._3C0000 = 0xF;
     pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m3_scriptIndex = -1;
     g_breakCurrentScript = 1;
 }
@@ -185,7 +185,7 @@ void OP_RETURN()
             //sprintf_screen(s_STACKERR_ACT = % d_Field__8006fd44, currentFieldActorId);
             assert(0);
         }
-        pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m18 = 0xF;
+        pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags._3C0000 = 0xF;
         pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m3_scriptIndex = -1;
         currentScriptFinished = 1;
         g_breakCurrentScript = 1;
@@ -245,12 +245,12 @@ void OP_10Sub(int param_1)
     }
     case 1:
         // reached target?
-        if ((pCurrentFieldScriptActor->m102_numSteps < 1) || (pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0 == 0)) {
+        if ((pCurrentFieldScriptActor->m102_numSteps < 1) || (pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags._FFFF_numSteps == 0)) {
             // go back to previous opcode to retrieve target location
             pCurrentFieldScriptActor->mCC_scriptPC -= 9;
             assert(pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 0] == 0x10);
             assert(pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 1] == 0);
-            if (pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0 != 0) {
+            if (pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags._FFFF_numSteps != 0) {
                 VECTOR currentPosition = pCurrentFieldScriptActor->m20_position;
 
                 (pCurrentFieldScriptActor->m20_position).vx = getVar80(2, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 8]) << 0x10;
@@ -268,7 +268,7 @@ void OP_10Sub(int param_1)
             else {
                 ADVANCE_VM(0xD);
             }
-            pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0 = -1;
+            pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags._FFFF_numSteps = -1;
 
         }
         else
@@ -282,7 +282,7 @@ void OP_10Sub(int param_1)
             pCurrentFieldScriptActor->m30_stepVector.vz = pCurrentFieldScriptActor->mD0_targetPositionOffset[2];
 
             g_breakCurrentScript = 1;
-            pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0--;
+            pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags._FFFF_numSteps--;
         }
 
         pCurrentFieldScriptActor->m102_numSteps--;
@@ -310,7 +310,7 @@ void OP_10Sub(int param_1)
 
 void OP_10()
 {
-    pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0 = -1;
+    pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags._FFFF_numSteps = -1;
     OP_10Sub(0);
 }
 
@@ -466,7 +466,7 @@ void  OP_REMOVE_FROM_CURRENT_PARTY()
             g_playerControlledActor = partyToFieldEntityArrayMapping[0];
             (actorArray[partyToFieldEntityArrayMapping[0]].m4C_scriptEntity)->m0_fieldScriptFlags.m_rawFlags &= ~0x80;
             (actorArray[partyToFieldEntityArrayMapping[0]].m4C_scriptEntity)->m0_fieldScriptFlags.m_rawFlags |= 0x0400;
-            (actorArray[partyToFieldEntityArrayMapping[0]].m4C_scriptEntity)->m0_fieldScriptFlags.m14_isPlayerControlled = 1;
+            (actorArray[partyToFieldEntityArrayMapping[0]].m4C_scriptEntity)->m0_fieldScriptFlags._4000_isPlayerControlled = 1;
         }
     }
     ADVANCE_VM(0x2);
@@ -497,7 +497,7 @@ void OP_ENABLE_VM_FOR_CHARACTER(void)
     iVar1 = readCharacter(1);
     if (iVar1 != 0xff) {
         iVar1 = readCharacter(1);
-        actorArray[iVar1].m4C_scriptEntity->m0_fieldScriptFlags.m0_updateScriptDisabled = 0;
+        actorArray[iVar1].m4C_scriptEntity->m0_fieldScriptFlags._1_updateScriptDisabled = 0;
     }
     ADVANCE_VM(2);
 }
@@ -512,7 +512,7 @@ void OP_DELETE_ENTITY()
     if (iVar1 != 0xff) {
         iVar1 = readCharacter(1);
         psVar2 = actorArray[iVar1].m4C_scriptEntity;
-        psVar2->m0_fieldScriptFlags.m0_updateScriptDisabled = 1;
+        psVar2->m0_fieldScriptFlags._1_updateScriptDisabled = 1;
         psVar2->m4_flags.m_rawFlags = psVar2->m4_flags.m_rawFlags | 0x100000;
         iVar1 = readCharacter(1);
         actorArray[iVar1].m58_flags = actorArray[iVar1].m58_flags | 0x20;
@@ -572,7 +572,7 @@ void OP_GET_ACTOR_FACING_ANGLE()
 
 void OP_STOP(void)
 {
-    pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m18 = 0xF;
+    pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags._3C0000 = 0xF;
     pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m3_scriptIndex = -1;
     currentScriptFinished = 1;
     g_breakCurrentScript = 1;
@@ -664,7 +664,7 @@ int OP_UPDATE_CHARACTER_Sub0(sFieldScriptEntity* param_1)
 
 void OP_UPDATE_CHARACTER()
 {
-    if (!pCurrentFieldScriptActor->m0_fieldScriptFlags.m14_isPlayerControlled) {
+    if (!pCurrentFieldScriptActor->m0_fieldScriptFlags._4000_isPlayerControlled) {
         if (updateCharacterVar0 == 0) {
             pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags = pCurrentFieldScriptActor->m0_fieldScriptFlags.m_rawFlags | 0x1000000;
         }
@@ -711,7 +711,7 @@ void OP_UPDATE_CHARACTER()
                     if ((pCurrentFieldScriptActor->m14_currentTriangleFlag & 0x400000U) == 0) {
                         if (g_menuIdToOpen == 0xff) {
                             if (!OP_UPDATE_CHARACTER_Sub0(pCurrentFieldScriptActor)) {
-                                pCurrentFieldScriptActor->m0_fieldScriptFlags.mx800_isJumping = 1;
+                                pCurrentFieldScriptActor->m0_fieldScriptFlags._800_isJumping = 1;
                                 numFollowStruct2 = partyToFollowStructMapping[0];
                             }
                         }
@@ -728,7 +728,7 @@ void OP_UPDATE_CHARACTER()
             else {
                 if (updateCharacterVar2 == 0) {
                     if ((g_menuIdToOpen == 0xff) && !OP_UPDATE_CHARACTER_Sub0(pCurrentFieldScriptActor)) {
-                        pCurrentFieldScriptActor->m0_fieldScriptFlags.mx800_isJumping = 1;
+                        pCurrentFieldScriptActor->m0_fieldScriptFlags._800_isJumping = 1;
                         numFollowStruct2 = partyToFollowStructMapping[0];
                         pCurrentFieldScriptActor->mE8_currentAnimationId = 0xff;
                         updateCharacterVar2 = updateCharacterVar2ResetValue;
@@ -742,7 +742,7 @@ void OP_UPDATE_CHARACTER()
     }
     else {
         if (!OP_UPDATE_CHARACTER_Sub0(pCurrentFieldScriptActor)) {
-            pCurrentFieldScriptActor->m0_fieldScriptFlags.mx800_isJumping = 1;
+            pCurrentFieldScriptActor->m0_fieldScriptFlags._800_isJumping = 1;
             numFollowStruct2 = partyToFollowStructMapping[0];
         }
     }
@@ -866,7 +866,7 @@ void OP_INIT_ENTITY_PC(void)
     if (iVar4 == -1) {
         resetFieldScriptEntityGraphicEntity(currentFieldActorId, 0, &partyCharacterBuffers[0], 1, 0, 0, 1);
         psVar7 = pCurrentFieldScriptActor;
-        pCurrentFieldScriptActor->m0_fieldScriptFlags.m0_updateScriptDisabled = 1;
+        pCurrentFieldScriptActor->m0_fieldScriptFlags._1_updateScriptDisabled = 1;
         currentScriptFinished = 1;
         g_breakCurrentScript = 1;
         uVar5 = psVar7->m4_flags.m_rawFlags | 0x100000;
@@ -877,7 +877,7 @@ void OP_INIT_ENTITY_PC(void)
             actorCameraTracked = currentFieldActorId;
             psVar7->m0_fieldScriptFlags.m_rawFlags &= ~0x80;
             psVar7->m0_fieldScriptFlags.m_rawFlags |= 0x0400;
-            psVar7->m0_fieldScriptFlags.m14_isPlayerControlled = 1;
+            psVar7->m0_fieldScriptFlags._4000_isPlayerControlled = 1;
         }
         iVar2 = currentFieldActorId;
         partyToFieldEntityArrayMapping[iVar4] = currentFieldActorId;
@@ -1195,18 +1195,18 @@ void OP_SET_ENCOUNTER_DATA()
 
 void OP_44()
 {
-    if (pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m23_walkMode == 0)
+    if (pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags._C00000_walkMode == 0)
     {
-        pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m23_walkMode = 3;
+        pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags._C00000_walkMode = 3;
 
         pCurrentFieldScriptActor->mD0_targetPositionOffset[0] = pCurrentFieldScriptActor->m20_position.vx.getIntegerPart();
         pCurrentFieldScriptActor->mD0_targetPositionOffset[1] = pCurrentFieldScriptActor->m20_position.vy.getIntegerPart();
         pCurrentFieldScriptActor->mD0_targetPositionOffset[2] = pCurrentFieldScriptActor->m20_position.vz.getIntegerPart();
     }
 
-    if (pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0 == -1)
+    if (pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags._FFFF_numSteps == -1)
     {
-        pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0 = getImmediateOrVariableUnsigned(3);
+        pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags._FFFF_numSteps = getImmediateOrVariableUnsigned(3);
     }
 
     if (spriteWalkToPositionOrActor(getImmediateOrVariableUnsigned(3)) == 0)
@@ -1327,8 +1327,8 @@ void OP_WALK_AND_CHANGE_FIELD()
 
 void  OP_SPRITE_WALK_TO_POSITION_AND_WAIT()
 {
-    pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m23_walkMode = 0;
-    pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0 = -1;
+    pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags._C00000_walkMode = 0;
+    pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags._FFFF_numSteps = -1;
     if (spriteWalkToPositionOrActor(-1) == 0) {
         ADVANCE_VM(0x6);
     }
@@ -1336,9 +1336,9 @@ void  OP_SPRITE_WALK_TO_POSITION_AND_WAIT()
 
 void OP_4B()
 {
-    pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m23_walkMode = 0;
-    if (pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0 == -1) {
-        pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0 = getImmediateOrVariableUnsigned(6);
+    pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags._C00000_walkMode = 0;
+    if (pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags._FFFF_numSteps == -1) {
+        pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags._FFFF_numSteps = getImmediateOrVariableUnsigned(6);
     }
     if (spriteWalkToPositionOrActor(getImmediateOrVariableUnsigned(6)) == 0) {
         ADVANCE_VM(0x8);
@@ -1347,15 +1347,15 @@ void OP_4B()
 
 void OP_4C()
 {
-    pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0 = -1;
+    pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags._FFFF_numSteps = -1;
     MissingCode();
     ADVANCE_VM(0x8);
 }
 
 void OP_52(void)
 {
-    pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m23_walkMode = 2;
-    pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0 = -1;
+    pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags._C00000_walkMode = 2;
+    pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags._FFFF_numSteps = -1;
     if (spriteWalkToPositionOrActor(0xffff) == 0) {
         ADVANCE_VM(0x2);
     }
@@ -1364,10 +1364,10 @@ void OP_52(void)
 
 void OP_FOLLOW_CHARACTER(void)
 {
-    pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m23_walkMode = 2;
-    if (pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0 == -1)
+    pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags._C00000_walkMode = 2;
+    if (pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags._FFFF_numSteps == -1)
     {
-        pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m0 = getImmediateOrVariableUnsigned(2);
+        pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags._FFFF_numSteps = getImmediateOrVariableUnsigned(2);
     }
     if (spriteWalkToPositionOrActor(getImmediateOrVariableUnsigned(2)) == 0)
     {
@@ -1838,12 +1838,12 @@ void OP_92()
     for (int i=0; i<8; i++)
     {
         pCurrentFieldScriptActor->m8C_scriptSlots[i].m2_delay = 0;
-        pCurrentFieldScriptActor->m8C_scriptSlots[i].m4_flags.m0 = -1;
+        pCurrentFieldScriptActor->m8C_scriptSlots[i].m4_flags._FFFF_numSteps = -1;
         pCurrentFieldScriptActor->m8C_scriptSlots[i].m0_scriptPC = -1;
-        pCurrentFieldScriptActor->m8C_scriptSlots[i].m4_flags.m16_status = 0;
-        pCurrentFieldScriptActor->m8C_scriptSlots[i].m4_flags.m18 = 0xF;
-        pCurrentFieldScriptActor->m8C_scriptSlots[i].m4_flags.m26 = 0;
-        pCurrentFieldScriptActor->m8C_scriptSlots[i].m4_flags.m27 = 0;
+        pCurrentFieldScriptActor->m8C_scriptSlots[i].m4_flags._30000_status = 0;
+        pCurrentFieldScriptActor->m8C_scriptSlots[i].m4_flags._3C0000 = 0xF;
+        pCurrentFieldScriptActor->m8C_scriptSlots[i].m4_flags._2000000 = 0;
+        pCurrentFieldScriptActor->m8C_scriptSlots[i].m4_flags._C000000 = 0;
     }
 
     pCurrentFieldScriptActor->mCE_currentScriptSlot = 0;
@@ -1900,7 +1900,7 @@ void OP_WAIT_DIALOG()
                 uVar2 = pCurrentFieldScriptActor->m84_dialogWindowFlags & 0xffff;
             }
             if ((uVar2 & 1) == 0) {
-                if ((pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m18) != 7) {
+                if ((pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags._3C0000) != 7) {
                     OP_STOP();
                 }
                 gDialogWindows[windowIndex].m414 = 0;
@@ -3496,7 +3496,7 @@ void OPX_21()
     if (iVar2 == -1) {
         resetFieldScriptEntityGraphicEntity(currentFieldActorId, 0, &partyCharacterBuffers[0], 1, 0, 0, 1);
         psVar1 = pCurrentFieldScriptActor;
-        pCurrentFieldScriptActor->m0_fieldScriptFlags.m0_updateScriptDisabled = 1;
+        pCurrentFieldScriptActor->m0_fieldScriptFlags._1_updateScriptDisabled = 1;
         currentScriptFinished = 1;
         g_breakCurrentScript = 1;
         psVar1->m4_flags.m_rawFlags = psVar1->m4_flags.m_rawFlags | 0x100000;
@@ -4084,7 +4084,7 @@ void OP_SET_CURRENT_ACTOR_FLAGS()
     uVar3 = getImmediateOrVariableUnsigned(1);
     psVar2 = pCurrentFieldScriptActor;
     sFieldScriptEntity_flags0 newFlags;
-    newFlags.m7 = uVar3 & 1;
+    newFlags._80 = uVar3 & 1;
     if ((uVar3 & 4) != 0) {
         newFlags.m_rawFlags |= 0x20;
     }
@@ -4135,7 +4135,7 @@ void OP_RESET_CHARACTER()
         psVar3->m40.vx = 0;
         psVar3->m40.vy = 0;
         psVar3->m40.vz = 0;
-        psVar3->m0_fieldScriptFlags.m0_updateScriptDisabled = 1;
+        psVar3->m0_fieldScriptFlags._1_updateScriptDisabled = 1;
         psVar3->m104_rotation = psVar3->m106_currentRotation = psVar3->m104_rotation | 0x8000;
 
         int dialogWindow;
@@ -4480,7 +4480,7 @@ void OP_RUN_ENTITY_SCRIPT_ASYNC()
                 int foundSlot = -1;
                 for (int i = 0; i < 8; i++)
                 {
-                    if ((pEntity->m8C_scriptSlots[i].m4_flags.m18 == 0xf) && !pEntity->m8C_scriptSlots[i].m4_flags.m22)
+                    if ((pEntity->m8C_scriptSlots[i].m4_flags._3C0000 == 0xf) && !pEntity->m8C_scriptSlots[i].m4_flags._400000)
                     {
                         foundSlot = i;
                         break;
@@ -4491,18 +4491,19 @@ void OP_RUN_ENTITY_SCRIPT_ASYNC()
                     return;
                 }
 
-                u8 param = pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 2] & 0x1f;
+                u8 param = pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 2];
                 u8 scriptId = param & 0x1F;
+                u8 mode = param >> 5;
 
                 pEntity->m8C_scriptSlots[foundSlot].m0_scriptPC = getScriptEntryPoint(entityId, scriptId);
-                pEntity->m8C_scriptSlots[foundSlot].m4_flags.m18 = param >> 5;
+                pEntity->m8C_scriptSlots[foundSlot].m4_flags._3C0000 = mode;
                 pEntity->m8C_scriptSlots[foundSlot].m3_scriptIndex = scriptId;
             }
         }
         else
         {
-            pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m16_status = 0;
-            pEntity->m8C_scriptSlots[pEntity->mCF_scriptSlotWaitedOn].m4_flags.m22 = 0;
+            pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags._30000_status = 0;
+            pEntity->m8C_scriptSlots[pEntity->mCF_scriptSlotWaitedOn].m4_flags._400000 = 0;
         }
     }
     ADVANCE_VM(0x3);
@@ -4516,7 +4517,7 @@ void OP_RUN_ENTITY_SCRIPT_BLOCKING()
         sFieldScriptEntity* pTargetEntity = actorArray[targetEntityId].m4C_scriptEntity;
         if ((pTargetEntity->m4_flags.m_rawFlags & 0x100000) == 0)
         {
-            int scriptStatus = pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m16_status;
+            int scriptStatus = pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags._30000_status;
             switch (scriptStatus)
             {
             case 0: //init
@@ -4526,7 +4527,7 @@ void OP_RUN_ENTITY_SCRIPT_BLOCKING()
                     int foundSlot = -1;
                     for (int i = 0; i < 8; i++)
                     {
-                        if ((pTargetEntity->m8C_scriptSlots[i].m4_flags.m18 == 0xf) && !pTargetEntity->m8C_scriptSlots[i].m4_flags.m22)
+                        if ((pTargetEntity->m8C_scriptSlots[i].m4_flags._3C0000 == 0xf) && !pTargetEntity->m8C_scriptSlots[i].m4_flags._400000)
                         {
                             foundSlot = i;
                             break;
@@ -4537,14 +4538,15 @@ void OP_RUN_ENTITY_SCRIPT_BLOCKING()
                         return;
                     }
 
-                    u8 param = pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 2] & 0x1f;
+                    u8 param = pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 2];
                     u8 scriptId = param & 0x1F;
+                    u8 mode = param >> 5;
 
                     pTargetEntity->m8C_scriptSlots[foundSlot].m0_scriptPC = getScriptEntryPoint(targetEntityId, scriptId);
-                    pTargetEntity->m8C_scriptSlots[foundSlot].m4_flags.m18 = param >> 5;
-                    pTargetEntity->m8C_scriptSlots[pCurrentFieldScriptActor->mCF_scriptSlotWaitedOn].m4_flags.m22 = 1;
+                    pTargetEntity->m8C_scriptSlots[foundSlot].m4_flags._3C0000 = mode;
+                    pTargetEntity->m8C_scriptSlots[pCurrentFieldScriptActor->mCF_scriptSlotWaitedOn].m4_flags._400000 = 1;
                     pCurrentFieldScriptActor->mCF_scriptSlotWaitedOn = foundSlot;
-                    pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m16_status = 1;
+                    pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags._30000_status = 1;
                     pTargetEntity->m8C_scriptSlots[foundSlot].m3_scriptIndex = scriptId;
                     return;
                 }
@@ -4552,20 +4554,20 @@ void OP_RUN_ENTITY_SCRIPT_BLOCKING()
                 pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
                 return;
             case 1: // waiting for script completion
-                if ((pTargetEntity->mCE_currentScriptSlot == pCurrentFieldScriptActor->mCF_scriptSlotWaitedOn) || (pTargetEntity->m8C_scriptSlots[pCurrentFieldScriptActor->mCF_scriptSlotWaitedOn].m4_flags.m18 == 0xf)) {
-                    pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m16_status = 2;
+                if ((pTargetEntity->mCE_currentScriptSlot == pCurrentFieldScriptActor->mCF_scriptSlotWaitedOn) || (pTargetEntity->m8C_scriptSlots[pCurrentFieldScriptActor->mCF_scriptSlotWaitedOn].m4_flags._3C0000 == 0xf)) {
+                    pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags._30000_status = 2;
                     return;
                 }
                 g_breakCurrentScript = 1;
                 return;
             case 2: // cleanup
-                if (pTargetEntity->m8C_scriptSlots[pCurrentFieldScriptActor->mCF_scriptSlotWaitedOn].m4_flags.m18 != 0xF)
+                if (pTargetEntity->m8C_scriptSlots[pCurrentFieldScriptActor->mCF_scriptSlotWaitedOn].m4_flags._3C0000 != 0xF)
                 {
                     g_breakCurrentScript = 1;
                     return;
                 }
-                pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m16_status = 0;
-                pTargetEntity->m8C_scriptSlots[pCurrentFieldScriptActor->mCF_scriptSlotWaitedOn].m4_flags.m22 = 0;
+                pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags._30000_status = 0;
+                pTargetEntity->m8C_scriptSlots[pCurrentFieldScriptActor->mCF_scriptSlotWaitedOn].m4_flags._400000 = 0;
                 break;
             default:
                 assert(0);
@@ -4574,8 +4576,8 @@ void OP_RUN_ENTITY_SCRIPT_BLOCKING()
         }
         else
         {
-            pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m16_status = 0;
-            pTargetEntity->m8C_scriptSlots[pTargetEntity->mCF_scriptSlotWaitedOn].m4_flags.m22 = 0;
+            pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags._30000_status = 0;
+            pTargetEntity->m8C_scriptSlots[pTargetEntity->mCF_scriptSlotWaitedOn].m4_flags._400000 = 0;
         }
     }
     ADVANCE_VM(0x3);
@@ -4591,22 +4593,22 @@ void OP_RUN_ENTITY_SCRIPT_UNKMODE()
 
         if ((pEntity->m4_flags.m_rawFlags & 0x100000) == 0)
         {
-            int index = pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m16_status;
+            int index = pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags._30000_status;
             if (index)
             {
                 if (index != 1)
                 {
                     return;
                 }
-                if ((pEntity->mCE_currentScriptSlot != pCurrentFieldScriptActor->mCF_scriptSlotWaitedOn) && (pEntity->m8C_scriptSlots[pCurrentFieldScriptActor->mCF_scriptSlotWaitedOn].m4_flags.m18 != 0xf))
+                if ((pEntity->mCE_currentScriptSlot != pCurrentFieldScriptActor->mCF_scriptSlotWaitedOn) && (pEntity->m8C_scriptSlots[pCurrentFieldScriptActor->mCF_scriptSlotWaitedOn].m4_flags._3C0000 != 0xf))
                 {
                     g_breakCurrentScript = 1;
                     return;
                 }
 
                 pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 3;
-                pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m16_status = 0;
-                pEntity->m8C_scriptSlots[pCurrentFieldScriptActor->mCF_scriptSlotWaitedOn].m4_flags.m22 = 0;
+                pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags._30000_status = 0;
+                pEntity->m8C_scriptSlots[pCurrentFieldScriptActor->mCF_scriptSlotWaitedOn].m4_flags._400000 = 0;
                 return;
             }
 
@@ -4616,7 +4618,7 @@ void OP_RUN_ENTITY_SCRIPT_UNKMODE()
                 int foundSlot = -1;
                 for (int i = 0; i < 8; i++)
                 {
-                    if ((pEntity->m8C_scriptSlots[i].m4_flags.m18 == 0xf) && !pEntity->m8C_scriptSlots[i].m4_flags.m22)
+                    if ((pEntity->m8C_scriptSlots[i].m4_flags._3C0000 == 0xf) && !pEntity->m8C_scriptSlots[i].m4_flags._400000)
                     {
                         foundSlot = i;
                         break;
@@ -4629,20 +4631,21 @@ void OP_RUN_ENTITY_SCRIPT_UNKMODE()
 
                 u8 param = pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 2];
                 u8 scriptId = param & 0x1F;
+                u8 scriptMode = param >> 5;
 
                 pEntity->m8C_scriptSlots[foundSlot].m0_scriptPC = getScriptEntryPoint(entityId, scriptId);
-                pEntity->m8C_scriptSlots[foundSlot].m4_flags.m18 = param >> 5;
-                pEntity->m8C_scriptSlots[pCurrentFieldScriptActor->mCF_scriptSlotWaitedOn].m4_flags.m22 = 1;
+                pEntity->m8C_scriptSlots[foundSlot].m4_flags._3C0000 = scriptMode;
+                pEntity->m8C_scriptSlots[pCurrentFieldScriptActor->mCF_scriptSlotWaitedOn].m4_flags._400000 = 1;
                 pEntity->m8C_scriptSlots[foundSlot].m3_scriptIndex = scriptId;
                 pCurrentFieldScriptActor->mCF_scriptSlotWaitedOn = foundSlot;
-                pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m16_status = 1;
+                pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags._30000_status = 1;
                 return;
             }
         }
         else
         {
-            pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags.m16_status = 0;
-            pEntity->m8C_scriptSlots[pEntity->mCF_scriptSlotWaitedOn].m4_flags.m22 = 0;
+            pCurrentFieldScriptActor->m8C_scriptSlots[pCurrentFieldScriptActor->mCE_currentScriptSlot].m4_flags._30000_status = 0;
+            pEntity->m8C_scriptSlots[pEntity->mCF_scriptSlotWaitedOn].m4_flags._400000 = 0;
         }
     }
     ADVANCE_VM(0x3);

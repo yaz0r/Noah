@@ -207,7 +207,7 @@ void validateField_init() {
     enableFieldValidationContext(FCT_Base);
     enableFieldValidationContext(FCT_Init);
     //enableFieldValidationContext(FCT_Script);
-    //enableFieldValidationContext(FCT_MoveCheck);
+    enableFieldValidationContext(FCT_MoveCheck);
     //enableFieldValidationContext(FCT_Rendering);
 
     bootField_intercept.enable();
@@ -243,8 +243,8 @@ void validateField_shutdown() {
 
 void validateField() {
     validateRandomSeed();
-    validateFieldVars();
     validateFieldEntities();
+    validateFieldVars();
     validateWalkMeshBundle();
     assert(fieldTransitionInProgress == g_gdbConnection->readU32(0x800afd04));
 }
