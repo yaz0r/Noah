@@ -4764,14 +4764,14 @@ int CheckCollisionWithMesh(int actorId, sModelBlock* param_2, int stepX, int ste
                     SVECTOR* vec1 = &pScratchData->m14[3];
 
                     // what triangle of the quad are we in?
-if (NormalClip(pScratchData->m0_gteXY[1], pScratchData->m0_gteXY[2], pScratchData->m10) > -1) {
-    pSVar7 = &pScratchData->m14[0];
-    vec1 = &pScratchData->m14[1];
-}
-getTriangleNormalAndAdjustY(*pSVar7, *vec1, pScratchData->m14[2], &pScratchData->m34, outputNormal);
-if (pScratchData->m34.vy < pScratchData->mA0_smallestY) {
-    pScratchData->mA0_smallestY = pScratchData->m34.vy;
-}
+                    if (NormalClip(pScratchData->m0_gteXY[1], pScratchData->m0_gteXY[2], pScratchData->m10) > -1) {
+                        pSVar7 = &pScratchData->m14[0];
+                        vec1 = &pScratchData->m14[1];
+                    }
+                    getTriangleNormalAndAdjustY(*pSVar7, *vec1, pScratchData->m14[2], &pScratchData->m34, outputNormal);
+                    if (pScratchData->m34.vy < pScratchData->mA0_smallestY) {
+                        pScratchData->mA0_smallestY = pScratchData->m34.vy;
+                    }
                 }
             }
         }
@@ -4821,7 +4821,7 @@ void EntityMoveCheck0(uint playerEntityIndex, sFieldEntity* pPlayerEntity, sFiel
     s32 finalCount = 0;
     s8 playerVar74 = pPlayerScriptEntity->m74_touchedActor;
 
-    for (int actorId = 0; actorId < g_totalActors; actorId++)
+    for (int actorId=0; actorId < g_totalActors; actorId++)
     {
         if (actorId == playerEntityIndex)
             continue;
@@ -4888,7 +4888,7 @@ void EntityMoveCheck0(uint playerEntityIndex, sFieldEntity* pPlayerEntity, sFiel
                 continue;
             }
 
-            if (!noUpdatesToPartyMembers)
+            if (noUpdatesToPartyMembers)
                 continue;
 
             // We are colliding
