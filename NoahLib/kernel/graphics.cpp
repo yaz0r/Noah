@@ -168,16 +168,90 @@ bool isGameInFocus() {
     bool gameHasFocus = ImGui::IsWindowFocused();
     ImGui::End();
 
+    extern bool bIsDebuggerViewEnabled;
+    if (!bIsDebuggerViewEnabled) {
+        gameHasFocus = true;
+    }
+
     return gameHasFocus;
 }
 
+void renderTexturedQuadBgfx(bgfx::ViewId outputView, bgfx::TextureHandle sourceTexture)
+{
+    if (!bgfx::isValid(sourceTexture))
+    {
+        return;
+    }
+    static bgfx::ProgramHandle program = BGFX_INVALID_HANDLE;
+    static bgfx::VertexBufferHandle quad_vertexbuffer = BGFX_INVALID_HANDLE;
+    static bgfx::IndexBufferHandle quad_indexbuffer = BGFX_INVALID_HANDLE;
+    static bgfx::UniformHandle inputTexture = BGFX_INVALID_HANDLE;
+    static bgfx::VertexLayout ms_layout;
+
+    static bool initialized = false;
+    if (!initialized)
+    {
+        program = loadBgfxProgram("blit_vs", "blit_ps");
+
+        ms_layout
+            .begin()
+            .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
+            .end();
+
+        static const float g_quad_vertex_buffer_data[] = {
+            -1.0f, -1.0f, 0.0f,
+            1.0f, -1.0f, 0.0f,
+            -1.0f,  1.0f, 0.0f,
+            -1.0f,  1.0f, 0.0f,
+            1.0f, -1.0f, 0.0f,
+            1.0f,  1.0f, 0.0f,
+        };
+
+        static const short int g_quad_index_buffer_data[] = {
+            0,1,2,3,4,5
+        };
+
+        quad_vertexbuffer = bgfx::createVertexBuffer(bgfx::copy(g_quad_vertex_buffer_data, sizeof(g_quad_vertex_buffer_data)), ms_layout);
+        quad_indexbuffer = bgfx::createIndexBuffer(bgfx::copy(g_quad_index_buffer_data, sizeof(g_quad_index_buffer_data)));
+
+        inputTexture = bgfx::createUniform("s_texture", bgfx::UniformType::Sampler);
+
+        initialized = true;
+    }
+
+    bgfx::setState(0
+        | BGFX_STATE_WRITE_RGB
+        | BGFX_STATE_WRITE_A
+        | BGFX_STATE_DEPTH_TEST_ALWAYS
+    );
+
+    extern int outputResolution[2];
+
+    bgfx::setViewRect(outputView, 0, 0, outputResolution[0], outputResolution[1]);
+    bgfx::setViewClear(outputView, BGFX_CLEAR_COLOR);
+
+    bgfx::setTexture(0, inputTexture, sourceTexture);
+
+    bgfx::setVertexBuffer(0, quad_vertexbuffer);
+    bgfx::setIndexBuffer(quad_indexbuffer);
+    bgfx::submit(outputView, program);
+}
+
+bool bIsDebuggerViewEnabled = false;
+
 void drawPSXFB()
 {
-	if (ImGui::Begin("PSX Output"))
-	{
-		ImGui::Image(PSXOutput_Texture, ImVec2(PSXRenderResolution[0], PSXRenderResolution[1]));
-	}
-	ImGui::End();
+    if (bIsDebuggerViewEnabled)
+    {
+        if (ImGui::Begin("PSX Output"))
+        {
+            ImGui::Image(PSXOutput_Texture, ImVec2(PSXRenderResolution[0], PSXRenderResolution[1]));
+        }
+        ImGui::End();
+    }
+    else {
+        renderTexturedQuadBgfx(0, PSXOutput_Texture);
+    }
 }
 
 void DR_MODE::execute()

@@ -442,26 +442,33 @@ struct OcornutImguiContext
 
 	void endFrame()
 	{
-    		ImGui::Render();
-		ImGui::UpdatePlatformWindows();
-		render(ImGui::GetDrawData());
+        extern bool bIsDebuggerViewEnabled;
 
-        ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();
-        for (int i = 1; i < platform_io.Viewports.Size; i++)
-        {
-            ImGuiViewport* viewport = platform_io.Viewports[i];
-            if (viewport->Flags & ImGuiViewportFlags_IsMinimized)
-                continue;
-            //if (platform_io.Platform_RenderWindow) platform_io.Platform_RenderWindow(viewport, platform_render_arg);
-            //if (platform_io.Renderer_RenderWindow) platform_io.Renderer_RenderWindow(viewport, renderer_render_arg);
-        }
-        for (int i = 1; i < platform_io.Viewports.Size; i++)
-        {
-            ImGuiViewport* viewport = platform_io.Viewports[i];
-            if (viewport->Flags & ImGuiViewportFlags_IsMinimized)
-                continue;
-            //if (platform_io.Platform_SwapBuffers) platform_io.Platform_SwapBuffers(viewport, platform_render_arg);
-            //if (platform_io.Renderer_SwapBuffers) platform_io.Renderer_SwapBuffers(viewport, renderer_render_arg);
+
+    	ImGui::Render();
+		ImGui::UpdatePlatformWindows();
+
+        if (bIsDebuggerViewEnabled) {
+            render(ImGui::GetDrawData());
+
+
+            ImGuiPlatformIO& platform_io = ImGui::GetPlatformIO();
+            for (int i = 1; i < platform_io.Viewports.Size; i++)
+            {
+                ImGuiViewport* viewport = platform_io.Viewports[i];
+                if (viewport->Flags & ImGuiViewportFlags_IsMinimized)
+                    continue;
+                //if (platform_io.Platform_RenderWindow) platform_io.Platform_RenderWindow(viewport, platform_render_arg);
+                //if (platform_io.Renderer_RenderWindow) platform_io.Renderer_RenderWindow(viewport, renderer_render_arg);
+            }
+            for (int i = 1; i < platform_io.Viewports.Size; i++)
+            {
+                ImGuiViewport* viewport = platform_io.Viewports[i];
+                if (viewport->Flags & ImGuiViewportFlags_IsMinimized)
+                    continue;
+                //if (platform_io.Platform_SwapBuffers) platform_io.Platform_SwapBuffers(viewport, platform_render_arg);
+                //if (platform_io.Renderer_SwapBuffers) platform_io.Renderer_SwapBuffers(viewport, renderer_render_arg);
+            }
         }
 
 	}

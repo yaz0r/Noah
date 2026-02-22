@@ -91,6 +91,7 @@ set(SOURCES
 addShaderProgram(vertexColor_vs vertexColor_ps vertexColor.varying.def)
 addShaderProgram(model3d_vs model3d_ps model3d.varying.def)
 addShaderProgram(PSXGeneric_vs PSXGeneric_ps PSXGeneric.varying.def)
+addShaderProgram(blit_vs blit_ps blit.varying.def)
 
 assign_source_group(${SOURCES})
 

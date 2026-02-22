@@ -8,6 +8,8 @@
 #include "shaders/generated/spirv/PSXGeneric_vs.sc.bin.h"
 #include "shaders/generated/spirv/vertexColor_ps.sc.bin.h"
 #include "shaders/generated/spirv/vertexColor_vs.sc.bin.h"
+#include "shaders/generated/spirv/blit_ps.sc.bin.h"
+#include "shaders/generated/spirv/blit_vs.sc.bin.h"
 #endif
 
 #if BGFX_PLATFORM_SUPPORTS_METAL
@@ -17,6 +19,8 @@
 #include "shaders/generated/metal/PSXGeneric_vs.sc.bin.h"
 #include "shaders/generated/metal/vertexColor_ps.sc.bin.h"
 #include "shaders/generated/metal/vertexColor_vs.sc.bin.h"
+#include "shaders/generated/metal/blit_ps.sc.bin.h"
+#include "shaders/generated/metal/blit_vs.sc.bin.h"
 #endif
 
 #if BGFX_PLATFORM_SUPPORTS_GLSL
@@ -26,6 +30,8 @@
 #include "shaders/generated/glsl/PSXGeneric_vs.sc.bin.h"
 #include "shaders/generated/glsl/vertexColor_ps.sc.bin.h"
 #include "shaders/generated/glsl/vertexColor_vs.sc.bin.h"
+#include "shaders/generated/glsl/blit_ps.sc.bin.h"
+#include "shaders/generated/glsl/blit_vs.sc.bin.h"
 #endif
 
 #if BGFX_PLATFORM_SUPPORTS_DXBC
@@ -35,6 +41,8 @@
 #include "shaders/generated/dx11/PSXGeneric_vs.sc.bin.h"
 #include "shaders/generated/dx11/vertexColor_ps.sc.bin.h"
 #include "shaders/generated/dx11/vertexColor_vs.sc.bin.h"
+#include "shaders/generated/dx11/blit_ps.sc.bin.h"
+#include "shaders/generated/dx11/blit_vs.sc.bin.h"
 #endif
 
 static const bgfx::EmbeddedShader s_embeddedShaders[] =
@@ -45,6 +53,8 @@ static const bgfx::EmbeddedShader s_embeddedShaders[] =
     BGFX_EMBEDDED_SHADER(PSXGeneric_vs),
     BGFX_EMBEDDED_SHADER(vertexColor_ps),
     BGFX_EMBEDDED_SHADER(vertexColor_vs),
+    BGFX_EMBEDDED_SHADER(blit_ps),
+    BGFX_EMBEDDED_SHADER(blit_vs),
 
     BGFX_EMBEDDED_SHADER_END()
 };

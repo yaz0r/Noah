@@ -1030,7 +1030,7 @@ void initExtendedOpcodeTable()
 		.end();
 
 	m_extendedOpcode[0xE]
-		.setName("SET_MUSIC_PARAMS")
+		.setName("FADE_MUSIC")
 		.addArgumentU16OrVar()
 		.addArgumentU16OrVar()
 		.end();

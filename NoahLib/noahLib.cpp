@@ -23,6 +23,8 @@
 #include "psx/libetc.h"
 #include "psx/libgpu.h"
 
+extern bool bIsDebuggerViewEnabled;
+
 ImLogger Noah_Logger[eLogCategories::log_max];
 
 void initMemoryCardsAndSpu(u32);
@@ -269,16 +271,17 @@ bool noahFrame_end()
     }
     ImGui::End();
 
+    if (bIsDebuggerViewEnabled) {
+        c_filesystemExplorer::frame();
 
-    c_filesystemExplorer::frame();
+        fieldInspector_frame();
 
-    fieldInspector_frame();
+        fieldViewDebug_step();
 
-    fieldViewDebug_step();
+        battleDebugView_frame();
 
-    battleDebugView_frame();
-
-    vramDebug_frame();
+        vramDebug_frame();
+    }
 
     drawPSXFB();
 

@@ -119,6 +119,10 @@ void checkForRandomEncounter()
             }
         }
 
+        extern bool g_debugEncounterTriggerDisabled;
+        if(g_debugEncounterTriggerDisabled)
+            bShouldTriggerEncounter = false;
+
         if (bShouldTriggerEncounter) {
             //SHORT_Field__800b2290 = SHORT_ARRAY_Field__800b2270[iVar6];
             //battleInitVar2 = selectedEncounter;

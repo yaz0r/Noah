@@ -59,6 +59,11 @@ void initOpcodes()
     fieldScriptOpcodes[0x3B] = OP_SET_VARBIT_FALSE;
     fieldScriptOpcodes[0x3C] = OP_SET_VAR_INC;
     fieldScriptOpcodes[0x3D] = OP_SET_VAR_DEC;
+    fieldScriptOpcodes[0x3E] = OP_SET_VAR_AND;
+    fieldScriptOpcodes[0x3F] = OP_SET_VAR_OR;
+    fieldScriptOpcodes[0x40] = OP_SET_VAR_XOR;
+    fieldScriptOpcodes[0x41] = OP_SET_VAR_SHIFTLEFT;
+    fieldScriptOpcodes[0x42] = OP_SET_VAR_SHIFTRIGHT;
     fieldScriptOpcodes[0x43] = OP_SET_VAR_RANDOM;
     fieldScriptOpcodes[0x44] = OP_44;
     fieldScriptOpcodes[0x46] = OP_46;
@@ -193,7 +198,7 @@ void initOpcodes()
     fieldScriptOpcodes_EX[0x0A] = OPX_SET_FLAG_BIT_FIELD;
     fieldScriptOpcodes_EX[0x0C] = OPX_0C;
     fieldScriptOpcodes_EX[0x0D] = OP_SET_DIALOG_PORTRAIT;
-    fieldScriptOpcodes_EX[0x0E] = OP_SET_MUSIC_PARAMS;
+    fieldScriptOpcodes_EX[0x0E] = OP_FADE_MUSIC;
     fieldScriptOpcodes_EX[0x10] = OPX_SET_TEMPO;
     fieldScriptOpcodes_EX[0x13] = OPX_13;
     fieldScriptOpcodes_EX[0x15] = OPX_15;

@@ -24,6 +24,8 @@
 
 #include "kernel/audio/soundInstance.h"
 
+extern sSoundInstance* pMusic;
+
 s32 particleCreationSlot = 0;
 u16 g_menuOpenArgFromScript = 0;
 
@@ -2880,7 +2882,7 @@ void OPX_84()
         battleTransitionEffect = fieldBattleTransitionEffect;
         requestedBattleConfig = getImmediateOrVariableUnsigned(1);
         battleInitVar1 = 0;
-        playMusicAuthorized = 0;
+        playMusicAuthorized = 0;// this actually triggers loading the battle module
         fieldExecuteVar2 = 0;
         MissingCode();
         s16 nextField = getImmediateOrVariableUnsigned(5);
@@ -4035,6 +4037,41 @@ void OP_SET_VAR_DEC(void)
     return;
 }
 
+void OP_SET_VAR_AND(void)
+{
+    setVar(readU16FromScript(1), getVariable(readU16FromScript(1)) & getVar40(3, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 5]));
+    ADVANCE_VM(0x6);
+    return;
+}
+
+void OP_SET_VAR_OR(void)
+{
+    setVar(readU16FromScript(1), getVariable(readU16FromScript(1)) | getVar40(3, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 5]));
+    ADVANCE_VM(0x6);
+    return;
+}
+
+void OP_SET_VAR_XOR(void)
+{
+    setVar(readU16FromScript(1), getVariable(readU16FromScript(1)) ^ getVar40(3, pCurrentFieldScriptFile[pCurrentFieldScriptActor->mCC_scriptPC + 5]));
+    ADVANCE_VM(0x6);
+    return;
+}
+
+void OP_SET_VAR_SHIFTLEFT(void)
+{
+    setVar(readU16FromScript(1), getVariable(readU16FromScript(1)) << (getImmediateOrVariableUnsigned(3) & 0x1F));
+    ADVANCE_VM(0x5);
+    return;
+}
+
+void OP_SET_VAR_SHIFTRIGHT(void)
+{
+    setVar(readU16FromScript(1), getVariable(readU16FromScript(1)) >> (getImmediateOrVariableUnsigned(3) & 0x1F));
+    ADVANCE_VM(0x5);
+    return;
+}
+
 void OP_SET_VAR_RANDOM()
 {
     setVar(readU16FromScript(1), xenoRand());
@@ -4797,10 +4834,29 @@ void OPX_0C()
     pCurrentFieldScriptActor->mCC_scriptPC = pCurrentFieldScriptActor->mCC_scriptPC + 0xd;
 }
 
-void OP_SET_MUSIC_PARAMS()
+void OP_FADE_MUSIC()
 {
-    MissingCode();
-    ADVANCE_VM(0x5);
+    ushort uVar1;
+    int iVar2;
+    int iVar3;
+    if (updateMusicState2Var3 == 0) {
+        if (currentlyPlayingMusic == 0xff) {
+            uVar1 = pCurrentFieldScriptActor->mCC_scriptPC + 5;
+        }
+        else if (fieldExecuteVar1 == 0) {
+            uVar1 = pCurrentFieldScriptActor->mCC_scriptPC + 5;
+        }
+        else {
+            uVar1 = pCurrentFieldScriptActor->mCC_scriptPC - 1;
+        }
+    }
+    else {
+        iVar2 = getImmediateOrVariableUnsigned(1);
+        iVar3 = getImmediateOrVariableUnsigned(3);
+        playBattleMusic(pMusic, iVar2, iVar3);
+        uVar1 = pCurrentFieldScriptActor->mCC_scriptPC + 5;
+    }
+    pCurrentFieldScriptActor->mCC_scriptPC = uVar1;
     g_breakCurrentScript = 1;
 }
 

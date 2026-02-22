@@ -29,6 +29,8 @@ int inputReplayPosition2 = 0;
 int inputOverflowed = 0;
 int inputReplayOffset = 0;
 
+extern bool bIsDebuggerViewEnabled;
+
 bool isControllerConnected(int port) {
     return true;
 }
@@ -37,6 +39,13 @@ void getInputDuringVsync(void)
 {
     MissingCode();
 
+#ifndef SHIPPING_BUILD
+    if (ImGui::IsKeyPressed(ImGuiKey_GraveAccent, false))
+    {
+        bIsDebuggerViewEnabled = !bIsDebuggerViewEnabled;
+    }
+#endif
+
     if (!isGameInFocus())
         return;
 
@@ -44,10 +53,10 @@ void getInputDuringVsync(void)
     if (controller == nullptr)
     {
         int num_joysticks;
-        if (SDL_JoystickID* joysticks = SDL_GetJoysticks(&num_joysticks)) {
+        if (SDL_JoystickID* joysticks = SDL_GetGamepads(&num_joysticks)) {
             for (int i = 0; i < num_joysticks; ++i) {
-                if (SDL_IsGamepad(i)) {
-                    controller = SDL_OpenGamepad(i);
+                if (SDL_IsGamepad(joysticks[i])) {
+                    controller = SDL_OpenGamepad(joysticks[i]);
                     if (controller) {
                         break;
                     }
