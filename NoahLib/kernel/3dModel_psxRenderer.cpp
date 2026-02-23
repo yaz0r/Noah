@@ -1237,7 +1237,7 @@ bool submitModelForRendering(sModelBlock* param_1, std::vector<sTag*>& param_2, 
 
         if (primRenderFunc)
         {
-            auto it = currentModelBlockSubBlocks.m4_indices.begin();
+            auto it = currentModelBlockSubBlocks.m4_indices.cbegin();
             primRenderFunc(it, currentModelBlockSubBlocks.m2_primCount);
         }
         else
