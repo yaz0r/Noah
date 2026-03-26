@@ -89,7 +89,7 @@ void drawDamageDisplayPolysTask2(sTaskHeader* param_1) {
     SetRotMatrix(&MStack_50);
     SetTransMatrix(&MStack_50);
 
-    for (int i = 0; i < pThis->m50[0].m14; i++) {
+    for (int i = 1; i <= pThis->m50[0].m14; i++) {
         drawDamageDisplayCharacter(&pThis->m50[i], pThis->m50[0].m10);
     }
 }

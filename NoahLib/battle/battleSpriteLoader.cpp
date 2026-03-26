@@ -363,11 +363,14 @@ void mainBattleSpriteCallback_phase4(sTaskHeader* param_1) {
 }
 
 void mainBattleSpriteCallback_phase3(sTaskHeader* param_1) {
+    sBattleSpriteLoaderTask* pThis = (sBattleSpriteLoaderTask*)param_1;
     if (isCDBusy() == 0) {
-        MissingCode();
-        initFieldEntitySub4Sub5Sub0(&createSavePointMeshData_mode5, ((sBattleSpriteLoaderTask*)param_1)->m24, sVec2_s16::fromS32(0x380), sVec2_s16::fromS32(0x1d10000));
+        MissingCode(); // DAT_Battle_loader__801e96b4 = pThis->m28; FUN_Battle_loader__801e6dc8();
+        initFieldEntitySub4Sub5Sub0(&createSavePointMeshData_mode5, pThis->m24, sVec2_s16::fromS32(0x380), sVec2_s16::fromS32(0x1d10000));
+        loadSequence((sSeqFile*)pThis->m2C_seq->getRawData().data());
         setTaskUpdateFunction(param_1, &mainBattleSpriteCallback_phase4);
-        MissingCode();
+        extern s8 battleMechaVar2;
+        battleMechaVar2 = 1;
     }
 }
 

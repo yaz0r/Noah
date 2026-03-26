@@ -445,7 +445,6 @@ void voicePostUpdate2(sSoundInstance* pSoundInstance, std::vector<sSoundInstance
             if (pVoice->m0 != 0) {
                 if (pVoice->m2 & 0x100) { // volume update
                     s32 volumeTarget = (pVoice->m78_volume & 0xFFFF) - (((pVoice->m78_volume & 0xFFFF) * pVoice->mD2) >> 0xF);
-                    volumeTarget = 0x7FFF;
                     if (volumeTarget > 0x7FFF) {
                         volumeTarget = 0x7FFF;
                     }

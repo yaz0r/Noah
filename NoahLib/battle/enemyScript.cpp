@@ -20,8 +20,8 @@ int executeMonsterScriptWhenAttacked(char param_1) {
     int result = 0;
     int result2 = 0;
     s8 numIterations = 0;;
-    if ((battleEntities[param_1].m0_base.m7C & 0x8000) == 0) {
-        result = 0;
+    if (((battleEntities[param_1].m0_base.m7C & 0x8000) == 0) ||
+        (result = 0, (battleEntities[param_1].m0_base.m34 & 0x800) != 0)) {
         if (battleEntities[param_1].m0_base.m34 & 0x800) {
             battleScriptContext[0].m0_attackType = 0;
             result = result2;
@@ -313,11 +313,14 @@ int executeMonsterScriptUpper(sBattleScriptExecutionContext* pScriptContext, int
         case 0x82:
             operationResult = executeMonsterScriptUpper_82(pScriptContext, entityIndex);
             break;
-        default:
-            assert(0);
-            break;
         case 0x90:
             operationResult = monsterBattleOpcode_90(pScriptContext, entityIndex);
+            break;
+        case 0x99:
+            exitScript = true;
+            break;
+        default:
+            assert(0);
             break;
         }
         advanceBattleScript(pScriptContext);

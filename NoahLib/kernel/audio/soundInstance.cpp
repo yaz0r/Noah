@@ -155,7 +155,7 @@ void playSoundEffectSub(uint param_1, uint param_2, short param_3, u16 param_4) 
             
             DisableEvent(audioTickEvent);
             for (int i = 0; i < playSoundEffectVar0; i++) {
-                sSoundInstanceEvent* pSoundEvent = &pSoundEffectsInstances->m94_events[param_1 & 0xFF + i];
+                sSoundInstanceEvent* pSoundEvent = &pSoundEffectsInstances->m94_events[(param_1 & 0xFF) + i];
                 auto pDrumData = pCurrentSeq->getRawData().begin() + 0x20 + (param_2 & 0xFFFF) * 2 + 2 * i;
 
                 pSoundEvent->m8 = param_2;

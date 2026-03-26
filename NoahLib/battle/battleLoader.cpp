@@ -575,7 +575,7 @@ void batteLoaderPhase2_1(void) {
 
     for (int i = 0; i < 11; i++) {
         if (isBattleSlotFilled[i]) {
-            numTicksBeforeReady[i] -= iVar5;
+            numTicksBeforeReady[i] -= (iVar5 - 1);
         }
     }
 }

@@ -97,6 +97,7 @@ void battleCreateFader(int param_1, s8 tpageABE, s8 targetR, s8 targetG, s8 targ
         pSprite = pBattleFader1;
         if (pBattleFader1)
         {
+            pSprite->m45_startColor = pSprite->m48_currentColor;
             goto LAB_Battle__800b3b20;
         }
         pSprite = &battleFader1;
@@ -128,7 +129,6 @@ void battleCreateFader(int param_1, s8 tpageABE, s8 targetR, s8 targetG, s8 targ
     pSprite->m45_startColor[1] = 0;
     pSprite->m45_startColor[2] = 0;
 LAB_Battle__800b3b20:
-    pSprite->m45_startColor = pSprite->m48_currentColor;
     pSprite->m41_tpageABE = tpageABE;
     pSprite->m42_targetColor[0] = targetR;
     pSprite->m42_targetColor[1] = targetG;

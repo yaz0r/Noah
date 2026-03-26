@@ -259,7 +259,7 @@ std::vector<u8>::const_iterator seqOP_60_setVolume(std::vector<u8>::const_iterat
 }
 
 std::vector<u8>::const_iterator seqOP_61(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
-    pChannel->m78_volume = (int)it[0] * 0x1000000 + pChannel->m78_volume & 0x7fffffff;
+    pChannel->m78_volume = (s8)it[0] * 0x1000000 + pChannel->m78_volume & 0x7fffffff;
     pChannel->m2 |= 0x100;
     pChannel->m4 &= 0xfef7;
     return it + 1;
@@ -267,7 +267,7 @@ std::vector<u8>::const_iterator seqOP_61(std::vector<u8>::const_iterator it, sSo
 
 std::vector<u8>::const_iterator seqOP_62_volumeSlide(std::vector<u8>::const_iterator it, sSoundInstance* pInstance, sSoundInstanceEvent* pChannel) {
     int duration = it[0];
-    int targetVolume = (int)it[1] * 0x1000000 - pChannel->m78_volume;
+    int targetVolume = (s8)it[1] * 0x1000000 - pChannel->m78_volume;
     if (duration && targetVolume) {
         pChannel->m96_volumeSlideDuration = duration;
         pChannel->m4 = (pChannel->m4 & 0xfeff) | 8;

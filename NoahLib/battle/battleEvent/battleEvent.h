@@ -44,6 +44,7 @@ struct sBattleRunningVar0 {
     s8 m7F4_battleDialogPortraitOddOrEven;
     sDialogParams m7F6_dialogParams;
     s8 m800 = 0;
+    s8 m801 = 0;
     s8 m802_dialogBoxInitialized = 0;
     std::array<s8, 0x10> m804;
     struct sSeqFile* m818 = nullptr;

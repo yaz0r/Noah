@@ -408,9 +408,9 @@ void battleStartEffect() {
         DrawSync(0);
         VSync(2);
 
-        battleRenderStructs[battleOddOrEven].m0_drawEnv.r0 = addAndClamp(battleRenderStructs[battleOddOrEven].m0_drawEnv.r0, 0xC);
-        battleRenderStructs[battleOddOrEven].m0_drawEnv.g0 = addAndClamp(battleRenderStructs[battleOddOrEven].m0_drawEnv.g0, 0xC);
-        battleRenderStructs[battleOddOrEven].m0_drawEnv.b0 = addAndClamp(battleRenderStructs[battleOddOrEven].m0_drawEnv.b0, 0xC);
+        battleRenderStructs[battleOddOrEven].m0_drawEnv.r0 = addAndClamp(battleRenderStructs[battleOddOrEven].m0_drawEnv.r0, -0xC);
+        battleRenderStructs[battleOddOrEven].m0_drawEnv.g0 = addAndClamp(battleRenderStructs[battleOddOrEven].m0_drawEnv.g0, -0xC);
+        battleRenderStructs[battleOddOrEven].m0_drawEnv.b0 = addAndClamp(battleRenderStructs[battleOddOrEven].m0_drawEnv.b0, -0xC);
 
         PutDispEnv(&pCurrentBattleRenderStruct->m5C_dispEnv);
         PutDrawEnv(&pCurrentBattleRenderStruct->m0_drawEnv);

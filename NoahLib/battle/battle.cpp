@@ -2106,8 +2106,8 @@ void checkWinConditions() {
 
     for (int i = 0; i < 8; i++) {
         if (isBattleSlotFilled[i + 3]) {
-            if (battleVisualEntities[i].m4_isGear == 0) {
-                if (battleEntities[i].m0_base.m7C & 0xC000) {
+            if (battleVisualEntities[i + 3].m4_isGear == 0) {
+                if (battleEntities[i + 3].m0_base.m7C & 0xC000) {
                     if (bitmaskCharacterCheck(jumpAnimationActiveActorBF, i + 3)) {
                         allPlayerCharacterBitmask |= characterIdToTargetBitmask(i + 3);
                     }
@@ -2126,7 +2126,7 @@ void checkWinConditions() {
                 }
             }
             else {
-                if (battleEntities[i].mA4_gear.m7C & 0xC000) {
+                if (battleEntities[i + 3].mA4_gear.m7C & 0xC000) {
                     if (bitmaskCharacterCheck(jumpAnimationActiveActorBF, i + 3)) {
                         allPlayerCharacterBitmask |= characterIdToTargetBitmask(i + 3);
                     }
