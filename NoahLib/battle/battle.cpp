@@ -43,6 +43,8 @@ void render_BA8_27C8_1E68(void);
 void battleDrawAPBar();
 void drawMonsterNames();
 void freeMechaModelBlocks(sMechaInitVar4* param_1, int param_2);
+void markEnemyDead(uint param_1);
+extern byte allocateJumpAnimationStructCallbackSpecial0;
 u16 allPlayerCharacterBitmask = 0;
 u8 battleInitVar0 = 0;
 u8 battleInitVar1 = 0;
@@ -388,22 +390,27 @@ void mechaInitEnvironmentMechaMesh(int entryId, ushort flags, sMechaDataTable2* 
         POLY_FT4* p = &pLoadedMecha->mB8_Polys[i];
         SetPolyFT4(p);
         SetSemiTrans(p, 1);
-        p->r0 = 0x40;
-        p->g0 = 0x40;
-        p->b0 = 0x40;
-        p->clut = GetClut(0x100, 0xF3);
-        p->tpage = GetTPage(0, 2, 0x280, 0x100);
-        p->u0 = 0x00;
-        p->v0 = 0xE0;
-        p->u1 = 0x0F;
-        p->v1 = 0xE0;
-        p->u2 = 0x00;
-        p->v2 = 0xEF;
-        p->u1 = 0x0F;
-        p->v1 = 0xEF;
+        p->r0 = battleMechaInitData->m478_r;
+        p->g0 = battleMechaInitData->m479_g;
+        p->b0 = battleMechaInitData->m47A_b;
+        p->clut = GetClut(0x30, 0x1cc);
+        p->tpage = GetTPage(0, 2, 0x380, 0);
+        p->u0 = 0xc0;
+        p->v0 = 0xc0;
+        p->u1 = 0xfe;
+        p->v1 = 0xc0;
+        p->u2 = 0xc0;
+        p->v2 = 0xfe;
+        p->u3 = 0xfe;
+        p->v3 = 0xfe;
     }
 
-    pLoadedMecha->m1C_scale = pData1->m10->m4->m8;
+    if (flags & 0x40) {
+        pLoadedMecha->m1C_scale = pData1->m10->m4->m8;
+    }
+    else {
+        pLoadedMecha->m1C_scale = (short)((int)pData1->m10->m4->m8 * (int)battleMechaInitData->m344 >> 0xc);
+    }
     pLoadedMecha->m10C = pData1->m10->m4->mE;
     initMechSub110(pLoadedMecha);
     pLoadedMecha->m10E = pData1->m10->m4->m10;
@@ -956,7 +963,13 @@ void battleTimeProgress() {
                         }
                     }
                     else {
-                        assert(0);
+                        // status timer countdown (0x2000 = timed status active)
+                        u8 timer = battleEntities[i].m15C_statusTimer - iVar5;
+                        battleEntities[i].m15C_statusTimer = timer;
+                        if (timer == 0) {
+                            battleEntities[i].m15C_statusTimer = 0;
+                            battleEntities[i].m0_base.m7C &= ~0x2000;
+                        }
                     }
                 }
             }
@@ -1859,6 +1872,36 @@ void renderOpenMenu() {
             drawDescriptionText();
         }
         break;
+    case 2:
+        renderOpenMenuSub0();
+        if (battleVar0->mA230->m66B) {
+            AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->mA230->m0_polys[4][battleVar0->mA230->m66A_oddOrEven]);
+            AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->mA230->m0_polys[5][battleVar0->mA230->m66A_oddOrEven]);
+        }
+        if (battleVar0->mA230->m66D) {
+            drawDescriptionText();
+            drawDescriptionText();
+        }
+        break;
+    case 3:
+        renderOpenMenuSub0();
+        MissingCode(); // poly rendering for case 3
+        break;
+    case 4:
+        renderOpenMenuSub0();
+        if (battleVar0->mA230->m66B == 0) {
+            break;
+        }
+        if (battleVar0->mA230->m66E) {
+            AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->mA230->m0_polys[0xc][battleVar0->mA230->m66C]);
+        }
+        AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->mA230->m0_polys[4][battleVar0->mA230->m66A_oddOrEven]);
+        drawDescriptionText();
+        drawDescriptionText();
+        break;
+    case 5:
+        renderOpenMenuSub0();
+        break;
     default:
         assert(0);
         break;
@@ -2096,7 +2139,7 @@ void checkWinConditions() {
                 }
             }
             else {
-                if ((battleEntities[i].m0_base.m7C & 0x8000) == 0) {
+                if ((battleEntities[i].m0_base.m7C & 0x8000) != 0) {
                     battleEntities[i].m0_base.m4C_HP = 0;
                 }
                 isEntityReadyForBattle[i] = -1;
@@ -2201,13 +2244,15 @@ void setBattleCameraMode(int param_1) {
         previousCameraAt2.vz = (int)battleCameraAtTarget.vz << 0x10;
         break;
     case 4:
-        assert(0);
+        battleCameraModeInterpolation = 5;
     default:
         if (battleCameraModeCallback1) {
-            assert(0);
+            battleCameraModeCallback1->mC_deleteCallback(battleCameraModeCallback1);
+            battleCameraModeCallback1 = nullptr;
         }
         if (battleCameraModeCallback2) {
-            assert(0);
+            battleCameraModeCallback2->mC_deleteCallback(battleCameraModeCallback2);
+            battleCameraModeCallback2 = nullptr;
         }
         break;
     }
@@ -2742,7 +2787,7 @@ int processBattleAnimationSub0(void) {
     if (hasPlayedAnimationOnMecha) {
         assert(0);
     }
-    return 0;
+    return count;
 }
 
 void startJumpAnimationCallback(sSpriteActorCore*) {
@@ -2824,6 +2869,27 @@ void processBattleAnimation_subType(sSpriteActorCore* param_1, int param_2) {
         jumpAnimationControlStruct->m48 = 1;
         jumpAnimationActiveActorBF |= battleCurrentDamages[allocateJumpAnimationStructVar0].m3A;
         break;
+    case -12:
+    {
+        setRenderingInfoForItemUser(param_1);
+        u32 uVar1 = battleCurrentDamages[allocateJumpAnimationStructVar0].m3A;
+        startJumpAnimationVar2 = (uVar1 >> 9) & 0x3f;
+        param_1->mAC.mx18 = 0x11;
+        abilityPlayAnimation(uVar1 & 0x1ff, param_1);
+        break;
+    }
+    case -11:
+    {
+        setRenderingInfoForItemUser(param_1);
+        u32 uVar1 = battleCurrentDamages[allocateJumpAnimationStructVar0].m3A;
+        startJumpAnimationVar2 = (uVar1 >> 9) & 0x3f;
+        param_1->mAC.mx18 = 0x11;
+        abilityPlayAnimation(uVar1 & 0x1ff, param_1);
+        setNeedFxFragments(param_1);
+        spriteActorSetPlayingAnimation(param_1, 0x13);
+        allocateJumpAnimationStructCallbackSpecial0 = 1;
+        break;
+    }
     case -10:
         setCameraVisibleEntities(battleCurrentDamages[allocateJumpAnimationStructVar0].m16_targetBitMask);
         break;
@@ -2832,6 +2898,15 @@ void processBattleAnimation_subType(sSpriteActorCore* param_1, int param_2) {
         OP_INIT_ENTITY_SCRIPT_sub0Sub8(param_1, 0);
         delayBattleAnimationCounter = battleCurrentDamages[allocateJumpAnimationStructVar0].m3A;
         break;
+    case -8:
+    {
+        jumpAnimationControlStruct->m48 = 1;
+        OP_INIT_ENTITY_SCRIPT_sub0Sub8(param_1, 0);
+        uint idx = battleCurrentDamages[allocateJumpAnimationStructVar0].m3A & 0xff;
+        battleVar1->mB0_isDialogWindowInitialized[4] = 0;
+        previousEntityTurn.m8[idx].m5D_monsterNameIsDisplayed = 0;
+        break;
+    }
     case -6:
         jumpAnimationControlStruct->m48 = 1;
         OP_INIT_ENTITY_SCRIPT_sub0Sub8(param_1, 0);
@@ -2864,11 +2939,39 @@ void processBattleAnimation(sSpriteActorCore* param_1) {
     s32 battleAnimationToPlay = battleCurrentDamages[allocateJumpAnimationStructVar0].m47_battleAnimationToPlay;
     switch (battleAnimationToPlay) {
     case -13:
+    case -12:
+    case -11:
     case -10:
     case -9:
+    case -8:
     case -6:
         processBattleAnimation_subType(param_1, battleAnimationToPlay);
         break;
+
+    case -7:
+        spriteActorSetPlayingAnimation(param_1, 5);
+        setCameraVisibleEntities(0);
+        return;
+
+    case -5:
+    {
+        jumpAnimationControlStruct->m48 = 1;
+        OP_INIT_ENTITY_SCRIPT_sub0Sub8(param_1, 0);
+        sSpriteActorCore* psVar10 = battleSpriteActorCores[battleCurrentDamages[allocateJumpAnimationStructVar0].m3A];
+        param_1->m24_vramData = psVar10->m24_vramData;
+        param_1->m7C->mE_vramLocation = psVar10->m7C->mE_vramLocation;
+        param_1->m3C = param_1->m3C | 0x40000000;
+        MissingCode(); // clone sprite tile data from psVar10->m20->m2C to param_1->m20->m2C
+        allocateJumpAnimationStructVar0++;
+        return;
+    }
+
+    case -4:
+        jumpAnimationControlStruct->m48 = 1;
+        OP_INIT_ENTITY_SCRIPT_sub0Sub8(param_1, 0);
+        param_1->mB0.mRaw = battleCurrentDamages[allocateJumpAnimationStructVar0].m3A;
+        allocateJumpAnimationStructVar0++;
+        return;
 
     case -1: // waiting for attack prompt
         OP_INIT_ENTITY_SCRIPT_sub0Sub8(param_1, 0);
@@ -2883,7 +2986,7 @@ void processBattleAnimation(sSpriteActorCore* param_1) {
             spriteActorSetPlayingAnimation(param_1, param_1->mB0.mx0_animationId);
             return;
         }
-        assert(0);
+        // fall through to -2 (jump back) when deaths occurred
     case -2: // jump back to initial position at end of turn
     {
         jumpAnimationControlStruct->m48 = 0;
@@ -3273,7 +3376,8 @@ void allocateJumpAnimationStructCallback(sJumpAnimationControlStruct* param_1) {
             sVec2_s16::fromValue(param_1->m4->mA0.vx, param_1->m4->mA0.vz)
         );
         if (jumpAnimationControlStruct->m44_distanceToTarget < distance) {
-            assert(0);
+            battleAnimationCallback_2(param_1->m4, param_1->m4C);
+            return;
         }
         else {
             jumpAnimationControlStruct->m44_distanceToTarget = distance;
@@ -3694,6 +3798,11 @@ void drawCircleMenuItemActive(int param_1) {
         battleVar2->m2F6 = 1;
         battleSoundEffect2(0x4f);
         return;
+    case 4:
+    case 6:
+    case 7:
+        MissingCode(); // FUN_Battle__8008bed8 (item selection UI) then useItem
+        return;
     case 8:
     case 0xE:
         return;
@@ -3760,6 +3869,11 @@ void drawCircleMenuItemSecondaryActive(int param_1) {
         battleVar2->m2F6 = 1;
         battleSoundEffect2(0x4f);
         break;
+    case 4:
+    case 6:
+    case 7:
+        MissingCode(); // FUN_Battle__8008bed8 (item selection UI) then useItem
+        return;
     case 8:
         return;
     default:
@@ -3840,6 +3954,90 @@ void drawCircleMenuCombo(int param_1) {
 }
 
 
+void transferCharStatsBackToField() {
+    for (int i = 0; i < 3; i++) {
+        if (battleCharacters[i] != 0x7f) {
+            uint characterId = battleEntities[i].m0_base.m56_battleCommandLoadout;
+            u8 gearNum = battleEntities[i].m0_base.mA0_partyData_gearNum;
+
+            // Chu-Chu special: convert gear HP back to character HP
+            if ((characterId == 7) && ((battleEntities[i].m15A_flags & 0x80) != 0)) {
+                battleEntities[i].m0_base.m4C_HP = (s16)((battleEntities[i].mA4_gear.m60_hp + 1) / 0x32);
+                if (battleEntities[i].m0_base.m4C_HP == 0) {
+                    battleEntities[i].m0_base.m4C_HP = 1;
+                }
+            }
+
+            gameState.m26C_party[characterId].m4C_HP = battleEntities[i].m0_base.m4C_HP;
+            u16 hp = gameState.m26C_party[characterId].m4C_HP;
+            u16 maxHp = gameState.m26C_party[characterId].m4E_MaxHP;
+            gameState.m26C_party[characterId].m50_MP = battleEntities[i].m0_base.m50_MP;
+            if (maxHp < hp) {
+                gameState.m26C_party[characterId].m4C_HP = gameState.m26C_party[characterId].m4E_MaxHP;
+            }
+            if ((u16)gameState.m26C_party[characterId].m52_MaxMP < (u16)gameState.m26C_party[characterId].m50_MP) {
+                gameState.m26C_party[characterId].m50_MP = gameState.m26C_party[characterId].m52_MaxMP;
+            }
+
+            for (int j = 0; j < 7; j++) {
+                gameState.m26C_party[characterId].m90[j] = battleEntities[i].m0_base.m90[j];
+            }
+            gameState.m26C_party[characterId].m3A = battleEntities[i].m0_base.m3A;
+
+            if ((battleEntities[i].m0_base.m7C & 0xc000) != 0) {
+                gameState.m26C_party[characterId].m4C_HP = 1;
+            }
+
+            u8 gearIdx = battleEntities[i].m0_base.mA0_partyData_gearNum;
+            if ((gearIdx < 7) || ((gearIdx < 0x11) && (gearIdx > 7))) {
+                u32 maxGearHp = gameState.m978_gears[gearNum].m64;
+                gameState.m978_gears[gearNum].m60_hp = battleEntities[i].mA4_gear.m60_hp;
+                u32 gearHp = gameState.m978_gears[gearNum].m60_hp;
+                gameState.m978_gears[gearNum].m38_fuel = (s16)battleEntities[i].mA4_gear.m38_fuel;
+                if (maxGearHp < gearHp) {
+                    gameState.m978_gears[gearNum].m60_hp = maxGearHp;
+                }
+                if (gameState.m978_gears[gearNum].m3C_maxFuel < gameState.m978_gears[gearNum].m38_fuel) {
+                    gameState.m978_gears[gearNum].m38_fuel = gameState.m978_gears[gearNum].m3C_maxFuel;
+                }
+                if ((battleEntities[i].mA4_gear.m7C & 0x8000) != 0) {
+                    gameState.m978_gears[gearNum].m60_hp = (u32)gameState.m978_gears[gearNum].m64 / 10;
+                }
+            }
+        }
+    }
+}
+
+bool tryToEscape() {
+    battleGetSlotStatusSub_current28Index = 0;
+    int iVar2 = xenoRand();
+    bool success = iVar2 % 100 < 0x32;
+    if (success) {
+        transferCharStatsBackToField();
+    }
+    return success;
+}
+
+void callGear(uint param_1) {
+    param_1 = param_1 & 0xff;
+    MissingCode(); // FUN_Battle__80088490(param_1)
+    MissingCode(); // FUN_Battle__8009aefc(param_1)
+    MissingCode(); // FUN_Battle__800baf48(param_1)
+    battleEntities[param_1].m15A_flags = battleEntities[param_1].m15A_flags | 0x80;
+    markEnemyDead(param_1);
+    apConfigArray[param_1].m1 = 2;
+    if (battleCharacters[param_1] != 7) {
+        battleVar0->m835C[param_1].m1E1 = 2;
+    }
+    battleVisualEntities[param_1].m4_isGear = 1;
+    battleVar2->m2EB[param_1] = 1;
+    for (int i = 0; i < 3; i++) {
+        if ((gameState.m1D34_currentParty[i] == battleCharacters[param_1])) {
+            gameState.m22B1_isOnGear[i] = 1;
+        }
+    }
+}
+
 void drawBattleMenuEscape(int param_1) {
     switch (battleInputButton) {
     case 0: // right
@@ -3887,6 +4085,14 @@ void drawBattleMenuEscape(int param_1) {
             battleSoundEffect2(0x4f);
         }
         battleVar2->m2F6 = 0;
+        return;
+    case 4:
+    case 6:
+    case 7:
+        if (tryToEscape()) {
+            battleRunningVar1 = 0x40;
+        }
+        battleVar2->m2DE = 1;
         return;
     case 8:
     case 0xE:
@@ -4311,6 +4517,12 @@ void drawCircleMenuCallGear(byte param_1) {
         }
         battleSoundEffect2(0x4f);
         return;
+    case 4:
+    case 6:
+    case 7:
+        callGear(param_1);
+        battleVar2->m2DE = 1;
+        return;
     case 8:
         return;
     default:
@@ -4373,7 +4585,6 @@ void cancelJumpAnim(void)
     }
     return;
 }
-void markEnemyDead(uint param_1);
 void moveEntityToOtherEntity(byte param_1, uint param_2) {
     byte bVar1;
     sBattleMechaInitData* psVar2;
@@ -5470,40 +5681,59 @@ void setDamageDone(uint param_1)
         case -1:
             break;
         case 0:
-            switch (battleTickMainSub0Var1[i]) {
-            case -1:
-                if (damageDonePerAttack[i] - battleTickMainSub0Var0[i] >= 0) {
-                    battleTickMainSub0Var0[i] = damageDonePerAttack[i] - battleTickMainSub0Var0[i];
-                }
-                else {
-                    battleTickMainSub0Var0[i] = battleTickMainSub0Var0[i] - damageDonePerAttack[i];
-                }
-                battleTickMainSub0Var1[i] = 0;
-                break;
-            }
-            break;
-        case 2:
-            switch (battleTickMainSub0Var1[i]) {
-            case -1:
+        case 5:
+        {
+            s8 prior = battleTickMainSub0Var1[i];
+            if (prior == -1) {
+                // first hit — set directly
                 battleTickMainSub0Var0[i] = damageDonePerAttack[i];
                 battleTickMainSub0Var1[i] = initBattleAttackStatusArray0[i];
-                break;
-            default:
-                assert(0);
+            }
+            else if (prior == 0 || prior == 5) {
+                // same polarity (damage + damage) — accumulate
+                battleTickMainSub0Var0[i] += damageDonePerAttack[i];
+            }
+            else if (prior == 2) {
+                // opposite polarity (prior heal, new damage) — subtract
+                s16 diff = damageDonePerAttack[i] - battleTickMainSub0Var0[i];
+                if (diff >= 0) {
+                    battleTickMainSub0Var0[i] = diff;
+                    battleTickMainSub0Var1[i] = 0; // flip to damage
+                }
+                else {
+                    battleTickMainSub0Var0[i] = -diff; // heal still wins
+                }
             }
             break;
-        case 4:
-            break; // TODO: is this correct?
-        case 5:
-            switch (battleTickMainSub0Var1[i]) {
-            case -1:
-                battleTickMainSub0Var0[i] = damageDonePerAttack[i]; // TODO; casting here?
+        }
+        case 2:
+        {
+            s8 prior = battleTickMainSub0Var1[i];
+            if (prior == -1) {
+                // first hit — set directly
+                battleTickMainSub0Var0[i] = damageDonePerAttack[i];
                 battleTickMainSub0Var1[i] = initBattleAttackStatusArray0[i];
-                break;
             }
+            else if (prior == 2) {
+                // same polarity (heal + heal) — accumulate
+                battleTickMainSub0Var0[i] += damageDonePerAttack[i];
+            }
+            else if (prior == 0 || prior == 5) {
+                // opposite polarity (prior damage, new heal) — subtract
+                s16 diff = damageDonePerAttack[i] - battleTickMainSub0Var0[i];
+                if (diff >= 0) {
+                    battleTickMainSub0Var0[i] = diff;
+                    battleTickMainSub0Var1[i] = 2; // flip to heal
+                }
+                else {
+                    battleTickMainSub0Var0[i] = -diff; // damage still wins
+                }
+            }
+            break;
+        }
+        case 4:
             break;
         default:
-            assert(0);
             break;
         }
 
@@ -5548,7 +5778,7 @@ void applyChangeToHpOrMp(uint param_1) {
                     battleEntities[i].m0_base.m4C_HP = 0;
                     performAttackSub3_var0 |= characterIdToTargetBitmask(i);
                     battleEntities[i].m0_base.m7C |= 0x8000;
-                    if (i > 2) { // if it's an enemy
+                    if (i > 2) {
                         markEnemyDead(i);
                     }
                 }
@@ -5557,26 +5787,87 @@ void applyChangeToHpOrMp(uint param_1) {
                 }
             }
             else {
-                assert(0);
+                // gear HP damage
+                s32 newGearHp = (s32)battleEntities[i].mA4_gear.m60_hp - (u16)battleCurrentDamages[param_1].m0_damageValue[i];
+                if (newGearHp < 1) {
+                    battleEntities[i].mA4_gear.m60_hp = 0;
+                    performAttackSub3_var0 |= characterIdToTargetBitmask(i);
+                    battleEntities[i].mA4_gear.m7C |= 0x8000;
+                    battleEntities[i].m0_base.m7C |= 0x8000;
+                    if (i > 2) {
+                        markEnemyDead(i);
+                    }
+                }
+                else {
+                    battleEntities[i].mA4_gear.m60_hp = newGearHp;
+                }
             }
             battleVar2->m2EB[i] = 1;
             break;
-        case 2: // healing
-            if (!battleVisualEntities[i].m4_isGear || healWhileOnGear) {
-                battleEntities[i].m0_base.m4C_HP += battleCurrentDamages[param_1].m0_damageValue[0];
+        case 1: // MP damage
+        case 9:
+        {
+            s16 mp = battleEntities[i].m0_base.m50_MP;
+            if (mp - (s16)battleCurrentDamages[param_1].m0_damageValue[i] < 1) {
+                battleEntities[i].m0_base.m50_MP = 0;
+            }
+            else {
+                battleEntities[i].m0_base.m50_MP = mp - battleCurrentDamages[param_1].m0_damageValue[i];
+            }
+            break;
+        }
+        case 2: // HP healing
+            if (battleVisualEntities[i].m4_isGear == 0 || healWhileOnGear) {
+                battleEntities[i].m0_base.m4C_HP += battleCurrentDamages[param_1].m0_damageValue[i];
                 if (battleEntities[i].m0_base.m4E_MaxHP < battleEntities[i].m0_base.m4C_HP) {
                     battleEntities[i].m0_base.m4C_HP = battleEntities[i].m0_base.m4E_MaxHP;
                 }
             }
             else {
-                assert(0);
+                // gear HP healing
+                u32 newGearHp = (u16)battleCurrentDamages[param_1].m0_damageValue[i] + battleEntities[i].mA4_gear.m60_hp;
+                battleEntities[i].mA4_gear.m60_hp = newGearHp;
+                if ((u32)battleEntities[i].mA4_gear.m64 < newGearHp) {
+                    battleEntities[i].mA4_gear.m60_hp = battleEntities[i].mA4_gear.m64;
+                }
+            }
+            battleVar2->m2EB[i] = 1;
+            break;
+        case 3: // MP healing
+            if (battleVisualEntities[i].m4_isGear == 0 || healWhileOnGear) {
+                battleEntities[i].m0_base.m50_MP += battleCurrentDamages[param_1].m0_damageValue[i];
+                if (battleEntities[i].m0_base.m52_MaxMP < battleEntities[i].m0_base.m50_MP) {
+                    battleEntities[i].m0_base.m50_MP = battleEntities[i].m0_base.m52_MaxMP;
+                }
             }
             break;
         case 4:
         case -1:
             break;
+        case 10: // fuel damage
+        {
+            s16 fuel = (s16)battleEntities[i].mA4_gear.m38_fuel;
+            if (fuel - (s16)battleCurrentDamages[param_1].m0_damageValue[i] < 1) {
+                battleEntities[i].mA4_gear.m38_fuel = 0;
+            }
+            else {
+                battleEntities[i].mA4_gear.m38_fuel = fuel - battleCurrentDamages[param_1].m0_damageValue[i];
+            }
+            battleVar2->m2EB[i] = 1;
+            break;
+        }
+        case 11: // fuel healing
+        {
+            u16 newFuel = (u16)battleEntities[i].mA4_gear.m38_fuel + battleCurrentDamages[param_1].m0_damageValue[i];
+            battleEntities[i].mA4_gear.m38_fuel = newFuel;
+            if ((u16)battleEntities[i].mA4_gear.m3C_maxFuel < newFuel) {
+                battleEntities[i].mA4_gear.m38_fuel = (u16)battleEntities[i].mA4_gear.m3C_maxFuel;
+            }
+            battleVar2->m2EB[i] = 1;
+            break;
+        }
         default:
-            assert(0);
+            break;
         }
     }
 }
@@ -6857,7 +7148,7 @@ void battleSpriteEffect_20_update(sTaskHeader* param_1)
     (psVar2->m0_position).vy = local_20.vy * 0x10000;
     auto puVar1 = psVar2->m64_spriteByteCode;
     (psVar2->m0_position).vz = local_20.vz * 0x10000;
-    if (puVar1.has_value()) {
+    if (!puVar1.has_value()) {
         param_1->mC_deleteCallback(param_1);
     }
     return;
@@ -7148,9 +7439,9 @@ void battleSpriteEffect(sSpriteActorCore* param_1, s8 param_2, std::span<u8>::it
         break;
     case 9:
         param_1->m32_direction += 0x800;
-        param_1->mC_step.vx -= param_1->mC_step.vx;
-        param_1->mC_step.vy -= param_1->mC_step.vy;
-        param_1->mC_step.vz -= param_1->mC_step.vz;
+        param_1->mC_step.vx = -param_1->mC_step.vx;
+        param_1->mC_step.vy = -param_1->mC_step.vy;
+        param_1->mC_step.vz = -param_1->mC_step.vz;
         return;
     case 0xe:
         OP_INIT_ENTITY_SCRIPT_sub0Sub7(param_1, (*endOfOpcode) << 4);

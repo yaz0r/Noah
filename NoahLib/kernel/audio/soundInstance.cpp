@@ -86,7 +86,7 @@ void setupAdsr(int param_1, sSoundInstanceEvent* param_2) {
 
     u32 adpcmAddressOffset = READ_LE_U32(pADSRData) * 8;
     u32 adpcmSampleSize = READ_LE_U16(pADSRData + 4) * 8;
-    u16 value6C = READ_LE_U16(pADSRData + 0x6);
+    s16 value6C = (s16)READ_LE_U16(pADSRData + 0x6);
     u32 ADSR_Values = READ_LE_U32(pADSRData + 8);
     u16 ADSR_Modes = READ_LE_U16(pADSRData + 0xC);
 
@@ -201,7 +201,7 @@ void playSoundEffectSub(uint param_1, uint param_2, short param_3, u16 param_4) 
                     pSoundEvent->m14 = pCurrentSeq->getRawData().begin() + READ_LE_U16(pDrumData);
 
                     // Todo: cross-check that
-                    for (int i = 0; i < 3; i++) {
+                    for (int i = 0; i < 4; i++) {
                         pSoundEvent->mD8[i].m1E = 0;
                     }
 

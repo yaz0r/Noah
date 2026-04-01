@@ -5,6 +5,7 @@
 #include "kernel/kernelBootMenu.h"
 #include "worldmap/worldmap.h"
 #include "battle/battle.h"
+#include "movie/movie.h"
 
 s32 bootMode = 0;
 s32 oldBootMode = 0;
@@ -29,7 +30,7 @@ static const std::array<sBootMode, 7> gameModes = { {
     {&worldmapEntryPoint, 0, 0, 1}, // worldmap
     {&unimplementedGameMode, 0, 0, 1}, // battling
     {&enterMenu, 0, 0, 0}, // menu
-    {&unimplementedGameMode, 0, 0, 1}, // movie
+    {&movieEntryPoint, 0, 0, 1}, // movie
 } };
 
 void setGameMode(int newGameMode) {

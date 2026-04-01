@@ -113,7 +113,7 @@ void formatDamageString(uint param_1, sDamageString& damageString, int param_3, 
     auto damageWritePtr = damageString.m1_string.begin();
     if ((bool)damageSign) {
         damageString.m1_string[0] = '-';
-        auto damageWritePtr = damageString.m1_string.begin() + 1;
+        damageWritePtr = damageString.m1_string.begin() + 1;
         param_1 = -param_1;
         param_3 = param_3 + -1;
     }
@@ -320,6 +320,24 @@ void createDamageDisplay(sSpriteActorCore* param_1, int damageValue, int damageT
     switch (damageType) {
     case 0:
         break;
+    case 1: // MP damage — prepend glyph 0x80
+        pNewDamageTask->m8C_damageStringLength += setupDamagePoly(battleFont, 0x80, &pNewDamageTask->m90[pNewDamageTask->m8C_damageStringLength], displayOffset, -16);
+        displayOffset += 0x20;
+        break;
+    case 2: // HP heal — green tint
+        pNewDamageTask->m80_colorAndCode.m0_r = 0;
+        pNewDamageTask->m80_colorAndCode.m1_g = 0x80;
+        pNewDamageTask->m80_colorAndCode.m2_b = 0;
+        pNewDamageTask->m80_colorAndCode.m3_code &= 0xfe;
+        break;
+    case 3: // MP heal — glyph 0x80 + purple tint
+        pNewDamageTask->m8C_damageStringLength += setupDamagePoly(battleFont, 0x80, &pNewDamageTask->m90[pNewDamageTask->m8C_damageStringLength], displayOffset, -16);
+        pNewDamageTask->m80_colorAndCode.m0_r = 0x80;
+        pNewDamageTask->m80_colorAndCode.m1_g = 0;
+        pNewDamageTask->m80_colorAndCode.m2_b = 0x80;
+        pNewDamageTask->m80_colorAndCode.m3_code &= 0xfe;
+        displayOffset += 0x20;
+        break;
     case 4: // miss
         pNewDamageTask->m88_timer = 0x40;
         pNewDamageTask->m8C_damageStringLength = setupDamagePoly(battleFont, 0x7c, &pNewDamageTask->m90[0], -20, -16);
@@ -332,8 +350,17 @@ void createDamageDisplay(sSpriteActorCore* param_1, int damageValue, int damageT
         (pNewDamageTask->m80_colorAndCode).m2_b = 0;
         (pNewDamageTask->m80_colorAndCode).m3_code &= ~1;
         break;
+    case 10: // fuel damage — glyph 0x7F
+        pNewDamageTask->m8C_damageStringLength += setupDamagePoly(battleFont, 0x7f, &pNewDamageTask->m90[pNewDamageTask->m8C_damageStringLength], displayOffset, 0);
+        break;
+    case 11: // fuel heal — glyph 0x91 + blue tint
+        pNewDamageTask->m8C_damageStringLength += setupDamagePoly(battleFont, 0x91, &pNewDamageTask->m90[pNewDamageTask->m8C_damageStringLength], displayOffset, 0);
+        pNewDamageTask->m80_colorAndCode.m0_r = 0;
+        pNewDamageTask->m80_colorAndCode.m1_g = 0;
+        pNewDamageTask->m80_colorAndCode.m2_b = 0x80;
+        pNewDamageTask->m80_colorAndCode.m3_code &= 0xfe;
+        break;
     default:
-        assert(0);
         break;
     }
 

@@ -8,6 +8,7 @@
 #include "kernel/graphics.h"
 #include "kernel/gameMode.h"
 #include "kernel/font.h"
+#include "movie/movie.h"
 #include "debug/vram.h"
 #include "field/field.h"
 #include "field/fieldDebugger/fieldInspector.h"
@@ -192,6 +193,33 @@ bool noahInit(int argc, char* argv[])
         }
     }
 
+    if (1) {
+        {
+            sLoadableDataRaw overlay;
+            readFile(0x12, overlay, 0, 0);
+            waitReadCompletion(0);
+            std::vector<u8> overlayDecompressed = mallocAndDecompress(overlay.getRawData().begin());
+            FILE* fHandle = fopen((std::string("movie") + std::string(".ovl")).c_str(), "wb+");
+            if (fHandle) {
+                fwrite(overlayDecompressed.data(), 1, overlayDecompressed.size(), fHandle);
+                fclose(fHandle);
+            }
+        }
+        // STR playback library loaded by movie overlay from dir (0x18, 0) file 1
+        {
+            setCurrentDirectory(0x18, 0);
+            sLoadableDataRaw overlay;
+            readFile(1, overlay, 0, 0);
+            waitReadCompletion(0);
+            FILE* fHandle = fopen((std::string("movie_str_lib") + std::string(".ovl")).c_str(), "wb+");
+            if (fHandle) {
+                fwrite(overlay.getRawData().data(), 1, overlay.getRawData().size(), fHandle);
+                fclose(fHandle);
+            }
+            setCurrentDirectory(0, 1);
+        }
+    }
+
     MissingCode();
     initKernelVariables();
     initGameState();
@@ -202,7 +230,19 @@ bool noahInit(int argc, char* argv[])
         validationInit();
     }
 
-    setGameMode(6); // for into movie?
+    // Set up intro movie parameters (matching Ghidra main())
+    movieType = 1; // picture+ADPCM
+    movieReturnMode = 1; // return to field
+    movieFadeParam = 0;
+    {
+        int diskNumber = getCurrentDiscNumber();
+        movieNumber = 7;
+        if (diskNumber == 1) {
+            movieNumber = 0x10;
+        }
+    }
+
+    setGameMode(6); // intro movie
 
     while (!gCloseApp) {
         bootGame(0);

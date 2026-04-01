@@ -5381,7 +5381,7 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
         }
 
         if ((((getWalkmeshTriangleFlag(pFieldScriptEntity) & 4) != 0) && (foundEntry != 0)) && ((int)pFieldScriptEntity->m10_walkmeshId <= g_numWalkMesh + -1)) {
-            pFieldScriptEntity->m10_walkmeshId = stackVar.m20_walkmeshId[0];
+            pFieldScriptEntity->m10_walkmeshId = stackVar.m20_walkmeshId[foundEntry - 1];
         }
 
         if ((pFieldScriptEntity->m0_fieldScriptFlags._700 & getWalkmeshTriangleFlag(pFieldScriptEntity) >> 5) == 0) {
@@ -5427,17 +5427,21 @@ int EntityMoveCheck1(int entityIndex, int maxAltitude, sFieldEntity* pFieldEntit
             pFieldScriptEntity->m8_currentWalkMeshTriangle[i] = stackVar.m88[i];
         }
 
-        if ((pFieldScriptEntity->m20_position.vy >> 16) < pSpriteActor->m84_maxY) {
-            if (pSpriteActor->m84_maxY != sVar2) {
-                (pSpriteActor->mC_step).vy += pSpriteActor->m1C_gravity;
+        {
+            s16 currentMaxY = pSpriteActor->m84_maxY;
+            s16 currentPositionY = pFieldScriptEntity->m20_position.vy >> 16;
+            if (currentPositionY < currentMaxY) {
+                if (currentMaxY != currentPositionY) {
+                    (pSpriteActor->mC_step).vy += pSpriteActor->m1C_gravity;
+                }
             }
-        }
-        else {
-            if (0 < (pSpriteActor->mC_step).vy) {
-                (pSpriteActor->mC_step).vy = 0;
+            else {
+                if (0 < (pSpriteActor->mC_step).vy) {
+                    (pSpriteActor->mC_step).vy = 0;
+                }
+                pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags &= ~0x401000;
+                (pFieldScriptEntity->m20_position).vy = (int)pSpriteActor->m84_maxY << 0x10;
             }
-            pFieldScriptEntity->m0_fieldScriptFlags.m_rawFlags &= ~0x401000;
-            (pFieldScriptEntity->m20_position).vy = (int)pSpriteActor->m84_maxY << 0x10;
         }
         VALIDATE_FIELD(FCT_MoveCheck, 0x80085444);
         (pSpriteActor->m0_position).vx = (pFieldScriptEntity->m20_position).vx;
@@ -6098,16 +6102,16 @@ int checkCameraCollision(VECTOR* param_1, std::array<SVECTOR, 2>& param_2, std::
     switch (collisionFlag)
     {
     case 1:
-        param_2[0] = pVertices[pCollisionTriangles[lastTriangle].m0_verticeIndex[1]];
-        param_2[1] = pVertices[pCollisionTriangles[lastTriangle].m0_verticeIndex[2]];
+        param_2[0] = pVertices[pCollisionTriangles[lastTriangle].m0_verticeIndex[0]];
+        param_2[1] = pVertices[pCollisionTriangles[lastTriangle].m0_verticeIndex[1]];
         break;
     case 2:
         param_2[0] = pVertices[pCollisionTriangles[lastTriangle].m0_verticeIndex[1]];
         param_2[1] = pVertices[pCollisionTriangles[lastTriangle].m0_verticeIndex[2]];
         break;
     case 4:
-        param_2[0] = pVertices[pCollisionTriangles[lastTriangle].m0_verticeIndex[1]];
-        param_2[1] = pVertices[pCollisionTriangles[lastTriangle].m0_verticeIndex[2]];
+        param_2[0] = pVertices[pCollisionTriangles[lastTriangle].m0_verticeIndex[2]];
+        param_2[1] = pVertices[pCollisionTriangles[lastTriangle].m0_verticeIndex[0]];
         break;
     default:
         assert(0);

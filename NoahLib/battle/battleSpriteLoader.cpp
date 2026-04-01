@@ -113,7 +113,7 @@ void loadBattleSpriteVram(sBattleSpriteConfigs* param_1) {
                         int iVar3 = iDest - 0x1C0;
                         iDest++;
 
-                        mechaInitEnvironmentMechaMesh(entryId, flags | 0x80, &param_1->m8[currentSpriteEntityId].m_mechaData2, &param_1->m8[currentSpriteEntityId].m_mechaData1, currentSpriteX, 0x100, 0, ((entryId - iVar3) * 0x10000) >> 0x10, 0);
+                        mechaInitEnvironmentMechaMesh(entryId, flags | 0x80, &param_1->m8[numCurrentEntity].m_mechaData2, &param_1->m8[numCurrentEntity].m_mechaData1, currentSpriteX, 0x100, 0, ((entryId - iVar3) * 0x10000) >> 0x10, 0);
                         initMechaForBattle(entryId);
                     }
                 }

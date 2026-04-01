@@ -22,31 +22,29 @@ int executeMonsterScriptWhenAttacked(char param_1) {
     s8 numIterations = 0;;
     if (((battleEntities[param_1].m0_base.m7C & 0x8000) == 0) ||
         (result = 0, (battleEntities[param_1].m0_base.m34 & 0x800) != 0)) {
-        if (battleEntities[param_1].m0_base.m34 & 0x800) {
-            battleScriptContext[0].m0_attackType = 0;
-            result = result2;
-            if (unknownMonsterStatus0[param_1 - 3].m0 != 0) {
-                sBattleScriptExecutionContext localContext;
-                localContext.m0_scriptPtr = monstersScriptsEntities[param_1 - 3].m0_scripts[2].value();
-                memset(battleScriptContext.data(), 0, sizeof(battleScriptContext));
-                while (true) {
-                    result = result2;
-                    if ((*localContext.m0_scriptPtr == 0xFD) || (*localContext.m0_scriptPtr == 0xFF))
-                        break;
-                    if (*localContext.m0_scriptPtr < 0x80) {
-                        if (*localContext.m0_scriptPtr == 0x62) {
-                            result2 = 1;
-                        }
-                        numIterations = executeMonsterScriptLower(&localContext, param_1 - 3, numIterations);
+        battleScriptContext[0].m0_attackType = 0;
+        result = result2;
+        if (unknownMonsterStatus0[param_1 - 3].m0 != 0) {
+            sBattleScriptExecutionContext localContext;
+            localContext.m0_scriptPtr = monstersScriptsEntities[param_1 - 3].m0_scripts[2].value();
+            memset(battleScriptContext.data(), 0, sizeof(battleScriptContext));
+            while (true) {
+                result = result2;
+                if ((*localContext.m0_scriptPtr == 0xFD) || (*localContext.m0_scriptPtr == 0xFF))
+                    break;
+                if (*localContext.m0_scriptPtr < 0x80) {
+                    if (*localContext.m0_scriptPtr == 0x62) {
+                        result2 = 1;
                     }
-                    else if(executeMonsterScriptUpper(&localContext, param_1 + -3) == 0) {
-                        skipScriptIfFalse(&localContext);
-                    }
+                    numIterations = executeMonsterScriptLower(&localContext, param_1 - 3, numIterations);
+                }
+                else if(executeMonsterScriptUpper(&localContext, param_1 + -3) == 0) {
+                    skipScriptIfFalse(&localContext);
                 }
             }
-            if (battleScriptContext[0].m0_attackType) {
-                executeBattleCode(param_1);
-            }
+        }
+        if (battleScriptContext[0].m0_attackType) {
+            executeBattleCode(param_1);
         }
     }
 
@@ -336,7 +334,7 @@ void skipScriptIfFalse(sBattleScriptExecutionContext* param_1)
     while (0x7f < *param_1->m0_scriptPtr) {
         advanceBattleScript(param_1);
     }
-    while (0x6f < (*param_1->m0_scriptPtr - 0x80)) {
+    while (0x6f < (u8)(*param_1->m0_scriptPtr + 0x80)) {
         advanceBattleScript(param_1);
     }
 }

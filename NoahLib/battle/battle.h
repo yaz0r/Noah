@@ -267,8 +267,12 @@ struct sBattleMechaInitData {
             }
         }
 
+        m344 = READ_LE_S16(it + 0x344);
         m348 = READ_LE_S16(it + 0x348);
         m34A = READ_LE_S16(it + 0x34A);
+        m478_r = READ_LE_U8(it + 0x478);
+        m479_g = READ_LE_U8(it + 0x479);
+        m47A_b = READ_LE_U8(it + 0x47A);
         m47C_at.vx = READ_LE_S16(it + 0x47C + 0);
         m47C_at.vy = READ_LE_S16(it + 0x47C + 2);
         m47C_at.vz = READ_LE_S16(it + 0x47C + 4);
@@ -279,8 +283,12 @@ struct sBattleMechaInitData {
     std::array<std::array<sVec2_s16, 8>, 4> m4;
     std::array<std::array<sVec2_s16, 2>, 8> m100;
     std::array<std::array<std::array<u8, 8>, 8>, 8> m140;
+    s16 m344;
     s16 m348;
     s16 m34A;
+    u8 m478_r;
+    u8 m479_g;
+    u8 m47A_b;
     SFP_VEC3 m47C_at;
     SFP_VEC3 m482_eye;
 
@@ -383,11 +391,13 @@ struct sBattleEntity {
     sGameStateA4 m0_base;
     sGameStateA42 mA4_gear;
     u8 m15A_flags;
+    u8 m15C_statusTimer = 0;
 
     void deserialize(std::vector<u8>::const_iterator buffer) {
         m0_base.deserialize(buffer + 0);
         mA4_gear.deserialize(buffer + 0xA4);
         m15A_flags = READ_LE_U8(buffer + 0x15A);
+        m15C_statusTimer = READ_LE_U8(buffer + 0x15C);
     }
 
     // size 0x170

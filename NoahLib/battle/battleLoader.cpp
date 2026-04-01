@@ -766,7 +766,7 @@ void loadEnemies() {
     currentBattleSpecificStrings = battleConfigFile2.m30_strings;
     for (int i = 3; i < 11; i++) {
         unknownMonsterStatus0[i - 3].m3 = 0;
-        if (battleVisualEntities[3].m2 == 0x7F) {
+        if (battleVisualEntities[i].m2 == 0x7F) {
             memset(&battleEntities[i], 0, sizeof(battleEntities[i]));
             unknownMonsterStatus0[i - 3].m0 = 0;
             unknownMonsterStatus0[i - 3].m1 = 0;
@@ -778,21 +778,21 @@ void loadEnemies() {
             assert(!monstersScriptsEntities[i - 3].m0_scripts[2].has_value());
             assert(!monstersScriptsEntities[i - 3].m0_scripts[3].has_value());
 
-            battleEntities[i] = battleConfigFile2.m32[battleVisualEntities[3].m2];
-            monstersScriptsEntities[i - 3].m0_scripts[0] = battleConfigFile2.getPointerForScriptSub(battleVisualEntities[3].m2, 0, 0);
-            monstersScriptsEntities[i - 3].m0_scripts[1] = battleConfigFile2.getPointerForScriptSub(battleVisualEntities[3].m2, 1, 0);
-            if (battleConfigFile2.m0_scriptsOffsets[battleVisualEntities[3].m2][2] == -1) {
+            battleEntities[i] = battleConfigFile2.m32[battleVisualEntities[i].m2];
+            monstersScriptsEntities[i - 3].m0_scripts[0] = battleConfigFile2.getPointerForScriptSub(battleVisualEntities[i].m2, 0, 0);
+            monstersScriptsEntities[i - 3].m0_scripts[1] = battleConfigFile2.getPointerForScriptSub(battleVisualEntities[i].m2, 1, 0);
+            if (battleConfigFile2.m0_scriptsOffsets[battleVisualEntities[i].m2][2] == -1) {
                 unknownMonsterStatus0[i - 3].m0 = 0;
             }
             else {
-                monstersScriptsEntities[i - 3].m0_scripts[2] = battleConfigFile2.getPointerForScriptSub(battleVisualEntities[3].m2, 2, 0);
+                monstersScriptsEntities[i - 3].m0_scripts[2] = battleConfigFile2.getPointerForScriptSub(battleVisualEntities[i].m2, 2, 0);
                 unknownMonsterStatus0[i - 3].m0 = 1;
             }
-            if (battleConfigFile2.m0_scriptsOffsets[battleVisualEntities[3].m2][3] == -1) {
+            if (battleConfigFile2.m0_scriptsOffsets[battleVisualEntities[i].m2][3] == -1) {
                 unknownMonsterStatus0[i - 3].m1 = 0;
             }
             else {
-                monstersScriptsEntities[i - 3].m0_scripts[3] = battleConfigFile2.getPointerForScriptSub(battleVisualEntities[3].m2, 3, 0);
+                monstersScriptsEntities[i - 3].m0_scripts[3] = battleConfigFile2.getPointerForScriptSub(battleVisualEntities[i].m2, 3, 0);
                 unknownMonsterStatus0[i - 3].m1 = 1;
             }
             for (int j = 0; j < 4; j++) {
