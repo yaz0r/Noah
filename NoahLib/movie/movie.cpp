@@ -58,8 +58,10 @@ static void movieStartPlaybackFromScript(u8 fadeParam)
     DrawSync(0);
     VSync(0);
 
+    bool enableAudio = (movieType == 1); // type 1 = picture + ADPCM
+
     g_strPlayer.init();
-    g_strPlayer.start(fileStartSector, fileSectors);
+    g_strPlayer.start(fileStartSector, fileSectors, enableAudio);
 
     SetDispMask(1);
 

@@ -22,8 +22,9 @@ struct sStrPlayer {
 
     // Start playing a movie from the ISO
     // fileStartSector: absolute sector on disc where the STR file starts
-    // fileSize: total size in bytes
-    bool start(int fileStartSector, int fileSizeInSectors);
+    // fileSizeInSectors: total size in sectors
+    // enableAudio: if true, XA ADPCM audio sectors are decoded and played
+    bool start(int fileStartSector, int fileSizeInSectors, bool enableAudio = false);
 
     // Decode next frame. Returns false when movie is done.
     bool decodeNextFrame();
@@ -49,6 +50,8 @@ private:
     int m_width;
     int m_height;
     bool m_finished;
+    bool m_audioEnabled;
+    unsigned int m_xaSectorCount;
 
     // Reassembly buffer for one complete frame's MDEC data
     std::vector<u8> m_frameBuffer;
