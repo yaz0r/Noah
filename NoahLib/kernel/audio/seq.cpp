@@ -71,7 +71,7 @@ void stopSequence(sSeqFile* param_1) {
         if (((psVar4->m0 & 1) != 0) && ((psVar4->m8 >> 16) == sVar1)) { // TODO: unsure about psVar4->m8 >> 16
             psVar4->m0 = 0;
             psVar2->m48_activeVoicesBF = ~(1 << (psVar4->m6_voiceIndex & 0x1f)) & psVar2->m48_activeVoicesBF;
-            playSoundEffectSubSub0(&psVar4->m30, psVar4->m27);
+            releaseSpuVoice(&psVar4->m30, psVar4->m27);
         }
         psVar4 = psVar4 + 1;
     } while (iVar5 != 0);

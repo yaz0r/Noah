@@ -23,7 +23,7 @@ struct sSoundInstanceEvent30 {
     u8 m2A_ADSR_Release;
     u8 m2B_ADSR_SustainLevel;
 };
-extern std::array<sSoundInstanceEvent30*, 24> playSoundEffectSubSub1Var0;
+extern std::array<sSoundInstanceEvent30*, 24> spuVoiceOwners;
 
 void initSoundSystem(ushort param_1);
 void setSoundError(u16 errorCode);

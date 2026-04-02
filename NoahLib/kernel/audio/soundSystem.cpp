@@ -18,7 +18,7 @@ static const u16 SPU_REG_CHON_low = 0x19c / 2;
 static const u16 SPU_REG_CHON_high = 0x19E / 2;
 
 u16 musicStatusFlag = 0;
-std::array<sSoundInstanceEvent30*, 0x18> playSoundEffectSubSub1Var0;
+std::array<sSoundInstanceEvent30*, 0x18> spuVoiceOwners;
 
 std::mutex spuStatusMutex;
 static const int numRegs = 512;
@@ -34,7 +34,7 @@ void sendAdsrToSpu() {
     u32 noiseGenerationFlag = 0;
     u32 reverbFlag = 0;
     for (int i = 0; i < 24; i++) {
-        sSoundInstanceEvent30* voiceState = playSoundEffectSubSub1Var0[i];
+        sSoundInstanceEvent30* voiceState = spuVoiceOwners[i];
         if(voiceState == nullptr)
             continue;
         u16 dirtyFlag = voiceState->m6;
@@ -393,14 +393,14 @@ void voicePostUpdate2Sub0(sSoundInstanceEvent30* param_1, uint param_2)
     sSoundInstanceEvent30* psVar1;
 
     if (param_2 < 0x18) {
-        psVar1 = playSoundEffectSubSub1Var0[param_2];
+        psVar1 = spuVoiceOwners[param_2];
         if (psVar1 != param_1) {
             if ((psVar1 != (sSoundInstanceEvent30*)0x0) && (param_1->m4 < psVar1->m4)) {
                 return;
             }
             param_1->m6 = -1;
             param_1->m0 = (short)param_2;
-            playSoundEffectSubSub1Var0[param_2] = param_1;
+            spuVoiceOwners[param_2] = param_1;
             pendingKeyOff = 1 << (param_2 & 0x1f) | pendingKeyOff;
         }
         pendingKeyOn = 1 << (param_2 & 0x1f) | pendingKeyOn;
@@ -410,7 +410,7 @@ void voicePostUpdate2Sub0(sSoundInstanceEvent30* param_1, uint param_2)
 
 void voicePostUpdate2Sub1(sSoundInstanceEvent30* param_1, uint param_2)
 {
-    if ((param_2 < 0x18) && (playSoundEffectSubSub1Var0[param_2] == param_1)) {
+    if ((param_2 < 0x18) && (spuVoiceOwners[param_2] == param_1)) {
         pendingKeyOff2 |= 1 << (param_2 & 0x1f);
     }
     return;

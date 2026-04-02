@@ -174,7 +174,8 @@ void setupAdsr(int param_1, sSoundInstanceEvent* param_2);
 sSoundInstance* createMusicInstance(sSeqFile* param_1);
 void applyFlagToAllVoices(ushort param_1, sSoundInstance* param_2);
 
-void playSoundEffectSubSub0(sSoundInstanceEvent30* param_1, int param_2);
+void releaseSpuVoice(sSoundInstanceEvent30* param_1, int param_2);
+void claimSpuVoice(sSoundInstanceEvent30* param_1, u32 param_2);
 
 void startMusicInstance(sSoundInstance* param_1, int, int);
 void startMusicInstanceSub0(sSoundInstance* param_1);

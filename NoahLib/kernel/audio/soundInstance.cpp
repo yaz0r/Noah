@@ -112,24 +112,24 @@ void setupAdsr(int param_1, sSoundInstanceEvent* param_2) {
 u32 pendingKeyOff = 0;
 u32 pendingKeyOn = 0;
 
-void playSoundEffectSubSub0(sSoundInstanceEvent30* param_1, int param_2) {
-    if ((param_2 < 0x18) && (playSoundEffectSubSub1Var0[param_2] == param_1)) {
-        playSoundEffectSubSub1Var0[param_2] = nullptr;
+void releaseSpuVoice(sSoundInstanceEvent30* param_1, int param_2) {
+    if ((param_2 < 0x18) && (spuVoiceOwners[param_2] == param_1)) {
+        spuVoiceOwners[param_2] = nullptr;
         u32 keyBitField = 1 << (param_2 & 0x1f);
         pendingKeyOff |= keyBitField;
         pendingKeyOn &= ~keyBitField;
     }
 }
 
-void playSoundEffectSubSub1(sSoundInstanceEvent30* param_1, u32 param_2) {
+void claimSpuVoice(sSoundInstanceEvent30* param_1, u32 param_2) {
     if (param_2 < 0x18) {
-        if (playSoundEffectSubSub1Var0[param_2] == param_1) {
+        if (spuVoiceOwners[param_2] == param_1) {
             pendingKeyOff |= 1 << (param_2 & 0x1f);
         }
-        else if ((playSoundEffectSubSub1Var0[param_2] == nullptr) || (playSoundEffectSubSub1Var0[param_2]->m4 <= param_1->m4)) {
+        else if ((spuVoiceOwners[param_2] == nullptr) || (spuVoiceOwners[param_2]->m4 <= param_1->m4)) {
             param_1->m6 = -1;
             param_1->m0 = param_2;
-            playSoundEffectSubSub1Var0[param_2] = param_1;
+            spuVoiceOwners[param_2] = param_1;
             pendingKeyOff |= (1 << (param_2 & 0x1f));
             pendingKeyOn &= ~(1 << (param_2 & 0x1f));
         }
@@ -164,7 +164,7 @@ void playSoundEffectSub(uint param_1, uint param_2, short param_3, u16 param_4) 
                 if (READ_LE_U16(pDrumData) == 0) {
                     pSoundInstance->m48_activeVoicesBF = ~(1 << (pSoundEvent->m6_voiceIndex & 0x1f)) & pSoundInstance->m48_activeVoicesBF;
                     pSoundEvent->m0 = 0;
-                    playSoundEffectSubSub0(&pSoundEvent->m30, pSoundEvent->m27);
+                    releaseSpuVoice(&pSoundEvent->m30, pSoundEvent->m27);
                 }
                 else {
                     pSoundInstance->m48_activeVoicesBF = 1 << (pSoundEvent->m6_voiceIndex & 0x1f) | pSoundInstance->m48_activeVoicesBF;
@@ -212,7 +212,7 @@ void playSoundEffectSub(uint param_1, uint param_2, short param_3, u16 param_4) 
                     }
                     pSoundEvent->m30.m2 = 0;
                     pSoundEvent->m30.m4 = 0x200;
-                    playSoundEffectSubSub1(&pSoundEvent->m30, pSoundEvent->m27);
+                    claimSpuVoice(&pSoundEvent->m30, pSoundEvent->m27);
                 }
             }
             pSoundInstance->m10_flags |= 0x8000;
@@ -317,7 +317,7 @@ void initSoundInstanceTracks(sSoundInstance* param_1) {
                 pSoundEvent->m27 = i - 1;
                 pSoundEvent->m30.m2 = 0;
                 pSoundEvent->m30.m4 = 0x200;
-                playSoundEffectSubSub1(&pSoundEvent->m30, pSoundEvent->m27);
+                claimSpuVoice(&pSoundEvent->m30, pSoundEvent->m27);
             }
         }
         param_1->m48_activeVoicesBF = usedVoicesBitField;
@@ -357,7 +357,7 @@ void startMusicInstanceSub0Sub(sSoundInstance* param_1)
 {
     for (int i = 0; i < param_1->m14_count; i++) {
         auto& voice = param_1->m94_events[i];
-        playSoundEffectSubSub0(&voice.m30, voice.m27);
+        releaseSpuVoice(&voice.m30, voice.m27);
     }
 }
 
@@ -538,7 +538,7 @@ void StopSoundEffect(uint param_1)
         if ((psVar2->m0 & 1) != 0) {
             psVar2->m0 = 0;
             psVar1->m48_activeVoicesBF = ~(1 << (psVar2->m6_voiceIndex & 0x1f)) & psVar1->m48_activeVoicesBF;
-            playSoundEffectSubSub0(&psVar2->m30, psVar2->m27);
+            releaseSpuVoice(&psVar2->m30, psVar2->m27);
         }
         psVar2 = psVar2 + 1;
     } while (iVar4 != 0);
@@ -561,7 +561,7 @@ void stopAllSounds() {
         auto& instance = pSoundEffectsInstances->m94_events[i];
         if (instance.m0 & 1) {
             instance.m0 = 0;
-            playSoundEffectSubSub0(&instance.m30, instance.m27);
+            releaseSpuVoice(&instance.m30, instance.m27);
         }
     }
     EnableEvent(audioTickEvent);
