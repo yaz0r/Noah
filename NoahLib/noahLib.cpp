@@ -242,7 +242,11 @@ bool noahInit(int argc, char* argv[])
         }
     }
 
+#ifndef SHIPPING_BUILD
+    setGameMode(0); // boot menu
+#else
     setGameMode(6); // intro movie
+#endif
 
     while (!gCloseApp) {
         bootGame(0);
@@ -260,7 +264,7 @@ void noahFrame_start()
     vsyncCallback();
 }
 
-bool noahFrame_end()
+bool noahFrame_end(bool drawImage)
 {
     updateSPUDebugger();
     if (ImGui::Begin("Loggers")) {
@@ -323,7 +327,9 @@ bool noahFrame_end()
         vramDebug_frame();
     }
 
-    drawPSXFB();
+    if (drawImage) {
+        drawPSXFB();
+    }
 
     EndFrame();
 

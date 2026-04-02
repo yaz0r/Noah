@@ -158,7 +158,7 @@ void battleEvent_loadArgs(std::vector<u8>::iterator bytecode, byte param_2, uint
                 battleEventVar0->m380_currentArgs[i] = (ushort)iVar3 & 0x7fff;
             }
             else {
-                MissingCode(); // vars table lookup: (((iVar2>>16) - (iVar2>>31)) * 0x8000 >> 16) * 2 as index into m394_vars
+                battleEventVar0->m380_currentArgs[i] = battleEventVar0->m394_vars[((iVar2 >> 16) - (iVar2 >> 31)) * 0x8000 >> 16];
             }
         }
         bytecode += 2;

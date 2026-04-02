@@ -1676,8 +1676,7 @@ s32 OPX8E_param1 = 0;
 
 int getCurrentDiscNumber()
 {
-    MissingCode();
-    return 0;
+    return 1; // only disc 1 is supported currently
 }
 
 

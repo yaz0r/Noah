@@ -12,6 +12,7 @@
 #include "psx/libgpu.h"
 
 #include <bgfx/bgfx.h>
+#include <SDL.h>
 
 void renderTexturedQuadBgfx(bgfx::ViewId outputView, bgfx::TextureHandle sourceTexture);
 
@@ -69,7 +70,14 @@ static void movieStartPlaybackFromScript(u8 fadeParam)
     static bgfx::TextureHandle movieTexture = BGFX_INVALID_HANDLE;
     static int texW = 0, texH = 0;
 
-    while (!g_strPlayer.isFinished()) {
+    // Input state for skip detection (matches Ghidra moviePlaybackPollSkipInput)
+    u16 prevInput = 0;
+    u16 curInput = 0;
+    int skipCountdown = 0;
+
+    u64 lastFrameTime = SDL_GetPerformanceCounter();
+    double perfFreq = (double)SDL_GetPerformanceFrequency();
+    while (!g_strPlayer.isFinished() && !gCloseApp) {
         if (!g_strPlayer.decodeNextFrame()) {
             break;
         }
@@ -99,9 +107,37 @@ static void movieStartPlaybackFromScript(u8 fadeParam)
             bgfx::updateTexture2D(movieTexture, 0, 0, 0, 0, w, h,
                                   bgfx::copy(bgra.data(), (uint32_t)(w * h * 4)));
 
-            StartFrame();
+            // Frame pacing: PS1 STR movies run at 15fps (1 frame every 2 NTSC vsyncs)
+            u64 now = SDL_GetPerformanceCounter();
+            double elapsed = (now - lastFrameTime) / perfFreq;
+            double frameTime = 1.0 / 15.0;
+            if (elapsed < frameTime) {
+                SDL_Delay((u32)((frameTime - elapsed) * 1000.0));
+            }
+            lastFrameTime = SDL_GetPerformanceCounter();
+
             renderTexturedQuadBgfx(0, movieTexture);
-            EndFrame();
+            noahFrame_end(false);
+            noahFrame_start();
+        }
+
+        // Poll inputs for skip (Cross=0x40, Start=0x800)
+        getInputDuringVsync();
+        prevInput = curInput;
+        curInput = newPadButtonForScripts[0].m0_buttons;
+        if (fadeParam == 0) {
+            if (!(prevInput & CROSS) && (curInput & CROSS)) {
+                skipCountdown = 5;
+            }
+            if (!(prevInput & START) && (curInput & START)) {
+                skipCountdown = 5;
+            }
+        }
+        if (skipCountdown > 0) {
+            skipCountdown--;
+            if (skipCountdown <= 1) {
+                break;
+            }
         }
     }
 

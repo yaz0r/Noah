@@ -44,7 +44,7 @@ u32 READ_LE_U32(const std::span<u8>::iterator& inputStream);
 s32 READ_LE_S32(const std::span<u8>::iterator& inputStream);
 
 void noahFrame_start();
-bool noahFrame_end();
+bool noahFrame_end(bool drawImage = true);
 
 struct sFixedPoint
 {
