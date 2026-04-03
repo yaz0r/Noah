@@ -28,6 +28,7 @@ public:
     }
     void writeU32(u64 address, u32 value);
     void writeU16(u64 address, u16 value);
+    void writeU8(u64 address, u8 value);
 
     std::string sendMonitorCommand(const std::string& command);
     void resetTarget();

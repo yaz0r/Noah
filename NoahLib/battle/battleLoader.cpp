@@ -184,6 +184,8 @@ void loadPartyMembers() {
 
     Noah_MissingCode("battle800D2500");
 
+    battleAttackNameStrings = mallocAndDecompress(relocatedPointer[37]);
+
     setCurrentDirectory(0xc, 1);
 
     //battleConfigFile2.resize(getFileSizeAligned(currentBattleConfig.m0 * 2 + 2));
@@ -534,7 +536,7 @@ void battleGetSlotStatus(std::array<u8, 0xB>& param1) {
             numTicksBeforeReady[i] = battleSlotStatusVar0[i] = battleGetSlotStatusSub(i);
         }
         isEntityReadyForBattle[i] = 0;
-        battleSlotStatusVar1[i] = 0;
+        battleSlotHalfSpeedToggle[i] = 0;
         param1[i] = 0;
     }
 }

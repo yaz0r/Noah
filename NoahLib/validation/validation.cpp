@@ -6,6 +6,7 @@
 #include "validation/kernel/validateKernel.h"
 #include "validation/field/fieldInputsValidation.h"
 #include "validation/field/validateField.h"
+#include "validation/battle/validateBattle.h"
 
 
 #include "kernel/gameState.h"
@@ -40,6 +41,7 @@ bool validationInit() {
     boolMenuValidation_init();
     validateField_init();
     fieldInputsValidation_init();
+    validateBattle_init();
 
     return true;
 }

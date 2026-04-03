@@ -12,7 +12,7 @@
 #include "kernel/font.h"
 
 extern std::array<s16, 0xB> battleSlotStatusVar0;
-extern std::array<s16, 0xB> battleSlotStatusVar1;
+extern std::array<s16, 0xB> battleSlotHalfSpeedToggle;
 extern std::array<s16, 0xB> numTicksBeforeReady;
 
 extern s8 currentBattleMode;
@@ -531,6 +531,7 @@ extern s16 performAttackSub3_var0;
 extern std::vector<u8>::const_iterator currentBattleSpecificStrings;
 extern std::array<s8, 11> battleMonsterMapping;
 extern s16 entitiesHitInCurrentAttackBF;
+extern std::vector<u8> battleAttackNameStrings;
 extern s16 performAttack_type;
 extern u8 startCharacterJumpToEnemyVar0;
 extern FP_VEC3 previousCameraEye2;
@@ -562,7 +563,7 @@ void setCameraVisibleEntities(uint playerBitmask);
 void updateCharacterBlinkingTask(u32 param_1);
 void battleIdleDuringLoading(void);
 void waitBattleAnimationSpriteLoading();
-void spriteBytecode2ExtendedE0_Sub0_10_battle(sSavePointMeshAbstract* param_1);
+void battleCameraControlSpriteInit(sSavePointMeshAbstract* param_1);
 void createMechaLoadingTask(int param_1);
 int battleGetMechaBitfieldForAnim(sLoadedMechas* param_1, int target, u16* result);
 int getBattleSlotLayout(int index);

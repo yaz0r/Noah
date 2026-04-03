@@ -8,13 +8,6 @@ std::array<sBattleScriptContext, 32> battleScriptContext;
 
 ushort bitmaskCharacterCheck(ushort bitmask, uint characterId);
 
-struct sBattleScriptExecutionContext {
-    std::vector<u8>::const_iterator m0_scriptPtr;
-};
-
-int executeMonsterScriptLower(sBattleScriptExecutionContext* pScriptContext, int entityIndex, int numIterations);
-int executeMonsterScriptUpper(sBattleScriptExecutionContext* pScriptContext, int entityIndex);
-void skipScriptIfFalse(sBattleScriptExecutionContext* param_1);
 
 int executeMonsterScriptWhenAttacked(char param_1) {
     int result = 0;
@@ -55,19 +48,30 @@ void advanceBattleScript(sBattleScriptExecutionContext* pScriptContext) {
     pScriptContext->m0_scriptPtr += 4;
 }
 
-void monsterBattleOpcode_4(sBattleScriptExecutionContext* param_1, uint param_2) {
+void monsterBattleOpcode_setByteVar(sBattleScriptExecutionContext* param_1, uint param_2) {
     auto pByte = monstersScriptsEntities[param_2].m30_s8Vars.begin() + param_1->m0_scriptPtr[1];
     *pByte = param_1->m0_scriptPtr[2];
 }
 
-void monsterBattleOpcode_addByte(sBattleScriptExecutionContext* param_1, uint param_2) {
+void monsterBattleOpcode_addByteVar(sBattleScriptExecutionContext* param_1, uint param_2) {
     auto pByte = monstersScriptsEntities[param_2].m30_s8Vars.begin() + param_1->m0_scriptPtr[1];
     *pByte = std::min<u8>(*pByte + param_1->m0_scriptPtr[2], 0xFF);
 }
 
-void monsterBattleOpcode_modulo(sBattleScriptExecutionContext* param_1, uint param_2) {
+void monsterBattleOpcode_moduloByteVar(sBattleScriptExecutionContext* param_1, uint param_2) {
     auto pByte = monstersScriptsEntities[param_2].m30_s8Vars.begin() + param_1->m0_scriptPtr[1];
     *pByte %= param_1->m0_scriptPtr[2];
+}
+
+bool isEnemySlotTargetable(uint param_1, char param_2) {
+    param_1 &= 0xFF;
+    if (isBattleSlotFilled[param_1] && (battleEntities[param_1].m0_base.m7C & 0xc002) == 0) {
+        if (param_2 != 0) {
+            return true;
+        }
+        return (battleEntities[param_1].m0_base.m84 & 0x20) == 0;
+    }
+    return false;
 }
 
 bool isMonsterTargetValid(uint param_1, char param_2) {
@@ -88,7 +92,7 @@ bool isMonsterTargetValid(uint param_1, char param_2) {
 
 u32 getRandomValueInRange(u32 param_1, u32 param_2);
 
-void monsterBattleOpcode_40(sBattleScriptExecutionContext* param_1, uint param_2) {
+void monsterBattleOpcode_selectRandomPC(sBattleScriptExecutionContext* param_1, uint param_2) {
     std::array<bool, 3> wasTargetTestedYet;
     wasTargetTestedYet.fill(false);
 
@@ -107,7 +111,7 @@ void monsterBattleOpcode_40(sBattleScriptExecutionContext* param_1, uint param_2
     } while ((wasTargetTestedYet[2] & wasTargetTestedYet[0] & wasTargetTestedYet[1]) == 0);
 }
 
-void monsterBattleOpcode_41(sBattleScriptExecutionContext* param_1, uint param_2) {
+void monsterBattleOpcode_selectRandomPCSameRow(sBattleScriptExecutionContext* param_1, uint param_2) {
     std::array<bool, 3> wasTargetTestedYet;
     wasTargetTestedYet.fill(false);
 
@@ -128,7 +132,7 @@ void monsterBattleOpcode_41(sBattleScriptExecutionContext* param_1, uint param_2
     } while ((wasTargetTestedYet[2] & wasTargetTestedYet[0] & wasTargetTestedYet[1]) == 0);
 }
 
-void monsterBattleOpcode_43(sBattleScriptExecutionContext* param_1, uint param_2) {
+void monsterBattleOpcode_selectRandomPCDiffRow(sBattleScriptExecutionContext* param_1, uint param_2) {
     std::array<bool, 3> wasTargetTestedYet;
     wasTargetTestedYet.fill(false);
 
@@ -149,7 +153,7 @@ void monsterBattleOpcode_43(sBattleScriptExecutionContext* param_1, uint param_2
     } while ((wasTargetTestedYet[2] & wasTargetTestedYet[0] & wasTargetTestedYet[1]) == 0);
 }
 
-void monsterBattleOpcode_4A(sBattleScriptExecutionContext* param_1, uint param_2) {
+void monsterBattleOpcode_selectRandomGearPC(sBattleScriptExecutionContext* param_1, uint param_2) {
     std::array<bool, 3> wasTargetTestedYet;
     wasTargetTestedYet.fill(false);
 
@@ -168,16 +172,17 @@ void monsterBattleOpcode_4A(sBattleScriptExecutionContext* param_1, uint param_2
     } while ((wasTargetTestedYet[2] & wasTargetTestedYet[0] & wasTargetTestedYet[1]) == 0);
 }
 
-int monsterBattleOpcode_50Sub(u16 bitmask)
+int monsterBattleOpcode_countEnemiesSameRow_findFirstInBitmask(u16 bitmask)
 {
-    for(int i=0; i<11; i++) {
+    int i = 0;
+    for (; i < 11; i++) {
         if (bitmaskCharacterCheck(bitmask, i))
-            return i;
+            break;
     }
-    return 10; // always return the last entry if everything fails
+    return i & 0xff; // returns 11 if no match (PSX behavior: loop exits with i=11)
 }
 
-void monsterBattleOpcode_50(sBattleScriptExecutionContext* param_1, uint param_2) {
+void monsterBattleOpcode_countEnemiesSameRow(sBattleScriptExecutionContext* param_1, uint param_2) {
     u8 destVarIndex = param_1->m0_scriptPtr[1];
     u8 maskVarIndex = param_1->m0_scriptPtr[2];
 
@@ -185,7 +190,7 @@ void monsterBattleOpcode_50(sBattleScriptExecutionContext* param_1, uint param_2
     for (int i = 3; i < 11; i++) {
         if (isMonsterTargetValid(i, 0)) {
             u16 bitMask = monstersScriptsEntities[param_2].m20_s16Vars[maskVarIndex];
-            if (battleVisualEntities[i].m0_positionSlot == battleVisualEntities[monsterBattleOpcode_50Sub(bitMask) & 0xff].m0_positionSlot) {
+            if (battleVisualEntities[i].m0_positionSlot == battleVisualEntities[monsterBattleOpcode_countEnemiesSameRow_findFirstInBitmask(bitMask) & 0xff].m0_positionSlot) {
                 result++;
             }
         }
@@ -195,15 +200,15 @@ void monsterBattleOpcode_50(sBattleScriptExecutionContext* param_1, uint param_2
 
 std::array<s16, 16> gameState_2324_copy;
 
-void monsterBattleOpcode_30(sBattleScriptExecutionContext* param_1, uint param_2) {
+void monsterBattleOpcode_loadGameStateVar(sBattleScriptExecutionContext* param_1, uint param_2) {
     monstersScriptsEntities[param_2].m20_s16Vars[param_1->m0_scriptPtr[1]] = gameState_2324_copy[param_1->m0_scriptPtr[2]];
 }
 
-void monsterBattleOpcode_3E(sBattleScriptExecutionContext* param_1, uint param_2) {
+void monsterBattleOpcode_randomByteVar(sBattleScriptExecutionContext* param_1, uint param_2) {
     monstersScriptsEntities[param_2].m30_s8Vars[param_1->m0_scriptPtr[1]] = getRandomValueInRange(0, param_1->m0_scriptPtr[2]);
 }
 
-void monsterBattleOpcode_52(sBattleScriptExecutionContext* param_1, std::array<sBattleScriptContext, 32>& param_2, uint param_3, uint param_4) {
+void monsterBattleOpcode_copyVarToContext(sBattleScriptExecutionContext* param_1, std::array<sBattleScriptContext, 32>& param_2, uint param_3, uint param_4) {
     s16 value = monstersScriptsEntities[param_3].m20_s16Vars[param_1->m0_scriptPtr[2]];
     
     switch (param_1->m0_scriptPtr[1]) {
@@ -215,11 +220,37 @@ void monsterBattleOpcode_52(sBattleScriptExecutionContext* param_1, std::array<s
     }
 }
 
-void monsterBattleOpcode_64(sBattleScriptExecutionContext* param_1, uint param_2) {
+void monsterBattleOpcode_selectRandomHiddenEnemy(sBattleScriptExecutionContext* param_1, uint param_2) {
+    monstersScriptsEntities[param_2].m20_s16Vars[param_1->m0_scriptPtr[1]] = 0;
+    std::array<u8, 8> candidates;
+    int numCandidates = 0;
+    for (u32 i = 3; i < 11; i++) {
+        if (isEnemySlotTargetable(i, param_1->m0_scriptPtr[2])) {
+            if (battleVisualEntities[i].m3 & 0x80) {
+                candidates[numCandidates] = (u8)i;
+                numCandidates++;
+            }
+        }
+    }
+    if (numCandidates != 0) {
+        u32 pick = getRandomValueInRange(0, (numCandidates - 1) & 0xff);
+        monstersScriptsEntities[param_2].m20_s16Vars[param_1->m0_scriptPtr[1]] = characterIdToTargetBitmask(candidates[pick & 0xff]);
+    }
+}
+
+void monsterBattleOpcode_storeSelfBitmask(sBattleScriptExecutionContext* param_1, uint param_2) {
     monstersScriptsEntities[param_2].m20_s16Vars[param_1->m0_scriptPtr[1]] = characterIdToTargetBitmask(param_2 + 3);
 }
 
-byte monsterBattleOpcode_1(sBattleScriptExecutionContext* param_1, std::array<sBattleScriptContext, 32>& param_2, byte param_3) {
+void monsterBattleOpcode_forceNextTurn(sBattleScriptExecutionContext* param_1, uint param_2) {
+    u16 bitmask = monstersScriptsEntities[param_2].m20_s16Vars[param_1->m0_scriptPtr[1]];
+    assert(bitmask != 0); // empty bitmask → findFirstInBitmask returns 11 → out of range forced turn
+    int entityIndex = monsterBattleOpcode_countEnemiesSameRow_findFirstInBitmask(bitmask);
+    assert(entityIndex < 11); // no matching entity in bitmask
+    bBattleTickMode1 = (u8)(entityIndex + 1);
+}
+
+byte monsterBattleOpcode_writeContextByte(sBattleScriptExecutionContext* param_1, std::array<sBattleScriptContext, 32>& param_2, byte param_3) {
     (&param_2[param_3].m0_attackType)[(byte)param_1->m0_scriptPtr[1]] = param_1->m0_scriptPtr[2];
     if (param_1->m0_scriptPtr[1] == '\0') {
         param_3 = param_3 + 1;
@@ -227,47 +258,63 @@ byte monsterBattleOpcode_1(sBattleScriptExecutionContext* param_1, std::array<sB
     return param_3;
 }
 
+void monsterBattleOpcode_writeContextWord(sBattleScriptExecutionContext* param_1, std::array<sBattleScriptContext, 32>& param_2, byte param_3) {
+    u8* base = &param_2[param_3].m0_attackType;
+    u8 offset = (u8)param_1->m0_scriptPtr[1];
+    base[offset] = param_1->m0_scriptPtr[2];
+    base[offset + 1] = param_1->m0_scriptPtr[3];
+}
+
 int executeMonsterScriptLower(sBattleScriptExecutionContext* pScriptContext, int entityIndex, int numIterations) {
     u8 bytecode = *pScriptContext->m0_scriptPtr;
     switch (bytecode) {
     case 1:
-        numIterations = monsterBattleOpcode_1(pScriptContext, battleScriptContext, numIterations);
+        numIterations = monsterBattleOpcode_writeContextByte(pScriptContext, battleScriptContext, numIterations);
         break;
     case 4:
-        monsterBattleOpcode_4(pScriptContext, entityIndex);
+        monsterBattleOpcode_setByteVar(pScriptContext, entityIndex);
         break;
     case 8:
-        monsterBattleOpcode_addByte(pScriptContext, entityIndex);
+        monsterBattleOpcode_addByteVar(pScriptContext, entityIndex);
         break;
     case 0xC:
-        monsterBattleOpcode_modulo(pScriptContext, entityIndex);
+        monsterBattleOpcode_moduloByteVar(pScriptContext, entityIndex);
         break;
     case 0x30:
-        monsterBattleOpcode_30(pScriptContext, entityIndex);
+        monsterBattleOpcode_loadGameStateVar(pScriptContext, entityIndex);
+        break;
+    case 0x3D:
+        monsterBattleOpcode_writeContextWord(pScriptContext, battleScriptContext, numIterations);
         break;
     case 0x3E:
-        monsterBattleOpcode_3E(pScriptContext, entityIndex);
+        monsterBattleOpcode_randomByteVar(pScriptContext, entityIndex);
         break;
     case 0x40:
-        monsterBattleOpcode_40(pScriptContext, entityIndex);
+        monsterBattleOpcode_selectRandomPC(pScriptContext, entityIndex);
         break;
     case 0x41:
-        monsterBattleOpcode_41(pScriptContext, entityIndex);
+        monsterBattleOpcode_selectRandomPCSameRow(pScriptContext, entityIndex);
         break;
     case 0x43:
-        monsterBattleOpcode_43(pScriptContext, entityIndex);
+        monsterBattleOpcode_selectRandomPCDiffRow(pScriptContext, entityIndex);
         break;
     case 0x4A:
-        monsterBattleOpcode_4A(pScriptContext, entityIndex);
+        monsterBattleOpcode_selectRandomGearPC(pScriptContext, entityIndex);
         break;
     case 0x50:
-        monsterBattleOpcode_50(pScriptContext, entityIndex);
+        monsterBattleOpcode_countEnemiesSameRow(pScriptContext, entityIndex);
         break;
     case 0x52:
-        monsterBattleOpcode_52(pScriptContext, battleScriptContext, entityIndex, numIterations);
+        monsterBattleOpcode_copyVarToContext(pScriptContext, battleScriptContext, entityIndex, numIterations);
+        break;
+    case 0x56:
+        monsterBattleOpcode_selectRandomHiddenEnemy(pScriptContext, entityIndex);
         break;
     case 0x64:
-        monsterBattleOpcode_64(pScriptContext, entityIndex);
+        monsterBattleOpcode_storeSelfBitmask(pScriptContext, entityIndex);
+        break;
+    case 0x73:
+        monsterBattleOpcode_forceNextTurn(pScriptContext, entityIndex);
         break;
 
     default:
@@ -317,6 +364,9 @@ int executeMonsterScriptUpper(sBattleScriptExecutionContext* pScriptContext, int
         case 0x99:
             exitScript = true;
             break;
+        case 0x9B:
+            operationResult = battleVisualEntities[(entityIndex & 0xff) + 3].m3 >> 7;
+            break;
         default:
             assert(0);
             break;
@@ -348,6 +398,7 @@ void executeMonsterScript(char param_1, int param_2) {
     
     int numIterations = 0;
     sBattleScriptExecutionContext local_18;
+    assert(monstersScriptsEntities[param_1 - 3].m0_scripts[0].has_value()); // PSX doesn't check — uninitialized enemy script?
     local_18.m0_scriptPtr = monstersScriptsEntities[param_1 - 3].m0_scripts[0].value();
     while (1) {
         u8 bytecode = *local_18.m0_scriptPtr;
@@ -372,7 +423,7 @@ void moveEntityToShootEntity(uint param_1, uint param_2);
 bool initJumpData(uint entity, uint target);
 void setCameraVisibleEntities(uint playerBitmask);
 
-void executeBattleCode_attack2Sub(byte param_1, uint param_2) {
+void executeBattleCode_finalizeDamageEntry(byte param_1, uint param_2) {
     short sVar1;
     sBattleVar2* psVar2;
 
@@ -383,7 +434,37 @@ void executeBattleCode_attack2Sub(byte param_1, uint param_2) {
     psVar2->m2DA_indexInBattleVar48 = psVar2->m2DA_indexInBattleVar48 + 1;
 }
 
-void executeBattleCode_attack2(byte param_1, uint param_2, byte param_3)
+void executeBattleCode_copyMonsterToSlot(byte param_1, uint param_2) {
+    // Find the first entity in the target bitmask
+    int sourceEntity = 0;
+    for (int i = 0; i < 11; i++) {
+        if (bitmaskCharacterCheck(battleScriptContext[param_2 & 0xff].m6_mask, i)) {
+            sourceEntity = i;
+            break;
+        }
+    }
+
+    uint destSlot = (uint)param_1;
+    uint srcSlot = sourceEntity & 0xff;
+    int destMonsterIdx = destSlot - 3;
+    int srcMonsterIdx = srcSlot - 3;
+
+    battleMonsterMapping[destSlot] = battleMonsterMapping[srcSlot];
+    monstersScriptsEntities[destMonsterIdx].m0_scripts[0] = monstersScriptsEntities[srcMonsterIdx].m0_scripts[0];
+    monstersScriptsEntities[destMonsterIdx].m0_scripts[1] = monstersScriptsEntities[srcMonsterIdx].m0_scripts[1];
+    monstersScriptsEntities[destMonsterIdx].m0_scripts[2] = monstersScriptsEntities[srcMonsterIdx].m0_scripts[2];
+    monstersScriptsEntities[destMonsterIdx].m0_scripts[3] = monstersScriptsEntities[srcMonsterIdx].m0_scripts[3];
+    unknownMonsterStatus0[destMonsterIdx].m0 = unknownMonsterStatus0[srcMonsterIdx].m0;
+    unknownMonsterStatus0[destMonsterIdx].m1 = unknownMonsterStatus0[srcMonsterIdx].m1;
+    memmove(&battleEntities[destSlot], &battleEntities[srcSlot], 0x170);
+
+    battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m3A = (s16)sourceEntity;
+    battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m47_battleAnimationToPlay = -5;
+    battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m23_battleEntityIndex = param_1;
+    battleVar2->m2DA_indexInBattleVar48 = battleVar2->m2DA_indexInBattleVar48 + 1;
+}
+
+void executeBattleCode_moveAndAttack(byte param_1, uint param_2, byte param_3)
 
 {
     sBattleVar2* psVar1;
@@ -406,28 +487,28 @@ void executeBattleCode_attack2(byte param_1, uint param_2, byte param_3)
     }
     uVar2 = characterIdToTargetBitmask(param_1);
     setCameraVisibleEntities((uint)battleScriptContext[param_2 & 0xff].m6_mask | uVar2 & 0xffff);
-    executeBattleCode_attack2Sub(param_1, param_2 & 0xff);
+    executeBattleCode_finalizeDamageEntry(param_1, param_2 & 0xff);
     return;
 }
 
 extern s8 battleTickMain_var0;
 
-void executeBattleCode_F(byte param_1, uint param_2)
+void executeBattleCode_specialAnimation(byte param_1, uint param_2)
 {
     battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m47_battleAnimationToPlay = -10;
     battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m16_targetBitMask = battleScriptContext[param_2 & 0xff].m6_mask;
-    executeBattleCode_attack2Sub(param_1, param_2);
+    executeBattleCode_finalizeDamageEntry(param_1, param_2);
     return;
 }
 
-void executeBattleCode_4(byte param_1, uint param_2)
+void executeBattleCode_playAnimation(byte param_1, uint param_2)
 {
     battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m47_battleAnimationToPlay = battleScriptContext[param_2 & 0xff].m4;
-    executeBattleCode_attack2Sub(param_1, param_2 & 0xff);
+    executeBattleCode_finalizeDamageEntry(param_1, param_2 & 0xff);
     return;
 }
 
-void executeBattleCode_C(uint param_1, byte param_2)
+void executeBattleCode_showMonsterName(uint param_1, byte param_2)
 
 {
     sBattleVar2* psVar1;
@@ -456,7 +537,7 @@ void executeBattleCode_C(uint param_1, byte param_2)
     return;
 }
 
-void executeBattleCode_1(byte param_1, uint param_2)
+void executeBattleCode_performAttack(byte param_1, uint param_2)
 {
     int iVar1;
     
@@ -468,7 +549,7 @@ void executeBattleCode_1(byte param_1, uint param_2)
     performAttackSub6(battleVar2->m2DA_indexInBattleVar48);
     battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m47_battleAnimationToPlay = battleScriptContext[param_2].m2;
     battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m16_targetBitMask = entitiesHitInCurrentAttackBF;
-    executeBattleCode_attack2Sub(param_1, param_2);
+    executeBattleCode_finalizeDamageEntry(param_1, param_2);
     if (battleScriptContext[param_2].m6_mask != entitiesHitInCurrentAttackBF)
     {
         for (int i = 0; i < battleVar2->m2DA_indexInBattleVar48; i++) {
@@ -481,7 +562,16 @@ void executeBattleCode_1(byte param_1, uint param_2)
     return;
 }
 
-void executeBattleCode_E(ushort param_1, s8 param_2) {
+void executeBattleCode_hideMonsterName(byte param_1) {
+    if (battleTickMain_var0 != 0) {
+        battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m23_battleEntityIndex = param_1;
+        battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m47_battleAnimationToPlay = -8;
+        battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m3A = battleTickMain_var0 - 1;
+        battleVar2->m2DA_indexInBattleVar48 = battleVar2->m2DA_indexInBattleVar48 + 1;
+    }
+}
+
+void executeBattleCode_statusEffect(ushort param_1, s8 param_2) {
     battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m23_battleEntityIndex = param_2;
     battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m47_battleAnimationToPlay = -9;
     battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48].m3A = param_1 & 0xff;
@@ -512,22 +602,28 @@ void executeBattleCode(byte param_1) {
             continueScript = false;
             break;
         case 1:
-            executeBattleCode_1(param_1, numIteration & 0xff);
+            executeBattleCode_performAttack(param_1, numIteration & 0xff);
             break;
         case 2:
-            executeBattleCode_attack2(param_1, numIteration & 0xff, uVar4 & 0xff);
+            executeBattleCode_moveAndAttack(param_1, numIteration & 0xff, uVar4 & 0xff);
             break;
         case 0x4:
-            executeBattleCode_4(param_1, numIteration & 0xff);
+            executeBattleCode_playAnimation(param_1, numIteration & 0xff);
+            break;
+        case 0x7:
+            executeBattleCode_copyMonsterToSlot(param_1, numIteration & 0xff);
             break;
         case 0xC:
-            executeBattleCode_C(numIteration & 0xff, param_1);
+            executeBattleCode_showMonsterName(numIteration & 0xff, param_1);
             break;
         case 0xe:
-            executeBattleCode_E(battleScriptContext[opcodeOffset].m4, param_1);
+            executeBattleCode_statusEffect(battleScriptContext[opcodeOffset].m4, param_1);
             break;
         case 0xF:
-            executeBattleCode_F(param_1, numIteration & 0xff);
+            executeBattleCode_specialAnimation(param_1, numIteration & 0xff);
+            break;
+        case 0x10:
+            executeBattleCode_hideMonsterName(param_1);
             break;
         }
 

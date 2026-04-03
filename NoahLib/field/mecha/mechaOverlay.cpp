@@ -3,6 +3,8 @@
 #include "field/field.h"
 #include "kernel/filesystem.h"
 #include "kernel/gte.h"
+#include "kernel/math.h"
+#include "kernel/trigo.h"
 #include "bx/math.h"
 #include "field/fieldGraphicObject.h"
 #include "kernel/memory.h"
@@ -705,6 +707,14 @@ int mechaOP_11(sMechaInitVar2* param_1, std::vector<sMechaBone>& param_2, sMecha
     }
 }
 
+int computeMechaDistanceToTarget(sLoadedMechas* param_1) {
+    auto* bones = &(*param_1->m4_bones)[0];
+    int dx = (int)param_1->m88[0] - bones->m5C_translation[0];
+    int dy = (int)param_1->m88[1] - bones->m5C_translation[1];
+    int dz = (int)param_1->m88[2] - bones->m5C_translation[2];
+    return SquareRoot0(dx * dx + dy * dy + dz * dz);
+}
+
 void mechaOp_62(sLoadedMechas* param_1, sMechaBone* param_2, byte param_3, short param_4,
     short param_5, short param_6)
 
@@ -808,7 +818,7 @@ static const std::vector<s8> DAT_Battle__800c3530 = { {
         0x1, 0x6C,
 } };
 
-extern s16 setupMechaForEventVar1;
+extern s16 mechaAnimTargetBitmask;
 
 void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int param_3, int param_4)
 {
@@ -1024,14 +1034,29 @@ void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int pa
                 pMecha->m34 = bytecodeHigher & 1;
             }
             break;
-        case 0x28: // distance to target?
+        case 0x28: // fall through if distance/stepSize < threshold (close enough)
+        case 0x29: // fall through if distance/stepSize >= threshold (far enough)
         {
-            //int distance = computeMechaDistanceToTarget(pMecha);
+            int distance = computeMechaDistanceToTarget(pMecha);
             if (pMecha->m8E == 0) {
                 pMecha->m8E = 1;
             }
-            MissingCode();
             pNextBytecode++;
+            int ratio = distance / (int)pMecha->m8E;
+            if (bytecodeLower == 0x28) {
+                if ((int)bytecodeHigher <= ratio) {
+                    // not close enough, skip (nop)
+                    continueBytecodeExecution = 0;
+                    pNextBytecode = pCurrentByteCodePtr;
+                }
+            }
+            else {
+                if (ratio < (int)bytecodeHigher) {
+                    // not far enough, skip (nop)
+                    continueBytecodeExecution = 0;
+                    pNextBytecode = pCurrentByteCodePtr;
+                }
+            }
             break;
         }
         case 0x2E:
@@ -1048,20 +1073,54 @@ void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int pa
             _currentByteCode = *pNextBytecode;
             pNextBytecode = pCurrentByteCodePtr + _currentByteCode / 2;
             break;
-        case 0x36:
+        case 0x36: // timed callback setup
             pMecha->m44 = 0;
             pMecha->m46 = *pNextBytecode++;
-            pMecha->m9C = *pNextBytecode++;
-            MissingCode();
+            {
+                u16 branchOffset = *pNextBytecode++;
+                if (bytecodeHigher == 0) {
+                    pMecha->m50_bytecode2 = nullptr;
+                }
+                else {
+                    pMecha->m50_bytecode2 = pCurrentByteCodePtr + (s16)branchOffset / 2;
+                }
+            }
             break;
-        case 0x39:
-            MissingCode();
+        case 0x38: // set at target position (instant)
+        case 0x39: // move to target position (interpolated)
+        {
+            MissingCode(); // FUN_Battle__800ae098 - movement interpolation via anim track
             pNextBytecode++;
             break;
+        }
         case 0x42:
         case 0x43:
-            MissingCode("Mecha angle");
+        {
+            auto* bones = &(*pMecha->m4_bones)[0];
+            int dx = (int)pMecha->m88[0] - bones->m5C_translation[0];
+            int dy = (int)pMecha->m88[1] - bones->m5C_translation[1];
+            int dz = (int)pMecha->m88[2] - bones->m5C_translation[2];
+            s16 pitch = 0;
+            if (bytecodeLower == 0x43) {
+                dy = 0;
+            }
+            else {
+                long xzDist = SquareRoot0(dx * dx + dz * dz);
+                pitch = (s16)ratan2(dy, xzDist);
+            }
+            s16 yaw = (s16)ratan2(-dx, -dz);
+            if (dx != 0 || dy != 0 || dz != 0) {
+                if (bytecodeHigher < 2) {
+                    bones->m54_rotationAngles[0] = pitch;
+                    bones->m54_rotationAngles[1] = yaw;
+                    bones->m5_needRotationUpdate = 1;
+                }
+                else {
+                    MissingCode(); // interpolated rotation via anim track
+                }
+            }
             break;
+        }
         case 0x48:
             pMecha->m36 = bytecodeHigher;
             break;
@@ -1090,33 +1149,40 @@ void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int pa
         case 0x4F:
             pNextBytecode++;
             break;
-        case 0x53:
+        case 0x53: // snap target Y to terrain height
         {
-            int sp120 = pMecha->m88[0];
-            int sp122 = 0;
-            int sp124 = pMecha->m88[2];
-            MissingCode();
+            MissingCode(); // needs battleSpriteOp89Sub1/Sub2 to compute terrain Y at m88 XZ
         }
         break;
-        case 0x54:
-            MissingCode();
+        case 0x54: // set step distance scaled by mecha scale
+        {
+            s16 operand = (s16)*pNextBytecode;
+            pMecha->m8E = (s16)((int)operand * ((int)pMecha->m1C_scale * (int)(*pMecha->m4_bones)[0].m4C_scale[2] >> 0xc) >> 0xc);
             pNextBytecode++;
             break;
-        case 0x57:
-            MissingCode();
+        }
+        case 0x57: // add entity-relative distance to m8E
+        {
+            u16 output;
+            battleGetMechaBitfieldForAnim(pMecha, bytecodeHigher, &output);
+            MissingCode(); // FUN_Battle__800aa650 - compute distance to entity, add to m8E
             break;
-        case 0x58:
+        }
+        case 0x58: // reset interpolation
             pMecha->m58 = bytecodeHigher & 0xFF;
             pMecha->m5A = 0;
             pMecha->m64 = 0;
             pMecha->m66 = 0;
             pMecha->m68 = 0;
-            if (bytecodeHigher & 0xFF) {
-                MissingCode();
+            if (bytecodeHigher != 0) {
+                MissingCode(); // FUN_Battle__800aef68 - execute interpolation immediately
             }
             break;
-        case 0x5A:
-            MissingCode();
+        case 0x5A: // set target position from camera "at" point
+            pMecha->m58 = 0;
+            pMecha->m88[0] = battleMechaInitData->m47C_at.vx;
+            pMecha->m88[1] = battleMechaInitData->m47C_at.vy;
+            pMecha->m88[2] = battleMechaInitData->m47C_at.vz;
             break;
         case 0x60:
             pMecha->m88[0] = (battleMechaInitData->m100[battleVisualEntities[pMecha->m20_mechaEntryId].m0_positionSlot][0].vx + battleMechaInitData->m100[battleVisualEntities[pMecha->m20_mechaEntryId].m0_positionSlot][1].vx) / 2;
@@ -1159,14 +1225,14 @@ void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int pa
                 pMecha->m3A = -1;
             }
             else {
-                pMecha->m3A = setupMechaForEventVar1;
+                pMecha->m3A = mechaAnimTargetBitmask;
             }
             break;
         case 0x70:
         {
             u16 nextValue = *pNextBytecode;
             pNextBytecode++;
-            if (pMecha->m3A == setupMechaForEventVar1) {
+            if (pMecha->m3A == mechaAnimTargetBitmask) {
                 assert((nextValue % 2) == 0);
                 pNextBytecode = pCurrentByteCodePtr + nextValue / 2;
                 continueBytecodeExecution = 0;
@@ -1836,13 +1902,93 @@ u32 updateMechAnimSub3(sMechaInitVar2* param_1, std::vector<sMechaBone>& param_2
                 break;
             case 3:
             {
-                s32 ratio = ((((s32)pTrack->m10_currentTime + 1) * 0x10000) >> 0x10);
-                param_2[i].m54_rotationAngles[0] = pTrack->m4_s16 + (ratio * pTrack->mA_s16) / pTrack->m12_maxTime;
-                param_2[i].m54_rotationAngles[1] = pTrack->m6_s16 + (ratio * pTrack->mC) / pTrack->m12_maxTime;
-                param_2[i].m54_rotationAngles[2] = pTrack->m8_s16 + (ratio * pTrack->mE) / pTrack->m12_maxTime;
+                s32 ratio = (s16)(pTrack->m10_currentTime + 1);
+                param_2[i].m54_rotationAngles[0] = pTrack->m4_s16 + (s16)((ratio * pTrack->mA_s16) / pTrack->m12_maxTime);
+                param_2[i].m54_rotationAngles[1] = pTrack->m6_s16 + (s16)((ratio * pTrack->mC) / pTrack->m12_maxTime);
+                param_2[i].m54_rotationAngles[2] = pTrack->m8_s16 + (s16)((ratio * pTrack->mE) / pTrack->m12_maxTime);
                 break;
             }
-            break;
+            case 4: // move toward target rotation per frame
+            {
+                s16 maxTime = pTrack->m12_maxTime;
+                int dx = ((int)pTrack->mA_s16 - (int)param_2[i].m54_rotationAngles[0]) / (int)maxTime;
+                int dy = ((int)pTrack->mC - (int)param_2[i].m54_rotationAngles[1]) / (int)maxTime;
+                int dz = ((int)pTrack->mE - (int)param_2[i].m54_rotationAngles[2]) / (int)maxTime;
+                if ((dx & 0xFFFF) == 0 && (dy & 0xFFFF) == 0 && (dz & 0xFFFF) == 0) {
+                    pTrack->m10_currentTime = pTrack->m12_maxTime;
+                    param_2[i].m54_rotationAngles[0] = pTrack->mA_s16;
+                    param_2[i].m54_rotationAngles[1] = pTrack->mC;
+                    param_2[i].m54_rotationAngles[2] = pTrack->mE;
+                }
+                else {
+                    param_2[i].m54_rotationAngles[0] += (s16)dx;
+                    param_2[i].m54_rotationAngles[1] += (s16)dy;
+                    param_2[i].m54_rotationAngles[2] += (s16)dz;
+                    pTrack->m10_currentTime = 0;
+                }
+                break;
+            }
+            case 5: // rotation acceleration
+            {
+                s16 vx = pTrack->m4_s16 + pTrack->mA_s16;
+                pTrack->m4_s16 = vx;
+                param_2[i].m54_rotationAngles[0] += vx;
+                s16 vy = pTrack->m6_s16 + pTrack->mC;
+                pTrack->m6_s16 = vy;
+                param_2[i].m54_rotationAngles[1] += vy;
+                s16 vz = pTrack->m8_s16 + pTrack->mE;
+                pTrack->m8_s16 = vz;
+                param_2[i].m54_rotationAngles[2] += vz;
+                break;
+            }
+            case 7: // rotation tracking toward target
+            case 8:
+            {
+                int dx = (int)pTrack->mA_s16 - param_2[i].m5C_translation[0];
+                int dy = (int)pTrack->mC - param_2[i].m5C_translation[1];
+                int dz = (int)pTrack->mE - param_2[i].m5C_translation[2];
+                long dist = SquareRoot0(dx * dx + dy * dy + dz * dz);
+                long yaw = ratan2(-dx, -dz);
+                s16 currentYaw = param_2[i].m54_rotationAngles[1];
+                int yawDelta = (int)((yaw - currentYaw) & 0xFFF);
+                if (yawDelta > 0x7FF) yawDelta -= 0x1000;
+                int moveAmount = ((int)(dist + 1 + pTrack->m10_currentTime) * (int)pTrack->m8_s16);
+                if (pTrack->m4_s16 != 0) {
+                    moveAmount = (int)pTrack->m6_s16 + moveAmount / (int)pTrack->m4_s16;
+                }
+                int absYawDelta = yawDelta < 0 ? -yawDelta : yawDelta;
+                s16 yawStep = (s16)moveAmount;
+                if (moveAmount <= absYawDelta) {
+                    param_2[i].m54_rotationAngles[1] = currentYaw + (s16)yawDelta;
+                }
+                else if (yawDelta < 0) {
+                    param_2[i].m54_rotationAngles[1] = currentYaw - yawStep;
+                }
+                else {
+                    param_2[i].m54_rotationAngles[1] = currentYaw + yawStep;
+                }
+                if ((pTrack->m2 & 0xF) == 7) {
+                    long xzDist = SquareRoot0(dx * dx + dz * dz);
+                    long pitch = ratan2(dy, xzDist);
+                    s16 currentPitch = param_2[i].m54_rotationAngles[0];
+                    int pitchDelta = (int)((pitch - currentPitch) & 0xFFF);
+                    if (pitchDelta > 0x7FF) pitchDelta -= 0x1000;
+                    int absPitchDelta = pitchDelta < 0 ? -pitchDelta : pitchDelta;
+                    if (moveAmount <= absPitchDelta) {
+                        param_2[i].m54_rotationAngles[0] = currentPitch + (s16)pitchDelta;
+                    }
+                    else if (pitchDelta < 0) {
+                        param_2[i].m54_rotationAngles[0] = currentPitch - yawStep;
+                    }
+                    else {
+                        param_2[i].m54_rotationAngles[0] = currentPitch + yawStep;
+                    }
+                }
+                if (pTrack->m10_currentTime < 32000) {
+                    pTrack->m10_currentTime += pTrack->m12_maxTime;
+                }
+                break;
+            }
             default:
                 assert(0);
             }
@@ -1888,61 +2034,113 @@ u32 updateMechAnimSub3(sMechaInitVar2* param_1, std::vector<sMechaBone>& param_2
         if (param_2[i].m70_animTracks[1]) {
             sMechaInitVar2Sub* pTrack = param_2[i].m70_animTracks[1];
             switch (pTrack->m2 & 0xF) {
-            case 0: // s16
+            case 0: // set translation from stream (s16 values)
                 if ((pTrack->m2 & 0x10) == 0) {
-                    param_2[i].m5C_translation[0] += READ_LE_S16(pTrack->m8);
+                    param_2[i].m5C_translation[0] = (int)READ_LE_S16(pTrack->m8);
                     pTrack->m8 += 2;
                 }
                 if ((pTrack->m2 & 0x20) == 0) {
-                    param_2[i].m5C_translation[1] += READ_LE_S16(pTrack->m8);
+                    param_2[i].m5C_translation[1] = (int)READ_LE_S16(pTrack->m8);
                     pTrack->m8 += 2;
                 }
                 if ((pTrack->m2 & 0x40) == 0) {
-                    param_2[i].m5C_translation[2] += READ_LE_S16(pTrack->m8);
+                    param_2[i].m5C_translation[2] = (int)READ_LE_S16(pTrack->m8);
                     pTrack->m8 += 2;
                 }
                 break;
-            case 1: // s8 (unless it's a 0x80)
+            case 1: // s8 delta or s16 absolute
                 if ((pTrack->m2 & 0x10) == 0) {
                     s8 psVar9 = READ_LE_S8(pTrack->m8);
                     pTrack->m8++;
                     if (psVar9 == (s8)0x80) {
-                        param_2[i].m5C_translation[0] = READ_LE_S16(pTrack->m8);
+                        param_2[i].m5C_translation[0] = (int)READ_LE_S16(pTrack->m8);
                         pTrack->m8 += 2;
                     }
                     else {
-                        param_2[i].m5C_translation[0] += psVar9;
+                        param_2[i].m5C_translation[0] = (int)psVar9 + param_2[i].m5C_translation[0];
                     }
                 }
                 if ((pTrack->m2 & 0x20) == 0) {
                     s8 psVar9 = READ_LE_S8(pTrack->m8);
                     pTrack->m8++;
                     if (psVar9 == (s8)0x80) {
-                        param_2[i].m5C_translation[1] = READ_LE_S16(pTrack->m8);
+                        param_2[i].m5C_translation[1] = (int)READ_LE_S16(pTrack->m8);
                         pTrack->m8 += 2;
                     }
                     else {
-                        param_2[i].m5C_translation[1] += psVar9;
+                        param_2[i].m5C_translation[1] = (int)psVar9 + param_2[i].m5C_translation[1];
                     }
                 }
                 if ((pTrack->m2 & 0x40) == 0) {
                     s8 psVar9 = READ_LE_S8(pTrack->m8);
                     pTrack->m8++;
                     if (psVar9 == (s8)0x80) {
-                        param_2[i].m5C_translation[2] = READ_LE_S16(pTrack->m8);
+                        param_2[i].m5C_translation[2] = (int)READ_LE_S16(pTrack->m8);
                         pTrack->m8 += 2;
                     }
                     else {
-                        param_2[i].m5C_translation[2] += psVar9;
+                        param_2[i].m5C_translation[2] = (int)psVar9 + param_2[i].m5C_translation[2];
                     }
                 }
                 break;
-            case 3:
+            case 2: // scaled + matrix-rotated delta
             {
-                s32 ratio = ((((s32)pTrack->m10_currentTime + 1) * 0x10000) >> 0x10);
-                param_2[i].m5C_translation[0] = pTrack->m4_s16 + (ratio * pTrack->mA_s16) / pTrack->m12_maxTime;
-                param_2[i].m5C_translation[1] = pTrack->m6_s16 + (ratio * pTrack->mC) / pTrack->m12_maxTime;
-                param_2[i].m5C_translation[2] = pTrack->m8_s16 + (ratio * pTrack->mE) / pTrack->m12_maxTime;
+                SVECTOR local_a8;
+                local_a8.vx = (pTrack->m2 & 0x10) == 0 ? READ_LE_S16(pTrack->m8) : 0;
+                if ((pTrack->m2 & 0x10) == 0) pTrack->m8 += 2;
+                local_a8.vy = (pTrack->m2 & 0x20) == 0 ? READ_LE_S16(pTrack->m8) : 0;
+                if ((pTrack->m2 & 0x20) == 0) pTrack->m8 += 2;
+                local_a8.vz = (pTrack->m2 & 0x40) == 0 ? READ_LE_S16(pTrack->m8) : 0;
+                if ((pTrack->m2 & 0x40) == 0) pTrack->m8 += 2;
+                local_a8.vx = (s16)((int)local_a8.vx * (int)param_2[i].m4C_scale[0] >> 0xc);
+                local_a8.vy = (s16)((int)local_a8.vy * (int)param_2[i].m4C_scale[1] >> 0xc);
+                local_a8.vz = (s16)((int)local_a8.vz * (int)param_2[i].m4C_scale[2] >> 0xc);
+                VECTOR local_a0;
+                ApplyMatrix(&param_2[i].m2C_boneFinalMatrix, &local_a8, &local_a0);
+                param_2[i].m5C_translation[0] += (speed * local_a0.vx >> 0xc);
+                param_2[i].m5C_translation[1] += (speed * local_a0.vy >> 0xc);
+                param_2[i].m5C_translation[2] += (speed * local_a0.vz >> 0xc);
+                break;
+            }
+            case 3: // linear interpolation
+            {
+                s32 ratio = (s16)(pTrack->m10_currentTime + 1);
+                param_2[i].m5C_translation[0] = (int)pTrack->m4_s16 + (int)(pTrack->mA_s16 * ratio) / (int)pTrack->m12_maxTime;
+                param_2[i].m5C_translation[1] = (int)pTrack->m6_s16 + (int)(pTrack->mC * ratio) / (int)pTrack->m12_maxTime;
+                param_2[i].m5C_translation[2] = (int)pTrack->m8_s16 + (int)(pTrack->mE * ratio) / (int)pTrack->m12_maxTime;
+                break;
+            }
+            case 4: // move toward target per frame
+            {
+                int maxTime = (int)pTrack->m12_maxTime;
+                int dx = ((int)pTrack->mA_s16 - param_2[i].m5C_translation[0]) / maxTime;
+                int dy = ((int)pTrack->mC - param_2[i].m5C_translation[1]) / maxTime;
+                int dz = ((int)pTrack->mE - param_2[i].m5C_translation[2]) / maxTime;
+                if ((dx & 0xFFFF) == 0 && (dy & 0xFFFF) == 0 && (dz & 0xFFFF) == 0) {
+                    pTrack->m10_currentTime = pTrack->m12_maxTime;
+                    param_2[i].m5C_translation[0] = (int)pTrack->mA_s16;
+                    param_2[i].m5C_translation[1] = (int)pTrack->mC;
+                    param_2[i].m5C_translation[2] = (int)pTrack->mE;
+                }
+                else {
+                    param_2[i].m5C_translation[0] += (int)(s16)dx;
+                    param_2[i].m5C_translation[1] += (int)(s16)dy;
+                    param_2[i].m5C_translation[2] += (int)(s16)dz;
+                    pTrack->m10_currentTime = 0;
+                }
+                break;
+            }
+            case 5: // acceleration
+            {
+                s16 vx = pTrack->m4_s16 + pTrack->mA_s16;
+                pTrack->m4_s16 = vx;
+                param_2[i].m5C_translation[0] += (int)vx;
+                s16 vy = pTrack->m6_s16 + pTrack->mC;
+                pTrack->m6_s16 = vy;
+                param_2[i].m5C_translation[1] += (int)vy;
+                s16 vz = pTrack->m8_s16 + pTrack->mE;
+                pTrack->m8_s16 = vz;
+                param_2[i].m5C_translation[2] += (int)vz;
                 break;
             }
             default:

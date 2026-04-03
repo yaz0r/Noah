@@ -735,14 +735,14 @@ void spriteBytecode2ExtendedE0_Sub0(sSavePointMeshAbstract* param_1)
         break;
     case 10:
         param_1->m38_spriteActorCore.m34_currentSpriteFrame = 0;
-        spriteBytecode2ExtendedE0_Sub0_10_battle(param_1);
+        battleCameraControlSpriteInit(param_1);
         param_1->m38_spriteActorCore.m0_position.vx = previousCameraEye2.vx;
         param_1->m38_spriteActorCore.m0_position.vy = previousCameraEye2.vy;
         param_1->m38_spriteActorCore.m0_position.vz = previousCameraEye2.vz;
         break;
     case 11:
         param_1->m38_spriteActorCore.m34_currentSpriteFrame = 0;
-        spriteBytecode2ExtendedE0_Sub0_10_battle(param_1);
+        battleCameraControlSpriteInit(param_1);
         param_1->m38_spriteActorCore.m0_position.vx = previousCameraAt2.vx;
         param_1->m38_spriteActorCore.m0_position.vy = previousCameraAt2.vy;
         param_1->m38_spriteActorCore.m0_position.vz = previousCameraAt2.vz;

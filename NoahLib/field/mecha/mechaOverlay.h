@@ -243,6 +243,7 @@ struct sLoadedMechas {
     s16 m1C_scale;
     s16 m1E;
     u8 m20_mechaEntryId;
+    u8 m21;
     u8 m22;
     u8 m23;
     std::array<s16, 3> m24;
@@ -260,9 +261,9 @@ struct sLoadedMechas {
     s16 m44;
     s16 m46;
     u16 m4A;
-    std::vector<u16>* m4C_bytecode3;
-    std::vector<u16>* m50_bytecode2;
-    std::vector<u16>* m54_bytecode1;
+    sMechaDataTable2_4_8* m4C_bytecode3;
+    sMechaDataTable2_4_8* m50_bytecode2;
+    sMechaDataTable2_4_8* m54_bytecode1;
     s16 m58;
     s16 m5A;
     s8 m5C;
@@ -333,6 +334,7 @@ void initMechaFieldArgs2(MATRIX& param_1, short param_2, short param_3, short pa
 
 void renderMechasForDebugFieldRenderer(int viewId);
 
+extern s16 mechaPlayAnimationVar0;
 void mechaPlayAnimation(ushort param_1, short param_2, int param_3);
 
 void getMechaBoneMatrix(MATRIX* param_1, void* param_2, int mechaIndex, int boneIndex);

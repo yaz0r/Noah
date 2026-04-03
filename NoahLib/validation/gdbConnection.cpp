@@ -439,3 +439,7 @@ void GDBConnection::writeU32(u64 address, u32 value) {
 void GDBConnection::writeU16(u64 address, u16 value) {
     writeMemory(address, &value, 2);
 }
+
+void GDBConnection::writeU8(u64 address, u8 value) {
+    writeMemory(address, &value, 1);
+}

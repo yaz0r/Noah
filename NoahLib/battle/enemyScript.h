@@ -17,6 +17,13 @@ struct sBattleScriptContext {
 };
 extern std::array<sBattleScriptContext, 32> battleScriptContext;
 
+struct sBattleScriptExecutionContext {
+    std::vector<u8>::const_iterator m0_scriptPtr;
+};
+
 void executeMonsterScript(char param_1, int param_2);
 int executeMonsterScriptWhenAttacked(char param_1);
 void executeBattleCode(byte param_1);
+int executeMonsterScriptLower(sBattleScriptExecutionContext* pScriptContext, int entityIndex, int numIterations);
+int executeMonsterScriptUpper(sBattleScriptExecutionContext* pScriptContext, int entityIndex);
+void skipScriptIfFalse(sBattleScriptExecutionContext* param_1);

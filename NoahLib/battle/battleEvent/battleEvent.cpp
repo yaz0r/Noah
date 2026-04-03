@@ -165,7 +165,7 @@ void battleEvent_loadArgs(std::vector<u8>::iterator bytecode, byte param_2, uint
     }
 }
 
-sTaskHeader* battleEvent_OP35_createEntity(sSpriteActorAnimationBundle* param_1, SVECTOR* param_2) {
+sTaskHeader* battleEvent_createSpriteEntity(sSpriteActorAnimationBundle* param_1, SVECTOR* param_2) {
     auto uVar2 = allocateSavePointMeshDataSub0_var0;
     sBattleSpriteActor* psVar3 = createCustomRenderableEntity<sBattleSpriteActor>(0x19c, nullptr, battleSpriteUpdate, battleSpriteRender, battleSpriteDelete);
     sSpriteActor* psVar4 = &psVar3->m38_spriteActor;
@@ -199,7 +199,7 @@ sTaskHeader* battleEvent_OP35_createEntity(sSpriteActorAnimationBundle* param_1,
     return psVar3;
 }
 
-int battleEvent_OP0_Stop(int currentEntityId) {
+int battleEvent_OP0_endScript(int currentEntityId) {
     auto& entry = battleEventVar0->m0_scriptEntities[currentEntityId];
     entry.m18[entry.m20_currentActiveEntry] = -1;
     entry.m10_isScriptSlotActive[entry.m20_currentActiveEntry] = -1;
@@ -221,7 +221,7 @@ s16 battleEvent_findFreeScriptSlot(sBattleRunningVar0Sub* param_1)
     return 8;
 }
 
-int battleEvent_OP5_sub0(int currentEntityId, const std::vector<u8>::iterator& bytecode) {
+int battleEvent_startScriptSlot(int currentEntityId, const std::vector<u8>::iterator& bytecode) {
     auto& thisEntity = battleEventVar0->m0_scriptEntities[currentEntityId];
     s16 uVar2 = battleEvent_findFreeScriptSlot(&battleEventVar0->m0_scriptEntities[bytecode[1]]) & 0xFF;
     if (uVar2 != 8) {
@@ -236,7 +236,7 @@ int battleEvent_OP5_sub0(int currentEntityId, const std::vector<u8>::iterator& b
     return 0;
 }
 
-int battleEvent_OP5(int currentEntityId, const std::vector<u8>::iterator& bytecode) {
+int battleEvent_OP5_waitScript(int currentEntityId, const std::vector<u8>::iterator& bytecode) {
 
     auto& thisEntity = battleEventVar0->m0_scriptEntities[currentEntityId];
     auto& otherEntity = battleEventVar0->m0_scriptEntities[bytecode[1]];
@@ -257,7 +257,7 @@ int battleEvent_OP5(int currentEntityId, const std::vector<u8>::iterator& byteco
         }
     }
     else {
-        battleEvent_OP5_sub0(currentEntityId, bytecode);
+        battleEvent_startScriptSlot(currentEntityId, bytecode);
     }
     return 0;
 }
@@ -445,13 +445,13 @@ int battleEvent_DisplayDialog(u16 messageIndex, int protraitIndex, int flags) {
     return 0;
 }
 
-int battleEvent_OP18(int currentEntityId, const std::vector<u8>::iterator& bytecode) {
+int battleEvent_OP18_showDialog(int currentEntityId, const std::vector<u8>::iterator& bytecode) {
     // print dialog window in battle event
     char isDialogClosed = battleEvent_DisplayDialog(READ_LE_U16(bytecode + 1), battleEventVar0->m0_scriptEntities[currentEntityId].m24, bytecode[3]);
     return (uint)(isDialogClosed != 0) << 2;
 }
 
-int battleEvent_OP1A_SetupDialogParams(int currentEntityId, const std::vector<u8>::iterator& bytecode) {
+int battleEvent_OP1A_setDialogParams(int currentEntityId, const std::vector<u8>::iterator& bytecode) {
     battleEvent_loadArgs(bytecode, 5, 0, 1);
 
     for (int i = 0; i < 4; i++) {
@@ -467,7 +467,7 @@ int battleEvent_OP1A_SetupDialogParams(int currentEntityId, const std::vector<u8
     return 0xB;
 }
 
-int battleEvent_OP1B(int currentEntityId, const std::vector<u8>::iterator& bytecode) {
+int battleEvent_OP1B_setPortrait(int currentEntityId, const std::vector<u8>::iterator& bytecode) {
     int arg = bytecode[1];
     if (arg > 0xf2) {
         MissingCode(); // table lookup via DAT_800d2c31[arg]
@@ -476,13 +476,13 @@ int battleEvent_OP1B(int currentEntityId, const std::vector<u8>::iterator& bytec
     return 2;
 }
 
-int battleEvent_OP1F(int currentEntityId, const std::vector<u8>::iterator& bytecode) {
+int battleEvent_OP1F_fadeIn(int currentEntityId, const std::vector<u8>::iterator& bytecode) {
     battleEvent_loadArgs(bytecode, 1, 0, 1);
     battleCreateFader(battleEventVar0->m380_currentArgs[0], 2, 0, 0, 0);
     return 3;
 }
 
-int battleEvent_OP23(int currentEntityId, const std::vector<u8>::iterator& bytecode) {
+int battleEvent_OP23_setupMecha(int currentEntityId, const std::vector<u8>::iterator& bytecode) {
     battleEvent_loadArgs(bytecode, 3, 0, 1);
 
     int slotIndex = battleEventVar0->m380_currentArgs[0] - 0xF3;
@@ -507,22 +507,22 @@ int battleEvent_OP23(int currentEntityId, const std::vector<u8>::iterator& bytec
     return 0;
 }
 
-void battleEvent_OP2A_sub0(sBattleSpriteActor* pTaskHeader, int index) {
+void battleEvent_setSpriteAnimation(sBattleSpriteActor* pTaskHeader, int index) {
     spriteActorSetPlayingAnimation(&pTaskHeader->m38_spriteActor, index);
 }
 
-int battleEvent_OP2A(int currentEntityId, const std::vector<u8>::iterator& bytecode) {
+int battleEvent_OP2A_playAnimation(int currentEntityId, const std::vector<u8>::iterator& bytecode) {
     battleEvent_loadArgs(bytecode, 2, 0, 1);
 
     sBattleRunningVar0Sub* entry = &battleEventVar0->m0_scriptEntities[(battleEventVar0->m380_currentArgs[0] + 0xD) & 0xFF];
     if (entry->m35) {
-        battleEvent_OP2A_sub0((sBattleSpriteActor*)entry->m30, battleEventVar0->m380_currentArgs[1]);
+        battleEvent_setSpriteAnimation((sBattleSpriteActor*)entry->m30, battleEventVar0->m380_currentArgs[1]);
     }
 
     return 5;
 }
 
-int battleEvent_OP2B(int currentEntityId, const std::vector<u8>::iterator& bytecode) {
+int battleEvent_OP2B_wait(int currentEntityId, const std::vector<u8>::iterator& bytecode) {
     if (battleEventVar0->m0_scriptEntities[currentEntityId].m28 == 0) {
         battleEvent_loadArgs(bytecode, 1, 0, 1);
         battleEventVar0->m0_scriptEntities[currentEntityId].m28 = 1;
@@ -536,13 +536,13 @@ int battleEvent_OP2B(int currentEntityId, const std::vector<u8>::iterator& bytec
     return bytecodeSize;
 }
 
-int battleEvent_OP31(int currentEntityId, const std::vector<u8>::iterator& bytecode) {
+int battleEvent_OP31_playSoundEffect(int currentEntityId, const std::vector<u8>::iterator& bytecode) {
     battleEvent_loadArgs(bytecode, 4, 0, 1);
     MissingCode(); // sound related
     return 9;
 }
 
-int battleEvent_OP35(int currentEntityId, const std::vector<u8>::iterator& bytecode) {
+int battleEvent_OP35_createSprite(int currentEntityId, const std::vector<u8>::iterator& bytecode) {
     battleEvent_loadArgs(bytecode, 2, 0, 1);
     sBattleRunningVar0Sub* entry = &battleEventVar0->m0_scriptEntities[(battleEventVar0->m380_currentArgs[0] + 0xD) & 0xFF];
     if (entry->m35 == 0) {
@@ -550,13 +550,13 @@ int battleEvent_OP35(int currentEntityId, const std::vector<u8>::iterator& bytec
         std::vector<u8> rawBundle = mallocAndDecompress(battleEventFile3.getRawData().begin() + READ_LE_U32(battleEventFile3.getRawData().begin() + 4 + battleEventVar0->m380_currentArgs[1] * 4));
         entry->m2C->init(rawBundle);
         SVECTOR position = { 0,0,0 };
-        entry->m30 = battleEvent_OP35_createEntity(entry->m2C, &position);
+        entry->m30 = battleEvent_createSpriteEntity(entry->m2C, &position);
         entry->m35 = 1;
     }
     return 5;
 }
 
-int battleEvent_OP37(int currentEntityId, const std::vector<u8>::iterator& bytecode) {
+int battleEvent_OP37_startBattle(int currentEntityId, const std::vector<u8>::iterator& bytecode) {
     isBattleAnEvent = 1;
     battleEventVar0->m800 = 1;
     battleRunningVar1 = 1;
@@ -564,7 +564,7 @@ int battleEvent_OP37(int currentEntityId, const std::vector<u8>::iterator& bytec
 }
 
 
-int battleEvent_OP38(int currentEntityId, const std::vector<u8>::iterator& bytecode) {
+int battleEvent_OP38_playMechaAnim(int currentEntityId, const std::vector<u8>::iterator& bytecode) {
     battleEvent_loadArgs(bytecode, 3, 0, 1);
 
     int mechaIndex = battleEventVar0->m380_currentArgs[0] - 0xF3;
@@ -588,108 +588,45 @@ void battleEvent_update(int) {
                     int bytecodeSize;
                     switch (bytecode) {
                     case 0x0:
-                        bytecodeSize = battleEvent_OP0_Stop(currentEntityId);
+                        bytecodeSize = battleEvent_OP0_endScript(currentEntityId);
                         j = 3; // to break out of the loop
                         break;
                     case 0x5:
-                        bytecodeSize = battleEvent_OP5(currentEntityId, battleEventVar0->m390_scriptByteCode + bytecodeOffset);
+                        bytecodeSize = battleEvent_OP5_waitScript(currentEntityId, battleEventVar0->m390_scriptByteCode + bytecodeOffset);
                         break;
                     case 0x18:
-                        bytecodeSize = battleEvent_OP18(currentEntityId, battleEventVar0->m390_scriptByteCode + bytecodeOffset);
+                        bytecodeSize = battleEvent_OP18_showDialog(currentEntityId, battleEventVar0->m390_scriptByteCode + bytecodeOffset);
                         break;
                     case 0x1A:
-                        bytecodeSize = battleEvent_OP1A_SetupDialogParams(currentEntityId, battleEventVar0->m390_scriptByteCode + bytecodeOffset);
+                        bytecodeSize = battleEvent_OP1A_setDialogParams(currentEntityId, battleEventVar0->m390_scriptByteCode + bytecodeOffset);
                         break;
                     case 0x1B:
-                        bytecodeSize = battleEvent_OP1B(currentEntityId, battleEventVar0->m390_scriptByteCode + bytecodeOffset);
+                        bytecodeSize = battleEvent_OP1B_setPortrait(currentEntityId, battleEventVar0->m390_scriptByteCode + bytecodeOffset);
                         break;
                     case 0x1F:
-                        bytecodeSize = battleEvent_OP1F(currentEntityId, battleEventVar0->m390_scriptByteCode + bytecodeOffset);
+                        bytecodeSize = battleEvent_OP1F_fadeIn(currentEntityId, battleEventVar0->m390_scriptByteCode + bytecodeOffset);
                         break;
                     case 0x23:
-                        bytecodeSize = battleEvent_OP23(currentEntityId, battleEventVar0->m390_scriptByteCode + bytecodeOffset);
+                        bytecodeSize = battleEvent_OP23_setupMecha(currentEntityId, battleEventVar0->m390_scriptByteCode + bytecodeOffset);
                         break;
                     case 0x2A:
-                        bytecodeSize = battleEvent_OP2A(currentEntityId, battleEventVar0->m390_scriptByteCode + bytecodeOffset);
+                        bytecodeSize = battleEvent_OP2A_playAnimation(currentEntityId, battleEventVar0->m390_scriptByteCode + bytecodeOffset);
                         break;
                     case 0x2B:
-                        bytecodeSize = battleEvent_OP2B(currentEntityId, battleEventVar0->m390_scriptByteCode + bytecodeOffset);
+                        bytecodeSize = battleEvent_OP2B_wait(currentEntityId, battleEventVar0->m390_scriptByteCode + bytecodeOffset);
                         break;
                     case 0x31:
-                        bytecodeSize = battleEvent_OP31(currentEntityId, battleEventVar0->m390_scriptByteCode + bytecodeOffset);
+                        bytecodeSize = battleEvent_OP31_playSoundEffect(currentEntityId, battleEventVar0->m390_scriptByteCode + bytecodeOffset);
                         break;
                     case 0x35:
-                        bytecodeSize = battleEvent_OP35(currentEntityId, battleEventVar0->m390_scriptByteCode + bytecodeOffset);
+                        bytecodeSize = battleEvent_OP35_createSprite(currentEntityId, battleEventVar0->m390_scriptByteCode + bytecodeOffset);
                         break;
                     case 0x37:
-                        bytecodeSize = battleEvent_OP37(currentEntityId, battleEventVar0->m390_scriptByteCode + bytecodeOffset);
+                        bytecodeSize = battleEvent_OP37_startBattle(currentEntityId, battleEventVar0->m390_scriptByteCode + bytecodeOffset);
                         break;
                     case 0x38:
-                        bytecodeSize = battleEvent_OP38(currentEntityId, battleEventVar0->m390_scriptByteCode + bytecodeOffset);
+                        bytecodeSize = battleEvent_OP38_playMechaAnim(currentEntityId, battleEventVar0->m390_scriptByteCode + bytecodeOffset);
                         break;
-                    case 0x1:  MissingCode(); break;
-                    case 0x2:  MissingCode(); break;
-                    case 0x3:  MissingCode(); break;
-                    case 0x4:  MissingCode(); break;
-                    case 0x6:  MissingCode(); break;
-                    case 0x7:  MissingCode(); break;
-                    case 0x8:  MissingCode(); break;
-                    case 0x9:  MissingCode(); break;
-                    case 0xA:  MissingCode(); break;
-                    case 0xB:  MissingCode(); break;
-                    case 0xC:  MissingCode(); break;
-                    case 0xD:  MissingCode(); break;
-                    case 0xE:  MissingCode(); break;
-                    case 0xF:  MissingCode(); break;
-                    case 0x10: MissingCode(); break;
-                    case 0x11: MissingCode(); break;
-                    case 0x12: MissingCode(); break;
-                    case 0x13: MissingCode(); break;
-                    case 0x14: MissingCode(); break;
-                    case 0x15: MissingCode(); break;
-                    case 0x16: MissingCode(); break;
-                    case 0x17: MissingCode(); break;
-                    case 0x19: MissingCode(); break;
-                    case 0x1C: MissingCode(); break;
-                    case 0x1D: MissingCode(); break;
-                    case 0x1E: MissingCode(); break;
-                    case 0x20: MissingCode(); break;
-                    case 0x21: MissingCode(); break;
-                    case 0x22: MissingCode(); break;
-                    case 0x24: MissingCode(); break;
-                    case 0x25: MissingCode(); break;
-                    case 0x26: MissingCode(); break;
-                    case 0x27: MissingCode(); break;
-                    case 0x28: MissingCode(); break;
-                    case 0x29: MissingCode(); break;
-                    case 0x2C: MissingCode(); break;
-                    case 0x2D: MissingCode(); break;
-                    case 0x2E: MissingCode(); break;
-                    case 0x2F: MissingCode(); break;
-                    case 0x30: MissingCode(); break;
-                    case 0x32: MissingCode(); break;
-                    case 0x33: MissingCode(); break;
-                    case 0x34: MissingCode(); break;
-                    case 0x36: MissingCode(); break;
-                    case 0x39: MissingCode(); break;
-                    case 0x3A: MissingCode(); break;
-                    case 0x3B: MissingCode(); break;
-                    case 0x3C: MissingCode(); break;
-                    case 0x3D: MissingCode(); break;
-                    case 0x3E: MissingCode(); break;
-                    case 0x3F: MissingCode(); break;
-                    case 0x40: MissingCode(); break;
-                    case 0x41: MissingCode(); break;
-                    case 0x42: MissingCode(); break;
-                    case 0x43: MissingCode(); break;
-                    case 0x44: MissingCode(); break;
-                    case 0x45: MissingCode(); break;
-                    case 0x46: MissingCode(); break;
-                    case 0x47: MissingCode(); break;
-                    case 0x48: MissingCode(); break;
-                    case 0x49: MissingCode(); break;
-                    case 0x4A: MissingCode(); break;
-                    case 0x4B: MissingCode(); break;
                     default:
                         assert(0);
                     }
