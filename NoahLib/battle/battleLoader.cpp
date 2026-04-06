@@ -350,6 +350,7 @@ void batteLoaderPhase1_1() {
                     battleVisualEntities[i].mA_X = battleLoadDataVar2Bis->m100[battleVisualEntities[i].m0_positionSlot][1].vx;
                     battleVisualEntities[i].mC_Z = battleLoadDataVar2Bis->m100[battleVisualEntities[i].m0_positionSlot][1].vy;
                 }
+                battleVisualEntities[i].m6_direction = currentBattleConfig.m18[i] & 0x80;
             }
         }
     }

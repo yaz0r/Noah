@@ -48,7 +48,7 @@ void battleDebugSelectorInit()
     gameState.m1D34_currentParty[2] = 2;
 
     // SceneNo
-    battleDebugSelectorTableValues[0][0] = 3; // TODO: this was 3 in original binary
+    battleDebugSelectorTableValues[0][0] = 0; // TODO: this was 3 in original binary
 
     // Party
     battleDebugSelectorTableValues[1][0] = 0;

@@ -7,9 +7,15 @@
 #include "validation/field/validateFieldEntities.h"
 #include "validation/kernel/randomSeed.h"
 #include "battle/battle.h"
+#include "battle/battleRenderContext.h"
 #include "kernel/inputs.h"
 
 extern u16 allPlayerCharacterBitmask;
+extern SVECTOR battleCameraEye;
+extern SVECTOR battleCameraEyeTarget;
+extern SVECTOR battleCameraAt;
+extern SVECTOR battleCameraAtTarget;
+extern MATRIX battleRenderingMatrix;
 
 // PSX addresses for battle globals
 static const u32 PSX_battleEntities = 0x800CCCE8;       // std::array<sBattleEntity, 11>, each 0x170
@@ -22,6 +28,15 @@ static const u32 PSX_allPlayerCharacterBitmask = 0x800d39dc; // u16
 static const u32 PSX_battleRunningVar1 = 0x800c48ea;    // s8
 static const u32 PSX_currentBattleMode = 0x800c3e4c;    // s8
 static const u32 PSX_battleSlotStatusVar0 = 0x800d2df0;  // std::array<s16, 11>
+
+// PSX addresses for visual entities and camera
+static const u32 PSX_battleSpriteActorCores = 0x800CCB3C; // std::array<sSpriteActorCore*, 11>
+static const u32 PSX_battleVisualEntities = 0x800c3eb4;  // std::array<sBattleVisualEntity, 11>, each 0x1c
+static const u32 PSX_battleRenderingMatrix = 0x800d30bc; // MATRIX
+static const u32 PSX_battleCameraEyeTarget = 0x800d30a0; // SVECTOR
+static const u32 PSX_battleCameraAtTarget = 0x800d30a8;  // SVECTOR
+static const u32 PSX_battleCameraEye = 0x800d3354;       // SVECTOR
+static const u32 PSX_battleCameraAt = 0x800d335c;        // SVECTOR
 
 // PSX function addresses
 static const u32 PSX_checkWinConditions_start = 0x8007252c;
@@ -84,6 +99,40 @@ void validateBattleEntities() {
     }
 }
 
+void validateBattleVisualEntities() {
+    for (int i = 0; i < 11; i++) {
+        u32 base = PSX_battleVisualEntities + 0x1c * i;
+        validate(base + 0x0, battleVisualEntities[i].m0_positionSlot);
+        validate(base + 0x1, battleVisualEntities[i].m1);
+        validate(base + 0x2, battleVisualEntities[i].m2);
+        validate(base + 0x3, battleVisualEntities[i].m3);
+        validate(base + 0x4, battleVisualEntities[i].m4_isGear);
+        validate(base + 0x5, battleVisualEntities[i].m5);
+        validate(base + 0x6, battleVisualEntities[i].m6_direction);
+        validate(base + 0xA, battleVisualEntities[i].mA_X);
+        validate(base + 0xC, battleVisualEntities[i].mC_Z);
+    }
+}
+
+void validateBattleSpriteActorCores() {
+    for (int i = 0; i < 11; i++) {
+        u32 psxPtr = g_gdbConnection->readU32(PSX_battleSpriteActorCores + i * 4);
+        if (battleSpriteActorCores[i] && psxPtr) {
+            validate(psxPtr + 0x0, battleSpriteActorCores[i]->m0_position);
+        } else {
+            validateAssert((battleSpriteActorCores[i] == nullptr) == (psxPtr == 0));
+        }
+    }
+}
+
+void validateBattleCamera() {
+    validate(PSX_battleCameraEye, battleCameraEye);
+    validate(PSX_battleCameraEyeTarget, battleCameraEyeTarget);
+    validate(PSX_battleCameraAt, battleCameraAt);
+    validate(PSX_battleCameraAtTarget, battleCameraAtTarget);
+    validate(PSX_battleRenderingMatrix, battleRenderingMatrix);
+}
+
 void validateBattleState() {
     validateRandomSeed();
 
@@ -98,6 +147,10 @@ void validateBattleState() {
         validateAssert(g_gdbConnection->readS8(PSX_randomTurnOrder + i) == randomTurnOrder[i]);
         validate(PSX_battleSlotStatusVar0 + i * 2, battleSlotStatusVar0[i]);
     }
+
+    validateBattleVisualEntities();
+    validateBattleSpriteActorCores();
+    validateBattleCamera();
 }
 
 // Hook: checkWinConditions
@@ -172,9 +225,16 @@ void battleHandleInput_detour() {
 
 DECLARE_HOOK(battleTickMain, void, s8);
 void battleTickMain_detour(s8 arg) {
+
+    validateBattleEntities();
+    validateBattleState();
+
     battleTickMain_intercept.callUndetoured(arg);
 
     g_gdbConnection->executeUntilAddress(0x80072268);
+
+    validateBattleEntities();
+    validateBattleState();
 }
 
 DECLARE_HOOK_VOID(battleDebugSelectorMainLoop, void);
@@ -206,10 +266,64 @@ void battleDebugSelectorMainLoop_detour() {
     battleDebugSelectorMainLoop_intercept.callUndetoured();
 }
 
+DECLARE_HOOK(battleLoaderTick, void, s8);
+void battleLoaderTick_detour(s8 arg) {
+    g_gdbConnection->executeUntilAddress(0x801e5840);
+    assert(arg == (s8)g_gdbConnection->getRegister(GDBConnection::A0));
+
+    validateBattleEntities();
+    validateBattleState();
+
+    battleLoaderTick_intercept.callUndetoured(arg);
+}
+
+DECLARE_HOOK_VOID(battleRender, void);
+void battleRender_detour() {
+    g_gdbConnection->executeUntilAddress(0x800be790);
+
+    validateBattleEntities();
+    validateBattleState();
+
+    battleRender_intercept.callUndetoured();
+}
+
+DECLARE_HOOK_VOID(updateBattleCamera, void);
+void updateBattleCamera_detour() {
+    g_gdbConnection->executeUntilAddress(0x800bbab8);
+
+    validateBattleEntities();
+    validateBattleState();
+
+    updateBattleCamera_intercept.callUndetoured();
+}
+
+DECLARE_HOOK(VSync, int, int);
+int VSync_detour(int arg) {
+    if (arg == -1) {
+        g_gdbConnection->executeUntilAddress(0x8004b54c);
+
+        VSync_intercept.callUndetoured(arg);
+
+        g_gdbConnection->executeUntilAddress(0x8004b68c);
+
+        g_gdbConnection->removeBreakpoint(0x8004b54c); // else we trap in internal calls to vsync
+        g_gdbConnection->removeBreakpoint(0x8004b68c); // else we trap in internal calls to vsync
+
+        return g_gdbConnection->getRegister(GDBConnection::V0);
+    }
+    else {
+        return VSync_intercept.callUndetoured(arg);
+    }
+}
+
 void validateBattle_init() {
     battleHandleInput_intercept.enable();
     battleDebugSelectorMainLoop_intercept.enable();
     battleTickMain_intercept.enable();
+    battleLoaderTick_intercept.enable();
+    battleRender_intercept.enable();
+    updateBattleCamera_intercept.enable();
+    VSync_intercept.enable();
 
     //enableBattleValidationContext(BCT_Base);
     //enableBattleValidationContext(BCT_Tick);

@@ -38,6 +38,9 @@
 
 #include "battle/menu_chi.h"
 
+#include "validation/gdbConnection.h"
+#include "validation/battle/validateBattle.h"
+
 void updatePortraits();
 void render_BA8_27C8_1E68(void);
 void battleDrawAPBar();
@@ -708,6 +711,7 @@ void renderMechasBattle(MATRIX* pMatrix, MATRIX* param_2, OTTable& OT, int oddOr
 }
 
 s32 battleCameraVar2;
+u8 battleCameraGearHeightDisabled = 0;
 u32 allEntitiesToFitInView = 0xFFFFFFFF;
 SVECTOR battleCameraParamsVar0;
 
@@ -814,8 +818,20 @@ void computeBattleCameraParams(uint bitmask) {
                 if (bestDistance < distance) {
                     bestDistance = distance;
                 }
-                if (battleVisualEntities[i].m4_isGear) {
-                    MissingCode();
+                if (battleVisualEntities[i].m4_isGear && !battleCameraGearHeightDisabled) {
+                    local_c0.vy -= battleSpriteActorCores[i]->m36;
+                    RotTransPers(&local_c0, &transformed, &dummy1, &dummy2);
+
+                    X = ((transformed.vx - 0xa0) * 0x40000) >> 0x10;
+                    Y = ((transformed.vy - 0xa4) * 0x40000) >> 0x10;
+
+                    transformed.vx = (transformed.vx - 0xa0) * 4;
+                    transformed.vy = (transformed.vy - 0xa4) * 4;
+
+                    distance = X * X + Y * Y;
+                    if (bestDistance < distance) {
+                        bestDistance = distance;
+                    }
                 }
             }
 
@@ -2054,6 +2070,10 @@ void fxFragmentSetup(u8 value) {
     assert(0);
 }
 
+int battleDrawTimming0;
+int battleDrawTimming1;
+int battle800ccc5c;
+
 void battleRender() {
     battleRenderCount++;
     checkSoftReboot();
@@ -2084,22 +2104,38 @@ void battleRender() {
     uploadCharacterSprites();
     execSpritesCallbacksList1();
     execSpritesCallbacksList2();
-    MissingCode();
-    /*
+
     int iVar3 = (int)spriteCallback2Var4;
     while (iVar3 = iVar3 + -1, iVar3 != -1) {
         updateBattleCamera();
         execSpritesCallbacksList2();
-    }*/
+    }
 
     drawBattleFromModes();
     battleUpdateInputs(0);
-    MissingCode();
-    /*
+
     while (spriteCallback2Var4 = spriteCallback2Var4 + -1, spriteCallback2Var4 != -1) {
         battleUpdateInputs(1);
-    }*/
-    MissingCode();
+    }
+    battleDrawTimming0 = VSync(1);
+    DrawSync(0);
+    battleDrawTimming1 = VSync(1);
+    iVar3 = VSync(-1);
+    iVar3 = (iVar3 - (startOfBattleTime & 0xffff)) - (fieldDrawEnvsInitialized & 0xffff);
+    spriteCallback2Var4 = (short)iVar3;
+
+    if (iVar3 * 0x10000 < 0) {
+        spriteCallback2Var4 = 0;
+    }
+    if (4 < spriteCallback2Var4) {
+        spriteCallback2Var4 = 4;
+    }
+    battle800ccc5c = (int)spriteCallback2Var4 + fieldDrawEnvsInitialized;
+    iVar3 = 0;
+    if (fieldDrawEnvsInitialized != 0) {
+        iVar3 = fieldDrawEnvsInitialized + 1;
+    }
+    VSync(iVar3);
 
     PutDispEnv(&pCurrentBattleRenderStruct->m5C_dispEnv);
     PutDrawEnv(&pCurrentBattleRenderStruct->m0_drawEnv);
@@ -2124,7 +2160,9 @@ void battleRender() {
 s8 battleTimeEnabled = 0;
 
 int battleRenderDebugAndMain(void) {
-    MissingCode("battle debug update");
+    if (*pRunningOnDTL != -1) {
+        assert(0);
+    }
     battleRender();
     return 0;
 }
@@ -3208,7 +3246,7 @@ void deleteJumpAnimationControlStructEndOfAttack() {
         MissingCode();
         freeDamageDisplayPolysTask2();
         updateBattleAnimationDataLoading();
-        MissingCode();
+        battleCameraGearHeightDisabled = 0;
 
         setBattleCameraParamX(0xc0);
         deleteJumpAnimationControlStruct();
