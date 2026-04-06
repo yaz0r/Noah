@@ -3,8 +3,8 @@
 
 This is a decompilation of Xenogears for PS1, based on the US release. All the code executing has been decompiled and reimplemented. Only the PSX sound chip is emulated.  
 The user must provide their own copy of Xenogears. No game data are provided in this project.
-It is **_not_** a matching decompilation, opting instead to reimplement the logic in modern(-ish) C++ with cross-platform in mind. For more informations, see [this page on the wiki](https://github.com/yaz0r/Noah/wiki/Why-not-make-a-matching-decompilation%3F)  
-This project currently builds and run on Windows/Linux (Mac will be added soon too).
+It is **_not_** a matching decompilation, opting instead to reimplement the logic in modern(-ish) C++ with cross-platform in mind.
+This project currently builds and run on Windows/Linux.
 
 # Status:
 Parts of the game are playable, but missing features will prevent progression. A player can use the in-engine debugger to jump over bugs to progress.
