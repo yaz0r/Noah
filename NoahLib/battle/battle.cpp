@@ -12,6 +12,7 @@
 #include "kernel/gameMode.h"
 #include "field/fieldGraphicObject.h"
 #include "battleSpriteLoader.h"
+#include "battleTerrain.h"
 #include "kernel/trigo.h"
 #include "kernel/gte.h"
 #include "battle/spinningEnemySelectionCursor.h"
@@ -40,6 +41,8 @@
 
 #include "validation/gdbConnection.h"
 #include "validation/battle/validateBattle.h"
+#include "validation/validation.h"
+#include "validation/field/validateField.h"
 
 void updatePortraits();
 void render_BA8_27C8_1E68(void);
@@ -126,7 +129,9 @@ ushort characterOdToInverseTargetBitmask(uint param_1)
 
 void initGraphicsForBattle(void) {
     ResetGraph(1);
-    Noah_MissingCode("Some dummy function calls");
+    SetGraphDebug(0x300);
+    SetGraphDebug(8);
+    SetGraphDebug(0);
     InitGeom();
     SetGeomOffset(0xa0, 0xb4);
     SetGeomScreen(0x200);
@@ -197,6 +202,21 @@ sMechaInitVar2 battleMechaInitVar2;
 sMechaInitVar3 battleMechaInitVar3;
 sBattleMechaInitData* battleMechaInitData = nullptr;
 
+extern std::array<sMechaInitVar4, 0x14> battleMechaInitVar4;
+
+// PSX 0x800b00d0: clears an array of 9 sMechaInitVar2Sub* pointers
+// (battleArray800C3BAC). The array is not modeled in the C++ port.
+void initBattle800B00D0() {
+    MissingCode();
+}
+
+// PSX 0x800a8bc4: zeroes two u16s at 0x800d330a / 0x800d331e inside the
+// battle mecha state block. These globals have zero xrefs in the original
+// binary; kept as a named no-op so the call site stays clean.
+void clearBattleMechaInitUnknownCounters() {
+    MissingCode();
+}
+
 void mechaInitForBattle() {
     battleMechaVar0 = 0;
     battleMechaVar1 = 0;
@@ -206,13 +226,20 @@ void mechaInitForBattle() {
     battleMechaVar5 = 1;
     initMechaInitVar2(&battleMechaInitVar2, battleMechaInitData->m348);
     initMechaInitVar3(&battleMechaInitVar3, battleMechaInitData->m34A);
+    initBattle800B00D0();
 
     for (int i = 0; i < 0x20; i++) {
         battleMechas[i] = nullptr;
     }
 
-
-    MissingCode();
+    // PSX clears the first u32 of each battleMechaInitVar4[] entry to mark them
+    // empty; the C++ equivalent is resetting the model-block vector so
+    // allocateBattleMecha's size()==0 probe picks the slot.
+    for (auto& entry : battleMechaInitVar4) {
+        entry.m0.clear();
+        entry.m4 = 0;
+    }
+    clearBattleMechaInitUnknownCounters();
 }
 
 void loadBattleLoader() {
@@ -265,6 +292,49 @@ int waitForMusic(uint param_1) {
 
 void initModel5(sModel* pModelBlock);
 
+// PSX 0x801e70e8: walks the relocated TIM bundle in the env mecha's texture
+// table, computing the bounding rect covering all 0x1101 (TIM image) entries
+// and caching it into VRAM-tracking globals (battleEnvTextureRect*).
+// The globals are currently write-only in the PSX binary, so the stub simply
+// registers the call in PC builds.
+int processBattleEnvTextures(sMechaDataTable1_sub4& textures) {
+    (void)textures;
+    MissingCode();
+    return 0;
+}
+
+// PSX inline init right after processBattleEnvTextures: copies per-bone
+// translations and m52 flags out of a side-table inside the env mecha data
+// bundle into the freshly-loaded environment bones, starting at bone[1].
+// The exact source offset depends on PSX struct layout that isn't yet modelled
+// on the C++ side, so the body is deferred.
+void initBattleEnvironmentBones(sMechaDataTable1* pData1) {
+    (void)pData1;
+    MissingCode();
+}
+
+// PSX 0x800aff9c: snap a freshly-initialised mecha's bone root to the nearest
+// battle terrain triangle, caching the triangle index back into m1E.
+void snapMechaBoneToBattleTerrain(sLoadedMechas* pLoadedMecha) {
+    SVECTOR pos;
+    pos.vx = (s16)(*pLoadedMecha->m4_bones)[0].m5C_translation[0];
+    pos.vy = (s16)(*pLoadedMecha->m4_bones)[0].m5C_translation[1];
+    pos.vz = (s16)(*pLoadedMecha->m4_bones)[0].m5C_translation[2];
+
+    int triIdx = findBattleTerrainTriangle(&pos, pLoadedMecha->m1E, 4, 0);
+    pLoadedMecha->m1E = (s16)triIdx;
+    if (triIdx < 0) {
+        pLoadedMecha->m1E = (s16)findBattleTerrainTriangleBruteForce(&pos);
+    }
+
+    u8 normal[16];
+    computeTerrainHeightAtTriangle(&pos, pLoadedMecha->m1E, normal);
+    pLoadedMecha->m60 = pos.vy;
+    if (pLoadedMecha->m36 == 0) {
+        (*pLoadedMecha->m4_bones)[0].m5C_translation[1] = pos.vy;
+    }
+}
+
 void mechaInitEnvironmentMechaMesh(int entryId, ushort flags, sMechaDataTable2* pData2, sMechaDataTable1* pData1, ushort tpageX, ushort tpageY, ushort clutX, short clutY, SVECTOR* param_9)
 {
     resetMemoryAllocStats(4, 0);
@@ -312,8 +382,7 @@ void mechaInitEnvironmentMechaMesh(int entryId, ushort flags, sMechaDataTable2* 
     pLoadedMecha->m4A = pData1->m10->m4->mC;
 
     if (pLoadedMecha->m4A & 0x200) {
-        MissingCode();
-        //patchSelfModifyingCode(2, 2, 0x40, 0x40);
+        patchSelfModifyingCode(2, 2, 0x40, 0x40);
     }
 
     // HACK:
@@ -441,7 +510,7 @@ void mechaInitEnvironmentMechaMesh(int entryId, ushort flags, sMechaDataTable2* 
         pLoadedMecha->mB0 = &pData2->m8;
         initMechaTransforms1(pLoadedMecha, &battleMechaInitVar2, &pData2->m4.m8, &pData2->m4.m4);
         initMechaAnimation(pLoadedMecha, pLoadedMecha, &battleMechaInitVar2, 0);
-        MissingCode();
+        snapMechaBoneToBattleTerrain(pLoadedMecha);
     }
 
     if ((flags & 2) == 0) {
@@ -475,26 +544,57 @@ int loadBattleEnvironment(std::vector<u8>::iterator param_1, std::vector<u8>::it
             resetMemoryAllocStats(4, 0);
 
             environmentModelConfigs = nullptr;
-            MissingCode();
+            extern int battle800c3ea0;
+            battle800c3ea0 = 0;
+            resetBattleTerrain();
+            // DAT_800d3344/39cc/3348 are battle-terrain globals already reset inside resetBattleTerrain().
             for (int i = 0; i < 2; i++) {
                 battleEnvBackgroundPolys[i] = nullptr;
             }
 
-            Noah_MissingCode("battle move image commands");
-            Noah_MissingCode("800d361a");
+            for (auto& cmd : battleMoveCommands) {
+                cmd = {};
+            }
+            // PSX also zeroes DAT_800d361a (no xrefs — dead global).
 
             if (param_3) {
                 Hack("Original code alias the animation bundle and asset bundle");
                 mechaInitEnvironmentMechaMesh(0x1f, 0xc4, nullptr, param_3, 0, 0, 0, 0, 0);
-                Noah_MissingCode("processBattleEnvTextures");
+                processBattleEnvTextures(param_3->m4_textures);
                 environmentModelConfigs = battleMechas[0x1F]->m4_bones;
                 environmentModelBlocks = battleMechas[0x1F]->m0;
-                Noah_MissingCode("Environment bones init");
+                initBattleEnvironmentBones(param_3);
+            }
+
+            // Initialize battle terrain from raw environment data
+            if (battleMechaInitData && battleMechaInitData->mData.size() > 0x514) {
+                auto rawData = battleMechaInitData->mData.begin();
+                s32 vertexOffset = READ_LE_S32(rawData + 0x50C);
+                s32 triangleOffset = READ_LE_S32(rawData + 0x510);
+
+                if (vertexOffset != 0 && triangleOffset != 0) {
+                    short* vertices = (short*)(battleMechaInitData->mData.data() + vertexOffset);
+                    s32 triangleCount = READ_LE_S32(rawData + triangleOffset);
+                    sBattleTerrainTriangle* triangles = (sBattleTerrainTriangle*)(battleMechaInitData->mData.data() + triangleOffset + 4);
+                    initBattleTerrain(vertices, triangles, triangleCount);
+                }
             }
         }
     }
 
     return 0;
+}
+
+// PSX caches two global draw-env pointers (battleDrawEnv0/1) used by
+// the battle loader overlay when it repaints the draw env during transitions.
+// The referenced fields are unused on PC, so the pointers are tracked but
+// never consumed.
+u8* battleDrawEnv0 = nullptr;
+u8* battleDrawEnv1 = nullptr;
+
+void setupBattleDrawEnvs(u8* param_1, u8* param_2) {
+    battleDrawEnv0 = param_1;
+    battleDrawEnv1 = param_2;
 }
 
 void startBattleLoader(int param_1)
@@ -522,7 +622,7 @@ void startBattleLoader(int param_1)
 
     battleRenderStructs[0].m0_drawEnv.isbg = loadBattleEnvironment(battleLoadDataVar2->mData.begin(), battleLoadDataVar1, battleLoadDataVar0, &battleMatrix800CCB94, &battleMatrix800CCBB4, &battleRenderStructs[0].m0_drawEnv.color);
 
-    MissingCode();
+    setupBattleDrawEnvs(&battleRenderStructs[0].m0_drawEnv.isbg, &battleRenderStructs[1].m0_drawEnv.isbg);
 }
 
 s32 battleRenderCount = 0;
@@ -626,17 +726,80 @@ void renderBattleScenePolys(sMechaInitVar4* envBlocks, std::vector<sMechaBone>* 
     gDepthDivider = backupDepthDivider;
 }
 
+// PSX 0x800a3e98 — updates and uploads one animated environment sub-texture tile
+// (battleMechas[0x1f]->m118[i]), advancing its frame counter and blitting new
+// pixels from the source bundle into the working VRAM mirror.
+void updateAnimatedEnvTextureTile(sLoadedMechas::sLoadedMechas_118* tile, int frameDelta) {
+    (void)tile;
+    (void)frameDelta;
+    MissingCode();
+}
+
+// PSX 0x800a6ae8 — rebuilds the battle environment VRAM double buffer after a
+// palette/texture change, re-patching all affected draw primitives.
+void rebuildBattleEnvironmentVramBuffer() {
+    MissingCode();
+}
+
+// Two image-move commands scheduled per frame during battle env rendering.
+std::array<sBattleImageMoveCommand, 2> battleMoveCommands;
+
+// PSX 0x80027eac — scrolls/moves one entry of the battle environment's
+// deferred image command list (CLUT blocks or tpage fragments).
+void executeBattleMoveImageCommands(sBattleImageMoveCommand* param_1) {
+    (void)param_1;
+    MissingCode();
+}
+
+// PSX 0x800a4db8 — builds the horizon/backdrop fan polys for the battle scene
+// (battleDrawEnv finalisation step).
+void drawBattleHorizonBackdrop(int envLightParam, SVECTOR* eye, SVECTOR* at, MATRIX* projection) {
+    (void)envLightParam;
+    (void)eye;
+    (void)at;
+    (void)projection;
+    MissingCode();
+}
+
+// PSX battle800c3ea0 — env light parameter consumed by drawBattleHorizonBackdrop.
+int battle800c3ea0 = 0;
+
+extern int battle800ccc5c;
+void renderBackgroundPoly(sBackgroundPoly* pBackgroundPoly, SVECTOR* eye, SVECTOR* at, MATRIX* projectionMatrix, sTag* pTag, int oddOrEven);
+
 void battleDrawEnv(MATRIX* param_1, MATRIX* lightMatrix, s32 param_3, std::vector<sTag>* OT, s32 oddOrEven, SVECTOR* param_6, SVECTOR* param_7, int param_8)
 {
     if (lightMatrix != nullptr) {
         SetLightMatrix(lightMatrix);
     }
-    MissingCode();
+
+    // Advance animated environment texture tiles on the environment mecha slot.
+    sLoadedMechas* envMecha = battleMechas[0x1f];
+    if (envMecha != nullptr && envMecha->m10E != 0) {
+        for (int i = 0; i < envMecha->m10E; i++) {
+            updateAnimatedEnvTextureTile(&envMecha->m118[i], battle800ccc5c);
+        }
+    }
+
+    rebuildBattleEnvironmentVramBuffer();
+
+    for (int i = 0; i < 2; i++) {
+        executeBattleMoveImageCommands(&battleMoveCommands[i]);
+    }
+
     if (environmentModelConfigs) {
         // hack param 5 is not 0, but it's probably garbage (uninitialized) and not used anyway
         renderBattleScenePolys(environmentModelBlocks, environmentModelConfigs, param_1, lightMatrix, 0, OT, oddOrEven, param_8);
     }
-    MissingCode();
+
+    // Two full-screen backdrop polys chained to the last OT slot.
+    for (int i = 0; i < 2; i++) {
+        if (battleEnvBackgroundPolys[i] != nullptr) {
+            renderBackgroundPoly(battleEnvBackgroundPolys[i], param_6, param_7, param_1, &(*OT)[param_8 - 1], oddOrEven);
+        }
+    }
+
+    drawBattleHorizonBackdrop(battle800c3ea0, param_6, param_7, param_1);
 }
 
 void renderBattleScene() {
@@ -650,33 +813,167 @@ void renderBattleScene() {
 }
 
 s16 gMechaAngleBattle;
+extern s16 updateTargetSelectionMarkerSub0_var0;
 void submitMechaForRendering(sLoadedMechas* pMecha, MATRIX* pMatrix, MATRIX* param_3, int param_4, int param_5, OTTable& OT, int oddOrEven);
 void updateMechAnim(sLoadedMechas* param_1, sMechaInitVar2* param_2, int iterations, int oddOrEven);
 
+// Globals referenced by renderMechasBattle that are not yet modelled elsewhere.
+s16 battle800c3b80;     // screen-wobble accumulator (sin-driven)
+u8  battle800c3df8 = 0; // gate for updateMechaEventAnim pre-pass
+s8  battle800c3ac4 = 0; // unused in rendering but read by rebuildBattleEnvironmentVramBuffer
+MATRIX* battle800d2fc0 = nullptr; // color matrix pointer stored by loadBattleEnvironment
+
+extern u16 setupMechaForEventVar1;
+extern u8 setupMechaForEventVar0;
+
+// PSX 0x800aa514: saturating additive blend of a scaled signed component.
+// result = clamp(base + (delta * scale + 255) >> 8, 0..255)
+u32 addSaturatingColorDelta(s16 delta, s16 scale, int base) {
+    s32 scaled = (s32)delta * (s32)scale;
+    if (scaled < 0) scaled += 0xff;
+    u32 result = (u32)(base + (scaled >> 8));
+    if ((s32)(result << 16) >> 16 > 0xff) {
+        result = 0xff;
+    }
+    return result & 0xff;
+}
+
+// PSX 0x800aa650: world-space collider radius of a mecha, derived from scale
+// and bone-box extents and switched by m4A bit 3.
+int getMechaColliderRadius(int mechaIdx) {
+    sLoadedMechas* pMecha = battleMechas[mechaIdx];
+    if (!pMecha) return 0;
+    s16 scaleAxis, boneExtent;
+    if ((pMecha->m4A & 8) == 0) {
+        scaleAxis = pMecha->m24[2];
+        boneExtent = (*pMecha->m4_bones)[0].m4C_scale[2];
+    } else {
+        scaleAxis = pMecha->m24[1];
+        boneExtent = (*pMecha->m4_bones)[0].m4C_scale[0];
+    }
+    return ((s32)scaleAxis * (((s32)pMecha->m1C_scale * (s32)boneExtent) >> 12)) >> 12;
+}
+
+// PSX 0x800b10ec: pushes a mecha at index `mechaIdx` away from world point
+// (targetX, targetZ) until they're at least `minDist` apart in XZ plane.
+void pushMechaAway(int mechaIdx, int targetX, int targetZ, int minDist) {
+    sLoadedMechas* pMecha = battleMechas[mechaIdx];
+    if (!pMecha) return;
+    sMechaBone* bone = &(*pMecha->m4_bones)[0];
+    int dx = targetX - bone->m5C_translation[0];
+    int dz = targetZ - bone->m5C_translation[2];
+    int distance = SquareRoot0(dx * dx + dz * dz) + 1;
+    if (distance >= minDist) return;
+
+    u32 angle = ratan2(dz, -dx);
+    if ((((s32)bone->m54_rotationAngles.vy - (s32)angle) & 0xfff) - 0x401 < 0x7ff) {
+        angle += 0x800;
+    }
+
+    int cosA = getAngleCos(angle);
+    int xCorrection = cosA * (minDist - distance);
+    if (xCorrection < 0) xCorrection += 0xfff;
+    bone->m5C_translation[0] = (targetX - (dx * minDist) / distance) - (xCorrection >> 12);
+
+    int sinA = getAngleSin(angle);
+    int zCorrection = sinA * (minDist - distance);
+    if (zCorrection < 0) zCorrection += 0xfff;
+    bone->m5C_translation[2] = (targetZ - (dz * minDist) / distance) - (zCorrection >> 12);
+}
+
+// PSX 0x800a4cf8: for every entry in the battle collider list, push mechaIdx
+// away from the colliders so their bounding cylinders don't overlap.
+void finalizeMechaForEvent(int mechaIdx) {
+    // PSX iterates DAT_800d2fd0 (short*) for DAT_800d2fc8 entries,
+    // each entry is {x, z, radiusOffset}. The list is not yet modelled on PC.
+    MissingCode();
+    (void)mechaIdx;
+}
+
+// PSX 0x800a44c0: re-applies a rotation matrix to cached sBattle800d330a entries
+// so attached/inherited meshes follow their parent bone after animation.
+void refreshAttachedMechaTransforms() {
+    MissingCode();
+}
+
+// PSX 0x800a2fd8: renders the mecha's trailing 'wheel effect' particle trail
+// into the battle OT, advancing the per-particle translation each frame.
+void drawMechaWheelTrail(sMechaInitVar3* param_1, MATRIX* pMatrix, int iterationCount, sTag* OT, int oddOrEven) {
+    (void)param_1;
+    (void)pMatrix;
+    (void)iterationCount;
+    (void)OT;
+    (void)oddOrEven;
+    MissingCode();
+}
+
+// PSX 0x800b026c: drives the battle camera/target event animation keyframe system
+// (battleArray800C3BAC entries with mechaOP_A_sub0 finalisation).
+void updateMechaEventAnim(sMechaInitVar2* param_1, int iterations, int param_3, int oddOrEven) {
+    (void)param_1;
+    (void)iterations;
+    (void)param_3;
+    (void)oddOrEven;
+    MissingCode();
+}
+
 void renderMechasBattle(MATRIX* pMatrix, MATRIX* param_2, OTTable& OT, int oddOrEven)
 {
-    MissingCode();
-    battleMechaVar0 += 1;// +DAT_Battle__800ccc5c;
+    battleMechaVar0 += 1 + battle800ccc5c;
     if (battleMechaVar0 > 6) {
         battleMechaVar0 = 6;
     }
     int mechaIterationCount = 0;
-    int mechaIterationCount2 = 0;
+    int animTickAccumulator = 0;
     if (battleMechaVar0 > 1) {
         do {
-            battleMechaVar0 = battleMechaVar0 + -2;
-            mechaIterationCount = mechaIterationCount + 1;
-        } while (1 < battleMechaVar0);
-        mechaIterationCount2 = mechaIterationCount * 8;
+            battleMechaVar0 -= 2;
+            mechaIterationCount++;
+        } while (battleMechaVar0 > 1);
+        animTickAccumulator = mechaIterationCount * 8;
     }
-    mechaIterationCount2 = (uint)battleMechaVar1 + (mechaIterationCount2 - mechaIterationCount) * 8;
-    battleMechaVar1 = (ushort)mechaIterationCount2;
-    battleMechaVar4 = battleMechaVar4 + 0x80; // TODO: this doesn't exists in field version?
-    int angleForMecha = getAngleSin(mechaIterationCount2 * 0x10000 >> 0x10);
-    gMechaAngleBattle = ((short)((((u64)((angleForMecha + 0x1000) * 0x51eb851f) >> 0x28) - (short)(angleForMecha + 0x1000)) >> 0x1f)) + 4;
+    animTickAccumulator = (u32)battleMechaVar1 + (animTickAccumulator - mechaIterationCount) * 8;
+    battleMechaVar1 = (u16)animTickAccumulator;
+    int angleForMecha = getAngleSin((s16)animTickAccumulator);
+    battleMechaVar4 += 0x80;
+    gMechaAngleBattle = ((s16)((((u64)((angleForMecha + 0x1000) * 0x51eb851f) >> 0x28) - (s16)(angleForMecha + 0x1000)) >> 0x1f)) + 4;
 
-    MissingCode();
+    // Screen wobble angle used by the back-color interpolation.
+    int wobble = getAngleSin((int)battleMechaVar4) + 0x1000;
+    if (wobble < 0) wobble += 0x101f;
+    battle800c3b80 = (s16)(wobble >> 5);
+    u8 backR = (u8)addSaturatingColorDelta(battle800c3b80, 0x20, battleMechaInitData->m478_r);
+    u8 backG = (u8)addSaturatingColorDelta(battle800c3b80, 0x20, battleMechaInitData->m479_g);
+    u8 backB = (u8)addSaturatingColorDelta(battle800c3b80, 0x20, battleMechaInitData->m47A_b);
 
+    // Mecha-vs-mecha collision pushback for the event-selected mecha.
+    if (battleMechas[setupMechaForEventVar0] != nullptr &&
+        (battleMechas[setupMechaForEventVar0]->m4A & 0x20) == 0) {
+        for (u32 otherIdx = 0; otherIdx < 0xb; otherIdx++) {
+            sLoadedMechas* other = battleMechas[otherIdx];
+            if (other == nullptr || otherIdx == setupMechaForEventVar0 || other->m5C != -1) continue;
+            if (((setupMechaForEventVar1 >> (otherIdx & 0x1f)) & 1) != 0) continue;
+            if (other->m34 == 0) continue;
+
+            sMechaBone* selfBone = &(*battleMechas[setupMechaForEventVar0]->m4_bones)[0];
+            int otherRadius = getMechaColliderRadius(otherIdx);
+            sMechaBone* otherBone = &(*other->m4_bones)[0];
+            if (otherBone->m5C_translation[1] - otherRadius >= selfBone->m5C_translation[1]) continue;
+
+            int selfRadius = getMechaColliderRadius(setupMechaForEventVar0);
+            if (battleMechas[setupMechaForEventVar0]->m4_bones[0][0].m5C_translation[1] - selfRadius >= otherBone->m5C_translation[1]) continue;
+
+            int rOther = getMechaColliderRadius(otherIdx);
+            int rSelf = getMechaColliderRadius(setupMechaForEventVar0);
+            pushMechaAway(setupMechaForEventVar0,
+                          otherBone->m5C_translation[0],
+                          otherBone->m5C_translation[2],
+                          rOther + rSelf);
+        }
+        finalizeMechaForEvent(setupMechaForEventVar0);
+    }
+
+    // Animation tick pass.
     for (int i = 0; i < 32; i++) {
         if (battleMechas[i]) {
             battleMechas[i]->m11C_previousTranslation = (*battleMechas[i]->m4_bones)[0].m5C_translation;
@@ -685,54 +982,70 @@ void renderMechasBattle(MATRIX* pMatrix, MATRIX* param_2, OTTable& OT, int oddOr
         }
     }
 
-    MissingCode();
+    if (battle800c3df8 != 0) {
+        updateMechaEventAnim(&battleMechaInitVar2, mechaIterationCount, 0, oddOrEven);
+    }
 
     for (int i = 0; i < 32; i++) {
         if (battleMechas[i] && battleMechas[i]->m5C != -1) {
-            //updateMechasBaseMatrixIsAttached(battleMechas[i]);
+            //updateMechasBaseMatrixIsAttached(battleMechas[i]); // field version
+        }
+    }
+    refreshAttachedMechaTransforms();
+
+    if (battle800d2fc0) {
+        SetColorMatrix(battle800d2fc0);
+    }
+
+    // Draw everything but the environment (index 0x1f), which is rendered separately.
+    if (battleMechaVar5 != 0) {
+        for (int i = 0; i < 31; i++) {
+            if (battleMechas[i]) {
+                battleMechas[i]->m128_deltaTranslation[0] = battleMechas[i]->m11C_previousTranslation[0] - (*battleMechas[i]->m4_bones)[0].m5C_translation[0];
+                battleMechas[i]->m128_deltaTranslation[1] = battleMechas[i]->m11C_previousTranslation[1] - (*battleMechas[i]->m4_bones)[0].m5C_translation[1];
+                battleMechas[i]->m128_deltaTranslation[2] = battleMechas[i]->m11C_previousTranslation[2] - (*battleMechas[i]->m4_bones)[0].m5C_translation[2];
+                u8 r = backR, g = backG, b = backB;
+                if (((updateTargetSelectionMarkerSub0_var0 >> (i & 0x1f)) & 1) == 0) {
+                    r = battleMechaInitData->m478_r;
+                    g = battleMechaInitData->m479_g;
+                    b = battleMechaInitData->m47A_b;
+                }
+                SetBackColor(r, g, b);
+                objectClippingMask = ((battleMechas[i]->m4A & 0x40) == 0) ? 1u : 0u;
+                Hack("Using field codepath for battle mecha!");
+                submitMechaForRendering(battleMechas[i], pMatrix, param_2, 1, battle800ccc5c, OT, oddOrEven);
+                objectClippingMask = 0;
+            }
         }
     }
 
-    MissingCode();
-
-    //SetColorMatrix(mechaFinalizeVar0);
-
-    // draw everything but the last (the environment that is drawn separately)
-    for (int i = 0; i < 31; i++) {
-        if (battleMechas[i]) {
-            battleMechas[i]->m128_deltaTranslation[0] = battleMechas[i]->m11C_previousTranslation[0] - (*battleMechas[i]->m4_bones)[0].m5C_translation[0];
-            battleMechas[i]->m128_deltaTranslation[1] = battleMechas[i]->m11C_previousTranslation[1] - (*battleMechas[i]->m4_bones)[0].m5C_translation[1];
-            battleMechas[i]->m128_deltaTranslation[2] = battleMechas[i]->m11C_previousTranslation[2] - (*battleMechas[i]->m4_bones)[0].m5C_translation[2];
-            Hack("Using field codepath for battle mecha!");
-            submitMechaForRendering(battleMechas[i], pMatrix, param_2, 1, 1, OT, oddOrEven);
-        }
-    }
-    MissingCode();
+    drawMechaWheelTrail(&battleMechaInitVar3, pMatrix, mechaIterationCount, OT.begin()._Unwrapped(), oddOrEven);
 }
 
 s32 battleCameraVar2;
 u8 battleCameraGearHeightDisabled = 0;
 u32 allEntitiesToFitInView = 0xFFFFFFFF;
-SVECTOR battleCameraParamsVar0;
+SVECTOR battleCameraParamsVar0 = { 0xc0, 0, 0 };
 
 // Compute camera to fit all characters from bitmask in view
 void computeBattleCameraParams(uint bitmask) {
     VECTOR positionSum = { 0,0,0,0 };
 
     s32 bestDistance = 0;
-    u32 numEntries = 0;
+    s32 numEntries = 0;
     {
         u32 currentBitmask = bitmask;
         for (int i = 0; i < 11; i++) {
             if ((currentBitmask & 1) && (battleVisualEntities[i].m3 == 0) && (battleSpriteActorCores[i])) {
-                positionSum.vx += battleSpriteActorCores[i]->m0_position.vx / 2;
-                positionSum.vy += battleSpriteActorCores[i]->m0_position.vy / 2;
-                positionSum.vz += battleSpriteActorCores[i]->m0_position.vz / 2;
+                positionSum.vx += (s32)battleSpriteActorCores[i]->m0_position.vx >> 1;
+                positionSum.vy += (s32)battleSpriteActorCores[i]->m0_position.vy >> 1;
+                positionSum.vz += (s32)battleSpriteActorCores[i]->m0_position.vz >> 1;
                 numEntries++;
             }
             currentBitmask >>= 1;
         }
     }
+
     allEntitiesToFitInView = bitmask;
     if (numEntries) {
         int minX = (positionSum.vx / numEntries) * 2;
@@ -838,6 +1151,11 @@ void computeBattleCameraParams(uint bitmask) {
             bitmask >>= 1;
         }
 
+        if (g_gdbConnection) {
+            g_gdbConnection->executeUntilAddress(0x800bc920); // after SquareRoot0 returns; s5 still holds bestDistance
+            validateAssert((s32)g_gdbConnection->getRegister(GDBConnection::S5) == bestDistance);
+        }
+
         s32 realDistance = SquareRoot0(bestDistance);
         VECTOR local_c0;
         s32 finalZ;
@@ -876,6 +1194,13 @@ void computeBattleCameraParams(uint bitmask) {
         battleCameraAtTarget.vx = (short)positionSum.vx;
         battleCameraAtTarget.vy = (short)positionSum.vy;
         battleCameraAtTarget.vz = (short)positionSum.vz;
+
+        if (g_gdbConnection) {
+            g_gdbConnection->executeUntilAddress(0x800bca70); // function epilogue
+            validate(0x800d30a0, battleCameraEyeTarget);
+            validate(0x800d30a8, battleCameraAtTarget);
+            validate(0x800c3cdc, battleCameraVar2);
+        }
     }
 }
 
@@ -993,6 +1318,14 @@ void battleTimeProgress() {
     }
 }
 
+// PSX 0x8008a144 — scrolls the chi-menu text strip one byte per frame by
+// uploading four slices of the m8970/m8fa0/m95d0/m9c00 glyph buffers to VRAM.
+// These staging buffers are not modelled in the C++ sBattleVar0, so the
+// actual LoadImage cascade is deferred.
+void battleChiMenuTextScrollTick() {
+    MissingCode();
+}
+
 void battleUpdateInputs_mode1(int mode) {
     if (battleTimeEnabled != '\0') {
         battleTimeProgress();
@@ -1022,21 +1355,54 @@ void battleUpdateInputs_mode1(int mode) {
         }
     }
 
+    // Chi-menu variable animation: expand/contract counter based on var1 state.
+    extern s32 battleChiMenuVar0;
+    extern s8 battleChiMenuVar1;
+    switch (battleChiMenuVar1) {
+    case 1:
+    case 3:
+        battleChiMenuVar0++;
+        break;
+    case 2:
+    case 4:
+        battleChiMenuVar0--;
+        break;
+    default:
+        break;
+    }
+
+    battleChiMenuTextScrollTick();
+}
+
+// PSX trailing block inside battleUpdateInputs_mode0: walks the three battle
+// character result slots (DAT_800d32f8), decrementing their m15fa/m15fb
+// countdowns, and kicks FUN_Battle_result__801df270 / FUN_Battle_result__801df4c0
+// when either latch is still live. The underlying sBattleCharacterResult state
+// isn't modelled on PC, so the body is a stub.
+void battleUpdateInputs_mode0Finalize() {
     MissingCode();
 }
 
 void battleUpdateInputs_mode0(int mode) {
+    u32 savedPlayTime = 0;
     bool bVar1 = true;
     bool wasPaused = false;
-    do 
+    do
     {
         if (!isControllerConnected(0)) {
-            assert(0);
+            if (!wasPaused) {
+                decompressPauseSignToVram(0x88, 100);
+                decompressPauseSignToVram(0x88, 0x144);
+                wasPaused = true;
+                pauseMusic();
+                savedPlayTime = g_playTimeInVsync;
+            }
         }
         else {
             bVar1 = false;
             if (wasPaused) {
-                assert(0);
+                resumeMusic();
+                g_playTimeInVsync = savedPlayTime;
             }
         }
 
@@ -1045,7 +1411,7 @@ void battleUpdateInputs_mode0(int mode) {
     if (battleVar1->mCF == 0) {
         battleInputButton = 0xff;
     }
-    do 
+    do
     {
         if (!getInputOverflowed()) {
             do {
@@ -1062,14 +1428,12 @@ void battleUpdateInputs_mode0(int mode) {
                 decompressPauseSignToVram(0x88, 100);
                 decompressPauseSignToVram(0x88, 0x144);
                 battleIsPaused = '\x01';
-                //unaff_s1 = playTimeInVsync;
-                assert(0);
+                savedPlayTime = g_playTimeInVsync;
             }
             else {
                 resumeMusic();
                 battleIsPaused = '\0';
-                //playTimeInVsync = unaff_s1;
-                assert(0);
+                g_playTimeInVsync = savedPlayTime;
             }
         }
         else {
@@ -1077,8 +1441,7 @@ void battleUpdateInputs_mode0(int mode) {
         }
 LAB_Battle__8008a804:
         if (battleIsPaused == 0) {
-            MissingCode();
-
+            battleUpdateInputs_mode0Finalize();
             return;
         }
 
@@ -1086,22 +1449,32 @@ LAB_Battle__8008a804:
 }
 
 void battleUpdateInputs_mode2() {
+    u32 savedPlayTime = 0;
     bool bVar1 = true;
     bool wasPaused = false;
     do
     {
         if (!isControllerConnected(0)) {
-            assert(0);
+            if (!wasPaused) {
+                decompressPauseSignToVram(0x88, 100);
+                decompressPauseSignToVram(0x88, 0x144);
+                wasPaused = true;
+                pauseMusic();
+                savedPlayTime = g_playTimeInVsync;
+            }
         }
         else {
             bVar1 = false;
             if (wasPaused) {
-                assert(0);
+                resumeMusic();
+                g_playTimeInVsync = savedPlayTime;
             }
         }
 
     } while (bVar1);
-    MissingCode();
+
+    battleChiMenuTextScrollTick();
+
     if (battleVar1->mCA_battleEventPoly) {
         for (int i = 0; i < 0x10; i++) {
             if (battleEventVar0->m0_scriptEntities[i].m28) {
@@ -1118,28 +1491,51 @@ void battleUpdateInputs_mode2() {
             battleInputButton = 0xFF;
         }
         if (getInputOverflowed() == 0) {
+            bool doResume = false;
             while (loadInputFromVSyncBuffer()) {
                 if (!battleIsPaused) {
                     if ((newPadButtonForDialogs & 0x20) != 0) {
                         battleInputButton = 4;
+                        goto LAB_mode2_finalize;
                     }
                 }
-                else if (*pRunningOnDTL != -1) {
-                    assert(0);
+                else if ((*pRunningOnDTL != -1) &&
+                         (newPadButtonForField & 4) &&
+                         (newPadButtonForField & 8)) {
+                    battleRunningVar1 = 1;
+                    doResume = true;
+                    break;
                 }
-                else if (newPadButtonForDialogs & 0x800) {
+                if (newPadButtonForDialogs & 0x800) {
                     if (battleTimeEnabled != '\0') {
-                        if (battleIsPaused == '\0') {
-                            assert(0);
+                        if (battleIsPaused == 0) {
+                            pauseMusic();
+                            decompressPauseSignToVram(0x88, 100);
+                            decompressPauseSignToVram(0x88, 0x144);
+                            battleIsPaused = 1;
+                            savedPlayTime = g_playTimeInVsync;
+                        }
+                        else {
+                            doResume = true;
                         }
                     }
+                    break;
                 }
+            }
+            if (doResume) {
+                resumeMusic();
+                battleIsPaused = 0;
+                g_playTimeInVsync = savedPlayTime;
             }
         }
         else {
             resetInputs();
         }
-    } while (battleIsPaused);
+LAB_mode2_finalize:
+        if (battleIsPaused == 0) {
+            return;
+        }
+    } while (true);
 }
 
 void battleUpdateInputs(int mode) {
@@ -1527,9 +1923,17 @@ void updateApFuelPolyBar() {
     }
 }
 
+// PSX 0x80076060 — updates the per-character HP/AP/fuel gauge POLY_FT4s in
+// battleVar0->m5A0 / m740_APOrFuelPoly every frame. Touches a very large set
+// of sBattleVar0/battleEntities fields at deeply nested offsets that the C++
+// struct layout doesn't fully model yet, so the body is kept as a stub.
+void renderGearHPSub0() {
+    MissingCode();
+}
+
 void renderGearHP() {
     updateApFuelPolyBar();
-    MissingCode();
+    renderGearHPSub0();
 }
 
 void battleDrawAPBar() {
@@ -1864,6 +2268,7 @@ void drawDescriptionText(void)
     AddPrim(&(*pCurrentBattleOT)[1], &battleVar0->mA230->m0_polys[9][battleVar0->mA230->m66A_oddOrEven]);
 }
 
+void renderOpenMenuCase3Polys();
 void renderOpenMenu() {
     switch (battleVar1->mB7) {
     case 0:
@@ -1901,7 +2306,7 @@ void renderOpenMenu() {
         break;
     case 3:
         renderOpenMenuSub0();
-        MissingCode(); // poly rendering for case 3
+        renderOpenMenuCase3Polys();
         break;
     case 4:
         renderOpenMenuSub0();
@@ -1993,6 +2398,32 @@ void render_BA8_27C8_1E68(void)
     return;
 }
 
+// renderOpenMenu case 3 — gated on sBattleVar0_a230::field_0x66f, adds two
+// primitives from m5A0[1][0..1] with byte-level strides of 9 and 0xc.
+// sBattleVar0_a230 currently stops at m66E, so the gate field and exact
+// source primitives aren't modelled; kept as a stub.
+void renderOpenMenuCase3Polys() {
+    MissingCode();
+}
+
+// PSX 0x80074eec — renders three battle poly arrays at m5550/m5640/m5c80
+// when battleVar1->mA8 is set (death blow/overdrive flash effect).
+void renderDeathBlowFlashPolys() {
+    MissingCode();
+}
+
+// PSX 0x80088b80 — renders the large battle command result text (WIN/LOSE/
+// number displays) into pBattleRenderStruct2's text poly arrays.
+void renderBattleResultText() {
+    MissingCode();
+}
+
+// PSX 0x80074ab8 — renders the battle result UI (overall) poly array
+// collection from pBattleRenderStruct2 when mC7/mAD flags are set.
+void battleDrawOverallUI() {
+    MissingCode();
+}
+
 void drawBattleMode1() {
     if (!drawBattleMode1Disabled) {
         drawBattleDialogWindows();
@@ -2004,14 +2435,18 @@ void drawBattleMode1() {
         battleRenderCommandRing();
         render_BA8_27C8_1E68();
         drawMonsterNames();
-        MissingCode();
+        renderDeathBlowFlashPolys();
         renderOpenMenu();
         renderTargetSelectionCursor();
         battleDrawAPBar();
-        MissingCode();
+        renderBattleResultText();
+        battleDrawOverallUI();
     }
 }
 
+// PSX 0x80074cec — battleResultDraw: calls three Battle_result overlay entry
+// points (801de048, 801de1c4, 801de408) to draw the end-of-battle result.
+// None of those have been ported yet.
 void battleResultDraw(void) {
     MissingCode();
 }
@@ -2066,13 +2501,24 @@ sJumpAnimationControlStruct* jumpAnimationControlStruct = nullptr;
 
 u8 isFxFragmentsSetup = 0;
 
+bool fxFragmentInitialized = false;
+void abilityPlayAnimationSub1(int param_1);
+bool initFxFragments(void);
+
 void fxFragmentSetup(u8 value) {
-    assert(0);
+    abilityPlayAnimationSub1(value);
+    initFxFragments();
+    fxFragmentInitialized = true;
 }
 
 int battleDrawTimming0;
 int battleDrawTimming1;
 int battle800ccc5c;
+
+// Forward declarations for helpers defined later in this file.
+void battleLoadFileFrom0xC(void);
+void clearAnimationsEndOfTurnSub();
+extern s8 finalizeBattleMechaLoadingVar0;
 
 void battleRender() {
     battleRenderCount++;
@@ -2091,22 +2537,25 @@ void battleRender() {
 
     ClearOTagR(*pCurrentBattleOT, 0x1000);
     battleOddOrEven = 1 - battleOddOrEven;
-    MissingCode("DTL stuff");
+
+    if (runningOnDTL != -1) {
+        assert(0);
+    }
 
     clearShapeTransfertTableEntry(battleOddOrEven);
     updateBattleCamera();
     renderBattleScene();
     setCurrentRenderingMatrix(&battleRenderingMatrix);
     setCharacterRenderingOT(*pCurrentBattleOT);
-
-    MissingCode();
+    if (runningOnDTL != -1) {
+        assert(0);
+    }
     renderMechasBattle(&battleRenderingMatrix, &battleMatrix800CCB94, *characterRenderingOT, battleOddOrEven);
     uploadCharacterSprites();
     execSpritesCallbacksList1();
     execSpritesCallbacksList2();
 
-    int iVar3 = (int)spriteCallback2Var4;
-    while (iVar3 = iVar3 + -1, iVar3 != -1) {
+    for(int i=0; i< spriteCallback2Var4; i++) {
         updateBattleCamera();
         execSpritesCallbacksList2();
     }
@@ -2120,18 +2569,18 @@ void battleRender() {
     battleDrawTimming0 = VSync(1);
     DrawSync(0);
     battleDrawTimming1 = VSync(1);
-    iVar3 = VSync(-1);
-    iVar3 = (iVar3 - (startOfBattleTime & 0xffff)) - (fieldDrawEnvsInitialized & 0xffff);
-    spriteCallback2Var4 = (short)iVar3;
 
-    if (iVar3 * 0x10000 < 0) {
+    spriteCallback2Var4 = (short)((VSync(-1) - (startOfBattleTime & 0xffff)) - (fieldDrawEnvsInitialized & 0xffff));
+
+    if (spriteCallback2Var4 * 0x10000 < 0) {
         spriteCallback2Var4 = 0;
     }
     if (4 < spriteCallback2Var4) {
         spriteCallback2Var4 = 4;
     }
     battle800ccc5c = (int)spriteCallback2Var4 + fieldDrawEnvsInitialized;
-    iVar3 = 0;
+
+    int iVar3 = 0;
     if (fieldDrawEnvsInitialized != 0) {
         iVar3 = fieldDrawEnvsInitialized + 1;
     }
@@ -2141,6 +2590,7 @@ void battleRender() {
     PutDrawEnv(&pCurrentBattleRenderStruct->m0_drawEnv);
     shapeTransfert();
     DrawOTag(&pCurrentBattleRenderStruct->m70_OT[0xfff]);
+    battleLoadFileFrom0xC();
 
     if (battleRenderCount == 1) {
         if (jumpAnimationControlStruct != nullptr) {
@@ -2151,7 +2601,10 @@ void battleRender() {
             isFxFragmentsSetup = 0;
             fxFragmentSetup(oldValue);
         }
-        MissingCode();
+        if (finalizeBattleMechaLoadingVar0 != 0 && isCDBusy() == 0) {
+            finalizeBattleMechaLoadingVar0 = 0;
+            clearAnimationsEndOfTurnSub();
+        }
     }
 
     battleRenderCount = battleRenderCount + -1;
@@ -2258,10 +2711,40 @@ void checkWinConditions() {
     }
 }
 
+// Counts the number of gear/enemy slots (3..10) currently present with a
+// valid direction (< 0x11). Used to derive fieldDrawEnvsInitialized /
+// battle800ccc5c for the animation frame-skip compensation.
+s32 battleDrawEnvCount = 0; // PSX DAT_800c3d58
+
 void initBattle3dRendering(void) {
-    MissingCode();
+    battleDrawEnvCount = 0;
+    for (int i = 3; i < 0xb; i++) {
+        if ((u8)battleVisualEntities[i].m2 < 0x11 && battleVisualEntities[i].m4_isGear != 0) {
+            battleDrawEnvCount++;
+        }
+    }
+    fieldDrawEnvsInitialized = battleDrawEnvCount / 2 - 1;
+    if (fieldDrawEnvsInitialized < 0) {
+        fieldDrawEnvsInitialized = 0;
+    }
+    battle800ccc5c = fieldDrawEnvsInitialized;
+    fieldDrawEnvsInitialized = 0;
     gDepthDivider = 2;
-    MissingCode();
+
+    // Swap to the "other" battle render struct so the previous one can finish
+    // being drawn on the back buffer.
+    sBattleRenderStruct* pNext = &battleRenderStructs[0];
+    if (pCurrentBattleRenderStruct == &battleRenderStructs[0]) {
+        pNext = &battleRenderStructs[1];
+    }
+    pCurrentBattleOT = &pNext->m70_OT;
+    pCurrentBattleRenderStruct = pNext;
+    ClearOTagR(*pCurrentBattleOT, 0x1000);
+    battleOddOrEven = 1;
+    pCurrentBattleRenderStruct = &battleRenderStructs[1];
+    battleTimeEnabled = 0;
+    battleRenderStructs[1].m0_drawEnv.isbg  = battleRenderStructs[0].m0_drawEnv.isbg;
+    battleRenderStructs[1].m0_drawEnv.color = battleRenderStructs[0].m0_drawEnv.color;
 }
 
 sSavePointMeshAbstract* battleCameraModeCallback1 = nullptr;
@@ -2296,10 +2779,14 @@ void setBattleCameraMode(int param_1) {
     }
 }
 
+// PSX spriteBytecode2ExtendedE0_Sub0_10 camera-mode flag, cleared by
+// resetBattleCameraMode when the battle returns to its default camera.
+s32 spriteBytecode2ExtendedE0_Sub0_10_battle_var0 = 0;
+
 void resetBattleCameraMode() {
     battleIR0 = 0x200;
     allEntitiesToFitInView = 0xffffffff;
-    MissingCode();
+    spriteBytecode2ExtendedE0_Sub0_10_battle_var0 = 0;
     battleCameraModeInterpolation = 1;
     setBattleCameraMode(0);
 }
@@ -2321,6 +2808,17 @@ void initUpdateTargetSelectionMarkerSub0_var0(void)
     return;
 }
 
+// PSX 0x800b7c28: clears loadingFXFramentVar1 so the FX fragment loader will
+// reset its state on the next battle start.
+extern byte loadingFXFramentVar1;
+void resetLoadingFxFragmentFlag() {
+    loadingFXFramentVar1 = 0;
+}
+
+// PSX 0x800b89f4: stock SsUtVibrateOff (rumble off) — no-op on PC.
+void stopControllerVibration() {
+}
+
 void initBattleSpriteSystem() {
     isBattleOverlayLoaded = 1;
     allocateSavePointMeshDataSub0_var0 = 0;
@@ -2332,7 +2830,8 @@ void initBattleSpriteSystem() {
     resetBattleCameraMode();
     allocateShapeTransfert(0x5000);
     initUpdateTargetSelectionMarkerSub0_var0();
-    MissingCode();
+    resetLoadingFxFragmentFlag();
+    stopControllerVibration();
     objectClippingMask = 0;
 }
 
@@ -2396,12 +2895,20 @@ std::array<std::array<s16, 3>, 3> partyMemberSpritesOffset = { {
     {0x0, 0x0, 0x0} // 3 PC
 } };
 
-void battleSoundEffect(u32) {
-    MissingCode();
+// Set by mainBattleSpriteCallback_phase3 after loading the battle sequence file.
+// Used as the sound bank for in-battle sfx. PSX stores this at 0x8005919c.
+sSeqFile* gBattleCurrentSoundEffectSeq = nullptr;
+
+void battleSoundEffect(u32 param_1) {
+    if (gBattleCurrentSoundEffectSeq) {
+        playSoundEffect(((u32)gBattleCurrentSoundEffectSeq->m14 << 16) | (param_1 & 0xff));
+    }
 }
 
-void battleSoundEffect2(u32) {
-    MissingCode();
+void battleSoundEffect2(u32 param_1) {
+    if (startCharacterJumpToEnemyVar0 != 0) {
+        battleSoundEffect(param_1);
+    }
 }
 
 u8 updateTargetSelectionMarkerVar0 = 0;
@@ -2660,7 +3167,7 @@ void abilityPlayAnimationSub0(sSpriteActorCore*)
 }
 
 void clearBattleAnimationData() {
-    MissingCode();
+    // PSX calls FUN_8002a498 here (CD-ROM close/reset); not needed on PC.
     waitBattleAnimationSpriteLoading();
 }
 
@@ -2672,8 +3179,19 @@ sSpriteActorAnimationBundle* battleAnimationLoadingDest = nullptr;
 std::vector<u8> fxUploadBuffer;
 
 void abilityPlayAnimationSub1(int param_1) {
+    extern std::array<std::array<s16, 2>, 3> battleMechaPartyTextureLocations;
     if (param_1 == 0xe3) {
-        MissingCode();
+        // Special deathblow prep: migrate the three party gear-side textures
+        // into the FX fragment area so the ability animation can read them.
+        RECT local_20;
+        for (int i = 0; i < 3; i++) {
+            local_20.w = 0x40;
+            local_20.h = 0x100;
+            local_20.x = battleMechaPartyTextureLocations[i][0];
+            local_20.y = battleMechaPartyTextureLocations[i][1];
+            MoveImage(&local_20, 0x280 - i * 0x40, 0x100);
+        }
+        DrawSync(0);
     }
     clearBattleAnimationData();
     setCurrentDirectory(0xc, 2);
@@ -3000,7 +3518,15 @@ void processBattleAnimation(sSpriteActorCore* param_1) {
         param_1->m24_vramData = psVar10->m24_vramData;
         param_1->m7C->mE_vramLocation = psVar10->m7C->mE_vramLocation;
         param_1->m3C = param_1->m3C | 0x40000000;
-        MissingCode(); // clone sprite tile data from psVar10->m20->m2C to param_1->m20->m2C
+        // Clone psVar10's sprite tile data into param_1's m20 slot so both
+        // sprites render from identical tiles after the switch.
+        {
+            auto* dstSprite = param_1->m20->getAsSprite();
+            auto* srcSprite = psVar10->m20->getAsSprite();
+            delete dstSprite->m2C;
+            dstSprite->m2C = new std::vector<sFieldEntitySub4_B4_sub>(*srcSprite->m2C);
+            dstSprite->m30 = dstSprite->m2C;
+        }
         allocateJumpAnimationStructVar0++;
         return;
     }
@@ -3108,13 +3634,48 @@ s8 startPlayingAttackAnimationVar0 = 0;
 void startPlayingAttackAnimation() {
     getSpriteCoreForAnimation
     ((uint)(byte)battleCurrentDamages[allocateJumpAnimationStructVar0].m23_battleEntityIndex);
-    setupBattleAnimationSpriteCore(jumpAnimationControlStruct->m4);
+    sSpriteActorCore* psVar5 = jumpAnimationControlStruct->m4;
+    setupBattleAnimationSpriteCore(psVar5);
 
-    if (startPlayingAttackAnimationVar0) {
-        assert(0);
+    if (startPlayingAttackAnimationVar0 != 0) {
+        sSpriteActorCore* psVar6 = psVar5->m74_pTargetEntitySprite;
+        psVar6->mAC.mRaw |= 0x40;
+        psVar5->mAC.mRaw |= 0x40;
+        battleAnimationCallback_2Sub0(psVar5, psVar6);
+
+        psVar6 = psVar5->m74_pTargetEntitySprite;
+        u32 uVar7 = (1u << ((psVar5->mAC.mx0_entityIdUpper2bit << 2) | psVar5->mA8.mx1E_entityId_bottom2bit))
+                  | (1u << ((psVar6->mAC.mx0_entityIdUpper2bit << 2) | psVar6->mA8.mx1E_entityId_bottom2bit));
+        computeBattleCameraParams(uVar7 & 0xffff);
+
+        s16 targetX = (s16)psVar6->m0_position.vx.getIntegerPart();
+        s16 targetZ = (s16)psVar6->m0_position.vz.getIntegerPart();
+        u32 targetVisIdx = (psVar6->mAC.mx0_entityIdUpper2bit << 2) | psVar6->mA8.mx1E_entityId_bottom2bit;
+        s16 visX = battleVisualEntities[targetVisIdx].mA_X;
+        s16 visZ = battleVisualEntities[targetVisIdx].mC_Z;
+
+        // Offset attacker 0x50 units along X based on target/visual comparison.
+        s16 offset;
+        if (targetX == visX && targetZ == visZ) {
+            // Target is at its home slot — use attacker's current X to decide side.
+            s16 attackerX = (s16)psVar5->m0_position.vx.getIntegerPart();
+            offset = (attackerX < targetX) ? -0x50 : 0x50;
+        } else {
+            // Target is displaced — attack from the opposite side.
+            offset = (visX < targetX) ? 0x50 : -0x50;
+        }
+        psVar5->mA0.vx = targetX + offset;
+        psVar5->mA0.vy = 0;
+        psVar5->mA0.vz = targetZ;
+
+        computeBattleCameraParams(uVar7 & 0xffff);
+        battleCameraEye = battleCameraEyeTarget;
+        battleCameraAt  = battleCameraAtTarget;
+        battleAnimationCallback_2Sub0(psVar5, psVar6);
     }
-    MissingCode();
-    processBattleAnimation(jumpAnimationControlStruct->m4);
+
+    updateBattleAnimationDataLoading();
+    processBattleAnimation(psVar5);
 }
 
 void battleAnimationCallback_5(int param_1) {
@@ -3225,6 +3786,22 @@ void startJumpAnimationSub0(int param_1)
 }
 
 
+// PSX 0x800c35d4 — battle music override flag, set by some deathblow sequences
+// to force the default battle music to resume after the attack ends.
+u8 battleDeathBlowMusicOverride = 0;
+
+// PSX 0x800bfa9c — re-kicks any mecha slots that were deferred during an
+// attack animation (DAT_800c362c controls whether a reload is pending). The
+// downstream createMechaLoadingTask path is partly ported, but the PSX-side
+// state is intertwined with VRAM swap flags we don't yet model, so the body
+// is kept as a stub.
+void battleRestartReservedMechaLoads() {
+    MissingCode();
+}
+
+void waitForBattleAnimationsToSettle();
+void clearAnimationsEndOfTurn(int param_1);
+
 void deleteJumpAnimationControlStructEndOfAttack() {
     if (jumpAnimationControlStruct != nullptr) {
         startJumpAnimationVar1 = 0;
@@ -3240,18 +3817,28 @@ void deleteJumpAnimationControlStructEndOfAttack() {
             battleRender();
         }
 
-        MissingCode();
+        waitForBattleAnimationsToSettle();
         clearBattleAnimationData();
         startJumpAnimationSub0(1);
-        MissingCode();
         freeDamageDisplayPolysTask2();
         updateBattleAnimationDataLoading();
+        battleRestartReservedMechaLoads();
         battleCameraGearHeightDisabled = 0;
 
         setBattleCameraParamX(0xc0);
         deleteJumpAnimationControlStruct();
 
-        MissingCode();
+        clearAnimationsEndOfTurn(uVar5);
+        if (battleDeathBlowMusicOverride != 0) {
+            playBattleMusic(pCurrentBattleMusic, 0x7f, 0x50);
+        }
+        battleDeathBlowMusicOverride = 0;
+        // Clear mAC bit 0x40 (move-to-target flag) on every battle sprite.
+        for (int i = 0; i < 11; i++) {
+            if (battleSpriteActorCores[i] != nullptr) {
+                battleSpriteActorCores[i]->mAC.mRaw &= 0xffffffbfu;
+            }
+        }
     }
 }
 
@@ -3496,7 +4083,7 @@ void setupBattleAnimationSpriteCore(sSpriteActorCore* param_1) {
 }
 
 void startReadingBattleJumpAnimation(sSpriteActorCore* param_1) {
-    MissingCode();
+    clearBattleAnimationData();
     setCurrentDirectory(0x2c, 1);
     battleAnimationLoadingDest = new sSpriteActorAnimationBundle;
     readFile(param_1->m7C->m0, *battleAnimationLoadingDest, 0, 0x80);
@@ -3911,9 +4498,100 @@ void drawCircleMenuItemSecondaryActive(int param_1) {
     }
 }
 
-bool useCombo(s8 param_1) {
+extern u8 abilitySelectedTarget;
+void freeBattleVar0_A230();
+void moveEntityToOtherEntity(byte param_1, uint param_2);
+
+// PSX 0x8008c81c — drives the combo selection menu for an entity: opens the
+// two dialog windows, runs input polling against a fuel budget, and fills in
+// battleVar2->m2C0_circleMenuCommandsNames[4..10] with the chosen moves.
+// Returns 0 if the player confirmed a sequence, 1 if cancelled.
+// The body is very large and touches many unported menu fields.
+char drawCircleMenuComboSelect(u8 entityIdx) {
+    (void)entityIdx;
     MissingCode();
-    return false;
+    return 1;
+}
+
+// PSX 0x800baf40 — stock SsUtVibrateOff variant called when opening/closing
+// the combo menu; no-op on PC.
+void stopBattleVibration(uint entityIdx, int mask) {
+    (void)entityIdx;
+    (void)mask;
+}
+
+// PSX 0x8008c360 — cleans up the battle command dialogs after an attack is
+// committed or cancelled. `param_1 != 0` closes the currently-open menu
+// (dismiss cursors, drop dialogs, free a230); `param_1 == 0` just clears
+// two dialog-window flags.
+void battleCleanupCommandMenu(bool dismissOpen) {
+    battleVar1->m9E_render27C8 = 0;
+    battleVar1->m9D_render1E68 = 0;
+    battleVar1->m9C_renderBA8 = 0;
+    battleVar1->mB7 = 0;
+    if (!dismissOpen) {
+        battleVar1->mB0_isDialogWindowInitialized[1] = 0;
+        battleVar1->mB0_isDialogWindowInitialized[0] = 0;
+    } else {
+        battleVar1->mC6_isTargetSelectionCursorVisible = 0;
+        clearBattleDialogWindow(0);
+        clearBattleDialogWindow(1);
+        battleRenderDebugAndMain();
+        freeBattleVar0_A230();
+        removeTargetSelectionCursors();
+    }
+}
+
+bool useCombo(s8 param_1) {
+    bool result = true;
+    u32 uVar1 = (u32)(u8)param_1;
+    char cVar3 = drawCircleMenuComboSelect((u8)uVar1);
+    if (cVar3 == 0) {
+        stopBattleVibration(uVar1, 0x80);
+        battleVar1->mAF = 0;
+        battleCleanupCommandMenu(true);
+        startCharacterJumpToEnemyVar0 = 0;
+        updateCharacterBlinkingTask(0);
+        battleVar2->m0[uVar1].m3C_currentTarget = abilitySelectedTarget;
+        initJumpData(uVar1, battleVar2->m0[uVar1].m3C_currentTarget);
+        startPlayingAttackAnimationVar0 = 1;
+        startCharacterJumpToEnemy((int)uVar1);
+
+        if ((battleEntities[battleVar2->m0[uVar1].m3C_currentTarget].m0_base.m34 & 0x800u) != 0) {
+            auto& dmg = battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48];
+            dmg.m23_battleEntityIndex = (u8)param_1;
+            dmg.m47_battleAnimationToPlay = -0xd;
+            dmg.m3A = (s16)characterIdToTargetBitmask(battleVar2->m0[uVar1].m3C_currentTarget);
+            battleVar2->m2DA_indexInBattleVar48++;
+        }
+
+        for (int i = 0; i < 7; i++) {
+            u8 cmd = battleVar2->m2C0_circleMenuCommandsNames[i + 4];
+            if (cmd != 0xff) {
+                battleVar2->m2DC = (s8)(cmd + 8);
+                u16 targetMask = characterIdToTargetBitmask(battleVar2->m0[uVar1].m3C_currentTarget);
+                performAttackSub3((s8)uVar1, (s16)targetMask, (s16)((u8)battleVar2->m2DC - 1));
+                performAttackSub6(battleVar2->m2DA_indexInBattleVar48);
+                auto& dmg = battleCurrentDamages[battleVar2->m2DA_indexInBattleVar48];
+                dmg.m47_battleAnimationToPlay = (s8)((s8)battleVar2->m2DC - 1);
+                dmg.m23_battleEntityIndex = (u8)param_1;
+                dmg.m16_targetBitMask = entitiesHitInCurrentAttackBF;
+                battleVar2->m2DA_indexInBattleVar48++;
+            }
+        }
+
+        handleMenuSelectEnemy_cancel_sub0((u8)uVar1);
+        moveEntityToOtherEntity((byte)uVar1, battleVar2->m0[uVar1].m3C_currentTarget);
+        while (battleVar2->m2DB == 0) {
+            battleRenderDebugAndMain();
+        }
+    } else {
+        stopBattleVibration(uVar1, 0x100);
+        battleCleanupCommandMenu(true);
+        battleVar1->mCB = 1;
+        result = false;
+    }
+    return result;
 }
 
 void drawCircleMenuCombo(int param_1) {
@@ -4048,11 +4726,107 @@ bool tryToEscape() {
     return success;
 }
 
+// PSX 0x80088490 — moves a battle entity to a gear-specific position slot
+// (first free slot in battleSlotLayout[16..23]) and snaps its visual X/Z
+// to the loadout's gear position.
+void callGearRelocateSlot(uint entityIdx) {
+    entityIdx &= 0xff;
+    u8 slot = battleVisualEntities[entityIdx].m0_positionSlot;
+    if (battleSlotLayout[slot + 0x10][0] != 0) {
+        u8 candidate = 0;
+        int row = 0x10;
+        do {
+            if (battleSlotLayout[row][0] == 0) {
+                slot = candidate;
+                break;
+            }
+            candidate++;
+            row++;
+        } while (candidate < 8);
+    }
+    battleVisualEntities[entityIdx].m0_positionSlot = slot;
+    battleVisualEntities[entityIdx].m1 = 0;
+    u8 newSlot = battleVisualEntities[entityIdx].m0_positionSlot;
+    battleSlotLayout[newSlot + 0x10][1] = 1;
+    battleSlotLayout[newSlot + 0x10][0] = 1;
+    battleVisualEntities[entityIdx].mA_X = battleLoadDataVar2Bis->m100[newSlot][0].vx;
+    battleVisualEntities[entityIdx].mC_Z = battleLoadDataVar2Bis->m100[newSlot][0].vy;
+}
+
+// PSX 0x8009aefc — wipes the battle entity's status flags in preparation for
+// a gear transformation (clearing all but m80's 0x2000 timed-status bit).
+void callGearClearStatus(uint entityIdx) {
+    entityIdx &= 0xff;
+    battleGetSlotStatusSub_current28Index = 0;
+    u16 m80 = battleEntities[entityIdx].m0_base.m80;
+    u8 loadout = battleEntities[entityIdx].m0_base.m56_battleCommandLoadout;
+    battleEntities[entityIdx].m0_base.m7C = 0;
+    battleEntities[entityIdx].m0_base.m84 = 0;
+    battleEntities[entityIdx].m0_base.m88 = 0;
+    battleEntities[entityIdx].m0_base.m8C = 0;
+    battleEntities[entityIdx].m0_base.m80 = m80 & 0x2000;
+    if (loadout == 7) {
+        // PSX 0x8009b104 — scales HP/MaxHP by 50 with saturation at 99999.
+        u32 maxHP = (u32)battleEntities[entityIdx].m0_base.m4E_MaxHP * 50;
+        if (maxHP < 100000) {
+            battleEntities[entityIdx].mA4_gear.m60_hp = (u32)battleEntities[entityIdx].m0_base.m4C_HP * 50;
+            battleEntities[entityIdx].mA4_gear.m64 = maxHP;
+        } else {
+            u32 hp = (u32)battleEntities[entityIdx].m0_base.m4C_HP * 50;
+            battleEntities[entityIdx].mA4_gear.m60_hp = (hp < 100000) ? hp : 99999;
+            battleEntities[entityIdx].mA4_gear.m64 = 99999;
+        }
+    }
+    // If the transforming entity is a 3-party loadout, clear bit 0x20 of m80
+    // on every other party-slot 3..10.
+    if (battleEntities[entityIdx].m0_base.m56_battleCommandLoadout == 3) {
+        for (u32 i = 3; i < 0xb; i++) {
+            battleEntities[i].m0_base.m80 &= 0xffdf;
+        }
+    }
+}
+
+// PSX 0x800badd4 — removes a battle sprite actor from the callback lists
+// and frees its spriteData/actor backing. Called by callGearSwapSprite.
+// PSX body calls FUN_Battle__800bfc80 (task-list walker) which touches
+// fields the C++ port doesn't fully model, so the body is stubbed.
+void releaseSpriteActor(int param_1) {
+    (void)param_1;
+    MissingCode();
+}
+
+extern u32 allocateSavePointMeshDataSub0_var1;
+
+// PSX 0x800baf48 — kicks off the sprite-to-gear transformation: runs the
+// wink/transform animation on the existing sprite, frees it, and starts a
+// new mecha load for the same slot.
+void callGearSwapSprite(uint entityIdx) {
+    setCameraVisibleEntities(1u << (entityIdx & 0x1f));
+    setCameraVisibleEntities(0);
+    u32 savedTaskVar = allocateSavePointMeshDataSub0_var1;
+    sSpriteActorCore* pCore = battleSpriteActorCores[entityIdx];
+    clearBattleAnimationData();
+    spriteActorSetPlayingAnimation(pCore, 0x16);
+    while (pCore->m9E_wait != 0 && pCore->mAC.mx18 == 0x16) {
+        battleRender();
+    }
+    while (allocateSavePointMeshDataSub0_var1 != savedTaskVar) {
+        battleRender();
+    }
+    releaseSpriteActor((int)entityIdx);
+    battleRender();
+    battleRender();
+    createMechaLoadingTask((int)entityIdx);
+    while (mainBattleSpriteCallback_phase5Var != 0) {
+        battleRender();
+    }
+}
+
 void callGear(uint param_1) {
     param_1 = param_1 & 0xff;
-    MissingCode(); // FUN_Battle__80088490(param_1)
-    MissingCode(); // FUN_Battle__8009aefc(param_1)
-    MissingCode(); // FUN_Battle__800baf48(param_1)
+    callGearRelocateSlot(param_1);
+    callGearClearStatus(param_1);
+    callGearSwapSprite(param_1);
     battleEntities[param_1].m15A_flags = battleEntities[param_1].m15A_flags | 0x80;
     markEnemyDead(param_1);
     apConfigArray[param_1].m1 = 2;
@@ -4381,8 +5155,16 @@ sTaskHeader* findMatchingGraphicEntity(sTaskHeader* param_1, void (*param_2)(sTa
     return nullptr;
 }
 
-void clearShapeTransferEntry(void*) {
-    MissingCode();
+// Records a freeable allocation in the shape-transfer arena's temporary-buffer
+// linked list; walked later by clearShapeTransfertTableEntry on double-buffer swap.
+void clearShapeTransferEntry(void* param_1) {
+    if (shapeTransfertTableCurrentEntry != nullptr) {
+        sShapeTransfertTempBuffer* entry = (sShapeTransfertTempBuffer*)shapeTransfertTableCurrentEntry;
+        entry->m0_data = param_1;
+        entry->m4_pNext = shapeTransfertTemporaryBuffersLinkedLists[shapeTransfertDoubleBufferIndex];
+        shapeTransfertTemporaryBuffersLinkedLists[shapeTransfertDoubleBufferIndex] = entry;
+        shapeTransfertTableCurrentEntry += sizeof(sShapeTransfertTempBuffer);
+    }
 }
 
 void updateCharacterBlinkingTask(u32 param_1) {
@@ -4603,7 +5385,7 @@ void cancelJumpAnim(void)
         if (battleVisualEntities[uVar3].m4_isGear == 0) {
             (psVar4->m0_position).vx = (uint)(ushort)battleVisualEntities[jumpAnimationControlStruct->m24].mA_X << 0x10;
             (psVar4->m0_position).vz = (uint)(ushort)battleVisualEntities[jumpAnimationControlStruct->m24].mC_Z << 0x10;
-            savePointCallback8Sub0Sub0_battle(psVar4);
+            sampleBattleTerrainHeight(psVar4);
             (psVar4->m0_position).vy = (int)psVar4->m84_maxY << 0x10;
             spriteActorSetPlayingAnimation(psVar4, psVar4->mB0.mx0_animationId);
             OP_INIT_ENTITY_SCRIPT_sub0Sub8(psVar4, 0);
@@ -4725,16 +5507,26 @@ void startBattleAttackAnimationSub0(u8 attacker, u8 param_2) {
             uVar1 = battleEntities[attacker].m0_base.m88 & 0x400;
         }
         else {
-            assert(0);
+            // PSX reads mA4_gear.field_0x80 & 0x2000 — sGameStateA42.m80 is
+            // not modelled on PC yet, so the gear-attacker path is stubbed.
+            MissingCode();
+            return;
         }
         attacker = attacker & 0xff;
         if (uVar1 != 0) {
             if ((battleEntities[attacker].m15A_flags & 0x80) == 0) {
-                MissingCode();
+                // Flag the deathblow-unlock tracker slots 0x16..0x20 for this
+                // party member so the next turn reverts the hp bar animation.
+                static const int slots[] = { 0x16, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f, 0x20 };
+                for (int s : slots) {
+                    partyBattleStats[attacker].m0[s].m0_flags = 0x2000;
+                }
                 battleEntities[attacker].m0_base.m88 = battleEntities[attacker].m0_base.m88 & 0xfbff;
             }
             else {
-                assert(0);
+                // Corresponding mecha tracker slots 0x15..0x1c with gear m80
+                // writeback — blocked on the unported gear m80 field.
+                MissingCode();
             }
         }
     }
@@ -6486,7 +7278,10 @@ extern bool needBattleEventOverlay;
 
 void loadBattleEventOverlay() {
     if (needBattleEventOverlay) {
-        MissingCode();
+        // PSX allocates overlay memory and reads file 1 (battle event overlay code)
+        // to 0x801e5000 before entering it. In the PC port the overlay is compiled
+        // natively, so we skip the load and call battleEventEntry() directly — it
+        // sets up its own directory and waits for loading internally.
         battleEventEntry();
     }
 }
@@ -6722,7 +7517,13 @@ u16 battleEffectBF = 0;
 
 void applyBattleEffectBF7() {
     if (battleEffectBF & 7) {
-        assert(0);
+        for (int i = 0; i < 3; i++) {
+            if (bitmaskCharacterCheck(battleEffectBF, i)) {
+                isEntityReadyForBattle[i] = 0;
+                numTicksBeforeReady[i] = battleSlotStatusVar0[i];
+                battleVar1->m7C[i] = 1;
+            }
+        }
     }
     battleEffectBF = 0;
 }
@@ -7056,7 +7857,6 @@ void battleTickMain(s8 param_1) {
 }
 
 void battleTickGameplay() {
-
     if (bBattleTickMode0 == 0) {
         if (bBattleTickMode1 == 0) {
             battleVar2->m2D3_currentEntityTurn = 0;
@@ -7064,6 +7864,16 @@ void battleTickGameplay() {
             s32 uVar2 = (uint)randomTurnOrder[uVar3];
             s32 bVar1 = isEntityReadyForBattle[uVar2];
             do {
+                if (g_gdbConnection) {
+                    g_gdbConnection->executeUntilAddress(0x800724d0);
+                    validateAssert(g_gdbConnection->readU16(0x800d39e0) == (u16)bBattleTickMode0);
+                    validateAssert(g_gdbConnection->readU8(0x800d2dc0) == bBattleTickMode1);
+                    validateAssert(g_gdbConnection->readU8(0x800d2dd7) == currentEntryInRandomTurnOrder);
+                    for (int i = 0; i < 11; i++) {
+                        validateAssert(g_gdbConnection->readS8(0x800d2dd8 + i) == randomTurnOrder[i]);
+                        validateAssert(g_gdbConnection->readS8(0x800d2de4 + i) == isEntityReadyForBattle[i]);
+                    }
+                }
                 if (bVar1 == 1) {
                     battleVar2->m2D3_currentEntityTurn = (char)uVar2 + 1;
                     currentEntryInRandomTurnOrder = (byte)(uVar3 + 1);
@@ -7244,8 +8054,12 @@ void battleMain() {
     battleRenderDebugAndMain();
     setupStringsForMonsterNames();
     // Wait for battle intro to finish and battle time to start
-    while (battleTimeEnabled == '\0') {
+    while (battleTimeEnabled == 0) {
         battleRenderDebugAndMain();
+    }
+
+    if (g_gdbConnection) {
+        g_gdbConnection->executeUntilAddress(0x80071278);
     }
 
     // This would cause a use after free
@@ -7259,8 +8073,13 @@ void battleMain() {
 
     loadBattleEventOverlay();
     updateBattleEventOverlay(1);
-    if (isBattleAnEvent == '\0') {
+    if (isBattleAnEvent == 0) {
         currentBattleMode = 1;
+    }
+
+    if (g_gdbConnection) {
+        g_gdbConnection->executeUntilAddress(0x80071308);
+        validateBattleState();
     }
 
     MissingCode();
@@ -7440,8 +8259,7 @@ void battleHandleInput(void) {
     } while (true);
 }
 
-// compute the direction and step for the jump
-void battleSpriteOp89Sub3(sSpriteActorCore* param_1, short param_2)
+void computeJumpXZStep(sSpriteActorCore* param_1, short param_2)
 {
     short sVar1;
     int iVar2;
@@ -7484,7 +8302,7 @@ void createAllDamageDisplays() {
     }
 }
 
-void battleSpriteOp89(sSpriteActorCore* param_1) {
+void initSpriteJumpToTarget(sSpriteActorCore* param_1) {
     param_1->m0_position.vx &= 0xFFFF0000;
     param_1->m0_position.vy &= 0xFFFF0000;
     param_1->m0_position.vz &= 0xFFFF0000;
@@ -7509,10 +8327,22 @@ void battleSpriteOp89(sSpriteActorCore* param_1) {
     SVECTOR SStack_30;
     setupSVector(&SStack_30, (param_1->mA0).vx, (param_1->mA0).vy, (param_1->mA0).vz);
 
-    MissingCode(); // compute the vertical step
+    int triangleIndex = findBattleTerrainTriangle(&SStack_30, param_1->m78, 4, (int)(param_1->mA0).vz);
+    if (triangleIndex < 0) {
+        triangleIndex = findBattleTerrainTriangleBruteForce(&SStack_30);
+    }
+    u8 terrainNormal[16];
+    computeTerrainHeightAtTriangle(&SStack_30, triangleIndex, terrainNormal);
+    if ((param_1->mA0).vy < SStack_30.vy) {
+        SStack_30.vy = (param_1->mA0).vy;
+    }
+    if (speed != 0) {
+        (param_1->mC_step).vy = (s32)(param_1->mC_step).vy +
+            ((SStack_30.vy * 0x10000) - (s32)(param_1->m0_position).vy) / speed;
+    }
 
-    battleSpriteOp89Sub3(param_1, -(short)angle);
-    savePointCallback8Sub0Sub0(param_1);
+    computeJumpXZStep(param_1, -(short)angle);
+    applySpriteVerticalMovement(param_1);
 }
 
 void idleBattleDuringLoading(void)
@@ -7872,7 +8702,7 @@ void battleSpriteEffect(sSpriteActorCore* param_1, s8 param_2, std::span<u8>::it
         return;
     case 0x1f:
         param_1->m3C = param_1->m3C & 0xfbffffff;
-        savePointCallback8Sub0Sub0_battle(param_1);
+        sampleBattleTerrainHeight(param_1);
         return;
     case 0x20:
         battleSpriteEffect_20(param_1);
@@ -7988,7 +8818,7 @@ LAB_Battle__800bbfa0:
 void battleCameraControlSpriteUpdate(sTaskHeader* param_1) {
     sSpriteActorCore* pSpriteCore = (sSpriteActorCore*)param_1->m4;
     OP_INIT_ENTITY_SCRIPT_sub0Sub9(pSpriteCore);
-    savePointCallback8Sub0(pSpriteCore);
+    updateSpriteMovement(pSpriteCore);
     if ((pSpriteCore->m40 >> 0xd & 0xf) == 10) {
         previousCameraEye2 = pSpriteCore->m0_position;
     }
@@ -8000,7 +8830,7 @@ void battleCameraControlSpriteUpdate(sTaskHeader* param_1) {
             return;
         }
         OP_INIT_ENTITY_SCRIPT_sub0Sub9(pSpriteCore);
-        savePointCallback8Sub0(pSpriteCore);
+        updateSpriteMovement(pSpriteCore);
         if ((pSpriteCore->m40 >> 0xd & 0xf) == 10) {
             previousCameraEye2 = pSpriteCore->m0_position;
         }

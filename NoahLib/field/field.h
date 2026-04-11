@@ -471,4 +471,15 @@ extern SVECTOR computeProjectionMatrixAngles;
 extern u8* shapeTransfertTableCurrentEntry;
 extern u8* shapeTransfertTableEnd;
 
+// Linked-list node stored in the shape-transfer bump arena to track allocations
+// that need to be freed when the arena is reset. Populated via
+// clearShapeTransferEntry (which adds an entry) and walked in clearShapeTransfertTableEntry.
+struct sShapeTransfertTempBuffer {
+    void* m0_data;
+    sShapeTransfertTempBuffer* m4_pNext;
+    // size 0x8
+};
+
+extern sShapeTransfertTempBuffer* shapeTransfertTemporaryBuffersLinkedLists[2];
+
 #include "validation/field/validateField.h"

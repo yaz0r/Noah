@@ -4,6 +4,7 @@
 #include "sprite/spriteSetup.h"
 #include "kernel/TIM.h"
 #include "battle/battle.h"
+#include "battle/battleTerrain.h"
 #include "kernel/3dModel_psxRenderer.h"
 #include "validation/gdbConnection.h"
 
@@ -254,26 +255,24 @@ int modulateSpeed(sSpriteActorCore* param_1, int param_2)
     return param_2;
 }
 
-void savePointCallback8Sub0Sub0_battle(sSpriteActorCore* param_1) {
+void sampleBattleTerrainHeight(sSpriteActorCore* param_1) {
     assert(isBattleOverlayLoaded);
 
-    MissingCode();
-    /*
     SVECTOR local_28;
     local_28.vx = param_1->m0_position.vx.getIntegerPart();
     local_28.vy = param_1->m0_position.vy.getIntegerPart();
     local_28.vz = param_1->m0_position.vz.getIntegerPart();
-    uVar1 = battleSpriteOp89Sub0(&local_28, param_1->m78, 4, in_a3);
-    if ((int)uVar1 < 0) {
-        uVar1 = battleSpriteOp89Sub1(&local_28);
+    int triangleIndex = findBattleTerrainTriangle(&local_28, param_1->m78, 4, 0);
+    if (triangleIndex < 0) {
+        triangleIndex = findBattleTerrainTriangleBruteForce(&local_28);
     }
-    battleSpriteOp89Sub2(&local_28, uVar1, auStack_20);
-    param_1->m78 = uVar1;
+    u8 auStack_20[16];
+    computeTerrainHeightAtTriangle(&local_28, triangleIndex, auStack_20);
+    param_1->m78 = triangleIndex;
     param_1->m84_maxY = local_28.vy;
-    */
 }
 
-void savePointCallback8Sub0Sub0(sSpriteActorCore* param_1)
+void applySpriteVerticalMovement(sSpriteActorCore* param_1)
 {
     if ((param_1->m3C >> 0x1a & 1) != 0) {
         (param_1->m0_position).vy += modulateSpeed(param_1, (param_1->mC_step).vy >> 4) * 0x10;
@@ -287,7 +286,7 @@ void savePointCallback8Sub0Sub0(sSpriteActorCore* param_1)
     int iVar2;
     int iVar3;
 
-    savePointCallback8Sub0Sub0_battle(param_1);
+    sampleBattleTerrainHeight(param_1);
     iVar3 = (param_1->mC_step).vy;
     iVar2 = iVar3 >> 4;
     if ((iVar3 < 1) || (param_1->m1C_gravity < 1)) {
@@ -333,7 +332,7 @@ void savePointCallback8Sub0Sub0(sSpriteActorCore* param_1)
     return;
 }
 
-void savePointCallback8Sub0(sSpriteActorCore* param_1)
+void updateSpriteMovement(sSpriteActorCore* param_1)
 {
     int iVar1;
     int iVar2;
@@ -343,7 +342,7 @@ void savePointCallback8Sub0(sSpriteActorCore* param_1)
     (param_1->m0_position).vx = (param_1->m0_position).vx + iVar1 * 0x10;
     iVar1 = modulateSpeed(param_1, iVar2 >> 4);
     (param_1->m0_position).vz = (param_1->m0_position).vz + iVar1 * 0x10;
-    savePointCallback8Sub0Sub0(param_1);
+    applySpriteVerticalMovement(param_1);
     return;
 }
 
@@ -440,7 +439,7 @@ void savePointCallback8(sTaskHeader* param_1) {
     sSpriteActorCore* pSpriteActor = ((sSpriteActorCore*)param_1->m4);
 
     OP_INIT_ENTITY_SCRIPT_sub0Sub9(pSpriteActor);
-    savePointCallback8Sub0(pSpriteActor);
+    updateSpriteMovement(pSpriteActor);
 
     if (pSpriteActor->m64_spriteByteCode.has_value()) {
         if (pSpriteActor->mAC.mx6 == 0) {
@@ -448,7 +447,7 @@ void savePointCallback8(sTaskHeader* param_1) {
         }
 
         OP_INIT_ENTITY_SCRIPT_sub0Sub9(pSpriteActor);
-        savePointCallback8Sub0(pSpriteActor);
+        updateSpriteMovement(pSpriteActor);
         if (pSpriteActor->m64_spriteByteCode.has_value()) {
             return;
         }
@@ -524,7 +523,7 @@ void initFieldEntitySub4Sub1(sSpriteActorCore* param_1)
     param_1->m30 = 0;
     param_1->m32_direction = 0;
     param_1->m34_currentSpriteFrame = 0;
-    param_1->mA8.clear();
+    param_1->mA8.mRaw = 0;
     param_1->m3C = param_1->m3C & 0xfe00ffe3;
     param_1->m40 = param_1->m40 & 0xfffe0003;
     param_1->mAC.mRaw = 0;
@@ -1272,7 +1271,27 @@ void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, std
         }
         break;
     case 0xA3:
-        MissingCode(); // save point spinning?
+        if ((param_1->mA8.mx0 == 1) && (param_1->m7C->m4 != 0)) {
+            param_1->m1C_gravity = param_1->m7C->m4;
+        }
+        else {
+            int iVar17 = READ_LE_S8(param_3) * 0x40 * (int)param_1->m82;
+            if (iVar17 < 0) {
+                iVar17 = iVar17 + 0xfff;
+            }
+            u32 uVar21 = 0x10000 / (u32)(param_1->mAC.mx7_timeScale);
+            int iVar9 = (int)(uVar21 * uVar21);
+            iVar17 = (iVar17 >> 0xc) * 0x20;
+            if (iVar9 < 0) {
+                iVar9 = iVar9 + 0xff;
+            }
+            iVar17 = iVar17 * (iVar9 >> 8);
+            if (iVar17 < 0) {
+                iVar17 = iVar17 + 0xff;
+            }
+            int envs = fieldDrawEnvsInitialized + 1;
+            param_1->m1C_gravity = (iVar17 >> 8) * envs * envs;
+        }
         break;
     case 0xA6: // used by save point (move up and down)
         if ((param_1->mA8.mx0) != 1) {

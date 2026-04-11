@@ -47,11 +47,16 @@ struct sBattleRunningVar0 {
     s8 m801 = 0;
     s8 m802_dialogBoxInitialized = 0;
     std::array<s8, 0x10> m804;
+    struct sSeqFile* m814_pLoadedMusic = nullptr;
     struct sSeqFile* m818 = nullptr;
-    s8 m81F;
+    s16 m81c_loadedMusicId = 0;
+    s8 m81e_loadedMusicVol = 0;
+    s8 m81f_hasLoadedMusic = 0;
     s8 m820;
     // size 0x828
 };
+
+extern struct sSoundInstance* gBattleEventMusicInstance;
 
 extern struct sBattleRunningVar0* battleEventVar0;
 

@@ -15,5 +15,6 @@ int isCDBusy_detour() {
 }
 
 void validateKernel_init() {
-    //isCDBusy_intercept.enable(); doing this is way too slow
+    // doing this is way too slow
+    //isCDBusy_intercept.enable();
 }

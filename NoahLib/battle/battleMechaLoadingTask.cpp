@@ -66,10 +66,10 @@ void battleMechaUpdate(sTaskHeader* param_1) {
         }
         if (pSpriteActor->m64_spriteByteCode.has_value()) {
             OP_INIT_ENTITY_SCRIPT_sub0Sub9(pSpriteActor);
-            savePointCallback8Sub0(pSpriteActor);
+            updateSpriteMovement(pSpriteActor);
             if ((pSpriteActor->mAC.mx6) != 0) {
                 OP_INIT_ENTITY_SCRIPT_sub0Sub9(pSpriteActor);
-                savePointCallback8Sub0(pSpriteActor);
+                updateSpriteMovement(pSpriteActor);
             }
         }
         (pSpriteActor->m0_position).vx = pMecha->m4_bones->at(0).m5C_translation[0] << 0x10;

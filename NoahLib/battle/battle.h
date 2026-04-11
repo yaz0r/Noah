@@ -220,6 +220,23 @@ struct sBattleVar1 {
 };
 extern sBattleVar1* battleVar1;
 
+struct sBattleImageMoveCommand {
+    s16 m0_x;
+    s16 m2_y;
+    u16 m4;
+    u8 m6;
+    u8 m7;
+    s16 m8_h;
+    s16 mA;
+    u16 mC;
+    s16 mE;
+    s32 m10;
+    s32 m14;
+    // size 0x18
+};
+
+extern std::array<sBattleImageMoveCommand, 2> battleMoveCommands;
+
 struct sBattle800c3e24 {
     void reset() {
         MissingCode(); // normally a memset 0

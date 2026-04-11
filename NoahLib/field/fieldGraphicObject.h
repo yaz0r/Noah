@@ -165,24 +165,23 @@ struct sSpriteActorCore {
     s8 m8D = 0;
     std::array<sStackElement, 16> m8E_stack;
     u16 m9E_wait = 0;
-    SVECTOR mA0;
-    struct sMA8{
-        u32 mx0 : 1;
-        u32 mx1 : 10;
-        u32 mxB : 6;
-        u32 mx11 : 3;
-        u32 mx14 : 2;
-        u32 mx16 : 6;
-        u32 mx1C : 2;
-        u32 mx1E_entityId_bottom2bit : 2;
+    SVECTOR mA0 = { 0, 0, 0, 0 };
+    union sMA8{
+        struct
+        {
+            u32 mx0 : 1;
+            u32 mx1 : 10;
+            u32 mxB : 6;
+            u32 mx11 : 3;
+            u32 mx14 : 2;
+            u32 mx16 : 6;
+            u32 mx1C : 2;
+            u32 mx1E_entityId_bottom2bit : 2;
+        };
+        u32 mRaw;
 
         sMA8() {
-            clear();
-        }
-
-        void clear()
-        {
-            memset(this, 0, sizeof(*this));
+            mRaw = 0;
         }
     } mA8;
     union sMAC {
@@ -266,7 +265,7 @@ struct sSavePointMesh2 : public sSavePointMeshAbstract
 
 extern sSpriteActorCore* spriteTransfertListHead;
 
-void savePointCallback8Sub0(sSpriteActorCore* param_1);
+void updateSpriteMovement(sSpriteActorCore* param_1);
 void registerSpriteCallback2(sTaskHeader* param_1, sTaskHeader* param_2);
 
 void SetTimeScale(sSpriteActor* param_1, int param_2); // 0x80021BCC
@@ -308,8 +307,8 @@ void pushBytecodePointerOnAnimationStack(sSpriteActorCore* param_1, std::span<u8
 void executeSpriteBytecode2Extended(sSpriteActorCore* param_1, int bytecode, std::span<u8>::iterator param_3);
 u8 popByteFromAnimationStack(sSpriteActorCore* param_1);
 void pushByteOnAnimationStack(sSpriteActorCore* param_1, u8 param);
-void savePointCallback8Sub0Sub0(sSpriteActorCore* param_1);
-void savePointCallback8Sub0Sub0_battle(sSpriteActorCore* param_1);
+void applySpriteVerticalMovement(sSpriteActorCore* param_1);
+void sampleBattleTerrainHeight(sSpriteActorCore* param_1);
 void updateAllSubsprites(sSpriteActorCore* param_1);
 void registerSpriteCallback2_2(sTaskHeader* param_1);
 void spriteBytecode2ExtendedE0(sSpriteActorCore* param_1, std::span<u8>::iterator param_2, sFieldEntitySub4_110* param_3);

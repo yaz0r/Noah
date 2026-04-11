@@ -1830,7 +1830,7 @@ struct sShapeTransfert
 
 int shapeTransfertTableSize = 0;
 u8* shapeTransfertBuffer[2] = { nullptr, nullptr };
-u8* shapeTransfertTemporaryBuffersLinkedLists[2] = { nullptr, nullptr };
+sShapeTransfertTempBuffer* shapeTransfertTemporaryBuffersLinkedLists[2] = { nullptr, nullptr };
 
 u8* shapeTransfertTableCurrentEntry;
 int shapeTransfertDoubleBufferIndex = 0;
@@ -7103,18 +7103,16 @@ int frameOddOrEven = 0;
 
 void clearShapeTransfertTableEntry(int param_1)
 {
-    void* ppvVar1 = shapeTransfertTemporaryBuffersLinkedLists[param_1];
     shapeTransfertTableStart = shapeTransfertBuffer[param_1];
     shapeTransfertTableEnd = shapeTransfertTableStart + shapeTransfertTableSize;
     shapeTransfertTableCurrentEntry = shapeTransfertTableStart;
     shapeTransfertDoubleBufferIndex = param_1;
-    while (ppvVar1 != nullptr) {
-        assert(0);
-        /*free(*ppvVar1);
-        ppvVar1 = (void**)ppvVar1[1];*/
-    }
+    // PSX calls free() on each entry's m0_data. On PC, the only live caller
+    // (deleteSpinningEnemySelectionCursor) stores a pointer to an embedded
+    // member of an object being deleted — not a heap allocation — so freeing
+    // would be a double-free. The entries live in the arena itself, so resetting
+    // the list head is sufficient.
     shapeTransfertTemporaryBuffersLinkedLists[param_1] = nullptr;
-    return;
 }
 
 MATRIX currentRenderingMatrix;

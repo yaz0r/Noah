@@ -78,11 +78,19 @@ void validate(u32 psxBase, const FP_VEC3& vec3) {
 }
 
 void validate(u32 psxBase, const s8& data) {
-    validateAssert(data == g_gdbConnection->readS8(psxBase + 0));
+    s8 psxValue = g_gdbConnection->readS8(psxBase);
+    if (psxValue != data) {
+        printf("Validation failure s8: got %d but expected %d (PSX)\n", data, psxValue);
+        validateAssert(false);
+    }
 }
 
 void validate(u32 psxBase, const u8& data) {
-    validateAssert(data == g_gdbConnection->readU8(psxBase + 0));
+    u8 psxValue = g_gdbConnection->readU8(psxBase);
+    if (psxValue != data) {
+        printf("Validation failure u8: got %d but expected %d (PSX)\n", data, psxValue);
+        validateAssert(false);
+    }
 }
 
 void validate(u32 psxBase, const s16& data) {

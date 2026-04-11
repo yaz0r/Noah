@@ -5,6 +5,7 @@
 #include "kernel/graphics.h"
 #include "battle/battle.h"
 #include "field/field.h"
+#include "validation/battle/validateBattle.h"
 
 void initMechaForBattle(int param_1);
 
@@ -146,10 +147,10 @@ void battleSpriteUpdate(sTaskHeader* param_1) {
 
     if (battleSpritesDisabled == 0) {
         OP_INIT_ENTITY_SCRIPT_sub0Sub9(pSprite);
-        savePointCallback8Sub0(pSprite);
+        updateSpriteMovement(pSprite);
         if (pSprite->mAC.mx6) {
             OP_INIT_ENTITY_SCRIPT_sub0Sub9(pSprite);
-            savePointCallback8Sub0(pSprite);
+            updateSpriteMovement(pSprite);
         }
     }
 }
@@ -314,7 +315,7 @@ void createBattlePlayerSpriteActors() {
         for (int i = 0; i < 3; i++) {
             if (battleSpriteActorCores[i]) {
                 sSpriteActorCore* pSprite = battleSpriteActorCores[i];
-                savePointCallback8Sub0Sub0_battle(pSprite);
+                sampleBattleTerrainHeight(pSprite);
                 pSprite->mA0.vx = pSprite->m0_position.vx.getIntegerPart();
                 pSprite->mA0.vy = pSprite->m0_position.vy.getIntegerPart();
                 pSprite->mA0.vz = pSprite->m0_position.vz.getIntegerPart();
@@ -324,12 +325,26 @@ void createBattlePlayerSpriteActors() {
     }
 }
 
+// This waits for player characters to finish jumping in at battle start, once they landed (based on Y), battle intro is over and time start moving forward
 void mainBattleSpriteCallback_phase6(sTaskHeader* param_1) {
+    if (g_gdbConnection) {
+        g_gdbConnection->executeUntilAddress(0x801e6c90);
+        validateBattleState();
+        int v0 = g_gdbConnection->getRegister(GDBConnection::V0);
+        assert(v0 == ((sBattleSpriteLoaderTask*)param_1)->m90_frameToDeleteCount);
+    }
     if (((sBattleSpriteLoaderTask*)param_1)->m90_frameToDeleteCount == 0) {
         for (int i = 0; i < 3; i++) {
-            if (!battleVisualEntities[i].m4_isGear && battleSpriteActorCores[i] && (battleSpriteActorCores[i]->m0_position.vy.getIntegerPart() != battleSpriteActorCores[i]->m84_maxY)) {
-                return;
+            if (!battleVisualEntities[i].m4_isGear) {
+                if (battleSpriteActorCores[i]) {
+                    if (battleSpriteActorCores[i]->m0_position.vy.getIntegerPart() != battleSpriteActorCores[i]->m84_maxY) { // has landed yet?
+                        return;
+                    }
+                }
             }
+        }
+        if (g_gdbConnection) {
+            g_gdbConnection->executeUntilAddress(0x801e6d08);
         }
         battleTimeEnabled = 1;
         defaultBattleSpriteDeleteCallback(param_1);
@@ -341,6 +356,9 @@ void mainBattleSpriteCallback_phase6(sTaskHeader* param_1) {
 
 int mainBattleSpriteCallback_phase5Var = 0;
 void mainBattleSpriteCallback_phase5(sTaskHeader* param_1) {
+    if (g_gdbConnection) {
+        g_gdbConnection->executeUntilAddress(0x801e6d34);
+    }
     if (mainBattleSpriteCallback_phase5Var == 0) {
         ((sBattleSpriteLoaderTask*)param_1)->m90_frameToDeleteCount = 0x10;
         setTaskUpdateFunction(param_1, &mainBattleSpriteCallback_phase6);
@@ -357,6 +375,11 @@ void startPlayableCharactersJumpToPosition() {
 
 void mainBattleSpriteCallback_phase4(sTaskHeader* param_1) {
     if (waitForMusic(0) == 0) {
+        if (g_gdbConnection) {
+            g_gdbConnection->executeUntilAddress(0x801e6d88);
+            if (g_gdbConnection->getRegister(GDBConnection::V0) != 0)
+                return;
+        }
         startPlayableCharactersJumpToPosition();
         setTaskUpdateFunction(param_1, &mainBattleSpriteCallback_phase5);
     }
@@ -365,9 +388,16 @@ void mainBattleSpriteCallback_phase4(sTaskHeader* param_1) {
 void mainBattleSpriteCallback_phase3(sTaskHeader* param_1) {
     sBattleSpriteLoaderTask* pThis = (sBattleSpriteLoaderTask*)param_1;
     if (isCDBusy() == 0) {
+        if (g_gdbConnection) {
+            g_gdbConnection->executeUntilAddress(0x801e6e5c);
+            if (g_gdbConnection->getRegister(GDBConnection::V0) != 0)
+                return;
+        }
         MissingCode(); // DAT_Battle_loader__801e96b4 = pThis->m28; FUN_Battle_loader__801e6dc8();
         initFieldEntitySub4Sub5Sub0(&createSavePointMeshData_mode5, pThis->m24, sVec2_s16::fromS32(0x380), sVec2_s16::fromS32(0x1d10000));
         loadSequence((sSeqFile*)pThis->m2C_seq->getRawData().data());
+        extern sSeqFile* gBattleCurrentSoundEffectSeq;
+        gBattleCurrentSoundEffectSeq = (sSeqFile*)pThis->m2C_seq->getRawData().data();
         setTaskUpdateFunction(param_1, &mainBattleSpriteCallback_phase4);
         extern s8 battleMechaVar2;
         battleMechaVar2 = 1;

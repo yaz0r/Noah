@@ -6,6 +6,15 @@ void SetGraphDebug(int level) {
     MissingCode();
 }
 
+void patchSelfModifyingCode(s16 shiftA, s16 shiftB, u16 addA, u16 addB) {
+    (void)shiftA;
+    (void)shiftB;
+    (void)addA;
+    (void)addB;
+    MissingCode();
+}
+
+
 s32 currentVideoMode = 0;
 
 s32 GetVideoMode()

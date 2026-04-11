@@ -1,16 +1,23 @@
 #pragma once
 
 void SPRITE_VM_NAME(sSpriteActorCore* param_1) {
+
+    // validate before loop
+#if !defined(IMPLEMENT_BATTLE_SPECIFIC_CASES)
+    VALIDATE_FIELD(FCT_KernelSpriteVM, 0x8002491c);
+    assert(false); // broke the offset for field there
+#else
+    VALIDATE_BATTLE(BCT_KernelSpriteVM, 0x800c11cc);
+#endif
+
+    u8 lastBytecodeExecuted = -1;
+
     do
     {
         if (param_1->m9E_wait != 0)
         {
             return;
         }
-
-#if !defined(IMPLEMENT_BATTLE_SPECIFIC_CASES)
-        VALIDATE_FIELD(FCT_KernelSpriteVM, 0x8002491c);
-#endif
 
         std::span<u8>::iterator startOfOpcode = param_1->m64_spriteByteCode.value();
         u8 bytecode = READ_LE_U8(startOfOpcode);
@@ -19,7 +26,12 @@ void SPRITE_VM_NAME(sSpriteActorCore* param_1) {
 #if !defined(IMPLEMENT_BATTLE_SPECIFIC_CASES)
         VALIDATE_FIELD(FCT_KernelSpriteVM, 0x80024930);
         VALIDATE_REG(FCT_KernelSpriteVM, S2, bytecode);
+#else
+        VALIDATE_BATTLE(BCT_KernelSpriteVM, 0x800c1218);
+        VALIDATE_BATTLE_REG(BCT_KernelSpriteVM, S5, bytecode);
 #endif
+
+        lastBytecodeExecuted = bytecode;
 
         if (bytecode < 0x80)
         {
@@ -101,9 +113,10 @@ void SPRITE_VM_NAME(sSpriteActorCore* param_1) {
             break;
         case 0xBE:
         {
-            bytecode = READ_LE_U8(pEndOfOpcode);
-            int iVar15 = (((int)bytecode >> 0xb & 0xfU) + 1) * (param_1->mAC.mx7_timeScale);
-            int _uVar13 = bytecode & 0x1ff;
+            // 16-bit signed operand: low byte at offset 0, sign-extended high byte at offset 1
+            s32 arg = (s32)READ_LE_S16(pEndOfOpcode);
+            int iVar15 = (((arg >> 0xb) & 0xf) + 1) * (param_1->mAC.mx7_timeScale);
+            int _uVar13 = arg & 0x1ff;
             if (false) {
                 iVar15 = iVar15 + 0xff;
             }
@@ -112,17 +125,17 @@ void SPRITE_VM_NAME(sSpriteActorCore* param_1) {
                 sVar12 = 1;
             }
             if ((param_1->m3C & 3) == 1) {
-                if (((int)bytecode < 0) && (_uVar13 != 0)) {
+                if ((arg < 0) && (_uVar13 != 0)) {
                     //_uVar13 = (uint) * (byte*)((int)param_1->m60 + (_uVar13 - 1));
                     assert(0);
                 }
-                int uVar5 = (int)bytecode >> 9 & 1;
+                int uVar5 = (arg >> 9) & 1;
                 int uVar10 = param_1->m3C;
                 int uVar6 = ((uVar5) ^ (param_1->mAC.mx2_facing)) << 3;
                 int uVar14 = uVar10 & 0xfffffff7 | uVar6;
                 param_1->mAC.mx3 = uVar5;
                 param_1->m3C = uVar14;
-                if (((int)bytecode >> 10 & 1U) == 0) {
+                if (((arg >> 10) & 1) == 0) {
                     uVar14 = uVar10 & 0xffffffe7 | uVar6;
                 }
                 else {
@@ -232,7 +245,7 @@ void SPRITE_VM_NAME(sSpriteActorCore* param_1) {
             param_1->mA8.mx1C = 0;
             return;
         case 0x89:
-            battleSpriteOp89(param_1);
+            initSpriteJumpToTarget(param_1);
             param_1->m64_spriteByteCode.value() += sizePerBytecodeTable[bytecode];
             break;
         case 0x8B:
@@ -279,7 +292,7 @@ void SPRITE_VM_NAME(sSpriteActorCore* param_1) {
             param_1->mA0.vx = param_1->m74_pTargetEntitySprite->m0_position.vx.getIntegerPart() + scale;
             param_1->mA0.vy = 0;
             param_1->mA0.vz = param_1->m74_pTargetEntitySprite->m0_position.vx.getIntegerPart();
-            battleSpriteOp89(param_1);
+            initSpriteJumpToTarget(param_1);
             param_1->m64_spriteByteCode.value() += sizePerBytecodeTable[bytecode];
             break;
         }

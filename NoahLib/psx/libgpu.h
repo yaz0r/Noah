@@ -3,6 +3,11 @@
 void SetGraphDebug(int level);
 s32 ResetGraph(s32 mode);
 
+// PSX 0x80030988: patches three shift-amount immediates in place inside a
+// texture-uv helper function so callers can cheaply change the UV step size.
+// Genuine self-modifying code — stubbed on PC.
+void patchSelfModifyingCode(s16 shiftA, s16 shiftB, u16 addA, u16 addB);
+
 s32 SetVideoMode(s32 mode);
 s32 GetVideoMode();
 

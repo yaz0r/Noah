@@ -1151,7 +1151,7 @@ void processMechaAnimData(sLoadedMechas* pMecha, sMechaInitVar2* param_2, int pa
             break;
         case 0x53: // snap target Y to terrain height
         {
-            MissingCode(); // needs battleSpriteOp89Sub1/Sub2 to compute terrain Y at m88 XZ
+            MissingCode(); // needs findBattleTerrainTriangleBruteForce/computeTerrainHeightAtTriangle to compute terrain Y at m88 XZ
         }
         break;
         case 0x54: // set step distance scaled by mecha scale
@@ -1382,8 +1382,7 @@ void mechaInitNewMecha(int entryId, ushort flags, sMechaDataTable2* pData2, sMec
     pLoadedMecha->m4A = pData1->m10->m4->mC;
 
     if (pLoadedMecha->m4A & 0x200) {
-        MissingCode();
-        //patchSelfModifyingCode(2, 2, 0x40, 0x40);
+        patchSelfModifyingCode(2, 2, 0x40, 0x40);
     }
 
     static sModel* mechaModelBlocksBufferForLoading = nullptr;
