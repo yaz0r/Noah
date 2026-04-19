@@ -823,8 +823,8 @@ u8  battle800c3df8 = 0; // gate for updateMechaEventAnim pre-pass
 s8  battle800c3ac4 = 0; // unused in rendering but read by rebuildBattleEnvironmentVramBuffer
 MATRIX* battle800d2fc0 = nullptr; // color matrix pointer stored by loadBattleEnvironment
 
-extern u16 setupMechaForEventVar1;
-extern u8 setupMechaForEventVar0;
+extern s16 mechaAnimTargetBitmask;
+extern s16 mechaAnimSelfIndex;
 
 // PSX 0x800aa514: saturating additive blend of a scaled signed component.
 // result = clamp(base + (delta * scale + 255) >> 8, 0..255)
@@ -947,30 +947,30 @@ void renderMechasBattle(MATRIX* pMatrix, MATRIX* param_2, OTTable& OT, int oddOr
     u8 backB = (u8)addSaturatingColorDelta(battle800c3b80, 0x20, battleMechaInitData->m47A_b);
 
     // Mecha-vs-mecha collision pushback for the event-selected mecha.
-    if (battleMechas[setupMechaForEventVar0] != nullptr &&
-        (battleMechas[setupMechaForEventVar0]->m4A & 0x20) == 0) {
+    if (battleMechas[mechaAnimSelfIndex] != nullptr &&
+        (battleMechas[mechaAnimSelfIndex]->m4A & 0x20) == 0) {
         for (u32 otherIdx = 0; otherIdx < 0xb; otherIdx++) {
             sLoadedMechas* other = battleMechas[otherIdx];
-            if (other == nullptr || otherIdx == setupMechaForEventVar0 || other->m5C != -1) continue;
-            if (((setupMechaForEventVar1 >> (otherIdx & 0x1f)) & 1) != 0) continue;
+            if (other == nullptr || otherIdx == mechaAnimSelfIndex || other->m5C != -1) continue;
+            if (((mechaAnimTargetBitmask >> (otherIdx & 0x1f)) & 1) != 0) continue;
             if (other->m34 == 0) continue;
 
-            sMechaBone* selfBone = &(*battleMechas[setupMechaForEventVar0]->m4_bones)[0];
+            sMechaBone* selfBone = &(*battleMechas[mechaAnimSelfIndex]->m4_bones)[0];
             int otherRadius = getMechaColliderRadius(otherIdx);
             sMechaBone* otherBone = &(*other->m4_bones)[0];
             if (otherBone->m5C_translation[1] - otherRadius >= selfBone->m5C_translation[1]) continue;
 
-            int selfRadius = getMechaColliderRadius(setupMechaForEventVar0);
-            if (battleMechas[setupMechaForEventVar0]->m4_bones[0][0].m5C_translation[1] - selfRadius >= otherBone->m5C_translation[1]) continue;
+            int selfRadius = getMechaColliderRadius(mechaAnimSelfIndex);
+            if (battleMechas[mechaAnimSelfIndex]->m4_bones[0][0].m5C_translation[1] - selfRadius >= otherBone->m5C_translation[1]) continue;
 
             int rOther = getMechaColliderRadius(otherIdx);
-            int rSelf = getMechaColliderRadius(setupMechaForEventVar0);
-            pushMechaAway(setupMechaForEventVar0,
+            int rSelf = getMechaColliderRadius(mechaAnimSelfIndex);
+            pushMechaAway(mechaAnimSelfIndex,
                           otherBone->m5C_translation[0],
                           otherBone->m5C_translation[2],
                           rOther + rSelf);
         }
-        finalizeMechaForEvent(setupMechaForEventVar0);
+        finalizeMechaForEvent(mechaAnimSelfIndex);
     }
 
     // Animation tick pass.
