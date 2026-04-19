@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.16)
 project(Noah)
 
 MACRO(COPY_BUILD_CONFIG SourceConfigName DestConfigName)

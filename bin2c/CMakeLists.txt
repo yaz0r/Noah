@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.16)
 project (bin2c_noah)
 
 ADD_EXECUTABLE(${PROJECT_NAME} bin2c.cpp)
