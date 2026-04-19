@@ -17,7 +17,7 @@ private:
 class c_isoManager
 {
 public:
-    static void init();
+    static bool init();
     static c_isoFile* getCurrentDisc();
 
 private:

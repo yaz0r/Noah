@@ -216,5 +216,6 @@ int initBgfxGlue(int argc, char* argv[])
 
 void deleteBgfxGlue()
 {
+    ImGui_ImplSDL3_Shutdown();
     imguiDestroy();
 }

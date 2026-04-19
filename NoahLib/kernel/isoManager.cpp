@@ -14,7 +14,7 @@ c_isoFile* c_isoManager::openIsoFile(const std::string& fileName)
     return nullptr;
 }
 
-void c_isoManager::init()
+bool c_isoManager::init()
 {
     c_isoFile* pNewIso = openIsoFile(std::string("iso/1.bin"));
     if (pNewIso)
@@ -25,7 +25,9 @@ void c_isoManager::init()
     if (g_isoFiles.size())
     {
         m_currentDisc = 0;
+        return true;
     }
+    return false;
 }
 
 c_isoFile* c_isoManager::getCurrentDisc()

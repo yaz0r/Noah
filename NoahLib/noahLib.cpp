@@ -44,7 +44,43 @@ bool enableValidation = false;
 bool noahInit(int argc, char* argv[])
 {
     initBgfxGlue(argc, argv);
-    c_isoManager::init();
+    bool isoFound = c_isoManager::init();
+
+    if (!isoFound)
+    {
+        bIsDebuggerViewEnabled = true;
+        while (!gCloseApp)
+        {
+            StartFrame();
+
+            ImGui::SetNextWindowPos(ImVec2(0, 0));
+            ImGui::SetNextWindowSize(ImGui::GetMainViewport()->Size);
+            ImGui::Begin("##error_bg", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoBackground);
+            ImGui::OpenPopup("Missing Game Files");
+            ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+            ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+            if (ImGui::BeginPopupModal("Missing Game Files", nullptr, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove))
+            {
+                ImGui::Text("Required game file not found:");
+                ImGui::Spacing();
+                ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "  iso/1.bin");
+                ImGui::Spacing();
+                ImGui::Separator();
+                ImGui::Spacing();
+                ImGui::TextWrapped("Place your Xenogears (US) PS1 disc image(s) as:\n  data/iso/1.bin\n  data/iso/2.bin (optional, for disc 2)");
+                ImGui::Spacing();
+                if (ImGui::Button("Exit", ImVec2(120, 0)))
+                {
+                    gCloseApp = true;
+                }
+                ImGui::EndPopup();
+            }
+            ImGui::End();
+
+            EndFrame();
+        }
+        return false;
+    }
 
     noahFrame_start();
 
