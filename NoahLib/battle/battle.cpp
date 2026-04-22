@@ -607,9 +607,24 @@ void startBattleLoader(int param_1)
     case 0:
         battleStartEffect();
         break;
+    case 1:
+        waitReadCompletion(0);
+        battleLoaderUpdateMode1();
+        break;
+    case 2:
+        waitReadCompletion(0);
+        MissingCode(); // battleLoaderUpdateMode2
+        break;
+    case 3:
+        waitReadCompletion(0);
+        MissingCode(); // battleLoaderUpdateMode3
+        break;
+    case 4:
+        waitReadCompletion(0);
+        MissingCode(); // battleLoaderUpdateMode4
+        break;
     default:
-        Hack("Unimplemented battle start effect, using default");
-        battleStartEffect();
+        assert(0);
         break;
     }
 
@@ -1106,6 +1121,22 @@ void computeBattleCameraParams(uint bitmask) {
         local_100.vy = (short)positionSum.vy + (short)local_d0.vy;
         local_100.vz = (short)positionSum.vz - (short)local_d0.vz;
         lookAtNoDivide(&MStack_f0, &local_100, &local_f8, &battleCameraUp);
+
+        if (g_gdbConnection) {
+            g_gdbConnection->executeUntilAddress(0x800bc780); // after lookAtNoDivide returns
+            u32 psxSP = g_gdbConnection->getRegister(GDBConnection::SP);
+            MATRIX psxMatrix;
+            g_gdbConnection->readMemory(psxSP + 0x30, &psxMatrix, sizeof(MATRIX));
+            for (int r = 0; r < 3; r++) {
+                for (int c = 0; c < 3; c++) {
+                    validateAssert(psxMatrix.m[r][c] == MStack_f0.m[r][c]);
+                }
+            }
+            for (int i = 0; i < 3; i++) {
+                validateAssert(psxMatrix.t[i] == MStack_f0.t[i]);
+            }
+        }
+
         SetRotMatrix(&MStack_f0);
         SetTransMatrix(&MStack_f0);
 
@@ -7859,6 +7890,14 @@ void battleTickMain(s8 param_1) {
 void battleTickGameplay() {
     if (bBattleTickMode0 == 0) {
         if (bBattleTickMode1 == 0) {
+            if (g_gdbConnection) {
+                g_gdbConnection->executeUntilAddress(0x80072458); // entry of bBattleTickMode1==0 path
+                validateAssert(g_gdbConnection->readU8(0x800d2dd7) == currentEntryInRandomTurnOrder);
+                for (int i = 0; i < 11; i++) {
+                    validateAssert(g_gdbConnection->readS8(0x800d2dd8 + i) == randomTurnOrder[i]);
+                    validateAssert(g_gdbConnection->readS8(0x800d2de4 + i) == isEntityReadyForBattle[i]);
+                }
+            }
             battleVar2->m2D3_currentEntityTurn = 0;
             s32 uVar3 = (uint)currentEntryInRandomTurnOrder;
             s32 uVar2 = (uint)randomTurnOrder[uVar3];

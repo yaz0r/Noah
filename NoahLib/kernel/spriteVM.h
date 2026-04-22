@@ -5,7 +5,9 @@ void SPRITE_VM_NAME(sSpriteActorCore* param_1) {
     // validate before loop
 #if !defined(IMPLEMENT_BATTLE_SPECIFIC_CASES)
     VALIDATE_FIELD(FCT_KernelSpriteVM, 0x8002491c);
-    assert(false); // broke the offset for field there
+    if (g_gdbConnection) {
+        assert(false); // broke the offset for field there
+    }
 #else
     VALIDATE_BATTLE(BCT_KernelSpriteVM, 0x800c11cc);
 #endif

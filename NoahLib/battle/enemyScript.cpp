@@ -1,5 +1,6 @@
 #include "noahLib.h"
 #include "battle.h"
+#include "battleLoader.h"
 
 #include "enemyScript.h"
 
@@ -358,9 +359,79 @@ int executeMonsterScriptUpper(sBattleScriptExecutionContext* pScriptContext, int
         case 0x82:
             operationResult = executeMonsterScriptUpper_82(pScriptContext, entityIndex);
             break;
+        case 0x83: // m30[arg1] <= imm8
+            operationResult = monstersScriptsEntities[entityIndex & 0xff].m30_s8Vars[pScriptContext->m0_scriptPtr[1]] <= pScriptContext->m0_scriptPtr[2];
+            break;
+        case 0x84: // m20[arg1] <= imm16 (unsigned)
+            operationResult = (u16)monstersScriptsEntities[entityIndex & 0xff].m20_s16Vars[pScriptContext->m0_scriptPtr[1]] <= READ_LE_U16(pScriptContext->m0_scriptPtr + 2);
+            break;
+        case 0x85: // m30[arg1] >= imm8
+            operationResult = pScriptContext->m0_scriptPtr[2] <= monstersScriptsEntities[entityIndex & 0xff].m30_s8Vars[pScriptContext->m0_scriptPtr[1]];
+            break;
+        case 0x86: // m20[arg1] >= imm16 (unsigned)
+            operationResult = READ_LE_U16(pScriptContext->m0_scriptPtr + 2) <= (u16)monstersScriptsEntities[entityIndex & 0xff].m20_s16Vars[pScriptContext->m0_scriptPtr[1]];
+            break;
+        case 0x87: // m30[arg1] == m30[arg2]
+            operationResult = monstersScriptsEntities[entityIndex & 0xff].m30_s8Vars[pScriptContext->m0_scriptPtr[1]] == monstersScriptsEntities[entityIndex & 0xff].m30_s8Vars[pScriptContext->m0_scriptPtr[2]];
+            break;
+        case 0x88: // m20[arg1] == m20[arg2]
+            operationResult = monstersScriptsEntities[entityIndex & 0xff].m20_s16Vars[pScriptContext->m0_scriptPtr[1]] == monstersScriptsEntities[entityIndex & 0xff].m20_s16Vars[pScriptContext->m0_scriptPtr[2]];
+            break;
+        case 0x89: // m30[arg1] <= m30[arg2]
+            operationResult = monstersScriptsEntities[entityIndex & 0xff].m30_s8Vars[pScriptContext->m0_scriptPtr[1]] <= monstersScriptsEntities[entityIndex & 0xff].m30_s8Vars[pScriptContext->m0_scriptPtr[2]];
+            break;
+        case 0x8a: // m20[arg1] <= m20[arg2] (unsigned)
+            operationResult = (u16)monstersScriptsEntities[entityIndex & 0xff].m20_s16Vars[pScriptContext->m0_scriptPtr[1]] <= (u16)monstersScriptsEntities[entityIndex & 0xff].m20_s16Vars[pScriptContext->m0_scriptPtr[2]];
+            break;
+        case 0x8b: // m30[arg1] & imm8
+            operationResult = (monstersScriptsEntities[entityIndex & 0xff].m30_s8Vars[pScriptContext->m0_scriptPtr[1]] & pScriptContext->m0_scriptPtr[2]) != 0;
+            break;
+        case 0x8c: // m20[arg1] & imm16
+            operationResult = (monstersScriptsEntities[entityIndex & 0xff].m20_s16Vars[pScriptContext->m0_scriptPtr[1]] & READ_LE_U16(pScriptContext->m0_scriptPtr + 2)) != 0;
+            break;
+        case 0x8d: // m30[arg1] & m30[arg2]
+            operationResult = (monstersScriptsEntities[entityIndex & 0xff].m30_s8Vars[pScriptContext->m0_scriptPtr[1]] & monstersScriptsEntities[entityIndex & 0xff].m30_s8Vars[pScriptContext->m0_scriptPtr[2]]) != 0;
+            break;
+        case 0x8e: // m20[arg1] & m20[arg2]
+            operationResult = (monstersScriptsEntities[entityIndex & 0xff].m20_s16Vars[pScriptContext->m0_scriptPtr[1]] & monstersScriptsEntities[entityIndex & 0xff].m20_s16Vars[pScriptContext->m0_scriptPtr[2]]) != 0;
+            break;
+        case 0x8f: // m30[arg1] != imm8
+            operationResult = monstersScriptsEntities[entityIndex & 0xff].m30_s8Vars[pScriptContext->m0_scriptPtr[1]] != pScriptContext->m0_scriptPtr[2];
+            break;
         case 0x90:
             operationResult = monsterBattleOpcode_90(pScriptContext, entityIndex);
             break;
+        case 0x91: // m30[arg1] != m30[arg2]
+            operationResult = monstersScriptsEntities[entityIndex & 0xff].m30_s8Vars[pScriptContext->m0_scriptPtr[1]] != monstersScriptsEntities[entityIndex & 0xff].m30_s8Vars[pScriptContext->m0_scriptPtr[2]];
+            break;
+        case 0x92: // m20[arg1] != m20[arg2]
+            operationResult = monstersScriptsEntities[entityIndex & 0xff].m20_s16Vars[pScriptContext->m0_scriptPtr[1]] != monstersScriptsEntities[entityIndex & 0xff].m20_s16Vars[pScriptContext->m0_scriptPtr[2]];
+            break;
+        case 0x93: // m10[arg1] == m10[arg2]
+            operationResult = monstersScriptsEntities[entityIndex & 0xff].m10_s32Vars[pScriptContext->m0_scriptPtr[1]] == monstersScriptsEntities[entityIndex & 0xff].m10_s32Vars[pScriptContext->m0_scriptPtr[2]];
+            break;
+        case 0x94: // m10[arg1] <= m10[arg2] (unsigned)
+            operationResult = (u32)monstersScriptsEntities[entityIndex & 0xff].m10_s32Vars[pScriptContext->m0_scriptPtr[1]] <= (u32)monstersScriptsEntities[entityIndex & 0xff].m10_s32Vars[pScriptContext->m0_scriptPtr[2]];
+            break;
+        case 0x95: // entity m7C high bit
+            operationResult = battleEntities[pScriptContext->m0_scriptPtr[1]].m0_base.m7C >> 0xf;
+            break;
+        case 0x96: // slot layout empty check
+            operationResult = battleSlotLayout[pScriptContext->m0_scriptPtr[1]][0] == 0;
+            break;
+        case 0x97: // no player characters in slots 0-1
+            operationResult = (allPlayerCharacterBitmask & 3) == 0;
+            break;
+        case 0x98: { // all monsters hidden
+            operationResult = 1;
+            for (int i = 0; i < 8; i++) {
+                if ((allPlayerCharacterBitmask >> 5) != 0 && (battleVisualEntities[i + 3].m3 & 0x80) == 0) {
+                    operationResult = 0;
+                    break;
+                }
+            }
+            break;
+        }
         case 0x99:
             exitScript = true;
             break;

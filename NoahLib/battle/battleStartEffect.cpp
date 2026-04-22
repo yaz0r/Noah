@@ -12,6 +12,7 @@
 #include "field/field.h"
 #include "kernel/memory.h"
 #include "battle.h"
+#include "validation/gdbConnection.h"
 
 void checkSoftReboot();
 
@@ -378,7 +379,14 @@ void battleStartEffect() {
 
         MissingCode();
 
-        if (isCDBusy() == 0) {
+        int isLoadingComplete = isCDBusy();
+
+        if (g_gdbConnection) {
+            g_gdbConnection->executeUntilAddress(0x800b7a18);
+            isLoadingComplete = g_gdbConnection->getRegister(GDBConnection::V0);
+        }
+
+        if (isLoadingComplete == 0) {
             switch (s2_tickState) {
             case 1:
             case 3:
@@ -423,4 +431,116 @@ void battleStartEffect() {
     waitReadCompletion(0);*/
     battleLoaderTick(3);
     return;
+}
+
+void battleLoaderUpdateMode1() {
+    s32 frameCounter = 0x52;
+    resetSpriteCallbacks();
+
+    // Capture framebuffer, set STP bit on all pixels, upload to VRAM at (0x2c0, 0x100)
+    std::vector<u16> captureBuffer;
+    RECT captureRect;
+    captureRect.x = 0; captureRect.y = 0;
+    captureRect.w = 0x140; captureRect.h = 0xe0;
+    StoreImage(&captureRect, captureBuffer);
+    DrawSync(0);
+    for (int i = 0; i < (int)captureBuffer.size(); i++) {
+        captureBuffer[i] |= 0x8000;
+    }
+    captureRect.x = 0x2c0; captureRect.y = 0x100;
+    captureRect.w = 0x140; captureRect.h = 0xe0;
+    LoadImage(&captureRect, (const u8*)captureBuffer.data());
+    DrawSync(0);
+
+    // Swap to the other render struct
+    if (pCurrentBattleRenderStruct == &battleRenderStructs[0]) {
+        pCurrentBattleRenderStruct = &battleRenderStructs[1];
+    }
+    pCurrentBattleOT = &pCurrentBattleRenderStruct->m70_OT;
+    ClearOTagR(&(*pCurrentBattleOT)[0], 0x1000);
+
+    battleOddOrEven = 0;
+    pCurrentBattleRenderStruct = &battleRenderStructs[0];
+
+    battleRenderStructs[0].m0_drawEnv.isbg = 1;
+    battleRenderStructs[1].m0_drawEnv.isbg = 1;
+    battleRenderStructs[0].m0_drawEnv.r0 = 0;
+    battleRenderStructs[1].m0_drawEnv.r0 = 0;
+    battleRenderStructs[0].m0_drawEnv.g0 = 0;
+    battleRenderStructs[1].m0_drawEnv.g0 = 0;
+    battleRenderStructs[0].m0_drawEnv.b0 = 0;
+    battleRenderStructs[1].m0_drawEnv.b0 = 0;
+
+    MissingCode(); // tile effect init (FUN_Battle_loader__801e82ec)
+
+    // Main loop — Ghidra shows "if (isCDBusy() == 0) break" but that's a decompiler error
+    // (WARNING: Could not recover jumptable at 0x801e8750).
+    // Disassembly confirms: tick processing is inside the loop, loop exits when
+    // frameCounter == 0 AND s2_tickState == 5 (bne s3,zero / bne s2,5 at 0x801e88e4).
+    s32 s2_tickState = 0;
+    s32 s5 = 0;
+    while (frameCounter || s2_tickState != 5) {
+        if (0 < frameCounter) {
+            frameCounter--;
+        }
+
+        if (pCurrentBattleRenderStruct == &battleRenderStructs[0]) {
+            pCurrentBattleRenderStruct = &battleRenderStructs[1];
+        }
+        else {
+            pCurrentBattleRenderStruct = &battleRenderStructs[0];
+        }
+
+        pCurrentBattleOT = &pCurrentBattleRenderStruct->m70_OT;
+        ClearOTagR(&(*pCurrentBattleOT)[0], 0x1000);
+        battleOddOrEven = 1 - battleOddOrEven;
+
+        int isCdBusyResult = isCDBusy();
+
+        if (g_gdbConnection) {
+            g_gdbConnection->executeUntilAddress(0x801e872c);
+            isCdBusyResult = g_gdbConnection->getRegister(GDBConnection::V0);
+        }
+
+        // Jumptable at 0x801e8750: dispatches between battleLoaderTick and startBattleLoadingDuringEffect2
+        // Entries confirmed from disassembly: 0x801e8768 = battleLoaderTick, 0x801e8758 = startBattleLoadingDuringEffect2
+        if (isCdBusyResult == 0 && s2_tickState < 5) {
+            switch (s2_tickState) {
+            case 0:
+            case 1:
+            case 3:
+            case 4:
+                battleLoaderTick(s5);
+                s5++;
+                s2_tickState++;
+                break;
+            case 2:
+                startBattleLoadingDuringEffect2();
+                s2_tickState++;
+                break;
+            }
+        }
+
+        checkSoftReboot();
+
+        MissingCode(); // tile animation (FUN_Battle_loader__801e7f4c)
+        MissingCode(); // tile rendering (FUN_Battle_loader__801e80b4)
+
+        DrawSync(0);
+        VSync(2);
+
+        battleRenderStructs[battleOddOrEven].m0_drawEnv.r0 = addAndClamp(battleRenderStructs[battleOddOrEven].m0_drawEnv.r0, -0xC);
+        battleRenderStructs[battleOddOrEven].m0_drawEnv.g0 = addAndClamp(battleRenderStructs[battleOddOrEven].m0_drawEnv.g0, -0xC);
+        battleRenderStructs[battleOddOrEven].m0_drawEnv.b0 = addAndClamp(battleRenderStructs[battleOddOrEven].m0_drawEnv.b0, -0xC);
+
+        PutDispEnv(&pCurrentBattleRenderStruct->m5C_dispEnv);
+        PutDrawEnv(&pCurrentBattleRenderStruct->m0_drawEnv);
+        DrawOTag(&pCurrentBattleRenderStruct->m70_OT[0xfff]);
+    }
+
+    // Post-loop cleanup (from "unreachable block" at 0x801e88f4)
+    MissingCode(); // free tile effect (FUN_Battle_loader__801e827c)
+    SetDispMask(0);
+    waitReadCompletion(0);
+    battleLoaderTick(3);
 }

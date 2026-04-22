@@ -12,6 +12,7 @@
 #include "psx/libgte/gte.h"
 
 #include "battle/battleSpriteLoader.h"
+#include "battle/battleLoader.h"
 
 extern u16 allPlayerCharacterBitmask;
 extern SVECTOR battleCameraEye;
@@ -258,6 +259,7 @@ void battleHandleInput_detour() {
 DECLARE_HOOK(battleTickMain, void, s8);
 void battleTickMain_detour(s8 arg) {
 
+    g_gdbConnection->executeUntilAddress(0x80071b94); // PSX battleTickMain entry
     validateBattleState();
 
     battleTickMain_intercept.callUndetoured(arg);
@@ -378,6 +380,42 @@ void computeBattleCameraParams_detour(uint bitmask) {
     validateBattleState();
 }
 
+DECLARE_HOOK_VOID(batteLoaderPhase1_0, void);
+void batteLoaderPhase1_0_detour() {
+    g_gdbConnection->executeUntilAddress(0x801e4048);
+    validateBattleState();
+    batteLoaderPhase1_0_intercept.callUndetoured();
+    g_gdbConnection->executeUntilAddress(0x801e4158);
+    validateBattleState();
+}
+
+DECLARE_HOOK_VOID(batteLoaderPhase1_1, void);
+void batteLoaderPhase1_1_detour() {
+    g_gdbConnection->executeUntilAddress(0x801e4160);
+    validateBattleState();
+    batteLoaderPhase1_1_intercept.callUndetoured();
+    g_gdbConnection->executeUntilAddress(0x801e4868);
+    validateBattleState();
+}
+
+DECLARE_HOOK_VOID(loadEnemies, void);
+void loadEnemies_detour() {
+    g_gdbConnection->executeUntilAddress(0x801e4870);
+    validateBattleState();
+    loadEnemies_intercept.callUndetoured();
+    g_gdbConnection->executeUntilAddress(0x801e4ab8);
+    validateBattleState();
+}
+
+DECLARE_HOOK_VOID(batteLoaderPhase1_3, void);
+void batteLoaderPhase1_3_detour() {
+    g_gdbConnection->executeUntilAddress(0x801e4ac0);
+    validateBattleState();
+    batteLoaderPhase1_3_intercept.callUndetoured();
+    g_gdbConnection->executeUntilAddress(0x801e4cc8);
+    validateBattleState();
+}
+
 DECLARE_HOOK_VOID(battleRenderDebugAndMain, int);
 int battleRenderDebugAndMain_detour() {
     g_gdbConnection->executeUntilAddress(0x800716d8);
@@ -405,6 +443,10 @@ void validateBattle_init() {
     mainBattleSpriteCallback_phase1_intercept.enable();
     mainBattleSpriteCallback_phase2_intercept.enable();
     battleRenderDebugAndMain_intercept.enable();
+    batteLoaderPhase1_0_intercept.enable();
+    batteLoaderPhase1_1_intercept.enable();
+    loadEnemies_intercept.enable();
+    batteLoaderPhase1_3_intercept.enable();
 
     //enableBattleValidationContext(BCT_Base);
     enableBattleValidationContext(BCT_Tick);

@@ -368,6 +368,7 @@ struct sBattleVisualEntity {
     // size 0x1C
 };
 extern std::array<sBattleVisualEntity, 11> battleVisualEntities;
+extern u16 allPlayerCharacterBitmask;
 
 struct sBattleSpriteActor : public sTaskHeaderPair {
     sSpriteActor m38_spriteActor;

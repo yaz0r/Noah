@@ -10,3 +10,8 @@ ushort bitmaskCharacterCheck(ushort bitmask, uint characterId);
 ushort bitmaskCharacterCheckReverse(ushort bitmask, uint characterId);
 extern std::array<u16, 16> bitmaskCharacter;
 extern std::array<std::array<u8, 4>, 32> battleSlotLayout;
+
+void batteLoaderPhase1_0();
+void batteLoaderPhase1_1();
+void loadEnemies();
+void batteLoaderPhase1_3();
